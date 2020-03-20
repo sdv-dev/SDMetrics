@@ -32,6 +32,7 @@ import sdmetrics
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     'm2r',
+    'nbsphinx',
     'sphinx.ext.autodoc',
     'sphinx.ext.githubpages',
     'sphinx.ext.viewcode',
@@ -112,6 +113,7 @@ html_context = {
 html_theme_options = {
     'collapse_navigation': False,
     'display_version': False,
+    'logo_only': True
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -122,12 +124,12 @@ html_theme_options = {
 # The name of an image file (relative to this directory) to use as a favicon of
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'images/dai-logo-white.ico'
+html_favicon = '../resources/favicon.png'
 
 # If given, this must be the name of an image file (path relative to the
 # configuration directory) that is the logo of the docs. It is placed at
 # the top of the sidebar; its width should therefore not exceed 200 pixels.
-html_logo = 'images/dai-logo-white-200.png'
+html_logo = '../resources/header_light.png'
 
 # -- Options for HTMLHelp output ---------------------------------------
 
@@ -194,3 +196,6 @@ texinfo_documents = [(
     description,
     'Miscellaneous'
 )]
+
+# -- Options for jupyter notebooks -------------------------------------
+nbsphinx_execute = 'never'

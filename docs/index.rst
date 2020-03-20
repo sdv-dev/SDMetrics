@@ -1,10 +1,16 @@
 .. include:: readme.rst
 
 .. toctree::
-   :hidden:
    :maxdepth: 2
 
-   Overview <readme>
+   readme
+
+.. toctree::
+   :glob:
+   :maxdepth: 2
+   :caption: Tutorials
+
+   tutorials/*
 
 .. toctree::
    :caption: Resources

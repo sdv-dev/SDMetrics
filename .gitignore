@@ -104,3 +104,7 @@ ENV/
 
 # Vim
 .*.swp
+
+# OS Files
+.DS_Store
+

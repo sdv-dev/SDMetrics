@@ -1,17 +1,16 @@
 # Config file for automatic testing at travis-ci.org
-dist: trusty
+dist: bionic
 language: python
 python:
+  - 3.7
   - 3.6
   - 3.5
 
-matrix:
-  include:
-    - python: 3.7
-      dist: xenial
-      sudo: required
-
 # Command to install dependencies
+addons:
+  apt:
+    packages:
+      - pandoc
 install: pip install -U tox-travis codecov
 
 after_success: codecov
@@ -29,4 +28,4 @@ deploy:
     target-branch: gh-pages
     on:
       branch: master
-      python: 3.6
+      python: 3.7
