@@ -35,12 +35,27 @@ class TabularDetector():
         """
         raise NotImplementedError()
 
-    def metrics(self, metadata, real_tables, fake_tables):
+    def metrics(self, metadata, real_tables, synthetic_tables):
+        """
+        This function yields a sequence of Metric object.
+
+        Args:
+            metadata (sdv.Metadata): The Metadata object from SDV.
+            real_tables (dict): A dictionary mapping table names to dataframes.
+            synthetic_tables (dict): A dictionary mapping table names to dataframes.
+
+        Yields:
+            Metric: The next metric.
+        """
+        yield from self._single_table(metadata, real_tables, synthetic_tables)
+        yield from self._parent_child(metadata, real_tables, synthetic_tables)
+
+    def _single_table(self, metadata, real_tables, synthetic_tables):
+        # Single Table Detection
         for table_name in set(real_tables):
-            # Single Table Detection
-            auroc = self._auroc(
+            auroc = self._compute_auroc(
                 real_tables[table_name],
-                fake_tables[table_name])
+                synthetic_tables[table_name])
 
             yield Metric(
                 name=self.name,
@@ -54,22 +69,24 @@ class TabularDetector():
                 domain=(0.0, 1.0)
             )
 
-            # Parent-Child Table Detection
+    def _parent_child(self, metadata, real_tables, synthetic_tables):
+        # Parent-Child Table Detection
+        for table_name in set(real_tables):
             key = metadata.get_primary_key(table_name)
             for child_name in metadata.get_children(table_name):
                 child_key = metadata.get_foreign_key(table_name, child_name)
 
-                real = self._explode(
+                real = self._denormalize(
                     real_tables[table_name],
                     key,
                     real_tables[child_name],
                     child_key)
-                fake = self._explode(
-                    fake_tables[table_name],
+                synthetic = self._denormalize(
+                    synthetic_tables[table_name],
                     key,
-                    fake_tables[child_name],
+                    synthetic_tables[child_name],
                     child_key)
-                auroc = self._auroc(real, fake)
+                auroc = self._compute_auroc(real, synthetic)
 
                 yield Metric(
                     name=self.name,
@@ -84,13 +101,13 @@ class TabularDetector():
                     domain=(0.0, 1.0)
                 )
 
-    def _auroc(self, real_table, fake_table):
+    def _compute_auroc(self, real_table, synthetic_table):
         transformer = HyperTransformer()
         real_table = transformer.fit_transform(real_table).values
-        fake_table = transformer.transform(fake_table).values
+        synthetic_table = transformer.transform(synthetic_table).values
 
-        X = np.concatenate([real_table, fake_table])
-        y = np.hstack([np.ones(len(real_table)), np.zeros(len(fake_table))])
+        X = np.concatenate([real_table, synthetic_table])
+        y = np.hstack([np.ones(len(real_table)), np.zeros(len(synthetic_table))])
         X[np.isnan(X)] = 0.0
 
         if len(X) < 20:
@@ -108,7 +125,7 @@ class TabularDetector():
         return np.mean(scores)
 
     @staticmethod
-    def _explode(table, key, child_table, child_key):
+    def _denormalize(table, key, child_table, child_key):
         """
         Given a parent table (with a primary key) and a child table (with a foreign key),
         this performs an outer join and returns a single flat table.

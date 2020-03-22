@@ -59,14 +59,14 @@ from sdv import load_demo, SDV
 metadata, real_tables = load_demo(metadata=True)
 sdv = SDV()
 sdv.fit(metadata, real_tables)
-fake_tables = sdv.sample_all(20)
+synthetic_tables = sdv.sample_all(20)
 ```
 
 Now that we have a synthetic dataset, we can evaluate it using **SDMetrics** by calling the `evaluate` function which returns an instance of `MetricsReport` with the default metrics:
 
 ```python
 from sdmetrics import evaluate
-report = evaluate(metadata, real_tables, fake_tables)
+report = evaluate(metadata, real_tables, synthetic_tables)
 ```
 
 ## Examining Metrics
@@ -109,7 +109,7 @@ from sdmetrics import adversary
 from sdmetrics import MetricsReport
 
 report = MetricsReport()
-report.add_metrics(adversary.metrics(metadata, real_tables, fake_tables))
+report.add_metrics(adversary.metrics(metadata, real_tables, synthetic_tables))
 ```
 
 ## Creating Metrics
@@ -145,7 +145,7 @@ method and provide your custom metrics iterator:
 from sdmetrics import MetricsReport
 
 report = MetricsReport()
-report.add_metrics(my_custom_metrics(metadata, real_tables, fake_tables))
+report.add_metrics(my_custom_metrics(metadata, real_tables, synthetic_tables))
 ```
 
 See `sdmetrics.adversary`, `sdmetrics.descriptor`, and `sdmetrics.statistical` for 
@@ -157,7 +157,7 @@ metrics that were computed.
 
 ```python
 from sdmetrics import MetricsReport
-report = evaluate(metadata, real_tables, fake_tables)
+report = evaluate(metadata, real_tables, synthetic_tables)
 report.details()
 ```
 

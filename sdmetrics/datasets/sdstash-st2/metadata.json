@@ -1,0 +1,16 @@
+{
+    "tables": {
+        "table1": {
+            "fields": {
+                "y": {
+                    "type": "numerical",
+                    "subtype": "float"
+                },
+                "x": {
+                    "type": "numerical",
+                    "subtype": "float"
+                }
+            }
+        }
+    }
+}
