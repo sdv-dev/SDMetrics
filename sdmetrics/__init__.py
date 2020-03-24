@@ -117,8 +117,8 @@ class Metric():
         return hash(self.name) + hash(self.value)
 
     def __str__(self):
-        return "Metric(name=%s, value=%s, tags=%s)" % (
-            self.name, self.value, self.tags)
+        return """Metric(\n  name=%s, \n  value=%.2f, \n  tags=%s, \n  description=%s\n)""" % (
+            self.name, self.value, self.tags, self.description)
 
 
 class MetricsReport():
