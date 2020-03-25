@@ -47,10 +47,10 @@ class TabularDetector():
         Yields:
             Metric: The next metric.
         """
-        yield from self._single_table(metadata, real_tables, synthetic_tables)
-        yield from self._parent_child(metadata, real_tables, synthetic_tables)
+        yield from self._single_table_detection(metadata, real_tables, synthetic_tables)
+        yield from self._parent_child_detection(metadata, real_tables, synthetic_tables)
 
-    def _single_table(self, metadata, real_tables, synthetic_tables):
+    def _single_table_detection(self, metadata, real_tables, synthetic_tables):
         # Single Table Detection
         for table_name in set(real_tables):
             auroc = self._compute_auroc(
@@ -69,7 +69,7 @@ class TabularDetector():
                 domain=(0.0, 1.0)
             )
 
-    def _parent_child(self, metadata, real_tables, synthetic_tables):
+    def _parent_child_detection(self, metadata, real_tables, synthetic_tables):
         # Parent-Child Table Detection
         for table_name in set(real_tables):
             key = metadata.get_primary_key(table_name)

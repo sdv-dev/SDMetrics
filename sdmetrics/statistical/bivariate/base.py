@@ -17,7 +17,7 @@ class BivariateMetric():
     @staticmethod
     def metric(real_2d, synthetic_2d):
         """This function is expected to perform a statistical test on the two
-        samples, each of which is two-dimensional, and return a tuple containing
+        samples, each of which contains two columns, and return a tuple containing
         (value, goal, unit, domain). See the Metric object for what these fields
         represent.
 

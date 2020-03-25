@@ -29,9 +29,9 @@ class UnivariateMetric():
         raise NotImplementedError()
 
     def metrics(self, metadata, real_tables, synthetic_tables):
-        """
-        This function iterates over all the columns in all the tables and, if the
-        data types match, it yields the Metric.
+        """This function iterates over all the columns in all the tables and, if
+        the data type of a column matches the data types for which this metric is
+        defined, it computes the metric for that column and yields it.
 
         Args:
             metadata (sdv.Metadata): The Metadata object from SDV.
