@@ -14,7 +14,7 @@ with open('HISTORY.md') as history_file:
 install_requires = [
     "sdv",
     "numpy",
-    "pandas",
+    'pandas>=0.22.0,<0.25',
     "rdt",
     "scikit-learn"
 ]
@@ -24,6 +24,7 @@ setup_requires = [
 ]
 
 tests_require = [
+    'parameterized',
     'pytest>=3.4.2',
     'pytest-cov>=2.6.0',
 ]

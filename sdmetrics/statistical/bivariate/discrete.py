@@ -18,11 +18,11 @@ class DiscreteDivergence(BivariateMetric):
     ]
 
     @staticmethod
-    def metric(real, fake):
+    def metric(real, synthetic):
         assert real.shape[1] == 2, "Expected 2d data."
-        assert fake.shape[1] == 2, "Expected 2d data."
+        assert synthetic.shape[1] == 2, "Expected 2d data."
         real = [(x[0], x[1]) for x in real]
-        fake = [(x[0], x[1]) for x in fake]
-        f_obs, f_exp = frequencies(real, fake)
+        synthetic = [(x[0], x[1]) for x in synthetic]
+        f_obs, f_exp = frequencies(real, synthetic)
         value = np.sum(rel_entr(f_obs, f_exp))
         return value, Goal.MINIMIZE, "entropy", (0.0, float("inf"))
