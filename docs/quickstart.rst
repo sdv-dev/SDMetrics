@@ -1,23 +1,3 @@
-Overview
-========
-The SDMetrics library provides a set of dataset-agnostic tools for evaluating the 
-quality of a synthetic database by comparing it to the real database that it is 
-modeled after.
-
-Installation
-============
-To get started with **SDMetrics**, run the following commands to install the library 
-in development mode:
-
-.. code-block:: bash
-
-    git clone git@github.com:k15z/SDMetrics.git
-    cd SDMetrics
-    make install
-
-You should now be able to run the tests with `make test` to verify that the 
-installation was successful.
-
 Quickstart
 ============
 Let's run the demo code from **SDV** to generate a simple synthetic dataset:

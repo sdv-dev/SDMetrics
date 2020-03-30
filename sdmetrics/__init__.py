@@ -230,14 +230,21 @@ class MetricsReport():
         labels, scores = [], []
         for metric in self.metrics:
             tables = [tag.replace("table:", "")
-                    for tag in metric.tags if "table:" in tag]
+                      for tag in metric.tags if "table:" in tag]
             labels.append(" <-> ".join(tables))
             scores.append(metric.value)
         df = pd.DataFrame({"score": scores, "label": labels})
         df = df.groupby("label").agg({"score": "mean"}).reset_index()
         df = df.sort_values(["score"], ascending=False)
         df = df.head(4)
-        sns.barplot(x="label", y="score", data=df, ci=None, palette=sns.color_palette("coolwarm_r", 7))
+        sns.barplot(
+            x="label",
+            y="score",
+            data=df,
+            ci=None,
+            palette=sns.color_palette(
+                "coolwarm_r",
+                7))
         plt.axhline(0.9, color="red", linestyle=":", label="Easy To Detect")
         plt.axhline(0.7, color="green", linestyle=":", label="Hard To Detect")
         plt.legend(loc="lower right")
@@ -248,7 +255,7 @@ class MetricsReport():
         # Coming soon.
         fig.add_subplot(gs[1:3, 2:])
         pvalues = np.array([m.value for m in self.metrics if m.unit == "p-value"])
-        sizes = [np.sum(pvalues<0.1), np.sum(pvalues>0.1)]
+        sizes = [np.sum(pvalues < 0.1), np.sum(pvalues > 0.1)]
         labels = ['Reject (p<0.1)', 'Fail To Reject']
         plt.pie(sizes, labels=labels)
         plt.axis('equal')
