@@ -94,7 +94,7 @@ class TabularDetector():
                     tags=set([
                         "detection:auroc",
                         "table:%s" % table_name,
-                        "child:%s" % child_name,
+                        "table:%s" % child_name,
                     ] + (["priority:high"] if auroc > 0.9 else [])),
                     goal=Goal.MINIMIZE,
                     unit="auroc",
