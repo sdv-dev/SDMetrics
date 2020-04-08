@@ -208,88 +208,90 @@ class MetricsReport():
 
     def visualize(self):
         """
-        This returns a pyplot.Figure which shows some of the key metrics in this report.
+        This returns a pyplot.Figure which shows some of the key metrics.
 
         Returns:
             pyplot.Figure: A matplotlib figure visualizing key metricss.
         """
+        from matplotlib import rcParams
+        rcParams['font.family'] = 'sans-serif'
+        rcParams['font.sans-serif'] = ['DejaVu Sans']
+
+        import numpy as np
         import seaborn as sns
         import matplotlib.pyplot as plt
+        plt.style.use('seaborn')
 
-        fig = plt.figure(figsize=(16, 9), constrained_layout=True)
-        gs = fig.add_gridspec(4, 3)
+        fig = plt.figure(figsize=(10, 12), constrained_layout=True)
+        gs = fig.add_gridspec(5, 4)
 
-        fig.add_subplot(gs[:2, :])
+        # Detectability of synthetic tables
+        fig.add_subplot(gs[3:, :])
         labels, scores = [], []
         for metric in self.metrics:
-            if metric.name == "logistic":
-                tables = [tag.replace("table:", "")
-                          for tag in metric.tags if "table:" in tag]
-                labels.append(" <-> ".join(tables))
-                scores.append(metric.value)
-        df = pd.DataFrame({"score": scores, "label": labels}
-                          ).sort_values("score", ascending=False)
+            tables = [tag.replace("table:", "")
+                      for tag in metric.tags if "table:" in tag]
+            labels.append(" <-> ".join(tables))
+            scores.append(metric.value)
+        df = pd.DataFrame({"score": scores, "label": labels})
+        df = df.groupby("label").agg({"score": "mean"}).reset_index()
+        df = df.sort_values(["score"], ascending=False)
+        df = df.head(4)
         sns.barplot(
-            x="score",
-            y="label",
+            x="label",
+            y="score",
             data=df,
-            orient="h",
+            ci=None,
             palette=sns.color_palette(
-                "RdYlGn",
-                10))
-        plt.axvline(0.9, color="red", linestyle=":", label="Easy To Detect")
-        plt.axvline(0.75, color="green", linestyle=":", label="Hard To Detect")
+                "coolwarm_r",
+                7))
+        plt.axhline(0.9, color="red", linestyle=":", label="Easy To Detect")
+        plt.axhline(0.7, color="green", linestyle=":", label="Hard To Detect")
         plt.legend(loc="lower right")
-        plt.title("Adversarial Detectability")
-        plt.xlabel("AUROC (Smaller is Better)")
-        plt.ylabel("")
+        plt.title("Detectability of Synthetic Tables", fontweight='bold')
+        plt.ylabel("auROC")
+        plt.xlabel("")
 
-        fig.add_subplot(gs[2:, :2])
+        # Coming soon.
+        fig.add_subplot(gs[1:3, 2:])
+        pvalues = np.array([m.value for m in self.metrics if m.unit == "p-value"])
+        sizes = [np.sum(pvalues < 0.1), np.sum(pvalues > 0.1)]
+        labels = ['Reject (p<0.1)', 'Fail To Reject']
+        plt.pie(sizes, labels=labels)
+        plt.axis('equal')
+        plt.title("Columnwise Statistical Tests", fontweight='bold')
+        plt.ylabel("")
+        plt.xlabel("")
+
+        # Coming soon.
+        fig.add_subplot(gs[:3, :2])
         labels, scores = [], []
         for metric in self.metrics:
-            if metric.name == "chisquare":
-                table = [tag.replace("table:", "")
-                         for tag in metric.tags if "table:" in tag][0]
-                column = [tag.replace("column:", "")
-                          for tag in metric.tags if "column:" in tag][0]
-                labels.append("%s.%s" % (table, column))
+            if metric.unit != "entropy":
+                continue
+            for tag in metric.tags:
+                if "column:" not in tag:
+                    continue
+                labels.append(tag.replace("column:", ""))
                 scores.append(metric.value)
-        df = pd.DataFrame({"score": scores, "label": labels}
-                          ).sort_values("score", ascending=True)
-        sns.barplot(
-            x="score",
-            y="label",
-            data=df,
-            orient="h",
-            palette=sns.color_palette(
-                "RdYlGn",
-                10))
-        plt.title("Categorical Columns")
-        plt.xlabel("Chi Squared Test (Bigger is Better)")
+        df = pd.DataFrame({"score": scores, "label": labels})
+        df = df.groupby("label").agg({"score": "mean"}).reset_index()
+        df = df.sort_values(["score"], ascending=False)
+        df = df.head(8)
+        sns.barplot(x="score", y="label", data=df, ci=None, palette=sns.color_palette("Blues_d"))
+        plt.title("Column Divergence", fontweight='bold')
         plt.ylabel("")
+        plt.xlabel("")
 
-        fig.add_subplot(gs[2:, 2:])
-        labels, scores = [], []
-        for metric in self.metrics:
-            if metric.name == "kstest":
-                table = [tag.replace("table:", "")
-                         for tag in metric.tags if "table:" in tag][0]
-                column = [tag.replace("column:", "")
-                          for tag in metric.tags if "column:" in tag][0]
-                labels.append("%s.%s" % (table, column))
-                scores.append(metric.value)
-        df = pd.DataFrame({"score": scores, "label": labels}
-                          ).sort_values("score", ascending=True)
-        sns.barplot(
-            x="score",
-            y="label",
-            data=df,
-            orient="h",
-            palette=sns.color_palette(
-                "RdYlGn",
-                10))
-        plt.title("Continuous Columns")
-        plt.xlabel("KS Test (Bigger is Better)")
+        # Coming soon.
+        fig.add_subplot(gs[:1, 2:])
+        plt.text(0.5, 0.7, r'Overall Score', fontsize=14, fontweight='bold', ha="center")
+        plt.text(0.5, 0.4, r'%.2f' % self.overall(), fontsize=36, ha="center")
+        rectangle = plt.Rectangle((0.2, 0.3), 0.6, 0.6, ec='black', fc='white')
+        plt.gca().add_patch(rectangle)
         plt.ylabel("")
+        plt.xlabel("")
+        plt.axis('off')
 
+        fig.tight_layout(pad=2.0)
         return fig

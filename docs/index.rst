@@ -1,9 +1,12 @@
-.. include:: readme.rst
+.. mdinclude:: index.md
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
 
-   readme
+   self
+   install
+   quickstart
 
 .. toctree::
    :glob:

@@ -34,6 +34,9 @@ class ContinuousDivergence(BivariateMetric):
             (str, Goal, str, tuple): A tuple containing (value, goal, unit, domain)
             which corresponds to the fields in a Metric object.
         """
+        real[np.isnan(real)] = 0.0
+        synthetic[np.isnan(synthetic)] = 0.0
+
         real, xedges, yedges = np.histogram2d(real[:, 0], real[:, 1])
         synthetic, _, _ = np.histogram2d(
             synthetic[:, 0], synthetic[:, 1], bins=[xedges, yedges])
