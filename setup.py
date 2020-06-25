@@ -12,11 +12,17 @@ with open('HISTORY.md') as history_file:
     history = history_file.read()
 
 install_requires = [
-    "sdv",
-    "numpy",
+    'rdt>=0.2.1,<0.3',
     'pandas>=0.22.0,<0.25',
-    "rdt",
-    "scikit-learn"
+    'scikit-learn>=0.20,<1',
+    'scipy<1.3,>=0.19.1',
+    'numpy<1.17,>=1.15.4',
+    'seaborn>=0.9,<0.11',
+    'docutils<0.15,>=0.10',   # prevent incompatibilities
+]
+
+tutorials_require = [
+    'sdv>=0.3.2,<0.4',
 ]
 
 setup_requires = [
@@ -74,8 +80,8 @@ setup(
     ],
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
-        'test': tests_require,
-        'dev': development_requires + tests_require,
+        'test': tests_require + tutorials_require,
+        'dev': development_requires + tests_require + tutorials_require,
     },
     install_package_data=True,
     install_requires=install_requires,

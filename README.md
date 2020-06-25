@@ -21,6 +21,7 @@ Metrics for Synthetic Data Generation Projects
 * Homepage: https://github.com/sdv-dev/SDMetrics
 
 # Overview
+
 The **SDMetrics** library provides a set of **dataset-agnostic tools** for evaluating the **quality of a synthetic database** by comparing it to the real database that it is modeled after. It includes a variety of metrics such as:
 
  - **Statistical metrics** which use statistical tests to compare the distributions of the real and synthetic distributions.
@@ -52,13 +53,17 @@ If you want to install from source or contribute to the project please read the
 [Contributing Guide](https://sdv-dev.github.io/SDMetrics/contributing.html#get-started).
 
 # Basic Usage
+
 Let's run the demo code from **SDV** to generate a simple synthetic dataset:
 
 ```python
 from sdv import load_demo, SDV
+
 metadata, real_tables = load_demo(metadata=True)
+
 sdv = SDV()
 sdv.fit(metadata, real_tables)
+
 synthetic_tables = sdv.sample_all(20)
 ```
 
@@ -66,10 +71,12 @@ Now that we have a synthetic dataset, we can evaluate it using **SDMetrics** by 
 
 ```python
 from sdmetrics import evaluate
+
 report = evaluate(metadata, real_tables, synthetic_tables)
 ```
 
 ## Examining Metrics
+
 This `report` object makes it easy to examine the metrics at different levels of granularity. For example, the `overall` method returns a single scalar value which functions as a composite score combining all of the metrics. This score can be passed to an optimization routine (i.e. to tune the hyperparameters in a model) and minimized in order to obtain higher quality synthetic data.
 
 ```python
@@ -83,6 +90,7 @@ print(report.highlights())
 ```
 
 ## Visualizing Metrics
+
 Finally, the `report` object provides a `visualize` method which generates a figure showing some of the key metrics.
 
 ```python
@@ -97,8 +105,9 @@ figure.savefig("resources/visualize.png")
 # Advanced Usage
 
 ## Specifying Metrics
-Instead of running all the default metrics, you can specify exactly what metrics you 
-want to run by creating an empty `MetricsReport` and adding the metrics yourself. For 
+
+Instead of running all the default metrics, you can specify exactly what metrics you
+want to run by creating an empty `MetricsReport` and adding the metrics yourself. For
 example, the following code only computes the adversary-based metrics.
 
 The `MetricsReport` object includes a `details` method which returns all of the
@@ -113,6 +122,7 @@ report.add_metrics(adversary.metrics(metadata, real_tables, synthetic_tables))
 ```
 
 ## Creating Metrics
+
 Suppose you want to add some new metrics to this library. To do this, you simply
 need to write a function which yields instances of the `Metric` object:
 
@@ -138,7 +148,7 @@ def my_custom_metrics(metadata, real_tables, synthetic_tables):
         yield Metric(name, value, tags)
 ```
 
-To attach your metrics to a `MetricsReport` object, you can use the `add_metrics` 
+To attach your metrics to a `MetricsReport` object, you can use the `add_metrics`
 method and provide your custom metrics iterator:
 
 ```python
@@ -148,10 +158,11 @@ report = MetricsReport()
 report.add_metrics(my_custom_metrics(metadata, real_tables, synthetic_tables))
 ```
 
-See `sdmetrics.adversary`, `sdmetrics.descriptor`, and `sdmetrics.statistical` for 
+See `sdmetrics.adversary`, `sdmetrics.descriptor`, and `sdmetrics.statistical` for
 more examples of how to implement metrics.
 
 ## Filtering Metrics
+
 The `MetricsReport` object includes a `details` method which returns all of the
 metrics that were computed.
 
@@ -194,8 +205,7 @@ Examples of standard tags implemented by the built-in metrics are shown below.
   </tr>
 </table>
 
-
-As this library matures, we will define additional standard tags and/or promote them to 
+As this library matures, we will define additional standard tags and/or promote them to
 first class attributes.
 
 # What's next?
