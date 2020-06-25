@@ -1,5 +1,5 @@
 
-from sdmetrics import Metric
+from sdmetrics.report import Metric
 
 
 class UnivariateMetric():

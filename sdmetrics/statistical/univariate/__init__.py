@@ -1,8 +1,8 @@
 """
 This module implements univariate goodness-of-fit tests.
 """
-from .base import UnivariateMetric
-from .cstest import CSTest
-from .kstest import KSTest
+from sdmetrics.statistical.univariate.base import UnivariateMetric
+from sdmetrics.statistical.univariate.cstest import CSTest
+from sdmetrics.statistical.univariate.kstest import KSTest
 
 __all__ = ["UnivariateMetric", "CSTest", "KSTest"]

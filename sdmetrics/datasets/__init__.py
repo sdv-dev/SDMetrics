@@ -8,7 +8,7 @@ from glob import glob
 import pandas as pd
 from sdv import Metadata
 
-_dir_ = os.path.dirname(__file__)
+_DIR_ = os.path.dirname(__file__)
 
 
 def list_datasets():
@@ -20,7 +20,7 @@ def list_datasets():
         (List[str]): A list of dataset names.
     """
     datasets = []
-    for path_to_metadata in glob(os.path.join(_dir_, "**/metadata.json")):
+    for path_to_metadata in glob(os.path.join(_DIR_, "**/metadata.json")):
         path_to_dataset = os.path.dirname(path_to_metadata)
         dataset_name = os.path.basename(path_to_dataset)
         datasets.append(dataset_name)
@@ -60,7 +60,8 @@ class Dataset():
         if is_path:
             path_to_dataset = dataset
         else:
-            path_to_dataset = os.path.join(_dir_, dataset)
+            path_to_dataset = os.path.join(_DIR_, dataset)
+
         metadata = Metadata(os.path.join(path_to_dataset, "metadata.json"))
         tables = Dataset._load_tables(os.path.join(path_to_dataset))
         lq_synthetic = Dataset._load_tables(os.path.join(path_to_dataset, "low_quality"))

@@ -12,11 +12,14 @@ with open('HISTORY.md') as history_file:
     history = history_file.read()
 
 install_requires = [
-    "sdv",
-    "numpy",
+    'sdv>=0.3.2,<0.4',
+    'rdt>=0.2.1,<0.3',
     'pandas>=0.22.0,<0.25',
-    "rdt",
-    "scikit-learn"
+    'scikit-learn>=0.20,<1',
+    'scipy<1.3,>=0.19.1',
+    'numpy<1.17,>=1.15.4',
+    'seaborn>=0.9,<0.11',
+    'docutils<0.15,>=0.10',   # prevent incompatibilities
 ]
 
 setup_requires = [
@@ -27,6 +30,8 @@ tests_require = [
     'parameterized',
     'pytest>=3.4.2',
     'pytest-cov>=2.6.0',
+    'jupyter>=1.0.0,<2',
+    'rundoc>=0.4.3,<0.5',
 ]
 
 development_requires = [
@@ -86,11 +91,11 @@ setup(
     keywords='sdmetrics sdmetrics SDMetrics',
     name='sdmetrics',
     packages=find_packages(include=['sdmetrics', 'sdmetrics.*']),
-    python_requires='>=3.5',
+    python_requires='>=3.5,<3.8',
     setup_requires=setup_requires,
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.1.0.dev0',
+    version='0.0.1.dev0',
     zip_safe=False,
 )

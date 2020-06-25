@@ -2,10 +2,8 @@
 This module implements statistical methods for comparing the distributions of
 the two databases.
 """
-from .bivariate import ContinuousDivergence, DiscreteDivergence
-from .univariate import CSTest, KSTest
-
-methods = [CSTest(), KSTest(), DiscreteDivergence(), ContinuousDivergence()]
+from sdmetrics.statistical.bivariate import ContinuousDivergence, DiscreteDivergence
+from sdmetrics.statistical.univariate import CSTest, KSTest
 
 
 def metrics(metadata, real_tables, synthetic_tables):
@@ -23,5 +21,5 @@ def metrics(metadata, real_tables, synthetic_tables):
     Yields:
         Metric: The next metric.
     """
-    for method in methods:
+    for method in [CSTest(), KSTest(), DiscreteDivergence(), ContinuousDivergence()]:
         yield from method.metrics(metadata, real_tables, synthetic_tables)
