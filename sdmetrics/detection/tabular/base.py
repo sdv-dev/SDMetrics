@@ -5,7 +5,7 @@ from rdt import HyperTransformer
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
-from sdmetrics import Goal, Metric
+from sdmetrics.report import Goal, Metric
 
 
 class TabularDetector():

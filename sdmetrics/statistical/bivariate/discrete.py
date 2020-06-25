@@ -2,10 +2,9 @@
 import numpy as np
 from scipy.special import rel_entr
 
-from sdmetrics import Goal
+from sdmetrics.report import Goal
+from sdmetrics.statistical.bivariate.base import BivariateMetric
 from sdmetrics.statistical.utils import frequencies
-
-from .base import BivariateMetric
 
 
 class DiscreteDivergence(BivariateMetric):

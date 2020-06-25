@@ -2,7 +2,7 @@
 This module implements constraint checking which makes sure the statistical
 properties of the synthetic data match the specified metadata.
 """
-from sdmetrics import Goal, Metric
+from sdmetrics.report import Goal, Metric
 
 
 def metrics(metadata, real_tables, synthetic_tables):

@@ -1,9 +1,8 @@
 import numpy as np
 from scipy.stats import ks_2samp
 
-from sdmetrics import Goal
-
-from .base import UnivariateMetric
+from sdmetrics.report import Goal
+from sdmetrics.statistical.univariate.base import UnivariateMetric
 
 
 class KSTest(UnivariateMetric):

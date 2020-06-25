@@ -1,9 +1,7 @@
 """
 This module implements machine learning methods for detecting synthetic data.
 """
-from .tabular import LogisticDetector
-
-detectors = [LogisticDetector()]
+from sdmetrics.detection.tabular import LogisticDetector
 
 
 def metrics(metadata, real_tables, synthetic_tables):
@@ -21,5 +19,5 @@ def metrics(metadata, real_tables, synthetic_tables):
     Yields:
         Metric: The next metric.
     """
-    for detector in detectors:
+    for detector in [LogisticDetector()]:
         yield from detector.metrics(metadata, real_tables, synthetic_tables)

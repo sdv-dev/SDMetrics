@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.model_selection import KFold
 
-from sdmetrics import Goal, Metric
+from sdmetrics.report import Goal, Metric
 
 
 class MLEfficacy():

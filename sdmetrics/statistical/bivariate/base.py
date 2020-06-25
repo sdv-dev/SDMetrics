@@ -1,6 +1,6 @@
 from itertools import permutations
 
-from sdmetrics import Metric
+from sdmetrics.report import Metric
 
 
 class BivariateMetric():

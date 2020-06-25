@@ -2,7 +2,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import RobustScaler
 from sklearn.svm import SVC
 
-from .base import TabularDetector
+from sdmetrics.detection.tabular.base import TabularDetector
 
 
 class SVCDetector(TabularDetector):

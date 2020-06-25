@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from sdmetrics import Goal, Metric, MetricsReport
+from sdmetrics.report import Goal, Metric, MetricsReport
 
 
 class TestMetricsReport(TestCase):

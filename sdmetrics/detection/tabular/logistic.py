@@ -2,7 +2,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import RobustScaler
 
-from .base import TabularDetector
+from sdmetrics.detection.tabular.base import TabularDetector
 
 
 class LogisticDetector(TabularDetector):
