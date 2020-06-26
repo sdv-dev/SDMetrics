@@ -22,7 +22,7 @@ def frequencies(real, synthetic):
         if value not in real:
             warnings.warn("Unexpected value %s in synthetic data." % (value,))
             real[value] += 1e-6  # Regularization to prevent NaN.
-    for value in synthetic:
+    for value in real:
         f_obs.append(synthetic[value] / sum(synthetic.values()))
         f_exp.append(real[value] / sum(real.values()))
     return f_obs, f_exp

@@ -53,9 +53,10 @@ class TabularDetector():
     def _single_table_detection(self, metadata, real_tables, synthetic_tables):
         # Single Table Detection
         for table_name in set(real_tables):
+            table_fields = list(metadata.get_dtypes(table_name, ids=False).keys())
             auroc = self._compute_auroc(
-                real_tables[table_name],
-                synthetic_tables[table_name])
+                real_tables[table_name][table_fields],
+                synthetic_tables[table_name][table_fields])
 
             yield Metric(
                 name=self.name,
@@ -73,19 +74,24 @@ class TabularDetector():
         # Parent-Child Table Detection
         for table_name in set(real_tables):
             key = metadata.get_primary_key(table_name)
+            table_fields = [key] + list(metadata.get_dtypes(table_name, ids=False))
             for child_name in metadata.get_children(table_name):
                 child_key = metadata.get_foreign_key(table_name, child_name)
+                child_fields = [child_key] + list(metadata.get_dtypes(child_name, ids=False))
 
                 real = self._denormalize(
-                    real_tables[table_name],
+                    real_tables[table_name][table_fields],
                     key,
-                    real_tables[child_name],
-                    child_key)
+                    real_tables[child_name][child_fields],
+                    child_key
+                )
                 synthetic = self._denormalize(
-                    synthetic_tables[table_name],
+                    synthetic_tables[table_name][table_fields],
                     key,
-                    synthetic_tables[child_name],
-                    child_key)
+                    synthetic_tables[child_name][child_fields],
+                    child_key
+                )
+
                 auroc = self._compute_auroc(real, synthetic)
 
                 yield Metric(
@@ -135,4 +141,6 @@ class TabularDetector():
             how='outer',
             left_on=key,
             right_on=child_key)
+
+        del flat[key]
         return flat
