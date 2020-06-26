@@ -27,5 +27,9 @@ class CSTest(UnivariateMetric):
             which corresponds to the fields in a Metric object.
         """
         f_obs, f_exp = frequencies(real_column, synthetic_column)
-        statistic, pvalue = chisquare(f_obs, f_exp)
+        if len(f_obs) == len(f_exp) == 1:
+            pvalue = 1.0
+        else:
+            _, pvalue = chisquare(f_obs, f_exp)
+
         return pvalue, Goal.MAXIMIZE, "p-value", (0.0, 1.0)

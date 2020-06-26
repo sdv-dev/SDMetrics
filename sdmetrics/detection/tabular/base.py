@@ -143,4 +143,7 @@ class TabularDetector():
             right_on=child_key)
 
         del flat[key]
+        if child_key != key:
+            del flat[child_key]
+
         return flat
