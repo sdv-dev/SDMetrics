@@ -9,8 +9,8 @@
 [![Travis CI Shield](https://travis-ci.org/sdv-dev/SDMetrics.svg?branch=master)](https://travis-ci.org/sdv-dev/SDMetrics)
 [![Coverage Status](https://codecov.io/gh/sdv-dev/SDMetrics/branch/master/graph/badge.svg)](https://codecov.io/gh/sdv-dev/SDMetrics)
 
-<p align="center">
-  <img width=640 style="max-width:100%" src="resources/header.png">
+<p>
+  <img width=15% src="resources/header.png">
 </p>
 
 Metrics for Synthetic Data Generation Projects
