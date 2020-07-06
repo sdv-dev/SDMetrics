@@ -12,7 +12,7 @@ with open('HISTORY.md') as history_file:
     history = history_file.read()
 
 install_requires = [
-    'sdv>=0.3.2,<0.4',
+    'sdv>=0.3.2,<0.3.3',
     'rdt>=0.2.1,<0.3',
     'pandas>=0.22.0,<0.25',
     'scikit-learn>=0.20,<1',
@@ -48,8 +48,8 @@ development_requires = [
     'autodocsumm>=0.1.13',
 
     # style check
-    'flake8>=3.7.7',
-    'isort>=4.3.4',
+    'flake8>=3.7.7,<4',
+    'isort>=4.3.4,<5',
 
     # fix style issues
     'autoflake>=1.2',
