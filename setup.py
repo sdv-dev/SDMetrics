@@ -17,7 +17,7 @@ install_requires = [
     'pandas>=0.22.0,<0.25',
     'scikit-learn>=0.20,<1',
     'scipy<1.3,>=0.19.1',
-    'numpy<1.17,>=1.15.4',
+    'numpy<2,>=1.15.4',
     'seaborn>=0.9,<0.11',
     'docutils<0.15,>=0.10',   # prevent incompatibilities
 ]
