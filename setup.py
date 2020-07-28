@@ -12,12 +12,12 @@ with open('HISTORY.md') as history_file:
     history = history_file.read()
 
 install_requires = [
-    'sdv>=0.3.2,<0.3.3',
+    'sdv>=0.3.2,<0.4',
     'rdt>=0.2.1,<0.3',
     'pandas>=0.22.0,<0.25',
     'scikit-learn>=0.20,<1',
     'scipy<1.3,>=0.19.1',
-    'numpy<1.17,>=1.15.4',
+    'numpy<2,>=1.15.4',
     'seaborn>=0.9,<0.11',
     'docutils<0.15,>=0.10',   # prevent incompatibilities
 ]
@@ -96,6 +96,6 @@ setup(
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.0.2.dev0',
+    version='0.0.2.dev1',
     zip_safe=False,
 )
