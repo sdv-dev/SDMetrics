@@ -12,14 +12,14 @@ with open('HISTORY.md') as history_file:
     history = history_file.read()
 
 install_requires = [
-    'sdv>=0.3.2,<0.4',
-    'rdt>=0.2.1,<0.3',
-    'pandas>=0.22.0,<0.25',
+    'sdv>=0.4.0.dev0,<0.5',
+    'rdt>=0.2.4.dev1,<0.3',
     'scikit-learn>=0.20,<1',
-    'scipy<1.3,>=0.19.1',
-    'numpy<2,>=1.15.4',
+    'scipy>=1.1.0,<2',
+    'numpy>=1.15.4,<2',
+    'pandas>=0.21,<2',
     'seaborn>=0.9,<0.11',
-    'docutils<0.15,>=0.10',   # prevent incompatibilities
+    'matplotlib>=2.2.2,<3.2.2',
 ]
 
 setup_requires = [
@@ -76,6 +76,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
@@ -91,7 +92,7 @@ setup(
     keywords='sdmetrics sdmetrics SDMetrics',
     name='sdmetrics',
     packages=find_packages(include=['sdmetrics', 'sdmetrics.*']),
-    python_requires='>=3.5,<3.8',
+    python_requires='>=3.5,<3.9',
     setup_requires=setup_requires,
     test_suite='tests',
     tests_require=tests_require,
