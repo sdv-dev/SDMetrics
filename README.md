@@ -9,8 +9,8 @@
 [![Travis CI Shield](https://travis-ci.org/sdv-dev/SDMetrics.svg?branch=master)](https://travis-ci.org/sdv-dev/SDMetrics)
 [![Coverage Status](https://codecov.io/gh/sdv-dev/SDMetrics/branch/master/graph/badge.svg)](https://codecov.io/gh/sdv-dev/SDMetrics)
 
-<p align="center">
-  <img width=640 style="max-width:100%" src="resources/header.png">
+<p>
+  <img width=15% src="resources/header.png">
 </p>
 
 Metrics for Synthetic Data Generation Projects
@@ -32,7 +32,7 @@ The **SDMetrics** library provides a set of **dataset-agnostic tools** for evalu
 
 ## Requirements
 
-**SDMetrics** has been developed and tested on [Python 3.5, 3.6, and 3.7](https://www.python.org/downloads/)
+**SDMetrics** has been developed and tested on [Python 3.5, 3.6, 3.7 and 3.8](https://www.python.org/downloads/)
 
 Also, although it is not strictly required, the usage of a [virtualenv](
 https://virtualenv.pypa.io/en/latest/) is highly recommended in order to avoid
