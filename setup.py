@@ -13,7 +13,7 @@ with open('HISTORY.md') as history_file:
 
 install_requires = [
     'sdv>=0.4.0.dev0,<0.5',
-    'rdt>=0.2.4.dev1,<0.3',
+    'rdt>=0.2.4,<0.3',
     'scikit-learn>=0.20,<1',
     'scipy>=1.1.0,<2',
     'numpy>=1.15.4,<2',
