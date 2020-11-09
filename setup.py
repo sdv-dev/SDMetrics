@@ -40,9 +40,9 @@ development_requires = [
     'watchdog>=0.8.3,<0.11',
 
     # docs
-    'm2r>=0.2.1',
+    'm2r>=0.2.0,<0.3',
     'nbsphinx>=0.5.0,<0.7',
-    'Sphinx>=3,<3.3',
+    'Sphinx>=1.7.1,<3',
     'sphinx_rtd_theme>=0.2.4,<0.6',
     'autodocsumm>=0.1.13,<0.2',
 
