@@ -13,7 +13,7 @@ def test_sdmetrics(dataset):
 
     details = hq_report.details()
     assert isinstance(details, pd.DataFrame)
-    assert len(details.columns) == 9
+    assert len(details.columns) == 7
 
     highlights = hq_report.highlights()
     assert isinstance(highlights, pd.DataFrame)
