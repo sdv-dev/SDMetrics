@@ -12,7 +12,6 @@ with open('HISTORY.md') as history_file:
     history = history_file.read()
 
 install_requires = [
-    'sdv>=0.4.0.dev0,<0.5',
     'rdt>=0.2.4,<0.3',
     'scikit-learn>=0.20,<1',
     'scipy>=1.1.0,<2',
@@ -27,41 +26,42 @@ setup_requires = [
 ]
 
 tests_require = [
-    'parameterized',
     'pytest>=3.4.2',
     'pytest-cov>=2.6.0',
     'jupyter>=1.0.0,<2',
     'rundoc>=0.4.3,<0.5',
+    'sdv>=0.4.6.dev1,<0.5',
 ]
 
 development_requires = [
     # general
-    'bumpversion>=0.5.3',
+    'bumpversion>=0.5.3,<0.6',
     'pip>=9.0.1',
-    'watchdog>=0.8.3',
+    'watchdog>=0.8.3,<0.11',
 
     # docs
     'm2r>=0.2.1',
-    'nbsphinx>=0.5.0',
-    'Sphinx>=2.4.0,<3.0.0',
-    'sphinx_rtd_theme>=0.2.4',
-    'autodocsumm>=0.1.13',
+    'nbsphinx>=0.5.0,<0.7',
+    'Sphinx>=3,<3.3',
+    'sphinx_rtd_theme>=0.2.4,<0.6',
+    'autodocsumm>=0.1.13,<0.2',
 
     # style check
     'flake8>=3.7.7,<4',
+    'flake8-absolute-import>=1.0,<2',
     'isort>=4.3.4,<5',
 
     # fix style issues
-    'autoflake>=1.2',
-    'autopep8>=1.4.3',
+    'autoflake>=1.1,<2',
+    'autopep8>=1.4.3,<2',
 
     # distribute on PyPI
-    'twine>=1.10.0',
+    'twine>=1.10.0,<4',
     'wheel>=0.30.0',
 
     # Advanced testing
-    'coverage>=4.5.1',
-    'tox>=2.9.1',
+    'coverage>=4.5.1,<6',
+    'tox>=2.9.1,<4',
 ]
 
 setup(
