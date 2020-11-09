@@ -1,29 +1,21 @@
-from unittest import TestCase
-
-from parameterized import parameterized
-from sdv import SDV, load_demo
+import pandas as pd
+import pytest
 
 from sdmetrics import evaluate
 from sdmetrics.datasets import Dataset, list_datasets
 
 
-class TestSDMetrics(TestCase):
+@pytest.mark.parametrize('dataset', list_datasets())
+def test_sdmetrics(dataset):
+    dataset = Dataset.load(dataset)
+    hq_report = evaluate(dataset.metadata, dataset.tables, dataset.hq_synthetic)
+    lq_report = evaluate(dataset.metadata, dataset.tables, dataset.lq_synthetic)
 
-    def test_integration(self):
-        metadata, tables = load_demo(metadata=True)
+    details = hq_report.details()
+    assert isinstance(details, pd.DataFrame)
+    assert len(details.columns) == 9
 
-        sdv = SDV()
-        sdv.fit(metadata, tables)
-        synthetic = sdv.sample_all(20)
+    highlights = hq_report.highlights()
+    assert isinstance(highlights, pd.DataFrame)
 
-        metrics = evaluate(metadata, tables, synthetic)
-        metrics.overall()
-        metrics.details()
-        metrics.highlights()
-
-    @parameterized.expand(list_datasets())
-    def test_data_driven(self, dataset):
-        dataset = Dataset.load(dataset)
-        hq_report = evaluate(dataset.metadata, dataset.tables, dataset.hq_synthetic)
-        lq_report = evaluate(dataset.metadata, dataset.tables, dataset.lq_synthetic)
-        assert hq_report.overall() > lq_report.overall()
+    assert hq_report.overall() > lq_report.overall()
