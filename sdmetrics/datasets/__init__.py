@@ -6,7 +6,6 @@ import os
 from glob import glob
 
 import pandas as pd
-from sdv import Metadata
 
 _DIR_ = os.path.dirname(__file__)
 
@@ -62,6 +61,14 @@ class Dataset():
         else:
             path_to_dataset = os.path.join(_DIR_, dataset)
 
+        try:
+            from sdv import Metadata  # Lazy import to make dependency optional
+        except ImportError as ie:
+            ie.msg += (
+                '\n\nIt seems like `sdv` is not installed.\n'
+                'Please install it using:\n\n    pip install sdv'
+            )
+            raise
         metadata = Metadata(os.path.join(path_to_dataset, "metadata.json"))
         tables = Dataset._load_tables(os.path.join(path_to_dataset))
         lq_synthetic = Dataset._load_tables(os.path.join(path_to_dataset, "low_quality"))
