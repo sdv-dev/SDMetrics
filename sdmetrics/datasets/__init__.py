@@ -69,7 +69,9 @@ class Dataset():
                 'Please install it using:\n\n    pip install sdv'
             )
             raise
+
         metadata = Metadata(os.path.join(path_to_dataset, "metadata.json"))
+
         tables = Dataset._load_tables(os.path.join(path_to_dataset))
         lq_synthetic = Dataset._load_tables(os.path.join(path_to_dataset, "low_quality"))
         hq_synthetic = Dataset._load_tables(os.path.join(path_to_dataset, "high_quality"))

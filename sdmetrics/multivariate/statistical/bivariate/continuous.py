@@ -2,8 +2,8 @@
 import numpy as np
 from scipy.special import rel_entr
 
+from sdmetrics.multivariate.statistical.bivariate.base import BivariateMetric
 from sdmetrics.report import Goal
-from sdmetrics.statistical.bivariate.base import BivariateMetric
 
 
 class ContinuousDivergence(BivariateMetric):

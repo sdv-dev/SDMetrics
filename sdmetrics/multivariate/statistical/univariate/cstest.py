@@ -1,9 +1,9 @@
 
 from scipy.stats import chisquare
 
+from sdmetrics.multivariate.statistical.univariate.base import UnivariateMetric
+from sdmetrics.multivariate.statistical.utils import frequencies
 from sdmetrics.report import Goal
-from sdmetrics.statistical.univariate.base import UnivariateMetric
-from sdmetrics.statistical.utils import frequencies
 
 
 class CSTest(UnivariateMetric):

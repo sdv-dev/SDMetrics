@@ -7,7 +7,12 @@ __email__ = 'dailabmit@gmail.com'
 __version__ = '0.0.3.dev0'
 
 from sdmetrics.evaluation import evaluate
+from sdmetrics.multivariate import constraint, detection, efficacy, statistical
 
 __all__ = [
-    'evaluate'
+    'constraint',
+    'detection',
+    'efficacy',
+    'evaluate',
+    'statistical',
 ]

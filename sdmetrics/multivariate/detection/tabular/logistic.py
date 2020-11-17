@@ -1,17 +1,17 @@
+from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import RobustScaler
-from sklearn.svm import SVC
 
-from sdmetrics.detection.tabular.base import TabularDetector
+from sdmetrics.multivariate.detection.tabular.base import TabularDetector
 
 
-class SVCDetector(TabularDetector):
+class LogisticDetector(TabularDetector):
 
-    name = "svc"
+    name = "logistic"
 
     def fit(self, X, y):
         """This function trains a sklearn pipeline with a robust scalar
-        and a support vector classifier.
+        and a logistic regression classifier.
 
         Arguments:
             X (np.ndarray): The numerical features (i.e. transformed rows).
@@ -19,7 +19,7 @@ class SVCDetector(TabularDetector):
         """
         self.model = Pipeline([
             ('scalar', RobustScaler()),
-            ('classifier', SVC(probability=True, gamma='scale')),
+            ('classifier', LogisticRegression(solver="lbfgs")),
         ])
         self.model.fit(X, y)
 

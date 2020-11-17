@@ -114,7 +114,7 @@ The `MetricsReport` object includes a `details` method which returns all of the
 metrics that were computed.
 
 ```python3
-from sdmetrics import detection
+from sdmetrics.multivariate import detection
 from sdmetrics.report import MetricsReport
 
 report = MetricsReport()
@@ -158,8 +158,8 @@ report = MetricsReport()
 report.add_metrics(my_custom_metrics(metadata, real_tables, synthetic_tables))
 ```
 
-See `sdmetrics.detection`, `sdmetrics.efficacy`, and `sdmetrics.statistical` for
-more examples of how to implement metrics.
+See `sdmetrics.multivariate.detection`, `sdmetrics.multivariate.efficacy`, and
+`sdmetrics.multivariate.statistical` for more examples of how to implement metrics.
 
 ## Filtering Metrics
 
