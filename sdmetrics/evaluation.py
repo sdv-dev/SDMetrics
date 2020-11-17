@@ -2,7 +2,7 @@
 
 """Evaluation module."""
 
-from sdmetrics import constraint, detection, statistical
+from sdmetrics.multivariate import constraint, detection, statistical
 from sdmetrics.report import MetricsReport
 
 
