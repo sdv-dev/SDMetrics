@@ -13,7 +13,7 @@ with open('HISTORY.md') as history_file:
 
 install_requires = [
     'sdv>=0.4.0.dev0,<0.5',
-    'rdt>=0.2.4,<0.3',
+    'rdt>=0.2.8.dev0,<0.3',
     'scikit-learn>=0.20,<1',
     'scipy>=1.1.0,<2',
     'numpy>=1.15.4,<2',
@@ -73,7 +73,6 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -92,11 +91,11 @@ setup(
     keywords='sdmetrics sdmetrics SDMetrics',
     name='sdmetrics',
     packages=find_packages(include=['sdmetrics', 'sdmetrics.*']),
-    python_requires='>=3.5,<3.9',
+    python_requires='>=3.6,<3.9',
     setup_requires=setup_requires,
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.0.2',
+    version='0.0.3.dev2',
     zip_safe=False,
 )
