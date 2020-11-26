@@ -6,11 +6,11 @@
 [![Development Status](https://img.shields.io/badge/Development%20Status-2%20--%20Pre--Alpha-yellow)](https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha)
 [![PyPI Shield](https://img.shields.io/pypi/v/sdmetrics.svg)](https://pypi.python.org/pypi/sdmetrics)
 [![Downloads](https://pepy.tech/badge/sdmetrics)](https://pepy.tech/project/sdmetrics)
-[![Travis CI Shield](https://travis-ci.org/sdv-dev/SDMetrics.svg?branch=master)](https://travis-ci.org/sdv-dev/SDMetrics)
+[![Tests](https://github.com/sdv-dev/SDMetrics/workflows/Run%20Tests/badge.svg)](https://github.com/sdv-dev/SDMetrics/actions?query=workflow%3A%22Run+Tests%22+branch%3Amaster)
 [![Coverage Status](https://codecov.io/gh/sdv-dev/SDMetrics/branch/master/graph/badge.svg)](https://codecov.io/gh/sdv-dev/SDMetrics)
 
 <p>
-  <img width=15% src="resources/header.png">
+  <img width=15% src="docs/resources/header.png">
 </p>
 
 Metrics for Synthetic Data Generation Projects
@@ -99,7 +99,7 @@ figure.savefig("sdmetrics-report.png")
 ```
 
 <p align="center">
-    <img style="width:100%" src="resources/visualize.png">
+    <img style="width:100%" src="docs/resources/visualize.png">
 </p>
 
 # Advanced Usage
