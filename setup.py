@@ -30,8 +30,10 @@ tests_require = [
     'parameterized',
     'pytest>=3.4.2',
     'pytest-cov>=2.6.0',
+    'pytest-rerunfailures>=9.1.1,<10',
     'jupyter>=1.0.0,<2',
     'rundoc>=0.4.3,<0.5',
+    'invoke',
 ]
 
 development_requires = [
