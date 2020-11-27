@@ -1,19 +1,22 @@
 # Config file for automatic testing at travis-ci.org
+os: linux
 dist: bionic
 language: python
 python:
-  - 3.8
-  - 3.7
   - 3.6
+  - 3.7
+  - 3.8
+env:
+  - TOXENV=lint
+  - TOXENV=readme
+  - TOXENV=pytest
+  - TOXENV=tutorials
 
 # Command to install dependencies
-addons:
-  apt:
-    packages:
-      - pandoc
-install: pip install -U tox-travis codecov
+install:
+  - sudo apt-get update
+  - pip install -U tox-travis codecov
 
 after_success: codecov
 
-# Command to run tests
-script: tox
+script: travis_wait 60 tox
