@@ -1,5 +1,9 @@
 # History
 
+## v0.0.4 - 2020-11-27
+
+Patch release to relax dependencies and avoid conflicts when using the latest SDV version.
+
 ## v0.0.3 - 2020-11-20
 
 Fix error on detection metrics when input data contains infinity or NaN values.
