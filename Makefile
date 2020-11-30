@@ -87,7 +87,8 @@ install-develop: clean-build clean-pyc ## install the package in editable mode a
 
 .PHONY: lint
 lint: ## check style with flake8 and isort
-	flake8 sdmetrics tests
+	flake8 sdmetrics
+	flake8 tests --ignore=D
 	isort -c --recursive sdmetrics tests
 
 .PHONY: fix-lint
