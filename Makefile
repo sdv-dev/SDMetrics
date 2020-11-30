@@ -117,7 +117,7 @@ test-tutorials: ## run the tutorial notebooks
 		"jupyter nbconvert --execute --ExecutePreprocessor.timeout=3600 --to=html --stdout {} > /dev/null || exit 255"
 
 .PHONY: test
-test: test-unit test-readme test-tutorials ## test everything that needs test dependencies
+test: test-unit # test-readme test-tutorials ## test everything that needs test dependencies
 
 .PHONY: test-devel
 test-devel: lint docs ## test everything that needs development dependencies
