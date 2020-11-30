@@ -120,7 +120,7 @@ test-tutorials: ## run the tutorial notebooks
 test: test-unit # test-readme test-tutorials ## test everything that needs test dependencies
 
 .PHONY: test-devel
-test-devel: lint docs ## test everything that needs development dependencies
+test-devel: lint # docs ## test everything that needs development dependencies
 
 .PHONY: test-all
 test-all: ## run tests on every Python version with tox
