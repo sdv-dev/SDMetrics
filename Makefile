@@ -87,7 +87,8 @@ install-develop: clean-build clean-pyc ## install the package in editable mode a
 
 .PHONY: lint
 lint: ## check style with flake8 and isort
-	flake8 sdmetrics tests
+	flake8 sdmetrics
+	flake8 tests --ignore=D
 	isort -c --recursive sdmetrics tests
 
 .PHONY: fix-lint
@@ -116,10 +117,10 @@ test-tutorials: ## run the tutorial notebooks
 		"jupyter nbconvert --execute --ExecutePreprocessor.timeout=3600 --to=html --stdout {} > /dev/null || exit 255"
 
 .PHONY: test
-test: test-unit test-readme test-tutorials ## test everything that needs test dependencies
+test: test-unit # test-readme test-tutorials ## test everything that needs test dependencies
 
 .PHONY: test-devel
-test-devel: lint docs ## test everything that needs development dependencies
+test-devel: lint # docs ## test everything that needs development dependencies
 
 .PHONY: test-all
 test-all: ## run tests on every Python version with tox
