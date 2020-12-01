@@ -4,7 +4,7 @@
 
 __author__ = 'MIT Data To AI Lab'
 __email__ = 'dailabmit@gmail.com'
-__version__ = '0.0.3.dev0'
+__version__ = '0.0.5.dev0'
 
 
 from sdmetrics import goal, multi_table, single_column, single_table, timeseries

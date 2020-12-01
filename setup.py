@@ -5,14 +5,14 @@
 
 from setuptools import setup, find_packages
 
-with open('README.md') as readme_file:
+with open('README.md', encoding='utf-8') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.md') as history_file:
+with open('HISTORY.md', encoding='utf-8') as history_file:
     history = history_file.read()
 
 install_requires = [
-    'rdt>=0.2.4,<0.3',
+    'rdt>=0.2.8,<0.3',
     'scikit-learn>=0.20,<1',
     'scipy>=1.1.0,<2',
     'numpy>=1.15.4,<2',
@@ -28,9 +28,10 @@ setup_requires = [
 tests_require = [
     'pytest>=3.4.2',
     'pytest-cov>=2.6.0',
+    'pytest-rerunfailures>=9.1.1,<10',
     'jupyter>=1.0.0,<2',
     'rundoc>=0.4.3,<0.5',
-    'sdv>=0.4.6.dev1,<0.5',
+    'invoke',
 ]
 
 development_requires = [
@@ -96,6 +97,6 @@ setup(
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.0.3.dev0',
+    version='0.0.5.dev0',
     zip_safe=False,
 )
