@@ -65,10 +65,8 @@ class DetectionMetric(SingleTableMetric):
         kf = StratifiedKFold(n_splits=3, shuffle=True)
         for train_index, test_index in kf.split(X, y):
             y_pred = cls.fit_predict(X[train_index], y[train_index], X[test_index])
-            auroc = roc_auc_score(y[test_index], y_pred)
-            if auroc < 0.5:
-                auroc = 1.0 - auroc
+            roc_auc = roc_auc_score(y[test_index], y_pred)
 
-            scores.append(auroc)
+            scores.append(max(0.5, roc_auc) * 2 - 1)
 
         return 1 - np.mean(scores)
