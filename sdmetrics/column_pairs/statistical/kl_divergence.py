@@ -33,7 +33,7 @@ class ContinuousKLDivergence(ColumnPairsMetric):
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
-    dtypes = ('float', 'int')
+    dtypes = ('number')
 
     @staticmethod
     def compute(real_data, synthetic_data):
