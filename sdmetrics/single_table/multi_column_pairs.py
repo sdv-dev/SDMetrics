@@ -28,13 +28,6 @@ class MultiColumnPairsMetric(SingleTableMetric, metaclass=NestedAttrsMeta('colum
     column_pairs_metric = None
 
     @classmethod
-    def _dtype_match(cls, column):
-        return any(
-            column.dtype.kind == np.dtype(dtype).kind
-            for dtype in cls.column_pairs_metric.dtypes
-        )
-
-    @classmethod
     def compute(cls, real_data, synthetic_data):
         """Compute this metric.
 

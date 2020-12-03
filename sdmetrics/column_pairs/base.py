@@ -17,7 +17,6 @@ class ColumnPairsMetric(BaseMetric):
             Maximum value or values that this metric can take.
         dtypes (tuple[str]):
             The data types which this metric works on (i.e. ``('object', 'bool')``).
-
     """
 
     name = None
