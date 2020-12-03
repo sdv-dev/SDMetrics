@@ -4,26 +4,10 @@ import numpy as np
 
 from sdmetrics import single_column
 from sdmetrics.single_table.base import SingleTableMetric
+from sdmetrics.utils import NestedAttrsMeta
 
 
-class MultiColumnMetricMetaclass(type):
-    """Metaclass which pulls the attributes from the SingleColumnMetric using properties."""
-
-    def __getattr__(cls, attr):
-        """If cls does not have the attribute, try to get it from the single_colum_metric."""
-        if hasattr(cls, attr):
-            return getattr(cls, attr)
-
-        if hasattr(cls.single_column_metric, attr):
-            return getattr(cls.single_column_metric, attr)
-
-        # At this point we know that neither cls nor cls.single_column_metric has the attribute.
-        # However, we try getting the attribute from cls again to provoke a crash with
-        # the right error message in it.
-        return getattr(cls, attr)
-
-
-class MultiColumnMetric(SingleTableMetric, metaclass=MultiColumnMetricMetaclass):
+class MultiColumnMetric(SingleTableMetric, metaclass=NestedAttrsMeta('single_column_metric')):
     """SingleTableMetric subclass that applies a SingleColumnMetric on each column.
 
     Attributes:

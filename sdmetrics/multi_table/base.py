@@ -28,9 +28,11 @@ class MultiTableMetric(BaseMetric):
 
         Args:
             real_data (dict[str, pandas.DataFrame]):
-                The tables from the real dataset.
+                The tables from the real dataset, passed as a dictionary of
+                table names and pandas.DataFrames.
             synthetic_data (dict[str, pandas.DataFrame]):
-                The tables from the synthetic dataset.
+                The tables from the synthetic dataset, passed as a dictionary of
+                table names and pandas.DataFrames.
 
         Returns:
             Union[float, tuple[float]]:

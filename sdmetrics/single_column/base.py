@@ -31,9 +31,11 @@ class SingleColumnMetric(BaseMetric):
 
         Args:
             real_data (Union[numpy.ndarray, pandas.Series]):
-                The values from the real dataset.
+                The values from the real dataset, passed as a 1d numpy
+                array or as a pandas.Series.
             synthetic_data (Union[numpy.ndarray, pandas.Series]):
-                The values from the synthetic dataset.
+                The values from the synthetic dataset, passed as a 1d numpy
+                array or as a pandas.Series.
 
         Returns:
             Union[float, tuple[float]]:

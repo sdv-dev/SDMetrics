@@ -2,28 +2,12 @@
 
 import numpy as np
 
+from sdmetrics import single_table
 from sdmetrics.multi_table.base import MultiTableMetric
-from sdmetrics.single_table import single_column
+from sdmetrics.utils import NestedAttrsMeta
 
 
-class MultiSingleTableMetricMetaclass(type):
-    """Metaclass which pulls the attributes from the SingleTable metric using properties."""
-
-    def __getattr__(cls, attr):
-        """If cls does not have the attribute, try to get it from the single_table_metric."""
-        if hasattr(cls, attr):
-            return getattr(cls, attr)
-
-        if hasattr(cls.single_table_metric, attr):
-            return getattr(cls.single_table_metric, attr)
-
-        # At this point we know that neither cls nor cls.single_table_metric has the attribute.
-        # However, we try getting the attribute from cls again to provoke a crash with
-        # the right error message in it.
-        return getattr(cls, attr)
-
-
-class MultiSingleTableMetric(MultiTableMetric, metaclass=MultiSingleTableMetricMetaclass):
+class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single_table_metric')):
     """MultiTableMetric subclass that applies a SingleTableMetric on each table.
 
     Attributes:
@@ -67,12 +51,24 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=MultiSingleTableMetricM
 
 
 class CSTest(MultiSingleTableMetric):
-    """MultiSingleTableMetric based on SingleColumn CSTest."""
+    """MultiSingleTableMetric based on SingleTable CSTest."""
 
-    single_table_metric = single_column.CSTest
+    single_table_metric = single_table.multi_single_column.CSTest
 
 
 class KSTest(MultiSingleTableMetric):
-    """MultiSingleTableMetric based on SingleColumn KSTest."""
+    """MultiSingleTableMetric based on SingleTable KSTest."""
 
-    single_table_metric = single_column.KSTest
+    single_table_metric = single_table.multi_single_column.KSTest
+
+
+class LogisticDetection(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable LogisticDetection."""
+
+    single_table_metric = single_table.detection.LogisticDetection
+
+
+class SVCDetection(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable SVCDetection."""
+
+    single_table_metric = single_table.detection.SVCDetection

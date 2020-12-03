@@ -12,9 +12,11 @@ class KSTest(SingleColumnMetric):
 
     This function uses the two-sample Kolmogorov–Smirnov test to compare
     the distributions of the two continuous columns using the empirical CDF.
-    It returns the resulting p-value so that a small value indicates that we
-    can reject the null hypothesis (i.e. and suggests that the distributions
-    are different).
+    It returns 1 minus the KS Test D statistic, which indicates the maximum
+    distance between the expteced CDF and the observed CDF values.
+
+    As a result, the output value is 1.0 if the distributions are identical
+    and 0.0 if they are completely different.
 
     Attributes:
         name (str):
@@ -29,7 +31,7 @@ class KSTest(SingleColumnMetric):
             The data types which this metric works on (i.e. ``('float', 'str')``).
     """
 
-    name = 'Kolmogorov-Smirnov'
+    name = 'Inverted Kolmogorov-Smirnov D statistic'
     dtypes = ('float', 'int')
     goal = Goal.MAXIMIZE
     min_value = 0.0
@@ -47,10 +49,10 @@ class KSTest(SingleColumnMetric):
 
         Returns:
             float:
-                The Kolmogorov–Smirnov test p-value
+                1 minus the Kolmogorov–Smirnov D statistic.
         """
         real_data = pd.Series(real_data).fillna(0)
         synthetic_data = pd.Series(synthetic_data).fillna(0)
-        _, pvalue = ks_2samp(real_data, synthetic_data)
+        statistic, _ = ks_2samp(real_data, synthetic_data)
 
-        return pvalue
+        return 1 - statistic

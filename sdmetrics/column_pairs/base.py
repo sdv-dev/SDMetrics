@@ -1,10 +1,10 @@
-"""Base Single Table metric class."""
+"""Base class for metrics that compare pairs of columns."""
 
 from sdmetrics.base import BaseMetric
 
 
-class SingleTableMetric(BaseMetric):
-    """Base class for metrics that apply to single tables.
+class ColumnPairsMetric(BaseMetric):
+    """Base class for metrics that compare pairs of columns.
 
     Attributes:
         name (str):
@@ -15,12 +15,15 @@ class SingleTableMetric(BaseMetric):
             Minimum value or values that this metric can take.
         max_value (Union[float, tuple[float]]):
             Maximum value or values that this metric can take.
+        dtypes (tuple[str]):
+            The data types which this metric works on (i.e. ``('object', 'bool')``).
     """
 
     name = None
     goal = None
     min_value = None
     max_value = None
+    dtypes = ()
 
     @staticmethod
     def compute(real_data, synthetic_data):
@@ -28,9 +31,11 @@ class SingleTableMetric(BaseMetric):
 
         Args:
             real_data (pandas.DataFrame):
-                The values from the real dataset, passed as a pandas.DataFrame.
+                The values from the real dataset, passed as pandas.DataFrame
+                with 2 columns.
             synthetic_data (pandas.DataFrame):
-                The values from the synthetic dataset, passed as a pandas.DataFrame.
+                The values from the synthetic dataset, passed as a
+                pandas.DataFrame with 2 columns.
 
         Returns:
             Union[float, tuple[float]]:
