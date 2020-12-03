@@ -2,8 +2,8 @@
 
 import numpy as np
 
+from sdmetrics import single_table
 from sdmetrics.multi_table.base import MultiTableMetric
-from sdmetrics.single_table import detection, single_column
 from sdmetrics.utils import NestedAttrsMeta
 
 
@@ -53,22 +53,22 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
 class CSTest(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable CSTest."""
 
-    single_table_metric = single_column.CSTest
+    single_table_metric = single_table.multi_single_column.CSTest
 
 
 class KSTest(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable KSTest."""
 
-    single_table_metric = single_column.KSTest
+    single_table_metric = single_table.multi_single_column.KSTest
 
 
 class LogisticDetection(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable LogisticDetection."""
 
-    single_table_metric = detection.LogisticDetection
+    single_table_metric = single_table.detection.LogisticDetection
 
 
 class SVCDetection(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable SVCDetection."""
 
-    single_table_metric = detection.SVCDetection
+    single_table_metric = single_table.detection.SVCDetection

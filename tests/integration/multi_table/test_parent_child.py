@@ -8,7 +8,6 @@ from sdmetrics.multi_table.detection.parent_child import (
 METRICS = [LogisticParentChildDetection, SVCParentChildDetection]
 
 
-@pytest.fixture
 def ones():
     parent = pd.DataFrame({
         'id': range(10),
@@ -23,7 +22,6 @@ def ones():
     return {'parent': parent, 'child': child}
 
 
-@pytest.fixture
 def zeros():
     parent = pd.DataFrame({
         'id': range(10),
@@ -38,7 +36,6 @@ def zeros():
     return {'parent': parent, 'child': child}
 
 
-@pytest.fixture
 def real_data():
     parent = pd.DataFrame({
         'id': range(60),
@@ -57,26 +54,24 @@ def real_data():
     return {'parent': parent, 'child': child}
 
 
-@pytest.fixture
 def good_data():
     parent = pd.DataFrame({
         'id': range(60),
         'a': np.random.normal(loc=0.01, size=60),
-        'b': np.random.randint(0, 10, size=60),
-        'c': ['a', 'b', 'b', 'b', 'c', 'c'] * 10,
-        'd': [True, True, True, True, False, False] * 10,
+        'b': np.random.randint(1, 11, size=60),
+        'c': ['a', 'b', 'b', 'c', 'c', 'c'] * 10,
+        'd': [True, True, True, True, True, False] * 10,
     })
     child = pd.DataFrame({
         'parent_id': list(range(60)) * 10,
         'a': np.random.normal(loc=0.01, size=600),
-        'b': np.random.randint(0, 10, size=600),
-        'c': ['a', 'b', 'b', 'b', 'c', 'c'] * 100,
-        'd': [True, True, True, True, False, False] * 100,
+        'b': np.random.randint(1, 11, size=600),
+        'c': ['a', 'b', 'b', 'c', 'c', 'c'] * 100,
+        'd': [True, True, True, True, True, False] * 100,
     })
     return {'parent': parent, 'child': child}
 
 
-@pytest.fixture
 def bad_data():
     parent = pd.DataFrame({
         'id': range(60),
@@ -101,28 +96,28 @@ FKS = [
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_max(metric, ones):
-    output = metric.compute(ones, ones, FKS)
+def test_max(metric):
+    output = metric.compute(ones(), ones(), FKS)
 
     assert output == 1
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_min(metric, ones, zeros):
-    output = metric.compute(ones, zeros, FKS)
+def test_min(metric):
+    output = metric.compute(ones(), zeros(), FKS)
 
     assert np.round(output, decimals=5) == 0
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_good(metric, real_data, good_data):
-    output = metric.compute(real_data, good_data, FKS)
+def test_good(metric):
+    output = metric.compute(real_data(), good_data(), FKS)
 
     assert 0.5 < output <= 1
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_bad(metric, real_data, bad_data):
-    output = metric.compute(real_data, bad_data, FKS)
+def test_bad(metric):
+    output = metric.compute(real_data(), bad_data(), FKS)
 
     assert 0 <= output < 0.5

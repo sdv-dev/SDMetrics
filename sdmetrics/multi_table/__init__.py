@@ -1,8 +1,8 @@
 """Metrics for multi table datasets."""
 
-from sdmetrics.multi_table import detection, single_table
+from sdmetrics.multi_table import detection, multi_single_table
 
 __all__ = [
     'detection',
-    'single_table',
+    'multi_single_table',
 ]

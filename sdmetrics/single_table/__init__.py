@@ -1,8 +1,8 @@
 """Metrics for single table datasets."""
 
-from sdmetrics.single_table import detection, single_column
+from sdmetrics.single_table import detection, multi_single_column
 
 __all__ = [
     'detection',
-    'single_column',
+    'multi_single_column',
 ]

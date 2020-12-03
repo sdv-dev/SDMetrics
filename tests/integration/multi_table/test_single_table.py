@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sdmetrics.multi_table.single_table import CSTest, KSTest, LogisticDetection, SVCDetection
+from sdmetrics.multi_table.multi_single_table import (
+    CSTest, KSTest, LogisticDetection, SVCDetection)
 
 METRICS = [CSTest, KSTest, LogisticDetection, SVCDetection]
 

@@ -3,9 +3,17 @@ import pandas as pd
 import pytest
 
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
-from sdmetrics.single_table.single_column import CSTest, KSTest
+from sdmetrics.single_table.multi_column_pairs import ContinuousKLDivergence, DiscreteKLDivergence
+from sdmetrics.single_table.multi_single_column import CSTest, KSTest
 
-METRICS = [CSTest, KSTest, LogisticDetection, SVCDetection]
+METRICS = [
+    CSTest,
+    KSTest,
+    LogisticDetection,
+    SVCDetection,
+    ContinuousKLDivergence,
+    DiscreteKLDivergence
+]
 
 
 @pytest.fixture
@@ -13,6 +21,8 @@ def ones():
     return pd.DataFrame({
         'a': [1] * 100,
         'b': [True] * 100,
+        'c': [1.0] * 100,
+        'd': [True] * 100,
     })
 
 
@@ -21,6 +31,8 @@ def zeros():
     return pd.DataFrame({
         'a': [0] * 100,
         'b': [False] * 100,
+        'c': [0.0] * 100,
+        'd': [False] * 100,
     })
 
 
@@ -65,7 +77,7 @@ def test_max(metric, ones):
 def test_min(metric, ones, zeros):
     output = metric.compute(ones, zeros)
 
-    assert np.round(output, decimals=5) == 0
+    assert 0.0 <= output < 0.1
 
 
 @pytest.mark.parametrize('metric', METRICS)

@@ -2,7 +2,6 @@
 
 import numpy as np
 from rdt import HyperTransformer
-from sklearn.impute import SimpleImputer
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
@@ -59,7 +58,6 @@ class DetectionMetric(SingleTableMetric):
         X = np.concatenate([real_data, synthetic_data])
         y = np.hstack([np.ones(len(real_data)), np.zeros(len(synthetic_data))])
         X[np.isin(X, [np.inf, -np.inf])] = None
-        X = SimpleImputer().fit_transform(X)
 
         scores = []
         kf = StratifiedKFold(n_splits=3, shuffle=True)
