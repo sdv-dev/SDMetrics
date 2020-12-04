@@ -1,6 +1,6 @@
 ## Instructions
 
-These are instructions to deploy the latest version of **SDVMetrics** to [conda](https://docs.conda.io/en/latest/).
+These are instructions to deploy the latest version of **SDMetrics** to [conda](https://docs.conda.io/en/latest/).
 It should be done after every new release.
 
 ## Update the recipe
