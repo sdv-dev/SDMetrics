@@ -52,6 +52,17 @@ This will pull and install the latest stable release from [PyPi](https://pypi.or
 If you want to install from source or contribute to the project please read the
 [Contributing Guide](https://sdv-dev.github.io/SDMetrics/contributing.html#get-started).
 
+## Install with conda
+
+**SDVMetrics** can also be installed using [conda](https://docs.conda.io/en/latest/):
+
+```bash
+conda install -c sdv-dev -c conda-forge sdvmetrics
+```
+
+This will pull and install the latest stable release from [Anaconda](https://anaconda.org/).
+
+
 # Basic Usage
 
 Let's run the demo code from **SDV** to generate a simple synthetic dataset:
