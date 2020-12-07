@@ -4,6 +4,7 @@ import pytest
 
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
+from sdmetrics.single_table.gaussian_mixture import GMLikelihood
 from sdmetrics.single_table.multi_column_pairs import ContinuousKLDivergence, DiscreteKLDivergence
 from sdmetrics.single_table.multi_single_column import CSTest, KSTest
 
@@ -16,6 +17,7 @@ METRICS = [
     DiscreteKLDivergence,
     BNLikelihood,
     BNLogLikelihood,
+    GMLikelihood,
 ]
 
 
