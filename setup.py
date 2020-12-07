@@ -19,6 +19,7 @@ install_requires = [
     'pandas>=0.21,<2',
     'seaborn>=0.9,<0.11',
     'matplotlib>=2.2.2,<3.2.2',
+    'pomegranate>=0.13.0,<0.13.5',
 ]
 
 setup_requires = [
