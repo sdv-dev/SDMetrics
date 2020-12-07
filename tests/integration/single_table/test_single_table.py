@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
 from sdmetrics.single_table.multi_column_pairs import ContinuousKLDivergence, DiscreteKLDivergence
 from sdmetrics.single_table.multi_single_column import CSTest, KSTest
@@ -12,7 +13,9 @@ METRICS = [
     LogisticDetection,
     SVCDetection,
     ContinuousKLDivergence,
-    DiscreteKLDivergence
+    DiscreteKLDivergence,
+    BNLikelihood,
+    BNLogLikelihood,
 ]
 
 
@@ -67,28 +70,13 @@ def bad_data():
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_max(metric, ones):
-    output = metric.compute(ones, ones.copy())
+def test_rank(metric, ones, zeros, real_data, good_data, bad_data):
+    worst = metric.compute(ones, zeros)
+    best = metric.compute(ones, ones)
 
-    assert output == 1
+    bad = metric.compute(real_data, bad_data)
+    good = metric.compute(real_data, good_data)
+    real = metric.compute(real_data, real_data)
 
-
-@pytest.mark.parametrize('metric', METRICS)
-def test_min(metric, ones, zeros):
-    output = metric.compute(ones, zeros)
-
-    assert 0.0 <= output < 0.1
-
-
-@pytest.mark.parametrize('metric', METRICS)
-def test_good(metric, real_data, good_data):
-    output = metric.compute(real_data, good_data)
-
-    assert 0.5 < output <= 1
-
-
-@pytest.mark.parametrize('metric', METRICS)
-def test_bad(metric, real_data, bad_data):
-    output = metric.compute(real_data, bad_data)
-
-    assert 0 <= output < 0.5
+    assert metric.min_value <= worst < best <= metric.max_value
+    assert metric.min_value <= bad < good < real <= metric.max_value
