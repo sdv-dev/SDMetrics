@@ -57,7 +57,7 @@ If you want to install from source or contribute to the project please read the
 **SDMetrics** can also be installed using [conda](https://docs.conda.io/en/latest/):
 
 ```bash
-conda install -c sdv-dev -c conda-forge sdmetrics
+conda install -c sdv-dev -c pytorch -c conda-forge sdmetrics
 ```
 
 This will pull and install the latest stable release from [Anaconda](https://anaconda.org/).
