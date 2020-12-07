@@ -5,6 +5,7 @@ from rdt import HyperTransformer
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
+from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 
 
@@ -27,10 +28,10 @@ class DetectionMetric(SingleTableMetric):
             Maximum value or values that this metric can take.
     """
 
-    name = None
-    goal = None
-    min_value = None
-    max_value = None
+    name = 'SingleTable Detection'
+    goal = Goal.MAXIMIZE
+    min_value = 0.0
+    max_value = 1.0
 
     @staticmethod
     def fit_predict(X_train, y_train, X_test):
