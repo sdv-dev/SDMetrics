@@ -12,17 +12,27 @@ def NestedAttrsMeta(nested):
 
         def __getattr__(cls, attr):
             """If cls does not have the attribute, try to get it from the nested object."""
-            if hasattr(cls, attr):
-                return getattr(cls, attr)
-
             nested_obj = getattr(cls, nested)
             if hasattr(nested_obj, attr):
                 return getattr(nested_obj, attr)
 
-            # At this point we know that neither cls nor the nested object has the attribute.
-            # However, we try getting the attribute from cls again to provoke a crash with
-            # the right error message in it.
-            return getattr(cls, attr)
+            raise AttributeError(f"type object '{cls.__name__}' has no attribute '{attr}'")
+
+        @property
+        def name(cls):
+            return getattr(cls, nested).name
+
+        @property
+        def goal(cls):
+            return getattr(cls, nested).goal
+
+        @property
+        def max_value(cls):
+            return getattr(cls, nested).max_value
+
+        @property
+        def min_value(cls):
+            return getattr(cls, nested).min_value
 
     return Metaclass
 
