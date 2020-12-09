@@ -15,21 +15,18 @@ class RegressionEfficacyMetric(MLEfficacyMetric):
     goal = Goal.MAXIMIZE
     min_value = -np.inf
     max_value = 1
-
-    @staticmethod
-    def _compute_scores(real_target, predictions):
-        return r2_score(real_target, predictions)
+    SCORER = r2_score
 
 
 class LinearRegression(RegressionEfficacyMetric):
 
-    model = linear_model.LinearRegression
+    MODEL = linear_model.LinearRegression
 
 
 class MLPRegressor(RegressionEfficacyMetric):
 
-    model = neural_network.MLPRegressor
-    model_kwargs = {
+    MODEL = neural_network.MLPRegressor
+    MODEL_KWARGS = {
         'hidden_layer_sizes': (100, ),
         'max_iter': 50
     }

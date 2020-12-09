@@ -2,7 +2,7 @@
 
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import f1_score
 from sklearn.neural_network import MLPClassifier
 from sklearn.tree import DecisionTreeClassifier
 
@@ -15,21 +15,15 @@ class BinaryClassificationEfficacyMetric(MLEfficacyMetric):
 
     name = None
     goal = Goal.MAXIMIZE
-    min_value = (0, 0)
-    max_value = (1, 1)
-
-    @staticmethod
-    def _compute_scores(real_target, predictions):
-        return (
-            accuracy_score(real_target, predictions),
-            f1_score(real_target, predictions, average='binary')
-        )
+    min_value = 0
+    max_value = 1
+    SCORER = f1_score
 
 
 class BinaryDecisionTreeClassifier(BinaryClassificationEfficacyMetric):
 
-    model = DecisionTreeClassifier
-    model_kwargs = {
+    MODEL = DecisionTreeClassifier
+    MODEL_KWARGS = {
         'max_depth': 15,
         'class_weight': 'balanced'
     }
@@ -37,13 +31,13 @@ class BinaryDecisionTreeClassifier(BinaryClassificationEfficacyMetric):
 
 class BinaryAdaBoostClassifier(BinaryClassificationEfficacyMetric):
 
-    model = AdaBoostClassifier
+    MODEL = AdaBoostClassifier
 
 
 class BinaryLogisticRegression(BinaryClassificationEfficacyMetric):
 
-    model = LogisticRegression
-    model_kwargs = {
+    MODEL = LogisticRegression
+    MODEL_KWARGS = {
         'solver': 'lbfgs',
         'n_jobs': 2,
         'class_weight': 'balanced',
@@ -53,8 +47,8 @@ class BinaryLogisticRegression(BinaryClassificationEfficacyMetric):
 
 class BinaryMLPClassifier(BinaryClassificationEfficacyMetric):
 
-    model = MLPClassifier
-    model_kwargs = {
+    MODEL = MLPClassifier
+    MODEL_KWARGS = {
         'hidden_layer_sizes': (50, ),
         'max_iter': 50
     }

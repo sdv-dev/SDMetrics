@@ -47,5 +47,4 @@ def test_rank(metric, real_data, good_data, bad_data):
     good = metric.compute(real_data, good_data, 'c')
     real = metric.compute(real_data, real_data, 'c')
 
-    for idx in range(len(bad)):
-        assert metric.min_value[idx] <= bad[idx] < good[idx] < real[idx] <= metric.max_value[idx]
+    assert metric.min_value <= bad < good < real <= metric.max_value

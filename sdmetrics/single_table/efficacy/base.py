@@ -31,8 +31,9 @@ class MLEfficacyMetric(SingleTableMetric):
     goal = None
     min_value = None
     max_value = None
-    model = None
-    model_kwargs = None
+    MODEL = None
+    MODEL_KWARGS = None
+    METRICS = None
 
     @classmethod
     def _fit_predict(cls, synthetic_data, synthetic_target, real_data):
@@ -54,7 +55,7 @@ class MLEfficacyMetric(SingleTableMetric):
         raise NotImplementedError()
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, target):
+    def compute(cls, real_data, synthetic_data, target, scorer=None):
         """Compute this metric.
 
         Args:
@@ -64,6 +65,9 @@ class MLEfficacyMetric(SingleTableMetric):
                 The values from the synthetic dataset.
             target (str):
                 Name of the column to use as the target.
+            scorer (Union[callable, list[callable], NoneType]):
+                Scorer (or list of scorers) to apply. If not passed, use the default
+                one for the type of metric.
 
         Returns:
             union[float, tuple[float]]:
@@ -80,4 +84,9 @@ class MLEfficacyMetric(SingleTableMetric):
 
         predictions = cls._fit_predict(synthetic_data, synthetic_target, real_data)
 
-        return cls._compute_scores(real_target, predictions)
+        scorer = scorer or cls.SCORER
+        if isinstance(scorer, (list, tuple)):
+            scorers = scorer
+            return tuple((scorer(real_target, predictions) for scorer in scorers))
+        else:
+            return scorer(real_target, predictions)
