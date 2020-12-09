@@ -12,7 +12,7 @@ with open('HISTORY.md', encoding='utf-8') as history_file:
     history = history_file.read()
 
 install_requires = [
-    'rdt>=0.2.8,<0.3',
+    'rdt>=0.2.10.dev0,<0.3',
     'scikit-learn>=0.20,<1',
     'scipy>=1.1.0,<2',
     'numpy>=1.15.4,<2',

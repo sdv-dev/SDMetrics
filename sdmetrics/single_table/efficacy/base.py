@@ -1,7 +1,10 @@
 """Base class for Efficacy metrics for single table datasets."""
 
 import numpy as np
-from rdt import HyperTransformer
+import rdt
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import RobustScaler
 
 from sdmetrics.single_table.base import SingleTableMetric
 
@@ -42,17 +45,27 @@ class MLEfficacyMetric(SingleTableMetric):
         if len(unique_labels) == 1:
             predictions = np.full(len(real_data), unique_labels[0])
         else:
-            model_kwargs = cls.model_kwargs.copy() if cls.model_kwargs else {}
-            model = cls.model(**model_kwargs)
-            model.fit(synthetic_data, synthetic_target)
-            predictions = model.predict(real_data)
+            transformer = rdt.HyperTransformer(dtype_transformers={'O': 'one_hot_encoding'})
+            real_data = transformer.fit_transform(real_data)
+            synthetic_data = transformer.transform(synthetic_data)
+
+            real_data[np.isin(real_data, [np.inf, -np.inf])] = None
+            synthetic_data[np.isin(synthetic_data, [np.inf, -np.inf])] = None
+
+            model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
+            model = cls.MODEL(**model_kwargs)
+
+            pipeline = Pipeline([
+                ('imputer', SimpleImputer()),
+                ('scaler', RobustScaler()),
+                ('model', model)
+            ])
+
+            pipeline.fit(synthetic_data, synthetic_target)
+
+            predictions = pipeline.predict(real_data)
 
         return predictions
-
-    @staticmethod
-    def _compute_scores(real_target, predictions):
-        """Compute scores comparing the real targets and the predictions."""
-        raise NotImplementedError()
 
     @classmethod
     def compute(cls, real_data, synthetic_data, target, scorer=None):
@@ -77,10 +90,6 @@ class MLEfficacyMetric(SingleTableMetric):
         synthetic_data = synthetic_data.copy()
         real_target = real_data.pop(target)
         synthetic_target = synthetic_data.pop(target)
-
-        transformer = HyperTransformer()
-        real_data = transformer.fit_transform(real_data)
-        synthetic_data = transformer.transform(synthetic_data)
 
         predictions = cls._fit_predict(synthetic_data, synthetic_target, real_data)
 

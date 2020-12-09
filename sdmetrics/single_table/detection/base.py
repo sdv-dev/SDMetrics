@@ -52,7 +52,7 @@ class DetectionMetric(SingleTableMetric):
             float:
                 One minus the ROC AUC Score obtained by the classifier.
         """
-        transformer = HyperTransformer()
+        transformer = HyperTransformer(dtype_transformers={'O': 'one_hot_encoding'})
         real_data = transformer.fit_transform(real_data).values
         synthetic_data = transformer.transform(synthetic_data).values
 
