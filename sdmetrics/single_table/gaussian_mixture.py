@@ -7,7 +7,7 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 
 
-class GMLikelihood(SingleTableMetric):
+class GMLogLikelihood(SingleTableMetric):
     """GaussianMixture Single Table metric.
 
     This metric fits multiple GaussianMixture models to the real data and then
@@ -27,7 +27,7 @@ class GMLikelihood(SingleTableMetric):
             Maximum value or values that this metric can take.
     """
 
-    name = 'GaussianMixture Likelihood'
+    name = 'GaussianMixture Log Likelihood'
     goal = Goal.MAXIMIZE
     min_value = -np.inf
     max_value = np.inf
