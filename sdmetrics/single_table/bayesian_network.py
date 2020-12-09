@@ -68,7 +68,7 @@ class BNLogLikelihood(SingleTableMetric):
     This metric fits a BayesianNetwork to the real data and then evaluates how
     likely it is that the synthetic data belongs to the same distribution.
 
-    The output is the average probability across all the synthetic rows.
+    The output is the average log probability across all the synthetic rows.
 
     Attributes:
         name (str):
@@ -81,10 +81,10 @@ class BNLogLikelihood(SingleTableMetric):
             Maximum value or values that this metric can take.
     """
 
-    name = 'BayesianNetwork Likelihood'
+    name = 'BayesianNetwork Log Likelihood'
     goal = Goal.MAXIMIZE
     min_value = -np.inf
-    max_value = np.inf
+    max_value = 0
 
     @staticmethod
     def compute(real_data, synthetic_data):
