@@ -53,6 +53,9 @@ class GMLogLikelihood(SingleTableMetric):
                 Average score returned by the GaussianMixtures.
         """
         columns = real_data.select_dtypes('number').columns
+        if columns.empty:
+            return np.nan
+
         scores = []
         for _ in range(iterations):
             for nc in n_components:

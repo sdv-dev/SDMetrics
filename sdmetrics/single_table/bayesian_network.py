@@ -10,6 +10,8 @@ from sdmetrics.single_table.base import SingleTableMetric
 def _bayesian_likelihoods(real_data, synthetic_data):
     columns = real_data.select_dtypes(('object', 'bool')).columns
     bn = BayesianNetwork.from_samples(real_data[columns].to_numpy())
+    if columns.empty:
+        return np.full(len(real_data), np.nan)
 
     probabilities = []
     for _, row in synthetic_data[columns].iterrows():
