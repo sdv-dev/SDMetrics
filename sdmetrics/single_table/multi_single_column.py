@@ -37,9 +37,9 @@ class MultiColumnMetric(SingleTableMetric, metaclass=NestedAttrsMeta('single_col
         """Compute this metric.
 
         Args:
-            real_data (Union[numpy.ndarray, pandas.DataFrame]):
+            real_data (pandas.DataFrame):
                 The values from the real dataset.
-            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
+            synthetic_data (pandas.DataFrame):
                 The values from the synthetic dataset.
 
         Returns:

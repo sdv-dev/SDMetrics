@@ -18,6 +18,8 @@ class ScikitLearnClassifierDetectionMetric(DetectionMetric):
     the classifier, which is defined in the subclasses.
     """
 
+    name = 'Scikit-Learn Detection'
+
     @staticmethod
     def _get_classifier():
         """Build and return an instance of a scikit-learn Classifier."""
