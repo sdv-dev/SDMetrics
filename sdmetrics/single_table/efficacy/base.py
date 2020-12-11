@@ -68,7 +68,17 @@ class MLEfficacyMetric(SingleTableMetric):
         return predictions
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, target, scorer=None):
+    def _validate_inputs(cls, real_data, synthetic_data, metadata, target):
+        metadata = super()._validate_inputs(real_data, synthetic_data, metadata)
+        if 'target' in metadata:
+            target = metadata['target']
+        elif target is None:
+            raise TypeError('`target` must be passed either directly or inside `metadata`')
+
+        return target
+
+    @classmethod
+    def compute(cls, real_data, synthetic_data, metadata=None, target=None, scorer=None):
         """Compute this metric.
 
         Args:
@@ -86,6 +96,8 @@ class MLEfficacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the models when evaluated on the real data.
         """
+        target = cls._validate_inputs(real_data, synthetic_data, metadata, target)
+
         real_data = real_data.copy()
         synthetic_data = synthetic_data.copy()
         real_target = real_data.pop(target)

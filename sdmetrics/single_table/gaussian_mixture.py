@@ -32,8 +32,9 @@ class GMLogLikelihood(SingleTableMetric):
     min_value = -np.inf
     max_value = np.inf
 
-    @staticmethod
-    def compute(real_data, synthetic_data, n_components=(10, 20, 30), iterations=3):
+    @classmethod
+    def compute(cls, real_data, synthetic_data, metadata=None,
+                n_components=(10, 20, 30), iterations=3):
         """Compute this metric.
 
         Args:
@@ -52,15 +53,16 @@ class GMLogLikelihood(SingleTableMetric):
             float:
                 Average score returned by the GaussianMixtures.
         """
-        columns = real_data.select_dtypes('number').columns
-        if columns.empty:
+        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
+        fields = cls._select_fields(metadata, 'numerical')
+        if not fields:
             return np.nan
 
         scores = []
         for _ in range(iterations):
             for nc in n_components:
                 gmm = GaussianMixture(nc, covariance_type='diag')
-                gmm.fit(real_data[columns])
-                scores.append(gmm.score(synthetic_data[columns]))
+                gmm.fit(real_data[fields])
+                scores.append(gmm.score(synthetic_data[fields]))
 
         return np.mean(scores)

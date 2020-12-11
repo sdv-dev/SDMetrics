@@ -27,19 +27,16 @@ class KSTest(SingleColumnMetric):
             Minimum value or values that this metric can take.
         max_value (Union[float, tuple[float]]):
             Maximum value or values that this metric can take.
-        dtypes (tuple[str]):
-            The data types which this metric works on (i.e. ``('float', 'str')``).
     """
 
     name = 'Inverted Kolmogorov-Smirnov D statistic'
-    dtypes = ('float', 'int')
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
 
     @staticmethod
     def compute(real_data, synthetic_data):
-        """Compare two discrete columns using a Kolmogorov–Smirnov test.
+        """Compare two continuous columns using a Kolmogorov–Smirnov test.
 
         Args:
             real_data (Union[numpy.ndarray, pandas.Series]):

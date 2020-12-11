@@ -39,7 +39,7 @@ class DetectionMetric(SingleTableMetric):
         raise NotImplementedError()
 
     @classmethod
-    def compute(cls, real_data, synthetic_data):
+    def compute(cls, real_data, synthetic_data, metadata=None):
         """Compute this metric.
 
         Args:
@@ -47,11 +47,15 @@ class DetectionMetric(SingleTableMetric):
                 The values from the real dataset.
             synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
 
         Returns:
             float:
                 One minus the ROC AUC Score obtained by the classifier.
         """
+        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
         transformer = HyperTransformer(dtype_transformers={'O': 'one_hot_encoding'})
         real_data = transformer.fit_transform(real_data).values
         synthetic_data = transformer.transform(synthetic_data).values

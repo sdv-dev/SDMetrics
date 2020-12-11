@@ -28,7 +28,7 @@ class DetectionMetric(MultiTableMetric):
     max_value = None
 
     @classmethod
-    def compute(cls, real_data, synthetic_data):
+    def compute(cls, real_data, synthetic_data, metadata=None):
         """Compute this metric.
 
         Args:
@@ -36,9 +36,12 @@ class DetectionMetric(MultiTableMetric):
                 The tables from the real dataset.
             synthetic_data (dict[str, pandas.DataFrame]):
                 The tables from the synthetic dataset.
+            metadata (dict):
+                Multi-table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
 
         Returns:
-            float:
-                One minus the ROC AUC Score obtained by the classifier.
+            Union[float, tuple[float]]:
+                Metric output.
         """
         raise NotImplementedError()

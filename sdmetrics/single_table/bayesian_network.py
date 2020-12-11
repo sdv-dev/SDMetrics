@@ -11,28 +11,6 @@ from sdmetrics.single_table.base import SingleTableMetric
 LOGGER = logging.getLogger(__name__)
 
 
-def _bayesian_likelihoods(real_data, synthetic_data, structure=None):
-    columns = real_data.select_dtypes(('object', 'bool')).columns
-    if columns.empty:
-        return np.full(len(real_data), np.nan)
-
-    LOGGER.debug('Fitting the BayesianNetwork to the real data')
-    if structure:
-        bn = BayesianNetwork.from_structure(real_data[columns].to_numpy(), structure)
-    else:
-        bn = BayesianNetwork.from_samples(real_data[columns].to_numpy(), algorithm='chow-liu')
-
-    LOGGER.debug('Evaluating likelihood of the synthetic data')
-    probabilities = []
-    for _, row in synthetic_data[columns].iterrows():
-        try:
-            probabilities.append(bn.probability([row.to_numpy()]))
-        except ValueError:
-            probabilities.append(0)
-
-    return np.asarray(probabilities)
-
-
 class BNLikelihood(SingleTableMetric):
     """BayesianNetwork Likelihood Single Table metric.
 
@@ -57,8 +35,33 @@ class BNLikelihood(SingleTableMetric):
     min_value = 0.0
     max_value = 1.0
 
-    @staticmethod
-    def compute(real_data, synthetic_data, structure=None):
+    @classmethod
+    def _likelihoods(cls, real_data, synthetic_data, metadata=None, structure=None):
+        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
+        structure = metadata.get('structure', structure)
+        fields = cls._select_fields(metadata, ('categorical', 'boolean'))
+
+        if not fields:
+            return np.full(len(real_data), np.nan)
+
+        LOGGER.debug('Fitting the BayesianNetwork to the real data')
+        if structure:
+            bn = BayesianNetwork.from_structure(real_data[fields].to_numpy(), structure)
+        else:
+            bn = BayesianNetwork.from_samples(real_data[fields].to_numpy(), algorithm='chow-liu')
+
+        LOGGER.debug('Evaluating likelihood of the synthetic data')
+        probabilities = []
+        for _, row in synthetic_data[fields].iterrows():
+            try:
+                probabilities.append(bn.probability([row.to_numpy()]))
+            except ValueError:
+                probabilities.append(0)
+
+        return np.asarray(probabilities)
+
+    @classmethod
+    def compute(cls, real_data, synthetic_data, metadata=None, structure=None):
         """Compute this metric.
 
         Args:
@@ -66,6 +69,9 @@ class BNLikelihood(SingleTableMetric):
                 The values from the real dataset.
             synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
             structure (tuple[tuple]):
                 Optional. BayesianNetwork structure to use when fitting
                 to the real data. If not passed, learn it from the data
@@ -75,10 +81,10 @@ class BNLikelihood(SingleTableMetric):
             float:
                 Mean of the probabilities returned by the Bayesian Network.
         """
-        return np.mean(_bayesian_likelihoods(real_data, synthetic_data, structure))
+        return np.mean(cls._likelihoods(real_data, synthetic_data, metadata, structure))
 
 
-class BNLogLikelihood(SingleTableMetric):
+class BNLogLikelihood(BNLikelihood):
     """BayesianNetwork Log Likelihood Single Table metric.
 
     This metric fits a BayesianNetwork to the real data and then evaluates how
@@ -102,8 +108,8 @@ class BNLogLikelihood(SingleTableMetric):
     min_value = -np.inf
     max_value = 0
 
-    @staticmethod
-    def compute(real_data, synthetic_data, structure=None):
+    @classmethod
+    def compute(cls, real_data, synthetic_data, metadata=None, structure=None):
         """Compute this metric.
 
         Args:
@@ -111,6 +117,9 @@ class BNLogLikelihood(SingleTableMetric):
                 The values from the real dataset.
             synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
             structure (tuple[tuple]):
                 Optional. BayesianNetwork structure to use when fitting
                 to the real data. If not passed, learn it from the data
@@ -120,6 +129,6 @@ class BNLogLikelihood(SingleTableMetric):
             float:
                 Mean of the log probabilities returned by the Bayesian Network.
         """
-        likelihoods = _bayesian_likelihoods(real_data, synthetic_data, structure)
+        likelihoods = cls._likelihoods(real_data, synthetic_data, metadata, structure)
         likelihoods[np.where(likelihoods == 0)] = 1e-8
         return np.mean(np.log(likelihoods))
