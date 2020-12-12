@@ -1,6 +1,5 @@
 """scikit-learn based DetectionMetrics for single table datasets."""
 
-import numpy as np
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
