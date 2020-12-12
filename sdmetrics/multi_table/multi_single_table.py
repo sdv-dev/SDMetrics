@@ -26,7 +26,7 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
     single_table_metric = None
 
     @classmethod
-    def compute(cls, real_data, synthetic_data):
+    def compute(cls, real_data, synthetic_data, metadata=None):
         """Compute this metric.
 
         Args:
@@ -34,6 +34,9 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
                 The tables from the real dataset.
             synthetic_data (dict[str, pandas.DataFrame]):
                 The tables from the synthetic dataset.
+            metadata (dict):
+                Multi-table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
 
         Returns:
             Union[float, tuple[float]]:
@@ -45,9 +48,11 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
         values = []
         for table_name, real_table in real_data.items():
             synthetic_table = synthetic_data[table_name]
-            values.append(cls.single_table_metric.compute(real_table, synthetic_table))
+            table_meta = metadata['tables'][table_name] if metadata else None
 
-        return np.mean(values)
+            values.append(cls.single_table_metric.compute(real_table, synthetic_table, table_meta))
+
+        return np.nanmean(values)
 
 
 class CSTest(MultiSingleTableMetric):
@@ -60,6 +65,12 @@ class KSTest(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable KSTest."""
 
     single_table_metric = single_table.multi_single_column.KSTest
+
+
+class KSTestExtended(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable KSTestExtended."""
+
+    single_table_metric = single_table.multi_single_column.KSTestExtended
 
 
 class LogisticDetection(MultiSingleTableMetric):

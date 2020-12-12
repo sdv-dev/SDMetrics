@@ -6,11 +6,12 @@ from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihoo
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
 from sdmetrics.single_table.gaussian_mixture import GMLogLikelihood
 from sdmetrics.single_table.multi_column_pairs import ContinuousKLDivergence, DiscreteKLDivergence
-from sdmetrics.single_table.multi_single_column import CSTest, KSTest
+from sdmetrics.single_table.multi_single_column import CSTest, KSTest, KSTestExtended
 
 METRICS = [
     CSTest,
     KSTest,
+    KSTestExtended,
     LogisticDetection,
     SVCDetection,
     ContinuousKLDivergence,

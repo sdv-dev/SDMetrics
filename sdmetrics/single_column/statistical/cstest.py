@@ -24,15 +24,12 @@ class CSTest(SingleColumnMetric):
             Minimum value or values that this metric can take.
         max_value (Union[float, tuple[float]]):
             Maximum value or values that this metric can take.
-        dtypes (tuple[str]):
-            The data types which this metric works on (i.e. ``('float', 'str')``).
     """
 
     name = 'Chi-Squared'
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
-    dtypes = ('object', 'bool')
 
     @staticmethod
     def compute(real_data, synthetic_data):

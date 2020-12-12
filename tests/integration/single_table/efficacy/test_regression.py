@@ -42,8 +42,8 @@ def bad_data():
 
 @pytest.mark.parametrize('metric', METRICS)
 def test_rank(metric, real_data, good_data, bad_data):
-    bad = metric.compute(real_data, bad_data, 'a')
-    good = metric.compute(real_data, good_data, 'a')
-    real = metric.compute(real_data, real_data, 'a')
+    bad = metric.compute(real_data, bad_data, target='a')
+    good = metric.compute(real_data, good_data, target='a')
+    real = metric.compute(real_data, real_data, target='a')
 
     assert metric.min_value <= bad < good < real <= metric.max_value

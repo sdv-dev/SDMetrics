@@ -53,7 +53,7 @@ class MultiColumnPairsMetric(SingleTableMetric, metaclass=NestedAttrsMeta('colum
             synthetic = synthetic_data[list(columns)]
             values.append(cls.column_pairs_metric.compute(real, synthetic))
 
-        return np.mean(values)
+        return np.nanmean(values)
 
 
 class ContinuousKLDivergence(MultiColumnPairsMetric):
