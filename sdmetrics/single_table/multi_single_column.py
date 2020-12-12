@@ -31,24 +31,6 @@ class MultiSingleColumnMetric(SingleTableMetric,
     field_types = None
 
     @classmethod
-    def _type_match(cls, field_meta):
-        if cls.field_types is None:
-            return True
-
-        if field_meta is None:
-            return False
-
-        field_type = field_meta['type']
-        if (field_type, ) in cls.field_types:
-            return True
-
-        field_subtype = field_meta.get('subtype')
-        if (field_type, field_subtype) in cls.field_types:
-            return True
-
-        return False
-
-    @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None):
         """Compute this metric.
 
@@ -66,10 +48,10 @@ class MultiSingleColumnMetric(SingleTableMetric,
         """
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
 
-        fields = metadata['fields']
+        fields = cls._select_fields(metadata, cls.field_types)
         values = []
         for column_name, real_column in real_data.items():
-            if cls._type_match(fields.get(column_name)):
+            if column_name in fields:
                 x1 = real_column.values
                 x2 = synthetic_data[column_name].values
 
@@ -81,19 +63,14 @@ class MultiSingleColumnMetric(SingleTableMetric,
 class CSTest(MultiSingleColumnMetric):
     """MultiSingleColumnMetric based on SingleColumn CSTest."""
 
-    field_types = (
-        ('boolean', ),
-        ('categorical', ),
-    )
+    field_types = ('boolean', 'categorical')
     single_column_metric = single_column.statistical.CSTest
 
 
 class KSTest(MultiSingleColumnMetric):
     """MultiSingleColumnMetric based on SingleColumn KSTest."""
 
-    field_types = (
-        ('numerical', ),
-    )
+    field_types = ('numerical', )
     single_column_metric = single_column.statistical.KSTest
 
 
@@ -101,11 +78,20 @@ class KSTestExtended(MultiSingleColumnMetric):
     """KSTest variation that transforms everything to numerical before comparing."""
 
     single_column_metric = single_column.statistical.KSTest
+    field_types = ('numerical', 'categorical', 'boolean', 'datetime')
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None):
+        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
         transformer = HyperTransformer()
-        real_data = transformer.fit_transform(real_data)
-        synthetic_data = transformer.transform(synthetic_data)
+        fields = cls._select_fields(metadata, cls.field_types)
+        real_data = transformer.fit_transform(real_data[fields])
+        synthetic_data = transformer.transform(synthetic_data[fields])
 
-        return super().compute(real_data, synthetic_data, metadata)
+        values = []
+        for column_name, real_column in real_data.items():
+            x1 = real_column.values
+            x2 = synthetic_data[column_name].values
+            values.append(cls.single_column_metric.compute(x1, x2))
+
+        return np.nanmean(values)
