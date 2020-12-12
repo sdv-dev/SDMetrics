@@ -62,7 +62,8 @@ class DetectionMetric(SingleTableMetric):
 
         X = np.concatenate([real_data, synthetic_data])
         y = np.hstack([np.ones(len(real_data)), np.zeros(len(synthetic_data))])
-        X[np.isin(X, [np.inf, -np.inf])] = None
+        if np.isin(X, [np.inf, -np.inf]).any():
+            X[np.isin(X, [np.inf, -np.inf])] = np.nan
 
         scores = []
         kf = StratifiedKFold(n_splits=3, shuffle=True)

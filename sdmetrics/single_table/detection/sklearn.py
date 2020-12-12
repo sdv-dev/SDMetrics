@@ -28,7 +28,6 @@ class ScikitLearnClassifierDetectionMetric(DetectionMetric):
     @classmethod
     def fit_predict(cls, X_train, y_train, X_test):
         """Fit a pipeline to train data and then use it to make prediction on test data."""
-        X_train[np.isin(X_train, [np.inf, -np.inf])] = None
         model = Pipeline([
             ('imputer', SimpleImputer()),
             ('scalar', RobustScaler()),
@@ -36,7 +35,6 @@ class ScikitLearnClassifierDetectionMetric(DetectionMetric):
         ])
         model.fit(X_train, y_train)
 
-        X_test[np.isin(X_test, [np.inf, -np.inf])] = None
         return model.predict_proba(X_test)[:, 1]
 
 
