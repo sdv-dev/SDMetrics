@@ -1,5 +1,6 @@
 """BayesianNetwork based metrics for single table."""
 
+import json
 import logging
 
 import numpy as np
@@ -46,6 +47,9 @@ class BNLikelihood(SingleTableMetric):
 
         LOGGER.debug('Fitting the BayesianNetwork to the real data')
         if structure:
+            if isinstance(structure, dict):
+                structure = BayesianNetwork.from_json(json.dumps(structure)).structure
+
             bn = BayesianNetwork.from_structure(real_data[fields].to_numpy(), structure)
         else:
             bn = BayesianNetwork.from_samples(real_data[fields].to_numpy(), algorithm='chow-liu')
@@ -71,11 +75,13 @@ class BNLikelihood(SingleTableMetric):
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
-                real_data fields and dtypes.
-            structure (tuple[tuple]):
+                real_data fields and dtypes. Optionally, the metadata can include
+                a ``structure`` entry with the structure of the Bayesian Network.
+            structure (dict):
                 Optional. BayesianNetwork structure to use when fitting
                 to the real data. If not passed, learn it from the data
-                using the ``chow-liu`` algorith.
+                using the ``chow-liu`` algorith. This is ignored if ``metadata``
+                is passed and it contains a ``structure`` entry in it.
 
         Returns:
             float:
@@ -119,11 +125,13 @@ class BNLogLikelihood(BNLikelihood):
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
-                real_data fields and dtypes.
-            structure (tuple[tuple]):
+                real_data fields and dtypes. Optionally, the metadata can include
+                a ``structure`` entry with the structure of the Bayesian Network.
+            structure (dict):
                 Optional. BayesianNetwork structure to use when fitting
                 to the real data. If not passed, learn it from the data
-                using the ``chow-liu`` algorith.
+                using the ``chow-liu`` algorith. This is ignored if ``metadata``
+                is passed and it contains a ``structure`` entry in it.
 
         Returns:
             float:
