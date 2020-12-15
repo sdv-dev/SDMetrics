@@ -1,7 +1,9 @@
 """Statistical Metrics to compare column pairs."""
 
-from sdmetrics.column_pairs.statistical import kl_divergence
+from sdmetrics.column_pairs.statistical.kl_divergence import (
+    ContinuousKLDivergence, DiscreteKLDivergence)
 
 __all__ = [
-    'kl_divergence'
+    'ContinuousKLDivergence',
+    'DiscreteKLDivergence',
 ]

@@ -23,12 +23,20 @@ class MultiColumnPairsMetric(SingleTableMetric, metaclass=NestedAttrsMeta('colum
             Maximum value or values that this metric can take.
         column_pairs_metric (sdmetrics.column_pairs.base.ColumnPairsMetric):
             ColumnPairsMetric to apply.
+        field_types (dict):
+            Field types to which the SingleColumn metric will be applied.
     """
 
     column_pairs_metric = None
+    column_pairs_metric_kwargs = None
+    field_types = None
 
-    @classmethod
-    def compute(cls, real_data, synthetic_data):
+    def __init__(self, column_pairs_metric, **column_pairs_metric_kwargs):
+        self.column_pairs_metric = column_pairs_metric
+        self.column_pairs_metric_kwargs = column_pairs_metric_kwargs
+        self.compute = self._compute
+
+    def _compute(self, real_data, synthetic_data, metadata=None, **kwargs):
         """Compute this metric.
 
         Args:
@@ -36,33 +44,59 @@ class MultiColumnPairsMetric(SingleTableMetric, metaclass=NestedAttrsMeta('colum
                 The values from the real dataset.
             synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the column pairs metric
 
         Returns:
             Union[float, tuple[float]]:
                 Metric output.
         """
-        if set(real_data.columns) != set(synthetic_data.columns):
-            raise ValueError('`real_data` and `synthetic_data` must have the same columns')
+        metadata = self._validate_inputs(real_data, synthetic_data, metadata)
 
-        real_data = real_data.select_dtypes(cls.column_pairs_metric.dtypes)
-        synthetic_data = synthetic_data.select_dtypes(cls.column_pairs_metric.dtypes)
+        fields = self._select_fields(metadata, self.field_types)
 
         values = []
-        for columns in combinations(real_data.columns, r=2):
+        for columns in combinations(fields, r=2):
             real = real_data[list(columns)]
             synthetic = synthetic_data[list(columns)]
-            values.append(cls.column_pairs_metric.compute(real, synthetic))
+            values.append(self.column_pairs_metric.compute(real, synthetic))
 
         return np.nanmean(values)
+
+    @classmethod
+    def compute(cls, real_data, synthetic_data, metadata=None, **kwargs):
+        """Compute this metric.
+
+        Args:
+            real_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the real dataset.
+            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the column pairs metric
+
+        Returns:
+            Union[float, tuple[float]]:
+                Metric output.
+        """
+        return cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
 
 
 class ContinuousKLDivergence(MultiColumnPairsMetric):
     """MultiColumnPairsMetric based on ColumnPairs ContinuousKLDivergence."""
 
+    field_types = ('numerical', )
     column_pairs_metric = column_pairs.statistical.kl_divergence.ContinuousKLDivergence
 
 
 class DiscreteKLDivergence(MultiColumnPairsMetric):
     """MultiColumnPairsMetric based on ColumnPairs DiscreteKLDivergence."""
 
+    field_types = ('boolean', 'categorical')
     column_pairs_metric = column_pairs.statistical.kl_divergence.DiscreteKLDivergence

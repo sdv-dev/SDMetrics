@@ -15,15 +15,12 @@ class ColumnPairsMetric(BaseMetric):
             Minimum value or values that this metric can take.
         max_value (Union[float, tuple[float]]):
             Maximum value or values that this metric can take.
-        dtypes (tuple[str]):
-            The data types which this metric works on (i.e. ``('object', 'bool')``).
     """
 
     name = None
     goal = None
     min_value = None
     max_value = None
-    dtypes = ()
 
     @staticmethod
     def compute(real_data, synthetic_data):

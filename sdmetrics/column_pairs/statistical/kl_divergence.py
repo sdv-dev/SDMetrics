@@ -25,15 +25,12 @@ class ContinuousKLDivergence(ColumnPairsMetric):
             Minimum value or values that this metric can take.
         max_value (Union[float, tuple[float]]):
             Maximum value or values that this metric can take.
-        dtypes (tuple[str]):
-            The data types which this metric works on (i.e. ``('float', 'int')``).
     """
 
     name = 'Continuous Kullback–Leibler Divergence'
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
-    dtypes = ('number')
 
     @staticmethod
     def compute(real_data, synthetic_data):
@@ -80,15 +77,12 @@ class DiscreteKLDivergence(ColumnPairsMetric):
             Minimum value or values that this metric can take.
         max_value (Union[float, tuple[float]]):
             Maximum value or values that this metric can take.
-        dtypes (tuple[str]):
-            The data types which this metric works on (i.e. ``('object', 'bool')``).
     """
 
     name = 'Discrete Kullback–Leibler Divergence'
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
-    dtypes = ('object', 'bool')
 
     @staticmethod
     def compute(real_data, synthetic_data):
