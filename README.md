@@ -62,7 +62,6 @@ conda install -c sdv-dev -c conda-forge sdmetrics
 
 This will pull and install the latest stable release from [Anaconda](https://anaconda.org/).
 
-
 # Basic Usage
 
 TODO
