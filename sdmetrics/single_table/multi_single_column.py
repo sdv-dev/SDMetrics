@@ -28,10 +28,15 @@ class MultiSingleColumnMetric(SingleTableMetric,
     """
 
     single_column_metric = None
+    single_column_metric_kwargs = None
     field_types = None
 
-    @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None):
+    def __init__(self, single_column_metric, **single_column_metric_kwargs):
+        self.single_column_metric = single_column_metric
+        self.single_column_metric_kwargs = single_column_metric_kwargs
+        self.compute = self._compute
+
+    def _compute(self, real_data, synthetic_data, metadata=None, **kwargs):
         """Compute this metric.
 
         Args:
@@ -41,23 +46,53 @@ class MultiSingleColumnMetric(SingleTableMetric,
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the single column metric
 
         Returns:
             Union[float, tuple[float]]:
                 Metric output.
         """
-        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
+        metadata = self._validate_inputs(real_data, synthetic_data, metadata)
 
-        fields = cls._select_fields(metadata, cls.field_types)
-        values = []
+        fields = self._select_fields(metadata, self.field_types)
+        scores = []
         for column_name, real_column in real_data.items():
             if column_name in fields:
-                x1 = real_column.values
-                x2 = synthetic_data[column_name].values
+                real_column = real_column.values
+                synthetic_column = synthetic_data[column_name].values
 
-                values.append(cls.single_column_metric.compute(x1, x2))
+                score = self.single_column_metric.compute(
+                    real_column,
+                    synthetic_column,
+                    **(self.single_column_metric_kwargs or {}),
+                    **kwargs
+                )
+                scores.append(score)
 
-        return np.nanmean(values)
+        return np.nanmean(scores)
+
+    @classmethod
+    def compute(cls, real_data, synthetic_data, metadata=None, **kwargs):
+        """Compute this metric.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The values from the real dataset.
+            synthetic_data (pandas.DataFrame):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the single column metric
+
+        Returns:
+            Union[float, tuple[float]]:
+                Metric output.
+        """
+        return cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
 
 
 class CSTest(MultiSingleColumnMetric):
@@ -82,6 +117,20 @@ class KSTestExtended(MultiSingleColumnMetric):
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None):
+        """Compute this metric.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The values from the real dataset.
+            synthetic_data (pandas.DataFrame):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict.
+
+        Returns:
+            Union[float, tuple[float]]:
+                Metric output.
+        """
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
         transformer = HyperTransformer()
         fields = cls._select_fields(metadata, cls.field_types)
@@ -90,8 +139,10 @@ class KSTestExtended(MultiSingleColumnMetric):
 
         values = []
         for column_name, real_column in real_data.items():
-            x1 = real_column.values
-            x2 = synthetic_data[column_name].values
-            values.append(cls.single_column_metric.compute(x1, x2))
+            real_column = real_column.values
+            synthetic_column = synthetic_data[column_name].values
+
+            score = cls.single_column_metric.compute(real_column, synthetic_column)
+            values.append(score)
 
         return np.nanmean(values)

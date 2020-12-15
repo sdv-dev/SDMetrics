@@ -12,7 +12,7 @@ def f1_macro(real_target, predictions):
     return f1_score(real_target, predictions, average='macro'),
 
 
-class MulticlassClassificationEfficacyMetric(MLEfficacyMetric):
+class MulticlassEfficacyMetric(MLEfficacyMetric):
     """Base class for Multiclass Classification Efficacy Metrics."""
 
     name = None
@@ -22,7 +22,7 @@ class MulticlassClassificationEfficacyMetric(MLEfficacyMetric):
     SCORER = f1_macro
 
 
-class MulticlassDecisionTreeClassifier(MulticlassClassificationEfficacyMetric):
+class MulticlassDecisionTreeClassifier(MulticlassEfficacyMetric):
 
     MODEL = DecisionTreeClassifier
     MODEL_KWARGS = {
@@ -31,7 +31,7 @@ class MulticlassDecisionTreeClassifier(MulticlassClassificationEfficacyMetric):
     }
 
 
-class MulticlassMLPClassifier(MulticlassClassificationEfficacyMetric):
+class MulticlassMLPClassifier(MulticlassEfficacyMetric):
 
     MODEL = MLPClassifier
     MODEL_KWARGS = {

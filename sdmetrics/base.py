@@ -20,6 +20,16 @@ class BaseMetric:
     min_value = None
     max_value = None
 
+    @classmethod
+    def get_subclasses(cls):
+        """Recursively find subclasses of this metric."""
+        subclasses = dict()
+        for subclass in cls.__subclasses__():
+            subclasses[subclass.__name__] = subclass
+            subclasses.update(subclass.get_subclasses())
+
+        return subclasses
+
     @staticmethod
     def compute(real_data, synthetic_data):
         """Compute this metric.

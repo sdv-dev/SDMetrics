@@ -40,6 +40,9 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
             metadata (dict):
                 Multi-table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the single table metric
 
         Returns:
             Union[float, tuple[float]]:
@@ -59,7 +62,7 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
         return np.nanmean(values)
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, **kwargs):
         """Compute this metric.
 
         Args:
@@ -70,12 +73,15 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
             metadata (dict):
                 Multi-table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the single table metric
 
         Returns:
             Union[float, tuple[float]]:
                 Metric output.
         """
-        return cls._compute(cls, real_data, synthetic_data, metadata)
+        return cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
 
 
 class CSTest(MultiSingleTableMetric):

@@ -2,18 +2,16 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sdmetrics.single_table.efficacy.binary_classification import (
-    BinaryAdaBoostClassifier, BinaryDecisionTreeClassifier, BinaryLogisticRegression,
-    BinaryMLPClassifier)
+from sdmetrics.single_table.efficacy.multiclass import (
+    MulticlassDecisionTreeClassifier, MulticlassMLPClassifier)
 
 METRICS = [
-    BinaryAdaBoostClassifier,
-    BinaryDecisionTreeClassifier,
-    BinaryLogisticRegression,
-    BinaryMLPClassifier
+    MulticlassDecisionTreeClassifier,
+    MulticlassMLPClassifier,
 ]
 
 
+@pytest.fixture
 def real_data():
     return pd.DataFrame({
         'a': np.random.normal(size=600),
@@ -23,6 +21,7 @@ def real_data():
     })
 
 
+@pytest.fixture
 def good_data():
     return pd.DataFrame({
         'a': np.random.normal(loc=0.01, size=600),
@@ -32,6 +31,7 @@ def good_data():
     })
 
 
+@pytest.fixture
 def bad_data():
     return pd.DataFrame({
         'a': np.random.normal(loc=5, scale=3, size=600),
@@ -42,9 +42,9 @@ def bad_data():
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_rank(metric):
-    bad = metric.compute(real_data(), bad_data(), target='d')
-    good = metric.compute(real_data(), good_data(), target='d')
-    real = metric.compute(real_data(), real_data(), target='d')
+def test_rank(metric, real_data, good_data, bad_data):
+    bad = metric.compute(real_data, bad_data, target='c')
+    good = metric.compute(real_data, good_data, target='c')
+    real = metric.compute(real_data, real_data, target='c')
 
-    assert metric.min_value <= bad < good <= real <= metric.max_value
+    assert metric.min_value <= bad < good < real <= metric.max_value

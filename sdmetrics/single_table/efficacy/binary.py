@@ -10,7 +10,7 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.efficacy.base import MLEfficacyMetric
 
 
-class BinaryClassificationEfficacyMetric(MLEfficacyMetric):
+class BinaryEfficacyMetric(MLEfficacyMetric):
     """Base class for Binary Classification Efficacy metrics."""
 
     name = None
@@ -20,7 +20,7 @@ class BinaryClassificationEfficacyMetric(MLEfficacyMetric):
     SCORER = f1_score
 
 
-class BinaryDecisionTreeClassifier(BinaryClassificationEfficacyMetric):
+class BinaryDecisionTreeClassifier(BinaryEfficacyMetric):
 
     MODEL = DecisionTreeClassifier
     MODEL_KWARGS = {
@@ -29,12 +29,12 @@ class BinaryDecisionTreeClassifier(BinaryClassificationEfficacyMetric):
     }
 
 
-class BinaryAdaBoostClassifier(BinaryClassificationEfficacyMetric):
+class BinaryAdaBoostClassifier(BinaryEfficacyMetric):
 
     MODEL = AdaBoostClassifier
 
 
-class BinaryLogisticRegression(BinaryClassificationEfficacyMetric):
+class BinaryLogisticRegression(BinaryEfficacyMetric):
 
     MODEL = LogisticRegression
     MODEL_KWARGS = {
@@ -45,7 +45,7 @@ class BinaryLogisticRegression(BinaryClassificationEfficacyMetric):
     }
 
 
-class BinaryMLPClassifier(BinaryClassificationEfficacyMetric):
+class BinaryMLPClassifier(BinaryEfficacyMetric):
 
     MODEL = MLPClassifier
     MODEL_KWARGS = {
