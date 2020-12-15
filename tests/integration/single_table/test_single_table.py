@@ -25,50 +25,50 @@ METRICS = [
 @pytest.fixture
 def ones():
     return pd.DataFrame({
-        'a': [1] * 100,
-        'b': [True] * 100,
-        'c': [1.0] * 100,
-        'd': [True] * 100,
+        'a': [1] * 300,
+        'b': [True] * 300,
+        'c': [1.0] * 300,
+        'd': [True] * 300,
     })
 
 
 @pytest.fixture
 def zeros():
     return pd.DataFrame({
-        'a': [0] * 100,
-        'b': [False] * 100,
-        'c': [0.0] * 100,
-        'd': [False] * 100,
+        'a': [0] * 300,
+        'b': [False] * 300,
+        'c': [0.0] * 300,
+        'd': [False] * 300,
     })
 
 
 @pytest.fixture
 def real_data():
     return pd.DataFrame({
-        'a': np.random.normal(size=600),
-        'b': np.random.randint(0, 10, size=600),
-        'c': ['a', 'b', 'b', 'c', 'c', 'c'] * 100,
-        'd': [True, True, True, True, True, False] * 100,
+        'a': np.random.normal(size=1800),
+        'b': np.random.randint(0, 10, size=1800),
+        'c': ['a', 'b', 'b', 'c', 'c', 'c'] * 300,
+        'd': [True, True, True, True, True, False] * 300,
     })
 
 
 @pytest.fixture
 def good_data():
     return pd.DataFrame({
-        'a': np.random.normal(loc=0.01, size=600),
-        'b': np.random.randint(0, 10, size=600),
-        'c': ['a', 'b', 'b', 'b', 'c', 'c'] * 100,
-        'd': [True, True, True, True, False, False] * 100,
+        'a': np.random.normal(loc=0.01, size=1800),
+        'b': np.random.randint(0, 10, size=1800),
+        'c': ['a', 'b', 'b', 'b', 'c', 'c'] * 300,
+        'd': [True, True, True, True, False, False] * 300,
     })
 
 
 @pytest.fixture
 def bad_data():
     return pd.DataFrame({
-        'a': np.random.normal(loc=5, scale=3, size=600),
-        'b': np.random.randint(5, 15, size=600),
-        'c': ['a', 'a', 'a', 'a', 'b', 'b'] * 100,
-        'd': [True, False, False, False, False, False] * 100,
+        'a': np.random.normal(loc=5, scale=3, size=1800),
+        'b': np.random.randint(5, 15, size=1800),
+        'c': ['a', 'a', 'a', 'a', 'b', 'b'] * 300,
+        'd': [True, False, False, False, False, False] * 300,
     })
 
 
