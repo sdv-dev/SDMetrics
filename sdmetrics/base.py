@@ -21,12 +21,20 @@ class BaseMetric:
     max_value = None
 
     @classmethod
-    def get_subclasses(cls):
-        """Recursively find subclasses of this metric."""
+    def get_subclasses(cls, include_parents=False):
+        """Recursively find subclasses of this metric.
+
+        Args:
+            include_parents (bool):
+                Whether to include subclasses which are parents to
+                other classes. Defaults to ``False``.
+        """
         subclasses = dict()
-        for subclass in cls.__subclasses__():
-            subclasses[subclass.__name__] = subclass
-            subclasses.update(subclass.get_subclasses())
+        for child in cls.__subclasses__():
+            grandchildren = child.get_subclasses(include_parents)
+            subclasses.update(grandchildren)
+            if include_parents or not grandchildren:
+                subclasses[child.__name__] = child
 
         return subclasses
 
