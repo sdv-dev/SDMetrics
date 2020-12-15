@@ -1,17 +1,8 @@
-<p>
-  <a href="https://sdv.dev">
-  <!--
-    <img width=40% src="https://sdv.dev/assets/header-img.png">
-  -->
-    <img width=30% src="https://github.com/sdv-dev/SDV/blob/master/docs/images/SDV-Logo-Color-Tagline.png?raw=true">
+<p align="left">
+  <a href="https://dai.lids.mit.edu">
+    <img width=15% src="https://dai.lids.mit.edu/wp-content/uploads/2018/06/Logo_DAI_highres.png" alt="DAI-Lab" />
   </a>
-  <!--a href="https://dai.lids.mit.edu">
-    <img align="center" width=18% src="https://dai.lids.mit.edu/wp-content/uploads/2018/06/Logo_DAI_highres.png" alt="DAI-Lab" />
-  </a-->
-</p>
-<p>
-<i>This repository is part of <a href="https://sdv.dev">The Synthetic Data Vault</a>,
-an Open Source Project form the <a href="https://dai.lids.mit.edu">Data to AI Lab, at MIT</a></i>
+  <i>An Open Source Project from the <a href="https://dai.lids.mit.edu">Data to AI Lab, at MIT</a></i>
 </p>
 
 [![Development Status](https://img.shields.io/badge/Development%20Status-2%20--%20Pre--Alpha-yellow)](https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha)
@@ -149,3 +140,15 @@ More details about each individual type of metrics can also be found here:
 * Single Column Metrics: [sdmetrics/single_column](sdmetrics/single_column)
 * Single Table Metrics: [sdmetrics/single_table](sdmetrics/single_table)
 * Multi Table Metrics: [sdmetrics/multi_table](sdmetrics/multi_table)
+
+# The Synthetic Data Vault
+
+<p>
+  <a href="https://sdv.dev">
+    <img width=30% src="https://github.com/sdv-dev/SDV/blob/master/docs/images/SDV-Logo-Color-Tagline.png?raw=true">
+  </a>
+  <p><i>This repository is part of <a href="https://sdv.dev">The Synthetic Data Vault Project</a></i></p>
+</p>
+
+* Website: https://sdv.dev
+* Documentation: https://sdv.dev/SDV
