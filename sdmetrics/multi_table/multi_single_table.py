@@ -25,8 +25,11 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
 
     single_table_metric = None
 
-    @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None):
+    def __init__(self, single_table_metric):
+        self.single_table_metric = single_table_metric
+        self.compute = self._compute
+
+    def _compute(self, real_data, synthetic_data, metadata=None):
         """Compute this metric.
 
         Args:
@@ -50,9 +53,29 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
             synthetic_table = synthetic_data[table_name]
             table_meta = metadata['tables'][table_name] if metadata else None
 
-            values.append(cls.single_table_metric.compute(real_table, synthetic_table, table_meta))
+            score = self.single_table_metric.compute(real_table, synthetic_table, table_meta)
+            values.append(score)
 
         return np.nanmean(values)
+
+    @classmethod
+    def compute(cls, real_data, synthetic_data, metadata=None):
+        """Compute this metric.
+
+        Args:
+            real_data (dict[str, pandas.DataFrame]):
+                The tables from the real dataset.
+            synthetic_data (dict[str, pandas.DataFrame]):
+                The tables from the synthetic dataset.
+            metadata (dict):
+                Multi-table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
+
+        Returns:
+            Union[float, tuple[float]]:
+                Metric output.
+        """
+        return cls._compute(cls, real_data, synthetic_data, metadata)
 
 
 class CSTest(MultiSingleTableMetric):
@@ -83,3 +106,15 @@ class SVCDetection(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable SVCDetection."""
 
     single_table_metric = single_table.detection.SVCDetection
+
+
+class BNLikelihood(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable BNLikelihood."""
+
+    single_table_metric = single_table.bayesian_network.BNLikelihood
+
+
+class BNLogLikelihood(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable BNLogLikelihood."""
+
+    single_table_metric = single_table.bayesian_network.BNLogLikelihood
