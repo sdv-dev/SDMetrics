@@ -98,6 +98,6 @@ setup(
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.1.0.dev0',
+    version='0.1.0.dev1',
     zip_safe=False,
 )
