@@ -64,6 +64,9 @@ class SingleTableMetric(BaseMetric):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 
         if metadata is not None:
+            if not isinstance(metadata, dict):
+                metadata = metadata.to_dict()
+
             fields = metadata['fields']
             for column in real_data.columns:
                 if column not in fields:

@@ -36,6 +36,9 @@ class ParentChildDetectionMetric(DetectionMetric,
 
     @staticmethod
     def _extract_foreign_keys(metadata):
+        if not isinstance(metadata, dict):
+            metadata = metadata.to_dict()
+
         foreign_keys = []
         for child_table, child_meta in metadata['tables'].items():
             for child_key, field_meta in child_meta['fields'].items():
