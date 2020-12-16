@@ -1,5 +1,7 @@
 """MultiTable metrics based on applying SingleTable metrics on all the tables."""
 
+from collections import defaultdict
+
 import numpy as np
 
 from sdmetrics import single_table
@@ -51,10 +53,15 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
         if set(real_data.keys()) != set(synthetic_data.keys()):
             raise ValueError('`real_data` and `synthetic_data` must have the same tables')
 
+        if metadata is None:
+            metadata = {'tables': defaultdict(type(None))}
+        elif not isinstance(metadata, dict):
+            metadata = metadata.to_dict()
+
         values = []
         for table_name, real_table in real_data.items():
             synthetic_table = synthetic_data[table_name]
-            table_meta = metadata['tables'][table_name] if metadata else None
+            table_meta = metadata['tables'][table_name]
 
             score = self.single_table_metric.compute(real_table, synthetic_table, table_meta)
             values.append(score)
