@@ -9,7 +9,7 @@ from sdmetrics.single_table.efficacy.base import MLEfficacyMetric
 
 
 def f1_macro(real_target, predictions):
-    return f1_score(real_target, predictions, average='macro'),
+    return f1_score(real_target, predictions, average='macro')
 
 
 class MulticlassEfficacyMetric(MLEfficacyMetric):
@@ -17,8 +17,8 @@ class MulticlassEfficacyMetric(MLEfficacyMetric):
 
     name = None
     goal = Goal.MAXIMIZE
-    min_value = (0, 0, 0)
-    max_value = (1, 1, 1)
+    min_value = 0
+    max_value = 1
     SCORER = f1_macro
 
 
