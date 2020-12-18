@@ -68,6 +68,28 @@ class BNLikelihood(SingleTableMetric):
     def compute(cls, real_data, synthetic_data, metadata=None, structure=None):
         """Compute this metric.
 
+        This fits a BayesianNetwork to the real data and then evaluates how
+        likely it is that the synthetic data belongs to the same distribution.
+
+        Real data and synthetic data must be passed as ``pandas.DataFrame`` instances
+        and ``metadata`` as a ``Table`` metadata ``dict`` representation.
+
+        If no ``metadata`` is given, one will be built from the values observed
+        in the ``real_data``.
+
+        If a ``structure`` is given, either directly or as a ``structure`` first level
+        entry within the ``metadata`` dict, it is passed to the underlying BayesianNetwork
+        for fitting. Otherwise, the structure is learned from the data using the ``chow-liu``
+        algorithm.
+
+        ``structure`` can be passed as either a tuple of tuples representing only the
+        network structure or as a ``dict`` representing a full serialization of a previously
+        fitted ``BayesianNetwork``. In the later scenario, only the ``structure`` will be
+        extracted from the ``BayesianNetwork`` instance, and then a new one will be fitted
+        to the given data.
+
+        The output is the average probability across all the synthetic rows.
+
         Args:
             real_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the real dataset.
@@ -117,6 +139,28 @@ class BNLogLikelihood(BNLikelihood):
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None, structure=None):
         """Compute this metric.
+
+        This fits a BayesianNetwork to the real data and then evaluates how
+        likely it is that the synthetic data belongs to the same distribution.
+
+        Real data and synthetic data must be passed as ``pandas.DataFrame`` instances
+        and ``metadata`` as a ``Table`` metadata ``dict`` representation.
+
+        If no ``metadata`` is given, one will be built from the values observed
+        in the ``real_data``.
+
+        If a ``structure`` is given, either directly or as a ``structure`` first level
+        entry within the ``metadata`` dict, it is passed to the underlying BayesianNetwork
+        for fitting. Otherwise, the structure is learned from the data using the ``chow-liu``
+        algorithm.
+
+        ``structure`` can be passed as either a tuple of tuples representing only the
+        network structure or as a ``dict`` representing a full serialization of a previously
+        fitted ``BayesianNetwork``. In the later scenario, only the ``structure`` will be
+        extracted from the ``BayesianNetwork`` instance, and then a new one will be fitted
+        to the given data.
+
+        The output is the average log probability across all the synthetic rows.
 
         Args:
             real_data (Union[numpy.ndarray, pandas.DataFrame]):

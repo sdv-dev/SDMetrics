@@ -31,6 +31,17 @@ class MLEfficacy(MLEfficacyMetric):
     def compute(cls, real_data, synthetic_data, metadata=None, target=None):
         """Compute this metric.
 
+        A ``target`` column name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the target column for the
+        Machine Learning prediction.
+
+        This analyzes the target column and applies all the Regression, Binary
+        Classification or Multiclass Classification metrics to the table depending
+        on the type of column that needs to be predicted.
+
+        The output is the average score obtained by the different metrics of the
+        chosen type.
+
         Args:
             real_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the real dataset.
@@ -73,5 +84,3 @@ class MLEfficacy(MLEfficacyMetric):
         for name, metric in metrics.items():
             LOGGER.info('MLEfficacy: Computing %s', name)
             scores.append(metric.compute(real_data, synthetic_data, metadata, target))
-
-        return np.nanmean(scores)

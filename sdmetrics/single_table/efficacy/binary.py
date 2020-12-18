@@ -21,6 +21,11 @@ class BinaryEfficacyMetric(MLEfficacyMetric):
 
 
 class BinaryDecisionTreeClassifier(BinaryEfficacyMetric):
+    """Binary DecisionTreeClassifier Efficacy based metric.
+
+    This fits a DecisionTreeClassifier to the synthetic data and
+    then evaluates it making predictions on the real data.
+    """
 
     MODEL = DecisionTreeClassifier
     MODEL_KWARGS = {
@@ -30,11 +35,21 @@ class BinaryDecisionTreeClassifier(BinaryEfficacyMetric):
 
 
 class BinaryAdaBoostClassifier(BinaryEfficacyMetric):
+    """Binary AdaBoostClassifier Efficacy based metric.
+
+    This fits an AdaBoostClassifier to the synthetic data and
+    then evaluates it making predictions on the real data.
+    """
 
     MODEL = AdaBoostClassifier
 
 
 class BinaryLogisticRegression(BinaryEfficacyMetric):
+    """Binary LogisticRegression Efficacy based metric.
+
+    This fits a LogisticRegression to the synthetic data and
+    then evaluates it making predictions on the real data.
+    """
 
     MODEL = LogisticRegression
     MODEL_KWARGS = {
@@ -46,6 +61,11 @@ class BinaryLogisticRegression(BinaryEfficacyMetric):
 
 
 class BinaryMLPClassifier(BinaryEfficacyMetric):
+    """Binary MLPClassifier Efficacy based metric.
+
+    This fits a MLPClassifier to the synthetic data and
+    then evaluates it making predictions on the real data.
+    """
 
     MODEL = MLPClassifier
     MODEL_KWARGS = {

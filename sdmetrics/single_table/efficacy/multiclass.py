@@ -23,6 +23,11 @@ class MulticlassEfficacyMetric(MLEfficacyMetric):
 
 
 class MulticlassDecisionTreeClassifier(MulticlassEfficacyMetric):
+    """Multiclass DecisionTreeClassifier Efficacy based metric.
+
+    This fits a DecisionTreeClassifier to the synthetic data and
+    then evaluates it making predictions on the real data.
+    """
 
     MODEL = DecisionTreeClassifier
     MODEL_KWARGS = {
@@ -32,6 +37,11 @@ class MulticlassDecisionTreeClassifier(MulticlassEfficacyMetric):
 
 
 class MulticlassMLPClassifier(MulticlassEfficacyMetric):
+    """Multiclass MLPClassifier Efficacy based metric.
+
+    This fits a MLPClassifier to the synthetic data and
+    then evaluates it making predictions on the real data.
+    """
 
     MODEL = MLPClassifier
     MODEL_KWARGS = {

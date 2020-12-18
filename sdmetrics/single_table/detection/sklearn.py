@@ -25,7 +25,7 @@ class ScikitLearnClassifierDetectionMetric(DetectionMetric):
         raise NotImplementedError()
 
     @classmethod
-    def fit_predict(cls, X_train, y_train, X_test):
+    def _fit_predict(cls, X_train, y_train, X_test):
         """Fit a pipeline to train data and then use it to make prediction on test data."""
         model = Pipeline([
             ('imputer', SimpleImputer()),
@@ -38,7 +38,13 @@ class ScikitLearnClassifierDetectionMetric(DetectionMetric):
 
 
 class LogisticDetection(ScikitLearnClassifierDetectionMetric):
-    """ScikitLearnClassifierDetectionMetric based on a LogisticRegression."""
+    """ScikitLearnClassifierDetectionMetric based on a LogisticRegression.
+
+    This metric builds a LogisticRegression Classifier that learns to tell the synthetic
+    data apart from the real data, which later on is evaluated using Cross Validation.
+
+    The output of the metric is one minus the average ROC AUC score obtained.
+    """
 
     name = "LogisticRegression Detection"
 
@@ -48,7 +54,13 @@ class LogisticDetection(ScikitLearnClassifierDetectionMetric):
 
 
 class SVCDetection(ScikitLearnClassifierDetectionMetric):
-    """ScikitLearnClassifierDetectionMetric based on a SVC."""
+    """ScikitLearnClassifierDetectionMetric based on a SVC.
+
+    This metric builds a SVC Classifier that learns to tell the synthetic
+    data apart from the real data, which later on is evaluated using Cross Validation.
+
+    The output of the metric is one minus the average ROC AUC score obtained.
+    """
 
     name = "SVC Detection"
 

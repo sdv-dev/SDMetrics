@@ -12,6 +12,11 @@ from sdmetrics.utils import NestedAttrsMeta
 class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single_table_metric')):
     """MultiTableMetric subclass that applies a SingleTableMetric on each table.
 
+    This class can either be used by creating a subclass that inherits from it and
+    sets the SingleTable Metric as the `single_table_metric` attribute,
+    or by creating an instance of this class passing the underlying SingleTable
+    metric as an argument.
+
     Attributes:
         name (str):
             Name to use when reports about this metric are printed.
@@ -33,6 +38,9 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
 
     def _compute(self, real_data, synthetic_data, metadata=None):
         """Compute this metric.
+
+        This applies the underlying single table metric to all the tables
+        found in the dataset and then returns the average score obtained.
 
         Args:
             real_data (dict[str, pandas.DataFrame]):
@@ -71,6 +79,9 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None, **kwargs):
         """Compute this metric.
+
+        This applies the underlying single table metric to all the tables
+        found in the dataset and then returns the average score obtained.
 
         Args:
             real_data (dict[str, pandas.DataFrame]):

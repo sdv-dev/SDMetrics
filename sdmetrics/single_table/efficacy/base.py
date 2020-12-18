@@ -81,6 +81,16 @@ class MLEfficacyMetric(SingleTableMetric):
     def compute(cls, real_data, synthetic_data, metadata=None, target=None, scorer=None):
         """Compute this metric.
 
+        This fits a Machine Learning model on the synthetic data and
+        then evaluates it making predictions on the real data.
+
+        A ``target`` column name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the target column for the
+        Machine Learning prediction.
+
+        Optionally, a list of ML scorer functions can be given. Otherwise, the default
+        one for the type of problem is used.
+
         Args:
             real_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the real dataset.

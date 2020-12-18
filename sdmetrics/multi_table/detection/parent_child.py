@@ -70,6 +70,15 @@ class ParentChildDetectionMetric(DetectionMetric,
     def compute(cls, real_data, synthetic_data, metadata=None, foreign_keys=None):
         """Compute this metric.
 
+        This denormalizes the parent-child relationships from the dataset and then
+        applies a Single Table Detection metric on the resulting tables.
+
+        The output of the metric is one minus the average ROC AUC score obtained.
+
+        A part from the real and synthetic data, either a ``foreign_keys`` list
+        containing the relationships between the tables or a ``metadata`` that can be
+        used to create such list must be passed.
+
         Args:
             real_data (dict[str, pandas.DataFrame]):
                 The tables from the real dataset.
@@ -102,10 +111,12 @@ class ParentChildDetectionMetric(DetectionMetric,
 
 
 class LogisticParentChildDetection(ParentChildDetectionMetric):
+    """ParentChild detection metric based on a LogisticRegression."""
 
     single_table_metric = LogisticDetection
 
 
 class SVCParentChildDetection(ParentChildDetectionMetric):
+    """ParentChild detection metric based on a SVC."""
 
     single_table_metric = SVCDetection

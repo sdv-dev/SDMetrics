@@ -14,6 +14,9 @@ class GMLogLikelihood(SingleTableMetric):
     evaluates how likely it is that the synthetic data belongs to the same
     distribution as the real data.
 
+    By default, GaussianMixture models with 10, 20 and 30 components are
+    fitted a total of 3 times.
+
     The output is the average log likelihood across all the GMMs.
 
     Attributes:
@@ -36,6 +39,21 @@ class GMLogLikelihood(SingleTableMetric):
     def compute(cls, real_data, synthetic_data, metadata=None,
                 n_components=(10, 20, 30), iterations=3):
         """Compute this metric.
+
+        This fits multiple GaussianMixture models to the real data and then
+        evaluates how likely it is that the synthetic data belongs to the same
+        distribution as the real data.
+
+        By default, GaussianMixture models with 10, 20 and 30 components are
+        fitted a total of 3 times.
+
+        Real data and synthetic data must be passed as ``pandas.DataFrame`` instances
+        and ``metadata`` as a ``Table`` metadata ``dict`` representation.
+
+        If no ``metadata`` is given, one will be built from the values observed
+        in the ``real_data``.
+
+        The output is the average log likelihood across all the GMMs.
 
         Args:
             real_data (Union[numpy.ndarray, pandas.DataFrame]):
