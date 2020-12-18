@@ -87,8 +87,7 @@ install-develop: clean-build clean-pyc ## install the package in editable mode a
 
 .PHONY: lint
 lint: ## check style with flake8 and isort
-	flake8 sdmetrics tests
-	isort -c --recursive sdmetrics tests
+	invoke lint
 
 .PHONY: fix-lint
 fix-lint: ## fix lint issues using autoflake, autopep8, and isort
@@ -101,17 +100,15 @@ fix-lint: ## fix lint issues using autoflake, autopep8, and isort
 
 .PHONY: test-unit
 test-unit: ## run tests quickly with the default Python
-	python -m pytest --cov=sdmetrics
+	invoke pytest
 
 .PHONY: test-readme
 test-readme: ## run the readme snippets
-	rm -rf tests/readme_test && mkdir tests/readme_test
-	cd tests/readme_test && rundoc run --single-session python3 -t python3 ../../README.md
-	rm -rf tests/readme_test
+	invoke readme
 
 .PHONY: test-tutorials
 test-tutorials: ## run the tutorial notebooks
-	jupyter nbconvert --execute --ExecutePreprocessor.timeout=600 tutorials/*.ipynb --stdout > /dev/null
+	invoke tutorials
 
 .PHONY: test
 test: test-unit test-readme test-tutorials ## test everything that needs test dependencies

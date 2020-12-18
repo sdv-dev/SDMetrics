@@ -1,0 +1,55 @@
+{% set name = 'sdmetrics' %}
+<<<<<<< HEAD
+{% set version = '0.1.0.dev3' %}
+=======
+{% set version = '0.0.5.dev0' %}
+>>>>>>> master
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+
+build:
+  number: 0
+  noarch: python
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - matplotlib >=2.2.2,<3.2.2
+    - numpy >=1.15.4,<2
+    - pandas >=0.21,<2
+    - pip
+    - python
+    - rdt >=0.2.8.dev0,<0.3
+    - scikit-learn >=0.20,<1
+    - scipy >=1.1.0,<2
+    - sdv >=0.5.0,<0.6
+    - seaborn >=0.9,<0.11
+    - pytest-runner
+  run:
+    - matplotlib >=2.2.2,<3.2.2
+    - numpy >=1.15.4,<2
+    - pandas >=0.21,<2
+    - python
+    - rdt >=0.2.8.dev0,<0.3
+    - scikit-learn >=0.20,<1
+    - scipy >=1.1.0,<2
+    - sdv >=0.5.0,<0.6
+    - seaborn >=0.9,<0.11
+
+about:
+  home: "https://github.com/sdv-dev/SDMetrics"
+  license: MIT
+  license_family: MIT
+  license_file: 
+  summary: "Metrics for Synthetic Data Generation Projects"
+  doc_url: 
+  dev_url: 
+
+extra:
+  recipe-maintainers:
+    - sdv-dev

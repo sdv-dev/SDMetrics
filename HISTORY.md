@@ -1,5 +1,35 @@
 # History
 
+## v0.1.0 - 2020-12-18
+
+This release introduces a new project organization and API, with metrics
+grouped by data modality, with a common API:
+
+* Single Column
+* Column Pair
+* Single Table
+* Multi Table
+* Time Series
+
+Within each data modality, different families of metrics have been implemented:
+
+* Statistical
+* Detection
+* Bayesian Network and Gaussian Mixture Likelihood
+* Machine Learning Efficacy
+
+## v0.0.4 - 2020-11-27
+
+Patch release to relax dependencies and avoid conflicts when using the latest SDV version.
+
+## v0.0.3 - 2020-11-20
+
+Fix error on detection metrics when input data contains infinity or NaN values.
+
+### Issues closed
+
+* ValueError: Input contains infinity or a value too large for dtype('float64') - Issue [#11](https://github.com/sdv-dev/SDMetrics/issues/11) by @csala
+
 ## v0.0.2 - 2020-08-08
 
 Add support for Python 3.8 and a broader range of dependencies.
