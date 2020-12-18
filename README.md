@@ -75,8 +75,8 @@ your synthetic dataset. For more details about how to use it please visit the co
 User Guides:
 
 * [Evaluating Single Table Data](https://sdv.dev/SDV/user_guides/single_table/evaluation.html)
-* [Evaluating Multi Table Data](https://sdv.dev/SDV/user_guides/multi_table/evaluation.html)
-* [Evaluating Time Series Data](https://sdv.dev/SDV/user_guides/timeseries/evaluation.html)
+* Evaluating Multi Table Data (Coming soon)
+* Evaluating Time Series Data (Coming soon)
 
 ## Standalone usage
 
