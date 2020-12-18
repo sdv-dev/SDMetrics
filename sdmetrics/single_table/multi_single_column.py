@@ -13,7 +13,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
     """SingleTableMetric subclass that applies a SingleColumnMetric on each column.
 
     This class can either be used by creating a subclass that inherits from it and
-    sets the SingleColumn Metric as the `single_column_metric` attribute,
+    sets the SingleColumn Metric as the ``single_column_metric`` attribute,
     or by creating an instance of this class passing the underlying SingleColumn
     metric as an argument.
 

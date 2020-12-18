@@ -13,7 +13,7 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
     """MultiTableMetric subclass that applies a SingleTableMetric on each table.
 
     This class can either be used by creating a subclass that inherits from it and
-    sets the SingleTable Metric as the `single_table_metric` attribute,
+    sets the SingleTable Metric as the ``single_table_metric`` attribute,
     or by creating an instance of this class passing the underlying SingleTable
     metric as an argument.
 

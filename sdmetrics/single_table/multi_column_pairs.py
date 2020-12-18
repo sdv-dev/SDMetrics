@@ -99,7 +99,7 @@ class ContinuousKLDivergence(MultiColumnPairsMetric):
 
     This approximates the KL divergence by binning the continuous values
     to turn them into categorical values and then computing the relative
-    entropy. Afterwards normalizes the value applying `1 / (1 + KLD)`.
+    entropy. Afterwards normalizes the value applying ``1 / (1 + KLD)``.
 
     Attributes:
         name (str):
@@ -124,7 +124,7 @@ class DiscreteKLDivergence(MultiColumnPairsMetric):
     """MultiColumnPairsMetric based on ColumnPairs DiscreteKLDivergence.
 
     This computes the KL divergence and afterwards normalizes the
-    value applying `1 / (1 + KLD)`.
+    value applying ``1 / (1 + KLD)``.
 
     Attributes:
         name (str):

@@ -24,7 +24,7 @@ class BaseMetric:
     def get_subclasses(cls, include_parents=False):
         """Recursively find subclasses of this metric.
 
-        If `include_parents` is passed as `True`, intermediate child classes
+        If ``include_parents`` is passed as ``True``, intermediate child classes
         that also have subclasses will be included. Otherwise, only classes
         without subclasses will be included to ensure that they are final
         implementations and are ready to be run on data.

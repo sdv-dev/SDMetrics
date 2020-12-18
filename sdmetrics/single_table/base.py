@@ -8,8 +8,8 @@ from sdmetrics.base import BaseMetric
 class SingleTableMetric(BaseMetric):
     """Base class for metrics that apply to single tables.
 
-    Input to these family of metrics are ``pandas.DataFrame``s and
-    ``dict`` representations of the corresponding ``Table`` metadata.
+    Input to these family of metrics are two ``pandas.DataFrame`` instances
+    and a ``dict`` representations of the corresponding ``Table`` metadata.
 
     Attributes:
         name (str):
