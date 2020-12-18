@@ -2,6 +2,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from sdmetrics import compute_metrics
+from sdmetrics.demos import load_single_table_demo
+from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
 from sdmetrics.single_table.gaussian_mixture import GMLogLikelihood
@@ -83,3 +86,20 @@ def test_rank(metric, ones, zeros, real_data, good_data, bad_data):
 
     assert metric.min_value <= worst < best <= metric.max_value
     assert metric.min_value <= bad < good < real <= metric.max_value
+
+
+def test_compute_all():
+    real_data, synthetic_data, metadata = load_single_table_demo()
+
+    output = compute_metrics(
+        SingleTableMetric.get_subclasses(),
+        real_data,
+        synthetic_data,
+        metadata=metadata
+    )
+
+    assert not pd.isnull(output.score.mean())
+
+    scores = output[output.score.notnull()]
+
+    assert scores.score.between(scores.min_value, scores.max_value).all()
