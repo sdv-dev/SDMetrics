@@ -47,26 +47,25 @@ It includes a variety of metrics such as:
 
 # Install
 
-**SDMetrics** is part of the **SDV** project and is automatically installed alongside it with
-the following commands:
+**SDMetrics** is part of the **SDV** project and is automatically installed alongside it. For
+details about this process please visit the [SDV Installation Guide](
+https://sdv.dev/SDV/getting_started/install.html)
+
+Optionally, **SDMetrics** can also be installed as a standalone library using the following commands:
 
 **Using `pip`:**
 
 ```bash
-pip install sdv
+pip install sdmetrics
 ```
 
 **Using `conda`:**
 
 ```bash
-conda install -c sdv-dev -c conda-forge sdv
+conda install -c sdv-dev -c conda-forge sdmetrics
 ```
 
-For details about this process please visit the [SDV Installation Guide](
-https://sdv.dev/SDV/getting_started/install.html)
-
-For more instructions about how to install **SDMetrics** as a standalone library or for
-development, please visit the [SDMetrics standalone installation Guide](INSTALL.md)
+For more installation options please visit the [SDMetrics installation Guide](INSTALL.md)
 
 # Usage
 
