@@ -1,5 +1,23 @@
 # History
 
+## v0.1.0 - 2020-12-18
+
+This release introduces a new project organization and API, with metrics
+grouped by data modality, with a common API:
+
+* Single Column
+* Column Pair
+* Single Table
+* Multi Table
+* Time Series
+
+Within each data modality, different families of metrics have been implemented:
+
+* Statistical
+* Detection
+* Bayesian Network and Gaussian Mixture Likelihood
+* Machine Learning Efficacy
+
 ## v0.0.4 - 2020-11-27
 
 Patch release to relax dependencies and avoid conflicts when using the latest SDV version.
