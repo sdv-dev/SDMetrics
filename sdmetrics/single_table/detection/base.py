@@ -34,13 +34,18 @@ class DetectionMetric(SingleTableMetric):
     max_value = 1.0
 
     @staticmethod
-    def fit_predict(X_train, y_train, X_test):
+    def _fit_predict(X_train, y_train, X_test):
         """Fit a classifier and then use it to predict."""
         raise NotImplementedError()
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None):
         """Compute this metric.
+
+        This builds a Machine Learning Classifier that learns to tell the synthetic
+        data apart from the real data, which later on is evaluated using Cross Validation.
+
+        The output of the metric is one minus the average ROC AUC score obtained.
 
         Args:
             real_data (Union[numpy.ndarray, pandas.DataFrame]):
@@ -53,7 +58,7 @@ class DetectionMetric(SingleTableMetric):
 
         Returns:
             float:
-                One minus the ROC AUC Score obtained by the classifier.
+                One minus the ROC AUC Cross Validation Score obtained by the classifier.
         """
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
         transformer = HyperTransformer(dtype_transformers={'O': 'one_hot_encoding'})
@@ -68,7 +73,7 @@ class DetectionMetric(SingleTableMetric):
         scores = []
         kf = StratifiedKFold(n_splits=3, shuffle=True)
         for train_index, test_index in kf.split(X, y):
-            y_pred = cls.fit_predict(X[train_index], y[train_index], X[test_index])
+            y_pred = cls._fit_predict(X[train_index], y[train_index], X[test_index])
             roc_auc = roc_auc_score(y[test_index], y_pred)
 
             scores.append(max(0.5, roc_auc) * 2 - 1)

@@ -12,6 +12,11 @@ class MultiSingleColumnMetric(SingleTableMetric,
                               metaclass=NestedAttrsMeta('single_column_metric')):
     """SingleTableMetric subclass that applies a SingleColumnMetric on each column.
 
+    This class can either be used by creating a subclass that inherits from it and
+    sets the SingleColumn Metric as the `single_column_metric` attribute,
+    or by creating an instance of this class passing the underlying SingleColumn
+    metric as an argument.
+
     Attributes:
         name (str):
             Name to use when reports about this metric are printed.
@@ -31,13 +36,18 @@ class MultiSingleColumnMetric(SingleTableMetric,
     single_column_metric_kwargs = None
     field_types = None
 
-    def __init__(self, single_column_metric, **single_column_metric_kwargs):
+    def __init__(self, single_column_metric=None, **single_column_metric_kwargs):
         self.single_column_metric = single_column_metric
         self.single_column_metric_kwargs = single_column_metric_kwargs
         self.compute = self._compute
 
     def _compute(self, real_data, synthetic_data, metadata=None, **kwargs):
         """Compute this metric.
+
+        This is done by computing the underlying SingleColumn metric to all the
+        columns that are compatible with it.
+
+        The output is the average of the scores obtained.
 
         Args:
             real_data (pandas.DataFrame):
@@ -77,6 +87,11 @@ class MultiSingleColumnMetric(SingleTableMetric,
     def compute(cls, real_data, synthetic_data, metadata=None, **kwargs):
         """Compute this metric.
 
+        This is done by computing the underlying SingleColumn metric to all the
+        columns that are compatible with it.
+
+        The output is the average of the scores obtained.
+
         Args:
             real_data (pandas.DataFrame):
                 The values from the real dataset.
@@ -96,21 +111,36 @@ class MultiSingleColumnMetric(SingleTableMetric,
 
 
 class CSTest(MultiSingleColumnMetric):
-    """MultiSingleColumnMetric based on SingleColumn CSTest."""
+    """MultiSingleColumnMetric based on SingleColumn CSTest.
+
+    This function applies the single column ``CSTest`` metric to all
+    the discrete columns found in the table and then returns the average
+    of all the scores obtained.
+    """
 
     field_types = ('boolean', 'categorical')
     single_column_metric = single_column.statistical.CSTest
 
 
 class KSTest(MultiSingleColumnMetric):
-    """MultiSingleColumnMetric based on SingleColumn KSTest."""
+    """MultiSingleColumnMetric based on SingleColumn KSTest.
+
+    This function applies the single column ``KSTest`` metric to all
+    the numerical columns found in the table and then returns the average
+    of all the scores obtained.
+    """
 
     field_types = ('numerical', )
     single_column_metric = single_column.statistical.KSTest
 
 
 class KSTestExtended(MultiSingleColumnMetric):
-    """KSTest variation that transforms everything to numerical before comparing."""
+    """KSTest variation that transforms everything to numerical before comparing the tables.
+
+    This is done by applying an ``rdt.HyperTransformer`` to the data with the
+    default values and afterwards applying a regular single_column ``KSTest``
+    metric to all the generated numerical columns.
+    """
 
     single_column_metric = single_column.statistical.KSTest
     field_types = ('numerical', 'categorical', 'boolean', 'datetime')

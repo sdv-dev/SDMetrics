@@ -8,6 +8,9 @@ from sdmetrics.base import BaseMetric
 class SingleTableMetric(BaseMetric):
     """Base class for metrics that apply to single tables.
 
+    Input to these family of metrics are ``pandas.DataFrame``s and
+    ``dict`` representations of the corresponding ``Table`` metadata.
+
     Attributes:
         name (str):
             Name to use when reports about this metric are printed.
@@ -60,6 +63,12 @@ class SingleTableMetric(BaseMetric):
 
     @classmethod
     def _validate_inputs(cls, real_data, synthetic_data, metadata=None):
+        """Validate the inputs and return a valid metadata.
+
+        If a metadata is passed, the data is validated against it.
+
+        If no metadata is passed, one is built based on the ``real_data`` values.
+        """
         if set(real_data.columns) != set(synthetic_data.columns):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 
@@ -84,6 +93,12 @@ class SingleTableMetric(BaseMetric):
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None):
         """Compute this metric.
+
+        Real data and synthetic data must be passed as ``pandas.DataFrame`` instances
+        and ``metadata`` as a ``Table`` metadata ``dict`` representation.
+
+        If no ``metadata`` is given, one will be built from the values observed
+        in the ``real_data``.
 
         Args:
             real_data (pandas.DataFrame):

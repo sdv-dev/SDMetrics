@@ -41,55 +41,50 @@ It includes a variety of metrics such as:
   and synthetic distributions.
 * **Detection metrics** which use machine learning to try to distinguish between real and synthetic data.
 * **Efficacy metrics** which compare the performance of machine learning models when run on the synthetic and real data.
-* **Bayesian Network and Gaussian Mixture metrics** which learn the distribution of the real data and evaluate the likelihood of the synthetic data belonging to the learned distribution.
+* **Bayesian Network and Gaussian Mixture metrics** which learn the distribution of the real data
+  and evaluate the likelihood of the synthetic data belonging to the learned distribution.
 * **Privacy metrics** which evaluate whether the synthetic data is leaking information about the real data.
 
 # Install
 
-## Requirements
+**SDMetrics** is part of the **SDV** project and is automatically installed alongside it. For
+details about this process please visit the [SDV Installation Guide](
+https://sdv.dev/SDV/getting_started/install.html)
 
-**SDMetrics** has been developed and tested on [Python 3.6, 3.7 and 3.8](https://www.python.org/downloads/)
+Optionally, **SDMetrics** can also be installed as a standalone library using the following commands:
 
-Also, although it is not strictly required, the usage of a [virtualenv](
-https://virtualenv.pypa.io/en/latest/) is highly recommended in order to avoid
-interfering with other software installed in the system where **SDMetrics** is run.
-
-## Install with pip
-
-The easiest and recommended way to install **SDMetrics** is using [pip](
-https://pip.pypa.io/en/stable/):
+**Using `pip`:**
 
 ```bash
 pip install sdmetrics
 ```
 
-This will pull and install the latest stable release from [PyPi](https://pypi.org/).
-
-If you want to install from source or contribute to the project please read the
-[Contributing Guide](https://sdv.dev/SDMetrics/contributing.html#get-started).
-
-## Install with conda
-
-**SDMetrics** can also be installed using [conda](https://docs.conda.io/en/latest/):
+**Using `conda`:**
 
 ```bash
 conda install -c sdv-dev -c conda-forge sdmetrics
 ```
 
-This will pull and install the latest stable release from [Anaconda](https://anaconda.org/).
+For more installation options please visit the [SDMetrics installation Guide](INSTALL.md)
 
-# Basic Usage
+# Usage
 
-In this small code snippet we show an example of how to use SDMetrics to evaluate how similar
-a toy multi-table dataset and its synthetic replica are:
+**SDMetrics** is included as part of the framework offered by SDV to evaluate the quality of
+your synthetic dataset. For more details about how to use it please visit the corresponding
+User Guides:
 
-1. The demo data is loaded.
-2. The list of available multi-table metrics is retreived.
-3. All the metrics are run to compare the real and synthetic data.
-4. A `pandas.DataFrame` is built with the results.
+* [Evaluating Single Table Data](https://sdv.dev/SDV/user_guides/single_table/evaluation.html)
+* Evaluating Multi Table Data (Coming soon)
+* Evaluating Time Series Data (Coming soon)
+
+## Standalone usage
+
+**SDMetrics** can also be used as a standalone library to run metrics individually.
+
+In this short example we show how to use it to evaluate a toy multi-table dataset and its
+synthetic replica by running all the compatible multi-table metrics on it:
 
 ```python3
-import pandas as pd
 import sdmetrics
 
 # Load the demo data, which includes:
@@ -102,40 +97,27 @@ real_data, synthetic_data, metadata = sdmetrics.load_demo()
 # containing the metric names and the corresponding metric classes.
 metrics = sdmetrics.multi_table.MultiTableMetric.get_subclasses()
 
-# Iterate over the metrics and compute them, capturing the scores obtained.
-scores = []
-for name, metric in metrics.items():
-    try:
-        scores.append({
-        'metric': name,
-        'score': metric.compute(real_data, synthetic_data, metadata)
-        })
-    except ValueError:
-        pass   # Ignore metrics that do not support this data
-
-# Put the results in a DataFrame for pretty printing.
-scores = pd.DataFrame(scores)
+# Run all the compatible metrics and get a report
+sdmetrics.compute_metrics(metrics, real_data, synthetic_data, metadata=metadata)
 ```
 
-The result will be a table containing the list of metrics that have been
-computed and the scores obtained, similar to this one:
+The output will be a table with all the details about the executed metrics and their score:
 
-| metric                       |    score |
-|------------------------------|----------|
-| CSTest                       | 0.76651  |
-| KSTest                       | 0.75     |
-| KSTestExtended               | 0.777778 |
-| LogisticDetection            | 0.925926 |
-| SVCDetection                 | 0.703704 |
-| LogisticParentChildDetection | 0.541667 |
-| SVCParentChildDetection      | 0.923611 |
+| metric                       | name                                    |      score |   min_value |   max_value | goal     |
+|------------------------------|-----------------------------------------|------------|-------------|-------------|----------|
+| CSTest                       | Chi-Squared                             |   0.76651  |           0 |           1 | MAXIMIZE |
+| KSTest                       | Inverted Kolmogorov-Smirnov D statistic |   0.75     |           0 |           1 | MAXIMIZE |
+| KSTestExtended               | Inverted Kolmogorov-Smirnov D statistic |   0.777778 |           0 |           1 | MAXIMIZE |
+| LogisticDetection            | LogisticRegression Detection            |   0.882716 |           0 |           1 | MAXIMIZE |
+| SVCDetection                 | SVC Detection                           |   0.833333 |           0 |           1 | MAXIMIZE |
+| BNLikelihood                 | BayesianNetwork Likelihood              | nan        |           0 |           1 | MAXIMIZE |
+| BNLogLikelihood              | BayesianNetwork Log Likelihood          | nan        |        -inf |           0 | MAXIMIZE |
+| LogisticParentChildDetection | LogisticRegression Detection            |   0.619444 |           0 |           1 | MAXIMIZE |
+| SVCParentChildDetection      | SVC Detection                           |   0.916667 |           0 |           1 | MAXIMIZE |
 
 # What's next?
 
-For more details about **SDMetrics** and **SDV** please visit the [documentation site](
-https://sdv.dev/SDV/).
-
-More details about each individual type of metrics can also be found here:
+If you want to read more about each individual metric, please visit the following folders:
 
 * Single Column Metrics: [sdmetrics/single_column](sdmetrics/single_column)
 * Single Table Metrics: [sdmetrics/single_table](sdmetrics/single_table)

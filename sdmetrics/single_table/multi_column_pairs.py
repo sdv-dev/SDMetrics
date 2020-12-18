@@ -39,6 +39,12 @@ class MultiColumnPairsMetric(SingleTableMetric, metaclass=NestedAttrsMeta('colum
     def _compute(self, real_data, synthetic_data, metadata=None, **kwargs):
         """Compute this metric.
 
+        This is done by grouping all the columns that are compatible with the
+        underlying ColumnPairs metric in groups of 2 and then evaluating them
+        using the ColumnPairs metric.
+
+        The output is the average of the scores obtained.
+
         Args:
             real_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the real dataset.
@@ -89,14 +95,51 @@ class MultiColumnPairsMetric(SingleTableMetric, metaclass=NestedAttrsMeta('colum
 
 
 class ContinuousKLDivergence(MultiColumnPairsMetric):
-    """MultiColumnPairsMetric based on ColumnPairs ContinuousKLDivergence."""
+    """MultiColumnPairsMetric based on ColumnPairs ContinuousKLDivergence.
+
+    This approximates the KL divergence by binning the continuous values
+    to turn them into categorical values and then computing the relative
+    entropy. Afterwards normalizes the value applying `1 / (1 + KLD)`.
+
+    Attributes:
+        name (str):
+            Name to use when reports about this metric are printed.
+        goal (sdmetrics.goal.Goal):
+            The goal of this metric.
+        min_value (Union[float, tuple[float]]):
+            Minimum value or values that this metric can take.
+        max_value (Union[float, tuple[float]]):
+            Maximum value or values that this metric can take.
+        column_pairs_metric (sdmetrics.column_pairs.base.ColumnPairsMetric):
+            ColumnPairs ContinuousKLDivergence.
+        field_types (dict):
+            Field types to which the SingleColumn metric will be applied.
+    """
 
     field_types = ('numerical', )
     column_pairs_metric = column_pairs.statistical.kl_divergence.ContinuousKLDivergence
 
 
 class DiscreteKLDivergence(MultiColumnPairsMetric):
-    """MultiColumnPairsMetric based on ColumnPairs DiscreteKLDivergence."""
+    """MultiColumnPairsMetric based on ColumnPairs DiscreteKLDivergence.
+
+    This computes the KL divergence and afterwards normalizes the
+    value applying `1 / (1 + KLD)`.
+
+    Attributes:
+        name (str):
+            Name to use when reports about this metric are printed.
+        goal (sdmetrics.goal.Goal):
+            The goal of this metric.
+        min_value (Union[float, tuple[float]]):
+            Minimum value or values that this metric can take.
+        max_value (Union[float, tuple[float]]):
+            Maximum value or values that this metric can take.
+        column_pairs_metric (sdmetrics.column_pairs.base.ColumnPairsMetric):
+            ColumnPairs DiscreteKLDivergence.
+        field_types (dict):
+            Field types to which the SingleColumn metric will be applied.
+    """
 
     field_types = ('boolean', 'categorical')
     column_pairs_metric = column_pairs.statistical.kl_divergence.DiscreteKLDivergence
