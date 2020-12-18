@@ -71,11 +71,9 @@ For more installation options please visit the [SDMetrics installation Guide](IN
 
 **SDMetrics** is included as part of the framework offered by SDV to evaluate the quality of
 your synthetic dataset. For more details about how to use it please visit the corresponding
-User Guides:
+User Guide:
 
-* [Evaluating Single Table Data](https://sdv.dev/SDV/user_guides/single_table/evaluation.html)
-* Evaluating Multi Table Data (Coming soon)
-* Evaluating Time Series Data (Coming soon)
+* [Evaluating Synthetic Data](https://sdv.dev/SDV/user_guides/single_table/evaluation.html)
 
 ## Standalone usage
 
