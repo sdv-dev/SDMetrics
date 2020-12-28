@@ -63,13 +63,6 @@ class MLEfficacy(MLEfficacyMetric):
         uniques = target_data.unique()
         if len(uniques) == 2:
             LOGGER.info('MLEfficacy: Selecting Binary Classification metrics')
-            if target_data.dtype == 'object':
-                first_label = target_data.unique()[0]
-                real_data = real_data.copy()
-                synthetic_data = synthetic_data.copy()
-                real_data[target] = target_data == first_label
-                synthetic_data[target] = synthetic_data[target] == first_label
-
             metrics = BinaryEfficacyMetric.get_subclasses()
         elif target_type == 'numerical':
             LOGGER.info('MLEfficacy: Selecting Regression metrics')
