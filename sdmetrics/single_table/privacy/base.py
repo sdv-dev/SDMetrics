@@ -124,3 +124,42 @@ class CatPrivacyMetric(SingleTableMetric):
                     count += 1
                     score += row_score
             return score/count
+
+class PrivacyAttackerModel():
+    def fit(self, synthetic_data, key, sensitive):
+        """Fit the attacker on the synthetic data.
+
+        Args:
+            synthetic_data(pandas.DataFrame):
+                The synthetic data table used for adverserial learning.
+            key(list[str]):
+                The names of the key columns.
+            semsitive(list[str]):
+                The names of the sensitive columns.
+        """
+        raise NotImplementedError("Please implement fit method of attackers")
+
+    def predict(self, key_data):
+        """Make a prediction of the sensitive data given keys.
+
+        Args:
+            key_data(tuple):
+                The key data.
+        
+        Returns:
+            tuple:
+                The predicted sensitive data.
+        """
+        raise NotImplementedError("Please implement predict method of attackers")
+
+    def score(self, key_data, sensitive_data):
+        """Score based on the belief of the attacker, in the form P(sensitive_data|key|data)
+
+        Args:
+            key_data(tuple):
+                The key data.
+            sensitive_data(tuple):
+                The sensitive data.
+        """
+        raise NotImplementedError("Posterior probability based scoring not supported\
+            for this attacker!")
