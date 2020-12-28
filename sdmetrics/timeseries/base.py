@@ -24,16 +24,35 @@ class TimeSeriesMetric(BaseMetric):
     min_value = None
     max_value = None
 
+    _DTYPES_TO_TYPES = {
+        'i': {
+            'type': 'numerical',
+            'subtype': 'integer',
+        },
+        'f': {
+            'type': 'numerical',
+            'subtype': 'float',
+        },
+        'O': {
+            'type': 'categorical',
+        },
+        'b': {
+            'type': 'boolean',
+        },
+        'M': {
+            'type': 'datetime',
+        }
+    }
+
     @classmethod
-    def _validate_inputs(cls, real_data, synthetic_data, metadata=None, entity_columns=None,
-                         context_columns=None):
+    def _validate_inputs(cls, real_data, synthetic_data, metadata=None, entity_columns=None):
         if set(real_data.columns) != set(synthetic_data.columns):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 
-        if not isinstance(metadata, dict):
-            metadata = metadata.to_dict()
-
         if metadata is not None:
+            if not isinstance(metadata, dict):
+                metadata = metadata.to_dict()
+
             fields = metadata['fields']
             for column in real_data.columns:
                 if column not in fields:
@@ -48,13 +67,11 @@ class TimeSeriesMetric(BaseMetric):
             metadata = {'fields': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict()}
 
         entity_columns = metadata.get('entity_columns', entity_columns or [])
-        context_columns = metadata.get('context_columns', context_columns or [])
 
-        return metadata, entity_columns, context_columns
+        return metadata, entity_columns
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, entity_columns=None,
-                context_columns=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, entity_columns=None):
         """Compute this metric.
 
         Args:
@@ -68,9 +85,6 @@ class TimeSeriesMetric(BaseMetric):
             entity_columns (list[str]):
                 Names of the columns which identify different time series
                 sequences.
-            context_columns (list[str]):
-                The columns in the dataframe which are constant within each
-                group/entity.
 
         Returns:
             Union[float, tuple[float]]:

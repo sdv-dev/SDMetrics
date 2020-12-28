@@ -58,8 +58,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
         raise NotImplementedError()
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, entity_columns=None,
-                context_columns=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, entity_columns=None):
         """Compute this metric.
 
         Args:
@@ -73,16 +72,13 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
             entity_columns (list[str]):
                 Names of the columns which identify different time series
                 sequences.
-            context_columns (list[str]):
-                The columns in the dataframe which are constant within each
-                group/entity.
 
         Returns:
             Union[float, tuple[float]]:
                 Metric output.
         """
-        _, entity_columns, context_columns = cls._validate_inputs(
-            real_data, synthetic_data, metadata, entity_columns, context_columns)
+        _, entity_columns = cls._validate_inputs(
+            real_data, synthetic_data, metadata, entity_columns)
 
         transformer = rdt.HyperTransformer(dtype_transformers={
             'O': 'one_hot_encoding',
@@ -101,6 +97,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
 
 
 class TSFCDetection(TimeSeriesDetectionMetric):
+    """TimeSeriesDetection metric based on a TimeSeriesForestClassifier."""
 
     @staticmethod
     def _compute_score(X_train, X_test, y_train, y_test):
@@ -114,6 +111,7 @@ class TSFCDetection(TimeSeriesDetectionMetric):
 
 
 class LSTMDetection(TimeSeriesDetectionMetric):
+    """TimeSeriesDetection metric based on an LSTM Classifier."""
 
     @staticmethod
     def _x_to_packed_sequence(X):
