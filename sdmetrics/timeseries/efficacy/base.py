@@ -33,20 +33,6 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
     min_value = 0.0
     max_value = np.inf
 
-    @staticmethod
-    def _build_x(transformer, data, entity_columns):
-        X = pd.DataFrame()
-        for entity_id, entity_data in data.groupby(entity_columns):
-            entity_data = entity_data.drop(entity_columns, axis=1)
-            entity_data = transformer.transform(entity_data)
-            entity_data = pd.Series({
-                column: entity_data[column].values
-                for column in entity_data.columns
-            }, name=entity_id)
-            X = X.append(entity_data)
-
-        return X
-
     @classmethod
     def _validate_inputs(cls, real_data, synthetic_data, metadata, entity_columns, target):
         metadata, entity_columns = super()._validate_inputs(
