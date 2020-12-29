@@ -19,7 +19,7 @@ def test_rank(metric):
     real_score = metric.compute(real_data, real_data, metadata)
     synthetic_score = metric.compute(real_data, synthetic_data, metadata)
 
-    assert metric.min_value <= synthetic_score < real_score <= metric.max_value
+    assert metric.min_value <= synthetic_score <= real_score <= metric.max_value
 
 
 def test_compute_all():
