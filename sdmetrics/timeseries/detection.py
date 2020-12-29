@@ -1,16 +1,12 @@
-"""Base class for Machine Learning Detection based metrics for Time Series."""
+"""Machine Learning Detection based metrics for Time Series."""
 
 import numpy as np
 import pandas as pd
 import rdt
-import torch
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sktime.classification.compose import TimeSeriesForestClassifier
-from sktime.transformers.series_as_features.compose import ColumnConcatenator
-from torch.nn.utils.rnn import pack_sequence
 
 from sdmetrics.goal import Goal
+from sdmetrics.timeseries import ml_scorers
 from sdmetrics.timeseries.base import TimeSeriesMetric
 
 
@@ -90,7 +86,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
         synt_x = cls._build_x(synthetic_data, transformer, entity_columns)
 
         X = pd.concat([real_x, synt_x])
-        y = np.array([0] * len(real_x) + [1] * len(synt_x))
+        y = pd.Series(np.array([0] * len(real_x) + [1] * len(synt_x)))
         X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, stratify=y)
 
         return 1 - cls._compute_score(X_train, X_test, y_train, y_test)
@@ -99,54 +95,10 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
 class TSFCDetection(TimeSeriesDetectionMetric):
     """TimeSeriesDetection metric based on a TimeSeriesForestClassifier."""
 
-    @staticmethod
-    def _compute_score(X_train, X_test, y_train, y_test):
-        steps = [
-            ('concatenate', ColumnConcatenator()),
-            ('classify', TimeSeriesForestClassifier(n_estimators=100))
-        ]
-        clf = Pipeline(steps)
-        clf.fit(X_train, y_train)
-        return clf.score(X_test, y_test)
+    _compute_score = ml_scorers.tsf_classifier
 
 
 class LSTMDetection(TimeSeriesDetectionMetric):
     """TimeSeriesDetection metric based on an LSTM Classifier."""
 
-    @staticmethod
-    def _x_to_packed_sequence(X):
-        sequences = []
-        for _, row in X.iterrows():
-            sequence = []
-            for _, values in row.iteritems():
-                sequence.append(values)
-            sequences.append(torch.FloatTensor(sequence).T)
-        return pack_sequence(sequences)
-
-    @classmethod
-    def _compute_score(cls, X_train, X_test, y_train, y_test):
-        input_dim = len(X_train.columns)
-        output_dim = len(set(y_train))
-        hidden_dim = 32
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-        lstm = torch.nn.LSTM(input_dim, hidden_dim).to(device)
-        linear = torch.nn.Linear(hidden_dim, output_dim).to(device)
-        X_train = cls._x_to_packed_sequence(X_train).to(device)
-        X_test = cls._x_to_packed_sequence(X_test).to(device)
-        y_train = torch.LongTensor(y_train).to(device)
-        y_test = torch.LongTensor(y_test).to(device)
-
-        optimizer = torch.optim.Adam(list(lstm.parameters()) + list(linear.parameters()), lr=1e-2)
-        for _ in range(1024):
-            _, (y, _) = lstm(X_train)
-            y_pred = linear(y[0])
-            loss = torch.nn.functional.cross_entropy(y_pred, y_train)
-
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-        _, (y, _) = lstm(X_test)
-        y_pred = linear(y[0])
-        return torch.sum(y_test == torch.argmax(y_pred, axis=1)).item() / len(y_test)
+    _compute_score = ml_scorers.lstm_classifier
