@@ -1,5 +1,17 @@
 # History
 
+## v0.1.1 - 2020-12-30
+
+This version adds Time Series Detection and Efficacy metrics, as well as a fix
+to ensure that Single Table binary classification efficacy metrics work well
+with binary targets which are not boolean.
+
+### Issues closed
+
+* Timeseries efficacy metrics - Issue [#35](https://github.com/sdv-dev/SDMetrics/issues/35) by @csala
+* Timeseries detection metrics - Issue [#34](https://github.com/sdv-dev/SDMetrics/issues/34) by @csala
+* Ensure binary classification targets are bool - Issue [#33](https://github.com/sdv-dev/SDMetrics/issues/33) by @csala
+
 ## v0.1.0 - 2020-12-18
 
 This release introduces a new project organization and API, with metrics
