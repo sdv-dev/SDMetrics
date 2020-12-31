@@ -73,7 +73,7 @@ For more installation options please visit the [SDMetrics installation Guide](IN
 your synthetic dataset. For more details about how to use it please visit the corresponding
 User Guide:
 
-* [Evaluating Synthetic Data](https://sdv.dev/SDV/user_guides/single_table/evaluation.html)
+* [Evaluating Synthetic Data](https://sdv.dev/SDV/user_guides/evaluation/index.html)
 
 ## Standalone usage
 
