@@ -87,6 +87,6 @@ class GCAP(CatPrivacyMetric):
     """The GCAP (General CAP) privacy metric. Scored based on the ZeroCAPAttacker.
     """
 
-    name = '0CAP'
-    MODEL = ZeroCAPAttacker
+    name = 'GCAP'
+    MODEL = GCAPAttacker
     ACCURACY_BASE = False
