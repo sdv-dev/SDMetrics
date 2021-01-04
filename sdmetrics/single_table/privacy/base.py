@@ -43,12 +43,13 @@ class CatPrivacyMetric(SingleTableMetric):
     min_value = 0
     max_value = 1
     MODEL = None
-    MODEL_KWARGS = None
+    MODEL_KWARGS = {}
     ACCURACY_BASE = None
 
     @classmethod
-    def _fit(cls, synthetic_data, key, sensitive):
-        model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
+    def _fit(cls, synthetic_data, key, sensitive, model_kwargs):
+        if model_kwargs == None:
+            model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
         model = cls.MODEL(**model_kwargs)
         model.fit(synthetic_data, key, sensitive)
         return model
@@ -69,7 +70,7 @@ class CatPrivacyMetric(SingleTableMetric):
         return key, sensitive
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key=None, sensitive=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, key=None, sensitive=None, model_kwargs = None):
         """Compute this metric.
 
         This fits a adversial attacker model on the synthetic data and
@@ -95,13 +96,16 @@ class CatPrivacyMetric(SingleTableMetric):
                 Name of the column(s) to use as the key attributes.
             sensitive (list(str)):
                 Name of the column(s) to use as the sensitive attributes.
+            model_kwargs (dict):
+                Key word arguments of the attacker model. cls.MODEL_KWARGS will be used
+                if noen is provided.
 
         Returns:
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
         key, sensitive = cls._validate_inputs(real_data, synthetic_data, metadata, key, sensitive)
-        model = cls._fit(synthetic_data, key, sensitive)
+        model = cls._fit(synthetic_data, key, sensitive, model_kwargs)
 
         if ACCURACY_BASE: #calculate privacy score based on prediction accuracy
             count = len(real_data)
