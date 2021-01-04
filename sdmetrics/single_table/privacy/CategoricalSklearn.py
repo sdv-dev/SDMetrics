@@ -26,7 +26,7 @@ class CatSklearnAttacker(PrivacyAttackerModel):
     SKL_LEARNER = None
 
     def __init__(self):
-        self.predictors = self.SKL_LEARNER()
+        self.predictor = self.SKL_LEARNER()
         self.key_processor = OrdinalEncoder() if self.KEY_TYPE == CategoricalType.CLASS_NUM \
             else OneHotEncoder()
         self.sensitive_processor = OrdinalEncoder() if \
@@ -112,20 +112,20 @@ class CatNB(CatPrivacyMetric):
     MODEL = CatNBAttacker
     ACCURACY_BASE = True
 
-class KNNAttacker(CatSklearnAttacker):
-    """The KNN (k nearest neighbors) privacy attaker uses a KNN classifier
+class CatKNNAttacker(CatSklearnAttacker):
+    """The Categorical KNN (k nearest neighbors) privacy attaker uses a KNN classifier
     and the score is calculated based on prediction accuracy.
     """
     KEY_TYPE = CategoricalType.ONE_HOT
     SENSITIVE_TYPE = CategoricalType.CLASS_NUM
     SKL_LEARNER = KNeighborsClassifier
 
-class KNN(CatPrivacyMetric):
-    """The KNN privacy metric. Scored based on the KNNAttacker.
+class CatKNN(CatPrivacyMetric):
+    """The Categorical KNN privacy metric. Scored based on the KNNAttacker.
     """
 
     name = 'K Nearest Neighbors'
-    MODEL = KNNAttacker
+    MODEL = CatKNNAttacker
     ACCURACY_BASE = True
 
 class CatRFAttacker(CatSklearnAttacker):

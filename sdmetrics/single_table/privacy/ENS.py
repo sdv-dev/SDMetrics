@@ -11,7 +11,7 @@ class CatENSAttacker(PrivacyAttackerModel):
     """
     def __init__(self, attackers = []):
         self.synthetic_dict = {} #table_name -> {key attribute: [sensitive attribute]}
-        self.attackers = attackers
+        self.attackers = [attacker() for attacker in attackers]
 
     def fit(self, synthetic_data, key, sensitive):
         for attacker in self.attackers:

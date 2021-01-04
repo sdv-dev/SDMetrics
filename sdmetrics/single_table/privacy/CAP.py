@@ -12,16 +12,16 @@ class CAPAttacker(PrivacyAttackerModel):
     attack will be ignored and not counted towards the privacy score.
     """
     def __init__(self):
-        self.synthetic_dict = {} #table_name -> {key attribute: [sensitive attribute]}
+        self.synthetic_dict = {} #{key attribute: [sensitive attribute]}
 
     def fit(self, synthetic_data, key, sensitive):
         for idx in range(len(synthetic_data)):
             key_value = tuple(synthetic_data[key].iloc[idx])
             sensitive_value = tuple(synthetic_data[sensitive].iloc[idx])
-            if key in self.synthetic_dict:
-                self.synthetic_dict[key].append(sensitive_value)
+            if key_value in self.synthetic_dict:
+                self.synthetic_dict[key_value].append(sensitive_value)
             else:
-                self.synthetic_dict[key] = [sensitive_value]
+                self.synthetic_dict[key_value] = [sensitive_value]
 
     def predict(self, key_data):
         if key_data not in self.synthetic_dict:

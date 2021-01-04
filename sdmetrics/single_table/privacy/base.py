@@ -1,4 +1,5 @@
-"""Base class for Efficacy metrics for single table datasets."""
+"""Base class for privacy metrics for single table datasets."""
+from enum import Enum
 
 import numpy as np
 
@@ -107,7 +108,7 @@ class CatPrivacyMetric(SingleTableMetric):
         key, sensitive = cls._validate_inputs(real_data, synthetic_data, metadata, key, sensitive)
         model = cls._fit(synthetic_data, key, sensitive, model_kwargs)
 
-        if ACCURACY_BASE: #calculate privacy score based on prediction accuracy
+        if cls.ACCURACY_BASE: #calculate privacy score based on prediction accuracy
             count = len(real_data)
             match = 0
             for idx in range(count):
@@ -120,13 +121,15 @@ class CatPrivacyMetric(SingleTableMetric):
         else: #calculate privacy score based on posterior prob of the correct sensitive data
             count = 0
             score = 0
-            for idx in range(count):
+            for idx in range(len(real_data)):
                 key_data = tuple(real_data[key].iloc[idx])
                 sensitive_data = tuple(real_data[sensitive].iloc[idx])
                 row_score = model.score(key_data, sensitive_data)
                 if row_score != None:
                     count += 1
                     score += row_score
+            if count == 0:
+                return 0
             return score/count
 
 class PrivacyAttackerModel():
