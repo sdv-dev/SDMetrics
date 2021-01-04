@@ -2,6 +2,7 @@ from sdmetrics.single_table.privacy.base import CategoricalType, CatPrivacyMetri
     PrivacyAttackerModel
 from sdmetrics.single_table.privacy.CAP import CAPAttacker, CAP, GCAPAttacker, GCAP,\
     ZeroCAPAttacker, ZeroCAP
+from sdmetrics.single_table.privacy.ENS import ENS, ENSAttacker
 
 __all__ = [
     'CatPrivacyMetric',
@@ -13,4 +14,6 @@ __all__ = [
     'GCAP',
     'ZeroCAPAttacker',
     'ZeroCAP',
+    'ENSAttacker',
+    'ENS'
 ]
