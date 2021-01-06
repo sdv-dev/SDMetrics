@@ -1,3 +1,9 @@
 __all__ = [
-    'base', 'CAP', 'CategoricalSklearn', 'ENS'
+    'base',
+    'CAP',
+    'CategoricalSklearn',
+    'ENS',
+    'util',
+    'LossFunction',
+    'NearestNeighbors'
 ]

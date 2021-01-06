@@ -4,6 +4,7 @@ from enum import Enum
 import numpy as np
 
 from sdmetrics.single_table.base import SingleTableMetric
+from sdmetrics.single_table.privacy.LossFunction import CdfInvLp
 from sdmetrics.goal import Goal
 
 class CategoricalType(Enum):
@@ -132,6 +133,127 @@ class CatPrivacyMetric(SingleTableMetric):
                 return 0
             return score/count
 
+class NumPrivacyMetric(SingleTableMetric):
+    """Base class for Numerical Privacy metrics on single tables.
+
+    These metrics fit a adversial attacker model on the synthetic data and
+    then evaluate its accuracy (or probability of making the correct attack)
+    on the real data.
+
+    Attributes:
+        name (str):
+            Name to use when reports about this metric are printed.
+        goal (sdmetrics.goal.Goal):
+            The goal of this metric.
+        min_value (Union[float, tuple[float]]):
+            Minimum value or values that this metric can take.
+        max_value (Union[float, tuple[float]]):
+            Maximum value or values that this metric can take.
+        model (Class):
+            Model class to use for the prediction.
+        model_kwargs (dict):
+            Keyword arguments to use to create the model instance.
+        loss_function (Class):
+            Loss function to use when evaluating the accuracy of the privacy attack.
+        loss_function_kwargs (dict):
+            Keyword arguments to use to create the loss function instance.
+    """
+
+    name = None
+    goal = Goal.MAXIMIZE
+    min_value = 0
+    max_value = float('inf')
+    MODEL = None
+    MODEL_KWARGS = {}
+    LOSS_FUNCTION = CdfInvLp
+    LOSS_FUNC_KWARGS = {'p': 2}
+
+    @classmethod
+    def _fit(cls, synthetic_data, key, sensitive, model_kwargs):
+        if model_kwargs == None:
+            model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
+        model = cls.MODEL(**model_kwargs)
+        model.fit(synthetic_data, key, sensitive)
+        return model
+
+    @classmethod
+    def _validate_inputs(cls, real_data, synthetic_data, metadata, key, sensitive):
+        metadata = super()._validate_inputs(real_data, synthetic_data, metadata)
+        if 'key' in metadata:
+            key = metadata['key']
+        elif key is None:
+            raise TypeError('`key` must be passed either directly or inside `metadata`')
+
+        if 'sensitive' in metadata:
+            sensitive = metadata['sensitive']
+        elif sensitive is None:
+            raise TypeError('`sensitive` must be passed either directly or inside `metadata`')
+
+        return key, sensitive
+
+    @classmethod
+    def compute(cls, real_data, synthetic_data, metadata=None, key=None, sensitive=None,\
+        model_kwargs = None, loss_func = None, loss_function_kwargs = None):
+        """Compute this metric.
+
+        This fits a adversial attacker model on the synthetic data and
+        then evaluates it making predictions on the real data.
+
+        A ``key`` column(s) name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the key column(s) for the
+        attack.
+
+        A ``sensitive`` column(s) name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the sensitive column(s) for the
+        attack.
+
+        Args:
+            real_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the real dataset.
+            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
+            key (list(str)):
+                Name of the column(s) to use as the key attributes.
+            sensitive (list(str)):
+                Name of the column(s) to use as the sensitive attributes.
+            model_kwargs (dict):
+                Key word arguments of the attacker model. cls.MODEL_KWARGS will be used
+                if none is provided.
+            loss_func (Class):
+                The loss function to use. cls.LOSS_FUNC will be used if none is provided.
+            loss_function_kwargs (dict):
+                Key word arguments of the loss function. cls.LOSS_FUNCTION_KWARGS will be used
+                if none is provided.
+
+        Returns:
+            union[float, tuple[float]]:
+                Scores obtained by the attackers when evaluated on the real data.
+        """
+        key, sensitive = cls._validate_inputs(real_data, synthetic_data, metadata, key, sensitive)
+        model = cls._fit(synthetic_data, key, sensitive, model_kwargs)
+
+        if loss_function_kwargs == None:
+            loss_function_kwargs = cls.LOSS_FUNCTION_KWARGS
+
+        if loss_func == None:
+            loss_func = cls.LOSS_FUNCTION(**loss_function_kwargs)
+        else:
+            loss_func = loss_func(**loss_function_kwargs)
+
+        loss_func.fit(real_data, sensitive)
+
+        count = len(real_data)
+        score = 0
+        for idx in range(count):
+            key_data = tuple(real_data[key].iloc[idx])
+            sensitive_data = tuple(real_data[sensitive].iloc[idx])
+            pred_sensitive = model.predict(key_data)
+            score += loss_func.measure(pred_sensitive, sensitive_data)
+        return score/count
+
 class PrivacyAttackerModel():
     def fit(self, synthetic_data, key, sensitive):
         """Fit the attacker on the synthetic data.
@@ -170,3 +292,26 @@ class PrivacyAttackerModel():
         """
         raise NotImplementedError("Posterior probability based scoring not supported\
             for this attacker!")
+
+class LossFunction():
+    def fit(self, data, cols):
+        """Learn the metric on the value space.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data data table.
+            cols (list[str]):
+                The names for the target columns (usually the sensitive cols).
+        """
+        pass
+
+    def measure(self, pred, real):
+        """Calculate the loss of a single prediction.
+
+        Args:
+            pred (tuple):
+                The predicted value.
+            real (tuple):
+                The actual value.
+        """
+        raise NotImplementedError("Please implement the loss measuring algorithm!")
