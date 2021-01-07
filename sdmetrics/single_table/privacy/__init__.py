@@ -4,6 +4,6 @@ __all__ = [
     'CategoricalSklearn',
     'ENS',
     'util',
-    'LossFunction',
+    'Loss',
     'NearestNeighbors'
 ]

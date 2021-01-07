@@ -4,7 +4,7 @@ from enum import Enum
 import numpy as np
 
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.single_table.privacy.LossFunction import CdfInvLp
+from sdmetrics.single_table.privacy.Loss import CdfInvLp, LossFunction
 from sdmetrics.goal import Goal
 
 class CategoricalType(Enum):
@@ -166,7 +166,7 @@ class NumPrivacyMetric(SingleTableMetric):
     MODEL = None
     MODEL_KWARGS = {}
     LOSS_FUNCTION = CdfInvLp
-    LOSS_FUNC_KWARGS = {'p': 2}
+    LOSS_FUNCTION_KWARGS = {'p': 2}
 
     @classmethod
     def _fit(cls, synthetic_data, key, sensitive, model_kwargs):
@@ -292,26 +292,3 @@ class PrivacyAttackerModel():
         """
         raise NotImplementedError("Posterior probability based scoring not supported\
             for this attacker!")
-
-class LossFunction():
-    def fit(self, data, cols):
-        """Learn the metric on the value space.
-
-        Args:
-            real_data (pandas.DataFrame):
-                The real data data table.
-            cols (list[str]):
-                The names for the target columns (usually the sensitive cols).
-        """
-        pass
-
-    def measure(self, pred, real):
-        """Calculate the loss of a single prediction.
-
-        Args:
-            pred (tuple):
-                The predicted value.
-            real (tuple):
-                The actual value.
-        """
-        raise NotImplementedError("Please implement the loss measuring algorithm!")
