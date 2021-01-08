@@ -5,5 +5,6 @@ __all__ = [
     'ENS',
     'util',
     'Loss',
-    'NearestNeighbors'
+    'NearestNeighbors',
+    'NumericalSklearn'
 ]
