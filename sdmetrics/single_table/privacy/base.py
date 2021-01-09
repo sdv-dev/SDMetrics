@@ -69,10 +69,10 @@ class CatPrivacyMetric(SingleTableMetric):
         elif sensitive is None:
             raise TypeError('`sensitive` must be passed either directly or inside `metadata`')
 
-        return key, sensitive
+        return key, sensitive, metadata
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key=None, sensitive=None, model_kwargs = None):
+    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[], model_kwargs = None):
         """Compute this metric.
 
         This fits a adversial attacker model on the synthetic data and
@@ -106,7 +106,18 @@ class CatPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        key, sensitive = cls._validate_inputs(real_data, synthetic_data, metadata, key, sensitive)
+        key, sensitive, metadata = cls._validate_inputs(real_data, synthetic_data,\
+            metadata, key, sensitive)
+
+        if len(key) == 0 or len(sensitive) == 0: #empty key or sensitive
+            return np.nan
+
+        for col in key + sensitive:
+            data_type = metadata['fields'][col]
+            if data_type != cls._DTYPES_TO_TYPES['i'] and data_type != cls._DTYPES_TO_TYPES['O']\
+                and data_type != cls._DTYPES_TO_TYPES['b']: #check data type
+                return np.nan
+
         model = cls._fit(synthetic_data, key, sensitive, model_kwargs)
 
         if cls.ACCURACY_BASE: #calculate privacy score based on prediction accuracy
@@ -162,7 +173,7 @@ class NumPrivacyMetric(SingleTableMetric):
     name = None
     goal = Goal.MAXIMIZE
     min_value = 0
-    max_value = float('inf')
+    max_value = np.inf
     MODEL = None
     MODEL_KWARGS = {}
     LOSS_FUNCTION = CdfInvLp
@@ -189,10 +200,10 @@ class NumPrivacyMetric(SingleTableMetric):
         elif sensitive is None:
             raise TypeError('`sensitive` must be passed either directly or inside `metadata`')
 
-        return key, sensitive
+        return key, sensitive, metadata
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key=None, sensitive=None,\
+    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],\
         model_kwargs = None, loss_func = None, loss_function_kwargs = None):
         """Compute this metric.
 
@@ -232,7 +243,18 @@ class NumPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        key, sensitive = cls._validate_inputs(real_data, synthetic_data, metadata, key, sensitive)
+        key, sensitive, metadata = cls._validate_inputs(real_data, synthetic_data,\
+            metadata, key, sensitive)
+
+        if len(key) == 0 or len(sensitive) == 0: #empty key or sensitive
+            return np.nan
+
+        for col in key + sensitive:
+            data_type = metadata['fields'][col]
+            if data_type != cls._DTYPES_TO_TYPES['i'] and data_type != cls._DTYPES_TO_TYPES['f']:
+            #check data type
+                return np.nan
+
         model = cls._fit(synthetic_data, key, sensitive, model_kwargs)
 
         if loss_function_kwargs == None:
