@@ -35,7 +35,7 @@ class CatENS(CatPrivacyMetric):
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],
-            model_kwargs=None):
+                model_kwargs=None):
         if model_kwargs is None:
             model_kwargs = cls.MODEL_KWARGS
         if 'attackers' not in model_kwargs:  # no attackers specfied

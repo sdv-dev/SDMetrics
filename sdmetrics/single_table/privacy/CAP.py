@@ -23,7 +23,7 @@ class CAPAttacker(PrivacyAttackerModel):
 
     def predict(self, key_data):
         if key_data not in self.synthetic_dict:
-            return None #target key attribute not found in synthetic table
+            return None  # target key attribute not found in synthetic table
         return majority(self.synthetic_dict[key_data])
 
     def score(self, key_data, sensitive_data):

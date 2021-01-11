@@ -49,7 +49,7 @@ class CatSklearnAttacker(PrivacyAttackerModel):
             keys_transform = self.key_processor.transform([keys])
         except ValueError:  # Some attributes of the input haven't appeared in synthetic tables
             return None
-        sensitive_pred = self.predictor.predict(keys_transform) 
+        sensitive_pred = self.predictor.predict(keys_transform)
         if len(np.array(sensitive_pred).shape) == 1:
             sensitive_pred = [sensitive_pred]
 
@@ -105,7 +105,7 @@ class NBWrapper():
 
     def __init__(self):
         self.predictors = []
-    
+
     def fit(self, X, Y):
         """
         Fit the classifier to training data X and lables Y.
