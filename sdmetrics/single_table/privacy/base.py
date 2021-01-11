@@ -75,7 +75,7 @@ class CatPrivacyMetric(SingleTableMetric):
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],
-                    model_kwargs=None):
+                model_kwargs=None):
         """Compute this metric.
 
         This fits a adversial attacker model on the synthetic data and
@@ -110,7 +110,7 @@ class CatPrivacyMetric(SingleTableMetric):
                 Scores obtained by the attackers when evaluated on the real data.
         """
         key, sensitive, metadata = cls._validate_inputs(real_data, synthetic_data,
-                    metadata, key, sensitive)
+                                                        metadata, key, sensitive)
 
         if len(key) == 0 or len(sensitive) == 0:  # empty key or sensitive
             return np.nan
@@ -208,7 +208,7 @@ class NumPrivacyMetric(SingleTableMetric):
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],
-                    model_kwargs=None, loss_func=None, loss_function_kwargs=None):
+                model_kwargs=None, loss_func=None, loss_function_kwargs=None):
         """Compute this metric.
 
         This fits a adversial attacker model on the synthetic data and
@@ -248,7 +248,7 @@ class NumPrivacyMetric(SingleTableMetric):
                 Scores obtained by the attackers when evaluated on the real data.
         """
         key, sensitive, metadata = cls._validate_inputs(real_data, synthetic_data,
-                    metadata, key, sensitive)
+                                                        metadata, key, sensitive)
 
         if len(key) == 0 or len(sensitive) == 0:  # empty key or sensitive
             return np.nan
