@@ -19,6 +19,23 @@ class BinaryEfficacyMetric(MLEfficacyMetric):
     max_value = 1
     SCORER = f1_score
 
+    @classmethod
+    def _score(cls, scorer, real_target, predictions):
+        if real_target.dtype == 'object':
+            first_label = real_target.unique()[0]
+            real_target = real_target == first_label
+            if predictions.dtype == 'object':
+                predictions = predictions == first_label
+
+        return super()._score(scorer, real_target, predictions)
+
+    @classmethod
+    def _fit_predict(cls, synthetic_data, synthetic_target, real_data, real_target):
+        if real_target.dtype == 'object':
+            synthetic_target = synthetic_target == real_target.unique()[0]
+
+        return super()._fit_predict(synthetic_data, synthetic_target, real_data, real_target)
+
 
 class BinaryDecisionTreeClassifier(BinaryEfficacyMetric):
     """Binary DecisionTreeClassifier Efficacy based metric.

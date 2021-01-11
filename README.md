@@ -73,7 +73,7 @@ For more installation options please visit the [SDMetrics installation Guide](IN
 your synthetic dataset. For more details about how to use it please visit the corresponding
 User Guide:
 
-* [Evaluating Synthetic Data](https://sdv.dev/SDV/user_guides/single_table/evaluation.html)
+* [Evaluating Synthetic Data](https://sdv.dev/SDV/user_guides/evaluation/index.html)
 
 ## Standalone usage
 
@@ -120,6 +120,7 @@ If you want to read more about each individual metric, please visit the followin
 * Single Column Metrics: [sdmetrics/single_column](sdmetrics/single_column)
 * Single Table Metrics: [sdmetrics/single_table](sdmetrics/single_table)
 * Multi Table Metrics: [sdmetrics/multi_table](sdmetrics/multi_table)
+* Time Series Metrics: [sdmetrics/timeseries](sdmetrics/timeseries)
 
 # The Synthetic Data Vault
 

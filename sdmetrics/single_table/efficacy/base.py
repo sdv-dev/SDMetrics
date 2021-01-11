@@ -39,8 +39,9 @@ class MLEfficacyMetric(SingleTableMetric):
     METRICS = None
 
     @classmethod
-    def _fit_predict(cls, synthetic_data, synthetic_target, real_data):
+    def _fit_predict(cls, synthetic_data, synthetic_target, real_data, real_target):
         """Fit a model in the synthetic data and make predictions for the real data."""
+        del real_target  # delete argument which subclasses use but this method does not.
         unique_labels = np.unique(synthetic_target)
         if len(unique_labels) == 1:
             predictions = np.full(len(real_data), unique_labels[0])
@@ -78,6 +79,15 @@ class MLEfficacyMetric(SingleTableMetric):
         return target
 
     @classmethod
+    def _score(cls, scorer, real_target, predictions):
+        scorer = scorer or cls.SCORER
+        if isinstance(scorer, (list, tuple)):
+            scorers = scorer
+            return tuple((scorer(real_target, predictions) for scorer in scorers))
+        else:
+            return scorer(real_target, predictions)
+
+    @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None, target=None, scorer=None):
         """Compute this metric.
 
@@ -113,11 +123,6 @@ class MLEfficacyMetric(SingleTableMetric):
         real_target = real_data.pop(target)
         synthetic_target = synthetic_data.pop(target)
 
-        predictions = cls._fit_predict(synthetic_data, synthetic_target, real_data)
+        predictions = cls._fit_predict(synthetic_data, synthetic_target, real_data, real_target)
 
-        scorer = scorer or cls.SCORER
-        if isinstance(scorer, (list, tuple)):
-            scorers = scorer
-            return tuple((scorer(real_target, predictions) for scorer in scorers))
-        else:
-            return scorer(real_target, predictions)
+        return cls._score(scorer, real_target, predictions)
