@@ -31,3 +31,15 @@ class CatENS(CatPrivacyMetric):
     name = 'ENS'
     MODEL = CatENSAttacker
     ACCURACY_BASE = True
+
+    @classmethod
+    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],\
+        model_kwargs = None):
+        if model_kwargs == None:
+            model_kwargs = cls.MODEL_KWARGS
+        if 'attackers' not in model_kwargs: #no attackers specfied
+            return np.nan
+        elif type(model_kwargs['attackers']) != list or len(model_kwargs['attackers']) == 0:
+            #zero attackers specfied
+            return np.nan
+        return super().compute(real_data, synthetic_data, metadata, key, sensitive, model_kwargs)
