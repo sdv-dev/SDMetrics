@@ -5,7 +5,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.svm import SVC
 
-from sdmetrics.single_table.privacy.base import CategoricalType, CatPrivacyMetric,\
+from sdmetrics.single_table.privacy.base import CatPrivacyMetric, CategoricalType,\
     PrivacyAttackerModel
 from sdmetrics.single_table.privacy.util import allow_nan, allow_nan_array
 

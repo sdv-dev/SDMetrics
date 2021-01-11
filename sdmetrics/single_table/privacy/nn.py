@@ -1,7 +1,7 @@
 import numpy as np
 
 from sdmetrics.single_table.privacy.base import NumPrivacyMetric, PrivacyAttackerModel
-from sdmetrics.single_table.privacy.Loss import CdfInvLp
+from sdmetrics.single_table.privacy.loss import CdfInvLp
 
 
 class RadiusNearestNeighborAttacker(PrivacyAttackerModel):

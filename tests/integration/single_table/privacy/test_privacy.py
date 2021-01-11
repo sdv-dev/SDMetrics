@@ -3,9 +3,9 @@ import pandas as pd
 import pytest
 
 from sdmetrics.single_table.privacy.base import CatPrivacyMetric, NumPrivacyMetric
-from sdmetrics.single_table.privacy.ENS import CatENS
-from sdmetrics.single_table.privacy.CategoricalSklearn import CatNBAttacker, CatRFAttacker,\
+from sdmetrics.single_table.privacy.cat_skl import CatNBAttacker, CatRFAttacker,\
     CatKNNAttacker
+from sdmetrics.single_table.privacy.ens import CatENS
 
 Cat_metrics = CatPrivacyMetric.get_subclasses()
 Num_metrics = NumPrivacyMetric.get_subclasses()

@@ -1,5 +1,5 @@
 from sdmetrics.single_table.privacy.base import CatPrivacyMetric, PrivacyAttackerModel
-from sdmetrics.single_table.privacy.util import count_frequency, closest_neighbors, majority
+from sdmetrics.single_table.privacy.util import closest_neighbors, count_frequency, majority
 
 
 class CAPAttacker(PrivacyAttackerModel):

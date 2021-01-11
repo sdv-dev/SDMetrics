@@ -3,9 +3,9 @@ from enum import Enum
 
 import numpy as np
 
-from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.single_table.privacy.Loss import CdfInvLp
 from sdmetrics.goal import Goal
+from sdmetrics.single_table.base import SingleTableMetric
+from sdmetrics.single_table.privacy.loss import CdfInvLp
 
 
 class CategoricalType(Enum):
