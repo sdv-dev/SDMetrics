@@ -4,16 +4,18 @@ from enum import Enum
 import numpy as np
 
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.single_table.privacy.Loss import CdfInvLp, LossFunction
+from sdmetrics.single_table.privacy.Loss import CdfInvLp
 from sdmetrics.goal import Goal
+
 
 class CategoricalType(Enum):
     """
-    This enumerates the type required for a categorical data; the value 
+    This enumerates the type required for a categorical data; the value
     can be one-hot-encoded, or coded as class number.
     """
     CLASS_NUM = "Class_num"
     ONE_HOT = "One_hot"
+
 
 class CatPrivacyMetric(SingleTableMetric):
     """Base class for Categorical Privacy metrics on single tables.
@@ -50,7 +52,7 @@ class CatPrivacyMetric(SingleTableMetric):
 
     @classmethod
     def _fit(cls, synthetic_data, key, sensitive, model_kwargs):
-        if model_kwargs == None:
+        if model_kwargs is None:
             model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
         model = cls.MODEL(**model_kwargs)
         model.fit(synthetic_data, key, sensitive)
@@ -72,7 +74,8 @@ class CatPrivacyMetric(SingleTableMetric):
         return key, sensitive, metadata
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[], model_kwargs = None):
+    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],
+            model_kwargs=None):
         """Compute this metric.
 
         This fits a adversial attacker model on the synthetic data and
@@ -106,21 +109,21 @@ class CatPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        key, sensitive, metadata = cls._validate_inputs(real_data, synthetic_data,\
-            metadata, key, sensitive)
+        key, sensitive, metadata = cls._validate_inputs(real_data, synthetic_data, 
+                metadata, key, sensitive)
 
-        if len(key) == 0 or len(sensitive) == 0: #empty key or sensitive
+        if len(key) == 0 or len(sensitive) == 0:  # empty key or sensitive
             return np.nan
 
         for col in key + sensitive:
             data_type = metadata['fields'][col]
             if data_type != cls._DTYPES_TO_TYPES['i'] and data_type != cls._DTYPES_TO_TYPES['O']\
-                and data_type != cls._DTYPES_TO_TYPES['b']: #check data type
+                    and data_type != cls._DTYPES_TO_TYPES['b']:  # check data type
                 return np.nan
 
         model = cls._fit(synthetic_data, key, sensitive, model_kwargs)
 
-        if cls.ACCURACY_BASE: #calculate privacy score based on prediction accuracy
+        if cls.ACCURACY_BASE:  # calculate privacy score based on prediction accuracy
             count = len(real_data)
             match = 0
             for idx in range(count):
@@ -129,20 +132,21 @@ class CatPrivacyMetric(SingleTableMetric):
                 pred_sensitive = model.predict(key_data)
                 if pred_sensitive == sensitive_data:
                     match += 1
-            return match/count
-        else: #calculate privacy score based on posterior prob of the correct sensitive data
+            return match / count
+        else:  # calculate privacy score based on posterior prob of the correct sensitive data
             count = 0
             score = 0
             for idx in range(len(real_data)):
                 key_data = tuple(real_data[key].iloc[idx])
                 sensitive_data = tuple(real_data[sensitive].iloc[idx])
                 row_score = model.score(key_data, sensitive_data)
-                if row_score != None:
+                if row_score is not None:
                     count += 1
                     score += row_score
             if count == 0:
                 return 0
-            return score/count
+            return score / count
+
 
 class NumPrivacyMetric(SingleTableMetric):
     """Base class for Numerical Privacy metrics on single tables.
@@ -181,7 +185,7 @@ class NumPrivacyMetric(SingleTableMetric):
 
     @classmethod
     def _fit(cls, synthetic_data, key, sensitive, model_kwargs):
-        if model_kwargs == None:
+        if model_kwargs is None:
             model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
         model = cls.MODEL(**model_kwargs)
         model.fit(synthetic_data, key, sensitive)
@@ -203,8 +207,8 @@ class NumPrivacyMetric(SingleTableMetric):
         return key, sensitive, metadata
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],\
-        model_kwargs = None, loss_func = None, loss_function_kwargs = None):
+    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],
+            model_kwargs=None, loss_func=None, loss_function_kwargs=None):
         """Compute this metric.
 
         This fits a adversial attacker model on the synthetic data and
@@ -243,24 +247,24 @@ class NumPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        key, sensitive, metadata = cls._validate_inputs(real_data, synthetic_data,\
-            metadata, key, sensitive)
+        key, sensitive, metadata = cls._validate_inputs(real_data, synthetic_data,
+                metadata, key, sensitive)
 
-        if len(key) == 0 or len(sensitive) == 0: #empty key or sensitive
+        if len(key) == 0 or len(sensitive) == 0:  # empty key or sensitive
             return np.nan
 
         for col in key + sensitive:
             data_type = metadata['fields'][col]
             if data_type != cls._DTYPES_TO_TYPES['i'] and data_type != cls._DTYPES_TO_TYPES['f']:
-            #check data type
+                # check data type
                 return np.nan
 
         model = cls._fit(synthetic_data, key, sensitive, model_kwargs)
 
-        if loss_function_kwargs == None:
+        if loss_function_kwargs is None:
             loss_function_kwargs = cls.LOSS_FUNCTION_KWARGS
 
-        if loss_func == None:
+        if loss_func is None:
             loss_func = cls.LOSS_FUNCTION(**loss_function_kwargs)
         else:
             loss_func = loss_func(**loss_function_kwargs)
@@ -274,7 +278,8 @@ class NumPrivacyMetric(SingleTableMetric):
             sensitive_data = tuple(real_data[sensitive].iloc[idx])
             pred_sensitive = model.predict(key_data)
             score += loss_func.measure(pred_sensitive, sensitive_data)
-        return score/count
+        return score / count
+
 
 class PrivacyAttackerModel():
     def fit(self, synthetic_data, key, sensitive):
@@ -296,7 +301,7 @@ class PrivacyAttackerModel():
         Args:
             key_data(tuple):
                 The key data.
-        
+
         Returns:
             tuple:
                 The predicted sensitive data.

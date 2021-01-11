@@ -1,7 +1,7 @@
 import numpy as np
-import pandas as pd
 
 from copulas.univariate.base import Univariate
+
 
 class LossFunction():
     def fit(self, data, cols):
@@ -26,12 +26,13 @@ class LossFunction():
         """
         raise NotImplementedError("Please implement the loss measuring algorithm!")
 
+
 class CdfInvLp(LossFunction):
     """This loss function first applies the fitted cdfs to every single entry (i.e. turning
     the numerical values into their respective percentiles) and then measures the Lp distance
     to the pth power, between the predicted value and the real value.
     """
-    def __init__(self, p = 2):
+    def __init__(self, p=2):
         """
         Args:
             p (float):
@@ -54,10 +55,11 @@ class CdfInvLp(LossFunction):
             dist += abs(percentiles[0] - percentiles[1])**self.p
         return dist
 
+
 class Lp(LossFunction):
     """pth power of the Lp distance.
     """
-    def __init__(self, p = 2):
+    def __init__(self, p=2):
         """
         Args:
             p (float):

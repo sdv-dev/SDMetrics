@@ -1,8 +1,6 @@
-import numpy as np
-import pandas as pd
-
 from sdmetrics.single_table.privacy.base import CatPrivacyMetric, PrivacyAttackerModel
 from sdmetrics.single_table.privacy.util import count_frequency, closest_neighbors, majority
+
 
 class CAPAttacker(PrivacyAttackerModel):
     """The CAP (Correct attribution probability) privacy attacker will find out all rows
@@ -12,7 +10,7 @@ class CAPAttacker(PrivacyAttackerModel):
     attack will be ignored and not counted towards the privacy score.
     """
     def __init__(self):
-        self.synthetic_dict = {} #{key attribute: [sensitive attribute]}
+        self.synthetic_dict = {}  # {key attribute: [sensitive attribute]}
 
     def fit(self, synthetic_data, key, sensitive):
         for idx in range(len(synthetic_data)):
@@ -34,6 +32,7 @@ class CAPAttacker(PrivacyAttackerModel):
         else:
             return None
 
+
 class CAP(CatPrivacyMetric):
     """The CAP privacy metric. Scored based on the CAPAttacker.
     """
@@ -41,6 +40,7 @@ class CAP(CatPrivacyMetric):
     name = 'CAP'
     MODEL = CAPAttacker
     ACCURACY_BASE = False
+
 
 class ZeroCAPAttacker(CAPAttacker):
     """The 0CAP privacy attacker, which operates in the same way as CAP does.
@@ -53,6 +53,7 @@ class ZeroCAPAttacker(CAPAttacker):
         else:
             return 0
 
+
 class ZeroCAP(CatPrivacyMetric):
     """The 0CAP privacy metric. Scored based on the ZeroCAPAttacker.
     """
@@ -61,11 +62,12 @@ class ZeroCAP(CatPrivacyMetric):
     MODEL = ZeroCAPAttacker
     ACCURACY_BASE = False
 
+
 class GCAPAttacker(CAPAttacker):
     """The GCAP privacy attacker will find out all rows in synthetic table
-    that are closest (in hamming distance) to the target key attributes, and predict 
+    that are closest (in hamming distance) to the target key attributes, and predict
     the sensitive entry that appears most frequently among them. The privacy score for each
-    row in the real table will be calculated as the frequency that the true sensitive 
+    row in the real table will be calculated as the frequency that the true sensitive
     attribute appears among all rows in the synthetic table with closest key attribute.
     """
     def predict(self, key_data):
@@ -82,6 +84,7 @@ class GCAPAttacker(CAPAttacker):
             ref_sensitive_attributes.extend(self.synthetic_dict[key])
 
         return count_frequency(ref_sensitive_attributes, sensitive_data)
+
 
 class GCAP(CatPrivacyMetric):
     """The GCAP (General CAP) privacy metric. Scored based on the ZeroCAPAttacker.

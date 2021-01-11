@@ -1,7 +1,7 @@
 import numpy as np
-import pandas as pd
 
-def majority(samples, ignore_none = True):
+
+def majority(samples, ignore_none=True):
     """
     Find the most frequent element in a list.
 
@@ -16,7 +16,7 @@ def majority(samples, ignore_none = True):
     most_freq_ele = None
     highest_freq = 0
     for element in samples:
-        if ignore_none and element == None:
+        if ignore_none and element is None:
             continue
         if element not in freq_dict:
             freq_dict[element] = 0
@@ -26,6 +26,7 @@ def majority(samples, ignore_none = True):
             highest_freq = freq
             most_freq_ele = element
     return most_freq_ele
+
 
 def count_frequency(samples, target):
     """
@@ -43,6 +44,7 @@ def count_frequency(samples, target):
         if ele == target:
             count += 1
     return count / len(samples)
+
 
 def hamming_distance(target, test):
     """
@@ -63,6 +65,7 @@ def hamming_distance(target, test):
             dist += 1
     return dist
 
+
 def closest_neighbors(samples, target):
     """
     Find out the elements in a given list that are closest to a given
@@ -81,10 +84,11 @@ def closest_neighbors(samples, target):
         hamming_dist = hamming_distance(target, element)
         if hamming_dist < dist:
             dist = hamming_dist
-            ret = [element,]
+            ret = [element, ]
         elif hamming_dist == dist:
             ret.append(element)
     return ret
+
 
 def allow_nan(df):
     """
@@ -100,9 +104,10 @@ def allow_nan(df):
     for i in df_copy:
         for j in range(len(df_copy[i])):
             entry = df_copy[i][j]
-            if (type(entry) == float and np.isnan(entry)) or entry == None:
+            if (type(entry) == float and np.isnan(entry)) or entry is None:
                 df_copy[i][j] = 'place_holder_for_nan'
     return df_copy
+
 
 def allow_nan_array(attributes):
     """
@@ -116,7 +121,7 @@ def allow_nan_array(attributes):
     """
     ret = []
     for entry in attributes:
-        if (type(entry) == float and np.isnan(entry)) or entry == None:
+        if (type(entry) == float and np.isnan(entry)) or entry is None:
             ret.append('place_holder_for_nan')
         else:
             ret.append(entry)

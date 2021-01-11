@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import CategoricalNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -9,6 +8,7 @@ from sklearn.svm import SVC
 from sdmetrics.single_table.privacy.base import CategoricalType, CatPrivacyMetric,\
     PrivacyAttackerModel
 from sdmetrics.single_table.privacy.util import allow_nan, allow_nan_array
+
 
 class CatSklearnAttacker(PrivacyAttackerModel):
     """Base class for categorical attacker based on sklearn models.
@@ -43,28 +43,29 @@ class CatSklearnAttacker(PrivacyAttackerModel):
         self.predictor.fit(key_train, sensitive_train)
 
     def predict(self, key_data):
-        keys = allow_nan_array(key_data) #de-nan key attributes
+        keys = allow_nan_array(key_data)  # de-nan key attributes
         try:
-            #key attributes in ML ready format
+            # key attributes in ML ready format
             keys_transform = self.key_processor.transform([keys])
-        except: #Some attributes of the input haven't appeared in synthetic tables
+        except ValueError:  # Some attributes of the input haven't appeared in synthetic tables
             return None
         sensitive_pred = self.predictor.predict(keys_transform) 
         if len(np.array(sensitive_pred).shape) == 1:
             sensitive_pred = [sensitive_pred]
 
-        #predicted sensitive attributes in original format
-        sensitives = self.sensitive_processor.inverse_transform(sensitive_pred) 
+        # predicted sensitive attributes in original format
+        sensitives = self.sensitive_processor.inverse_transform(sensitive_pred)
         return tuple(sensitives[0])
 
+
 class SvcWrapper():
-    """This class provides an wrapper arround sklearn.svm.SVC so that it can support 
+    """This class provides an wrapper arround sklearn.svm.SVC so that it can support
     multidimensional y.
     """
 
     def __init__(self):
         self.predictors = []
-    
+
     def fit(self, X, Y):
         """
         Fit the classifier to training data X and lables Y.
@@ -95,6 +96,7 @@ class SvcWrapper():
             Y.append(predictor.predict(X))
         Y = np.array(Y).T
         return Y
+
 
 class NBWrapper():
     """This class provides an wrapper arround sklearn.naive_bayes.CategoricalNB so that it can
@@ -135,6 +137,7 @@ class NBWrapper():
         Y = np.array(Y).T
         return Y
 
+
 class CatNBAttacker(CatSklearnAttacker):
     """The Categorical NaiveBaysian privacy attaker uses a naive bayesian classifier
     and the score is calculated based on prediction accuracy.
@@ -142,6 +145,7 @@ class CatNBAttacker(CatSklearnAttacker):
     KEY_TYPE = CategoricalType.CLASS_NUM
     SENSITIVE_TYPE = CategoricalType.CLASS_NUM
     SKL_LEARNER = NBWrapper
+
 
 class CatNB(CatPrivacyMetric):
     """The Categorical NaiveBaysian privacy metric. Scored based on the CatNBAttacker.
@@ -151,6 +155,7 @@ class CatNB(CatPrivacyMetric):
     MODEL = CatNBAttacker
     ACCURACY_BASE = True
 
+
 class CatKNNAttacker(CatSklearnAttacker):
     """The Categorical KNN (k nearest neighbors) privacy attaker uses a KNN classifier
     and the score is calculated based on prediction accuracy.
@@ -158,6 +163,7 @@ class CatKNNAttacker(CatSklearnAttacker):
     KEY_TYPE = CategoricalType.ONE_HOT
     SENSITIVE_TYPE = CategoricalType.CLASS_NUM
     SKL_LEARNER = KNeighborsClassifier
+
 
 class CatKNN(CatPrivacyMetric):
     """The Categorical KNN privacy metric. Scored based on the KNNAttacker.
@@ -167,6 +173,7 @@ class CatKNN(CatPrivacyMetric):
     MODEL = CatKNNAttacker
     ACCURACY_BASE = True
 
+
 class CatRFAttacker(CatSklearnAttacker):
     """The Categorical RF (Random Forest) privacy attaker uses a RF classifier
     and the score is calculated based on prediction accuracy.
@@ -174,6 +181,7 @@ class CatRFAttacker(CatSklearnAttacker):
     KEY_TYPE = CategoricalType.ONE_HOT
     SENSITIVE_TYPE = CategoricalType.CLASS_NUM
     SKL_LEARNER = RandomForestClassifier
+
 
 class CatRF(CatPrivacyMetric):
     """The Categorical RF privacy metric. Scored based on the CatRFAttacker.
@@ -183,6 +191,7 @@ class CatRF(CatPrivacyMetric):
     MODEL = CatRFAttacker
     ACCURACY_BASE = True
 
+
 class CatSVMAttacker(CatSklearnAttacker):
     """The Categorical SVM (Support Vector Machine) privacy attaker uses a SVM classifier
     and the score is calculated based on prediction accuracy.
@@ -190,6 +199,7 @@ class CatSVMAttacker(CatSklearnAttacker):
     KEY_TYPE = CategoricalType.ONE_HOT
     SENSITIVE_TYPE = CategoricalType.CLASS_NUM
     SKL_LEARNER = SvcWrapper
+
 
 class CatSVM(CatPrivacyMetric):
     """The Categorical SVM privacy metric. Scored based on the CatSVMAttacker.

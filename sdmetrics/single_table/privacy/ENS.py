@@ -1,16 +1,16 @@
 import numpy as np
-import pandas as pd
 
 from sdmetrics.single_table.privacy.base import CatPrivacyMetric, PrivacyAttackerModel
 from sdmetrics.single_table.privacy.util import majority
+
 
 class CatENSAttacker(PrivacyAttackerModel):
     """The Categorical ENS (ensemble 'majority vote' classifier) privacy attacker will
     predict the majority of the specified sub-attackers's predicions, and the privacy score will
     be calculated based on the accuracy of its prediction.
     """
-    def __init__(self, attackers = []):
-        self.synthetic_dict = {} #table_name -> {key attribute: [sensitive attribute]}
+    def __init__(self, attackers=[]):
+        self.synthetic_dict = {}  # table_name -> {key attribute: [sensitive attribute]}
         self.attackers = [attacker() for attacker in attackers]
 
     def fit(self, synthetic_data, key, sensitive):
@@ -20,6 +20,7 @@ class CatENSAttacker(PrivacyAttackerModel):
     def predict(self, key_data):
         predictions = [attacker.predict(key_data) for attacker in self.attackers]
         return majority(predictions)
+
 
 class CatENS(CatPrivacyMetric):
     """The Categorical ENS privacy metric. Scored based on the ENSAttacker.
@@ -33,13 +34,13 @@ class CatENS(CatPrivacyMetric):
     ACCURACY_BASE = True
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],\
-        model_kwargs = None):
-        if model_kwargs == None:
+    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],
+            model_kwargs=None):
+        if model_kwargs is None:
             model_kwargs = cls.MODEL_KWARGS
-        if 'attackers' not in model_kwargs: #no attackers specfied
+        if 'attackers' not in model_kwargs:  # no attackers specfied
             return np.nan
         elif type(model_kwargs['attackers']) != list or len(model_kwargs['attackers']) == 0:
-            #zero attackers specfied
+            # zero attackers specfied
             return np.nan
         return super().compute(real_data, synthetic_data, metadata, key, sensitive, model_kwargs)
