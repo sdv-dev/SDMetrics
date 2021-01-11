@@ -169,7 +169,7 @@ class CatKNN(CatPrivacyMetric):
     """The Categorical KNN privacy metric. Scored based on the KNNAttacker.
     """
 
-    name = 'K Nearest Neighbors'
+    name = 'K-Nearest Neighbors'
     MODEL = CatKNNAttacker
     ACCURACY_BASE = True
 
