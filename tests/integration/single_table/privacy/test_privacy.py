@@ -47,11 +47,11 @@ def test_cat(metric):
     else:
         model_kwargs = {'attackers': [CatNBAttacker, CatRFAttacker, CatKNNAttacker]}
         cat = metric.compute(cat_data(), cat_data(), key=['a', 'b'], sensitive=['c', 'd'],
-                            model_kwargs=model_kwargs)
+                             model_kwargs=model_kwargs)
         num = metric.compute(num_data(), num_data(), key=['a', 'b'], sensitive=['c', 'd'],
-                            model_kwargs=model_kwargs)
+                             model_kwargs=model_kwargs)
         bad = metric.compute(bad_data(), bad_data(), key=['a', 'b'], sensitive=['c', 'd'],
-                            model_kwargs=model_kwargs)
+                             model_kwargs=model_kwargs)
     assert metric.min_value <= cat <= metric.max_value
     assert np.isnan(num)
     assert np.isnan(bad)
