@@ -96,13 +96,52 @@ class SvcWrapper():
         Y = np.array(Y).T
         return Y
 
+class NBWrapper():
+    """This class provides an wrapper arround sklearn.naive_bayes.CategoricalNB so that it can
+    support multidimensional y.
+    """
+
+    def __init__(self):
+        self.predictors = []
+    
+    def fit(self, X, Y):
+        """
+        Fit the classifier to training data X and lables Y.
+
+        Arguments:
+            X (np.array): training data matrix of shape (n_samples, n_features)
+            Y (np.array): label matrix of shape (n_samples, n_labels)
+        """
+        n_labels = Y.shape[1]
+        for idx in range(n_labels):
+            Y_col = Y[:, idx]
+            predictor = CategoricalNB()
+            predictor.fit(X, Y_col)
+            self.predictors.append(predictor)
+
+    def predict(self, X):
+        """
+        Predict the labels corresponding to data X.
+
+        Arguments:
+            X (np.array): training data matrix of shape (n_samples, n_features)
+
+        Returns:
+            np.array: label matrix of shape (n_samples, n_labels)
+        """
+        Y = []
+        for predictor in self.predictors:
+            Y.append(predictor.predict(X))
+        Y = np.array(Y).T
+        return Y
+
 class CatNBAttacker(CatSklearnAttacker):
     """The Categorical NaiveBaysian privacy attaker uses a naive bayesian classifier
     and the score is calculated based on prediction accuracy.
     """
     KEY_TYPE = CategoricalType.CLASS_NUM
     SENSITIVE_TYPE = CategoricalType.CLASS_NUM
-    SKL_LEARNER = CategoricalNB
+    SKL_LEARNER = NBWrapper
 
 class CatNB(CatPrivacyMetric):
     """The Categorical NaiveBaysian privacy metric. Scored based on the CatNBAttacker.
