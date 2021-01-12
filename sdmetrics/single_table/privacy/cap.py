@@ -9,6 +9,7 @@ class CAPAttacker(PrivacyAttackerModel):
     sensitive entry appears among all such entries. In the case that no such row is found, the
     attack will be ignored and not counted towards the privacy score.
     """
+
     def __init__(self):
         self.synthetic_dict = {}  # {key attribute: [sensitive attribute]}
 
@@ -47,6 +48,7 @@ class ZeroCAPAttacker(CAPAttacker):
     The difference is that when a match in key attribute is not found, the attack will
     be classified as failed and a score of 0 will be recorded.
     """
+
     def score(self, key_data, sensitive_data):
         if key_data in self.synthetic_dict:
             return count_frequency(self.synthetic_dict[key_data], sensitive_data)
@@ -70,6 +72,7 @@ class GCAPAttacker(CAPAttacker):
     row in the real table will be calculated as the frequency that the true sensitive
     attribute appears among all rows in the synthetic table with closest key attribute.
     """
+
     def predict(self, key_data):
         ref_key_attributes = closest_neighbors(self.synthetic_dict.keys(), key_data)
         ref_sensitive_attributes = []

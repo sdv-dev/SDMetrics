@@ -10,6 +10,7 @@ class RadiusNearestNeighborAttacker(PrivacyAttackerModel):
     separate function, and typically describes the closeness between the given key and
     the corresponding entry in the table.
     """
+
     def __init__(self, weight_func=None, weight_func_kwargs={}):
         """
         Args:
@@ -55,6 +56,7 @@ class CdfInvCutoff(CdfInvLp):
     Suppose the cdfs of each entry are c1,...,cn, resp.
     Then weight = 1 if and only if (sum |c_i(ki) - c_i(ki')|**p) / n <= cutoff**p.
     """
+
     def __init__(self, p=2, cutoff=0.1):
         self.p = p
         self.cdfs = []

@@ -104,7 +104,7 @@ def allow_nan(df):
     for i in df_copy:
         for j in range(len(df_copy[i])):
             entry = df_copy[i][j]
-            if (type(entry) == float and np.isnan(entry)) or entry is None:
+            if (isinstance(entry, float) and np.isnan(entry)) or entry is None:
                 df_copy[i][j] = 'place_holder_for_nan'
     return df_copy
 
@@ -121,7 +121,7 @@ def allow_nan_array(attributes):
     """
     ret = []
     for entry in attributes:
-        if (type(entry) == float and np.isnan(entry)) or entry is None:
+        if (isinstance(entry, float) and np.isnan(entry)) or entry is None:
             ret.append('place_holder_for_nan')
         else:
             ret.append(entry)

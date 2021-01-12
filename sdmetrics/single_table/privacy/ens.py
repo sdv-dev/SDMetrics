@@ -9,6 +9,7 @@ class CatENSAttacker(PrivacyAttackerModel):
     predict the majority of the specified sub-attackers's predicions, and the privacy score will
     be calculated based on the accuracy of its prediction.
     """
+
     def __init__(self, attackers=[]):
         self.synthetic_dict = {}  # table_name -> {key attribute: [sensitive attribute]}
         self.attackers = [attacker() for attacker in attackers]
@@ -40,7 +41,8 @@ class CatENS(CatPrivacyMetric):
             model_kwargs = cls.MODEL_KWARGS
         if 'attackers' not in model_kwargs:  # no attackers specfied
             return np.nan
-        elif type(model_kwargs['attackers']) != list or len(model_kwargs['attackers']) == 0:
+        elif not isinstance(model_kwargs['attackers'], list) or\
+                len(model_kwargs['attackers']) == 0:
             # zero attackers specfied
             return np.nan
         return super().compute(real_data, synthetic_data, metadata, key, sensitive, model_kwargs)

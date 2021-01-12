@@ -12,7 +12,6 @@ class LossFunction():
             cols (list[str]):
                 The names for the target columns (usually the sensitive cols).
         """
-        pass
 
     def measure(self, pred, real):
         """Calculate the loss of a single prediction.
@@ -31,6 +30,7 @@ class CdfInvLp(LossFunction):
     the numerical values into their respective percentiles) and then measures the Lp distance
     to the pth power, between the predicted value and the real value.
     """
+
     def __init__(self, p=2):
         """
         Args:
@@ -58,6 +58,7 @@ class CdfInvLp(LossFunction):
 class Lp(LossFunction):
     """pth power of the Lp distance.
     """
+
     def __init__(self, p=2):
         """
         Args:

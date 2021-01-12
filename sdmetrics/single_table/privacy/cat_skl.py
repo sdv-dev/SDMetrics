@@ -6,7 +6,7 @@ from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.svm import SVC
 
 from sdmetrics.single_table.privacy.base import (
-    CatPrivacyMetric, CategoricalType, PrivacyAttackerModel)
+    CategoricalType, CatPrivacyMetric, PrivacyAttackerModel)
 from sdmetrics.single_table.privacy.util import allow_nan, allow_nan_array
 
 
