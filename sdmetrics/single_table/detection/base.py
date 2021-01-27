@@ -1,6 +1,7 @@
 """Base class for Machine Learning Detection metrics for single table datasets."""
 
 import logging
+
 import numpy as np
 from rdt import HyperTransformer
 from sklearn.metrics import roc_auc_score
