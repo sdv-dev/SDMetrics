@@ -19,7 +19,7 @@ requirements:
     - python
     - pytest-runner
     - scikit-learn >=0.20,<1
-    - scipy >=1.1.0,<2
+    - scipy >=1.1.0,<1.6.0
     - numpy >=1.15.4,<2
     - pandas >=1,<1.1.5
     - seaborn >=0.9,<0.11
@@ -29,7 +29,7 @@ requirements:
   run:
     - python
     - scikit-learn >=0.20,<1
-    - scipy >=1.1.0,<2
+    - scipy >=1.1.0,<1.6.0
     - numpy >=1.15.4,<2
     - pandas >=1,<1.1.5
     - seaborn >=0.9,<0.11
