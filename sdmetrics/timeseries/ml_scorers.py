@@ -27,7 +27,7 @@ def _x_to_packed_sequence(X):
 
         sequences.append(torch.FloatTensor(sequence).T)
 
-    return torch.nn.utils.rnn.pack_sequence(sequences)
+    return torch.nn.utils.rnn.pack_sequence(sequences, enforce_sorted=False)
 
 
 def lstm_classifier(X_train, X_test, y_train, y_test):

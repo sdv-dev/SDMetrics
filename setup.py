@@ -15,13 +15,13 @@ install_requires = [
     'scikit-learn>=0.20,<1',
     'sktime>=0.4,<0.5',
     'tsfresh>=0.15,<1',
-    'scipy>=1.1.0,<2',
+    'scipy>=1.1.0,<1.6.0',
     'numpy>=1.15.4,<2',
     'pandas>=1,<1.1.5',
     'seaborn>=0.9,<0.11',
     'matplotlib>=2.2.2,<3.2.2',
     'pomegranate>=0.13.0,<0.13.5',
-    'rdt>=0.2.10,<0.3',
+    'rdt>=0.2.10,<0.4',
     'torch>=1,<2',
 ]
 
@@ -101,6 +101,6 @@ setup(
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.1.1',
+    version='0.1.2.dev3',
     zip_safe=False,
 )

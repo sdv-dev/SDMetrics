@@ -53,16 +53,12 @@ class ParentChildDetectionMetric(DetectionMetric,
         """Denormalize the child table over the parent."""
         parent_table, parent_key, child_table, child_key = foreign_key
 
-        flat = data[parent_table].merge(
-            data[child_table],
+        flat = data[parent_table].set_index(parent_key).merge(
+            data[child_table].set_index(child_key),
             how='outer',
-            left_on=parent_key,
-            right_on=child_key
-        )
-
-        del flat[parent_key]
-        if child_key != parent_key:
-            del flat[child_key]
+            left_index=True,
+            right_index=True,
+        ).reset_index(drop=True)
 
         return flat
 

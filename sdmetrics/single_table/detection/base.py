@@ -1,5 +1,7 @@
 """Base class for Machine Learning Detection metrics for single table datasets."""
 
+import logging
+
 import numpy as np
 from rdt import HyperTransformer
 from sklearn.metrics import roc_auc_score
@@ -7,6 +9,8 @@ from sklearn.model_selection import StratifiedKFold
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
+
+LOGGER = logging.getLogger(__name__)
 
 
 class DetectionMetric(SingleTableMetric):
@@ -70,12 +74,16 @@ class DetectionMetric(SingleTableMetric):
         if np.isin(X, [np.inf, -np.inf]).any():
             X[np.isin(X, [np.inf, -np.inf])] = np.nan
 
-        scores = []
-        kf = StratifiedKFold(n_splits=3, shuffle=True)
-        for train_index, test_index in kf.split(X, y):
-            y_pred = cls._fit_predict(X[train_index], y[train_index], X[test_index])
-            roc_auc = roc_auc_score(y[test_index], y_pred)
+        try:
+            scores = []
+            kf = StratifiedKFold(n_splits=3, shuffle=True)
+            for train_index, test_index in kf.split(X, y):
+                y_pred = cls._fit_predict(X[train_index], y[train_index], X[test_index])
+                roc_auc = roc_auc_score(y[test_index], y_pred)
 
-            scores.append(max(0.5, roc_auc) * 2 - 1)
+                scores.append(max(0.5, roc_auc) * 2 - 1)
 
-        return 1 - np.mean(scores)
+            return 1 - np.mean(scores)
+        except ValueError as err:
+            LOGGER.info('DetectionMetric: Skipping due to %s', err)
+            return np.nan
