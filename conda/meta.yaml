@@ -27,6 +27,8 @@ requirements:
     - pomegranate >=0.13.0,<0.13.5
     - rdt >=0.2.10,<0.4
     - pytorch >=1,<2
+    - sktime >=0.5,<0.6
+    - tsfresh >=0.15,<1
 
   run:
     - python
@@ -39,6 +41,8 @@ requirements:
     - pomegranate >=0.13.0,<0.13.5
     - rdt >=0.2.10,<0.4
     - pytorch >=1,<2
+    - sktime >=0.5,<0.6
+    - tsfresh >=0.15,<1
 
 about:
   home: "https://github.com/sdv-dev/SDMetrics"

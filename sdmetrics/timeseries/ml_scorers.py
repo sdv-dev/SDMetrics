@@ -4,7 +4,11 @@ import rdt
 import torch
 from sklearn.pipeline import Pipeline
 from sktime.classification.compose import TimeSeriesForestClassifier
-from sktime.transformations.panel.compose import ColumnConcatenator
+
+try:
+    from sktime.transformers.series_as_features.compose import ColumnConcatenator
+except (ImportError, AttributeError):
+    from sktime.transformations.panel.compose import ColumnConcatenator
 
 
 def tsf_classifier(X_train, X_test, y_train, y_test):
