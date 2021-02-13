@@ -1,5 +1,13 @@
 # History
 
+## v0.1.3 - 2021-02-13
+
+A small bug fixing release.
+
+### Issues closed
+
+* Upgrade sktime bug - Issue [#49](https://github.com/sdv-dev/SDMetrics/issues/49) by @fealho
+
 ## v0.1.2 - 2021-01-27
 
 Big fixing release that addresses several minor errors.
