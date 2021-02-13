@@ -2,11 +2,11 @@
 
 ## v0.1.3 - 2021-02-13
 
-A small bug fixing release.
+Updates the required dependecies to facilitate a conda release.
 
 ### Issues closed
 
-* Upgrade sktime bug - Issue [#49](https://github.com/sdv-dev/SDMetrics/issues/49) by @fealho
+* Upgrade sktime - Issue [#49](https://github.com/sdv-dev/SDMetrics/issues/49) by @fealho
 
 ## v0.1.2 - 2021-01-27
 
