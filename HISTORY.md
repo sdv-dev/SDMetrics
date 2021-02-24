@@ -1,5 +1,9 @@
 # History
 
+## v0.2.0 - 2021-02-24
+
+Dependency upgrades to ensure compatibility with the rest of the SDV ecosystem.
+
 ## v0.1.3 - 2021-02-13
 
 Updates the required dependecies to facilitate a conda release.

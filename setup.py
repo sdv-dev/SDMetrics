@@ -19,7 +19,7 @@ install_requires = [
     'scipy>=1.4.1,<2',
     'sktime>=0.4,<0.6',
     'torch>=1.4,<2',
-    'rdt>=0.2.10,<0.5',
+    'rdt>=0.4.0,<0.5',
 ]
 
 setup_requires = [
