@@ -1,5 +1,28 @@
 # History
 
+## v0.2.0 - 2021-02-24
+
+Dependency upgrades to ensure compatibility with the rest of the SDV ecosystem.
+
+## v0.1.3 - 2021-02-13
+
+Updates the required dependecies to facilitate a conda release.
+
+### Issues closed
+
+* Upgrade sktime - Issue [#49](https://github.com/sdv-dev/SDMetrics/issues/49) by @fealho
+
+## v0.1.2 - 2021-01-27
+
+Big fixing release that addresses several minor errors.
+
+### Issues closed
+
+* More splits than classes - Issue [#46](https://github.com/sdv-dev/SDMetrics/issues/46) by @fealho
+* Scipy 1.6.0 causes an AttributeError - Issue [#44](https://github.com/sdv-dev/SDMetrics/issues/44) by @fealho
+* Time series metrics fails with variable length timeseries - Issue [#42](https://github.com/sdv-dev/SDMetrics/issues/42) by @fealho
+* ParentChildDetection metrics KeyError - Issue [#39](https://github.com/sdv-dev/SDMetrics/issues/39) by @csala
+
 ## v0.1.1 - 2020-12-30
 
 This version adds Time Series Detection and Efficacy metrics, as well as a fix

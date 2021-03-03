@@ -1,5 +1,6 @@
 import glob
 import os
+import re
 import shutil
 import stat
 from pathlib import Path
@@ -10,6 +11,37 @@ from invoke import task
 @task
 def pytest(c):
     c.run('python -m pytest --reruns 5 --cov=sdmetrics')
+
+
+@task
+def install_minimum(c):
+    with open('setup.py', 'r') as setup_py:
+        lines = setup_py.read().splitlines()
+
+    versions = []
+    started = False
+    for line in lines:
+        if started:
+            if line == ']':
+                break
+
+            line = line.strip()
+            line = re.sub(r',?<=?[\d.]*,?', '', line)
+            line = re.sub(r'>=?', '==', line)
+            line = re.sub(r"""['",]""", '', line)
+            versions.append(line)
+
+        elif line.startswith('install_requires = ['):
+            started = True
+
+    c.run(f'python -m pip install {" ".join(versions)}')
+
+
+@task
+def minimum(c):
+    install_minimum(c)
+    c.run('python -m pip check')
+    c.run('python -m pytest --reruns 3')
 
 
 @task
