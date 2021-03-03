@@ -22,6 +22,7 @@ install_requires = [
     'matplotlib>=2.2.2,<3.2.2',
     'pomegranate>=0.13.0,<0.13.5',
     'rdt>=0.2.10,<0.3',
+    'copulas>=0.3.3,<0.4',
     'torch>=1,<2',
 ]
 
