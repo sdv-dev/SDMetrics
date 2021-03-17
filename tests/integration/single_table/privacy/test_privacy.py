@@ -18,6 +18,10 @@ TODO:
     2) Maybe add test for 1 key column 2 sensitive & vice versa
     3) Maybe add a few more categories? Although it really should work
     4) Do the same tests for the numerical
+    5) Maybe some sanity checks, like if passed wrong key/sensitive columns
+    6) unit test closest_neighbors (i think it doesnt work, and even if it did it's kinda
+    questionable, if the value has never been seen in the synthetic data, hamming distance is inf)
+
 """
 
 def cat_real_data():
