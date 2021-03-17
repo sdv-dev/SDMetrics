@@ -3,6 +3,8 @@ import pandas as pd
 import pytest
 
 from sdmetrics.single_table.privacy.cap import *
+from sdmetrics.single_table.privacy.nn import *
+from sdmetrics.single_table.privacy.num_skl import *
 from sdmetrics.single_table.privacy.base import CatPrivacyMetric, NumPrivacyMetric
 from sdmetrics.single_table.privacy.cat_skl import CatKNNAttacker, CatNBAttacker, CatRFAttacker
 from sdmetrics.single_table.privacy.ens import CatENS
@@ -60,6 +62,12 @@ def num_data():
         'd': np.random.normal(size=50)
     })
 
+def data():
+    return pd.DataFrame({
+        'key': np.random.choice(['a', 'b', 'c', 'd', 'e'], 100),
+        'sensitive': np.random.normal(size=100)
+    })
+
 
 @pytest.mark.parametrize('metric', Cat_metrics.values())
 def test_cat(metric):
@@ -72,6 +80,8 @@ def test_cat(metric):
                 key=['key1', 'key2'], sensitive=['sensitive1', 'sensitive2'])
         horrible = metric.compute(cat_real_data(), cat_real_data(),
                 key=['key1', 'key2'], sensitive=['sensitive1', 'sensitive2'])
+        x = metric.compute(data(), data(),
+                key=['key', 'key2'], sensitive=['sensitive'])
 
         num = metric.compute(num_data(), num_data(), key=['a', 'b'], sensitive=['c', 'd'])
     else:
@@ -84,7 +94,8 @@ def test_cat(metric):
             key=['key1', 'key2'], sensitive=['sensitive1', 'sensitive2'], model_kwargs=model_kwargs)
         horrible = metric.compute(cat_real_data(), cat_real_data(),
             key=['key1', 'key2'], sensitive=['sensitive1', 'sensitive2'], model_kwargs=model_kwargs)
-
+        x = metric.compute(data(), data(),
+                key=['key', 'key2'], sensitive=['sensitive'], model_kwargs=model_kwargs)
 
         num = metric.compute(num_data(), num_data(), key=['a', 'b'], sensitive=['c', 'd'],
                              model_kwargs=model_kwargs)
@@ -95,6 +106,7 @@ def test_cat(metric):
     print(bad)
     print(horrible)
     print(metric.max_value)
+    print(x)
     assert 1 == 2
     assert metric.min_value <= perfect <= good <= bad <= horrible <= metric.max_value
     assert np.isnan(num)
@@ -102,10 +114,13 @@ def test_cat(metric):
 
 @pytest.mark.parametrize('metric', Num_metrics.values())
 def test_num(metric):
-    cat = metric.compute(cat_bad_data(), cat_bad_data(), key=['a', 'b'], sensitive=['c', 'd'])
+    #cat = metric.compute(cat_bad_data(), cat_bad_data(), key=['a', 'b'], sensitive=['c', 'd'])
     num = metric.compute(num_data(), num_data(), key=['a', 'b'], sensitive=['c', 'd'])
     #bad = metric.compute(bad_data(), bad_data(), key=['a', 'b'], sensitive=['c', 'd'])
-
+    x = metric.compute(data(), data(),
+                key=['key'], sensitive=['sensitive'])
+    print("x:" + str(x))
+    assert 1 == 2
     assert metric.min_value <= num <= metric.max_value
-    assert np.isnan(cat)
+    #assert np.isnan(cat)
     #assert np.isnan(bad)
