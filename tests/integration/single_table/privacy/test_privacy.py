@@ -76,14 +76,24 @@ def test_categoricals_non_ens(metric):
 
 
 @pytest.mark.parametrize('metric', categorical_metrics.values())
+def test_categorical_empty_keys(metric):
+    if metric != CategoricalEnsemble:
+        with pytest.raises(TypeError):
+            metric.compute(cat_real_data(), cat_real_data(), sensitive_fields=['sensitive1'])
+
+
+@pytest.mark.parametrize('metric', categorical_metrics.values())
+def test_categorical_empty_sensitive(metric):
+    if metric != CategoricalEnsemble:
+        with pytest.raises(TypeError):
+            metric.compute(cat_real_data(), cat_real_data(), key_fields=['key1'])
+
+
+@pytest.mark.parametrize('metric', categorical_metrics.values())
 def test_categorical_empty_keys_sensitive(metric):
     if metric != CategoricalEnsemble:
-        score = metric.compute(
-            cat_real_data(), cat_real_data(),
-            key_fields=[], sensitive_fields=['sensitive1', 'sensitive2']
-        )
-
-    assert metric.min_value <= score <= metric.max_value
+        with pytest.raises(TypeError):
+            metric.compute(cat_real_data(), cat_real_data())
 
 
 def test_categorical_ens():
