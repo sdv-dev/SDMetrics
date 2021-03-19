@@ -22,7 +22,7 @@ class LossFunction():
             real (tuple):
                 The actual value.
         """
-        raise NotImplementedError("Please implement the loss measuring algorithm!")
+        raise NotImplementedError('Please implement the loss measuring algorithm!')
 
 
 class InverseCDFDistance(LossFunction):

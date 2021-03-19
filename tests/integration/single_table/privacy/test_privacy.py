@@ -104,7 +104,7 @@ def test_categorical_ens():
     )
 
     assert CategoricalEnsemble.min_value <= horrible <= bad <= \
-            good <= perfect <= CategoricalEnsemble.max_value
+           good <= perfect <= CategoricalEnsemble.max_value
 
 
 def numerical_real_data():

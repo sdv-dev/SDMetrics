@@ -58,8 +58,8 @@ def hamming_distance(target, test):
         int: the hamming distance
     """
     dist = 0
-    assert len(target) == len(test), "Tuples must have the same length in the \
-        calculation of hamming distance!"
+    assert len(target) == len(test), 'Tuples must have the same length in the \
+        calculation of hamming distance!'
     for target_entry, test_entry in zip(target, test):
         if target_entry != test_entry:
             dist += 1
@@ -78,7 +78,7 @@ def closest_neighbors(samples, target):
     Returns:
         list [tuple]: elements in samples that are closest to target
     """
-    dist = float("inf")
+    dist = float('inf')
     ret = []
     for element in samples:
         hamming_dist = hamming_distance(target, element)
