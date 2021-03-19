@@ -27,10 +27,14 @@ class CategoricalSklearnAttacker(PrivacyAttackerModel):
 
     def __init__(self):
         self.predictor = self.SKL_LEARNER()
-        self.key_processor = (OrdinalEncoder() if self.KEY_TYPE == CategoricalType.CLASS_NUM
-            else OneHotEncoder())
-        self.sensitive_processor = (OrdinalEncoder() if
-            self.SENSITIVE_TYPE == CategoricalType.CLASS_NUM else OneHotEncoder())
+        self.key_processor = (
+            OrdinalEncoder() if self.KEY_TYPE == CategoricalType.CLASS_NUM
+            else OneHotEncoder()
+        )
+        self.sensitive_processor = (
+            OrdinalEncoder() if
+            self.SENSITIVE_TYPE == CategoricalType.CLASS_NUM else OneHotEncoder()
+        )
 
     def fit(self, synthetic_data, key_fields, sensitive_fields):
         key_table = allow_nan(synthetic_data[key_fields])

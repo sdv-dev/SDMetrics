@@ -3,10 +3,11 @@ import pandas as pd
 import pytest
 
 from sdmetrics.single_table.privacy import (
-    CategoricalPrivacyMetric, NumericalPrivacyMetric,
-    NumericalRadiusNearestNeighbor, CategoricalEnsemble)
+    CategoricalPrivacyMetric, NumericalPrivacyMetric, CategoricalEnsemble
+)
 from sdmetrics.single_table.privacy.categorical_skl import (
-    CategoricalKNNAttacker, CategoricalNBAttacker, CategoricalRFAttacker)
+    CategoricalKNNAttacker, CategoricalNBAttacker, CategoricalRFAttacker
+)
 
 categorical_metrics = CategoricalPrivacyMetric.get_subclasses()
 numerical_metrics = NumericalPrivacyMetric.get_subclasses()
@@ -50,18 +51,26 @@ def cat_bad_synthetic_data():
 
 @pytest.mark.parametrize('metric', categorical_metrics.values())
 def test_categoricals_non_ens(metric):
-    if metric != CategoricalEnsemble:  # Ensemble is special since it requires additional args to work
-        perfect = metric.compute(cat_real_data(), cat_perfect_synthetic_data(),
-            key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'])
+    if metric != CategoricalEnsemble:  # Ensemble needs additional args to work
+        perfect = metric.compute(
+            cat_real_data(), cat_perfect_synthetic_data(),
+            key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2']
+        )
 
-        good = metric.compute(cat_real_data(), cat_good_synthetic_data(),
-            key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'])
+        good = metric.compute(
+            cat_real_data(), cat_good_synthetic_data(),
+            key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2']
+        )
 
-        bad = metric.compute(cat_real_data(), cat_bad_synthetic_data(),
-            key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'])
+        bad = metric.compute(
+            cat_real_data(), cat_bad_synthetic_data(),
+            key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2']
+        )
 
-        horrible = metric.compute(cat_real_data(), cat_real_data(),
-            key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'])
+        horrible = metric.compute(
+            cat_real_data(), cat_real_data(),
+            key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2']
+        )
 
         assert metric.min_value <= horrible <= bad <= good <= perfect <= metric.max_value
 
@@ -70,24 +79,32 @@ def test_categorical_ens():
     model_kwargs = {
         'attackers': [CategoricalNBAttacker, CategoricalRFAttacker, CategoricalKNNAttacker]
     }
-    perfect = CategoricalEnsemble.compute(cat_real_data(), cat_perfect_synthetic_data(),
+    perfect = CategoricalEnsemble.compute(
+        cat_real_data(), cat_perfect_synthetic_data(),
         key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'],
-        model_kwargs=model_kwargs)
+        model_kwargs=model_kwargs
+    )
 
-    good = CategoricalEnsemble.compute(cat_real_data(), cat_good_synthetic_data(),
+    good = CategoricalEnsemble.compute(
+        cat_real_data(), cat_good_synthetic_data(),
         key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'],
-        model_kwargs=model_kwargs)
+        model_kwargs=model_kwargs
+    )
 
-    bad = CategoricalEnsemble.compute(cat_real_data(), cat_bad_synthetic_data(),
+    bad = CategoricalEnsemble.compute(
+        cat_real_data(), cat_bad_synthetic_data(),
         key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'],
-        model_kwargs=model_kwargs)
+        model_kwargs=model_kwargs
+    )
 
-    horrible = CategoricalEnsemble.compute(cat_real_data(), cat_real_data(),
+    horrible = CategoricalEnsemble.compute(
+        cat_real_data(), cat_real_data(),
         key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'],
-        model_kwargs=model_kwargs)
+        model_kwargs=model_kwargs
+    )
 
-    assert (CategoricalEnsemble.min_value <= horrible <= bad <=
-            good <= perfect <= CategoricalEnsemble.max_value)
+    assert (CategoricalEnsemble.min_value <= horrible <= bad
+            <= good <= perfect <= CategoricalEnsemble.max_value)
 
 
 def numerical_real_data():
@@ -97,6 +114,7 @@ def numerical_real_data():
         'sensitive1': [0.0, 1.0, 2.0, 3.0, 4.0] * 4,
         'sensitive2': [-0.0, -1.0, -2.0, -3.0, -4.0] * 4
     })
+
 
 def numerical_good_synthetic_data():
     return pd.DataFrame({
@@ -118,13 +136,19 @@ def numerical_bad_synthetic_data():
 
 @pytest.mark.parametrize('metric', numerical_metrics.values())
 def test_num(metric):
-    good = metric.compute(numerical_real_data(), numerical_good_synthetic_data(),
-        key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'])
+    good = metric.compute(
+        numerical_real_data(), numerical_good_synthetic_data(),
+        key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2']
+    )
 
-    bad = metric.compute(numerical_real_data(), numerical_bad_synthetic_data(),
-        key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'])
+    bad = metric.compute(
+        numerical_real_data(), numerical_bad_synthetic_data(),
+        key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2']
+    )
 
-    horrible = metric.compute(numerical_real_data(), numerical_real_data(),
-        key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'])
+    horrible = metric.compute(
+        numerical_real_data(), numerical_real_data(),
+        key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2']
+    )
 
     assert metric.min_value <= horrible <= bad <= good <= metric.max_value

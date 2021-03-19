@@ -88,8 +88,8 @@ class CategoricalPrivacyMetric(SingleTableMetric):
         attack.
 
         A ``sensitive_fields`` column(s) name must be given, either directly or as a first level
-        entry in the ``metadata`` dict, which will be used as the sensitive_fields column(s) for the
-        attack.
+        entry in the ``metadata`` dict, which will be used as the sensitive_fields column(s) 
+        for the attack.
 
         Args:
             real_data (Union[numpy.ndarray, pandas.DataFrame]):
@@ -125,9 +125,9 @@ class CategoricalPrivacyMetric(SingleTableMetric):
         for col in key_fields + sensitive_fields:
             data_type = metadata['fields'][col]
             if (
-                data_type != cls._DTYPES_TO_TYPES['i'] and
-                data_type != cls._DTYPES_TO_TYPES['O'] and
-                data_type != cls._DTYPES_TO_TYPES['b']
+                data_type != cls._DTYPES_TO_TYPES['i']
+                and data_type != cls._DTYPES_TO_TYPES['O']
+                and data_type != cls._DTYPES_TO_TYPES['b']
             ):  # check data type
                 return np.nan
 
