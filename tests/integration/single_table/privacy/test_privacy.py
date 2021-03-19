@@ -75,6 +75,17 @@ def test_categoricals_non_ens(metric):
         assert metric.min_value <= horrible <= bad <= good <= perfect <= metric.max_value
 
 
+@pytest.mark.parametrize('metric', categorical_metrics.values())
+def test_categorical_empty_keys_sensitive(metric):
+    if metric != CategoricalEnsemble:
+        score = metric.compute(
+            cat_real_data(), cat_real_data(),
+            key_fields=[], sensitive_fields=['sensitive1', 'sensitive2']
+        )
+
+    assert metric.min_value <= score <= metric.max_value
+
+
 def test_categorical_ens():
     model_kwargs = {
         'attackers': [CategoricalNBAttacker, CategoricalRFAttacker, CategoricalKNNAttacker]
@@ -103,8 +114,8 @@ def test_categorical_ens():
         model_kwargs=model_kwargs
     )
 
-    assert (CategoricalEnsemble.min_value <= horrible <= bad <= \
-            good <= perfect <= CategoricalEnsemble.max_value)
+    assert CategoricalEnsemble.min_value <= horrible <= bad <= \
+            good <= perfect <= CategoricalEnsemble.max_value
 
 
 def numerical_real_data():
@@ -152,3 +163,5 @@ def test_num(metric):
     )
 
     assert metric.min_value <= horrible <= bad <= good <= metric.max_value
+
+

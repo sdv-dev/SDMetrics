@@ -124,11 +124,9 @@ class CategoricalPrivacyMetric(SingleTableMetric):
 
         for col in key_fields + sensitive_fields:
             data_type = metadata['fields'][col]
-            if (
-                data_type != cls._DTYPES_TO_TYPES['i'] and \
-                data_type != cls._DTYPES_TO_TYPES['O'] and \
-                data_type != cls._DTYPES_TO_TYPES['b']
-            ):  # check data type
+            if data_type != cls._DTYPES_TO_TYPES['i'] and \
+               data_type != cls._DTYPES_TO_TYPES['O'] and \
+               data_type != cls._DTYPES_TO_TYPES['b']:  # check data type
                 return np.nan
 
         model = cls._fit(synthetic_data, key_fields, sensitive_fields, model_kwargs)
