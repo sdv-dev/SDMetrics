@@ -75,27 +75,6 @@ def test_categoricals_non_ens(metric):
         assert metric.min_value <= horrible <= bad <= good <= perfect <= metric.max_value
 
 
-@pytest.mark.parametrize('metric', categorical_metrics.values())
-def test_categorical_empty_keys(metric):
-    if metric != CategoricalEnsemble:
-        with pytest.raises(TypeError):
-            metric.compute(cat_real_data(), cat_real_data(), sensitive_fields=['sensitive1'])
-
-
-@pytest.mark.parametrize('metric', categorical_metrics.values())
-def test_categorical_empty_sensitive(metric):
-    if metric != CategoricalEnsemble:
-        with pytest.raises(TypeError):
-            metric.compute(cat_real_data(), cat_real_data(), key_fields=['key1'])
-
-
-@pytest.mark.parametrize('metric', categorical_metrics.values())
-def test_categorical_empty_keys_sensitive(metric):
-    if metric != CategoricalEnsemble:
-        with pytest.raises(TypeError):
-            metric.compute(cat_real_data(), cat_real_data())
-
-
 def test_categorical_ens():
     model_kwargs = {
         'attackers': [CategoricalNBAttacker, CategoricalRFAttacker, CategoricalKNNAttacker]
@@ -175,3 +154,22 @@ def test_num(metric):
     assert metric.min_value <= horrible <= bad <= good <= metric.max_value
 
 
+@pytest.mark.parametrize('metric', categorical_metrics.values())
+def test_categorical_empty_keys(metric):
+    if metric != CategoricalEnsemble:
+        with pytest.raises(TypeError):
+            metric.compute(cat_real_data(), cat_real_data(), sensitive_fields=['sensitive1'])
+
+
+@pytest.mark.parametrize('metric', categorical_metrics.values())
+def test_categorical_empty_sensitive(metric):
+    if metric != CategoricalEnsemble:
+        with pytest.raises(TypeError):
+            metric.compute(cat_real_data(), cat_real_data(), key_fields=['key1'])
+
+
+@pytest.mark.parametrize('metric', categorical_metrics.values())
+def test_categorical_empty_keys_sensitive(metric):
+    if metric != CategoricalEnsemble:
+        with pytest.raises(TypeError):
+            metric.compute(cat_real_data(), cat_real_data())
