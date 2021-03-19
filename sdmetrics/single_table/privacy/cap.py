@@ -1,4 +1,4 @@
-from sdmetrics.single_table.privacy.base import CatPrivacyMetric, PrivacyAttackerModel
+from sdmetrics.single_table.privacy.base import CategoricalPrivacyMetric, PrivacyAttackerModel
 from sdmetrics.single_table.privacy.util import closest_neighbors, count_frequency, majority
 
 
@@ -13,10 +13,10 @@ class CAPAttacker(PrivacyAttackerModel):
     def __init__(self):
         self.synthetic_dict = {}  # {key attribute: [sensitive attribute]}
 
-    def fit(self, synthetic_data, key, sensitive):
+    def fit(self, synthetic_data, key_fields, sensitive_fields):
         for idx in range(len(synthetic_data)):
-            key_value = tuple(synthetic_data[key].iloc[idx])
-            sensitive_value = tuple(synthetic_data[sensitive].iloc[idx])
+            key_value = tuple(synthetic_data[key_fields].iloc[idx])
+            sensitive_value = tuple(synthetic_data[sensitive_fields].iloc[idx])
             if key_value in self.synthetic_dict:
                 self.synthetic_dict[key_value].append(sensitive_value)
             else:
@@ -34,7 +34,7 @@ class CAPAttacker(PrivacyAttackerModel):
             return None
 
 
-class CAP(CatPrivacyMetric):
+class CAP(CategoricalPrivacyMetric):
     """The CAP privacy metric. Scored based on the CAPAttacker.
     """
 
@@ -56,7 +56,7 @@ class ZeroCAPAttacker(CAPAttacker):
             return 0
 
 
-class ZeroCAP(CatPrivacyMetric):
+class ZeroCAP(CategoricalPrivacyMetric):
     """The 0CAP privacy metric. Scored based on the ZeroCAPAttacker.
     """
 
@@ -89,7 +89,7 @@ class GCAPAttacker(CAPAttacker):
         return count_frequency(ref_sensitive_attributes, sensitive_data)
 
 
-class GCAP(CatPrivacyMetric):
+class GCAP(CategoricalPrivacyMetric):
     """The GCAP (General CAP) privacy metric. Scored based on the ZeroCAPAttacker.
     """
 

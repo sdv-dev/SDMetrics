@@ -5,7 +5,7 @@ import numpy as np
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.single_table.privacy.loss import CdfInvLp
+from sdmetrics.single_table.privacy.loss import InverseCDFDistance
 
 
 class CategoricalType(Enum):
@@ -17,7 +17,7 @@ class CategoricalType(Enum):
     ONE_HOT = "One_hot"
 
 
-class CatPrivacyMetric(SingleTableMetric):
+class CategoricalPrivacyMetric(SingleTableMetric):
     """Base class for Categorical Privacy metrics on single tables.
 
     These metrics fit a adversial attacker model on the synthetic data and
@@ -51,42 +51,42 @@ class CatPrivacyMetric(SingleTableMetric):
     ACCURACY_BASE = None
 
     @classmethod
-    def _fit(cls, synthetic_data, key, sensitive, model_kwargs):
+    def _fit(cls, synthetic_data, key_fields, sensitive_fields, model_kwargs):
         if model_kwargs is None:
             model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
         model = cls.MODEL(**model_kwargs)
-        model.fit(synthetic_data, key, sensitive)
+        model.fit(synthetic_data, key_fields, sensitive_fields)
         return model
 
     @classmethod
-    def _validate_inputs(cls, real_data, synthetic_data, metadata, key, sensitive):
+    def _validate_inputs(cls, real_data, synthetic_data, metadata, key_fields, sensitive_fields):
         metadata = super()._validate_inputs(real_data, synthetic_data, metadata)
-        if 'key' in metadata:
-            key = metadata['key']
-        elif key is None:
-            raise TypeError('`key` must be passed either directly or inside `metadata`')
+        if 'key_fields' in metadata:
+            key_fields = metadata['key_fields']
+        elif key_fields is None:
+            raise TypeError('`key_fields` must be passed either directly or inside `metadata`')
 
-        if 'sensitive' in metadata:
-            sensitive = metadata['sensitive']
-        elif sensitive is None:
-            raise TypeError('`sensitive` must be passed either directly or inside `metadata`')
+        if 'sensitive_fields' in metadata:
+            sensitive_fields = metadata['sensitive_fields']
+        elif sensitive_fields is None:
+            raise TypeError('`sensitive_fields` must be passed either directly or inside `metadata`')
 
-        return key, sensitive, metadata
+        return key_fields, sensitive_fields, metadata
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],
+    def compute(cls, real_data, synthetic_data, metadata=None, key_fields=[], sensitive_fields=[],
                 model_kwargs=None):
         """Compute this metric.
 
         This fits a adversial attacker model on the synthetic data and
         then evaluates it making predictions on the real data.
 
-        A ``key`` column(s) name must be given, either directly or as a first level
+        A ``key_fields`` column(s) name must be given, either directly or as a first level
         entry in the ``metadata`` dict, which will be used as the key column(s) for the
         attack.
 
-        A ``sensitive`` column(s) name must be given, either directly or as a first level
-        entry in the ``metadata`` dict, which will be used as the sensitive column(s) for the
+        A ``sensitive_fields`` column(s) name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the sensitive_fields column(s) for the
         attack.
 
         Args:
@@ -97,9 +97,9 @@ class CatPrivacyMetric(SingleTableMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
-            key (list(str)):
+            key_fields (list(str)):
                 Name of the column(s) to use as the key attributes.
-            sensitive (list(str)):
+            sensitive_fields (list(str)):
                 Name of the column(s) to use as the sensitive attributes.
             model_kwargs (dict):
                 Key word arguments of the attacker model. cls.MODEL_KWARGS will be used
@@ -109,26 +109,26 @@ class CatPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        key, sensitive, metadata = cls._validate_inputs(real_data, synthetic_data,
-                                                        metadata, key, sensitive)
+        key_fields, sensitive_fields, metadata = cls._validate_inputs(real_data, synthetic_data,
+                                                        metadata, key_fields, sensitive_fields)
 
-        if len(key) == 0 or len(sensitive) == 0:  # empty key or sensitive
+        if len(key_fields) == 0 or len(sensitive_fields) == 0:  # empty key_fields or sensitive_fields
             return np.nan
 
-        for col in key + sensitive:
+        for col in key_fields + sensitive_fields:
             data_type = metadata['fields'][col]
             if data_type != cls._DTYPES_TO_TYPES['i'] and data_type != cls._DTYPES_TO_TYPES['O']\
                     and data_type != cls._DTYPES_TO_TYPES['b']:  # check data type
                 return np.nan
 
-        model = cls._fit(synthetic_data, key, sensitive, model_kwargs)
+        model = cls._fit(synthetic_data, key_fields, sensitive_fields, model_kwargs)
 
         if cls.ACCURACY_BASE:  # calculate privacy score based on prediction accuracy
             count = len(real_data)
             match = 0
             for idx in range(count):
-                key_data = tuple(real_data[key].iloc[idx])
-                sensitive_data = tuple(real_data[sensitive].iloc[idx])
+                key_data = tuple(real_data[key_fields].iloc[idx])
+                sensitive_data = tuple(real_data[sensitive_fields].iloc[idx])
                 pred_sensitive = model.predict(key_data)
                 if pred_sensitive == sensitive_data:
                     match += 1
@@ -137,8 +137,8 @@ class CatPrivacyMetric(SingleTableMetric):
             count = 0
             score = 0
             for idx in range(len(real_data)):
-                key_data = tuple(real_data[key].iloc[idx])
-                sensitive_data = tuple(real_data[sensitive].iloc[idx])
+                key_data = tuple(real_data[key_fields].iloc[idx])
+                sensitive_data = tuple(real_data[sensitive_fields].iloc[idx])
                 row_score = model.score(key_data, sensitive_data)
                 if row_score is not None:
                     count += 1
@@ -180,45 +180,45 @@ class NumPrivacyMetric(SingleTableMetric):
     max_value = np.inf
     MODEL = None
     MODEL_KWARGS = {}
-    LOSS_FUNCTION = CdfInvLp
+    LOSS_FUNCTION = InverseCDFDistance
     LOSS_FUNCTION_KWARGS = {'p': 2}
 
     @classmethod
-    def _fit(cls, synthetic_data, key, sensitive, model_kwargs):
+    def _fit(cls, synthetic_data, key_fields, sensitive_fields, model_kwargs):
         if model_kwargs is None:
             model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
         model = cls.MODEL(**model_kwargs)
-        model.fit(synthetic_data, key, sensitive)
+        model.fit(synthetic_data, key_fields, sensitive_fields)
         return model
 
     @classmethod
-    def _validate_inputs(cls, real_data, synthetic_data, metadata, key, sensitive):
+    def _validate_inputs(cls, real_data, synthetic_data, metadata, key_fields, sensitive_fields):
         metadata = super()._validate_inputs(real_data, synthetic_data, metadata)
-        if 'key' in metadata:
-            key = metadata['key']
-        elif key is None:
-            raise TypeError('`key` must be passed either directly or inside `metadata`')
+        if 'key_fields' in metadata:
+            key_fields = metadata['key_fields']
+        elif key_fields is None:
+            raise TypeError('`key_fields` must be passed either directly or inside `metadata`')
 
-        if 'sensitive' in metadata:
-            sensitive = metadata['sensitive']
-        elif sensitive is None:
-            raise TypeError('`sensitive` must be passed either directly or inside `metadata`')
+        if 'sensitive_fields' in metadata:
+            sensitive_fields = metadata['sensitive_fields']
+        elif sensitive_fields is None:
+            raise TypeError('`sensitive_fields` must be passed either directly or inside `metadata`')
 
-        return key, sensitive, metadata
+        return key_fields, sensitive_fields, metadata
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key=[], sensitive=[],
+    def compute(cls, real_data, synthetic_data, metadata=None, key_fields=[], sensitive_fields=[],
                 model_kwargs=None, loss_func=None, loss_function_kwargs=None):
         """Compute this metric.
 
         This fits a adversial attacker model on the synthetic data and
         then evaluates it making predictions on the real data.
 
-        A ``key`` column(s) name must be given, either directly or as a first level
+        A ``key_fields`` column(s) name must be given, either directly or as a first level
         entry in the ``metadata`` dict, which will be used as the key column(s) for the
         attack.
 
-        A ``sensitive`` column(s) name must be given, either directly or as a first level
+        A ``sensitive_fields`` column(s) name must be given, either directly or as a first level
         entry in the ``metadata`` dict, which will be used as the sensitive column(s) for the
         attack.
 
@@ -230,9 +230,9 @@ class NumPrivacyMetric(SingleTableMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
-            key (list(str)):
+            key_fields (list(str)):
                 Name of the column(s) to use as the key attributes.
-            sensitive (list(str)):
+            sensitive_fields (list(str)):
                 Name of the column(s) to use as the sensitive attributes.
             model_kwargs (dict):
                 Key word arguments of the attacker model. cls.MODEL_KWARGS will be used
@@ -247,19 +247,19 @@ class NumPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        key, sensitive, metadata = cls._validate_inputs(real_data, synthetic_data,
-                                                        metadata, key, sensitive)
+        key_fields, sensitive_fields, metadata = cls._validate_inputs(real_data, synthetic_data,
+                                                        metadata, key_fields, sensitive_fields)
 
-        if len(key) == 0 or len(sensitive) == 0:  # empty key or sensitive
+        if len(key_fields) == 0 or len(sensitive_fields) == 0:  # empty key_fields or sensitive_fields
             return np.nan
 
-        for col in key + sensitive:
+        for col in key_fields + sensitive_fields:
             data_type = metadata['fields'][col]
             if data_type != cls._DTYPES_TO_TYPES['i'] and data_type != cls._DTYPES_TO_TYPES['f']:
                 # check data type
                 return np.nan
 
-        model = cls._fit(synthetic_data, key, sensitive, model_kwargs)
+        model = cls._fit(synthetic_data, key_fields, sensitive_fields, model_kwargs)
 
         if loss_function_kwargs is None:
             loss_function_kwargs = cls.LOSS_FUNCTION_KWARGS
@@ -269,28 +269,28 @@ class NumPrivacyMetric(SingleTableMetric):
         else:
             loss_func = loss_func(**loss_function_kwargs)
 
-        loss_func.fit(real_data, sensitive)
+        loss_func.fit(real_data, sensitive_fields)
 
         count = len(real_data)
         score = 0
         for idx in range(count):
-            key_data = tuple(real_data[key].iloc[idx])
-            sensitive_data = tuple(real_data[sensitive].iloc[idx])
+            key_data = tuple(real_data[key_fields].iloc[idx])
+            sensitive_data = tuple(real_data[sensitive_fields].iloc[idx])
             pred_sensitive = model.predict(key_data)
             score += loss_func.measure(pred_sensitive, sensitive_data)
         return score / count
 
 
 class PrivacyAttackerModel():
-    def fit(self, synthetic_data, key, sensitive):
+    def fit(self, synthetic_data, key_fields, sensitive_fields):
         """Fit the attacker on the synthetic data.
 
         Args:
             synthetic_data(pandas.DataFrame):
                 The synthetic data table used for adverserial learning.
-            key(list[str]):
+            key_fields(list[str]):
                 The names of the key columns.
-            semsitive(list[str]):
+            sensitive_fields(list[str]):
                 The names of the sensitive columns.
         """
         raise NotImplementedError("Please implement fit method of attackers")

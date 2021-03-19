@@ -1,7 +1,7 @@
 import numpy as np
 
 from sdmetrics.single_table.privacy.base import NumPrivacyMetric, PrivacyAttackerModel
-from sdmetrics.single_table.privacy.loss import CdfInvLp
+from sdmetrics.single_table.privacy.loss import InverseCDFDistance
 
 
 class RadiusNearestNeighborAttacker(PrivacyAttackerModel):
@@ -22,21 +22,21 @@ class RadiusNearestNeighborAttacker(PrivacyAttackerModel):
         self.weight_func = weight_func(**weight_func_kwargs)
         self.synthetic_data = None
         self.key = None
-        self.sensitive = None
+        self.sensitive_fields = None
 
-    def fit(self, synthetic_data, key, sensitive):
-        self.weight_func.fit(synthetic_data, key)
+    def fit(self, synthetic_data, key_fields, sensitive_fields):
+        self.weight_func.fit(synthetic_data, key_fields)
         self.synthetic_data = synthetic_data
-        self.key = key
-        self.sensitive = sensitive
+        self.key_fields = key_fields
+        self.sensitive_fields = sensitive_fields
 
     def predict(self, key_data):
         weights = 0
         summ = None
         modified = False
         for idx in range(len(self.synthetic_data)):
-            ref_key = tuple(self.synthetic_data[self.key].iloc[idx])
-            sensitive_data = np.array(self.synthetic_data[self.sensitive].iloc[idx])
+            ref_key = tuple(self.synthetic_data[self.key_fields].iloc[idx])
+            sensitive_data = np.array(self.synthetic_data[self.sensitive_fields].iloc[idx])
             weight = self.weight_func.measure(key_data, ref_key)
             weights += weight
             if not modified:
@@ -45,12 +45,12 @@ class RadiusNearestNeighborAttacker(PrivacyAttackerModel):
             else:
                 summ += sensitive_data
         if weights == 0:
-            return (0,) * len(self.sensitive)
+            return (0,) * len(self.sensitive_fields)
         else:
             return tuple(summ / weights)
 
 
-class CdfInvCutoff(CdfInvLp):
+class CdfInvCutoff(InverseCDFDistance):
     """Gives weight = 1 if the Lp averaged distance between the entries is below a given cutoff.
     Formally, suppose given key = (k1,..,kn), while the reference key is (k1',...,kn').
     Suppose the cdfs of each entry are c1,...,cn, resp.
@@ -63,12 +63,12 @@ class CdfInvCutoff(CdfInvLp):
         self.cutoff = cutoff**p
 
     def fit(self, data, cols):
-        CdfInvLp.fit(self, data, cols)
+        InverseCDFDistance.fit(self, data, cols)
         self.cutoff *= len(cols)
 
     def measure(self, pred, real):
-        dist = CdfInvLp.measure(self, pred, real)
-        return 1 if dist < self.cutoff else 0
+        dist = InverseCDFDistance.measure(self, pred, real)
+        return 1.0 / (dist + 1e-3) # TODO: figure out a better way to set cutoff
 
 
 class RadiusNearestNeighbor(NumPrivacyMetric):

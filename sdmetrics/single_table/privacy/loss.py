@@ -25,7 +25,7 @@ class LossFunction():
         raise NotImplementedError("Please implement the loss measuring algorithm!")
 
 
-class CdfInvLp(LossFunction):
+class InverseCDFDistance(LossFunction):
     """This loss function first applies the fitted cdfs to every single entry (i.e. turning
     the numerical values into their respective percentiles) and then measures the Lp distance
     to the pth power, between the predicted value and the real value.
@@ -55,7 +55,7 @@ class CdfInvLp(LossFunction):
         return dist
 
 
-class Lp(LossFunction):
+class LpNorm(LossFunction):
     """pth power of the Lp distance.
     """
 
