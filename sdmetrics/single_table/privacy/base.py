@@ -43,7 +43,7 @@ class CategoricalPrivacyMetric(SingleTableMetric):
     """
 
     name = None
-    goal = Goal.MINIMIZE
+    goal = Goal.MAXIMIZE
     min_value = 0
     max_value = 1
     MODEL = None
@@ -54,6 +54,7 @@ class CategoricalPrivacyMetric(SingleTableMetric):
     def _fit(cls, synthetic_data, key_fields, sensitive_fields, model_kwargs):
         if model_kwargs is None:
             model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
+
         model = cls.MODEL(**model_kwargs)
         model.fit(synthetic_data, key_fields, sensitive_fields)
         return model
@@ -69,13 +70,14 @@ class CategoricalPrivacyMetric(SingleTableMetric):
         if 'sensitive_fields' in metadata:
             sensitive_fields = metadata['sensitive_fields']
         elif sensitive_fields is None:
-            raise TypeError('`sensitive_fields` must be passed either directly or inside `metadata`')
+            raise TypeError(
+                '`sensitive_fields` must be passed either directly or inside `metadata`')
 
         return key_fields, sensitive_fields, metadata
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key_fields=[], sensitive_fields=[],
-                model_kwargs=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, key_fields=None,
+                sensitive_fields=None, model_kwargs=None):
         """Compute this metric.
 
         This fits a adversial attacker model on the synthetic data and
@@ -109,16 +111,24 @@ class CategoricalPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        key_fields, sensitive_fields, metadata = cls._validate_inputs(real_data, synthetic_data,
-                                                        metadata, key_fields, sensitive_fields)
+        key_fields, sensitive_fields, metadata = cls._validate_inputs(
+            real_data,
+            synthetic_data,
+            metadata,
+            key_fields,
+            sensitive_fields
+        )
 
-        if len(key_fields) == 0 or len(sensitive_fields) == 0:  # empty key_fields or sensitive_fields
+        if len(key_fields) == 0 or len(sensitive_fields) == 0:
             return np.nan
 
         for col in key_fields + sensitive_fields:
             data_type = metadata['fields'][col]
-            if data_type != cls._DTYPES_TO_TYPES['i'] and data_type != cls._DTYPES_TO_TYPES['O']\
-                    and data_type != cls._DTYPES_TO_TYPES['b']:  # check data type
+            if (
+                data_type != cls._DTYPES_TO_TYPES['i'] and
+                data_type != cls._DTYPES_TO_TYPES['O'] and
+                data_type != cls._DTYPES_TO_TYPES['b']
+            ):  # check data type
                 return np.nan
 
         model = cls._fit(synthetic_data, key_fields, sensitive_fields, model_kwargs)
@@ -132,7 +142,9 @@ class CategoricalPrivacyMetric(SingleTableMetric):
                 pred_sensitive = model.predict(key_data)
                 if pred_sensitive == sensitive_data:
                     match += 1
-            return match / count
+
+            return 1.0 - match / count
+
         else:  # calculate privacy score based on posterior prob of the correct sensitive data
             count = 0
             score = 0
@@ -143,12 +155,14 @@ class CategoricalPrivacyMetric(SingleTableMetric):
                 if row_score is not None:
                     count += 1
                     score += row_score
+
             if count == 0:
                 return 0
-            return score / count
+
+            return 1.0 - score / count
 
 
-class NumPrivacyMetric(SingleTableMetric):
+class NumericalPrivacyMetric(SingleTableMetric):
     """Base class for Numerical Privacy metrics on single tables.
 
     These metrics fit a adversial attacker model on the synthetic data and
@@ -187,8 +201,10 @@ class NumPrivacyMetric(SingleTableMetric):
     def _fit(cls, synthetic_data, key_fields, sensitive_fields, model_kwargs):
         if model_kwargs is None:
             model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
+
         model = cls.MODEL(**model_kwargs)
         model.fit(synthetic_data, key_fields, sensitive_fields)
+
         return model
 
     @classmethod
@@ -202,13 +218,15 @@ class NumPrivacyMetric(SingleTableMetric):
         if 'sensitive_fields' in metadata:
             sensitive_fields = metadata['sensitive_fields']
         elif sensitive_fields is None:
-            raise TypeError('`sensitive_fields` must be passed either directly or inside `metadata`')
+            raise TypeError(
+                '`sensitive_fields` must be passed either directly or inside `metadata`')
 
         return key_fields, sensitive_fields, metadata
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key_fields=[], sensitive_fields=[],
-                model_kwargs=None, loss_func=None, loss_function_kwargs=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, key_fields=None,
+                sensitive_fields=None, model_kwargs=None, loss_function=None,
+                loss_function_kwargs=None):
         """Compute this metric.
 
         This fits a adversial attacker model on the synthetic data and
@@ -237,8 +255,8 @@ class NumPrivacyMetric(SingleTableMetric):
             model_kwargs (dict):
                 Key word arguments of the attacker model. cls.MODEL_KWARGS will be used
                 if none is provided.
-            loss_func (Class):
-                The loss function to use. cls.LOSS_FUNC will be used if none is provided.
+            loss_function (Class):
+                The loss function to use. cls.LOSS_FUNCTION will be used if none is provided.
             loss_function_kwargs (dict):
                 Key word arguments of the loss function. cls.LOSS_FUNCTION_KWARGS will be used
                 if none is provided.
@@ -247,16 +265,18 @@ class NumPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        key_fields, sensitive_fields, metadata = cls._validate_inputs(real_data, synthetic_data,
-                                                        metadata, key_fields, sensitive_fields)
+        key_fields, sensitive_fields, metadata = (
+            cls._validate_inputs(real_data, synthetic_data, metadata, key_fields, sensitive_fields)
+        )
 
-        if len(key_fields) == 0 or len(sensitive_fields) == 0:  # empty key_fields or sensitive_fields
+        if len(key_fields) == 0 or len(sensitive_fields) == 0:
             return np.nan
 
         for col in key_fields + sensitive_fields:
             data_type = metadata['fields'][col]
+
+            # check data type
             if data_type != cls._DTYPES_TO_TYPES['i'] and data_type != cls._DTYPES_TO_TYPES['f']:
-                # check data type
                 return np.nan
 
         model = cls._fit(synthetic_data, key_fields, sensitive_fields, model_kwargs)
@@ -264,12 +284,12 @@ class NumPrivacyMetric(SingleTableMetric):
         if loss_function_kwargs is None:
             loss_function_kwargs = cls.LOSS_FUNCTION_KWARGS
 
-        if loss_func is None:
-            loss_func = cls.LOSS_FUNCTION(**loss_function_kwargs)
+        if loss_function is None:
+            loss_function = cls.LOSS_FUNCTION(**loss_function_kwargs)
         else:
-            loss_func = loss_func(**loss_function_kwargs)
+            loss_function = loss_function(**loss_function_kwargs)
 
-        loss_func.fit(real_data, sensitive_fields)
+        loss_function.fit(real_data, sensitive_fields)
 
         count = len(real_data)
         score = 0
@@ -277,7 +297,8 @@ class NumPrivacyMetric(SingleTableMetric):
             key_data = tuple(real_data[key_fields].iloc[idx])
             sensitive_data = tuple(real_data[sensitive_fields].iloc[idx])
             pred_sensitive = model.predict(key_data)
-            score += loss_func.measure(pred_sensitive, sensitive_data)
+            score += loss_function.measure(pred_sensitive, sensitive_data)
+
         return score / count
 
 
@@ -317,5 +338,5 @@ class PrivacyAttackerModel():
             sensitive_data(tuple):
                 The sensitive data.
         """
-        raise NotImplementedError("Posterior probability based scoring not supported\
-            for this attacker!")
+        raise NotImplementedError('Posterior probability based scoring not supported'
+                                  'for this attacker!')

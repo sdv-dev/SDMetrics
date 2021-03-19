@@ -1,10 +1,10 @@
 import numpy as np
 
-from sdmetrics.single_table.privacy.base import NumPrivacyMetric, PrivacyAttackerModel
+from sdmetrics.single_table.privacy.base import NumericalPrivacyMetric, PrivacyAttackerModel
 from sdmetrics.single_table.privacy.loss import InverseCDFDistance
 
 
-class RadiusNearestNeighborAttacker(PrivacyAttackerModel):
+class NumericalRadiusNearestNeighborAttacker(PrivacyAttackerModel):
     """The Radius Nearest Neighbor Attacker will predict the sensitive value to be a
     weighted mean of the entries in the synthetic table. Where this weight is given by a
     separate function, and typically describes the closeness between the given key and
@@ -68,13 +68,13 @@ class CdfInvCutoff(InverseCDFDistance):
 
     def measure(self, pred, real):
         dist = InverseCDFDistance.measure(self, pred, real)
-        return 1.0 / (dist + 1e-3) # TODO: figure out a better way to set cutoff
+        return 1.0 / (dist + 1e-3)  # TODO: figure out a better way to set cutoff
 
 
-class RadiusNearestNeighbor(NumPrivacyMetric):
-    """The Radius Nearest Neighbor privacy metric. Scored based on the RadiusNearestNeighbor.
+class NumericalRadiusNearestNeighbor(NumericalPrivacyMetric):
+    """The Radius Nearest Neighbor privacy metric. Scored based on the NumericalRadiusNearestNeighbor.
     """
 
-    name = 'Radius Nearest Neighbor'
-    MODEL = RadiusNearestNeighborAttacker
+    name = 'Numerical Radius Nearest Neighbor'
+    MODEL = NumericalRadiusNearestNeighborAttacker
     MODEL_KWARGS = {'weight_func': CdfInvCutoff, 'weight_func_kwargs': {'p': 2, 'cutoff': 0.1}}

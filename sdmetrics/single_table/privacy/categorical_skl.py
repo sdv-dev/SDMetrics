@@ -1,12 +1,12 @@
 import numpy as np
+import sklearn.naive_bayes
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import CategoricalNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.svm import SVC
 
 from sdmetrics.single_table.privacy.base import (
-    CategoricalType, CategoricalPrivacyMetric, PrivacyAttackerModel)
+    CategoricalPrivacyMetric, CategoricalType, PrivacyAttackerModel)
 from sdmetrics.single_table.privacy.util import allow_nan, allow_nan_array
 
 
@@ -27,10 +27,10 @@ class CategoricalSklearnAttacker(PrivacyAttackerModel):
 
     def __init__(self):
         self.predictor = self.SKL_LEARNER()
-        self.key_processor = OrdinalEncoder() if self.KEY_TYPE == CategoricalType.CLASS_NUM \
-            else OneHotEncoder()
-        self.sensitive_processor = OrdinalEncoder() if \
-            self.SENSITIVE_TYPE == CategoricalType.CLASS_NUM else OneHotEncoder()
+        self.key_processor = (OrdinalEncoder() if self.KEY_TYPE == CategoricalType.CLASS_NUM
+            else OneHotEncoder())
+        self.sensitive_processor = (OrdinalEncoder() if
+            self.SENSITIVE_TYPE == CategoricalType.CLASS_NUM else OneHotEncoder())
 
     def fit(self, synthetic_data, key_fields, sensitive_fields):
         key_table = allow_nan(synthetic_data[key_fields])
@@ -117,7 +117,7 @@ class NBWrapper():
         n_labels = Y.shape[1]
         for idx in range(n_labels):
             Y_col = Y[:, idx]
-            predictor = CategoricalNB()
+            predictor = sklearn.naive_bayes.CategoricalNB()
             predictor.fit(X, Y_col)
             self.predictors.append(predictor)
 
@@ -202,9 +202,9 @@ class CategoricalSVMAttacker(CategoricalSklearnAttacker):
 
 
 class CategoricalSVM(CategoricalPrivacyMetric):
-    """The Categorical SVM privacy metric. Scored based on theCategoricalSVMAttacker.
+    """The Categorical SVM privacy metric. Scored based on the CategoricalSVMAttacker.
     """
 
     name = 'Support Vector Classifier'
-    MODEL =CategoricalSVMAttacker
+    MODEL = CategoricalSVMAttacker
     ACCURACY_BASE = True

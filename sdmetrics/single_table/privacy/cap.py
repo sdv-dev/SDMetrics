@@ -25,6 +25,7 @@ class CAPAttacker(PrivacyAttackerModel):
     def predict(self, key_data):
         if key_data not in self.synthetic_dict:
             return None  # target key attribute not found in synthetic table
+
         return majority(self.synthetic_dict[key_data])
 
     def score(self, key_data, sensitive_data):
@@ -34,11 +35,11 @@ class CAPAttacker(PrivacyAttackerModel):
             return None
 
 
-class CAP(CategoricalPrivacyMetric):
-    """The CAP privacy metric. Scored based on the CAPAttacker.
+class CategoricalCAP(CategoricalPrivacyMetric):
+    """The Categorical CAP privacy metric. Scored based on the CAPAttacker.
     """
 
-    name = 'CAP'
+    name = 'CategoricalCAP'
     MODEL = CAPAttacker
     ACCURACY_BASE = False
 
@@ -56,8 +57,8 @@ class ZeroCAPAttacker(CAPAttacker):
             return 0
 
 
-class ZeroCAP(CategoricalPrivacyMetric):
-    """The 0CAP privacy metric. Scored based on the ZeroCAPAttacker.
+class CategoricalZeroCAP(CategoricalPrivacyMetric):
+    """The Categorical 0CAP privacy metric. Scored based on the ZeroCAPAttacker.
     """
 
     name = '0CAP'
@@ -65,8 +66,8 @@ class ZeroCAP(CategoricalPrivacyMetric):
     ACCURACY_BASE = False
 
 
-class GCAPAttacker(CAPAttacker):
-    """The GCAP privacy attacker will find out all rows in synthetic table
+class GeneralizedCAPAttacker(CAPAttacker):
+    """The GeneralizedCAP privacy attacker will find out all rows in synthetic table
     that are closest (in hamming distance) to the target key attributes, and predict
     the sensitive entry that appears most frequently among them. The privacy score for each
     row in the real table will be calculated as the frequency that the true sensitive
@@ -78,6 +79,7 @@ class GCAPAttacker(CAPAttacker):
         ref_sensitive_attributes = []
         for key in ref_key_attributes:
             ref_sensitive_attributes.extend(self.synthetic_dict[key])
+
         return majority(ref_sensitive_attributes)
 
     def score(self, key_data, sensitive_data):
@@ -89,10 +91,10 @@ class GCAPAttacker(CAPAttacker):
         return count_frequency(ref_sensitive_attributes, sensitive_data)
 
 
-class GCAP(CategoricalPrivacyMetric):
-    """The GCAP (General CAP) privacy metric. Scored based on the ZeroCAPAttacker.
+class CategoricalGeneralizedCAP(CategoricalPrivacyMetric):
+    """The GeneralizedCAP privacy metric. Scored based on the ZeroCAPAttacker.
     """
 
-    name = 'GCAP'
-    MODEL = GCAPAttacker
+    name = 'Categorical GeneralizedCAP'
+    MODEL = GeneralizedCAPAttacker
     ACCURACY_BASE = False

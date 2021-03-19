@@ -52,23 +52,5 @@ class InverseCDFDistance(LossFunction):
         for idx in range(len(pred)):
             percentiles = self.cdfs[idx].cdf(np.array([pred[idx], real[idx]]))
             dist += abs(percentiles[0] - percentiles[1])**self.p
-        return dist
 
-
-class LpNorm(LossFunction):
-    """pth power of the Lp distance.
-    """
-
-    def __init__(self, p=2):
-        """
-        Args:
-            p (float):
-                The p parameter in L_p metric. Must be positive.
-        """
-        self.p = p
-
-    def measure(self, pred, real):
-        dist = 0
-        for idx in range(len(pred)):
-            dist += abs(pred[idx] - real[1])**self.p
         return dist
