@@ -42,9 +42,9 @@ class CategoricalEnsemble(CategoricalPrivacyMetric):
 
         if 'attackers' not in model_kwargs:  # no attackers specfied
             return np.nan
-        elif not isinstance(model_kwargs['attackers'], list) or \
-             len(model_kwargs['attackers']) == 0:  # zero attackers specfied
-                return np.nan
+        elif (not isinstance(model_kwargs['attackers'], list)
+              or len(model_kwargs['attackers']) == 0):  # zero attackers specfied
+            return np.nan
 
         return super().compute(
             real_data,

@@ -109,26 +109,26 @@ def test_categorical_ens():
 
 def numerical_real_data():
     return pd.DataFrame({
-        'key1': [0.0, 1.0, 2.0, 3.0, 4.0] * 4,
-        'key2': [-0.0, -1.0, -2.0, -3.0, -4.0] * 4,
-        'sensitive1': [0.0, 1.0, 2.0, 3.0, 4.0] * 4,
-        'sensitive2': [-0.0, -1.0, -2.0, -3.0, -4.0] * 4
+        'key1': [0.0, 0.1, 0.2, 0.3, 0.4] * 4,
+        'key2': [-0.0, -0.1, -0.2, -0.3, -0.4] * 4,
+        'sensitive1': [0.0, 0.1, 0.2, 0.3, 0.4] * 4,
+        'sensitive2': [-0.0, -0.1, -0.2, -0.3, -0.4] * 4
     })
 
 
 def numerical_good_synthetic_data():
     return pd.DataFrame({
-        'key1': np.random.normal(size=20),
-        'key2': np.random.normal(size=20),
-        'sensitive1': np.random.normal(100, size=20),
-        'sensitive2': np.random.normal(-100, size=20)
+        'key1': np.random.normal(loc=0.2, scale=0.1, size=20),
+        'key2': np.random.normal(loc=-0.2, scale=0.1, size=20),
+        'sensitive1': np.random.normal(loc=10.0, size=20),
+        'sensitive2': np.random.normal(loc=-10.0, size=20)
     })
 
 
 def numerical_bad_synthetic_data():
     return pd.DataFrame({
-        'key1': np.random.normal(size=20),
-        'key2': np.random.normal(size=20),
+        'key1': np.random.normal(loc=0.2, scale=0.1, size=20),
+        'key2': np.random.normal(loc=-0.2, scale=0.1, size=20),
         'sensitive1': np.random.normal(size=20),
         'sensitive2': np.random.normal(size=20)
     })

@@ -52,6 +52,7 @@ class NumericalRadiusNearestNeighborAttacker(PrivacyAttackerModel):
 
 class CdfInvCutoff(InverseCDFDistance):
     """Gives weight = 1 if the Lp averaged distance between the entries is below a given cutoff.
+    
     Formally, suppose given key = (k1,..,kn), while the reference key is (k1',...,kn').
     Suppose the cdfs of each entry are c1,...,cn, resp.
     Then weight = 1 if and only if (sum |c_i(ki) - c_i(ki')|**p) / n <= cutoff**p.
@@ -68,13 +69,13 @@ class CdfInvCutoff(InverseCDFDistance):
 
     def measure(self, pred, real):
         dist = InverseCDFDistance.measure(self, pred, real)
-        return 1.0 / (dist + 1e-3)  # TODO: figure out a better way to set cutoff
+        return 1 if dist < self.cutoff else 0
 
 
 class NumericalRadiusNearestNeighbor(NumericalPrivacyMetric):
-    """The Radius Nearest Neighbor privacy metric. Scored based on the NumericalRadiusNearestNeighbor.
+    """The Radius Nearest Neighbor metric. Scored based on the NumericalRadiusNearestNeighbor.
     """
 
     name = 'Numerical Radius Nearest Neighbor'
     MODEL = NumericalRadiusNearestNeighborAttacker
-    MODEL_KWARGS = {'weight_func': CdfInvCutoff, 'weight_func_kwargs': {'p': 2, 'cutoff': 0.1}}
+    MODEL_KWARGS = {'weight_func': CdfInvCutoff, 'weight_func_kwargs': {'p': 2, 'cutoff': 0.3}}
