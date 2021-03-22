@@ -52,7 +52,7 @@ class NumericalRadiusNearestNeighborAttacker(PrivacyAttackerModel):
 
 class CdfInvCutoff(InverseCDFDistance):
     """Gives weight = 1 if the Lp averaged distance between the entries is below a given cutoff.
-    
+
     Formally, suppose given key = (k1,..,kn), while the reference key is (k1',...,kn').
     Suppose the cdfs of each entry are c1,...,cn, resp.
     Then weight = 1 if and only if (sum |c_i(ki) - c_i(ki')|**p) / n <= cutoff**p.
