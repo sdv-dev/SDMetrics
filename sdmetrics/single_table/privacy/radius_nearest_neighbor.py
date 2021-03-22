@@ -1,17 +1,18 @@
 import numpy as np
 
 from sdmetrics.single_table.privacy.base import NumericalPrivacyMetric, PrivacyAttackerModel
-from sdmetrics.single_table.privacy.loss import InverseCDFDistance
+from sdmetrics.single_table.privacy.loss import InverseCdfDistance
 
 
 class NumericalRadiusNearestNeighborAttacker(PrivacyAttackerModel):
-    """The Radius Nearest Neighbor Attacker will predict the sensitive value to be a
-    weighted mean of the entries in the synthetic table. Where this weight is given by a
-    separate function, and typically describes the closeness between the given key and
-    the corresponding entry in the table.
+    """The Radius Nearest Neighbor Attacker.
+
+    It will predict the sensitive value to be a weighted mean of the entries in the
+    synthetic table. Where this weight is given by a separate function, and typically
+    describes the closeness between the given key and the corresponding entry in the table.
     """
 
-    def __init__(self, weight_func=None, weight_func_kwargs={}):
+    def __init__(self, weight_func=None, weight_func_kwargs=None):
         """
         Args:
             weight_func (Class):
@@ -19,10 +20,14 @@ class NumericalRadiusNearestNeighborAttacker(PrivacyAttackerModel):
             weight_func_kwargs (dict):
                 Parameters of the weight function.
         """
+        if weight_func_kwargs is None:
+            weight_func_kwargs = {}
+
         self.weight_func = weight_func(**weight_func_kwargs)
         self.synthetic_data = None
         self.key = None
         self.sensitive_fields = None
+        self.key_fields = None
 
     def fit(self, synthetic_data, key_fields, sensitive_fields):
         self.weight_func.fit(synthetic_data, key_fields)
@@ -44,13 +49,14 @@ class NumericalRadiusNearestNeighborAttacker(PrivacyAttackerModel):
                 modified = True
             else:
                 summ += sensitive_data
+
         if weights == 0:
             return (0,) * len(self.sensitive_fields)
         else:
             return tuple(summ / weights)
 
 
-class CdfInvCutoff(InverseCDFDistance):
+class InverseCdfCutoff(InverseCdfDistance):
     """Gives weight = 1 if the Lp averaged distance between the entries is below a given cutoff.
 
     Formally, suppose given key = (k1,..,kn), while the reference key is (k1',...,kn').
@@ -64,11 +70,11 @@ class CdfInvCutoff(InverseCDFDistance):
         self.cutoff = cutoff**p
 
     def fit(self, data, cols):
-        InverseCDFDistance.fit(self, data, cols)
+        InverseCdfDistance.fit(self, data, cols)
         self.cutoff *= len(cols)
 
     def measure(self, pred, real):
-        dist = InverseCDFDistance.measure(self, pred, real)
+        dist = InverseCdfDistance.measure(self, pred, real)
         return 1 if dist < self.cutoff else 0
 
 
@@ -78,4 +84,6 @@ class NumericalRadiusNearestNeighbor(NumericalPrivacyMetric):
 
     name = 'Numerical Radius Nearest Neighbor'
     MODEL = NumericalRadiusNearestNeighborAttacker
-    MODEL_KWARGS = {'weight_func': CdfInvCutoff, 'weight_func_kwargs': {'p': 2, 'cutoff': 0.3}}
+    MODEL_KWARGS = {
+        'weight_func': InverseCdfCutoff, 'weight_func_kwargs': {'p': 2, 'cutoff': 0.3}
+    }

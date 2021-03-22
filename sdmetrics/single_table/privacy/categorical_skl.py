@@ -21,6 +21,7 @@ class CategoricalSklearnAttacker(PrivacyAttackerModel):
         skl_learner (Class):
             A (wrapped) sklearn classifier class that can be called with no arguments.
     """
+
     KEY_TYPE = None
     SENSITIVE_TYPE = None
     SKL_LEARNER = None
@@ -63,20 +64,20 @@ class CategoricalSklearnAttacker(PrivacyAttackerModel):
 
 
 class SVCWrapper():
-    """This class provides an wrapper arround sklearn.svm.SVC so that it can support
-    multidimensional y.
+    """A wrapper arround `sklearn.svm.SVC` to support multidimensional y.
     """
 
     def __init__(self):
         self.predictors = []
 
     def fit(self, X, Y):
-        """
-        Fit the classifier to training data X and lables Y.
+        """Fit the classifier to training data X and lables Y.
 
         Arguments:
-            X (np.array): training data matrix of shape (n_samples, n_features)
-            Y (np.array): label matrix of shape (n_samples, n_labels)
+            X (np.array):
+                training data matrix of shape (n_samples, n_features)
+            Y (np.array):
+                label matrix of shape (n_samples, n_labels)
         """
         n_labels = Y.shape[1]
         for idx in range(n_labels):
@@ -86,11 +87,11 @@ class SVCWrapper():
             self.predictors.append(predictor)
 
     def predict(self, X):
-        """
-        Predict the labels corresponding to data X.
+        """Predict the labels corresponding to data X.
 
         Arguments:
-            X (np.array): training data matrix of shape (n_samples, n_features)
+            X (np.array):
+                training data matrix of shape (n_samples, n_features)
 
         Returns:
             np.array: label matrix of shape (n_samples, n_labels)
@@ -98,25 +99,26 @@ class SVCWrapper():
         Y = []
         for predictor in self.predictors:
             Y.append(predictor.predict(X))
+
         Y = np.array(Y).T
         return Y
 
 
 class NBWrapper():
-    """This class provides an wrapper arround sklearn.naive_bayes.CategoricalNB so that it can
-    support multidimensional y.
+    """A wrapper arround `sklearn.naive_bayes.CategoricalNB` to support multidimensional y.
     """
 
     def __init__(self):
         self.predictors = []
 
     def fit(self, X, Y):
-        """
-        Fit the classifier to training data X and lables Y.
+        """Fit the classifier to training data X and lables Y.
 
         Arguments:
-            X (np.array): training data matrix of shape (n_samples, n_features)
-            Y (np.array): label matrix of shape (n_samples, n_labels)
+            X (np.array):
+                training data matrix of shape (n_samples, n_features)
+            Y (np.array):
+                label matrix of shape (n_samples, n_labels)
         """
         n_labels = Y.shape[1]
         for idx in range(n_labels):
@@ -126,8 +128,7 @@ class NBWrapper():
             self.predictors.append(predictor)
 
     def predict(self, X):
-        """
-        Predict the labels corresponding to data X.
+        """Predict the labels corresponding to data X.
 
         Arguments:
             X (np.array): training data matrix of shape (n_samples, n_features)
@@ -143,9 +144,11 @@ class NBWrapper():
 
 
 class CategoricalNBAttacker(CategoricalSklearnAttacker):
-    """The Categorical NaiveBaysian privacy attaker uses a naive bayesian classifier
-    and the score is calculated based on prediction accuracy.
+    """The Categorical NaiveBaysian privacy attaker.
+    
+    Uses a naive bayesian classifier to calculate the score based on prediction accuracy.
     """
+
     KEY_TYPE = CategoricalType.CLASS_NUM
     SENSITIVE_TYPE = CategoricalType.CLASS_NUM
     SKL_LEARNER = NBWrapper
@@ -161,9 +164,11 @@ class CategoricalNB(CategoricalPrivacyMetric):
 
 
 class CategoricalKNNAttacker(CategoricalSklearnAttacker):
-    """The Categorical KNN (k nearest neighbors) privacy attaker uses a KNN classifier
-    and the score is calculated based on prediction accuracy.
+    """The Categorical KNN (k nearest neighbors) privacy attaker.
+
+    Uses a KNN classifier to calculate the score based on prediction accuracy.
     """
+
     KEY_TYPE = CategoricalType.ONE_HOT
     SENSITIVE_TYPE = CategoricalType.CLASS_NUM
     SKL_LEARNER = KNeighborsClassifier
@@ -179,9 +184,11 @@ class CategoricalKNN(CategoricalPrivacyMetric):
 
 
 class CategoricalRFAttacker(CategoricalSklearnAttacker):
-    """The Categorical RF (Random Forest) privacy attaker uses a RF classifier
-    and the score is calculated based on prediction accuracy.
+    """The Categorical RF (Random Forest) privacy attaker.
+
+    Uses a RF classifier to calculate the score based on prediction accuracy.
     """
+
     KEY_TYPE = CategoricalType.ONE_HOT
     SENSITIVE_TYPE = CategoricalType.CLASS_NUM
     SKL_LEARNER = RandomForestClassifier
@@ -197,9 +204,11 @@ class CategoricalRF(CategoricalPrivacyMetric):
 
 
 class CategoricalSVMAttacker(CategoricalSklearnAttacker):
-    """The Categorical SVM (Support Vector Machine) privacy attaker uses a SVM classifier
-    and the score is calculated based on prediction accuracy.
+    """The Categorical SVM (Support Vector Machine) privacy attaker.
+
+    Uses a SVM classifier to calculate the score based on prediction accuracy.
     """
+
     KEY_TYPE = CategoricalType.ONE_HOT
     SENSITIVE_TYPE = CategoricalType.CLASS_NUM
     SKL_LEARNER = SVCWrapper

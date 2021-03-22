@@ -28,24 +28,25 @@ class NumSklearnAttacker(PrivacyAttackerModel):
         sensitive_pred = self.predictor.predict([key_data])
         if len(np.array(sensitive_pred).shape) == 1:
             sensitive_pred = [sensitive_pred]
+
         return tuple(sensitive_pred[0])
 
 
 class SVRWrapper():
-    """This class provides an wrapper arround sklearn.svm.SVR so that it can support
-    multidimensional y.
+    """A wrapper arround `sklearn.svm.SVR` to support multidimensional y.
     """
 
     def __init__(self):
         self.predictors = []
 
     def fit(self, X, Y):
-        """
-        Fit the classifier to training data X and lables Y.
+        """Fit the classifier to training data X and lables Y.
 
         Arguments:
-            X (np.array): training data matrix of shape (n_samples, n_features)
-            Y (np.array): label matrix of shape (n_samples, n_labels)
+            X (np.array):
+                training data matrix of shape (n_samples, n_features).
+            Y (np.array):
+                label matrix of shape (n_samples, n_labels).
         """
         n_labels = Y.shape[1]
         for idx in range(n_labels):
@@ -55,8 +56,7 @@ class SVRWrapper():
             self.predictors.append(predictor)
 
     def predict(self, X):
-        """
-        Predict the labels corresponding to data X.
+        """Predict the labels corresponding to data X.
 
         Arguments:
             X (np.array): training data matrix of shape (n_samples, n_features)
@@ -67,6 +67,7 @@ class SVRWrapper():
         Y = []
         for predictor in self.predictors:
             Y.append(predictor.predict(X))
+
         Y = np.array(Y).T
         return Y
 
@@ -74,6 +75,7 @@ class SVRWrapper():
 class LRAttacker(NumSklearnAttacker):
     """The privacy attaker based on the Linear Regression model.
     """
+
     SKL_LEARNER = LinearRegression
 
 
@@ -88,6 +90,7 @@ class NumericalLR(NumericalPrivacyMetric):
 class MLPAttacker(NumSklearnAttacker):
     """The privacy attaker based on the MLP (Multi-layer Perceptron) regression model.
     """
+
     SKL_LEARNER = MLPRegressor
 
 
@@ -102,6 +105,7 @@ class NumericalMLP(NumericalPrivacyMetric):
 class SVRAttacker(NumSklearnAttacker):
     """The privacy attaker based on the SVR (Support-vector Regression) model.
     """
+
     SKL_LEARNER = SVRWrapper
 
 

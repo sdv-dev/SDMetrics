@@ -5,14 +5,15 @@ import numpy as np
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.single_table.privacy.loss import InverseCDFDistance
+from sdmetrics.single_table.privacy.loss import InverseCdfDistance
 
 
 class CategoricalType(Enum):
+    """Enumerates the type required for a categorical data.
+
+    The value can be one-hot-encoded, or coded as class number.
     """
-    This enumerates the type required for a categorical data; the value
-    can be one-hot-encoded, or coded as class number.
-    """
+
     CLASS_NUM = "Class_num"
     ONE_HOT = "One_hot"
 
@@ -20,7 +21,7 @@ class CategoricalType(Enum):
 class CategoricalPrivacyMetric(SingleTableMetric):
     """Base class for Categorical Privacy metrics on single tables.
 
-    These metrics fit a adversial attacker model on the synthetic data and
+    These metrics fit an adversial attacker model on the synthetic data and
     then evaluate its accuracy (or probability of making the correct attack)
     on the real data.
 
@@ -80,7 +81,7 @@ class CategoricalPrivacyMetric(SingleTableMetric):
                 sensitive_fields=None, model_kwargs=None):
         """Compute this metric.
 
-        This fits a adversial attacker model on the synthetic data and
+        This fits an adversial attacker model on the synthetic data and
         then evaluates it making predictions on the real data.
 
         A ``key_fields`` column(s) name must be given, either directly or as a first level
@@ -124,9 +125,9 @@ class CategoricalPrivacyMetric(SingleTableMetric):
 
         for col in key_fields + sensitive_fields:
             data_type = metadata['fields'][col]
-            if data_type != cls._DTYPES_TO_TYPES['i'] and \
-               data_type != cls._DTYPES_TO_TYPES['O'] and \
-               data_type != cls._DTYPES_TO_TYPES['b']:  # check data type
+            if (data_type != cls._DTYPES_TO_TYPES['i'] and
+               data_type != cls._DTYPES_TO_TYPES['O'] and
+               data_type != cls._DTYPES_TO_TYPES['b']):  # check data type
                 return np.nan
 
         model = cls._fit(synthetic_data, key_fields, sensitive_fields, model_kwargs)
@@ -163,7 +164,7 @@ class CategoricalPrivacyMetric(SingleTableMetric):
 class NumericalPrivacyMetric(SingleTableMetric):
     """Base class for Numerical Privacy metrics on single tables.
 
-    These metrics fit a adversial attacker model on the synthetic data and
+    These metrics fit an adversial attacker model on the synthetic data and
     then evaluate its accuracy (or probability of making the correct attack)
     on the real data.
 
@@ -192,7 +193,7 @@ class NumericalPrivacyMetric(SingleTableMetric):
     max_value = np.inf
     MODEL = None
     MODEL_KWARGS = {}
-    LOSS_FUNCTION = InverseCDFDistance
+    LOSS_FUNCTION = InverseCdfDistance
     LOSS_FUNCTION_KWARGS = {'p': 2}
 
     @classmethod
@@ -227,7 +228,7 @@ class NumericalPrivacyMetric(SingleTableMetric):
                 loss_function_kwargs=None):
         """Compute this metric.
 
-        This fits a adversial attacker model on the synthetic data and
+        This fits an adversial attacker model on the synthetic data and
         then evaluates it making predictions on the real data.
 
         A ``key_fields`` column(s) name must be given, either directly or as a first level
@@ -299,8 +300,14 @@ class NumericalPrivacyMetric(SingleTableMetric):
 
         return score / count
 
-
 class PrivacyAttackerModel():
+    """Train and evaluate a privacy model.
+
+    Train a model to predict sensitive attributes from key attributes
+    using the synthetic data. Then, evaluate the privacy of the model by
+    trying to predict the sensitive attributes of the real data.
+    """
+
     def fit(self, synthetic_data, key_fields, sensitive_fields):
         """Fit the attacker on the synthetic data.
 
@@ -328,7 +335,7 @@ class PrivacyAttackerModel():
         raise NotImplementedError("Please implement predict method of attackers")
 
     def score(self, key_data, sensitive_data):
-        """Score based on the belief of the attacker, in the form P(sensitive_data|key|data)
+        """Score based on the belief of the attacker, in the form P(sensitive_data|key|data).
 
         Args:
             key_data(tuple):

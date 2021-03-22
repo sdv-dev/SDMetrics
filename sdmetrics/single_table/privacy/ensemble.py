@@ -5,9 +5,10 @@ from sdmetrics.single_table.privacy.util import majority
 
 
 class CategoricalEnsembleAttacker(PrivacyAttackerModel):
-    """The Categorical ENS (ensemble 'majority vote' classifier) privacy attacker will
-    predict the majority of the specified sub-attackers's predicions, and the privacy score will
-    be calculated based on the accuracy of its prediction.
+    """The Categorical ENS (ensemble 'majority vote' classifier) privacy attacker.
+
+    It will predict the majority of the specified sub-attackers's predicions, and the privacy
+    score will be calculated based on the accuracy of its prediction.
     """
 
     def __init__(self, attackers=[]):
@@ -23,11 +24,10 @@ class CategoricalEnsembleAttacker(PrivacyAttackerModel):
 
 
 class CategoricalEnsemble(CategoricalPrivacyMetric):
-    """The Categorical Ensemble privacy metric. Scored based on the EnsembleAttacker.
+    """The Categorical Ensemble privacy metric. Scored based on the CategoricalEnsembleAttacker.
 
-    When calling cls.compute, please make sure to pass in the following argument:
-        model_kwargs (dict):
-            {attackers: list[PrivacyAttackerModel]}
+    When calling `cls.compute`, please make sure to pass in the argument
+    `model_kwargs (dict): {attackers: list[PrivacyAttackerModel]}`.
     """
 
     name = 'Ensemble'
