@@ -145,7 +145,7 @@ class NBWrapper():
 
 class CategoricalNBAttacker(CategoricalSklearnAttacker):
     """The Categorical NaiveBaysian privacy attaker.
-    
+
     Uses a naive bayesian classifier to calculate the score based on prediction accuracy.
     """
 

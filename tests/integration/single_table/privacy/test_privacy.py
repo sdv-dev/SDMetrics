@@ -101,8 +101,8 @@ def test_categorical_ens():
         model_kwargs=model_kwargs
     )
 
-    assert (CategoricalEnsemble.min_value <= horrible <= bad <=
-            good <= perfect <= CategoricalEnsemble.max_value)
+    assert (CategoricalEnsemble.min_value <= horrible <= bad
+            <= good <= perfect <= CategoricalEnsemble.max_value)
 
 
 def numerical_real_data():
