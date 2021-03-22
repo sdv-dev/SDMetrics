@@ -3,11 +3,9 @@ import pandas as pd
 import pytest
 
 from sdmetrics.single_table.privacy import (
-    CategoricalPrivacyMetric, NumericalPrivacyMetric, CategoricalEnsemble
-)
+    CategoricalEnsemble, CategoricalPrivacyMetric, NumericalPrivacyMetric)
 from sdmetrics.single_table.privacy.categorical_skl import (
-    CategoricalKNNAttacker, CategoricalNBAttacker, CategoricalRFAttacker
-)
+    CategoricalKNNAttacker, CategoricalNBAttacker, CategoricalRFAttacker)
 
 categorical_metrics = CategoricalPrivacyMetric.get_subclasses()
 numerical_metrics = NumericalPrivacyMetric.get_subclasses()
@@ -104,7 +102,7 @@ def test_categorical_ens():
     )
 
     assert CategoricalEnsemble.min_value <= horrible <= bad <= \
-           good <= perfect <= CategoricalEnsemble.max_value
+        good <= perfect <= CategoricalEnsemble.max_value
 
 
 def numerical_real_data():
