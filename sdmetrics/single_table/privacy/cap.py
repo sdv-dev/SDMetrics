@@ -70,8 +70,7 @@ class CAPAttacker(PrivacyAttackerModel):
 
 
 class CategoricalCAP(CategoricalPrivacyMetric):
-    """The Categorical CAP privacy metric. Scored based on the CAPAttacker.
-    """
+    """The Categorical CAP privacy metric. Scored based on the CAPAttacker."""
 
     name = 'CategoricalCAP'
     MODEL = CAPAttacker
@@ -106,8 +105,7 @@ class ZeroCAPAttacker(CAPAttacker):
 
 
 class CategoricalZeroCAP(CategoricalPrivacyMetric):
-    """The Categorical 0CAP privacy metric. Scored based on the ZeroCAPAttacker.
-    """
+    """The Categorical 0CAP privacy metric. Scored based on the ZeroCAPAttacker."""
 
     name = '0CAP'
     MODEL = ZeroCAPAttacker
@@ -164,8 +162,7 @@ class GeneralizedCAPAttacker(CAPAttacker):
 
 
 class CategoricalGeneralizedCAP(CategoricalPrivacyMetric):
-    """The GeneralizedCAP privacy metric. Scored based on the ZeroCAPAttacker.
-    """
+    """The GeneralizedCAP privacy metric. Scored based on the ZeroCAPAttacker."""
 
     name = 'Categorical GeneralizedCAP'
     MODEL = GeneralizedCAPAttacker

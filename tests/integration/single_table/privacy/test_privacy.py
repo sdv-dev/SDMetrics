@@ -4,7 +4,7 @@ import pytest
 
 from sdmetrics.single_table.privacy import (
     CategoricalEnsemble, CategoricalPrivacyMetric, NumericalPrivacyMetric)
-from sdmetrics.single_table.privacy.categorical_skl import (
+from sdmetrics.single_table.privacy.categorical_sklearn import (
     CategoricalKNNAttacker, CategoricalNBAttacker, CategoricalRFAttacker)
 
 categorical_metrics = CategoricalPrivacyMetric.get_subclasses()

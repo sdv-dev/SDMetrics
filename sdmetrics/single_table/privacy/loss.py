@@ -25,7 +25,7 @@ class LossFunction():
         raise NotImplementedError('Please implement the loss measuring algorithm!')
 
 
-class InverseCdfDistance(LossFunction):
+class InverseCDFDistance(LossFunction):
     """Measure the distance between continuous key fields.
 
     This loss function first applies the fitted cdfs to every single entry (i.e. turning

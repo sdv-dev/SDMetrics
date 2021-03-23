@@ -64,8 +64,7 @@ class CategoricalSklearnAttacker(PrivacyAttackerModel):
 
 
 class SVCWrapper():
-    """A wrapper arround `sklearn.svm.SVC` to support multidimensional y.
-    """
+    """A wrapper arround `sklearn.svm.SVC` to support multidimensional y."""
 
     def __init__(self):
         self.predictors = []
@@ -105,8 +104,7 @@ class SVCWrapper():
 
 
 class NBWrapper():
-    """A wrapper arround `sklearn.naive_bayes.CategoricalNB` to support multidimensional y.
-    """
+    """A wrapper arround `sklearn.naive_bayes.CategoricalNB` to support multidimensional y."""
 
     def __init__(self):
         self.predictors = []
@@ -155,8 +153,7 @@ class CategoricalNBAttacker(CategoricalSklearnAttacker):
 
 
 class CategoricalNB(CategoricalPrivacyMetric):
-    """The Categorical NaiveBaysian privacy metric. Scored based on the CategoricalNBAttacker.
-    """
+    """The Categorical NaiveBaysian privacy metric. Scored based on the CategoricalNBAttacker."""
 
     name = 'Categorical NaiveBayesian'
     MODEL = CategoricalNBAttacker
@@ -175,8 +172,7 @@ class CategoricalKNNAttacker(CategoricalSklearnAttacker):
 
 
 class CategoricalKNN(CategoricalPrivacyMetric):
-    """The Categorical KNN privacy metric. Scored based on the KNNAttacker.
-    """
+    """The Categorical KNN privacy metric. Scored based on the KNNAttacker."""
 
     name = 'K-Nearest Neighbors'
     MODEL = CategoricalKNNAttacker
@@ -195,8 +191,7 @@ class CategoricalRFAttacker(CategoricalSklearnAttacker):
 
 
 class CategoricalRF(CategoricalPrivacyMetric):
-    """The Categorical RF privacy metric. Scored based on the CategoricalRFAttacker.
-    """
+    """The Categorical RF privacy metric. Scored based on the CategoricalRFAttacker."""
 
     name = 'Categorical Random Forest'
     MODEL = CategoricalRFAttacker
@@ -215,8 +210,7 @@ class CategoricalSVMAttacker(CategoricalSklearnAttacker):
 
 
 class CategoricalSVM(CategoricalPrivacyMetric):
-    """The Categorical SVM privacy metric. Scored based on the CategoricalSVMAttacker.
-    """
+    """The Categorical SVM privacy metric. Scored based on the CategoricalSVMAttacker."""
 
     name = 'Support Vector Classifier'
     MODEL = CategoricalSVMAttacker

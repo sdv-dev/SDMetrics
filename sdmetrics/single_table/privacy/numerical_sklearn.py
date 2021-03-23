@@ -6,7 +6,7 @@ from sklearn.svm import SVR as svr
 from sdmetrics.single_table.privacy.base import NumericalPrivacyMetric, PrivacyAttackerModel
 
 
-class NumSklearnAttacker(PrivacyAttackerModel):
+class NumericalSklearnAttacker(PrivacyAttackerModel):
     """Base class for numerical attacker based on sklearn models.
 
     Attributes:
@@ -33,8 +33,7 @@ class NumSklearnAttacker(PrivacyAttackerModel):
 
 
 class SVRWrapper():
-    """A wrapper arround `sklearn.svm.SVR` to support multidimensional y.
-    """
+    """A wrapper arround `sklearn.svm.SVR` to support multidimensional y."""
 
     def __init__(self):
         self.predictors = []
@@ -72,46 +71,40 @@ class SVRWrapper():
         return Y
 
 
-class LRAttacker(NumSklearnAttacker):
-    """The privacy attaker based on the Linear Regression model.
-    """
+class LRAttacker(NumericalSklearnAttacker):
+    """The privacy attaker based on the Linear Regression model."""
 
     SKL_LEARNER = LinearRegression
 
 
 class NumericalLR(NumericalPrivacyMetric):
-    """The Numerical Linear Regression privacy metric. Scored based on the LRAttacker.
-    """
+    """The Numerical Linear Regression privacy metric. Scored based on the LRAttacker."""
 
     name = 'Numerical Linear Regression'
     MODEL = LRAttacker
 
 
-class MLPAttacker(NumSklearnAttacker):
-    """The privacy attaker based on the MLP (Multi-layer Perceptron) regression model.
-    """
+class MLPAttacker(NumericalSklearnAttacker):
+    """The privacy attaker based on the MLP (Multi-layer Perceptron) regression model."""
 
     SKL_LEARNER = MLPRegressor
 
 
 class NumericalMLP(NumericalPrivacyMetric):
-    """The Multi-layer Perceptron regression privacy metric. Scored based on the MLPAttacker.
-    """
+    """The Multi-layer Perceptron regression privacy metric. Scored based on the MLPAttacker."""
 
     name = 'Multi-layer Perceptron Regression'
     MODEL = MLPAttacker
 
 
-class SVRAttacker(NumSklearnAttacker):
-    """The privacy attaker based on the SVR (Support-vector Regression) model.
-    """
+class SVRAttacker(NumericalSklearnAttacker):
+    """The privacy attaker based on the SVR (Support-vector Regression) model."""
 
     SKL_LEARNER = SVRWrapper
 
 
 class NumericalSVR(NumericalPrivacyMetric):
-    """The Numerical Support-vector Regression privacy metric. Scored based on the SVRAttacker.
-    """
+    """The Numerical Support-vector Regression privacy metric. Scored based on the SVRAttacker."""
 
     name = 'Numerical Support-vector Regression'
     MODEL = SVRAttacker
