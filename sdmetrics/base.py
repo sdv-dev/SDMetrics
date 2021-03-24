@@ -1,5 +1,6 @@
 """BaseMetric class."""
-
+import numpy as np
+from sdmetrics.goal import Goal
 
 class BaseMetric:
     """Base class for all the metrics in SDMetrics.
@@ -58,3 +59,47 @@ class BaseMetric:
                 Metric output or outputs.
         """
         raise NotImplementedError()
+
+    @classmethod
+    def normalize(cls, raw_score):
+        """Compute the normalized value of the metric.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        min_value = float(cls.min_value) if cls.min_value is not None else float('-inf')
+        max_value = float(cls.max_value) if cls.max_value is not None else float('inf')
+
+        print(min_value)
+        print(max_value)
+        if max_value < raw_score or min_value > raw_score:
+            raise ValueError('`raw_score` must be between `min_value` and `max_value`.')
+
+        def is_finite(value):
+            return value not in (float('-inf'), float('inf'))
+
+        score = None
+        if is_finite(min_value) and is_finite(max_value):
+            score = (raw_score - min_value) / (max_value - min_value)
+
+        elif not is_finite(min_value) and is_finite(max_value):
+            score = np.exp(raw_score - max_value)
+
+        elif is_finite(min_value) and not is_finite(max_value):
+            score = 1.0 - np.exp(min_value - raw_score)
+
+        else:
+            raise ValueError('Unbounded score on both sides!')
+
+        if score is None or score < 0 or score > 1:
+            raise ValueError(f'The score {score} should be a value between 0 and 1.')
+
+        if cls.goal == Goal.MINIMIZE:
+            return 1.0 - score
+
+        return score
