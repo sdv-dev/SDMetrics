@@ -44,6 +44,30 @@ Implemented metrics:
     * `MLEfficacy`: Generic ML Efficacy metric that detects the type of ML Problem associated
       with the dataset by analyzing the target column type and then applies all the metrics
       that are compatible with it.
+* Privacy Metrics: Metrics that fit an adversial attacker model on the synthetic data and
+    then evaluate its accuracy (or probability of making the correct attack) on the real data.
+    * `CategoricalCAP`: Privacy Metric for categorical columns, based
+    on the Correct Attribution Probability method.
+    * `CategoricalZeroCAP`: Privacy Metric for categorical columns, based
+    on the Correct Attribution Probability method.
+    * `CategoricalGeneralizedCAP`: Privacy Metric for categorical columns, based
+    on the Correct Attribution Probability method.
+    * `NumericalMLP`: Privacy Metric for numerical columns, based
+    on MLPRegressor from scikit-learn.
+    * `NumericalLR`: Privacy Metric for numerical columns, based
+    on LinearRegression from scikit-learn.
+    * `NumericalSVR`: Privacy Metric for numerical columns, based
+    on SVR from scikit-learn.
+    * `CategoricalKNN`: Privacy Metric for categorical columns, based
+    on KNeighborsClassifier from scikit-learn.
+    * `CategoricalNB`: Privacy Metric for categorical columns, based
+    on CategoricalNB from scikit-learn.
+    * `CategoricalRF`: Privacy Metric for categorical columns, based
+    on RandomForestClassifier from scikit-learn.
+    * `CategoricalEnsemble`: Privacy Metric for categorical columns, based
+    on an 'ensemble' of other categorical Privacy Metrics.
+    * `NumericalRadiusNearestNeighbor`: Privacy Metric for numerical columns, based
+    on an implementation of the Radius Nearest Neighbor method.
 * MultiSingleColumn Metrics: Metrics that apply a Single Column metric on each column from
   the table that is compatible with it and then compute the average across all the columns.
     * `CSTest`: MultiSingleColumn metric based on applying the Single Column CSTest on all
@@ -86,7 +110,18 @@ Out[2]:
  'KSTest': sdmetrics.single_table.multi_single_column.KSTest,
  'KSTestExtended': sdmetrics.single_table.multi_single_column.KSTestExtended,
  'ContinuousKLDivergence': sdmetrics.single_table.multi_column_pairs.ContinuousKLDivergence,
- 'DiscreteKLDivergence': sdmetrics.single_table.multi_column_pairs.DiscreteKLDivergence}
+ 'DiscreteKLDivergence': sdmetrics.single_table.multi_column_pairs.DiscreteKLDivergence,
+ 'CategoricalCAP': sdmetrics.single_table.privacy.cap,
+ 'CategoricalGeneralizedCAP': sdmetrics.single_table.privacy.cap,
+ 'CategoricalZeroCAP': sdmetrics.single_table.privacy.cap,
+ 'CategoricalKNN': sdmetrics.single_table.privacy.cap,
+ 'CategoricalNB': sdmetrics.single_table.privacy.cap,
+ 'CategoricalRF': sdmetrics.single_table.privacy.cap,
+ 'CategoricalEnsemble': sdmetrics.single_table.privacy.ensemble,
+ 'NumericalLR': sdmetrics.single_table.privacy.numerical_sklearn,
+ 'NumericalMLP': sdmetrics.single_table.privacy.numerical_sklearn,
+ 'NumericalSVR': sdmetrics.single_table.privacy.numerical_sklearn,
+ 'NumericalRadiusNearestNeighbor': sdmetrics.single_table.privacy.radius_nearest_neighbor}
 ```
 
 ## Single Table Inputs and Outputs

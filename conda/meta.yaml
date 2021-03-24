@@ -25,8 +25,8 @@ requirements:
     - pomegranate >=0.13.4,<0.14.2
     - pytorch >=1.4,<2
     - sktime >=0.4,<0.6
+    - copulas>=0.5.0,<0.6
     - rdt >=0.4.0,<0.5
-
   run:
     - python >=3.6,<3.9
     - scikit-learn >=0.23,<1
@@ -36,6 +36,7 @@ requirements:
     - pomegranate >=0.13.4,<0.14.2
     - pytorch >=1.4,<2
     - sktime >=0.4,<0.6
+    - copulas>=0.5.0,<0.6
     - rdt >=0.4.0,<0.5
 
 about:
