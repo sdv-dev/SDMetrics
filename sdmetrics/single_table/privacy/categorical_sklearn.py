@@ -11,7 +11,11 @@ from sdmetrics.single_table.privacy.util import allow_nan, allow_nan_array
 
 
 class CategoricalSklearnAttacker(PrivacyAttackerModel):
-    """Base class for categorical attacker based on sklearn models.
+    """Base class for the categorical attackers based on sklearn models.
+
+    It is used to train a model to predict sensitive attributes from key attributes
+    using the synthetic data. Then, evaluate the privacy of the model by
+    trying to predict the sensitive attributes of the real data.
 
     Attributes:
         key_type (CategoricalType):
@@ -38,6 +42,16 @@ class CategoricalSklearnAttacker(PrivacyAttackerModel):
         )
 
     def fit(self, synthetic_data, key_fields, sensitive_fields):
+        """Fit the CategoricalSklearnAttacker on the synthetic data.
+
+        Args:
+            synthetic_data(pandas.DataFrame):
+                The synthetic data table used for adverserial learning.
+            key_fields(list[str]):
+                The names of the key columns.
+            sensitive_fields(list[str]):
+                The names of the sensitive columns.
+        """
         key_table = allow_nan(synthetic_data[key_fields])
         sensitive_table = allow_nan(synthetic_data[sensitive_fields])
         self.key_processor.fit(key_table)
@@ -48,12 +62,23 @@ class CategoricalSklearnAttacker(PrivacyAttackerModel):
         self.predictor.fit(key_train, sensitive_train)
 
     def predict(self, key_data):
+        """Make a prediction of the sensitive data given keys.
+
+        Args:
+            key_data(tuple):
+                The key data.
+
+        Returns:
+            tuple:
+                The predicted sensitive data.
+        """
         keys = allow_nan_array(key_data)  # de-nan key attributes
         try:
             # key attributes in ML ready format
             keys_transform = self.key_processor.transform([keys])
         except ValueError:  # Some attributes of the input haven't appeared in synthetic tables
             return None
+
         sensitive_pred = self.predictor.predict(keys_transform)
         if len(np.array(sensitive_pred).shape) == 1:
             sensitive_pred = [sensitive_pred]

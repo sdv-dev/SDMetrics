@@ -30,12 +30,32 @@ class NumericalRadiusNearestNeighborAttacker(PrivacyAttackerModel):
         self.key_fields = None
 
     def fit(self, synthetic_data, key_fields, sensitive_fields):
+        """Fit the NumericalRadiusNearestNeighborAttacker on the synthetic data.
+
+        Args:
+            synthetic_data(pandas.DataFrame):
+                The synthetic data table used for adverserial learning.
+            key_fields(list[str]):
+                The names of the key columns.
+            sensitive_fields(list[str]):
+                The names of the sensitive columns.
+        """
         self.weight_func.fit(synthetic_data, key_fields)
         self.synthetic_data = synthetic_data
         self.key_fields = key_fields
         self.sensitive_fields = sensitive_fields
 
     def predict(self, key_data):
+        """Make a prediction of the sensitive data given keys.
+
+        Args:
+            key_data(tuple):
+                The key data.
+
+        Returns:
+            tuple:
+                The predicted sensitive data.
+        """
         weights = 0
         summ = None
         modified = False
@@ -70,16 +90,43 @@ class InverseCDFCutoff(InverseCDFDistance):
         self.cutoff = cutoff**p
 
     def fit(self, data, cols):
+        """Fits univariate distributions (automatically selected).
+
+        Args:
+            data (DataFrame):
+                Data, where each column in `cols` is a continuous column.
+            cols (list[str]):
+                Column names.
+        """
         InverseCDFDistance.fit(self, data, cols)
         self.cutoff *= len(cols)
 
     def measure(self, pred, real):
+        """Compute the distance (L_p norm) between the pred and real values.
+
+        This uses the probability integral transform to map the pred/real values
+        to a CDF value (between 0.0 and 1.0). Then, it computes the L_p norm
+        between the CDF(pred) and CDF(real).
+
+        Args:
+            pred (tuple):
+                Predicted value(s) corresponding to the columns specified in fit.
+            real (tuple):
+                Real value(s) corresponding to the columns specified in fit.
+
+        Returns:
+            float:
+                The L_p norm of the CDF value.
+        """
         dist = InverseCDFDistance.measure(self, pred, real)
         return 1 if dist < self.cutoff else 0
 
 
 class NumericalRadiusNearestNeighbor(NumericalPrivacyMetric):
-    """The Radius Nearest Neighbor metric. Scored based on the NumericalRadiusNearestNeighbor."""
+    """The Radius Nearest Neighbor privacy metric.
+
+    Scored based on the NumericalRadiusNearestNeighborAttacker.
+    """
 
     name = 'Numerical Radius Nearest Neighbor'
     MODEL = NumericalRadiusNearestNeighborAttacker

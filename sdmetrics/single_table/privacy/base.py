@@ -106,7 +106,7 @@ class CategoricalPrivacyMetric(SingleTableMetric):
                 Name of the column(s) to use as the sensitive attributes.
             model_kwargs (dict):
                 Key word arguments of the attacker model. cls.MODEL_KWARGS will be used
-                if noen is provided.
+                if none is provided.
 
         Returns:
             union[float, tuple[float]]:

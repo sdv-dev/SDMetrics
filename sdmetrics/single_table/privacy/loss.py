@@ -3,12 +3,14 @@ from copulas.univariate.base import Univariate
 
 
 class LossFunction():
+    """Base class for a loss function."""
+
     def fit(self, data, cols):
         """Learn the metric on the value space.
 
         Args:
             real_data (pandas.DataFrame):
-                The real data data table.
+                The real data table.
             cols (list[str]):
                 The names for the target columns (usually the sensitive cols).
         """
@@ -48,7 +50,6 @@ class InverseCDFDistance(LossFunction):
         Args:
             data (DataFrame):
                 Data, where each column in `cols` is a continuous column.
-
             cols (list[str]):
                 Column names.
         """
@@ -68,7 +69,6 @@ class InverseCDFDistance(LossFunction):
         Args:
             pred (tuple):
                 Predicted value(s) corresponding to the columns specified in fit.
-
             real (tuple):
                 Real value(s) corresponding to the columns specified in fit.
 

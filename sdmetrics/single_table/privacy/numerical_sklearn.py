@@ -9,6 +9,10 @@ from sdmetrics.single_table.privacy.base import NumericalPrivacyMetric, PrivacyA
 class NumericalSklearnAttacker(PrivacyAttackerModel):
     """Base class for numerical attacker based on sklearn models.
 
+    It is used to train a model to predict sensitive attributes from key attributes
+    using the synthetic data. Then, evaluate the privacy of the model by
+    trying to predict the sensitive attributes of the real data.
+
     Attributes:
         skl_learner (Class):
             A (wrapped) sklearn classifier class that can be called with no arguments.
@@ -19,12 +23,32 @@ class NumericalSklearnAttacker(PrivacyAttackerModel):
         self.predictor = self.SKL_LEARNER()
 
     def fit(self, synthetic_data, key, sensitive):
+        """Fit the NumericalSklearnAttacker on the synthetic data.
+
+        Args:
+            synthetic_data(pandas.DataFrame):
+                The synthetic data table used for adverserial learning.
+            key_fields(list[str]):
+                The names of the key columns.
+            sensitive_fields(list[str]):
+                The names of the sensitive columns.
+        """
         key_table = np.array(synthetic_data[key])
         sensitive_table = np.array(synthetic_data[sensitive])
 
         self.predictor.fit(key_table, sensitive_table)
 
     def predict(self, key_data):
+        """Make a prediction of the sensitive data given keys.
+
+        Args:
+            key_data(tuple):
+                The key data.
+
+        Returns:
+            tuple:
+                The predicted sensitive data.
+        """
         sensitive_pred = self.predictor.predict([key_data])
         if len(np.array(sensitive_pred).shape) == 1:
             sensitive_pred = [sensitive_pred]
