@@ -1,6 +1,8 @@
 """BaseMetric class."""
 import numpy as np
+
 from sdmetrics.goal import Goal
+
 
 class BaseMetric:
     """Base class for all the metrics in SDMetrics.
