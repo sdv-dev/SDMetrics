@@ -1,27 +1,66 @@
+import pytest
+
 from sdmetrics.base import BaseMetric
 from sdmetrics.goal import Goal
 
 
 class TestBaseMetric:
 
-    @staticmethod
-    def positive():
-        BaseMetric.max_value = 2000
-        BaseMetric.min_value = 1000
-        score = 1600
-
-        return BaseMetric, score
-
-    def test_normalize_positive_bounds_maximize(self):
-        BaseMetric, score = self.positive()
+    def test_normalize_bounded(self):
+        BaseMetric.max_value = 1
+        BaseMetric.min_value = -1
         BaseMetric.goal = Goal.MAXIMIZE
-        normalized = BaseMetric.normalize(score)
 
-        assert normalized == .6
+        raw_score = 0
+        normalized = BaseMetric.normalize(raw_score)
 
-    def test_normalize_positive_bounds_minimize(self):
-        BaseMetric, score = self.positive()
+        assert normalized == .5
+
+    def test_normalize_high_bound(self):
+        BaseMetric.max_value = 1
+        BaseMetric.min_value = float('-inf')
+        BaseMetric.goal = Goal.MAXIMIZE
+
+        raw_score = 1
+        normalized = BaseMetric.normalize(raw_score)
+
+        assert normalized == 1
+
+    def test_normalize_low_bound(self):
+        BaseMetric.max_value = float('inf')
+        BaseMetric.min_value = -1
+        BaseMetric.goal = Goal.MAXIMIZE
+
+        raw_score = -1
+        normalized = BaseMetric.normalize(raw_score)
+
+        assert normalized == 0
+
+    def test_normalize_unbounded(self):
+        BaseMetric.max_value = float('inf')
+        BaseMetric.min_value = float('-inf')
+        BaseMetric.goal = Goal.MAXIMIZE
+
+        raw_score = 0
+        normalized = BaseMetric.normalize(raw_score)
+
+        assert normalized == .5
+
+    def test_normalize_minimize(self):
+        BaseMetric.max_value = 1
+        BaseMetric.min_value = -1
         BaseMetric.goal = Goal.MINIMIZE
-        normalized = BaseMetric.normalize(score)
 
-        assert normalized == .4
+        raw_score = 1
+        normalized = BaseMetric.normalize(raw_score)
+
+        assert normalized == 0
+
+    def test_normalize_out_of_bounds(self):
+        BaseMetric.max_value = 1
+        BaseMetric.min_value = -1
+        BaseMetric.goal = Goal.MAXIMIZE
+
+        raw_score = 2
+        with pytest.raises(ValueError):
+            BaseMetric.normalize(raw_score)

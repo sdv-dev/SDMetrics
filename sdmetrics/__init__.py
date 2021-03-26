@@ -52,14 +52,17 @@ def compute_metrics(metrics, real_data, synthetic_data, metadata=None, **kwargs)
     scores = []
     for name, metric in metrics.items():
         try:
-            score = metric.compute(real_data, synthetic_data, **kwargs)
+            raw_score = metric.compute(real_data, synthetic_data, **kwargs)
+            normalized_score = metric.normalize(raw_score)
         except Exception:
-            score = None
+            raw_score = None
+            normalized_score = None
 
         scores.append({
             'metric': name,
             'name': metric.name,
-            'score': score,
+            'raw_score': raw_score,
+            'normalized_score': normalized_score,
             'min_value': metric.min_value,
             'max_value': metric.max_value,
             'goal': metric.goal.name,

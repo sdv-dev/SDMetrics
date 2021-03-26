@@ -74,32 +74,31 @@ class BaseMetric:
             float:
                 The normalized value of the metric
         """
-        min_value = float(cls.min_value) if cls.min_value is not None else float('-inf')
-        max_value = float(cls.max_value) if cls.max_value is not None else float('inf')
+        min_value = float(cls.min_value)
+        max_value = float(cls.max_value)
 
-        print(min_value)
-        print(max_value)
         if max_value < raw_score or min_value > raw_score:
             raise ValueError('`raw_score` must be between `min_value` and `max_value`.')
 
-        def is_finite(value):
-            return value not in (float('-inf'), float('inf'))
+        is_min_finite = min_value not in (float('-inf'), float('inf'))
+        is_max_finite = max_value not in (float('-inf'), float('inf'))
 
         score = None
-        if is_finite(min_value) and is_finite(max_value):
+        if is_min_finite and is_max_finite:
             score = (raw_score - min_value) / (max_value - min_value)
 
-        elif not is_finite(min_value) and is_finite(max_value):
+        elif not is_min_finite and is_max_finite:
             score = np.exp(raw_score - max_value)
 
-        elif is_finite(min_value) and not is_finite(max_value):
+        elif is_min_finite and not is_max_finite:
             score = 1.0 - np.exp(min_value - raw_score)
 
         else:
-            raise ValueError('Unbounded score on both sides!')
+            score = 1 / (1 + np.exp(-raw_score))
 
         if score is None or score < 0 or score > 1:
-            raise ValueError(f'The score {score} should be a value between 0 and 1.')
+            raise AssertionError(f'This should be unreachable. The score {score} should be'
+                                 f'a value between 0 and 1.')
 
         if cls.goal == Goal.MINIMIZE:
             return 1.0 - score
