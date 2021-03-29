@@ -51,4 +51,4 @@ def test_rank(metric, real_data, good_data, bad_data):
     normalized_real = metric.normalize(real)
 
     assert metric.min_value <= bad < good < real <= metric.max_value
-    assert 0.0 <= normalized_bad < normalized_good <= normalized_real <= 1.0
+    assert 0.0 <= normalized_bad <= normalized_good <= normalized_real <= 1.0
