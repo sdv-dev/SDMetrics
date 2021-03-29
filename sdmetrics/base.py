@@ -72,7 +72,7 @@ class BaseMetric:
 
         Returns:
             float:
-                The normalized value of the metric
+                The normalized value of the metric.
         """
         min_value = float(cls.min_value)
         max_value = float(cls.max_value)

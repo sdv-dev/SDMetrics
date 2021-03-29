@@ -109,6 +109,21 @@ class MultiSingleColumnMetric(SingleTableMetric,
         """
         return cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
 
+    @classmethod
+    def normalize(cls, raw_score):
+        """Returns the `raw_score` as is, since it is already normalized.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        assert cls.min_value  == 0.0
+        return super().normalize(raw_score)
+
 
 class CSTest(MultiSingleColumnMetric):
     """MultiSingleColumnMetric based on SingleColumn CSTest.

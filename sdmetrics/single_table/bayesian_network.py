@@ -189,6 +189,9 @@ class BNLogLikelihood(BNLikelihood):
     def normalize(cls, raw_score):
         """Normalize the log-likelihood value.
 
+        Note that this is not the mean likelihood but rather the exponentiation
+        of the mean log-likelihood.
+
         Args:
             raw_score (float):
                 The value of the metric from `compute`.

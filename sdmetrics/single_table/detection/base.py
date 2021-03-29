@@ -87,3 +87,17 @@ class DetectionMetric(SingleTableMetric):
         except ValueError as err:
             LOGGER.info('DetectionMetric: Skipping due to %s', err)
             return np.nan
+
+    @classmethod
+    def normalize(cls, raw_score):
+        """Returns the `raw_score` as is, since it is already normalized.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                Simply returns `raw_score`.
+        """
+        return super().normalize(raw_score)

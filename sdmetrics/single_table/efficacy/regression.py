@@ -17,6 +17,20 @@ class RegressionEfficacyMetric(MLEfficacyMetric):
     max_value = 1
     SCORER = r2_score
 
+    @classmethod
+    def normalize(cls, raw_score):
+        """Returns a normalized version of the R^2 score.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        return super().normalize(raw_score)
+
 
 class LinearRegression(RegressionEfficacyMetric):
     """LinearRegression Efficacy based metric.

@@ -101,6 +101,21 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
         """
         return cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
 
+    @classmethod
+    def normalize(cls, raw_score):
+        """Returns the `raw_score` as is, since it is already normalized.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        assert cls.min_value == 0.0
+        return super().normalize(raw_score)
+
 
 class CSTest(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable CSTest."""
@@ -142,3 +157,20 @@ class BNLogLikelihood(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable BNLogLikelihood."""
 
     single_table_metric = single_table.bayesian_network.BNLogLikelihood
+    
+    @classmethod
+    def normalize(cls, raw_score):
+        """Normalize the log-likelihood value.
+
+        Note that this is not the mean likelihood but rather the exponentiation
+        of the mean log-likelihood.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        return super().normalize(raw_score)
