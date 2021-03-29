@@ -44,23 +44,31 @@ class TestContinuousKLDivergence:
 
     def test_perfect(self):
         output = ContinuousKLDivergence.compute(self.ones(), self.ones())
+        normalized = ContinuousKLDivergence.normalize(output)
 
         assert output == 1
+        assert normalized == 1
 
     def test_awful(self):
         output = ContinuousKLDivergence.compute(self.ones(), self.zeros())
+        normalized = ContinuousKLDivergence.normalize(output)
 
         assert 0.0 <= output < 0.1
+        assert 0.0 <= normalized < 0.1
 
     def test_good(self):
         output = ContinuousKLDivergence.compute(self.real(), self.good())
+        normalized = ContinuousKLDivergence.normalize(output)
 
         assert 0.5 < output <= 1
+        assert 0.5 < normalized <= 1
 
     def test_bad(self):
         output = ContinuousKLDivergence.compute(self.real(), self.bad())
+        normalized = ContinuousKLDivergence.normalize(output)
 
         assert 0 <= output < 0.5
+        assert 0 <= normalized < 0.5
 
 
 class TestDiscreteKLDivergence:
@@ -102,20 +110,28 @@ class TestDiscreteKLDivergence:
 
     def test_perfect(self):
         output = DiscreteKLDivergence.compute(self.ones(), self.ones())
+        normalized = DiscreteKLDivergence.normalize(output)
 
         assert output == 1
+        assert normalized == 1
 
     def test_awful(self):
         output = DiscreteKLDivergence.compute(self.ones(), self.zeros())
+        normalized = DiscreteKLDivergence.normalize(output)
 
         assert 0.0 <= output < 0.1
+        assert 0.0 <= normalized < 0.1
 
     def test_good(self):
         output = DiscreteKLDivergence.compute(self.real(), self.good())
+        normalized = DiscreteKLDivergence.normalize(output)
 
         assert 0.5 < output <= 1
+        assert 0.5 < normalized <= 1
 
     def test_bad(self):
         output = DiscreteKLDivergence.compute(self.real(), self.bad())
+        normalized = DiscreteKLDivergence.normalize(output)
 
         assert 0 <= output < 0.5
+        assert 0 <= normalized < 0.5
