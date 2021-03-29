@@ -20,7 +20,7 @@ install_requires = [
     'sktime>=0.4,<0.6',
     'torch>=1.4,<2',
     'copulas>=0.5.0,<0.6',
-    'rdt>=0.4.0,<0.5',
+    'rdt>=0.4.1.dev1,<0.5',
 ]
 
 setup_requires = [
