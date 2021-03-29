@@ -98,26 +98,34 @@ FKS = [
 @pytest.mark.parametrize('metric', METRICS)
 def test_max(metric):
     output = metric.compute(ones(), ones(), foreign_keys=FKS)
+    normalized = metric.normalize(output)
 
     assert output == 1
+    assert normalized == 1
 
 
 @pytest.mark.parametrize('metric', METRICS)
 def test_min(metric):
     output = metric.compute(ones(), zeros(), foreign_keys=FKS)
+    normalized = metric.normalize(output)
 
     assert np.round(output, decimals=5) == 0
+    assert np.round(normalized, decimals=5) == 0
 
 
 @pytest.mark.parametrize('metric', METRICS)
 def test_good(metric):
     output = metric.compute(real_data(), good_data(), foreign_keys=FKS)
+    normalized = metric.normalize(output)
 
     assert 0.5 < output <= 1
+    assert 0.5 < normalized <= 1
 
 
 @pytest.mark.parametrize('metric', METRICS)
 def test_bad(metric):
     output = metric.compute(real_data(), bad_data(), foreign_keys=FKS)
+    normalized = metric.normalize(output)
 
     assert 0 <= output < 0.5
+    assert 0 <= normalized < 0.5

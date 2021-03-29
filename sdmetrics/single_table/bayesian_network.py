@@ -184,3 +184,20 @@ class BNLogLikelihood(BNLikelihood):
         likelihoods = cls._likelihoods(real_data, synthetic_data, metadata, structure)
         likelihoods[np.where(likelihoods == 0)] = 1e-8
         return np.mean(np.log(likelihoods))
+
+    @classmethod
+    def normalize(cls, raw_score):
+        """Normalize the log-likelihood value.
+
+        Note that this is not the mean likelihood but rather the exponentiation
+        of the mean log-likelihood.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        return super().normalize(raw_score)

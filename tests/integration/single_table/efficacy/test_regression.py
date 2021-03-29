@@ -46,4 +46,9 @@ def test_rank(metric, real_data, good_data, bad_data):
     good = metric.compute(real_data, good_data, target='a')
     real = metric.compute(real_data, real_data, target='a')
 
+    normalized_bad = metric.normalize(bad)
+    normalized_good = metric.normalize(good)
+    normalized_real = metric.normalize(real)
+
     assert metric.min_value <= bad < good < real <= metric.max_value
+    assert 0.0 <= normalized_bad <= normalized_good <= normalized_real <= 1.0

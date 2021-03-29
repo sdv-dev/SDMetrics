@@ -21,6 +21,20 @@ class MulticlassEfficacyMetric(MLEfficacyMetric):
     max_value = 1
     SCORER = f1_macro
 
+    @classmethod
+    def normalize(cls, raw_score):
+        """Returns the `raw_score` as is, since it is already normalized.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        return super().normalize(raw_score)
+
 
 class MulticlassDecisionTreeClassifier(MulticlassEfficacyMetric):
     """Multiclass DecisionTreeClassifier Efficacy based metric.

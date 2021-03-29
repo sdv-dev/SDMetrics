@@ -59,7 +59,12 @@ def test_rank(metric):
     good = metric.compute(real_data(), good_data(), target='d')
     real = metric.compute(real_data(), real_data(), target='d')
 
+    normalized_bad = metric.normalize(bad)
+    normalized_good = metric.normalize(good)
+    normalized_real = metric.normalize(real)
+
     assert metric.min_value <= bad < good <= real <= metric.max_value
+    assert 0.0 <= normalized_bad < normalized_good <= normalized_real <= 1.0
 
 
 @pytest.mark.parametrize('metric', METRICS)
@@ -68,4 +73,9 @@ def test_rank_object(metric):
     good = metric.compute(real_data(True), good_data(True), target='d')
     real = metric.compute(real_data(True), real_data(True), target='d')
 
+    normalized_bad = metric.normalize(bad)
+    normalized_good = metric.normalize(good)
+    normalized_real = metric.normalize(real)
+
     assert metric.min_value <= bad < good <= real <= metric.max_value
+    assert 0.0 <= normalized_bad < normalized_good <= normalized_real <= 1.0

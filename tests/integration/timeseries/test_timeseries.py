@@ -19,7 +19,11 @@ def test_rank(metric):
     real_score = metric.compute(real_data, real_data, metadata)
     synthetic_score = metric.compute(real_data, synthetic_data, metadata)
 
+    normalized_real_score = metric.normalize(real_score)
+    normalized_synthetic_score = metric.normalize(synthetic_score)
+
     assert metric.min_value <= synthetic_score <= real_score <= metric.max_value
+    assert 0.0 <= normalized_synthetic_score <= normalized_real_score <= 1.0
 
 
 def test_compute_all():
@@ -32,8 +36,12 @@ def test_compute_all():
         metadata=metadata
     )
 
-    assert not pd.isnull(output.score.mean())
+    assert not pd.isnull(output.raw_score.mean())
 
-    scores = output[output.score.notnull()]
+    scores = output[output.raw_score.notnull()]
 
-    assert scores.score.between(scores.min_value, scores.max_value).all()
+    assert scores.raw_score.between(scores.min_value, scores.max_value).all()
+
+    scores = output[output.normalized_score.notnull()]
+
+    assert scores.normalized_score.between(0.0, 1.0).all()

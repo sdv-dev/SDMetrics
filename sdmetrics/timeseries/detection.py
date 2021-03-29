@@ -91,6 +91,21 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
 
         return 1 - cls._compute_score(X_train, X_test, y_train, y_test)
 
+    @classmethod
+    def normalize(cls, raw_score):
+        """Returns the `raw_score` as is, since it is already normalized.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        assert cls.min_value == 0.0
+        return super().normalize(raw_score)
+
 
 class TSFCDetection(TimeSeriesDetectionMetric):
     """TimeSeriesDetection metric based on a TimeSeriesForestClassifier."""
