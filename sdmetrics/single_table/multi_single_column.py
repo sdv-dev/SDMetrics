@@ -121,7 +121,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
             float:
                 The normalized value of the metric
         """
-        assert cls.min_value  == 0.0
+        assert cls.min_value == 0.0
         return super().normalize(raw_score)
 
 

@@ -157,7 +157,7 @@ class BNLogLikelihood(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable BNLogLikelihood."""
 
     single_table_metric = single_table.bayesian_network.BNLogLikelihood
-    
+
     @classmethod
     def normalize(cls, raw_score):
         """Normalize the log-likelihood value.
