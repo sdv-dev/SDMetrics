@@ -4,6 +4,7 @@ import pytest
 
 from sdmetrics import compute_metrics
 from sdmetrics.demos import load_single_table_demo
+from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
@@ -87,6 +88,12 @@ def test_rank(metric, ones, zeros, real_data, good_data, bad_data):
     assert metric.min_value <= worst < best <= metric.max_value
     assert metric.min_value <= bad < good < real <= metric.max_value
 
+    bad, good, real = map(metric.normalize, (bad, good, real))
+    if metric.goal == Goal.MAXIMIZE:
+        assert 0.0 <= bad < good < real <= 1.0
+    else:
+        assert 0.0 <= real < good < bad <= 1.0
+
 
 def test_compute_all():
     real_data, synthetic_data, metadata = load_single_table_demo()
@@ -98,8 +105,10 @@ def test_compute_all():
         metadata=metadata
     )
 
-    assert not pd.isnull(output.score.mean())
+    assert not pd.isnull(output.raw_score.mean())
 
-    scores = output[output.score.notnull()]
+    scores = output[output.raw_score.notnull()]
+    assert scores.raw_score.between(scores.min_value, scores.max_value).all()
 
-    assert scores.score.between(scores.min_value, scores.max_value).all()
+    scores = output[output.normalized_score.notnull()]
+    assert scores.normalized_score.between(0.0, 1.0).all()

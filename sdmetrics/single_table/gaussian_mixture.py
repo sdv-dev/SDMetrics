@@ -149,3 +149,19 @@ class GMLogLikelihood(SingleTableMetric):
                 pass
 
         return np.mean(scores)
+
+    @classmethod
+    def normalize(cls, raw_score):
+        """Normalize the log-likelihood value.
+
+        Notice that this is not the mean likelihood.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        return super().normalize(raw_score)

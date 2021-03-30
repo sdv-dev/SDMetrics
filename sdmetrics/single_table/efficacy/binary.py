@@ -36,6 +36,20 @@ class BinaryEfficacyMetric(MLEfficacyMetric):
 
         return super()._fit_predict(synthetic_data, synthetic_target, real_data, real_target)
 
+    @classmethod
+    def normalize(cls, raw_score):
+        """Returns the `raw_score` as is, since it is already normalized.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        return super().normalize(raw_score)
+
 
 class BinaryDecisionTreeClassifier(BinaryEfficacyMetric):
     """Binary DecisionTreeClassifier Efficacy based metric.

@@ -61,6 +61,20 @@ class ContinuousKLDivergence(ColumnPairsMetric):
 
         return 1 / (1 + np.sum(kl_div(f_obs, f_exp)))
 
+    @classmethod
+    def normalize(cls, raw_score):
+        """Returns the `raw_score` as is, since it is already normalized.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        return super().normalize(raw_score)
+
 
 class DiscreteKLDivergence(ColumnPairsMetric):
     """Discrete Kullback–Leibler Divergence based metric.
@@ -92,3 +106,17 @@ class DiscreteKLDivergence(ColumnPairsMetric):
 
         f_obs, f_exp = get_frequencies(real, synthetic)
         return 1 / (1 + np.sum(kl_div(f_obs, f_exp)))
+
+    @classmethod
+    def normalize(cls, raw_score):
+        """Returns the `raw_score` as is, since it is already normalized.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        return super().normalize(raw_score)
