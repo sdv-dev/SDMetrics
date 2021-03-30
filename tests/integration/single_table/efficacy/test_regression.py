@@ -1,5 +1,3 @@
-import sys
-
 import numpy as np
 import pandas as pd
 import pytest
@@ -10,10 +8,6 @@ METRICS = [
     LinearRegression,
     MLPRegressor,
 ]
-
-
-# if sys.version_info.minor == 6:
-#     np.random.seed(42000)
 
 
 @pytest.fixture
