@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -10,33 +12,37 @@ METRICS = [
 ]
 
 
+# if sys.version_info.minor == 6:
+#     np.random.seed(42000)
+
+
 @pytest.fixture
 def real_data():
     return pd.DataFrame({
-        'a': np.random.normal(size=600),
-        'b': np.random.randint(0, 10, size=600),
-        'c': ['a', 'b', 'b', 'c', 'c', 'c'] * 100,
-        'd': [True, True, True, True, True, False] * 100,
+        'a': np.random.normal(size=1000),
+        'b': np.random.randint(0, 10, size=1000),
+        'c': ['a', 'b', 'b', 'c'] * 250,
+        'd': [True, True, True, False] * 250,
     })
 
 
 @pytest.fixture
 def good_data():
     return pd.DataFrame({
-        'a': np.random.normal(loc=0.01, size=600),
-        'b': np.random.randint(0, 10, size=600),
-        'c': ['a', 'b', 'b', 'b', 'c', 'c'] * 100,
-        'd': [True, True, True, True, False, False] * 100,
+        'a': np.random.normal(loc=0.01, size=1000),
+        'b': np.random.randint(0, 10, size=1000),
+        'c': ['a', 'b', 'c', 'c'] * 250,
+        'd': [True, True, False, False] * 250,
     })
 
 
 @pytest.fixture
 def bad_data():
     return pd.DataFrame({
-        'a': np.random.normal(loc=5, scale=3, size=600),
-        'b': np.random.randint(5, 15, size=600),
-        'c': ['a', 'a', 'a', 'a', 'b', 'b'] * 100,
-        'd': [True, False, False, False, False, False] * 100,
+        'a': np.random.normal(loc=5, scale=3, size=1000),
+        'b': np.random.randint(5, 15, size=1000),
+        'c': ['a', 'a', 'a', 'b'] * 250,
+        'd': [True, False, False, False] * 250,
     })
 
 
