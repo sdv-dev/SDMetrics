@@ -8,7 +8,6 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
-from sdmetrics.single_table.gaussian_mixture import GMLogLikelihood
 from sdmetrics.single_table.multi_column_pairs import ContinuousKLDivergence, DiscreteKLDivergence
 from sdmetrics.single_table.multi_single_column import CSTest, KSTest, KSTestExtended
 
@@ -22,7 +21,6 @@ METRICS = [
     DiscreteKLDivergence,
     BNLikelihood,
     BNLogLikelihood,
-    GMLogLikelihood,
 ]
 
 
@@ -79,20 +77,26 @@ def bad_data():
 @pytest.mark.parametrize('metric', METRICS)
 def test_rank(metric, ones, zeros, real_data, good_data, bad_data):
     worst = metric.compute(ones, zeros)
+    normalized_worst = metric.normalize(worst)
     best = metric.compute(ones, ones)
+    normalized_best = metric.normalize(best)
 
     bad = metric.compute(real_data, bad_data)
+    normalized_bad = metric.normalize(bad)
     good = metric.compute(real_data, good_data)
+    normalized_good = metric.normalize(good)
     real = metric.compute(real_data, real_data)
+    normalized_real = metric.normalize(real)
 
-    assert metric.min_value <= worst < best <= metric.max_value
-    assert metric.min_value <= bad < good < real <= metric.max_value
-
-    bad, good, real = map(metric.normalize, (bad, good, real))
     if metric.goal == Goal.MAXIMIZE:
-        assert 0.0 <= bad < good < real <= 1.0
+        assert metric.min_value <= worst < best <= metric.max_value
+        assert metric.min_value <= bad < good < real <= metric.max_value
     else:
-        assert 0.0 <= real < good < bad <= 1.0
+        assert metric.min_value <= best < worst <= metric.max_value
+        assert metric.min_value <= real < good < bad <= metric.max_value
+
+    assert 0.0 <= normalized_worst < normalized_best <= 1.0
+    assert 0.0 <= normalized_bad < normalized_good < normalized_real <= 1.0
 
 
 def test_compute_all():
