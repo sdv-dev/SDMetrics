@@ -19,7 +19,8 @@ install_requires = [
     'scipy>=1.4.1,<2',
     'sktime>=0.4,<0.6',
     'torch>=1.4,<2',
-    'rdt>=0.4.0,<0.5',
+    'copulas>=0.5.0,<0.6',
+    'rdt>=0.4.1,<0.5',
 ]
 
 setup_requires = [
@@ -98,6 +99,6 @@ setup(
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.2.0',
+    version='0.3.0.dev2',
     zip_safe=False,
 )

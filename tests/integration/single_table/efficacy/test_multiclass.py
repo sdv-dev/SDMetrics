@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.datasets import load_wine
 
 from sdmetrics.single_table.efficacy.multiclass import (
     MulticlassDecisionTreeClassifier, MulticlassMLPClassifier)
@@ -13,41 +14,47 @@ METRICS = [
 
 @pytest.fixture
 def real_data():
-    return pd.DataFrame({
-        'a': np.random.normal(size=6000),
-        'b': np.random.randint(0, 10, size=6000),
-        'c': ['a', 'b', 'b', 'c', 'c', 'c'] * 1000,
-        'd': [True, True, True, True, True, False] * 1000,
-    })
+    return load_wine(as_frame=True).frame
 
 
 @pytest.fixture
 def good_data():
-    return pd.DataFrame({
-        'a': np.random.normal(loc=5, size=600),
-        'b': np.random.randint(5, 15, size=600),
-        'c': ['a', 'b', 'b', 'b', 'c', 'c'] * 100,
-        'd': [True, True, True, True, False, False] * 100,
-    })
+    wine = load_wine(as_frame=True)
+    data = wine.data
+    stds = data.std(axis=0) * 2.5
+    columns = len(data.columns)
+    rows = len(data)
+    zeros = np.zeros(columns)
+    noise = np.random.normal(loc=zeros, scale=stds, size=(rows, columns))
+    good = data + noise
+    good['target'] = wine.target
+    return good
 
 
 @pytest.fixture
 def bad_data():
-    return pd.DataFrame({
-        'a': np.random.normal(loc=10, scale=3, size=600),
-        'b': np.random.randint(10, 20, size=600),
-        'c': ['a', 'a', 'a', 'a', 'a', 'b'] * 100,
-        'd': [True, False, False, False, False, False] * 100,
-    })
+    wine = load_wine(as_frame=True)
+    data = wine.data
+    stds = data.std(axis=0)
+    mus = data.mean(axis=0)
+    columns = len(data.columns)
+    rows = len(data)
+    bad = np.random.normal(loc=mus, scale=stds, size=(rows, columns))
+    bad = pd.DataFrame(bad, columns=data.columns)
+    bad['target'] = wine.target
+
+    return bad
 
 
 @pytest.mark.parametrize('metric', METRICS)
 def test_rank(metric, real_data, good_data, bad_data):
-    bad = metric.compute(real_data, bad_data, target='c')
-    good = metric.compute(real_data, good_data, target='c')
-    real = metric.compute(real_data, real_data, target='c')
+    bad = metric.compute(real_data, bad_data, target='target')
+    good = metric.compute(real_data, good_data, target='target')
+    real = metric.compute(real_data, real_data, target='target')
 
-    assert metric.min_value <= bad
-    assert bad < good
-    assert good < real
-    assert real <= metric.max_value
+    normalized_bad = metric.normalize(bad)
+    normalized_good = metric.normalize(good)
+    normalized_real = metric.normalize(real)
+
+    assert metric.min_value <= bad < good < real <= metric.max_value
+    assert 0.0 <= normalized_bad < normalized_good <= normalized_real <= 1.0

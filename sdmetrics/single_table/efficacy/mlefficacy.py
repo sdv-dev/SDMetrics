@@ -77,3 +77,19 @@ class MLEfficacy(MLEfficacyMetric):
         for name, metric in metrics.items():
             LOGGER.info('MLEfficacy: Computing %s', name)
             scores.append(metric.compute(real_data, synthetic_data, metadata, target))
+
+    @classmethod
+    def normalize(cls, raw_score):
+        """Returns a normalized version of the `raw_score`.
+
+        This normalizes the raw score by applying the sigmoid function.
+
+        Args:
+            raw_score (float):
+                The value of the metric from `compute`.
+
+        Returns:
+            float:
+                The normalized value of the metric
+        """
+        return super().normalize(raw_score)

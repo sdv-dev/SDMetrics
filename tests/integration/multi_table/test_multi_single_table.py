@@ -62,29 +62,37 @@ def bad_data():
 @pytest.mark.parametrize('metric', METRICS)
 def test_max(metric, ones):
     output = metric.compute(ones, ones.copy())
+    normalized = metric.normalize(output)
 
     assert output == 1
+    assert normalized == 1
 
 
 @pytest.mark.parametrize('metric', METRICS)
 def test_min(metric, ones, zeros):
     output = metric.compute(ones, zeros)
+    normalized = metric.normalize(output)
 
     assert np.round(output, decimals=5) == 0
+    assert np.round(normalized, decimals=5) == 0
 
 
 @pytest.mark.parametrize('metric', METRICS)
 def test_good(metric, real_data, good_data):
     output = metric.compute(real_data, good_data)
+    normalized = metric.normalize(output)
 
     assert 0.5 < output <= 1
+    assert 0.5 < normalized <= 1
 
 
 @pytest.mark.parametrize('metric', METRICS)
 def test_bad(metric, real_data, bad_data):
     output = metric.compute(real_data, bad_data)
+    normalized = metric.normalize(output)
 
     assert 0 <= output < 0.5
+    assert 0 <= normalized < 0.5
 
 
 @pytest.mark.parametrize('metric', METRICS)
