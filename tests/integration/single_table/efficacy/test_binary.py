@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.datasets import load_breast_cancer
 
 from sdmetrics.single_table.efficacy.binary import (
     BinaryAdaBoostClassifier, BinaryDecisionTreeClassifier, BinaryLogisticRegression,
@@ -14,50 +15,45 @@ METRICS = [
 ]
 
 
-def real_data(as_str=False):
-    data = pd.DataFrame({
-        'a': np.random.normal(size=600),
-        'b': np.random.randint(0, 10, size=600),
-        'c': ['a', 'b', 'b', 'c', 'c', 'c'] * 100,
-        'd': [True, True, True, True, True, False] * 100,
-    })
-    if as_str:
-        data['d'] = data['d'].astype(str)
-
-    return data
+@pytest.fixture
+def real_data():
+    return load_breast_cancer(as_frame=True).frame
 
 
-def good_data(as_str=False):
-    data = pd.DataFrame({
-        'a': np.random.normal(loc=0.01, size=600),
-        'b': np.random.randint(0, 10, size=600),
-        'c': ['a', 'b', 'b', 'b', 'c', 'c'] * 100,
-        'd': [True, True, True, True, False, False] * 100,
-    })
-    if as_str:
-        data['d'] = data['d'].astype(str)
+@pytest.fixture
+def good_data():
+    breast_cancer = load_breast_cancer(as_frame=True)
+    data = breast_cancer.data
+    stds = data.std(axis=0) * 2.5
+    columns = len(data.columns)
+    rows = len(data)
+    zeros = np.zeros(columns)
+    noise = np.random.normal(loc=zeros, scale=stds, size=(rows, columns))
+    good = data + noise
+    good['target'] = breast_cancer.target
+    return good
 
-    return data
 
+@pytest.fixture
+def bad_data():
+    breast_cancer = load_breast_cancer(as_frame=True)
+    data = breast_cancer.data
+    stds = data.std(axis=0)
+    mus = data.mean(axis=0)
+    columns = len(data.columns)
+    rows = len(data)
+    bad = np.random.normal(loc=mus, scale=stds, size=(rows, columns))
+    bad = pd.DataFrame(bad, columns=data.columns)
+    bad['target'] = breast_cancer.target
 
-def bad_data(as_str=False):
-    data = pd.DataFrame({
-        'a': np.random.normal(loc=5, scale=3, size=600),
-        'b': np.random.randint(5, 15, size=600),
-        'c': ['a', 'a', 'a', 'a', 'b', 'b'] * 100,
-        'd': [True, False, False, False, False, False] * 100,
-    })
-    if as_str:
-        data['d'] = data['d'].astype(str)
-
-    return data
+    return bad
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_rank(metric):
-    bad = metric.compute(real_data(), bad_data(), target='d')
-    good = metric.compute(real_data(), good_data(), target='d')
-    real = metric.compute(real_data(), real_data(), target='d')
+def test_rank(metric, real_data, bad_data, good_data):
+    bad = metric.compute(real_data, bad_data, target='target')
+    good = metric.compute(real_data, good_data, target='target')
+    real = metric.compute(real_data, real_data, target='target')
 
     normalized_bad = metric.normalize(bad)
     normalized_good = metric.normalize(good)
@@ -68,10 +64,10 @@ def test_rank(metric):
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_rank_object(metric):
-    bad = metric.compute(real_data(True), bad_data(True), target='d')
-    good = metric.compute(real_data(True), good_data(True), target='d')
-    real = metric.compute(real_data(True), real_data(True), target='d')
+def test_rank_object(metric, real_data, bad_data, good_data):
+    bad = metric.compute(real_data, bad_data, target='target')
+    good = metric.compute(real_data, good_data, target='target')
+    real = metric.compute(real_data, real_data, target='target')
 
     normalized_bad = metric.normalize(bad)
     normalized_good = metric.normalize(good)
