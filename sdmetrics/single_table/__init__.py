@@ -1,7 +1,7 @@
 """Metrics for single table datasets."""
 
 from sdmetrics.single_table import (
-    base, bayesian_network, detection, efficacy, gaussian_mixture, multi_single_column)
+    base, bayesian_network, detection, efficacy, gaussian_mixture, multi_single_column, privacy)
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection.base import DetectionMetric
@@ -20,11 +20,16 @@ from sdmetrics.single_table.multi_column_pairs import (
     ContinuousKLDivergence, DiscreteKLDivergence, MultiColumnPairsMetric)
 from sdmetrics.single_table.multi_single_column import (
     CSTest, KSTest, KSTestExtended, MultiSingleColumnMetric)
+from sdmetrics.single_table.privacy import (
+    CategoricalCAP, CategoricalEnsemble, CategoricalGeneralizedCAP, CategoricalKNN, CategoricalNB,
+    CategoricalPrivacyMetric, CategoricalRF, CategoricalZeroCAP, NumericalLR, NumericalMLP,
+    NumericalPrivacyMetric, NumericalRadiusNearestNeighbor, NumericalSVR)
 
 __all__ = [
     'bayesian_network',
     'base',
     'detection',
+    'privacy',
     'efficacy',
     'gaussian_mixture',
     'multi_single_column',
@@ -55,4 +60,17 @@ __all__ = [
     'CSTest',
     'KSTest',
     'KSTestExtended',
+    'CategoricalCAP',
+    'CategoricalZeroCAP',
+    'CategoricalGeneralizedCAP',
+    'NumericalMLP',
+    'NumericalLR',
+    'NumericalSVR',
+    'CategoricalKNN',
+    'CategoricalNB',
+    'CategoricalRF',
+    'CategoricalPrivacyMetric',
+    'NumericalPrivacyMetric',
+    'CategoricalEnsemble',
+    'NumericalRadiusNearestNeighbor',
 ]
