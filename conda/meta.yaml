@@ -1,5 +1,5 @@
 {% set name = 'sdmetrics' %}
-{% set version = '0.3.0' %}
+{% set version = '0.3.1.dev2' %}
 
 package:
   name: "{{ name|lower }}"
@@ -26,7 +26,7 @@ requirements:
     - pytorch >=1.4,<2
     - sktime >=0.4,<0.6
     - copulas>=0.5.0,<0.6
-    - rdt >=0.4.1,<0.5
+    - rdt >=0.5.0,<0.6
   run:
     - python >=3.6,<3.9
     - scikit-learn >=0.23,<1
@@ -37,7 +37,7 @@ requirements:
     - pytorch >=1.4,<2
     - sktime >=0.4,<0.6
     - copulas>=0.5.0,<0.6
-    - rdt >=0.4.1,<0.5
+    - rdt >=0.5.0,<0.6
 
 about:
   home: "https://github.com/sdv-dev/SDMetrics"
