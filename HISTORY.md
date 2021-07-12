@@ -1,5 +1,14 @@
 # History
 
+## v0.3.1 - 2021-07-12
+
+This release fixes a bug to make the privacy metrics available in the API docs.
+It also updates dependencies to ensure compatibility with the rest of the SDV ecosystem.
+
+### Issues closed
+
+* `CategoricalSVM` not being imported - Issue [#65](https://github.com/sdv-dev/SDMetrics/issues/65) by @csala
+
 ## v0.3.0 - 2021-03-30
 
 This release includes privacy metrics to evaluate if the real data could be obtained or
