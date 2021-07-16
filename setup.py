@@ -14,13 +14,16 @@ with open('HISTORY.md', encoding='utf-8') as history_file:
 install_requires = [
     'numpy>=1.18.0,<2',
     'pandas>=1.1,<1.1.5',
-    'pomegranate>=0.13.4,<0.14.2',
     'scikit-learn>=0.23,<1',
     'scipy>=1.4.1,<2',
     'sktime>=0.4,<0.6',
     'torch>=1.4,<2',
     'copulas>=0.5.0,<0.6',
     'rdt>=0.5.0,<0.6',
+]
+
+pomegranate_requires = [
+    'pomegranate>=0.13.4,<0.14.2',
 ]
 
 setup_requires = [
@@ -83,6 +86,7 @@ setup(
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
         'test': tests_require,
+        'pomegranate': pomegranate_requires,
         'dev': development_requires + tests_require,
     },
     install_package_data=True,
