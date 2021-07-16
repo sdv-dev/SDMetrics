@@ -37,6 +37,7 @@ tests_require = [
     'jupyter>=1.0.0,<2',
     'rundoc>=0.4.3,<0.5',
     'invoke',
+    'pomegranate>=0.13.4,<0.14.2'
 ]
 
 development_requires = [
