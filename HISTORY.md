@@ -1,5 +1,13 @@
 # History
 
+## v0.3.2 - 2021-08-16
+
+This release makes `pomegranate` an optional dependency.
+
+### Issues closed
+
+* Make pomegranate an optional dependency - Issue [#63](https://github.com/sdv-dev/SDMetrics/issues/63) by @fealho
+
 ## v0.3.1 - 2021-07-12
 
 This release fixes a bug to make the privacy metrics available in the API docs.
