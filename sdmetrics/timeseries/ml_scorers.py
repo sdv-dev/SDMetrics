@@ -3,7 +3,7 @@
 import rdt
 import torch
 from sklearn.pipeline import Pipeline
-from sktime.classification.compose import TimeSeriesForestClassifier
+from sktime.classification.interval_based import TimeSeriesForestClassifier
 
 try:
     from sktime.transformers.series_as_features.compose import ColumnConcatenator
