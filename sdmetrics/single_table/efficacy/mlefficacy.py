@@ -1,3 +1,5 @@
+"""MLEfficacy metric for single table datasets."""
+
 import logging
 
 import numpy as np

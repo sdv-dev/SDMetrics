@@ -1,4 +1,4 @@
-"""Base class for Efficacy metrics for single table datasets."""
+"""Base class for Binary Efficacy metrics for single table datasets."""
 
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.linear_model import LogisticRegression

@@ -1,3 +1,5 @@
+"""Single table efficacy metrics module."""
+
 from sdmetrics.single_table.efficacy import binary, multiclass, regression
 from sdmetrics.single_table.efficacy.base import MLEfficacyMetric
 from sdmetrics.single_table.efficacy.binary import (

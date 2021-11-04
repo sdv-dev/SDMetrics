@@ -1,3 +1,4 @@
+"""RadiusNearestNeighbor module and its attacker/utilities."""
 import numpy as np
 
 from sdmetrics.single_table.privacy.base import NumericalPrivacyMetric, PrivacyAttackerModel
@@ -13,7 +14,8 @@ class NumericalRadiusNearestNeighborAttacker(PrivacyAttackerModel):
     """
 
     def __init__(self, weight_func=None, weight_func_kwargs=None):
-        """
+        """Set up the appropriate attributes.
+
         Args:
             weight_func (Class):
                 The weight function to use.

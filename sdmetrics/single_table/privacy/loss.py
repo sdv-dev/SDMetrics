@@ -1,3 +1,5 @@
+"""Utilities for the single_table.privacy modules."""
+
 import numpy as np
 from copulas.univariate.base import Univariate
 
@@ -36,7 +38,8 @@ class InverseCDFDistance(LossFunction):
     """
 
     def __init__(self, p=2):
-        """
+        """Set up the appropriate attributes.
+
         Args:
             p (float):
                 The p parameter in L_p metric. Must be positive.

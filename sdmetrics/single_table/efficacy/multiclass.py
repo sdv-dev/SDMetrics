@@ -1,4 +1,4 @@
-"""Base class for Efficacy metrics for single table datasets."""
+"""Base class for Multiclass Classification Efficacy Metrics for single table datasets."""
 
 from sklearn.metrics import f1_score
 from sklearn.neural_network import MLPClassifier
@@ -9,6 +9,7 @@ from sdmetrics.single_table.efficacy.base import MLEfficacyMetric
 
 
 def f1_macro(real_target, predictions):
+    """Return the `f1_score` of the passed data."""
     return f1_score(real_target, predictions, average='macro')
 
 
