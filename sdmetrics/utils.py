@@ -4,7 +4,7 @@ import warnings
 from collections import Counter
 
 
-def NestedAttrsMeta(nested):
+def nested_attrs_meta(nested):
     """Metaclass factory that defines a Metaclass with a dynamic attribute name."""
 
     class Metaclass(type):

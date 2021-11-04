@@ -9,7 +9,10 @@ from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.utils import nested_attrs_meta
 
 
-class MultiColumnPairsMetric(SingleTableMetric, metaclass=nested_attrs_meta('column_pairs_metric')):
+class MultiColumnPairsMetric(
+    SingleTableMetric,
+    metaclass=nested_attrs_meta('column_pairs_metric')
+):
     """SingleTableMetric subclass that applies a ColumnPairsMetric on each possible column pair.
 
     Attributes:
