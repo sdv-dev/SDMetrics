@@ -62,5 +62,6 @@ class TestBaseMetric:
         BaseMetric.goal = Goal.MAXIMIZE
 
         raw_score = 2
-        with pytest.raises(ValueError):
+        error_msg = '`raw_score` must be between `min_value` and `max_value`.'
+        with pytest.raises(ValueError, match=error_msg):
             BaseMetric.normalize(raw_score)
