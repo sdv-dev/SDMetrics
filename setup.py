@@ -51,6 +51,7 @@ development_requires = [
     'flake8>=3.7.7,<4',
     'flake8-absolute-import>=1.0,<2',
     'isort>=4.3.4,<5',
+    'pep8-naming>=0.12.1,<0.13',
 
     # fix style issues
     'autoflake>=1.1,<2',

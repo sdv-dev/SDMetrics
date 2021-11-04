@@ -5,11 +5,11 @@ from rdt import HyperTransformer
 
 from sdmetrics import single_column
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.utils import NestedAttrsMeta
+from sdmetrics.utils import nested_attrs_meta
 
 
 class MultiSingleColumnMetric(SingleTableMetric,
-                              metaclass=NestedAttrsMeta('single_column_metric')):
+                              metaclass=nested_attrs_meta('single_column_metric')):
     """SingleTableMetric subclass that applies a SingleColumnMetric on each column.
 
     This class can either be used by creating a subclass that inherits from it and
