@@ -80,7 +80,7 @@ class MLEfficacy(MLEfficacyMetric):
 
     @classmethod
     def normalize(cls, raw_score):
-        """Returns a normalized version of the `raw_score`.
+        """Return a normalized version of the `raw_score`.
 
         This normalizes the raw score by applying the sigmoid function.
 

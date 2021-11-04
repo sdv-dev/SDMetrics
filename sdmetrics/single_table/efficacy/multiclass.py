@@ -23,7 +23,7 @@ class MulticlassEfficacyMetric(MLEfficacyMetric):
 
     @classmethod
     def normalize(cls, raw_score):
-        """Returns the `raw_score` as is, since it is already normalized.
+        """Return the `raw_score` as is, since it is already normalized.
 
         Args:
             raw_score (float):
