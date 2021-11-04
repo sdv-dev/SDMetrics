@@ -17,6 +17,7 @@ class NumericalSklearnAttacker(PrivacyAttackerModel):
         skl_learner (Class):
             A (wrapped) sklearn classifier class that can be called with no arguments.
     """
+
     SKL_LEARNER = None
 
     def __init__(self):
