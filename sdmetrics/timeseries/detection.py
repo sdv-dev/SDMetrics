@@ -41,7 +41,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
             entity_data = entity_data.drop(entity_columns, axis=1)
             entity_data = transformer.transform(entity_data)
             entity_data = pd.Series({
-                column: entity_data[column].values
+                column: entity_data[column].to_numpy()
                 for column in entity_data.columns
             }, name=entity_id)
             X = X.append(entity_data)

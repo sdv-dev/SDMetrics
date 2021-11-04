@@ -70,8 +70,8 @@ class MultiSingleColumnMetric(SingleTableMetric,
         scores = []
         for column_name, real_column in real_data.items():
             if column_name in fields:
-                real_column = real_column.values
-                synthetic_column = synthetic_data[column_name].values
+                real_column = real_column.array
+                synthetic_column = synthetic_data[column_name].array
 
                 score = self.single_column_metric.compute(
                     real_column,
@@ -184,8 +184,8 @@ class KSTestExtended(MultiSingleColumnMetric):
 
         values = []
         for column_name, real_column in real_data.items():
-            real_column = real_column.values
-            synthetic_column = synthetic_data[column_name].values
+            real_column = real_column.array
+            synthetic_column = synthetic_data[column_name].array
 
             score = cls.single_column_metric.compute(real_column, synthetic_column)
             values.append(score)
