@@ -16,6 +16,7 @@ install_requires = [
     'pandas>=1.1,<1.1.5',
     'scikit-learn>=0.24,<2',
     'scipy>=1.4.1,<2',
+    'numba>=0.50,<0.54',
     'sktime>=0.6,<1',
     'torch>=1.4,<2',
     'copulas>=0.5.0,<0.6',
@@ -46,13 +47,6 @@ development_requires = [
     'pip>=9.0.1',
     'watchdog>=0.8.3,<0.11',
 
-    # docs
-    'm2r>=0.2.0,<0.3',
-    'nbsphinx>=0.5.0,<0.7',
-    'Sphinx>=1.7.1,<3',
-    'sphinx_rtd_theme>=0.2.4,<0.6',
-    'autodocsumm>=0.1.13,<0.2',
-
     # style check
     'flake8>=3.7.7,<4',
     'flake8-absolute-import>=1.0,<2',
@@ -60,9 +54,10 @@ development_requires = [
 
     # fix style issues
     'autoflake>=1.1,<2',
-    'autopep8>=1.4.3,<2',
+    'autopep8>=1.4.3,<1.6',
 
     # distribute on PyPI
+    'packaging>=20,<21',
     'twine>=1.10.0,<4',
     'wheel>=0.30.0',
 

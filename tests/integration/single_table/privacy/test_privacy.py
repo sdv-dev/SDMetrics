@@ -100,9 +100,10 @@ def test_categorical_ens():
         key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2'],
         model_kwargs=model_kwargs
     )
+    _min = CategoricalEnsemble.min_value
+    _max = CategoricalEnsemble.max_value
 
-    assert (CategoricalEnsemble.min_value <= horrible <= bad
-            <= good <= perfect <= CategoricalEnsemble.max_value)
+    assert _min <= horrible <= bad <= good <= perfect <= _max
 
 
 def numerical_real_data():
