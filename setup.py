@@ -68,6 +68,7 @@ development_requires = [
     'flake8-eradicate>=1.1.0,<1.2',
     'flake8-mutable>=1.2.0,<1.3',
     'flake8-print>=4.0.0,<4.1',
+    'pandas-vet>=0.2.2,<0.3',
     'flake8-expression-complexity>=0.0.9,<0.1',
     'flake8-multiline-containers>=0.0.18,<0.1',
     'flake8-use-fstring',
