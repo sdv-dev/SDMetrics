@@ -73,7 +73,6 @@ development_requires = [
     'flake8-multiline-containers>=0.0.18,<0.1',
     'flake8-use-fstring',
     'pydocstyle>=6.1.1,<6.2',
-    'pylint>=2.5.3,<3',
 
     # fix style issues
     'autoflake>=1.1,<2',
