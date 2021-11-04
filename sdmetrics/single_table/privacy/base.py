@@ -14,8 +14,8 @@ class CategoricalType(Enum):
     The value can be one-hot-encoded, or coded as class number.
     """
 
-    CLASS_NUM = "Class_num"
-    ONE_HOT = "One_hot"
+    CLASS_NUM = 'Class_num'
+    ONE_HOT = 'One_hot'
 
 
 class CategoricalPrivacyMetric(SingleTableMetric):
@@ -320,7 +320,7 @@ class PrivacyAttackerModel():
             sensitive_fields(list[str]):
                 The names of the sensitive columns.
         """
-        raise NotImplementedError("Please implement fit method of attackers")
+        raise NotImplementedError('Please implement fit method of attackers')
 
     def predict(self, key_data):
         """Make a prediction of the sensitive data given keys.
@@ -333,7 +333,7 @@ class PrivacyAttackerModel():
             tuple:
                 The predicted sensitive data.
         """
-        raise NotImplementedError("Please implement predict method of attackers")
+        raise NotImplementedError('Please implement predict method of attackers')
 
     def score(self, key_data, sensitive_data):
         """Score based on the belief of the attacker, in the form P(sensitive_data|key|data).
