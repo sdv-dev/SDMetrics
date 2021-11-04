@@ -63,6 +63,7 @@ development_requires = [
     'flake8-docstrings>=1.5.0,<2',
     'flake8-mock>=0.3,<0.4',
     'flake8-variables-names>=0.0.4,<0.1',
+    'pep8-naming>=0.12.1,<0.13',
     'dlint>=0.11.0,<0.12',  # code security addon for flake8
     'flake8-fixme>=1.1.1,<1.2',
     'flake8-eradicate>=1.1.0,<1.2',
