@@ -51,6 +51,7 @@ development_requires = [
     'flake8>=3.7.7,<4',
     'flake8-absolute-import>=1.0,<2',
     'isort>=4.3.4,<5',
+    'dlint>=0.11.0,<0.12',  # code security addon for flake8
 
     # fix style issues
     'autoflake>=1.1,<2',

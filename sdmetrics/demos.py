@@ -22,7 +22,7 @@ def load_demo(modality='multi_table'):
     """
     demo_path = pathlib.Path(__file__).parent / 'demos' / f'{modality}.pkl'
     with open(demo_path, 'rb') as demo_file:
-        return pickle.load(demo_file)
+        return pickle.load(demo_file)  # noqa: DUO103
 
 
 def load_multi_table_demo():
