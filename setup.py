@@ -61,7 +61,6 @@ development_requires = [
     'flake8-print>=4.0.0,<4.1',
     'flake8-expression-complexity>=0.0.9,<0.1',
     'flake8-multiline-containers>=0.0.18,<0.1',
-    'flake8-use-fstring',
 
     # fix style issues
     'autoflake>=1.1,<2',
