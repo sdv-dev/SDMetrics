@@ -35,15 +35,13 @@ class InverseCDFDistance(LossFunction):
     This loss function first applies the fitted cdfs to every single entry (i.e. turning
     the numerical values into their respective percentiles) and then measures the Lp distance
     to the pth power, between the predicted value and the real value.
+
+    Args:
+        p (float):
+            The p parameter in L_p metric. Must be positive.
     """
 
     def __init__(self, p=2):
-        """Set up the appropriate attributes.
-
-        Args:
-            p (float):
-                The p parameter in L_p metric. Must be positive.
-        """
         self.p = p
         self.cdfs = []
 

@@ -11,17 +11,15 @@ class NumericalRadiusNearestNeighborAttacker(PrivacyAttackerModel):
     It will predict the sensitive value to be a weighted mean of the entries in the
     synthetic table. Where this weight is given by a separate function, and typically
     describes the closeness between the given key and the corresponding entry in the table.
+
+    Args:
+        weight_func (Class):
+            The weight function to use.
+        weight_func_kwargs (dict):
+            Parameters of the weight function.
     """
 
     def __init__(self, weight_func=None, weight_func_kwargs=None):
-        """Set up the appropriate attributes.
-
-        Args:
-            weight_func (Class):
-                The weight function to use.
-            weight_func_kwargs (dict):
-                Parameters of the weight function.
-        """
         if weight_func_kwargs is None:
             weight_func_kwargs = {}
 
