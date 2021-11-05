@@ -52,6 +52,7 @@ development_requires = [
     'flake8-absolute-import>=1.0,<2',
     'isort>=4.3.4,<5',
     'flake8-pytest-style>=1.5.0,<2',
+    'flake8-quotes>=3.3.0,<4',
 
     # fix style issues
     'autoflake>=1.1,<2',
