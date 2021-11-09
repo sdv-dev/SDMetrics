@@ -12,12 +12,12 @@ METRICS = [
 ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def real_data():
     return load_wine(as_frame=True).frame
 
 
-@pytest.fixture
+@pytest.fixture()
 def good_data():
     wine = load_wine(as_frame=True)
     data = wine.data
@@ -31,7 +31,7 @@ def good_data():
     return good
 
 
-@pytest.fixture
+@pytest.fixture()
 def bad_data():
     wine = load_wine(as_frame=True)
     data = wine.data

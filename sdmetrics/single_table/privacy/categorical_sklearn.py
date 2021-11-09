@@ -107,9 +107,9 @@ class SVCWrapper():
         """
         n_labels = Y.shape[1]
         for idx in range(n_labels):
-            Y_col = Y[:, idx]
+            y = Y[:, idx]
             predictor = SVC()
-            predictor.fit(X, Y_col)
+            predictor.fit(X, y)
             self.predictors.append(predictor)
 
     def predict(self, X):
@@ -147,9 +147,9 @@ class NBWrapper():
         """
         n_labels = Y.shape[1]
         for idx in range(n_labels):
-            Y_col = Y[:, idx]
+            y = Y[:, idx]
             predictor = sklearn.naive_bayes.CategoricalNB()
-            predictor.fit(X, Y_col)
+            predictor.fit(X, y)
             self.predictors.append(predictor)
 
     def predict(self, X):

@@ -11,7 +11,7 @@ METRICS = [
 ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def real_data():
     boston = load_boston()
     data = pd.DataFrame(boston.data, columns=boston.feature_names)
@@ -19,7 +19,7 @@ def real_data():
     return data
 
 
-@pytest.fixture
+@pytest.fixture()
 def good_data():
     boston = load_boston()
     data = pd.DataFrame(boston.data, columns=boston.feature_names)
@@ -38,7 +38,7 @@ def good_data():
     return good
 
 
-@pytest.fixture
+@pytest.fixture()
 def bad_data():
     boston = load_boston()
     data = pd.DataFrame(boston.data, columns=boston.feature_names)

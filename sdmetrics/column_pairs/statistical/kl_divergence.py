@@ -48,8 +48,8 @@ class ContinuousKLDivergence(ColumnPairsMetric):
             Union[float, tuple[float]]:
                 Metric output.
         """
-        real_data[pd.isnull(real_data)] = 0.0
-        synthetic_data[pd.isnull(synthetic_data)] = 0.0
+        real_data[pd.isna(real_data)] = 0.0
+        synthetic_data[pd.isna(synthetic_data)] = 0.0
         column1, column2 = real_data.columns[:2]
 
         real, xedges, yedges = np.histogram2d(real_data[column1], real_data[column2])

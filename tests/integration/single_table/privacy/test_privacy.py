@@ -47,7 +47,7 @@ def cat_bad_synthetic_data():
     })
 
 
-@pytest.mark.parametrize('metric', categorical_metrics.values())
+@pytest.mark.parametrize('metric', categorical_metrics.values())  # noqa: PD011
 def test_categoricals_non_ens(metric):
     if metric != CategoricalEnsemble:  # Ensemble needs additional args to work
         perfect = metric.compute(
@@ -133,7 +133,7 @@ def numerical_bad_synthetic_data():
     })
 
 
-@pytest.mark.parametrize('metric', numerical_metrics.values())
+@pytest.mark.parametrize('metric', numerical_metrics.values())  # noqa: PD011
 def test_num(metric):
     good = metric.compute(
         numerical_real_data(), numerical_good_synthetic_data(),
@@ -153,21 +153,21 @@ def test_num(metric):
     assert metric.min_value <= horrible <= bad <= good <= metric.max_value
 
 
-@pytest.mark.parametrize('metric', categorical_metrics.values())
+@pytest.mark.parametrize('metric', categorical_metrics.values())  # noqa: PD011
 def test_categorical_empty_keys(metric):
     if metric != CategoricalEnsemble:
         with pytest.raises(TypeError):
             metric.compute(cat_real_data(), cat_real_data(), sensitive_fields=['sensitive1'])
 
 
-@pytest.mark.parametrize('metric', categorical_metrics.values())
+@pytest.mark.parametrize('metric', categorical_metrics.values())  # noqa: PD011
 def test_categorical_empty_sensitive(metric):
     if metric != CategoricalEnsemble:
         with pytest.raises(TypeError):
             metric.compute(cat_real_data(), cat_real_data(), key_fields=['key1'])
 
 
-@pytest.mark.parametrize('metric', categorical_metrics.values())
+@pytest.mark.parametrize('metric', categorical_metrics.values())  # noqa: PD011
 def test_categorical_empty_keys_sensitive(metric):
     if metric != CategoricalEnsemble:
         with pytest.raises(TypeError):

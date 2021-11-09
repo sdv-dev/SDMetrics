@@ -4,7 +4,7 @@ import warnings
 from collections import Counter
 
 
-def NestedAttrsMeta(nested):
+def nested_attrs_meta(nested):
     """Metaclass factory that defines a Metaclass with a dynamic attribute name."""
 
     class Metaclass(type):
@@ -63,7 +63,7 @@ def get_frequencies(real, synthetic):
             real[value] += 1e-6  # Regularization to prevent NaN.
 
     for value in real:
-        f_obs.append(synthetic[value] / sum(synthetic.values()))
-        f_exp.append(real[value] / sum(real.values()))
+        f_obs.append(synthetic[value] / sum(synthetic.values()))  # noqa: PD011
+        f_exp.append(real[value] / sum(real.values()))  # noqa: PD011
 
     return f_obs, f_exp
