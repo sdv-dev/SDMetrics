@@ -15,12 +15,12 @@ METRICS = [
 ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def real_data():
     return load_breast_cancer(as_frame=True).frame
 
 
-@pytest.fixture
+@pytest.fixture()
 def good_data():
     breast_cancer = load_breast_cancer(as_frame=True)
     data = breast_cancer.data
@@ -34,7 +34,7 @@ def good_data():
     return good
 
 
-@pytest.fixture
+@pytest.fixture()
 def bad_data():
     breast_cancer = load_breast_cancer(as_frame=True)
     data = breast_cancer.data
