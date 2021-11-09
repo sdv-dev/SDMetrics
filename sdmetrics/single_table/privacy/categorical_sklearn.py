@@ -1,3 +1,5 @@
+"""Categorical sklearn privacy metric modules and their attackers."""
+
 import numpy as np
 import sklearn.naive_bayes
 from sklearn.ensemble import RandomForestClassifier

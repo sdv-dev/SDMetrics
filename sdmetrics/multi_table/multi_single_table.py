@@ -103,7 +103,7 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
 
     @classmethod
     def normalize(cls, raw_score):
-        """Returns the `raw_score` as is, since it is already normalized.
+        """Return the `raw_score` as is, since it is already normalized.
 
         Args:
             raw_score (float):

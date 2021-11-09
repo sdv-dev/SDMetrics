@@ -63,7 +63,7 @@ class ContinuousKLDivergence(ColumnPairsMetric):
 
     @classmethod
     def normalize(cls, raw_score):
-        """Returns the `raw_score` as is, since it is already normalized.
+        """Return the `raw_score` as is, since it is already normalized.
 
         Args:
             raw_score (float):
@@ -100,6 +100,18 @@ class DiscreteKLDivergence(ColumnPairsMetric):
 
     @staticmethod
     def compute(real_data, synthetic_data):
+        """Compute the KL divergence.
+
+        Args:
+            real_data:
+                The values from the real dataset.
+            synthetic_data:
+                The values from the synthetic dataset.
+
+        Returns:
+            Union[float, tuple[float]]:
+                Metric output or outputs.
+        """
         columns = real_data.columns[:2]
         real = real_data[columns].itertuples(index=False)
         synthetic = synthetic_data[columns].itertuples(index=False)
@@ -109,7 +121,7 @@ class DiscreteKLDivergence(ColumnPairsMetric):
 
     @classmethod
     def normalize(cls, raw_score):
-        """Returns the `raw_score` as is, since it is already normalized.
+        """Return the `raw_score` as is, since it is already normalized.
 
         Args:
             raw_score (float):
