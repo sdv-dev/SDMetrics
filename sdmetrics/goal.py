@@ -10,6 +10,6 @@ class Goal(Enum):
     minimized, or maximized.
     """
 
-    IGNORE = "ignore"
-    MAXIMIZE = "maximize"
-    MINIMIZE = "minimize"
+    IGNORE = 'ignore'
+    MAXIMIZE = 'maximize'
+    MINIMIZE = 'minimize'
