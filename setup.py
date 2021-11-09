@@ -51,6 +51,7 @@ development_requires = [
     'flake8>=3.7.7,<4',
     'flake8-absolute-import>=1.0,<2',
     'isort>=4.3.4,<5',
+    'flake8-pytest-style>=1.5.0,<2',
     'flake8-builtins>=1.5.3,<1.6',
     'flake8-comprehensions>=3.6.1,<3.7',
     'flake8-debugger>=4.0.0,<4.1',
