@@ -1,3 +1,5 @@
+"""CategoricalEnsemble module and its attacker."""
+
 import numpy as np
 
 from sdmetrics.single_table.privacy.base import CategoricalPrivacyMetric, PrivacyAttackerModel

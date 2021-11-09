@@ -5,11 +5,11 @@ from rdt import HyperTransformer
 
 from sdmetrics import single_column
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.utils import NestedAttrsMeta
+from sdmetrics.utils import nested_attrs_meta
 
 
 class MultiSingleColumnMetric(SingleTableMetric,
-                              metaclass=NestedAttrsMeta('single_column_metric')):
+                              metaclass=nested_attrs_meta('single_column_metric')):
     """SingleTableMetric subclass that applies a SingleColumnMetric on each column.
 
     This class can either be used by creating a subclass that inherits from it and
@@ -70,8 +70,8 @@ class MultiSingleColumnMetric(SingleTableMetric,
         scores = []
         for column_name, real_column in real_data.items():
             if column_name in fields:
-                real_column = real_column.values
-                synthetic_column = synthetic_data[column_name].values
+                real_column = real_column.to_numpy()
+                synthetic_column = synthetic_data[column_name].to_numpy()
 
                 score = self.single_column_metric.compute(
                     real_column,
@@ -111,7 +111,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
 
     @classmethod
     def normalize(cls, raw_score):
-        """Returns the `raw_score` as is, since it is already normalized.
+        """Return the `raw_score` as is, since it is already normalized.
 
         Args:
             raw_score (float):
@@ -184,8 +184,8 @@ class KSTestExtended(MultiSingleColumnMetric):
 
         values = []
         for column_name, real_column in real_data.items():
-            real_column = real_column.values
-            synthetic_column = synthetic_data[column_name].values
+            real_column = real_column.to_numpy()
+            synthetic_column = synthetic_data[column_name].to_numpy()
 
             score = cls.single_column_metric.compute(real_column, synthetic_column)
             values.append(score)

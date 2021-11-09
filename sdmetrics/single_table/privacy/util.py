@@ -1,3 +1,5 @@
+"""Utils for the single_table.privacy modules."""
+
 import numpy as np
 
 

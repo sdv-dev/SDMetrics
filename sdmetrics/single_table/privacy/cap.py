@@ -1,3 +1,5 @@
+"""CAP modules and their attackers."""
+
 from sdmetrics.single_table.privacy.base import CategoricalPrivacyMetric, PrivacyAttackerModel
 from sdmetrics.single_table.privacy.util import closest_neighbors, count_frequency, majority
 

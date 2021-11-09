@@ -46,11 +46,11 @@ class LogisticDetection(ScikitLearnClassifierDetectionMetric):
     The output of the metric is one minus the average ROC AUC score obtained.
     """
 
-    name = "LogisticRegression Detection"
+    name = 'LogisticRegression Detection'
 
     @staticmethod
     def _get_classifier():
-        return LogisticRegression(solver="lbfgs")
+        return LogisticRegression(solver='lbfgs')
 
 
 class SVCDetection(ScikitLearnClassifierDetectionMetric):
@@ -62,7 +62,7 @@ class SVCDetection(ScikitLearnClassifierDetectionMetric):
     The output of the metric is one minus the average ROC AUC score obtained.
     """
 
-    name = "SVC Detection"
+    name = 'SVC Detection'
 
     @staticmethod
     def _get_classifier():

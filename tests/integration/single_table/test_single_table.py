@@ -24,7 +24,7 @@ METRICS = [
 ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def ones():
     return pd.DataFrame({
         'a': [1] * 300,
@@ -34,7 +34,7 @@ def ones():
     })
 
 
-@pytest.fixture
+@pytest.fixture()
 def zeros():
     return pd.DataFrame({
         'a': [0] * 300,
@@ -44,7 +44,7 @@ def zeros():
     })
 
 
-@pytest.fixture
+@pytest.fixture()
 def real_data():
     return pd.DataFrame({
         'a': np.random.normal(size=1800),
@@ -54,7 +54,7 @@ def real_data():
     })
 
 
-@pytest.fixture
+@pytest.fixture()
 def good_data():
     return pd.DataFrame({
         'a': np.random.normal(loc=0.01, size=1800),
@@ -64,7 +64,7 @@ def good_data():
     })
 
 
-@pytest.fixture
+@pytest.fixture()
 def bad_data():
     return pd.DataFrame({
         'a': np.random.normal(loc=5, scale=3, size=1800),
@@ -109,10 +109,10 @@ def test_compute_all():
         metadata=metadata
     )
 
-    assert not pd.isnull(output.raw_score.mean())
+    assert not pd.isna(output.raw_score.mean())
 
-    scores = output[output.raw_score.notnull()]
+    scores = output[output.raw_score.notna()]
     assert scores.raw_score.between(scores.min_value, scores.max_value).all()
 
-    scores = output[output.normalized_score.notnull()]
+    scores = output[output.normalized_score.notna()]
     assert scores.normalized_score.between(0.0, 1.0).all()
