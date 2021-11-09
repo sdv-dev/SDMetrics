@@ -40,7 +40,7 @@ class BNLikelihood(SingleTableMetric):
         try:
             from pomegranate import BayesianNetwork
         except ImportError:
-            raise ImportError("Please install pomegranate with `pip install pomegranate`")
+            raise ImportError('Please install pomegranate with `pip install pomegranate`')
 
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
         structure = metadata.get('structure', structure)
