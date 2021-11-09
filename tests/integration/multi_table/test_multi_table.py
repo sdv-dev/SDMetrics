@@ -15,8 +15,8 @@ def test_compute_all():
         metadata=metadata
     )
 
-    assert not pd.isnull(output.raw_score.mean())
+    assert not pd.isna(output.raw_score.mean())
 
-    scores = output[output.raw_score.notnull()]
+    scores = output[output.raw_score.notna()]
 
     assert scores.raw_score.between(scores.min_value, scores.max_value).all()
