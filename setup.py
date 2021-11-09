@@ -19,7 +19,7 @@ install_requires = [
     'numba>=0.50,<0.54',
     'sktime>=0.6,<1',
     'torch>=1.4,<2',
-    'copulas>=0.5.0,<0.6',
+    'copulas>=0.6.0,<0.7',
     'rdt>=0.5.0,<0.6',
 ]
 
