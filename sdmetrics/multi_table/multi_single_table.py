@@ -6,10 +6,10 @@ import numpy as np
 
 from sdmetrics import single_table
 from sdmetrics.multi_table.base import MultiTableMetric
-from sdmetrics.utils import NestedAttrsMeta
+from sdmetrics.utils import nested_attrs_meta
 
 
-class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single_table_metric')):
+class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('single_table_metric')):
     """MultiTableMetric subclass that applies a SingleTableMetric on each table.
 
     This class can either be used by creating a subclass that inherits from it and
@@ -103,7 +103,7 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=NestedAttrsMeta('single
 
     @classmethod
     def normalize(cls, raw_score):
-        """Returns the `raw_score` as is, since it is already normalized.
+        """Return the `raw_score` as is, since it is already normalized.
 
         Args:
             raw_score (float):

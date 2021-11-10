@@ -1,3 +1,5 @@
+"""Privacy metrics module."""
+
 from sdmetrics.single_table.privacy.base import CategoricalPrivacyMetric, NumericalPrivacyMetric
 from sdmetrics.single_table.privacy.cap import (
     CategoricalCAP, CategoricalGeneralizedCAP, CategoricalZeroCAP)

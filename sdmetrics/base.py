@@ -37,7 +37,7 @@ class BaseMetric:
                 Whether to include subclasses which are parents to
                 other classes. Defaults to ``False``.
         """
-        subclasses = dict()
+        subclasses = {}
         for child in cls.__subclasses__():
             grandchildren = child.get_subclasses(include_parents)
             subclasses.update(grandchildren)

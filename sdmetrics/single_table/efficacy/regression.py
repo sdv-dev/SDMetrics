@@ -19,7 +19,7 @@ class RegressionEfficacyMetric(MLEfficacyMetric):
 
     @classmethod
     def normalize(cls, raw_score):
-        """Returns a normalized version of the R^2 score.
+        """Return a normalized version of the R^2 score.
 
         Args:
             raw_score (float):

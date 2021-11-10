@@ -4,11 +4,11 @@ import numpy as np
 
 from sdmetrics.multi_table.detection.base import DetectionMetric
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
-from sdmetrics.utils import NestedAttrsMeta
+from sdmetrics.utils import nested_attrs_meta
 
 
 class ParentChildDetectionMetric(DetectionMetric,
-                                 metaclass=NestedAttrsMeta('single_table_metric')):
+                                 metaclass=nested_attrs_meta('single_table_metric')):
     """Base class for Multi-table Detection metrics based on parent-child relationships.
 
     These metrics denormalize the parent-child relationships from the dataset and then
