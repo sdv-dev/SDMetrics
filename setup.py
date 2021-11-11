@@ -14,14 +14,14 @@ with open('HISTORY.md', encoding='utf-8') as history_file:
 install_requires = [
     "numpy>=1.19.0,<1.20.0;python_version<'3.7'",
     "numpy>=1.20.0,<2;python_version>='3.7'",
-    'pandas>=1.1.3,<1.1.5',
+    'pandas>=1.1.3,<2',
     'scikit-learn>=0.24,<2',
     'scipy>=1.5.4,<2',
     'numba>=0.50,<0.54',
     'sktime>=0.6,<1',
     'torch>=1.4,<2',
     'copulas>=0.6.0,<0.7',
-    'rdt>=0.5.0,<0.6',
+    'rdt>=0.6.1,<0.7',
 ]
 
 pomegranate_requires = [
