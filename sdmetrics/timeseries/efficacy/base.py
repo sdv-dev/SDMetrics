@@ -63,7 +63,7 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
 
     @classmethod
     def _compute_score(cls, real_data, synthetic_data, entity_columns, target):
-        transformer = rdt.HyperTransformer(dtype_transformers={
+        transformer = rdt.HyperTransformer(default_data_type_transformers={
             'O': 'one_hot_encoding',
             'M': rdt.transformers.DatetimeTransformer(strip_constant=True),
         })

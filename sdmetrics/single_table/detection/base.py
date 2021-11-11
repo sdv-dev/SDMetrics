@@ -65,7 +65,7 @@ class DetectionMetric(SingleTableMetric):
                 One minus the ROC AUC Cross Validation Score obtained by the classifier.
         """
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
-        transformer = HyperTransformer(dtype_transformers={'O': 'one_hot_encoding'})
+        transformer = HyperTransformer(default_data_type_transformers={'O': 'one_hot_encoding'})
         real_data = transformer.fit_transform(real_data).to_numpy()
         synthetic_data = transformer.transform(synthetic_data).to_numpy()
 

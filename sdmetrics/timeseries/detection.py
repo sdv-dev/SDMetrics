@@ -76,7 +76,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
 
-        transformer = rdt.HyperTransformer(dtype_transformers={
+        transformer = rdt.HyperTransformer(default_data_type_transformers={
             'O': 'one_hot_encoding',
             'M': rdt.transformers.DatetimeTransformer(strip_constant=True),
         })
