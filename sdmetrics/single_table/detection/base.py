@@ -66,7 +66,7 @@ class DetectionMetric(SingleTableMetric):
         """
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
         transformer = HyperTransformer(default_data_type_transformers={'O': 'one_hot_encoding'})
-        real_data = transformer.fit_transform(real_data, real_data.columns).to_numpy()
+        real_data = transformer.fit_transform(real_data).to_numpy()
         synthetic_data = transformer.transform(synthetic_data).to_numpy()
 
         X = np.concatenate([real_data, synthetic_data])
