@@ -8,12 +8,12 @@ from pyts.classification import TimeSeriesForest
 from pyts.multivariate.classification import MultivariateClassifier
 
 
-def _melt(row):
-    return np.melt(row.to_numpy())
+def _stack(row):
+    return np.stack(row.to_numpy())  # noqa
 
 
 def _to_numpy(dataframe):
-    return np.melt(dataframe.apply(_melt, axis=1))
+    return np.stack(dataframe.apply(_stack, axis=1))  # noqa
 
 
 def tsf_classifier(X_train, X_test, y_train, y_test):
