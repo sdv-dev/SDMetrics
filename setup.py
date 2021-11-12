@@ -39,7 +39,6 @@ tests_require = [
     'jupyter>=1.0.0,<2',
     'rundoc>=0.4.3,<0.5',
     'invoke',
-    'pomegranate>=0.13.4,<0.14.2'
 ]
 
 development_requires = [
@@ -102,9 +101,9 @@ setup(
     ],
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
-        'test': tests_require,
+        'test': tests_require + pomegranate_requires,
         'pomegranate': pomegranate_requires,
-        'dev': development_requires + tests_require,
+        'dev': development_requires + tests_require + pomegranate_requires,
     },
     install_package_data=True,
     install_requires=install_requires,
