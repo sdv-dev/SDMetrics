@@ -24,7 +24,8 @@ install_requires = [
 ]
 
 pomegranate_requires = [
-    'pomegranate>=0.13.4,<0.14.2',
+    "pomegranate>=1.14.1,<0.14.2;python_version>'3.8'",
+    "pomegranate>=1.13.4,<0.14.2;python_version<'3.9'",
 ]
 
 setup_requires = [
