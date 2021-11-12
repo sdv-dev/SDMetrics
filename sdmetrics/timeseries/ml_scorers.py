@@ -1,22 +1,26 @@
 """Machine Learning Detection based metrics for Time Series."""
 
+import numpy as np
 import pandas as pd
 import rdt
 import torch
-from sklearn.pipeline import Pipeline
-from sktime.classification.interval_based import TimeSeriesForestClassifier
-from sktime.transformations.panel.compose import ColumnConcatenator
+from pyts.classification import TimeSeriesForest
+from pyts.multivariate.classification import MultivariateClassifier
+
+
+def _melt(row):
+    return np.melt(row.to_numpy())
+
+
+def _to_numpy(dataframe):
+    return np.melt(dataframe.apply(_melt, axis=1))
 
 
 def tsf_classifier(X_train, X_test, y_train, y_test):
-    """ML Scorer based on sktime pipeline with a TimeSeriesForestClassifier."""
-    steps = [
-        ('concatenate', ColumnConcatenator()),
-        ('classify', TimeSeriesForestClassifier(n_estimators=100))
-    ]
-    clf = Pipeline(steps)
-    clf.fit(X_train, y_train)
-    return clf.score(X_test, y_test)
+    """ML Scorer based on a TimeSeriesForestClassifier."""
+    clf = MultivariateClassifier(TimeSeriesForest())
+    clf.fit(_to_numpy(X_train), y_train)
+    return clf.score(_to_numpy(X_test), y_test)
 
 
 def _x_to_packed_sequence(X):

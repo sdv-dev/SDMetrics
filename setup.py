@@ -17,10 +17,11 @@ install_requires = [
     'pandas>=1.1.3,<1.1.5',
     'scikit-learn>=0.24,<2',
     'scipy>=1.5.4,<2',
-    'sktime>=0.6,<1',
     'torch>=1.4,<2',
     'copulas>=0.6.0,<0.7',
     'rdt>=0.6.1,<0.7',
+    "pyts>=0.10.0,<0.12.0;python_version<'3.6'",
+    "pyts>=0.12.0,<0.13.0;python_version>='3.9'",
 ]
 
 pomegranate_requires = [
