@@ -20,8 +20,8 @@ install_requires = [
     'torch>=1.4,<2',
     'copulas>=0.6.0,<0.7',
     'rdt>=0.6.1,<0.7',
-    "pyts>=0.10.0,<0.12.0;python_version<'3.6'",
-    "pyts>=0.12.0,<0.13.0;python_version>='3.9'",
+    "pyts>=0.10.0,<0.12.0;python_version<'3.7'",
+    "pyts>=0.12.0,<0.13.0;python_version>='3.7'",
 ]
 
 pomegranate_requires = [
