@@ -1,11 +1,20 @@
 import glob
+import operator
 import os
 import re
+import platform
 import shutil
 import stat
 from pathlib import Path
 
 from invoke import task
+
+COMPARISONS = {
+    '>=': operator.ge,
+    '>': operator.gt,
+    '<': operator.lt,
+    '<=': operator.le
+}
 
 
 @task
@@ -15,12 +24,24 @@ def check_dependencies(c):
 
 @task
 def unit(c):
-    c.run('python -m pytest ./tests/unit --reruns 5 --cov=sdmetrics --cov-report=xml')
+    c.run('python -m pytest ./tests/unit --cov=sdmetrics --cov-report=xml')
 
 
 @task
 def integration(c):
-    c.run('python -m pytest ./tests/integration --reruns 5')
+    c.run('python -m pytest ./tests/integration --reruns 5 --disable-warnings')
+
+
+def _validate_python_version(line):
+    python_version_match = re.search(r"python_version(<=?|>=?)\'(\d\.?)+\'", line)
+    if python_version_match:
+        python_version = python_version_match.group(0)
+        comparison = re.search(r'(>=?|<=?)', python_version).group(0)
+        version_number = python_version.split(comparison)[-1].replace("'", "")
+        comparison_function = COMPARISONS[comparison]
+        return comparison_function(platform.python_version(), version_number)
+
+    return True
 
 
 @task
@@ -37,10 +58,16 @@ def install_minimum(c):
                 continue
 
             line = line.strip()
-            line = re.sub(r',?<=?[\d.]*,?', '', line)
-            line = re.sub(r'>=?', '==', line)
-            line = re.sub(r"""['",]""", '', line)
-            versions.append(line)
+            if _validate_python_version(line):
+                requirement = re.match(r'[^>]*', line).group(0)
+                requirement = re.sub(r"""['",]""", '', requirement)
+                version = re.search(r'>=?(\d\.?)+', line).group(0)
+                if version:
+                    version = re.sub(r'>=?', '==', version)
+                    version = re.sub(r"""['",]""", '', version)
+                    requirement += version
+
+                versions.append(requirement)
 
         elif (line.startswith('install_requires = [') or
              line.startswith('pomegranate_requires = [')):

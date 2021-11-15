@@ -12,19 +12,20 @@ with open('HISTORY.md', encoding='utf-8') as history_file:
     history = history_file.read()
 
 install_requires = [
-    'numpy>=1.19.0,<2',
-    'pandas>=1.1,<1.1.5',
+    "numpy>=1.18.0,<1.20.0;python_version<'3.7'",
+    "numpy>=1.20.0,<2;python_version>='3.7'",
+    'pandas>=1.1.3,<2',
     'scikit-learn>=0.24,<2',
-    'scipy>=1.4.1,<2',
-    'numba>=0.50,<0.54',
-    'sktime>=0.6,<1',
-    'torch>=1.4,<2',
-    'copulas>=0.5.0,<0.6',
-    'rdt>=0.5.0,<0.6',
+    'scipy>=1.5.4,<2',
+    'torch>=1.8.0,<2',
+    'copulas>=0.6.0,<0.7',
+    'rdt>=0.6.1,<0.7',
+    'pyts>=0.12.0,<0.13.0',
 ]
 
 pomegranate_requires = [
-    'pomegranate>=0.13.4,<0.14.2',
+    "pomegranate>=0.13.4,<0.14.2;python_version<'3.7'",
+    "pomegranate>=0.14.1,<0.15;python_version>='3.7'",
 ]
 
 setup_requires = [
@@ -38,7 +39,6 @@ tests_require = [
     'jupyter>=1.0.0,<2',
     'rundoc>=0.4.3,<0.5',
     'invoke',
-    'pomegranate>=0.13.4,<0.14.2'
 ]
 
 development_requires = [
@@ -97,12 +97,13 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
-        'test': tests_require,
+        'test': tests_require + pomegranate_requires,
         'pomegranate': pomegranate_requires,
-        'dev': development_requires + tests_require,
+        'dev': development_requires + tests_require + pomegranate_requires,
     },
     install_package_data=True,
     install_requires=install_requires,
@@ -113,7 +114,7 @@ setup(
     keywords='sdmetrics sdmetrics SDMetrics',
     name='sdmetrics',
     packages=find_packages(include=['sdmetrics', 'sdmetrics.*']),
-    python_requires='>=3.6,<3.9',
+    python_requires='>=3.6,<3.10',
     setup_requires=setup_requires,
     test_suite='tests',
     tests_require=tests_require,

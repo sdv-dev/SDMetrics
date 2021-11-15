@@ -1,21 +1,26 @@
 """Machine Learning Detection based metrics for Time Series."""
 
+import numpy as np
+import pandas as pd
 import rdt
 import torch
-from sklearn.pipeline import Pipeline
-from sktime.classification.interval_based import TimeSeriesForestClassifier
-from sktime.transformations.panel.compose import ColumnConcatenator
+from pyts.classification import TimeSeriesForest
+from pyts.multivariate.classification import MultivariateClassifier
+
+
+def _stack(row):
+    return np.stack(row.to_numpy())  # noqa
+
+
+def _to_numpy(dataframe):
+    return np.stack(dataframe.apply(_stack, axis=1))  # noqa
 
 
 def tsf_classifier(X_train, X_test, y_train, y_test):
-    """ML Scorer based on sktime pipeline with a TimeSeriesForestClassifier."""
-    steps = [
-        ('concatenate', ColumnConcatenator()),
-        ('classify', TimeSeriesForestClassifier(n_estimators=100))
-    ]
-    clf = Pipeline(steps)
-    clf.fit(X_train, y_train)
-    return clf.score(X_test, y_test)
+    """ML Scorer based on a TimeSeriesForestClassifier."""
+    clf = MultivariateClassifier(TimeSeriesForest())
+    clf.fit(_to_numpy(X_train), y_train)
+    return clf.score(_to_numpy(X_test), y_test)
 
 
 def _x_to_packed_sequence(X):
@@ -44,8 +49,14 @@ def lstm_classifier(X_train, X_test, y_train, y_test):
     X_test = _x_to_packed_sequence(X_test).to(device)
 
     transformer = rdt.transformers.categorical.LabelEncodingTransformer()
-    y_train = torch.LongTensor(transformer.fit_transform(y_train).to_numpy()).to(device)
-    y_test = torch.LongTensor(transformer.transform(y_test).to_numpy()).to(device)
+    column = 'target'
+    output_column = f'{column}.value'
+    y_train = pd.DataFrame(y_train, columns=[column])
+    y_test = pd.DataFrame(y_test, columns=[column])
+
+    y_train = transformer.fit_transform(y_train, column)[output_column].to_numpy()
+    y_train = torch.LongTensor(y_train).to(device)
+    y_test = torch.LongTensor(transformer.transform(y_test)[output_column].to_numpy()).to(device)
 
     optimizer = torch.optim.Adam(list(lstm.parameters()) + list(linear.parameters()), lr=1e-2)
 
