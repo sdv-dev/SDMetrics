@@ -24,12 +24,12 @@ def check_dependencies(c):
 
 @task
 def unit(c):
-    c.run('python -m pytest ./tests/unit --reruns 5 --cov=sdmetrics --cov-report=xml')
+    c.run('python -m pytest ./tests/unit --cov=sdmetrics --cov-report=xml')
 
 
 @task
 def integration(c):
-    c.run('python -m pytest ./tests/integration --reruns 5')
+    c.run('python -m pytest ./tests/integration --reruns 5 --disable-warnings')
 
 
 def _validate_python_version(line):
