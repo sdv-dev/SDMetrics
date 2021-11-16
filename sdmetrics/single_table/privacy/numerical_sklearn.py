@@ -1,7 +1,9 @@
+"""Numerical sklearn privacy metric modules and their attackers."""
+
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
-from sklearn.svm import SVR as svr
+from sklearn.svm import SVR
 
 from sdmetrics.single_table.privacy.base import NumericalPrivacyMetric, PrivacyAttackerModel
 
@@ -17,6 +19,7 @@ class NumericalSklearnAttacker(PrivacyAttackerModel):
         skl_learner (Class):
             A (wrapped) sklearn classifier class that can be called with no arguments.
     """
+
     SKL_LEARNER = None
 
     def __init__(self):
@@ -73,9 +76,9 @@ class SVRWrapper():
         """
         n_labels = Y.shape[1]
         for idx in range(n_labels):
-            Y_col = Y[:, idx]
-            predictor = svr()
-            predictor.fit(X, Y_col)
+            y = Y[:, idx]
+            predictor = SVR()
+            predictor.fit(X, y)
             self.predictors.append(predictor)
 
     def predict(self, X):

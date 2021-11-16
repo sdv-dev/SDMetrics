@@ -4,7 +4,6 @@ import json
 import logging
 
 import numpy as np
-from pomegranate import BayesianNetwork
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
@@ -38,6 +37,11 @@ class BNLikelihood(SingleTableMetric):
 
     @classmethod
     def _likelihoods(cls, real_data, synthetic_data, metadata=None, structure=None):
+        try:
+            from pomegranate import BayesianNetwork
+        except ImportError:
+            raise ImportError('Please install pomegranate with `pip install pomegranate`')
+
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
         structure = metadata.get('structure', structure)
         fields = cls._select_fields(metadata, ('categorical', 'boolean'))

@@ -37,7 +37,7 @@ Implemented metrics:
       on a DecisionTreeClassifier from scikit-learn.
     * `MulticlassMLPClassifier`: ML Efficacy metric for multiclass classifications problems, based
       on an MLPClassifier from scikit-learn.
-    * `LinearRegressionClassifier`: ML Efficacy metric for regression problems, based
+    * `LinearRegression`: ML Efficacy metric for regression problems, based
       on a LinearRegression from scikit-learn.
     * `MLPRegressor`: ML Efficacy metric for regression problems, based
       on an MLPRegressor from scikit-learn.

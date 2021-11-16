@@ -1,5 +1,36 @@
 # History
 
+## v0.4.0 - 2021-11-16
+
+This release adds support for Python 3.9 and updates dependencies to ensure compatibility with the
+rest of the SDV ecosystem, and upgrades to the latests [RDT](https://github.com/sdv-dev/RDT/releases/tag/v0.6.1)
+release.
+
+### Issues closed
+
+* Replace `sktime` for `pyts` - Issue [#103](https://github.com/sdv-dev/SDMetrics/issues/103) by @pvk-developer
+* Add support for Python 3.9 - Issue [#102](https://github.com/sdv-dev/SDMetrics/issues/102) by @pvk-developer
+* Increase code style lint - Issue [#80](https://github.com/sdv-dev/SDMetrics/issues/80) by @fealho
+* Add `pip check` to `CI` workflows - Issue [#79](https://github.com/sdv-dev/SDMetrics/issues/79) by @pvk-developer
+* Upgrade dependency ranges - Issue [#69](https://github.com/sdv-dev/SDMetrics/issues/69) by @katxiao
+
+## v0.3.2 - 2021-08-16
+
+This release makes `pomegranate` an optional dependency.
+
+### Issues closed
+
+* Make pomegranate an optional dependency - Issue [#63](https://github.com/sdv-dev/SDMetrics/issues/63) by @fealho
+
+## v0.3.1 - 2021-07-12
+
+This release fixes a bug to make the privacy metrics available in the API docs.
+It also updates dependencies to ensure compatibility with the rest of the SDV ecosystem.
+
+### Issues closed
+
+* `CategoricalSVM` not being imported - Issue [#65](https://github.com/sdv-dev/SDMetrics/issues/65) by @csala
+
 ## v0.3.0 - 2021-03-30
 
 This release includes privacy metrics to evaluate if the real data could be obtained or

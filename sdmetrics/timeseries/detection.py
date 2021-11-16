@@ -41,7 +41,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
             entity_data = entity_data.drop(entity_columns, axis=1)
             entity_data = transformer.transform(entity_data)
             entity_data = pd.Series({
-                column: entity_data[column].values
+                column: entity_data[column].to_numpy()
                 for column in entity_data.columns
             }, name=entity_id)
             X = X.append(entity_data)
@@ -76,7 +76,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
 
-        transformer = rdt.HyperTransformer(dtype_transformers={
+        transformer = rdt.HyperTransformer(default_data_type_transformers={
             'O': 'one_hot_encoding',
             'M': rdt.transformers.DatetimeTransformer(strip_constant=True),
         })
@@ -93,7 +93,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
 
     @classmethod
     def normalize(cls, raw_score):
-        """Returns the `raw_score` as is, since it is already normalized.
+        """Return the `raw_score` as is, since it is already normalized.
 
         Args:
             raw_score (float):

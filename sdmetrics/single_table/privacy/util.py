@@ -1,3 +1,5 @@
+"""Utils for the single_table.privacy modules."""
+
 import numpy as np
 
 
@@ -33,7 +35,7 @@ def majority(samples, ignore_none=True):
 
 
 def count_frequency(samples, target):
-    """Calculate how frequent an target attribute appear in a list
+    """Calculate how frequent an target attribute appear in a list.
 
     Arguments:
         samples (list):

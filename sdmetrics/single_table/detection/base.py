@@ -65,9 +65,9 @@ class DetectionMetric(SingleTableMetric):
                 One minus the ROC AUC Cross Validation Score obtained by the classifier.
         """
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
-        transformer = HyperTransformer(dtype_transformers={'O': 'one_hot_encoding'})
-        real_data = transformer.fit_transform(real_data).values
-        synthetic_data = transformer.transform(synthetic_data).values
+        transformer = HyperTransformer(default_data_type_transformers={'O': 'one_hot_encoding'})
+        real_data = transformer.fit_transform(real_data).to_numpy()
+        synthetic_data = transformer.transform(synthetic_data).to_numpy()
 
         X = np.concatenate([real_data, synthetic_data])
         y = np.hstack([np.ones(len(real_data)), np.zeros(len(synthetic_data))])
@@ -90,7 +90,7 @@ class DetectionMetric(SingleTableMetric):
 
     @classmethod
     def normalize(cls, raw_score):
-        """Returns the `raw_score` as is, since it is already normalized.
+        """Return the `raw_score` as is, since it is already normalized.
 
         Args:
             raw_score (float):
