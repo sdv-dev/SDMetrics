@@ -4,6 +4,7 @@ import logging
 
 import numpy as np
 from rdt import HyperTransformer
+from rdt.transformers import OneHotEncodingTransformer
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
@@ -65,7 +66,9 @@ class DetectionMetric(SingleTableMetric):
                 One minus the ROC AUC Cross Validation Score obtained by the classifier.
         """
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
-        transformer = HyperTransformer(default_data_type_transformers={'O': 'one_hot_encoding'})
+        transformer = HyperTransformer(default_data_type_transformers={
+            'categorical': OneHotEncodingTransformer(error_on_unknown=False),
+        })
         real_data = transformer.fit_transform(real_data).to_numpy()
         synthetic_data = transformer.transform(synthetic_data).to_numpy()
 
