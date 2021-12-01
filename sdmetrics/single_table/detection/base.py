@@ -77,19 +77,15 @@ class DetectionMetric(SingleTableMetric):
         if np.isin(X, [np.inf, -np.inf]).any():
             X[np.isin(X, [np.inf, -np.inf])] = np.nan
 
-        try:
-            scores = []
-            kf = StratifiedKFold(n_splits=3, shuffle=True)
-            for train_index, test_index in kf.split(X, y):
-                y_pred = cls._fit_predict(X[train_index], y[train_index], X[test_index])
-                roc_auc = roc_auc_score(y[test_index], y_pred)
+        scores = []
+        kf = StratifiedKFold(n_splits=3, shuffle=True)
+        for train_index, test_index in kf.split(X, y):
+            y_pred = cls._fit_predict(X[train_index], y[train_index], X[test_index])
+            roc_auc = roc_auc_score(y[test_index], y_pred)
 
-                scores.append(max(0.5, roc_auc) * 2 - 1)
+            scores.append(max(0.5, roc_auc) * 2 - 1)
 
-            return 1 - np.mean(scores)
-        except ValueError as err:
-            LOGGER.info('DetectionMetric: Skipping due to %s', err)
-            return np.nan
+        return 1 - np.mean(scores)
 
     @classmethod
     def normalize(cls, raw_score):
