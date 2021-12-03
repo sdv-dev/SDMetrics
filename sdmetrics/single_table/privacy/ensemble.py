@@ -96,10 +96,10 @@ class CategoricalEnsemble(CategoricalPrivacyMetric):
             model_kwargs = cls.MODEL_KWARGS
 
         if 'attackers' not in model_kwargs:  # no attackers specfied
-            return np.nan
+            return ValueError('No attackers specified.')
         elif (not isinstance(model_kwargs['attackers'], list)
               or len(model_kwargs['attackers']) == 0):  # zero attackers specfied
-            return np.nan
+            return ValueError('Zero attackers specified')
 
         return super().compute(
             real_data,
