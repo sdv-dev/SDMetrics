@@ -47,7 +47,7 @@ class MLEfficacyMetric(SingleTableMetric):
             predictions = np.full(len(real_data), unique_labels[0])
         else:
             transformer = rdt.HyperTransformer(default_data_type_transformers={
-                'O': 'one_hot_encoding'
+                'categorical': rdt.transformers.OneHotEncodingTransformer(error_on_unknown=False),
             })
             real_data = transformer.fit_transform(real_data)
             synthetic_data = transformer.transform(synthetic_data)

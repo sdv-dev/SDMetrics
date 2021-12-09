@@ -4,9 +4,11 @@ import logging
 
 import numpy as np
 from rdt import HyperTransformer
+from rdt.transformers import OneHotEncodingTransformer
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
+from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 
@@ -65,7 +67,9 @@ class DetectionMetric(SingleTableMetric):
                 One minus the ROC AUC Cross Validation Score obtained by the classifier.
         """
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
-        transformer = HyperTransformer(default_data_type_transformers={'O': 'one_hot_encoding'})
+        transformer = HyperTransformer(default_data_type_transformers={
+            'categorical': OneHotEncodingTransformer(error_on_unknown=False),
+        })
         real_data = transformer.fit_transform(real_data).to_numpy()
         synthetic_data = transformer.transform(synthetic_data).to_numpy()
 
@@ -85,8 +89,7 @@ class DetectionMetric(SingleTableMetric):
 
             return 1 - np.mean(scores)
         except ValueError as err:
-            LOGGER.info('DetectionMetric: Skipping due to %s', err)
-            return np.nan
+            raise IncomputableMetricError(f'DetectionMetric: Unable to be fit with error {err}')
 
     @classmethod
     def normalize(cls, raw_score):

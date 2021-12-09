@@ -11,7 +11,7 @@
 [![Tests](https://github.com/sdv-dev/SDMetrics/workflows/Run%20Tests/badge.svg)](https://github.com/sdv-dev/SDMetrics/actions?query=workflow%3A%22Run+Tests%22+branch%3Amaster)
 [![Coverage Status](https://codecov.io/gh/sdv-dev/SDMetrics/branch/master/graph/badge.svg)](https://codecov.io/gh/sdv-dev/SDMetrics)
 
-<img align="center" width=30% src="docs/resources/header.png">
+<img align="center" width=30% src="https://user-images.githubusercontent.com/41479552/143880141-73354e1e-84bf-42db-83f7-01c49ee7c81a.png">
 
 Metrics for Synthetic Data Generation Projects
 

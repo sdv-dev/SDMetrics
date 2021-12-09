@@ -1,5 +1,14 @@
 # History
 
+## v0.4.1 - 2021-12-09
+
+This release improves the handling of metric errors, and updates the default transformer behavior used in SDMetrics.
+
+### Issues closed
+
+* Report metric errors from compute_metrics - Issue [#107](https://github.com/sdv-dev/SDMetrics/issues/107) by @katxiao
+* Specify default categorical transformers - Issue [#105](https://github.com/sdv-dev/SDMetrics/pull/105) by @katxiao
+
 ## v0.4.0 - 2021-11-16
 
 This release adds support for Python 3.9 and updates dependencies to ensure compatibility with the

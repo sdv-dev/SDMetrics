@@ -5,6 +5,7 @@ import logging
 import numpy as np
 from sklearn.mixture import GaussianMixture
 
+from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 
@@ -68,6 +69,10 @@ class GMLogLikelihood(SingleTableMetric):
             except ValueError:
                 pass
 
+        if not best:
+            metric_name = cls.name
+            raise IncomputableMetricError(f'{metric_name}: Unable to fit GaussianMixture')
+
         return best
 
     @classmethod
@@ -118,9 +123,6 @@ class GMLogLikelihood(SingleTableMetric):
         """
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
         fields = cls._select_fields(metadata, 'numerical')
-        if not fields:
-            LOGGER.debug('No numerical fields found. Returning NaN.')
-            return np.nan
 
         real_data = real_data[fields]
         synthetic_data = synthetic_data[fields]
@@ -147,6 +149,10 @@ class GMLogLikelihood(SingleTableMetric):
                     break
             except ValueError:
                 pass
+
+        if not scores:
+            metric_name = cls.name
+            raise IncomputableMetricError(f'{metric_name}: Exhausted retries for GaussianMixture')
 
         return np.mean(scores)
 
