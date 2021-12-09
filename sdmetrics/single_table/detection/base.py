@@ -8,6 +8,7 @@ from rdt.transformers import OneHotEncodingTransformer
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
+from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 
@@ -88,8 +89,7 @@ class DetectionMetric(SingleTableMetric):
 
             return 1 - np.mean(scores)
         except ValueError as err:
-            LOGGER.info('DetectionMetric: Skipping due to %s', err)
-            return np.nan
+            raise IncomputableMetricError(f'DetectionMetric: Unable to be fit with error {err}')
 
     @classmethod
     def normalize(cls, raw_score):

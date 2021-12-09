@@ -3,6 +3,7 @@
 from operator import attrgetter
 
 from sdmetrics.base import BaseMetric
+from sdmetrics.errors import IncomputableMetricError
 
 
 class SingleTableMetric(BaseMetric):
@@ -49,6 +50,22 @@ class SingleTableMetric(BaseMetric):
 
     @classmethod
     def _select_fields(cls, metadata, types):
+        """Select fields from metadata that match the specified types.
+
+        Args:
+            metadata (dict):
+                The table metadata.
+            types (str or tuple):
+                The desired data types.
+
+        Returns:
+            list:
+                All fields that match the specified types.
+
+        Raises:
+            IncompatibleMetricError:
+                If no matching fields are found, the metric is unable to be computed.
+        """
         fields = []
         if isinstance(types, str):
             types = (types, )
@@ -58,6 +75,9 @@ class SingleTableMetric(BaseMetric):
             field_subtype = field_meta.get('subtype')
             if any(t in types for t in (field_type, (field_type, ), (field_type, field_subtype))):
                 fields.append(field_name)
+
+        if len(fields) == 0:
+            raise IncomputableMetricError(f'Cannot find fields of types {types}')
 
         return fields
 

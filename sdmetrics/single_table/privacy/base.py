@@ -74,6 +74,9 @@ class CategoricalPrivacyMetric(SingleTableMetric):
             raise TypeError(
                 '`sensitive_fields` must be passed either directly or inside `metadata`')
 
+        if len(key_fields) == 0 or len(sensitive_fields) == 0:
+            raise ValueError('`key_fields` or `sensitive_fields` is empty')
+
         return key_fields, sensitive_fields, metadata
 
     @classmethod
@@ -120,15 +123,12 @@ class CategoricalPrivacyMetric(SingleTableMetric):
             sensitive_fields
         )
 
-        if len(key_fields) == 0 or len(sensitive_fields) == 0:
-            return np.nan
-
         for col in key_fields + sensitive_fields:
             data_type = metadata['fields'][col]
             if (data_type != cls._DTYPES_TO_TYPES['i']
                and data_type != cls._DTYPES_TO_TYPES['O']
                and data_type != cls._DTYPES_TO_TYPES['b']):  # check data type
-                return np.nan
+                raise TypeError(f'Column {col} has invalid data type {data_type}')
 
         model = cls._fit(synthetic_data, key_fields, sensitive_fields, model_kwargs)
 
@@ -220,6 +220,9 @@ class NumericalPrivacyMetric(SingleTableMetric):
             raise TypeError(
                 '`sensitive_fields` must be passed either directly or inside `metadata`')
 
+        if len(key_fields) == 0 or len(sensitive_fields) == 0:
+            raise ValueError('`key_fields` or `sensitive_fields` is empty')
+
         return key_fields, sensitive_fields, metadata
 
     @classmethod
@@ -268,15 +271,12 @@ class NumericalPrivacyMetric(SingleTableMetric):
             cls._validate_inputs(real_data, synthetic_data, metadata, key_fields, sensitive_fields)
         )
 
-        if len(key_fields) == 0 or len(sensitive_fields) == 0:
-            return np.nan
-
         for col in key_fields + sensitive_fields:
             data_type = metadata['fields'][col]
 
             # check data type
             if data_type != cls._DTYPES_TO_TYPES['i'] and data_type != cls._DTYPES_TO_TYPES['f']:
-                return np.nan
+                raise TypeError(f'Column {col} has invalid data type {data_type}')
 
         model = cls._fit(synthetic_data, key_fields, sensitive_fields, model_kwargs)
 
