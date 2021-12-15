@@ -82,6 +82,35 @@ class SingleTableMetric(BaseMetric):
         return fields
 
     @classmethod
+    def _drop_id_fields(cls, real_data, synthetic_data, metadata):
+        """Drop fields that are type id.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict):
+                The table metadata.
+
+        Returns:
+            (pandas.DataFrame, pandas.DataFrame):
+                Copies of the real and synthetic data that do not contain id columns.
+        """
+        real_data_copy = real_data.copy()
+        synthetic_data_copy = synthetic_data.copy()
+
+        ids = []
+        for field_name, field_meta in metadata['fields'].items():
+            if field_meta['type'] is 'id':
+                ids.append(field_name)
+
+        real_data_copy.drop(columns=ids)
+        synthetic_data_copy.drop(columns=ids)
+
+        return real_data_copy, synthetic_data_copy
+
+    @classmethod
     def _validate_inputs(cls, real_data, synthetic_data, metadata=None):
         """Validate the inputs and return a valid metadata.
 
