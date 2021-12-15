@@ -5,6 +5,7 @@ from collections import defaultdict
 import numpy as np
 
 from sdmetrics import single_table
+from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.multi_table.base import MultiTableMetric
 from sdmetrics.utils import nested_attrs_meta
 
@@ -67,12 +68,19 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
             metadata = metadata.to_dict()
 
         values = []
+        errors = {}
         for table_name, real_table in real_data.items():
             synthetic_table = synthetic_data[table_name]
             table_meta = metadata['tables'][table_name]
 
-            score = self.single_table_metric.compute(real_table, synthetic_table, table_meta)
-            values.append(score)
+            try:
+                score = self.single_table_metric.compute(real_table, synthetic_table, table_meta)
+                values.append(score)
+            except IncomputableMetricError as e:
+                errors[table_name] = e
+
+        if not values:
+            raise IncomputableMetricError(f'Encountered the following errors: {errors}')
 
         return np.nanmean(values)
 
