@@ -76,8 +76,8 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
             try:
                 score = self.single_table_metric.compute(real_table, synthetic_table, table_meta)
                 values.append(score)
-            except IncomputableMetricError as e:
-                errors[table_name] = e
+            except IncomputableMetricError as error:
+                errors[table_name] = error
 
         if not values:
             raise IncomputableMetricError(f'Encountered the following errors: {errors}')
