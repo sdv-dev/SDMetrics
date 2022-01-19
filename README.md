@@ -13,7 +13,9 @@
 <div align="left">
 <br/>
 <p align="center">
+<a href="https://github.com/sdv-dev/SDV">
 <img align="center" width=40% src="https://github.com/sdv-dev/SDV/blob/master/docs/images/SDMetrics-DataCebo.png"></img>
+</a>
 </p>
 </div>
 
@@ -24,16 +26,16 @@
 The **SDMetrics** library provides a set of **dataset-agnostic tools** for evaluating the **quality
 of a synthetic database** by comparing it to the real database that it is modeled after.
 
-| Important Links            |                                                                |
-| -------------------------- | -------------------------------------------------------------- |
-| :computer: **[Website]**        | Check out the SDV Website for more information about the project. |
-| :orange_book: **[SDV Blog]**        | Regular publshing of useful content about Synthetic Data Generation. |
-| :book: **[Documentation]**      | Quickstarts, User and Development Guides, and API Reference. |
-| :octocat: **[Repository]**            | The link to the Github Repository of this library. |
-| :scroll: **[License]**        | The entire ecosystem is published under the MIT License. |
-| :keyboard: **[Development Status]** | This software is in its Pre-Alpha stage. |
-| ![](slack.png) **[Community]** | Join our Slack Workspace for announcements and discussions. |
-| ![](mybinder.png) **[Tutorials]** | Run the SDV Tutorials in a Binder environment. |
+| Important Links                               |                                                                      |
+| --------------------------------------------- | -------------------------------------------------------------------- |
+| :computer: **[Website]**                      | Check out the SDV Website for more information about the project.    |
+| :orange_book: **[SDV Blog]**                  | Regular publshing of useful content about Synthetic Data Generation. |
+| :book: **[Documentation]**                    | Quickstarts, User and Development Guides, and API Reference.         |
+| :octocat: **[Repository]**                    | The link to the Github Repository of this library.                   |
+| :scroll: **[License]**                        | The entire ecosystem is published under the MIT License.             |
+| :keyboard: **[Development Status]**           | This software is in its Pre-Alpha stage.                             |
+| [![][Slack Logo] **Community**][Community]    | Join our Slack Workspace for announcements and discussions.          |
+| [![][MyBinder Logo] **Tutorials**][Tutorials] | Run the SDV Tutorials in a Binder environment.                       |
 
 [Website]: https://sdv.dev
 [SDV Blog]: https://sdv.dev/blog
@@ -41,7 +43,9 @@ of a synthetic database** by comparing it to the real database that it is modele
 [Repository]: https://github.com/sdv-dev/SDMetrics
 [License]: https://github.com/sdv-dev/SDMetrics/blob/master/LICENSE
 [Development Status]: https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha
+[Slack Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/slack.png
 [Community]: https://join.slack.com/t/sdv-space/shared_invite/zt-gdsfcb5w-0QQpFMVoyB2Yd6SRiMplcw
+[MyBinder Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/mybinder.png
 [Tutorials]: https://mybinder.org/v2/gh/sdv-dev/SDV/master?filepath=tutorials
 
 ## Features
@@ -151,9 +155,12 @@ If you want to read more about each individual metric, please visit the followin
 <br/>
 <br/>
 
-The [DataCebo team](https://datacebo.com) is the proud developer of [The Synthetic Data Vault Project](
-https://sdv.dev), the largest open source ecosystem for synthetic data generation & evaluation.
-The ecosystem is home to multiple libraries that support synthetic data, including:
+[The Synthetic Data Vault Project](https://sdv.dev) was first created at MIT's [Data to AI Lab](
+https://dai.lids.mit.edu/) in 2016. After 4 years of research and traction with enterprise, we
+created [DataCebo](https://datacebo.com) in 2020 with the goal of growing the project.
+Today, DataCebo is the proud developer of SDV, the largest ecosystem for
+synthetic data generation & evaluation. It is home to multiple libraries that support synthetic
+data, including:
 
 * 🔄 Data discovery & transformation. Reverse the transforms to reproduce realistic data.
 * 🧠 Multiple machine learning models -- ranging from Copulas to Deep Learning -- to create tabular,
