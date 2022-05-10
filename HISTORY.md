@@ -1,5 +1,15 @@
 # History
 
+## v0.4.2 - 2022-05-10
+
+This release fixes an error  where the relational `KSTest` crashes if a table doesn't have numerical columns.
+It also includes some housekeeping, updating the pomegranate and copulas version requirements.
+
+### Issues closed
+
+* Cap pomegranate to <0.14.7 - Issue [#116](https://github.com/sdv-dev/SDMetrics/issues/116) by @csala
+* Relational KSTest crashes with IncomputableMetricError if a table doesn't have numerical columns - Issue [#109](https://github.com/sdv-dev/SDMetrics/pull/109) by @katxiao
+
 ## v0.4.1 - 2021-12-09
 
 This release improves the handling of metric errors, and updates the default transformer behavior used in SDMetrics.
