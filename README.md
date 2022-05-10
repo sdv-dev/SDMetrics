@@ -1,8 +1,7 @@
-<p align="left">
-  <a href="https://dai.lids.mit.edu">
-    <img width=15% src="https://dai.lids.mit.edu/wp-content/uploads/2018/06/Logo_DAI_highres.png" alt="DAI-Lab" />
-  </a>
-  <i>An Open Source Project from the <a href="https://dai.lids.mit.edu">Data to AI Lab, at MIT</a></i>
+<div align="center">
+<br/>
+<p align="center">
+    <i>This repository is part of <a href="https://sdv.dev">The Synthetic Data Vault Project</a>, a project from <a href="https://datacebo.com">DataCebo</a>.</i>
 </p>
 
 [![Development Status](https://img.shields.io/badge/Development%20Status-2%20--%20Pre--Alpha-yellow)](https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha)
@@ -11,20 +10,45 @@
 [![Tests](https://github.com/sdv-dev/SDMetrics/workflows/Run%20Tests/badge.svg)](https://github.com/sdv-dev/SDMetrics/actions?query=workflow%3A%22Run+Tests%22+branch%3Amaster)
 [![Coverage Status](https://codecov.io/gh/sdv-dev/SDMetrics/branch/master/graph/badge.svg)](https://codecov.io/gh/sdv-dev/SDMetrics)
 
-<img align="center" width=30% src="https://user-images.githubusercontent.com/41479552/143880141-73354e1e-84bf-42db-83f7-01c49ee7c81a.png">
+<div align="left">
+<br/>
+<p align="center">
+<a href="https://github.com/sdv-dev/SDV">
+<img align="center" width=40% src="https://github.com/sdv-dev/SDV/blob/master/docs/images/SDMetrics-DataCebo.png"></img>
+</a>
+</p>
+</div>
 
-Metrics for Synthetic Data Generation Projects
-
-* Website: https://sdv.dev
-* Documentation: https://sdv.dev/SDV
-* Repository: https://github.com/sdv-dev/SDMetrics
-* License: [MIT](https://github.com/sdv-dev/SDMetrics/blob/master/LICENSE)
-* Development Status: [Pre-Alpha](https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha)
+</div>
 
 # Overview
 
 The **SDMetrics** library provides a set of **dataset-agnostic tools** for evaluating the **quality
 of a synthetic database** by comparing it to the real database that it is modeled after.
+
+| Important Links                               |                                                                      |
+| --------------------------------------------- | -------------------------------------------------------------------- |
+| :computer: **[Website]**                      | Check out the SDV Website for more information about the project.    |
+| :orange_book: **[SDV Blog]**                  | Regular publshing of useful content about Synthetic Data Generation. |
+| :book: **[Documentation]**                    | Quickstarts, User and Development Guides, and API Reference.         |
+| :octocat: **[Repository]**                    | The link to the Github Repository of this library.                   |
+| :scroll: **[License]**                        | The entire ecosystem is published under the MIT License.             |
+| :keyboard: **[Development Status]**           | This software is in its Pre-Alpha stage.                             |
+| [![][Slack Logo] **Community**][Community]    | Join our Slack Workspace for announcements and discussions.          |
+| [![][MyBinder Logo] **Tutorials**][Tutorials] | Run the SDV Tutorials in a Binder environment.                       |
+
+[Website]: https://sdv.dev
+[SDV Blog]: https://sdv.dev/blog
+[Documentation]: https://sdv.dev/SDV
+[Repository]: https://github.com/sdv-dev/SDMetrics
+[License]: https://github.com/sdv-dev/SDMetrics/blob/master/LICENSE
+[Development Status]: https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha
+[Slack Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/slack.png
+[Community]: https://join.slack.com/t/sdv-space/shared_invite/zt-gdsfcb5w-0QQpFMVoyB2Yd6SRiMplcw
+[MyBinder Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/mybinder.png
+[Tutorials]: https://mybinder.org/v2/gh/sdv-dev/SDV/master?filepath=tutorials
+
+## Features
 
 It supports multiple data modalities:
 
@@ -62,7 +86,7 @@ pip install sdmetrics
 **Using `conda`:**
 
 ```bash
-conda install -c sdv-dev -c conda-forge -c pytorch sdmetrics
+conda install -c conda-forge -c pytorch sdmetrics
 ```
 
 For more installation options please visit the [SDMetrics installation Guide](INSTALL.md)
@@ -122,14 +146,28 @@ If you want to read more about each individual metric, please visit the followin
 * Multi Table Metrics: [sdmetrics/multi_table](sdmetrics/multi_table)
 * Time Series Metrics: [sdmetrics/timeseries](sdmetrics/timeseries)
 
-# The Synthetic Data Vault
+---
 
-<p>
-  <a href="https://sdv.dev">
-    <img width=30% src="https://github.com/sdv-dev/SDV/blob/master/docs/images/SDV-Logo-Color-Tagline.png?raw=true">
-  </a>
-  <p><i>This repository is part of <a href="https://sdv.dev">The Synthetic Data Vault Project</a></i></p>
-</p>
 
-* Website: https://sdv.dev
-* Documentation: https://sdv.dev/SDV
+<div align="center">
+<a href="https://datacebo.com"><img align="center" width=40% src="https://github.com/sdv-dev/SDV/blob/master/docs/images/DataCebo.png"></img></a>
+</div>
+<br/>
+<br/>
+
+[The Synthetic Data Vault Project](https://sdv.dev) was first created at MIT's [Data to AI Lab](
+https://dai.lids.mit.edu/) in 2016. After 4 years of research and traction with enterprise, we
+created [DataCebo](https://datacebo.com) in 2020 with the goal of growing the project.
+Today, DataCebo is the proud developer of SDV, the largest ecosystem for
+synthetic data generation & evaluation. It is home to multiple libraries that support synthetic
+data, including:
+
+* 🔄 Data discovery & transformation. Reverse the transforms to reproduce realistic data.
+* 🧠 Multiple machine learning models -- ranging from Copulas to Deep Learning -- to create tabular,
+  multi table and time series data.
+* 📊 Measuring quality and privacy of synthetic data, and comparing different synthetic data
+  generation models.
+
+[Get started using the SDV package](https://sdv.dev/SDV/getting_started/install.html) -- a fully
+integrated solution and your one-stop shop for synthetic data. Or, use the standalone libraries
+for specific needs.

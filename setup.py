@@ -18,14 +18,14 @@ install_requires = [
     'scikit-learn>=0.24,<2',
     'scipy>=1.5.4,<2',
     'torch>=1.8.0,<2',
-    'copulas>=0.6.0,<0.7',
+    'copulas>=0.7.0,<0.8',
     'rdt>=0.6.1,<0.7',
     'pyts>=0.12.0,<0.13.0',
 ]
 
 pomegranate_requires = [
     "pomegranate>=0.13.4,<0.14.2;python_version<'3.7'",
-    "pomegranate>=0.14.1,<0.15;python_version>='3.7'",
+    "pomegranate>=0.14.1,<0.14.7;python_version>='3.7'",
 ]
 
 setup_requires = [
@@ -35,7 +35,7 @@ setup_requires = [
 tests_require = [
     'pytest>=3.4.2',
     'pytest-cov>=2.6.0',
-    'pytest-rerunfailures>=9.1.1,<10',
+    'pytest-rerunfailures>=10',
     'jupyter>=1.0.0,<2',
     'rundoc>=0.4.3,<0.5',
     'invoke',
@@ -119,6 +119,6 @@ setup(
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.4.1',
+    version='0.4.2.dev1',
     zip_safe=False,
 )

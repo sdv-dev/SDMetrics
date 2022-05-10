@@ -29,7 +29,7 @@ Implemented metrics:
       on a DecisionTreeClassifier from scikit-learn.
     * `BinaryAdaBoostClassifier`: ML Efficacy metric for binary classifications problems, based
       on an AdaBoostClassifier from scikit-learn.
-    * `BinaryLogisticRegressionClassifier`: ML Efficacy metric for binary classifications problems, based
+    * `BinaryLogisticRegression`: ML Efficacy metric for binary classifications problems, based
       on a LogisticRegression from scikit-learn.
     * `BinaryMLPClassifier`: ML Efficacy metric for binary classifications problems, based
       on an MLPClassifier from scikit-learn.
