@@ -18,7 +18,7 @@ install_requires = [
     'scikit-learn>=0.24,<2',
     'scipy>=1.5.4,<2',
     'torch>=1.8.0,<2',
-    'copulas>=0.6.0,<0.7',
+    'copulas>=0.7.0.dev0,<0.8',
     'rdt>=0.6.1,<0.7',
     'pyts>=0.12.0,<0.13.0',
 ]
