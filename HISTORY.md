@@ -1,6 +1,6 @@
 # History
 
-## v0.4.2 - 2022-05-10
+## v0.5.0 - 2022-05-11
 
 This release fixes an error  where the relational `KSTest` crashes if a table doesn't have numerical columns.
 It also includes some housekeeping, updating the pomegranate and copulas version requirements.
