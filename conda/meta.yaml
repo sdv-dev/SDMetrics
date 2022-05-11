@@ -1,5 +1,5 @@
 {% set name = 'sdmetrics' %}
-{% set version = '0.4.2' %}
+{% set version = '0.5.0.dev1' %}
 
 package:
   name: "{{ name|lower }}"
