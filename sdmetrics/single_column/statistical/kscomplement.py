@@ -7,8 +7,8 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
 
 
-class KSTest(SingleColumnMetric):
-    """Kolmogorov-Smirnov test based metric.
+class KSComplement(SingleColumnMetric):
+    """Kolmogorov-Smirnov statistic based metric.
 
     This function uses the two-sample Kolmogorov–Smirnov test to compare
     the distributions of the two continuous columns using the empirical CDF.

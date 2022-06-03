@@ -131,10 +131,10 @@ class CSTest(MultiSingleTableMetric):
     single_table_metric = single_table.multi_single_column.CSTest
 
 
-class KSTest(MultiSingleTableMetric):
-    """MultiSingleTableMetric based on SingleTable KSTest."""
+class KSComplement(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable KSComplement."""
 
-    single_table_metric = single_table.multi_single_column.KSTest
+    single_table_metric = single_table.multi_single_column.KSComplement
 
 
 class KSTestExtended(MultiSingleTableMetric):

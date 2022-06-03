@@ -72,9 +72,9 @@ Implemented metrics:
   the table that is compatible with it and then compute the average across all the columns.
     * `CSTest`: MultiSingleColumn metric based on applying the Single Column CSTest on all
       the categorical variables.
-    * `KSTest`: MultiSingleColumn metric based on applying the Single Column KSTest on all
+    * `KSComplement`: MultiSingleColumn metric based on applying the Single Column KSComplement on all
       the numerical variables.
-    * `KSTestExtended`: MultiSingleColumn metric based on applying the Single Column KSTest on
+    * `KSTestExtended`: MultiSingleColumn metric based on applying the Single Column KSComplement on
       all the numerical variables that result from transforming all the columsn from the tables
       using an RDT HyperTransformer.
 * MultiColumnPairs Metrics: Metrics that apply a ColumnPairs metric on each pair of columns from
@@ -107,7 +107,7 @@ Out[2]:
  'MLPRegressor': sdmetrics.single_table.efficacy.regression.MLPRegressor,
  'GMLogLikelihood': sdmetrics.single_table.gaussian_mixture.GMLogLikelihood,
  'CSTest': sdmetrics.single_table.multi_single_column.CSTest,
- 'KSTest': sdmetrics.single_table.multi_single_column.KSTest,
+ 'KSComplement': sdmetrics.single_table.multi_single_column.KSComplement,
  'KSTestExtended': sdmetrics.single_table.multi_single_column.KSTestExtended,
  'ContinuousKLDivergence': sdmetrics.single_table.multi_column_pairs.ContinuousKLDivergence,
  'DiscreteKLDivergence': sdmetrics.single_table.multi_column_pairs.DiscreteKLDivergence,

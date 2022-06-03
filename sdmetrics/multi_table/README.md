@@ -12,7 +12,7 @@ Implemented metrics:
 * Multi Single Table Metrics: Metrics that execute a Single Table Metric on each table from the
   dataset and then return the average score obtained by it.
   * `CSTest`: Multi Single Table metric based on the Single Table CSTest metric.
-  * `KSTest`: Multi Single Table metric based on the Single Table KSTest metric.
+  * `KSComplement`: Multi Single Table metric based on the Single Table KSComplement metric.
   * `KSTestExtended`: Multi Single Table metric based on the Single Table KSTestExtended metric.
   * `LogisticDetection`: Multi Single Table metric based on the Single Table LogisticDetection metric.
   * `SVCDetection`: Multi Single Table metric based on the Single Table SVCDetection metric.
@@ -30,7 +30,7 @@ In [1]: from sdmetrics.multi_table import MultiTableMetric
 In [2]: MultiTableMetric.get_subclasses()
 Out[2]:
 {'CSTest': sdmetrics.multi_table.multi_single_table.CSTest,
- 'KSTest': sdmetrics.multi_table.multi_single_table.KSTest,
+ 'KSComplement': sdmetrics.multi_table.multi_single_table.KSComplement,
  'KSTestExtended': sdmetrics.multi_table.multi_single_table.KSTestExtended,
  'LogisticDetection': sdmetrics.multi_table.multi_single_table.LogisticDetection,
  'SVCDetection': sdmetrics.multi_table.multi_single_table.SVCDetection,
