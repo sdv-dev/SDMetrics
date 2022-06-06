@@ -2,6 +2,9 @@
 
 import warnings
 from collections import Counter
+from datetime import datetime
+
+import pandas as pd
 
 
 def nested_attrs_meta(nested):
@@ -67,3 +70,21 @@ def get_frequencies(real, synthetic):
         f_exp.append(real[value] / sum(real.values()))  # noqa: PD011
 
     return f_obs, f_exp
+
+
+def is_datetime(data):
+    """Determine if the input is a datetime type or not.
+
+    Args:
+        data (pandas.DataFrame, int or datetime):
+            Input to evaluate.
+
+    Returns:
+        bool:
+            True if the input is a datetime type, False if not.
+    """
+    return (
+        pd.api.types.is_datetime64_any_dtype(data)
+        or isinstance(data, pd.Timestamp)
+        or isinstance(data, datetime)
+    )

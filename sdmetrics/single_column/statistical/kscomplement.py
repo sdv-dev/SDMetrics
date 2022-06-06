@@ -5,6 +5,7 @@ from scipy.stats import ks_2samp
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
+from sdmetrics.utils import is_datetime
 
 
 class KSComplement(SingleColumnMetric):
@@ -48,8 +49,13 @@ class KSComplement(SingleColumnMetric):
             float:
                 1 minus the Kolmogorov–Smirnov D statistic.
         """
-        real_data = pd.Series(real_data).fillna(0)
-        synthetic_data = pd.Series(synthetic_data).fillna(0)
+        real_data = pd.Series(real_data).dropna()
+        synthetic_data = pd.Series(synthetic_data).dropna()
+
+        if is_datetime(real_data):
+            real_data = pd.to_numeric(real_data)
+            synthetic_data = pd.to_numeric(synthetic_data)
+
         statistic, _ = ks_2samp(real_data, synthetic_data)
 
         return 1 - statistic
