@@ -3,12 +3,12 @@
 from sdmetrics.single_column import base, statistical
 from sdmetrics.single_column.base import SingleColumnMetric
 from sdmetrics.single_column.statistical.cstest import CSTest
-from sdmetrics.single_column.statistical.kstest import KSTest
+from sdmetrics.single_column.statistical.kscomplement import KSComplement
 
 __all__ = [
     'base',
     'statistical',
     'SingleColumnMetric',
     'CSTest',
-    'KSTest',
+    'KSComplement',
 ]

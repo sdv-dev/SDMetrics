@@ -9,11 +9,11 @@ from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
 from sdmetrics.single_table.multi_column_pairs import ContinuousKLDivergence, DiscreteKLDivergence
-from sdmetrics.single_table.multi_single_column import CSTest, KSTest, KSTestExtended
+from sdmetrics.single_table.multi_single_column import CSTest, KSComplement, KSTestExtended
 
 METRICS = [
     CSTest,
-    KSTest,
+    KSComplement,
     KSTestExtended,
     LogisticDetection,
     SVCDetection,

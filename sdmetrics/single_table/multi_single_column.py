@@ -137,27 +137,27 @@ class CSTest(MultiSingleColumnMetric):
     single_column_metric = single_column.statistical.CSTest
 
 
-class KSTest(MultiSingleColumnMetric):
-    """MultiSingleColumnMetric based on SingleColumn KSTest.
+class KSComplement(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn KSComplement.
 
-    This function applies the single column ``KSTest`` metric to all
+    This function applies the single column ``KSComplement`` metric to all
     the numerical columns found in the table and then returns the average
     of all the scores obtained.
     """
 
     field_types = ('numerical', )
-    single_column_metric = single_column.statistical.KSTest
+    single_column_metric = single_column.statistical.KSComplement
 
 
 class KSTestExtended(MultiSingleColumnMetric):
-    """KSTest variation that transforms everything to numerical before comparing the tables.
+    """KSComplement variation that transforms everything to numerical before comparing the tables.
 
     This is done by applying an ``rdt.HyperTransformer`` to the data with the
-    default values and afterwards applying a regular single_column ``KSTest``
+    default values and afterwards applying a regular single_column ``KSComplement``
     metric to all the generated numerical columns.
     """
 
-    single_column_metric = single_column.statistical.KSTest
+    single_column_metric = single_column.statistical.KSComplement
     field_types = ('numerical', 'categorical', 'boolean', 'datetime')
 
     @classmethod

@@ -19,7 +19,7 @@ from sdmetrics.single_table.gaussian_mixture import GMLogLikelihood
 from sdmetrics.single_table.multi_column_pairs import (
     ContinuousKLDivergence, DiscreteKLDivergence, MultiColumnPairsMetric)
 from sdmetrics.single_table.multi_single_column import (
-    CSTest, KSTest, KSTestExtended, MultiSingleColumnMetric)
+    CSTest, KSComplement, KSTestExtended, MultiSingleColumnMetric)
 from sdmetrics.single_table.privacy.base import CategoricalPrivacyMetric, NumericalPrivacyMetric
 from sdmetrics.single_table.privacy.cap import (
     CategoricalCAP, CategoricalGeneralizedCAP, CategoricalZeroCAP)
@@ -63,7 +63,7 @@ __all__ = [
     'DiscreteKLDivergence',
     'MultiSingleColumnMetric',
     'CSTest',
-    'KSTest',
+    'KSComplement',
     'KSTestExtended',
     'CategoricalCAP',
     'CategoricalZeroCAP',

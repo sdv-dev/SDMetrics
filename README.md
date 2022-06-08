@@ -125,17 +125,17 @@ sdmetrics.compute_metrics(metrics, real_data, synthetic_data, metadata=metadata)
 
 The output will be a table with all the details about the executed metrics and their score:
 
-| metric                       | name                                    |      score |   min_value |   max_value | goal     |
-|------------------------------|-----------------------------------------|------------|-------------|-------------|----------|
-| CSTest                       | Chi-Squared                             |   0.76651  |           0 |           1 | MAXIMIZE |
-| KSTest                       | Inverted Kolmogorov-Smirnov D statistic |   0.75     |           0 |           1 | MAXIMIZE |
-| KSTestExtended               | Inverted Kolmogorov-Smirnov D statistic |   0.777778 |           0 |           1 | MAXIMIZE |
-| LogisticDetection            | LogisticRegression Detection            |   0.882716 |           0 |           1 | MAXIMIZE |
-| SVCDetection                 | SVC Detection                           |   0.833333 |           0 |           1 | MAXIMIZE |
-| BNLikelihood                 | BayesianNetwork Likelihood              | nan        |           0 |           1 | MAXIMIZE |
-| BNLogLikelihood              | BayesianNetwork Log Likelihood          | nan        |        -inf |           0 | MAXIMIZE |
-| LogisticParentChildDetection | LogisticRegression Detection            |   0.619444 |           0 |           1 | MAXIMIZE |
-| SVCParentChildDetection      | SVC Detection                           |   0.916667 |           0 |           1 | MAXIMIZE |
+| metric                       | name                                         |      score |   min_value |   max_value | goal     |
+|------------------------------|----------------------------------------------|------------|-------------|-------------|----------|
+| CSTest                       | Chi-Squared                                  |   0.76651  |           0 |           1 | MAXIMIZE |
+| KSComplement                 | Complement to Kolmogorov-Smirnov D statistic |   0.75     |           0 |           1 | MAXIMIZE |
+| KSTestExtended               | Inverted Kolmogorov-Smirnov D statistic      |   0.777778 |           0 |           1 | MAXIMIZE |
+| LogisticDetection            | LogisticRegression Detection                 |   0.882716 |           0 |           1 | MAXIMIZE |
+| SVCDetection                 | SVC Detection                                |   0.833333 |           0 |           1 | MAXIMIZE |
+| BNLikelihood                 | BayesianNetwork Likelihood                   | nan        |           0 |           1 | MAXIMIZE |
+| BNLogLikelihood              | BayesianNetwork Log Likelihood               | nan        |        -inf |           0 | MAXIMIZE |
+| LogisticParentChildDetection | LogisticRegression Detection                 |   0.619444 |           0 |           1 | MAXIMIZE |
+| SVCParentChildDetection      | SVC Detection                                |   0.916667 |           0 |           1 | MAXIMIZE |
 
 # What's next?
 
