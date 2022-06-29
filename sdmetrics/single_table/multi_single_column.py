@@ -41,13 +41,13 @@ class MultiSingleColumnMetric(SingleTableMetric,
         self.single_column_metric_kwargs = single_column_metric_kwargs
         self.compute = self._compute
 
-    def _compute(self, real_data, synthetic_data, metadata=None, **kwargs):
-        """Compute this metric.
+    def _compute(self, real_data, synthetic_data, metadata=None, store_errors=False, **kwargs):
+        """Compute this metric for all columns.
 
         This is done by computing the underlying SingleColumn metric to all the
         columns that are compatible with it.
 
-        The output is the average of the scores obtained.
+        The output is a mapping of column name to the score of that column.
 
         Args:
             real_data (pandas.DataFrame):
@@ -56,32 +56,42 @@ class MultiSingleColumnMetric(SingleTableMetric,
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict.
+            store_errors (bool):
+                Whether or not to store any metric computation errors in the results.
             **kwargs:
                 Any additional keyword arguments will be passed down
                 to the single column metric
 
         Returns:
-            Union[float, tuple[float]]:
-                Metric output.
+            Dict[string -> Union[float, tuple[float]]]:
+                A mapping of column name to metric output.
         """
         metadata = self._validate_inputs(real_data, synthetic_data, metadata)
 
         fields = self._select_fields(metadata, self.field_types)
-        scores = []
+        invalid_cols = set(metadata['fields'].keys()) - set(fields)
+
+        scores = {col: np.nan for col in invalid_cols}
         for column_name, real_column in real_data.items():
             if column_name in fields:
                 real_column = real_column.to_numpy()
                 synthetic_column = synthetic_data[column_name].to_numpy()
 
-                score = self.single_column_metric.compute(
-                    real_column,
-                    synthetic_column,
-                    **(self.single_column_metric_kwargs or {}),
-                    **kwargs
-                )
-                scores.append(score)
+                try:
+                    score = self.single_column_metric.compute(
+                        real_column,
+                        synthetic_column,
+                        **(self.single_column_metric_kwargs or {}),
+                        **kwargs
+                    )
+                    scores[column_name] = score
+                except Exception as error:
+                    if store_errors:
+                        scores[column_name] = error
+                    else:
+                        raise error
 
-        return np.nanmean(scores)
+        return scores
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None, **kwargs):
@@ -107,7 +117,35 @@ class MultiSingleColumnMetric(SingleTableMetric,
             Union[float, tuple[float]]:
                 Metric output.
         """
-        return cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
+        scores = cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
+        return np.nanmean(list(scores.values()))
+
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data, metadata=None, **kwargs):
+        """Compute this metric broken down by column.
+
+        This is done by computing the underlying SingleColumn metric to all the
+        columns that are compatible with it.
+
+        The output is a mapping of column to the column's score.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The values from the real dataset.
+            synthetic_data (pandas.DataFrame):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the single column metric
+
+        Returns:
+            Dict[string -> Union[float, tuple[float]]]:
+                A mapping of column name to metric output.
+        """
+        return cls._compute(
+            cls, real_data, synthetic_data, metadata=None, store_errors=True, **kwargs)
 
     @classmethod
     def normalize(cls, raw_score):
