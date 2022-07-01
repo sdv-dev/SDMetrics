@@ -116,7 +116,10 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
         scores = cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
         scores = list(scores.values())
         if len(scores) > 0 and isinstance(scores[0], dict):
-            scores = [score for table_scores in scores for score in table_scores.values()]
+            scores = [
+                score for table_scores in scores for score in table_scores.values()
+                if not isinstance(score, Exception)
+            ]
 
         return np.nanmean(scores)
 

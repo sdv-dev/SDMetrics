@@ -135,7 +135,7 @@ class TestMultiSingleColumnMetric:
     def test_compute(self):
         """Test the ``compute`` method.
 
-        Expect that an averaage of the column metric scores is returned.
+        Expect that an average of the column metric scores is returned.
 
         Setup:
         - ``_compute`` helper method should return a mapping of column name to metric scores.
