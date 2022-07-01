@@ -1,7 +1,5 @@
 """Statistic Similarity Metric."""
 
-import math
-
 import pandas as pd
 
 from sdmetrics.goal import Goal
@@ -30,6 +28,9 @@ class StatisticSimilarity(SingleColumnMetric):
     min_value = 0.0
     max_value = 1.0
     statistic = 'mean'
+
+    def __init__(self, statistic='mean'):
+        self.statistic = statistic
 
     def compute(self, real_data, synthetic_data):
         """Compare the statistic similarity of two continuous columns.
@@ -64,8 +65,8 @@ class StatisticSimilarity(SingleColumnMetric):
             raise ValueError(f'requested statistic {self.statistic} is not valid. '
                              'Please choose either mean, std, or median.')
 
-        score = 1 - math.abs(score_real - score_synthetic) / (real_data.max() - real_data.min())
-        return math.max(score, 0)
+        score = 1 - abs(score_real - score_synthetic) / (real_data.max() - real_data.min())
+        return max(score, 0)
 
     @classmethod
     def normalize(cls, raw_score):
