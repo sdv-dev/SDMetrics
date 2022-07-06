@@ -67,22 +67,27 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
         elif not isinstance(metadata, dict):
             metadata = metadata.to_dict()
 
-        values = []
+        scores = {}
         errors = {}
         for table_name, real_table in real_data.items():
             synthetic_table = synthetic_data[table_name]
             table_meta = metadata['tables'][table_name]
 
             try:
-                score = self.single_table_metric.compute(real_table, synthetic_table, table_meta)
-                values.append(score)
-            except IncomputableMetricError as error:
+                score_breakdown = self.single_table_metric.compute_breakdown(
+                    real_table, synthetic_table, table_meta)
+                scores[table_name] = score_breakdown
+            except AttributeError:
+                score = self.single_table_metric.compute(
+                    real_table, synthetic_table, table_meta)
+                scores[table_name] = score
+            except Exception as error:
                 errors[table_name] = error
 
-        if not values:
+        if not scores:
             raise IncomputableMetricError(f'Encountered the following errors: {errors}')
 
-        return np.nanmean(values)
+        return scores
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None, **kwargs):
@@ -106,6 +111,39 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
         Returns:
             Union[float, tuple[float]]:
                 Metric output.
+        """
+        scores = cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
+        scores = list(scores.values())
+        if len(scores) > 0 and isinstance(scores[0], dict):
+            scores = [
+                score for table_scores in scores for score in table_scores.values()
+                if not isinstance(score, Exception)
+            ]
+
+        return np.nanmean(scores)
+
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data, metadata=None, **kwargs):
+        """Compute this metric broken down by tables and columns.
+
+        This applies the underlying single table metric to all the tables
+        found in the dataset and then returns the breakdown of the obtained scores.
+
+        Args:
+            real_data (dict[str, pandas.DataFrame]):
+                The tables from the real dataset.
+            synthetic_data (dict[str, pandas.DataFrame]):
+                The tables from the synthetic dataset.
+            metadata (dict):
+                Multi-table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the single table metric
+
+        Returns:
+            dict[string -> dict[string -> Union[float, tuple[float]]]]:
+                A mapping of table name to column metric breakdowns.
         """
         return cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
 
