@@ -74,14 +74,13 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
             table_meta = metadata['tables'][table_name]
 
             try:
-                if hasattr(self.single_table_metric, 'compute_breakdown'):
-                    score_breakdown = self.single_table_metric.compute_breakdown(
-                        real_table, synthetic_table, table_meta)
-                    scores[table_name] = score_breakdown
-                else:
-                    score = self.single_table_metric.compute(
-                        real_table, synthetic_table, table_meta)
-                    scores[table_name] = score
+                score_breakdown = self.single_table_metric.compute_breakdown(
+                    real_table, synthetic_table, table_meta)
+                scores[table_name] = score_breakdown
+            except AttributeError:
+                score = self.single_table_metric.compute(
+                    real_table, synthetic_table, table_meta)
+                scores[table_name] = score
             except Exception as error:
                 errors[table_name] = error
 
