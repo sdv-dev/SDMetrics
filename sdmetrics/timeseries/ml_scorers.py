@@ -2,10 +2,10 @@
 
 import numpy as np
 import pandas as pd
-from rdt.transformers import LabelEncoder
 import torch
 from pyts.classification import TimeSeriesForest
 from pyts.multivariate.classification import MultivariateClassifier
+from rdt.transformers import LabelEncoder
 
 
 def _stack(row):
