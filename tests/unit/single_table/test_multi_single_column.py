@@ -32,7 +32,8 @@ class TestMultiSingleColumnMetric:
         metric_mock = Mock()
         metric_mock._validate_inputs.return_value = metadata
         metric_mock._select_fields.return_value = ['a', 'b']
-        metric_mock.single_column_metric.compute.side_effect = [1.0, 2.0]
+        metric_mock.single_column_metric.compute_breakdown.side_effect = [
+            {'score': 1.0}, {'score': 2.0}]
         metric_mock.single_column_metric_kwargs = None
 
         data = pd.DataFrame({
@@ -46,7 +47,12 @@ class TestMultiSingleColumnMetric:
         result = MultiSingleColumnMetric._compute(metric_mock, data, data)
 
         # Assert
-        assert result == {'a': 1.0, 'b': 2.0, 'c': np.nan, 'd': np.nan}
+        assert result == {
+            'a': {'score': 1.0},
+            'b': {'score': 2.0},
+            'c': {'score': np.nan},
+            'd': {'score': np.nan},
+        }
 
     def test__compute_store_errors_false(self):
         """Test the ``_compute`` method with an error and ``store_errors`` set to ``False``.
@@ -74,7 +80,7 @@ class TestMultiSingleColumnMetric:
         metric_mock = Mock()
         metric_mock._validate_inputs.return_value = metadata
         metric_mock._select_fields.return_value = ['a', 'b', 'c']
-        metric_mock.single_column_metric.compute.side_effect = [1.0, 2.0, test_error]
+        metric_mock.single_column_metric.compute_breakdown.side_effect = [1.0, 2.0, test_error]
         metric_mock.single_column_metric_kwargs = None
 
         data = pd.DataFrame({
@@ -116,7 +122,8 @@ class TestMultiSingleColumnMetric:
         metric_mock = Mock()
         metric_mock._validate_inputs.return_value = metadata
         metric_mock._select_fields.return_value = ['a', 'b', 'c']
-        metric_mock.single_column_metric.compute.side_effect = [1.0, 2.0, test_error]
+        metric_mock.single_column_metric.compute_breakdown.side_effect = [
+            {'score': 1.0}, {'score': 2.0}, {'error': test_error}]
         metric_mock.single_column_metric_kwargs = None
 
         data = pd.DataFrame({
@@ -130,7 +137,12 @@ class TestMultiSingleColumnMetric:
         result = MultiSingleColumnMetric._compute(metric_mock, data, data, store_errors=True)
 
         # Assert
-        assert result == {'a': 1.0, 'b': 2.0, 'c': test_error, 'd': np.nan}
+        assert result == {
+            'a': {'score': 1.0},
+            'b': {'score': 2.0},
+            'c': {'error': test_error},
+            'd': {'score': np.nan},
+        }
 
     def test_compute(self):
         """Test the ``compute`` method.
@@ -148,7 +160,12 @@ class TestMultiSingleColumnMetric:
         - The average metric score.
         """
         # Setup
-        metric_breakdown = {'a': 1.0, 'b': 2.0, 'c': 1.0, 'd': np.nan}
+        metric_breakdown = {
+            'a': {'score': 1.0},
+            'b': {'score': 2.0},
+            'c': {'score': 1.0},
+            'd': {'score': np.nan},
+        }
 
         # Run
         with patch.object(MultiSingleColumnMetric, '_compute', return_value=metric_breakdown):
@@ -173,7 +190,12 @@ class TestMultiSingleColumnMetric:
         - A mapping of the metric scores broken down by column.
         """
         # Setup
-        metric_breakdown = {'a': 1.0, 'b': 2.0, 'c': 1.0, 'd': np.nan}
+        metric_breakdown = {
+            'a': {'score': 1.0},
+            'b': {'score': 2.0},
+            'c': {'score': 1.0},
+            'd': {'score': np.nan},
+        }
 
         # Run
         with patch.object(MultiSingleColumnMetric, '_compute', return_value=metric_breakdown):

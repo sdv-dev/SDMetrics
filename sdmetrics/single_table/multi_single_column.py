@@ -71,7 +71,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
         fields = self._select_fields(metadata, self.field_types)
         invalid_cols = set(metadata['fields'].keys()) - set(fields)
 
-        scores = {col: np.nan for col in invalid_cols}
+        scores = {col: {'score': np.nan} for col in invalid_cols}
         for column_name, real_column in real_data.items():
             if column_name in fields:
                 real_column = real_column.to_numpy()
@@ -87,7 +87,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
                     scores[column_name] = score
                 except Exception as error:
                     if store_errors:
-                        scores[column_name] = error
+                        scores[column_name] = {'error': error}
                     else:
                         raise error
 
