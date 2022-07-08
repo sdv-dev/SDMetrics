@@ -33,7 +33,8 @@ class TestMultiSingleColumnMetric:
         metric_mock._validate_inputs.return_value = metadata
         metric_mock._select_fields.return_value = ['a', 'b']
         metric_mock.single_column_metric.compute_breakdown.side_effect = [
-            {'score': 1.0}, {'score': 2.0}]
+            {'score': 1.0}, {'score': 2.0},
+        ]
         metric_mock.single_column_metric_kwargs = None
 
         data = pd.DataFrame({
@@ -123,7 +124,8 @@ class TestMultiSingleColumnMetric:
         metric_mock._validate_inputs.return_value = metadata
         metric_mock._select_fields.return_value = ['a', 'b', 'c']
         metric_mock.single_column_metric.compute_breakdown.side_effect = [
-            {'score': 1.0}, {'score': 2.0}, {'error': test_error}]
+            {'score': 1.0}, {'score': 2.0}, {'error': test_error},
+        ]
         metric_mock.single_column_metric_kwargs = None
 
         data = pd.DataFrame({
