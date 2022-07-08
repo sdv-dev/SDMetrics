@@ -78,7 +78,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
                 synthetic_column = synthetic_data[column_name].to_numpy()
 
                 try:
-                    score = self.single_column_metric.compute(
+                    score = self.single_column_metric.compute_breakdown(
                         real_column,
                         synthetic_column,
                         **(self.single_column_metric_kwargs or {}),
@@ -118,7 +118,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
                 Metric output.
         """
         scores = cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
-        return np.nanmean(list(scores.values()))
+        return np.nanmean([breakdown['score'] for breakdown in scores.values()])
 
     @classmethod
     def compute_breakdown(cls, real_data, synthetic_data, metadata=None, **kwargs):
