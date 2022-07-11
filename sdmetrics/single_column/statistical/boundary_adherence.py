@@ -51,7 +51,7 @@ class BoundaryAdherence(SingleColumnMetric):
 
         valid = synthetic_data.between(real_data.min(), real_data.max())
 
-        return valid.sum() / len(real_data)
+        return valid.sum() / len(synthetic_data)
 
     @classmethod
     def normalize(cls, raw_score):
