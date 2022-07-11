@@ -54,8 +54,8 @@ class CategoryCoverage(SingleColumnMetric):
             dict:
                 A mapping of the category coverage results.
         """
-        real_data = pd.Series(real_data)
-        synthetic_data = pd.Series(synthetic_data)
+        real_data = pd.Series(real_data).dropna()
+        synthetic_data = pd.Series(synthetic_data).dropna()
 
         real_data_value = real_data.nunique()
         synthetic_data_value = synthetic_data.nunique()
