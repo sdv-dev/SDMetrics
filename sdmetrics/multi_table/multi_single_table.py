@@ -116,8 +116,8 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
         scores = list(scores.values())
         if len(scores) > 0 and isinstance(scores[0], dict):
             scores = [
-                score for table_scores in scores for score in table_scores.values()
-                if not isinstance(score, Exception)
+                result['score'] for table_scores in scores for result in table_scores.values()
+                if 'score' in result
             ]
 
         return np.nanmean(scores)

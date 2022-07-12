@@ -71,14 +71,14 @@ class MultiSingleColumnMetric(SingleTableMetric,
         fields = self._select_fields(metadata, self.field_types)
         invalid_cols = set(metadata['fields'].keys()) - set(fields)
 
-        scores = {col: np.nan for col in invalid_cols}
+        scores = {col: {'score': np.nan} for col in invalid_cols}
         for column_name, real_column in real_data.items():
             if column_name in fields:
                 real_column = real_column.to_numpy()
                 synthetic_column = synthetic_data[column_name].to_numpy()
 
                 try:
-                    score = self.single_column_metric.compute(
+                    score = self.single_column_metric.compute_breakdown(
                         real_column,
                         synthetic_column,
                         **(self.single_column_metric_kwargs or {}),
@@ -87,7 +87,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
                     scores[column_name] = score
                 except Exception as error:
                     if store_errors:
-                        scores[column_name] = error
+                        scores[column_name] = {'error': error}
                     else:
                         raise error
 
@@ -118,7 +118,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
                 Metric output.
         """
         scores = cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
-        return np.nanmean(list(scores.values()))
+        return np.nanmean([breakdown['score'] for breakdown in scores.values()])
 
     @classmethod
     def compute_breakdown(cls, real_data, synthetic_data, metadata=None, **kwargs):

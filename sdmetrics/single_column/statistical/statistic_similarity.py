@@ -45,6 +45,21 @@ class StatisticSimilarity(SingleColumnMetric):
             float:
                 The statistical similarity of the two columns.
         """
+        return self.compute_breakdown(real_data, synthetic_data)['score']
+
+    def compute_breakdown(self, real_data, synthetic_data):
+        """Compare the breakdown of statistic similarity of two continuous columns.
+
+        Args:
+            real_data (Union[numpy.ndarray, pandas.Series]):
+                The values from the real dataset.
+            synthetic_data (Union[numpy.ndarray, pandas.Series]):
+                The values from the synthetic dataset.
+
+        Returns:
+            dict:
+                A dict containing the score, and the real and synthetic metric values.
+        """
         real_data = pd.Series(real_data).dropna()
         synthetic_data = pd.Series(synthetic_data).dropna()
 
@@ -66,7 +81,7 @@ class StatisticSimilarity(SingleColumnMetric):
                              'Please choose either mean, std, or median.')
 
         score = 1 - abs(score_real - score_synthetic) / (real_data.max() - real_data.min())
-        return max(score, 0)
+        return {'real': score_real, 'synthetic': score_synthetic, 'score': max(score, 0)}
 
     @classmethod
     def normalize(cls, raw_score):

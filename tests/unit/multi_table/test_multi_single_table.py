@@ -71,8 +71,17 @@ class TestMultiSingleTableMetric:
         """
         # Setup
         metric_breakdown = {
-            'tableA': {'a': 1.0, 'b': 2.0, 'c': 1.0, 'd': np.nan},
-            'tableB': {'col1': 2.0, 'col2': np.nan, 'col3': ValueError('test error')},
+            'tableA': {
+                'a': {'score': 1.0},
+                'b': {'score': 2.0},
+                'c': {'score': 1.0},
+                'd': {'score': np.nan},
+            },
+            'tableB': {
+                'col1': {'score': 2.0},
+                'col2': {'score': np.nan},
+                'col3': {'error': ValueError('test error')},
+            },
         }
 
         # Run

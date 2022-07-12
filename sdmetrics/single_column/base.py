@@ -35,7 +35,25 @@ class SingleColumnMetric(BaseMetric):
                 array or as a pandas.Series.
 
         Returns:
-            Union[float, tuple[float]]:
+            float
                 Metric output.
         """
         raise NotImplementedError()
+
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data):
+        """Compute this metric breakdown.
+
+        Args:
+            real_data (Union[numpy.ndarray, pandas.Series]):
+                The values from the real dataset, passed as a 1d numpy
+                array or as a pandas.Series.
+            synthetic_data (Union[numpy.ndarray, pandas.Series]):
+                The values from the synthetic dataset, passed as a 1d numpy
+                array or as a pandas.Series.
+
+        Returns:
+            dict
+                Mapping of the metric output. Must include the key 'score'.
+        """
+        return {'score': cls.compute(real_data, synthetic_data)}
