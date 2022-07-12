@@ -25,22 +25,6 @@ class MissingValueSimilarity(SingleColumnMetric):
     min_value = 0.0
     max_value = 1.0
 
-    def compute(self, real_data, synthetic_data):
-        """Compare the missing value similarity of two continuous columns.
-
-        Args:
-            real_data (Union[numpy.ndarray, pandas.Series]):
-                The values from the real dataset.
-            synthetic_data (Union[numpy.ndarray, pandas.Series]):
-                The values from the synthetic dataset.
-
-        Returns:
-            float:
-                The missing value similarity of the two columns.
-        """
-        results = self.compute_breakdown(real_data, synthetic_data)
-        return results['score']
-
     def compute_breakdown(self, real_data, synthetic_data):
         """Compare the missing value similarity of two continuous columns.
 
@@ -65,6 +49,22 @@ class MissingValueSimilarity(SingleColumnMetric):
             'real': real_data_value,
             'synthetic': synthetic_data_value,
         }
+
+    def compute(self, real_data, synthetic_data):
+        """Compare the missing value similarity of two continuous columns.
+
+        Args:
+            real_data (Union[numpy.ndarray, pandas.Series]):
+                The values from the real dataset.
+            synthetic_data (Union[numpy.ndarray, pandas.Series]):
+                The values from the synthetic dataset.
+
+        Returns:
+            float:
+                The missing value similarity of the two columns.
+        """
+        results = self.compute_breakdown(real_data, synthetic_data)
+        return results['score']
 
     @classmethod
     def normalize(cls, raw_score):
