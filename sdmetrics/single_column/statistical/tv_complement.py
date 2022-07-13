@@ -47,7 +47,7 @@ class TVComplement(SingleColumnMetric):
         f_obs, f_exp = get_frequencies(real_data, synthetic_data)
         total_variation = 0
         for i in range(len(f_obs)):
-            total_variation += abs(f_obs - f_exp)
+            total_variation += abs(f_obs[i] - f_exp[i])
 
         return 1 - 0.5 * total_variation
 
