@@ -186,3 +186,28 @@ class ContingencySimilarity(MultiColumnPairsMetric):
 
     field_types = ('boolean', 'categorical')
     column_pairs_metric = column_pairs.statistical.contingency_similarity.ContingencySimilarity
+
+
+class CorrelationSimilarity(MultiColumnPairsMetric):
+    """MultiColumnPairsMetric based on ColumnPairs CorrelationSimilarity.
+
+    This computes the correlation between column pairs based on the specified coefficient,
+    which defaults to 'Pearson'.
+
+    Attributes:
+        name (str):
+            Name to use when reports about this metric are printed.
+        goal (sdmetrics.goal.Goal):
+            The goal of this metric.
+        min_value (Union[float, tuple[float]]):
+            Minimum value or values that this metric can take.
+        max_value (Union[float, tuple[float]]):
+            Maximum value or values that this metric can take.
+        column_pairs_metric (sdmetrics.column_pairs.base.ColumnPairsMetric):
+            ColumnPairs DiscreteKLDivergence.
+        field_types (dict):
+            Field types to which the SingleColumn metric will be applied.
+    """
+
+    field_types = ('numerical', 'datetime')
+    column_pairs_metric = column_pairs.statistical.correlation_similarity.CorrelationSimilarity
