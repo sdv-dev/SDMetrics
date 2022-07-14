@@ -19,20 +19,15 @@ class StatisticSimilarity(SingleColumnMetric):
             Minimum value or values that this metric can take.
         max_value (Union[float, tuple[float]]):
             Maximum value or values that this metric can take.
-        statistic (str):
-            The statistic to compute the metric on (mean, std, or median). Defaults to mean.
     """
 
     name = 'StatisticSimilarity'
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
-    statistic = 'mean'
 
-    def __init__(self, statistic='mean'):
-        self.statistic = statistic
-
-    def compute(self, real_data, synthetic_data):
+    @classmethod
+    def compute(cls, real_data, synthetic_data, statistic='mean'):
         """Compare the statistic similarity of two continuous columns.
 
         Args:
@@ -45,9 +40,10 @@ class StatisticSimilarity(SingleColumnMetric):
             float:
                 The statistical similarity of the two columns.
         """
-        return self.compute_breakdown(real_data, synthetic_data)['score']
+        return cls.compute_breakdown(real_data, synthetic_data, statistic)['score']
 
-    def compute_breakdown(self, real_data, synthetic_data):
+    @staticmethod
+    def compute_breakdown(real_data, synthetic_data, statistic='mean'):
         """Compare the breakdown of statistic similarity of two continuous columns.
 
         Args:
@@ -67,17 +63,17 @@ class StatisticSimilarity(SingleColumnMetric):
             real_data = pd.to_numeric(real_data)
             synthetic_data = pd.to_numeric(synthetic_data)
 
-        if self.statistic == 'mean':
+        if statistic == 'mean':
             score_real = real_data.mean()
             score_synthetic = synthetic_data.mean()
-        elif self.statistic == 'std':
+        elif statistic == 'std':
             score_real = real_data.std()
             score_synthetic = synthetic_data.std()
-        elif self.statistic == 'median':
+        elif statistic == 'median':
             score_real = real_data.median()
             score_synthetic = synthetic_data.median()
         else:
-            raise ValueError(f'requested statistic {self.statistic} is not valid. '
+            raise ValueError(f'requested statistic {statistic} is not valid. '
                              'Please choose either mean, std, or median.')
 
         score = 1 - abs(score_real - score_synthetic) / (real_data.max() - real_data.min())
