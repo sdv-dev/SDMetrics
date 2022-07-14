@@ -6,6 +6,7 @@ from sdmetrics.single_column.statistical.cstest import CSTest
 from sdmetrics.single_column.statistical.kscomplement import KSComplement
 from sdmetrics.single_column.statistical.missing_value_similarity import MissingValueSimilarity
 from sdmetrics.single_column.statistical.statistic_similarity import StatisticSimilarity
+from sdmetrics.single_column.statistical.tv_complement import TVComplement
 
 __all__ = [
     'BoundaryAdherence',
@@ -13,5 +14,6 @@ __all__ = [
     'CSTest',
     'KSComplement',
     'MissingValueSimilarity',
-    'StatisticSimilarity'
+    'StatisticSimilarity',
+    'TVComplement',
 ]
