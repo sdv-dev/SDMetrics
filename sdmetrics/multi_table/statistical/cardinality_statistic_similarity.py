@@ -143,6 +143,9 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
                 The average of all (parent, child) cardinality statistic similarity scores.
         """
         score_breakdowns = cls.compute_breakdown(real_data, synthetic_data, metadata, statistic)
+        if 'score' in score_breakdowns:
+            return score_breakdowns['score']
+
         all_scores = [breakdown['score'] for _, breakdown in score_breakdowns.items()]
 
         return sum(all_scores) / len(all_scores)

@@ -1,5 +1,6 @@
 from unittest.mock import Mock, patch
 
+import numpy as np
 import pandas as pd
 
 from sdmetrics.multi_table.statistical import CardinalityStatisticSimilarity
@@ -69,6 +70,40 @@ class TestCardinalityStatisticSimilarity:
         # Assert
         assert result == 2.3 / 3
 
+    def test_compute_no_relationships(self):
+        """Test the ``compute`` method when there are no relationships.
+
+        Expect that a score of `numpy.nan` is returned, as the metric is not applicable.
+
+        Setup:
+        - ``_compute`` helper method should return a score of `numpy.nan`.
+
+        Input:
+        - real data
+        - synthetic data
+
+        Output:
+        - `numpy.nan`
+        """
+        # Setup
+        metric_breakdown = {'score': np.nan}
+
+        # Run
+        with patch.object(
+            CardinalityStatisticSimilarity,
+            'compute_breakdown',
+            return_value=metric_breakdown,
+        ):
+            result = CardinalityStatisticSimilarity.compute(
+                real_data=Mock(),
+                synthetic_data=Mock(),
+                metadata=Mock(),
+                statistic='mean',
+            )
+
+        # Assert
+        assert np.isnan(result)
+
     def test_compute_breakdown(self):
         """Test the ``compute_breakdown`` method.
 
@@ -114,6 +149,51 @@ class TestCardinalityStatisticSimilarity:
             ('tableA', 'tableB'): {'score': 1.0, 'real': 1.2, 'synthetic': 1.2},
             ('tableB', 'tableC'): {'score': 1.0, 'real': 0.5, 'synthetic': 0.5},
         }
+
+        # Run
+        result = CardinalityStatisticSimilarity.compute_breakdown(
+            real_data, synthetic_data, metadata, 'mean')
+
+        # Assert
+        assert result == expected_metric_breakdown
+
+    def test_compute_breakdown_no_relationships(self):
+        """Test the ``compute_breakdown`` method when there are no relationships.
+
+        Expect that a breakdown score of `{'score': numpy.nan}` is returned, because the metric
+        is not applicable.
+
+        Setup:
+        - ``metadata`` should contain no relationships.
+
+        Input:
+        - real data
+        - synthetic data
+
+        Output:
+        - A breakdown with a score of `numpy.nan`
+        """
+        # Setup
+        metadata = {
+            'tables': {
+                'tableA': {'fields': {'col1': {}}},
+                'tableB': {'fields': {'col1': {}, 'col2': {}}},
+                'tableC': {'fields': {'col2': {}}},
+            },
+        }
+        real_data = {
+            'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
+            'tableB': pd.DataFrame(
+                {'col1': [1, 1, 2, 3, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableC': pd.DataFrame({'col2': ['a', 'b', 'c']}),
+        }
+        synthetic_data = {
+            'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
+            'tableB': pd.DataFrame(
+                {'col1': [1, 2, 4, 4, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableC': pd.DataFrame({'col2': ['a', 'b', 'd']}),
+        }
+        expected_metric_breakdown = {'score': np.nan}
 
         # Run
         result = CardinalityStatisticSimilarity.compute_breakdown(
