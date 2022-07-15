@@ -69,12 +69,12 @@ class CardinalityShapeSimilarity(MultiTableMetric):
                         real_data[parent_table_name][parent_field_name],
                         real_data[table_name][field_name],
                     )
-                    cardinality_synthetic = cls._get_cardinality_distribution(
+                    cardinality_synthetic = get_cardinality_distribution(
                         synthetic_data[parent_table_name][parent_field_name],
                         synthetic_data[table_name][field_name],
                     )
-                    score_breakdowns[(parent_table_name, table_name)] = 1 - ks_2samp(
-                        cardinality_real, cardinality_synthetic)
+                    statistic, _ = ks_2samp(cardinality_real, cardinality_synthetic)
+                    score_breakdowns[(parent_table_name, table_name)] = {'score': 1 - statistic}
 
         if len(score_breakdowns) == 0:
             return {'score': np.nan}
@@ -105,6 +105,9 @@ class CardinalityShapeSimilarity(MultiTableMetric):
                 The average of all (parent, child) cardinality statistic similarity scores.
         """
         score_breakdowns = cls.compute_breakdown(real_data, synthetic_data, metadata)
+        if 'score' in score_breakdowns:
+            return score_breakdowns['score']
+
         all_scores = [breakdown['score'] for _, breakdown in score_breakdowns.items()]
 
         return sum(all_scores) / len(all_scores)
