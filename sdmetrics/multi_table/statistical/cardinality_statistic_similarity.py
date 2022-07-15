@@ -1,10 +1,10 @@
 """The CardinalityStatisticSimilarity metric."""
 
 import numpy as np
-import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.multi_table.base import MultiTableMetric
+from sdmetrics.utils import get_cardinality_distribution
 
 
 class CardinalityStatisticSimilarity(MultiTableMetric):
@@ -25,26 +25,6 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
-
-    @classmethod
-    def _get_cardinality_distribution(cls, parent_column, child_column):
-        """Compute the cardinality distribution of the (parent, child) pairing.
-
-        Args:
-            parent_column (pandas.Series):
-                The parent column.
-            child_column (pandas.Series):
-                The child column.
-
-        Returns:
-            pandas.Series:
-                The cardinality distribution.
-        """
-        child_df = pd.DataFrame({'child_counts': child_column.value_counts()})
-        cardinality_df = pd.DataFrame({'parent': parent_column}).join(
-            child_df, on='parent').fillna(0)
-
-        return cardinality_df['child_counts']
 
     @classmethod
     def _compute_statistic(cls, real_distribution, synthetic_distribution, statistic):
@@ -120,11 +100,11 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
                 if 'ref' in field:
                     parent_table_name = field['ref']['table']
                     parent_field_name = field['ref']['field']
-                    cardinality_real = cls._get_cardinality_distribution(
+                    cardinality_real = get_cardinality_distribution(
                         real_data[parent_table_name][parent_field_name],
                         real_data[table_name][field_name],
                     )
-                    cardinality_synthetic = cls._get_cardinality_distribution(
+                    cardinality_synthetic = get_cardinality_distribution(
                         synthetic_data[parent_table_name][parent_field_name],
                         synthetic_data[table_name][field_name],
                     )
