@@ -115,22 +115,22 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
             metadata = metadata.to_dict()
 
         score_breakdowns = {}
-        for table_name, table in metadata['tables']:
-            for field_name, field in table['fields']:
+        for table_name, table in metadata['tables'].items():
+            for field_name, field in table['fields'].items():
                 if 'ref' in field:
-                    child_table_name = field['ref']['table']
-                    child_field_name = field['ref']['field']
+                    parent_table_name = field['ref']['table']
+                    parent_field_name = field['ref']['field']
                     cardinality_real = cls._get_cardinality_distribution(
+                        real_data[parent_table_name][parent_field_name],
                         real_data[table_name][field_name],
-                        real_data[child_table_name][child_field_name],
                     )
                     cardinality_synthetic = cls._get_cardinality_distribution(
+                        synthetic_data[parent_table_name][parent_field_name],
                         synthetic_data[table_name][field_name],
-                        synthetic_data[child_table_name][child_field_name],
                     )
                     score_breakdown = cls._compute_statistic(
                         cardinality_real, cardinality_synthetic, statistic)
-                    score_breakdowns[(table_name, child_table_name)] = score_breakdown
+                    score_breakdowns[(parent_table_name, table_name)] = score_breakdown
 
         if len(score_breakdowns) == 0:
             return {'score': np.nan}
@@ -163,7 +163,7 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
                 The average of all (parent, child) cardinality statistic similarity scores.
         """
         score_breakdowns = cls.compute_breakdown(real_data, synthetic_data, metadata, statistic)
-        all_scores = [breakdown['score'] for breakdown in score_breakdowns]
+        all_scores = [breakdown['score'] for _, breakdown in score_breakdowns.items()]
 
         return sum(all_scores) / len(all_scores)
 

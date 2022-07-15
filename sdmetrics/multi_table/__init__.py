@@ -8,7 +8,8 @@ from sdmetrics.multi_table.detection.parent_child import (
 from sdmetrics.multi_table.multi_single_table import (
     BNLikelihood, BNLogLikelihood, CSTest, KSComplement, KSTestExtended, LogisticDetection,
     MultiSingleTableMetric, SVCDetection)
-from sdmetrics.statistical.cardinality_statistic_similarity import CardinalityStatisticSimilarity
+from sdmetrics.multi_table.statistical.cardinality_statistic_similarity import (
+    CardinalityStatisticSimilarity)
 
 __all__ = [
     'detection',

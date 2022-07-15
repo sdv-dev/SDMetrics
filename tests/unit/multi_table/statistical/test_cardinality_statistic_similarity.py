@@ -1,0 +1,146 @@
+from unittest.mock import Mock, patch
+
+import pandas as pd
+
+from sdmetrics.multi_table.statistical import CardinalityStatisticSimilarity
+
+
+class TestCardinalityStatisticSimilarity:
+
+    def test__compute_statistic(self):
+        """Test the ``_compute_statistic`` method.
+
+        Expect that a metric breakdown using the desired statistic is returned.
+
+        Input:
+        - real distribution
+        - synthetic distribution
+
+        Output:
+        - A metric breakdown, containing 'score'.
+        """
+        # Setup
+        real_distribution = pd.Series([1, 2, 2, 5, 1])
+        synthetic_distribution = pd.Series([2, 2, 3, 1, 4])
+
+        # Run
+        result = CardinalityStatisticSimilarity._compute_statistic(
+            real_distribution, synthetic_distribution, 'mean')
+
+        # Assert
+        assert result == {'real': 2.2, 'synthetic': 2.4, 'score': 0.9500000000000001}
+
+    def test_compute(self):
+        """Test the ``compute`` method.
+
+        Expect that an average of the column metric scores across all tables is returned.
+
+        Setup:
+        - ``_compute`` helper method should return a nested mapping of table name to metric
+          breakdown.
+
+        Input:
+        - real data
+        - synthetic data
+
+        Output:
+        - The average metric score.
+        """
+        # Setup
+        metric_breakdown = {
+            ('tableA', 'tableB'): {'score': 0.9},
+            ('tableB', 'tableC'): {'score': 0.7},
+            ('tableA', 'tableD'): {'score': 0.7},
+        }
+
+        # Run
+        with patch.object(
+            CardinalityStatisticSimilarity,
+            'compute_breakdown',
+            return_value=metric_breakdown,
+        ):
+            result = CardinalityStatisticSimilarity.compute(
+                real_data=Mock(),
+                synthetic_data=Mock(),
+                metadata=Mock(),
+                statistic='mean',
+            )
+
+        # Assert
+        assert result == 2.3 / 3
+
+    def test_compute_breakdown(self):
+        """Test the ``compute_breakdown`` method.
+
+        Expect that a nested breakdown of the column metric scores by table and column is returned.
+
+        Setup:
+        - ``_compute`` helper method should return a nested mapping of table name to metric
+          breakdown.
+
+        Input:
+        - real data
+        - synthetic data
+
+        Output:
+        - A nested mapping of table name to the metric scores broken down by column.
+        """
+        # Setup
+        metadata = {
+            'tables': {
+                'tableA': {'fields': {'col1': {}}},
+                'tableB': {
+                    'fields': {
+                        'col1': {'ref': {'table': 'tableA', 'field': 'col1'}},
+                        'col2': {},
+                    },
+                },
+                'tableC': {'fields': {'col2': {'ref': {'table': 'tableB', 'field': 'col2'}}}},
+            },
+        }
+        real_data = {
+            'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
+            'tableB': pd.DataFrame(
+                {'col1': [1, 1, 2, 3, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableC': pd.DataFrame({'col2': ['a', 'b', 'c']}),
+        }
+        synthetic_data = {
+            'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
+            'tableB': pd.DataFrame(
+                {'col1': [1, 2, 4, 4, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableC': pd.DataFrame({'col2': ['a', 'b', 'd']}),
+        }
+        expected_metric_breakdown = {
+            ('tableA', 'tableB'): {'score': 1.0, 'real': 1.2, 'synthetic': 1.2},
+            ('tableB', 'tableC'): {'score': 1.0, 'real': 0.5, 'synthetic': 0.5},
+        }
+
+        # Run
+        result = CardinalityStatisticSimilarity.compute_breakdown(
+            real_data, synthetic_data, metadata, 'mean')
+
+        # Assert
+        assert result == expected_metric_breakdown
+
+    @patch('sdmetrics.multi_table.statistical.cardinality_statistic_similarity.MultiTableMetric.'
+           'normalize')
+    def test_normalize(self, normalize_mock):
+        """Test the ``normalize`` method.
+
+        Expect that the inherited ``normalize`` method is called.
+
+        Input:
+        - Raw score
+
+        Output:
+        - The output of the inherited ``normalize`` method.
+        """
+        # Setup
+        raw_score = 0.9
+
+        # Run
+        result = CardinalityStatisticSimilarity.normalize(raw_score)
+
+        # Assert
+        normalize_mock.assert_called_once_with(raw_score)
+        assert result == normalize_mock.return_value
