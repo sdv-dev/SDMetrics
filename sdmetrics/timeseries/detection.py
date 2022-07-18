@@ -2,8 +2,7 @@
 
 import numpy as np
 import pandas as pd
-from rdt import HyperTransformer
-from rdt.transformers import OneHotEncoder
+import rdt
 from sklearn.model_selection import train_test_split
 
 from sdmetrics.goal import Goal
@@ -77,11 +76,11 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
 
-        fit_data = real_data.drop(entity_columns, axis=1)
-        transformer = HyperTransformer()
-        transformer.detect_initial_config(fit_data)
-        transformer.update_transformers_by_sdtype('categorical', OneHotEncoder())
-        transformer.fit(fit_data)
+        transformer = rdt.HyperTransformer(default_data_type_transformers={
+            'categorical': rdt.transformers.OneHotEncodingTransformer(error_on_unknown=False),
+            'datetime': rdt.transformers.DatetimeTransformer(strip_constant=True),
+        })
+        transformer.fit(real_data.drop(entity_columns, axis=1))
 
         real_x = cls._build_x(real_data, transformer, entity_columns)
         synt_x = cls._build_x(synthetic_data, transformer, entity_columns)

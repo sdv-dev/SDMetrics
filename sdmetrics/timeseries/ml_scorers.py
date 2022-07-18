@@ -2,10 +2,10 @@
 
 import numpy as np
 import pandas as pd
+import rdt
 import torch
 from pyts.classification import TimeSeriesForest
 from pyts.multivariate.classification import MultivariateClassifier
-from rdt.transformers import LabelEncoder
 
 
 def _stack(row):
@@ -48,7 +48,7 @@ def lstm_classifier(X_train, X_test, y_train, y_test):
     X_train = _x_to_packed_sequence(X_train).to(device)
     X_test = _x_to_packed_sequence(X_test).to(device)
 
-    transformer = LabelEncoder()
+    transformer = rdt.transformers.categorical.LabelEncodingTransformer()
     column = 'target'
     output_column = f'{column}.value'
     y_train = pd.DataFrame(y_train, columns=[column])

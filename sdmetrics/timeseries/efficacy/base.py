@@ -2,8 +2,7 @@
 
 import numpy as np
 import pandas as pd
-from rdt import HyperTransformer
-from rdt.transformers import OneHotEncoder
+import rdt
 from sklearn.model_selection import train_test_split
 
 from sdmetrics.goal import Goal
@@ -64,11 +63,11 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
 
     @classmethod
     def _compute_score(cls, real_data, synthetic_data, entity_columns, target):
-        fit_data = real_data.drop(entity_columns + [target], axis=1)
-        transformer = HyperTransformer()
-        transformer.detect_initial_config(fit_data)
-        transformer.update_transformers_by_sdtype('categorical', OneHotEncoder())
-        transformer.fit(fit_data)
+        transformer = rdt.HyperTransformer(default_data_type_transformers={
+            'categorical': rdt.transformers.OneHotEncodingTransformer(error_on_unknown=False),
+            'datetime': rdt.transformers.DatetimeTransformer(strip_constant=True),
+        })
+        transformer.fit(real_data.drop(entity_columns + [target], axis=1))
 
         real_x, real_y = cls._build_xy(transformer, real_data, entity_columns, target)
         synt_x, synt_y = cls._build_xy(transformer, synthetic_data, entity_columns, target)
