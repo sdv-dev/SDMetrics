@@ -28,11 +28,11 @@ class CardinalityShapeSimilarity(MultiTableMetric):
     max_value = 1.0
 
     @classmethod
-    def compute_breakdown(cls, real_data, synthetic_data, metadata=None):
+    def compute_breakdown(cls, real_data, synthetic_data, metadata):
         """Compute the breakdown of cardinality shape similarity in the given tables.
 
         Compute the cardinality distributions for the real and synthetic data for each
-        (parent, child) relationship specified in the metadata. Then compute the KSComplement
+        (parent, child) relationship specified in the metadata. Then compute the `KSComplement`
         over the two cardinality distributions, and compare the final scores
         to obtain the cardinality shape similarity score.
 
@@ -44,8 +44,7 @@ class CardinalityShapeSimilarity(MultiTableMetric):
                 The tables from the synthetic dataset, passed as a dictionary of
                 table names and pandas.DataFrames.
             metadata (dict):
-                Multi-table metadata dict. If not passed, it is build based on the
-                real_data fields and dtypes.
+                Multi-table metadata dict.
 
         Returns:
             dict:
@@ -54,8 +53,6 @@ class CardinalityShapeSimilarity(MultiTableMetric):
         """
         if set(real_data.keys()) != set(synthetic_data.keys()):
             raise ValueError('`real_data` and `synthetic_data` must have the same tables.')
-        if metadata is None:
-            raise ValueError('`metadata` cannot be ``None``.')
         if not isinstance(metadata, dict):
             metadata = metadata.to_dict()
 
@@ -82,12 +79,12 @@ class CardinalityShapeSimilarity(MultiTableMetric):
         return score_breakdowns
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None):
+    def compute(cls, real_data, synthetic_data, metadata):
         """Compute the average of cardinality shape similarity in the given tables.
 
         Compute the average shape similarity in cardinality distributions for
         (parent, child) relationship in the given tables, as specified in the metadata.
-        The shape similarity is computed based on the KSComplement.
+        The shape similarity is computed based on the `KSComplement`.
 
         Args:
             real_data (dict[str, pandas.DataFrame]):
@@ -97,8 +94,7 @@ class CardinalityShapeSimilarity(MultiTableMetric):
                 The tables from the synthetic dataset, passed as a dictionary of
                 table names and pandas.DataFrames.
             metadata (dict):
-                Multi-table metadata dict. If not passed, it is build based on the
-                real_data fields and dtypes.
+                Multi-table metadata dict.
 
         Returns:
             float:
