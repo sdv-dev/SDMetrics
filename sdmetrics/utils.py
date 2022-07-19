@@ -72,6 +72,26 @@ def get_frequencies(real, synthetic):
     return f_obs, f_exp
 
 
+def get_cardinality_distribution(parent_column, child_column):
+    """Compute the cardinality distribution of the (parent, child) pairing.
+
+    Args:
+        parent_column (pandas.Series):
+            The parent column.
+        child_column (pandas.Series):
+            The child column.
+
+    Returns:
+        pandas.Series:
+            The cardinality distribution.
+    """
+    child_df = pd.DataFrame({'child_counts': child_column.value_counts()})
+    cardinality_df = pd.DataFrame({'parent': parent_column}).join(
+        child_df, on='parent').fillna(0)
+
+    return cardinality_df['child_counts']
+
+
 def is_datetime(data):
     """Determine if the input is a datetime type or not.
 
