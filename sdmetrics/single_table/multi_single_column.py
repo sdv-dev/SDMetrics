@@ -217,7 +217,6 @@ class KSTestExtended(MultiSingleColumnMetric):
         metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
         transformer = HyperTransformer()
         fields = cls._select_fields(metadata, cls.field_types)
-        transformer.detect_initial_config(real_data)
         real_data = transformer.fit_transform(real_data[fields])
         synthetic_data = transformer.transform(synthetic_data[fields])
 
