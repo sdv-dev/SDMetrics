@@ -26,10 +26,10 @@ class TestStatisticSimilarity:
         real_data = pd.Series([1.0, 2.4, 2.6, 0.8])
         synthetic_data = pd.Series([0.9, 1.8, 3.1, 5.0])
 
-        metric = StatisticSimilarity(statistic='mean')
+        metric = StatisticSimilarity()
 
         # Run
-        result = metric.compute_breakdown(real_data, synthetic_data)
+        result = metric.compute_breakdown(real_data, synthetic_data, statistic='mean')
 
         # Assert
         assert result == {'score': 1 - (2.7 - 1.7) / 1.8, 'real': 1.7, 'synthetic': 2.7}
@@ -52,11 +52,11 @@ class TestStatisticSimilarity:
         # Setup
         metric_breakdown = {'score': 0.56, 'real': 1.7, 'synthetic': 2.7}
 
-        metric = StatisticSimilarity(statistic='mean')
+        metric = StatisticSimilarity()
 
         # Run
         with patch.object(StatisticSimilarity, 'compute_breakdown', return_value=metric_breakdown):
-            result = metric.compute(Mock(), Mock())
+            result = metric.compute(Mock(), Mock(), statistic='mean')
 
         # Assert
         assert result == 0.56
@@ -74,7 +74,7 @@ class TestStatisticSimilarity:
         - The output of the inherited ``normalize`` method.
         """
         # Setup
-        metric = StatisticSimilarity(statistic='mean')
+        metric = StatisticSimilarity()
         raw_score = 0.9
 
         # Run
