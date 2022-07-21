@@ -229,3 +229,54 @@ class KSTestExtended(MultiSingleColumnMetric):
             values.append(score)
 
         return np.nanmean(values)
+
+
+class StatisticSimilarity(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn StatisticSimilarity.
+
+    Apply the desired statistic to compare the real and synthetic data.
+    """
+
+    field_types = ('numerical', 'datetime')
+    single_column_metric = single_column.statistical.StatisticalSimilarity
+
+
+class BoundaryAdherence(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn BoundaryAdherence.
+
+    Compute the fraction of rows in the synthetic data that are within the min and max
+    bounds of the real data.
+    """
+
+    field_types = ('numerical', 'datetime')
+    single_column_metric = single_column.statistical.BoundaryAdherence
+
+
+class MissingValueSimilarity(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn MissingValueSimilarity.
+
+    Compare the percentage of missing values between the real and synthetic data.
+    """
+
+    field_types = ('numerical', 'datetime')
+    single_column_metric = single_column.statistical.MissingValueSimilarity
+
+
+class CategoryCoverage(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn CategoryCoverage.
+
+    Compute the fraction of real data categories that are present in the synthetic data.
+    """
+
+    field_types = ('categorical', 'boolean')
+    single_column_metric = single_column.statistical.CategoryCoverage
+
+
+class TVComplement(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn TVComplement.
+
+    Compute the complement of the total variaton distance between the real and synthetic data
+    """
+
+    field_types = ('categorical', 'boolean')
+    single_column_metric = single_column.statistical.TVComplement

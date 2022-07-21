@@ -9,6 +9,8 @@ from sdmetrics.single_column.base import SingleColumnMetric
 class CategoryCoverage(SingleColumnMetric):
     """Category coverage metric.
 
+    Compute the fraction of real data categories that are present in the synthetic data.
+
     Attributes:
         name (str):
             Name to use when reports about this metric are printed.

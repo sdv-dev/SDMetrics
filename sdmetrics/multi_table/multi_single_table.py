@@ -181,6 +181,48 @@ class KSTestExtended(MultiSingleTableMetric):
     single_table_metric = single_table.multi_single_column.KSTestExtended
 
 
+class StatisticSimilarity(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable StatisticSimilarity."""
+
+    single_table_metric = single_table.multi_single_column.StatisticSimilarity
+
+
+class BoundaryAdherence(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable BoundaryAdherence."""
+
+    single_table_metric = single_table.multi_single_column.BoundaryAdherence
+
+
+class MissingValueSimilarity(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable MissingValueSimilarity."""
+
+    single_table_metric = single_table.multi_single_column.MissingValueSimilarity
+
+
+class CategoryCoverage(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable CategoryCoverage."""
+
+    single_table_metric = single_table.multi_single_column.CategoryCoverage
+
+
+class TVComplement(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable TVComplement."""
+
+    single_table_metric = single_table.multi_single_column.TVComplement
+
+
+class CorrelationSimilarity(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable CorrelationSimilarity."""
+
+    single_table_metric = single_table.multi_single_column.CorrelationSimilarity
+
+
+class ContingencySimilarity(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable ContingencySimilarity."""
+
+    single_table_metric = single_table.multi_single_column.ContingencySimilarity
+
+
 class LogisticDetection(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable LogisticDetection."""
 
