@@ -238,7 +238,7 @@ class StatisticSimilarity(MultiSingleColumnMetric):
     """
 
     field_types = ('numerical', 'datetime')
-    single_column_metric = single_column.statistical.StatisticalSimilarity
+    single_column_metric = single_column.statistical.StatisticSimilarity
 
 
 class BoundaryAdherence(MultiSingleColumnMetric):

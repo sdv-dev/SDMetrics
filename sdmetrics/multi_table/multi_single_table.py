@@ -214,13 +214,13 @@ class TVComplement(MultiSingleTableMetric):
 class CorrelationSimilarity(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable CorrelationSimilarity."""
 
-    single_table_metric = single_table.multi_single_column.CorrelationSimilarity
+    single_table_metric = single_table.multi_column_pairs.CorrelationSimilarity
 
 
 class ContingencySimilarity(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable ContingencySimilarity."""
 
-    single_table_metric = single_table.multi_single_column.ContingencySimilarity
+    single_table_metric = single_table.multi_column_pairs.ContingencySimilarity
 
 
 class LogisticDetection(MultiSingleTableMetric):
