@@ -9,7 +9,6 @@ Implemented metrics:
 * Detection Metrics: Metrics that train a Machine Learning Classifier to distinguish between
   the real and the synthetic data. The score obtained by these metrics is the complementary of the
   score obtained by the classifier when cross validated.
-    * `TSFCDetection`: Detection metric based on a TimeSeriesForestClassifier from sktime.
     * `LSTMDetection`: Detection metric based on an LSTM Classifier implemented on PyTorch.
 * ML Efficacy Metrics: Metrics that compare the score obtained by a Machine Learning model
   when fitted on the synthetic data or real data, and then evaluated on held out real data.
@@ -18,7 +17,6 @@ Implemented metrics:
   that represent machine learning problems which are relatively easy to solve. If the performance
   of the models when fitted on real data is too low, the output from these metrics may be
   meaningless.
-    * `TSFClassifierEfficacy`: Efficacy metric based on a TimeSeriesForestClassifier from sktime.
     * `LSTMClassifierEfficacy`: Efficacy metric based on an LSTM Classifier implemented on PyTorch.
 
 ## TimeSeriesMetric
@@ -31,8 +29,7 @@ In [1]: from sdmetrics.timeseries import TimeSeriesMetric
 
 In [2]: TimeSeriesMetric.get_subclasses()
 Out[2]:
-{'TSFCDetection': sdmetrics.timeseries.detection.TSFCDetection,
- 'LSTMDetection': sdmetrics.timeseries.detection.LSTMDetection}
+{'LSTMDetection': sdmetrics.timeseries.detection.LSTMDetection}
 ```
 
 ## Time Series Inputs and Outputs

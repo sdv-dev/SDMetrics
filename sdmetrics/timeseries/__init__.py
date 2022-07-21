@@ -2,10 +2,9 @@
 
 from sdmetrics.timeseries import base, detection, efficacy, ml_scorers
 from sdmetrics.timeseries.base import TimeSeriesMetric
-from sdmetrics.timeseries.detection import LSTMDetection, TimeSeriesDetectionMetric, TSFCDetection
+from sdmetrics.timeseries.detection import LSTMDetection, TimeSeriesDetectionMetric
 from sdmetrics.timeseries.efficacy import TimeSeriesEfficacyMetric
-from sdmetrics.timeseries.efficacy.classification import (
-    LSTMClassifierEfficacy, TSFClassifierEfficacy)
+from sdmetrics.timeseries.efficacy.classification import LSTMClassifierEfficacy
 
 __all__ = [
     'base',
@@ -15,8 +14,6 @@ __all__ = [
     'TimeSeriesMetric',
     'TimeSeriesDetectionMetric',
     'LSTMDetection',
-    'TSFCDetection',
     'TimeSeriesEfficacyMetric',
     'LSTMClassifierEfficacy',
-    'TSFClassifierEfficacy',
 ]

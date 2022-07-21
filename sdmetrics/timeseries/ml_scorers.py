@@ -4,8 +4,6 @@ import numpy as np
 import pandas as pd
 import rdt
 import torch
-from pyts.classification import TimeSeriesForest
-from pyts.multivariate.classification import MultivariateClassifier
 
 
 def _stack(row):
@@ -14,13 +12,6 @@ def _stack(row):
 
 def _to_numpy(dataframe):
     return np.stack(dataframe.apply(_stack, axis=1))  # noqa
-
-
-def tsf_classifier(X_train, X_test, y_train, y_test):
-    """ML Scorer based on a TimeSeriesForestClassifier."""
-    clf = MultivariateClassifier(TimeSeriesForest())
-    clf.fit(_to_numpy(X_train), y_train)
-    return clf.score(_to_numpy(X_test), y_test)
 
 
 def _x_to_packed_sequence(X):

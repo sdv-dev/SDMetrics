@@ -1,12 +1,10 @@
 import pytest
 
 from sdmetrics.demos import load_timeseries_demo
-from sdmetrics.timeseries.efficacy.classification import (
-    LSTMClassifierEfficacy, TSFClassifierEfficacy)
+from sdmetrics.timeseries.efficacy.classification import LSTMClassifierEfficacy
 
 METRICS = [
     LSTMClassifierEfficacy,
-    TSFClassifierEfficacy,
 ]
 
 
