@@ -4,11 +4,10 @@ import pytest
 from sdmetrics import compute_metrics
 from sdmetrics.demos import load_timeseries_demo
 from sdmetrics.timeseries.base import TimeSeriesMetric
-from sdmetrics.timeseries.detection import LSTMDetection, TSFCDetection
+from sdmetrics.timeseries.detection import LSTMDetection
 
 METRICS = [
     LSTMDetection,
-    TSFCDetection
 ]
 
 

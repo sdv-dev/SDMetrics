@@ -23,7 +23,6 @@ requirements:
     - numpy >=1.18.0,<2
     - pandas >=1.1.3,<2
     - pytorch >=1.8.0,<2
-    - pyts >=0.12.0,<0.13.0
     - copulas>=0.6.0,<0.7
     - rdt >=0.6.1,<0.7
   run:
@@ -33,7 +32,6 @@ requirements:
     - numpy >=1.18.0,<2
     - pandas >=1.1.3,<2
     - pytorch >=1.8.0,<2
-    - pyts >=0.12.0,<0.13.0
     - copulas>=0.6.0,<0.7
     - rdt >=0.6.1,<0.7
 
