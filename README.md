@@ -129,7 +129,6 @@ The output will be a table with all the details about the executed metrics and t
 |------------------------------|----------------------------------------------|------------|-------------|-------------|----------|
 | CSTest                       | Chi-Squared                                  |   0.76651  |           0 |           1 | MAXIMIZE |
 | KSComplement                 | Complement to Kolmogorov-Smirnov D statistic |   0.75     |           0 |           1 | MAXIMIZE |
-| KSTestExtended               | Inverted Kolmogorov-Smirnov D statistic      |   0.777778 |           0 |           1 | MAXIMIZE |
 | LogisticDetection            | LogisticRegression Detection                 |   0.882716 |           0 |           1 | MAXIMIZE |
 | SVCDetection                 | SVC Detection                                |   0.833333 |           0 |           1 | MAXIMIZE |
 | BNLikelihood                 | BayesianNetwork Likelihood                   | nan        |           0 |           1 | MAXIMIZE |

@@ -175,12 +175,6 @@ class KSComplement(MultiSingleTableMetric):
     single_table_metric = single_table.multi_single_column.KSComplement
 
 
-class KSTestExtended(MultiSingleTableMetric):
-    """MultiSingleTableMetric based on SingleTable KSTestExtended."""
-
-    single_table_metric = single_table.multi_single_column.KSTestExtended
-
-
 class StatisticSimilarity(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable StatisticSimilarity."""
 
