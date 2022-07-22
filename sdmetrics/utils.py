@@ -141,7 +141,8 @@ class HyperTransformer():
                 self.column_transforms[field] = {'mean': data[field].mean()}
             elif kind == 'b':
                 # Boolean column.
-                self.column_transforms[field] = {'mode': data[field].mode()}
+                numeric = pd.to_numeric(data[field], errors='coerce').astype(float)
+                self.column_transforms[field] = {'mode': numeric.mode().iloc[0]}
             elif kind == 'O':
                 # Categorical column.
                 col_data = pd.DataFrame({'field': data[field]})
