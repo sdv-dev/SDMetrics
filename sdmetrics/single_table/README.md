@@ -74,9 +74,6 @@ Implemented metrics:
       the categorical variables.
     * `KSComplement`: MultiSingleColumn metric based on applying the Single Column KSComplement on all
       the numerical variables.
-    * `KSTestExtended`: MultiSingleColumn metric based on applying the Single Column KSComplement on
-      all the numerical variables that result from transforming all the columsn from the tables
-      using an RDT HyperTransformer.
 * MultiColumnPairs Metrics: Metrics that apply a ColumnPairs metric on each pair of columns from
   the tables which are compatible with it and then compute the average across all the columns pairs.
     * `ContinuousKLDivergence`: MultiColumnPairs metric based on applying the ColumnPairs
@@ -108,7 +105,6 @@ Out[2]:
  'GMLogLikelihood': sdmetrics.single_table.gaussian_mixture.GMLogLikelihood,
  'CSTest': sdmetrics.single_table.multi_single_column.CSTest,
  'KSComplement': sdmetrics.single_table.multi_single_column.KSComplement,
- 'KSTestExtended': sdmetrics.single_table.multi_single_column.KSTestExtended,
  'ContinuousKLDivergence': sdmetrics.single_table.multi_column_pairs.ContinuousKLDivergence,
  'DiscreteKLDivergence': sdmetrics.single_table.multi_column_pairs.DiscreteKLDivergence,
  'CategoricalCAP': sdmetrics.single_table.privacy.cap,
