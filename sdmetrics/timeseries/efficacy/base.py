@@ -2,11 +2,11 @@
 
 import numpy as np
 import pandas as pd
-import rdt
 from sklearn.model_selection import train_test_split
 
 from sdmetrics.goal import Goal
 from sdmetrics.timeseries.base import TimeSeriesMetric
+from sdmetrics.utils import HyperTransformer
 
 
 class TimeSeriesEfficacyMetric(TimeSeriesMetric):
@@ -46,13 +46,13 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
         return entity_columns, target
 
     @staticmethod
-    def _build_xy(transformer, data, entity_columns, target_column):
+    def _build_xy(hypertransformer, data, entity_columns, target_column):
         X = pd.DataFrame()
         y = pd.Series()
         for entity_id, group in data.groupby(entity_columns):
             y = y.append(pd.Series({entity_id: group.pop(target_column).iloc[0]}))
             entity_data = group.drop(entity_columns, axis=1)
-            entity_data = transformer.transform(entity_data)
+            entity_data = hypertransformer.transform(entity_data)
             entity_data = pd.Series({
                 column: entity_data[column].to_numpy()
                 for column in entity_data.columns
@@ -63,14 +63,11 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
 
     @classmethod
     def _compute_score(cls, real_data, synthetic_data, entity_columns, target):
-        transformer = rdt.HyperTransformer(default_data_type_transformers={
-            'categorical': rdt.transformers.OneHotEncodingTransformer(error_on_unknown=False),
-            'datetime': rdt.transformers.DatetimeTransformer(strip_constant=True),
-        })
-        transformer.fit(real_data.drop(entity_columns + [target], axis=1))
+        ht = HyperTransformer()
+        ht.fit(real_data.drop(entity_columns + [target], axis=1))
 
-        real_x, real_y = cls._build_xy(transformer, real_data, entity_columns, target)
-        synt_x, synt_y = cls._build_xy(transformer, synthetic_data, entity_columns, target)
+        real_x, real_y = cls._build_xy(ht, real_data, entity_columns, target)
+        synt_x, synt_y = cls._build_xy(ht, synthetic_data, entity_columns, target)
 
         train, test = train_test_split(real_x.index, shuffle=True)
         real_x_train, real_x_test = real_x.loc[train], real_x.loc[test]

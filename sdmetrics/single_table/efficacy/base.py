@@ -1,12 +1,12 @@
 """Base class for Efficacy metrics for single table datasets."""
 
 import numpy as np
-import rdt
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import RobustScaler
 
 from sdmetrics.single_table.base import SingleTableMetric
+from sdmetrics.utils import HyperTransformer
 
 
 class MLEfficacyMetric(SingleTableMetric):
@@ -46,11 +46,9 @@ class MLEfficacyMetric(SingleTableMetric):
         if len(unique_labels) == 1:
             predictions = np.full(len(real_data), unique_labels[0])
         else:
-            transformer = rdt.HyperTransformer(default_data_type_transformers={
-                'categorical': rdt.transformers.OneHotEncodingTransformer(error_on_unknown=False),
-            })
-            real_data = transformer.fit_transform(real_data)
-            synthetic_data = transformer.transform(synthetic_data)
+            ht = HyperTransformer()
+            real_data = ht.fit_transform(real_data)
+            synthetic_data = ht.transform(synthetic_data)
 
             real_data[np.isin(real_data, [np.inf, -np.inf])] = None
             synthetic_data[np.isin(synthetic_data, [np.inf, -np.inf])] = None

@@ -2,12 +2,12 @@
 
 import numpy as np
 import pandas as pd
-import rdt
 from sklearn.model_selection import train_test_split
 
 from sdmetrics.goal import Goal
 from sdmetrics.timeseries import ml_scorers
 from sdmetrics.timeseries.base import TimeSeriesMetric
+from sdmetrics.utils import HyperTransformer
 
 
 class TimeSeriesDetectionMetric(TimeSeriesMetric):
@@ -35,11 +35,11 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
     max_value = 1.0
 
     @staticmethod
-    def _build_x(data, transformer, entity_columns):
+    def _build_x(data, hypertransformer, entity_columns):
         X = pd.DataFrame()
         for entity_id, entity_data in data.groupby(entity_columns):
             entity_data = entity_data.drop(entity_columns, axis=1)
-            entity_data = transformer.transform(entity_data)
+            entity_data = hypertransformer.transform(entity_data)
             entity_data = pd.Series({
                 column: entity_data[column].to_numpy()
                 for column in entity_data.columns
@@ -76,14 +76,11 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
 
-        transformer = rdt.HyperTransformer(default_data_type_transformers={
-            'categorical': rdt.transformers.OneHotEncodingTransformer(error_on_unknown=False),
-            'datetime': rdt.transformers.DatetimeTransformer(strip_constant=True),
-        })
-        transformer.fit(real_data.drop(entity_columns, axis=1))
+        ht = HyperTransformer()
+        ht.fit(real_data.drop(entity_columns, axis=1))
 
-        real_x = cls._build_x(real_data, transformer, entity_columns)
-        synt_x = cls._build_x(synthetic_data, transformer, entity_columns)
+        real_x = cls._build_x(real_data, ht, entity_columns)
+        synt_x = cls._build_x(synthetic_data, ht, entity_columns)
 
         X = pd.concat([real_x, synt_x])
         y = pd.Series(np.array([0] * len(real_x) + [1] * len(synt_x)))
