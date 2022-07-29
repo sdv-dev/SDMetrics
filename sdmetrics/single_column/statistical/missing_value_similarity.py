@@ -9,6 +9,8 @@ from sdmetrics.single_column.base import SingleColumnMetric
 class MissingValueSimilarity(SingleColumnMetric):
     """Missing value similarity metric.
 
+    Compute the percentage of missing values between the real and synthetic data.
+
     Attributes:
         name (str):
             Name to use when reports about this metric are printed.

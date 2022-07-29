@@ -104,12 +104,6 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
         return super().normalize(raw_score)
 
 
-class TSFCDetection(TimeSeriesDetectionMetric):
-    """TimeSeriesDetection metric based on a TimeSeriesForestClassifier."""
-
-    _compute_score = ml_scorers.tsf_classifier
-
-
 class LSTMDetection(TimeSeriesDetectionMetric):
     """TimeSeriesDetection metric based on an LSTM Classifier."""
 
