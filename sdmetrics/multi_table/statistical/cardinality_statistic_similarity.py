@@ -55,8 +55,8 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
             raise ValueError(f'requested statistic {statistic} is not valid. '
                              'Please choose either mean, std, or median.')
 
-        score = 1 - abs(score_real - score_synthetic) / (
-            real_distribution.max() - real_distribution.min())
+        score = 1 - abs(score_real - score_synthetic) / max(
+            (real_distribution.max() - real_distribution.min()), 1)
 
         return {'real': score_real, 'synthetic': score_synthetic, 'score': max(score, 0)}
 

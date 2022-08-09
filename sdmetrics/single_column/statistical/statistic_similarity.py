@@ -42,8 +42,8 @@ class StatisticSimilarity(SingleColumnMetric):
         """
         return cls.compute_breakdown(real_data, synthetic_data, statistic)['score']
 
-    @staticmethod
-    def compute_breakdown(real_data, synthetic_data, statistic='mean'):
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data, statistic='mean'):
         """Compare the breakdown of statistic similarity of two continuous columns.
 
         Args:
@@ -76,7 +76,7 @@ class StatisticSimilarity(SingleColumnMetric):
             raise ValueError(f'requested statistic {statistic} is not valid. '
                              'Please choose either mean, std, or median.')
 
-        score = 1 - abs(score_real - score_synthetic) / (real_data.max() - real_data.min())
+        score = 1 - abs(score_real - score_synthetic) / max((real_data.max() - real_data.min()), 1)
         return {'real': score_real, 'synthetic': score_synthetic, 'score': max(score, 0)}
 
     @classmethod

@@ -43,22 +43,22 @@ class ContingencySimilarity(ColumnPairsMetric):
         real = real_data[columns]
         synthetic = synthetic_data[columns]
         contingency_real = pd.crosstab(
-            index=real[columns[0]],
-            columns=real[columns[1]],
+            index=real[columns[0]].astype(str),
+            columns=real[columns[1]].astype(str),
             normalize=True,
         )
         contingency_synthetic = pd.crosstab(
-            index=synthetic[columns[0]],
-            columns=synthetic[columns[1]],
+            index=synthetic[columns[0]].astype(str),
+            columns=synthetic[columns[1]].astype(str),
             normalize=True,
         )
 
         for col in set(contingency_synthetic.columns) - set(contingency_real.columns):
             contingency_real[col] = [0 for _ in range(len(contingency_real))]
-        for row in set(contingency_synthetic.index) - set(contingency_real.index):
-            contingency_real.loc[row] = [0 for _ in range(len(contingency_real.columns))]
         for col in set(contingency_real.columns) - set(contingency_synthetic.columns):
             contingency_synthetic[col] = [0 for _ in range(len(contingency_synthetic))]
+        for row in set(contingency_synthetic.index) - set(contingency_real.index):
+            contingency_real.loc[row] = [0 for _ in range(len(contingency_real.columns))]
         for row in set(contingency_real.index) - set(contingency_synthetic.index):
             contingency_synthetic.loc[row] = [0 for _ in range(len(contingency_synthetic.columns))]
 

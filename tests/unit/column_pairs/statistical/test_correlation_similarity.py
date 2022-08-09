@@ -30,7 +30,7 @@ class TestCorrelationSimilarity:
         synthetic_data = pd.DataFrame({'col1': [0.9, 1.8, 3.1, 5.0], 'col2': [2, 3, 4, 1]})
         score_real = -0.451
         score_synthetic = -0.003
-        pearson_mock.side_effect = [score_real, score_synthetic]
+        pearson_mock.side_effect = [(score_real, 0.1), (score_synthetic, 0.1)]
         expected_score_breakdown = {
             'score': 1 - abs(score_real - score_synthetic) / 2,
             'real': score_real,
@@ -75,7 +75,7 @@ class TestCorrelationSimilarity:
         })
         score_real = 0.2
         score_synthetic = 0.1
-        pearson_mock.side_effect = [score_real, score_synthetic]
+        pearson_mock.side_effect = [(score_real, 0.1), (score_synthetic, 0.2)]
         expected_score_breakdown = {
             'score': 1 - abs(score_real - score_synthetic) / 2,
             'real': score_real,

@@ -27,7 +27,8 @@ class CategoryCoverage(SingleColumnMetric):
     min_value = 0.0
     max_value = 1.0
 
-    def compute(self, real_data, synthetic_data):
+    @classmethod
+    def compute(cls, real_data, synthetic_data):
         """Compare the category coverage of two continuous columns.
 
         Args:
@@ -40,10 +41,11 @@ class CategoryCoverage(SingleColumnMetric):
             float:
                 The category coverage ratio of the two columns.
         """
-        results = self.compute_breakdown(real_data, synthetic_data)
+        results = cls.compute_breakdown(real_data, synthetic_data)
         return results['score']
 
-    def compute_breakdown(self, real_data, synthetic_data):
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data):
         """Compare the category coverage of two continuous columns.
 
         Args:
