@@ -8,19 +8,26 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
-from sdmetrics.single_table.multi_column_pairs import ContinuousKLDivergence, DiscreteKLDivergence
-from sdmetrics.single_table.multi_single_column import CSTest, KSTest, KSTestExtended
+from sdmetrics.single_table.multi_column_pairs import (
+    ContingencySimilarity, ContinuousKLDivergence, DiscreteKLDivergence)
+from sdmetrics.single_table.multi_single_column import (
+    BoundaryAdherence, CategoryCoverage, CSTest, KSComplement, MissingValueSimilarity,
+    TVComplement)
 
 METRICS = [
     CSTest,
-    KSTest,
-    KSTestExtended,
+    KSComplement,
     LogisticDetection,
     SVCDetection,
     ContinuousKLDivergence,
     DiscreteKLDivergence,
     BNLikelihood,
     BNLogLikelihood,
+    BoundaryAdherence,
+    MissingValueSimilarity,
+    CategoryCoverage,
+    TVComplement,
+    ContingencySimilarity,
 ]
 
 
@@ -89,14 +96,14 @@ def test_rank(metric, ones, zeros, real_data, good_data, bad_data):
     normalized_real = metric.normalize(real)
 
     if metric.goal == Goal.MAXIMIZE:
-        assert metric.min_value <= worst < best <= metric.max_value
-        assert metric.min_value <= bad < good < real <= metric.max_value
+        assert metric.min_value <= worst <= best <= metric.max_value
+        assert metric.min_value <= bad <= good <= real <= metric.max_value
     else:
-        assert metric.min_value <= best < worst <= metric.max_value
-        assert metric.min_value <= real < good < bad <= metric.max_value
+        assert metric.min_value <= best <= worst <= metric.max_value
+        assert metric.min_value <= real <= good <= bad <= metric.max_value
 
-    assert 0.0 <= normalized_worst < normalized_best <= 1.0
-    assert 0.0 <= normalized_bad < normalized_good < normalized_real <= 1.0
+    assert 0.0 <= normalized_worst <= normalized_best <= 1.0
+    assert 0.0 <= normalized_bad <= normalized_good <= normalized_real <= 1.0
 
 
 def test_compute_all():

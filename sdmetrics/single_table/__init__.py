@@ -17,9 +17,11 @@ from sdmetrics.single_table.efficacy.regression import (
     LinearRegression, MLPRegressor, RegressionEfficacyMetric)
 from sdmetrics.single_table.gaussian_mixture import GMLogLikelihood
 from sdmetrics.single_table.multi_column_pairs import (
-    ContinuousKLDivergence, DiscreteKLDivergence, MultiColumnPairsMetric)
+    ContingencySimilarity, ContinuousKLDivergence, CorrelationSimilarity, DiscreteKLDivergence,
+    MultiColumnPairsMetric)
 from sdmetrics.single_table.multi_single_column import (
-    CSTest, KSTest, KSTestExtended, MultiSingleColumnMetric)
+    BoundaryAdherence, CategoryCoverage, CSTest, KSComplement, MissingValueSimilarity,
+    MultiSingleColumnMetric, StatisticSimilarity, TVComplement)
 from sdmetrics.single_table.privacy.base import CategoricalPrivacyMetric, NumericalPrivacyMetric
 from sdmetrics.single_table.privacy.cap import (
     CategoricalCAP, CategoricalGeneralizedCAP, CategoricalZeroCAP)
@@ -63,8 +65,7 @@ __all__ = [
     'DiscreteKLDivergence',
     'MultiSingleColumnMetric',
     'CSTest',
-    'KSTest',
-    'KSTestExtended',
+    'KSComplement',
     'CategoricalCAP',
     'CategoricalZeroCAP',
     'CategoricalGeneralizedCAP',
@@ -79,4 +80,11 @@ __all__ = [
     'NumericalPrivacyMetric',
     'CategoricalEnsemble',
     'NumericalRadiusNearestNeighbor',
+    'ContingencySimilarity',
+    'CorrelationSimilarity',
+    'BoundaryAdherence',
+    'CategoryCoverage',
+    'MissingValueSimilarity',
+    'StatisticSimilarity',
+    'TVComplement',
 ]

@@ -2,10 +2,8 @@
 
 import numpy as np
 import pandas as pd
-import rdt
 import torch
-from pyts.classification import TimeSeriesForest
-from pyts.multivariate.classification import MultivariateClassifier
+from sklearn.preprocessing import LabelEncoder
 
 
 def _stack(row):
@@ -14,13 +12,6 @@ def _stack(row):
 
 def _to_numpy(dataframe):
     return np.stack(dataframe.apply(_stack, axis=1))  # noqa
-
-
-def tsf_classifier(X_train, X_test, y_train, y_test):
-    """ML Scorer based on a TimeSeriesForestClassifier."""
-    clf = MultivariateClassifier(TimeSeriesForest())
-    clf.fit(_to_numpy(X_train), y_train)
-    return clf.score(_to_numpy(X_test), y_test)
 
 
 def _x_to_packed_sequence(X):
@@ -48,15 +39,14 @@ def lstm_classifier(X_train, X_test, y_train, y_test):
     X_train = _x_to_packed_sequence(X_train).to(device)
     X_test = _x_to_packed_sequence(X_test).to(device)
 
-    transformer = rdt.transformers.categorical.LabelEncodingTransformer()
+    transformer = LabelEncoder()
     column = 'target'
-    output_column = f'{column}.value'
     y_train = pd.DataFrame(y_train, columns=[column])
     y_test = pd.DataFrame(y_test, columns=[column])
 
-    y_train = transformer.fit_transform(y_train, column)[output_column].to_numpy()
+    y_train = transformer.fit_transform(y_train[column])
     y_train = torch.LongTensor(y_train).to(device)
-    y_test = torch.LongTensor(transformer.transform(y_test)[output_column].to_numpy()).to(device)
+    y_test = torch.LongTensor(transformer.transform(y_test)).to(device)
 
     optimizer = torch.optim.Adam(list(lstm.parameters()) + list(linear.parameters()), lr=1e-2)
 

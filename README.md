@@ -44,7 +44,7 @@ of a synthetic database** by comparing it to the real database that it is modele
 [License]: https://github.com/sdv-dev/SDMetrics/blob/master/LICENSE
 [Development Status]: https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha
 [Slack Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/slack.png
-[Community]: https://join.slack.com/t/sdv-space/shared_invite/zt-gdsfcb5w-0QQpFMVoyB2Yd6SRiMplcw
+[Community]: https://bit.ly/sdv-slack-invite
 [MyBinder Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/mybinder.png
 [Tutorials]: https://mybinder.org/v2/gh/sdv-dev/SDV/master?filepath=tutorials
 
@@ -125,17 +125,16 @@ sdmetrics.compute_metrics(metrics, real_data, synthetic_data, metadata=metadata)
 
 The output will be a table with all the details about the executed metrics and their score:
 
-| metric                       | name                                    |      score |   min_value |   max_value | goal     |
-|------------------------------|-----------------------------------------|------------|-------------|-------------|----------|
-| CSTest                       | Chi-Squared                             |   0.76651  |           0 |           1 | MAXIMIZE |
-| KSTest                       | Inverted Kolmogorov-Smirnov D statistic |   0.75     |           0 |           1 | MAXIMIZE |
-| KSTestExtended               | Inverted Kolmogorov-Smirnov D statistic |   0.777778 |           0 |           1 | MAXIMIZE |
-| LogisticDetection            | LogisticRegression Detection            |   0.882716 |           0 |           1 | MAXIMIZE |
-| SVCDetection                 | SVC Detection                           |   0.833333 |           0 |           1 | MAXIMIZE |
-| BNLikelihood                 | BayesianNetwork Likelihood              | nan        |           0 |           1 | MAXIMIZE |
-| BNLogLikelihood              | BayesianNetwork Log Likelihood          | nan        |        -inf |           0 | MAXIMIZE |
-| LogisticParentChildDetection | LogisticRegression Detection            |   0.619444 |           0 |           1 | MAXIMIZE |
-| SVCParentChildDetection      | SVC Detection                           |   0.916667 |           0 |           1 | MAXIMIZE |
+| metric                       | name                                         |      score |   min_value |   max_value | goal     |
+|------------------------------|----------------------------------------------|------------|-------------|-------------|----------|
+| CSTest                       | Chi-Squared                                  |   0.76651  |           0 |           1 | MAXIMIZE |
+| KSComplement                 | Complement to Kolmogorov-Smirnov D statistic |   0.75     |           0 |           1 | MAXIMIZE |
+| LogisticDetection            | LogisticRegression Detection                 |   0.882716 |           0 |           1 | MAXIMIZE |
+| SVCDetection                 | SVC Detection                                |   0.833333 |           0 |           1 | MAXIMIZE |
+| BNLikelihood                 | BayesianNetwork Likelihood                   | nan        |           0 |           1 | MAXIMIZE |
+| BNLogLikelihood              | BayesianNetwork Log Likelihood               | nan        |        -inf |           0 | MAXIMIZE |
+| LogisticParentChildDetection | LogisticRegression Detection                 |   0.619444 |           0 |           1 | MAXIMIZE |
+| SVCParentChildDetection      | SVC Detection                                |   0.916667 |           0 |           1 | MAXIMIZE |
 
 # What's next?
 

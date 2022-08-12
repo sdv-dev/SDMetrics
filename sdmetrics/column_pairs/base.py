@@ -35,7 +35,25 @@ class ColumnPairsMetric(BaseMetric):
                 pandas.DataFrame with 2 columns.
 
         Returns:
-            Union[float, tuple[float]]:
+            float:
                 Metric output.
         """
         raise NotImplementedError()
+
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data):
+        """Compute the breakdown of this metric.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The values from the real dataset, passed as pandas.DataFrame
+                with 2 columns.
+            synthetic_data (pandas.DataFrame):
+                The values from the synthetic dataset, passed as a
+                pandas.DataFrame with 2 columns.
+
+        Returns:
+            dict
+                A mapping of the metric output. Must contain the key 'score'.
+        """
+        return {'score': cls.compute(real_data, synthetic_data)}

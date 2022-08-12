@@ -1,22 +1,17 @@
-"""Kolmogorov-Smirnov test based Metric."""
+"""Boundary Adherence Metric."""
 
 import pandas as pd
-from scipy.stats import ks_2samp
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
+from sdmetrics.utils import is_datetime
 
 
-class KSTest(SingleColumnMetric):
-    """Kolmogorov-Smirnov test based metric.
+class BoundaryAdherence(SingleColumnMetric):
+    """Boundary adherence metric.
 
-    This function uses the two-sample Kolmogorov–Smirnov test to compare
-    the distributions of the two continuous columns using the empirical CDF.
-    It returns 1 minus the KS Test D statistic, which indicates the maximum
-    distance between the expteced CDF and the observed CDF values.
-
-    As a result, the output value is 1.0 if the distributions are identical
-    and 0.0 if they are completely different.
+    Compute the fraction of rows in the synthetic data that are within the min and max
+    bounds of the real data
 
     Attributes:
         name (str):
@@ -29,14 +24,14 @@ class KSTest(SingleColumnMetric):
             Maximum value or values that this metric can take.
     """
 
-    name = 'Inverted Kolmogorov-Smirnov D statistic'
+    name = 'BoundaryAdherence'
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
 
-    @staticmethod
-    def compute(real_data, synthetic_data):
-        """Compare two continuous columns using a Kolmogorov–Smirnov test.
+    @classmethod
+    def compute(cls, real_data, synthetic_data):
+        """Compute the boundary adherence of two continuous columns.
 
         Args:
             real_data (Union[numpy.ndarray, pandas.Series]):
@@ -46,13 +41,18 @@ class KSTest(SingleColumnMetric):
 
         Returns:
             float:
-                1 minus the Kolmogorov–Smirnov D statistic.
+                The boundary adherence of the two columns.
         """
-        real_data = pd.Series(real_data).fillna(0)
-        synthetic_data = pd.Series(synthetic_data).fillna(0)
-        statistic, _ = ks_2samp(real_data, synthetic_data)
+        real_data = pd.Series(real_data).dropna()
+        synthetic_data = pd.Series(synthetic_data).dropna()
 
-        return 1 - statistic
+        if is_datetime(real_data):
+            real_data = pd.to_numeric(real_data)
+            synthetic_data = pd.to_numeric(synthetic_data)
+
+        valid = synthetic_data.between(real_data.min(), real_data.max())
+
+        return valid.sum() / len(synthetic_data)
 
     @classmethod
     def normalize(cls, raw_score):

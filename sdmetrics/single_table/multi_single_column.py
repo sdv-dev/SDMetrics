@@ -1,7 +1,6 @@
 """SingleTable metrics based on applying a SingleColumnMetric on all the columns."""
 
 import numpy as np
-from rdt import HyperTransformer
 
 from sdmetrics import single_column
 from sdmetrics.single_table.base import SingleTableMetric
@@ -41,13 +40,13 @@ class MultiSingleColumnMetric(SingleTableMetric,
         self.single_column_metric_kwargs = single_column_metric_kwargs
         self.compute = self._compute
 
-    def _compute(self, real_data, synthetic_data, metadata=None, **kwargs):
-        """Compute this metric.
+    def _compute(self, real_data, synthetic_data, metadata=None, store_errors=False, **kwargs):
+        """Compute this metric for all columns.
 
         This is done by computing the underlying SingleColumn metric to all the
         columns that are compatible with it.
 
-        The output is the average of the scores obtained.
+        The output is a mapping of column name to the score of that column.
 
         Args:
             real_data (pandas.DataFrame):
@@ -56,32 +55,42 @@ class MultiSingleColumnMetric(SingleTableMetric,
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict.
+            store_errors (bool):
+                Whether or not to store any metric computation errors in the results.
             **kwargs:
                 Any additional keyword arguments will be passed down
                 to the single column metric
 
         Returns:
-            Union[float, tuple[float]]:
-                Metric output.
+            Dict[string -> Union[float, tuple[float]]]:
+                A mapping of column name to metric output.
         """
         metadata = self._validate_inputs(real_data, synthetic_data, metadata)
 
         fields = self._select_fields(metadata, self.field_types)
-        scores = []
+        invalid_cols = set(metadata['fields'].keys()) - set(fields)
+
+        scores = {col: {'score': np.nan} for col in invalid_cols}
         for column_name, real_column in real_data.items():
             if column_name in fields:
                 real_column = real_column.to_numpy()
                 synthetic_column = synthetic_data[column_name].to_numpy()
 
-                score = self.single_column_metric.compute(
-                    real_column,
-                    synthetic_column,
-                    **(self.single_column_metric_kwargs or {}),
-                    **kwargs
-                )
-                scores.append(score)
+                try:
+                    score = self.single_column_metric.compute_breakdown(
+                        real_column,
+                        synthetic_column,
+                        **(self.single_column_metric_kwargs or {}),
+                        **kwargs
+                    )
+                    scores[column_name] = score
+                except Exception as error:
+                    if store_errors:
+                        scores[column_name] = {'error': error}
+                    else:
+                        raise error
 
-        return np.nanmean(scores)
+        return scores
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None, **kwargs):
@@ -107,7 +116,35 @@ class MultiSingleColumnMetric(SingleTableMetric,
             Union[float, tuple[float]]:
                 Metric output.
         """
-        return cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
+        scores = cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
+        return np.nanmean([breakdown['score'] for breakdown in scores.values()])
+
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data, metadata=None, **kwargs):
+        """Compute this metric broken down by column.
+
+        This is done by computing the underlying SingleColumn metric to all the
+        columns that are compatible with it.
+
+        The output is a mapping of column to the column's score.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The values from the real dataset.
+            synthetic_data (pandas.DataFrame):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the single column metric
+
+        Returns:
+            Dict[string -> Union[float, tuple[float]]]:
+                A mapping of column name to metric output.
+        """
+        return cls._compute(
+            cls, real_data, synthetic_data, metadata=None, store_errors=True, **kwargs)
 
     @classmethod
     def normalize(cls, raw_score):
@@ -137,57 +174,64 @@ class CSTest(MultiSingleColumnMetric):
     single_column_metric = single_column.statistical.CSTest
 
 
-class KSTest(MultiSingleColumnMetric):
-    """MultiSingleColumnMetric based on SingleColumn KSTest.
+class KSComplement(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn KSComplement.
 
-    This function applies the single column ``KSTest`` metric to all
+    This function applies the single column ``KSComplement`` metric to all
     the numerical columns found in the table and then returns the average
     of all the scores obtained.
     """
 
     field_types = ('numerical', )
-    single_column_metric = single_column.statistical.KSTest
+    single_column_metric = single_column.statistical.KSComplement
 
 
-class KSTestExtended(MultiSingleColumnMetric):
-    """KSTest variation that transforms everything to numerical before comparing the tables.
+class StatisticSimilarity(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn StatisticSimilarity.
 
-    This is done by applying an ``rdt.HyperTransformer`` to the data with the
-    default values and afterwards applying a regular single_column ``KSTest``
-    metric to all the generated numerical columns.
+    Apply the desired statistic to compare the real and synthetic data.
     """
 
-    single_column_metric = single_column.statistical.KSTest
-    field_types = ('numerical', 'categorical', 'boolean', 'datetime')
+    field_types = ('numerical', 'datetime')
+    single_column_metric = single_column.statistical.StatisticSimilarity
 
-    @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None):
-        """Compute this metric.
 
-        Args:
-            real_data (pandas.DataFrame):
-                The values from the real dataset.
-            synthetic_data (pandas.DataFrame):
-                The values from the synthetic dataset.
-            metadata (dict):
-                Table metadata dict.
+class BoundaryAdherence(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn BoundaryAdherence.
 
-        Returns:
-            Union[float, tuple[float]]:
-                Metric output.
-        """
-        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
-        transformer = HyperTransformer()
-        fields = cls._select_fields(metadata, cls.field_types)
-        real_data = transformer.fit_transform(real_data[fields])
-        synthetic_data = transformer.transform(synthetic_data[fields])
+    Compute the fraction of rows in the synthetic data that are within the min and max
+    bounds of the real data.
+    """
 
-        values = []
-        for column_name, real_column in real_data.items():
-            real_column = real_column.to_numpy()
-            synthetic_column = synthetic_data[column_name].to_numpy()
+    field_types = ('numerical', 'datetime')
+    single_column_metric = single_column.statistical.BoundaryAdherence
 
-            score = cls.single_column_metric.compute(real_column, synthetic_column)
-            values.append(score)
 
-        return np.nanmean(values)
+class MissingValueSimilarity(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn MissingValueSimilarity.
+
+    Compare the percentage of missing values between the real and synthetic data.
+    """
+
+    field_types = ('numerical', 'datetime')
+    single_column_metric = single_column.statistical.MissingValueSimilarity
+
+
+class CategoryCoverage(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn CategoryCoverage.
+
+    Compute the fraction of real data categories that are present in the synthetic data.
+    """
+
+    field_types = ('categorical', 'boolean')
+    single_column_metric = single_column.statistical.CategoryCoverage
+
+
+class TVComplement(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn TVComplement.
+
+    Compute the complement of the total variaton distance between the real and synthetic data
+    """
+
+    field_types = ('categorical', 'boolean')
+    single_column_metric = single_column.statistical.TVComplement

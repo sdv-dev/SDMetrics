@@ -12,8 +12,7 @@ Implemented metrics:
 * Multi Single Table Metrics: Metrics that execute a Single Table Metric on each table from the
   dataset and then return the average score obtained by it.
   * `CSTest`: Multi Single Table metric based on the Single Table CSTest metric.
-  * `KSTest`: Multi Single Table metric based on the Single Table KSTest metric.
-  * `KSTestExtended`: Multi Single Table metric based on the Single Table KSTestExtended metric.
+  * `KSComplement`: Multi Single Table metric based on the Single Table KSComplement metric.
   * `LogisticDetection`: Multi Single Table metric based on the Single Table LogisticDetection metric.
   * `SVCDetection`: Multi Single Table metric based on the Single Table SVCDetection metric.
   * `BNLikelihood`: Multi Single Table metric based on the Single Table BNLikelihood metric.
@@ -30,8 +29,7 @@ In [1]: from sdmetrics.multi_table import MultiTableMetric
 In [2]: MultiTableMetric.get_subclasses()
 Out[2]:
 {'CSTest': sdmetrics.multi_table.multi_single_table.CSTest,
- 'KSTest': sdmetrics.multi_table.multi_single_table.KSTest,
- 'KSTestExtended': sdmetrics.multi_table.multi_single_table.KSTestExtended,
+ 'KSComplement': sdmetrics.multi_table.multi_single_table.KSComplement,
  'LogisticDetection': sdmetrics.multi_table.multi_single_table.LogisticDetection,
  'SVCDetection': sdmetrics.multi_table.multi_single_table.SVCDetection,
  'BNLikelihood': sdmetrics.multi_table.multi_single_table.BNLikelihood,
@@ -49,16 +47,16 @@ All the multi table metrics operate on at least two inputs:
 * `synthetic_data`: A dict containing the table names and data from the synthetic dataset passed
   as `pandas.DataFrame`s
 
-For example, a `KStestExtended` metric can be used as follows:
+For example, a `KStest` metric can be used as follows:
 
 ```python3
-In [3]: from sdmetrics.multi_table import KSTestExtended
+In [3]: from sdmetrics.multi_table import KSComplement
 
 In [4]: from sdmetrics import load_demo
 
 In [5]: real_data, synthetic_data, metadata = load_demo()
 
-In [6]: KSTestExtended.compute(real_data, synthetic_data)
+In [6]: KSComplement.compute(real_data, synthetic_data)
 Out[6]: 0.8194444444444443
 ```
 

@@ -113,7 +113,7 @@ def tutorials(c):
 def lint(c):
     check_dependencies(c)
     c.run('flake8 sdmetrics')
-    c.run('pydocstyle rdt')
+    c.run('pydocstyle sdmetrics')
     c.run('flake8 tests --ignore=D')
     c.run('pydocstyle tests')
     c.run('isort -c --recursive sdmetrics tests')

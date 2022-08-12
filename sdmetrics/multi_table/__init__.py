@@ -6,8 +6,13 @@ from sdmetrics.multi_table.detection.base import DetectionMetric
 from sdmetrics.multi_table.detection.parent_child import (
     LogisticParentChildDetection, ParentChildDetectionMetric, SVCParentChildDetection)
 from sdmetrics.multi_table.multi_single_table import (
-    BNLikelihood, BNLogLikelihood, CSTest, KSTest, KSTestExtended, LogisticDetection,
-    MultiSingleTableMetric, SVCDetection)
+    BNLikelihood, BNLogLikelihood, BoundaryAdherence, CategoryCoverage, ContingencySimilarity,
+    CorrelationSimilarity, CSTest, KSComplement, LogisticDetection, MissingValueSimilarity,
+    MultiSingleTableMetric, StatisticSimilarity, SVCDetection, TVComplement)
+from sdmetrics.multi_table.statistical.cardinality_shape_similarity import (
+    CardinalityShapeSimilarity)
+from sdmetrics.multi_table.statistical.cardinality_statistic_similarity import (
+    CardinalityStatisticSimilarity)
 
 __all__ = [
     'detection',
@@ -20,9 +25,17 @@ __all__ = [
     'BNLikelihood',
     'BNLogLikelihood',
     'CSTest',
-    'KSTest',
-    'KSTestExtended',
+    'KSComplement',
     'LogisticDetection',
     'SVCDetection',
     'MultiSingleTableMetric',
+    'CardinalityShapeSimilarity',
+    'CardinalityStatisticSimilarity',
+    'BoundaryAdherence',
+    'CategoryCoverage',
+    'CorrelationSimilarity',
+    'ContingencySimilarity',
+    'MissingValueSimilarity',
+    'StatisticSimilarity',
+    'TVComplement',
 ]
