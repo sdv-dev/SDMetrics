@@ -1,5 +1,7 @@
 """Correlation Similarity Metric."""
 
+import warnings
+
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr
@@ -7,6 +9,7 @@ from scipy.stats import pearsonr, spearmanr
 from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
 from sdmetrics.utils import is_datetime
+from sdmetrics.warnings import ConstantInputWarning
 
 
 class CorrelationSimilarity(ColumnPairsMetric):
@@ -42,6 +45,18 @@ class CorrelationSimilarity(ColumnPairsMetric):
             dict:
                 A dict containing the score, and the real and synthetic metric values.
         """
+        if not isinstance(real_data, pd.DataFrame):
+            real_data = pd.DataFrame(real_data)
+            synthetic_data = pd.DataFrame(synthetic_data)
+
+        if (real_data.nunique() == 1).any() or (synthetic_data.nunique() == 1).any():
+            msg = (
+                'One or both of the input arrays is constant. '
+                'The CorrelationSimilarity metric is either undefined or infinite.'
+            )
+            warnings.warn(ConstantInputWarning(msg))
+            return {'score': np.nan}
+
         real_data[pd.isna(real_data)] = 0.0
         synthetic_data[pd.isna(synthetic_data)] = 0.0
         column1, column2 = real_data.columns[:2]

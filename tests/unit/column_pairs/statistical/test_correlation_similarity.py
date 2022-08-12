@@ -1,9 +1,11 @@
 from datetime import datetime
 from unittest.mock import Mock, call, patch
 
+import numpy as np
 import pandas as pd
 
 from sdmetrics.column_pairs.statistical import CorrelationSimilarity
+from sdmetrics.warnings import ConstantInputWarning
 from tests.utils import SeriesMatcher
 
 
@@ -91,6 +93,37 @@ class TestCorrelationSimilarity:
             call(SeriesMatcher(real_data['col1']), SeriesMatcher(real_data['col2'])),
             call(SeriesMatcher(synthetic_data['col1']), SeriesMatcher(synthetic_data['col2'])),
         )
+        assert result == expected_score_breakdown
+
+    def test_compute_breakdown_constant_input(self):
+        """Test the ``compute_breakdown`` method with constant input.
+
+        Expect that an invalid score is returned and that a warning is thrown.
+
+        Input:
+        - Mocked real data.
+        - Mocked synthetic data.
+
+        Output:
+        - A mapping of the metric results, containing the score and the real and synthetic results.
+        """
+        # Setup
+        real_data = pd.DataFrame({'col1': [1.0, 1.0, 1.0], 'col2': [2.0, 2.0, 2.0]})
+        synthetic_data = pd.DataFrame({'col1': [0.9, 1.8, 3.1], 'col2': [2, 3, 4]})
+        expected_score_breakdown = {
+            'score': np.nan,
+        }
+        expected_warn_msg = (
+            'One or both of the input arrays is constant. '
+            'The CorrelationSimilarity metric is either undefined or infinte.'
+        )
+
+        # Run
+        metric = CorrelationSimilarity()
+        with np.testing.assert_warns(ConstantInputWarning, match=expected_warn_msg):
+            result = metric.compute_breakdown(real_data, synthetic_data, coefficient='Pearson')
+
+        # Assert
         assert result == expected_score_breakdown
 
     def test_compute(self):

@@ -9,7 +9,7 @@ from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
 from sdmetrics.single_table.multi_column_pairs import (
-    ContingencySimilarity, ContinuousKLDivergence, CorrelationSimilarity, DiscreteKLDivergence)
+    ContingencySimilarity, ContinuousKLDivergence, DiscreteKLDivergence)
 from sdmetrics.single_table.multi_single_column import (
     BoundaryAdherence, CategoryCoverage, CSTest, KSComplement, MissingValueSimilarity,
     StatisticSimilarity, TVComplement)
@@ -29,7 +29,6 @@ METRICS = [
     CategoryCoverage,
     TVComplement,
     ContingencySimilarity,
-    CorrelationSimilarity,
 ]
 
 
