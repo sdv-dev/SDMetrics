@@ -28,7 +28,8 @@ class TVComplement(SingleColumnMetric):
     min_value = 0.0
     max_value = 1.0
 
-    def compute(self, real_data, synthetic_data):
+    @classmethod
+    def compute(cls, real_data, synthetic_data):
         """Compute the complement of the total variation distance of two discrete columns.
 
         Args:

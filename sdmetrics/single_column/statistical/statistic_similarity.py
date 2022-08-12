@@ -1,10 +1,14 @@
 """Statistic Similarity Metric."""
 
+import warnings
+
+import numpy as np
 import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
 from sdmetrics.utils import is_datetime
+from sdmetrics.warnings import ConstantInputWarning
 
 
 class StatisticSimilarity(SingleColumnMetric):
@@ -42,8 +46,8 @@ class StatisticSimilarity(SingleColumnMetric):
         """
         return cls.compute_breakdown(real_data, synthetic_data, statistic)['score']
 
-    @staticmethod
-    def compute_breakdown(real_data, synthetic_data, statistic='mean'):
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data, statistic='mean'):
         """Compare the breakdown of statistic similarity of two continuous columns.
 
         Args:
@@ -58,6 +62,14 @@ class StatisticSimilarity(SingleColumnMetric):
         """
         real_data = pd.Series(real_data).dropna()
         synthetic_data = pd.Series(synthetic_data).dropna()
+
+        if real_data.nunique() == 1:
+            msg = (
+                'The real data input array is constant. '
+                'The StatisticSimilarity metric is either undefined or infinite.'
+            )
+            warnings.warn(ConstantInputWarning(msg))
+            return {'score': np.nan}
 
         if is_datetime(real_data):
             real_data = pd.to_numeric(real_data)

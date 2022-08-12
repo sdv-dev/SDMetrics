@@ -27,7 +27,8 @@ class MissingValueSimilarity(SingleColumnMetric):
     min_value = 0.0
     max_value = 1.0
 
-    def compute_breakdown(self, real_data, synthetic_data):
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data):
         """Compare the missing value similarity of two continuous columns.
 
         Args:
@@ -52,7 +53,8 @@ class MissingValueSimilarity(SingleColumnMetric):
             'synthetic': synthetic_data_value,
         }
 
-    def compute(self, real_data, synthetic_data):
+    @classmethod
+    def compute(cls, real_data, synthetic_data):
         """Compare the missing value similarity of two continuous columns.
 
         Args:
@@ -65,7 +67,7 @@ class MissingValueSimilarity(SingleColumnMetric):
             float:
                 The missing value similarity of the two columns.
         """
-        results = self.compute_breakdown(real_data, synthetic_data)
+        results = cls.compute_breakdown(real_data, synthetic_data)
         return results['score']
 
     @classmethod

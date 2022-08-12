@@ -29,7 +29,8 @@ class BoundaryAdherence(SingleColumnMetric):
     min_value = 0.0
     max_value = 1.0
 
-    def compute(self, real_data, synthetic_data):
+    @classmethod
+    def compute(cls, real_data, synthetic_data):
         """Compute the boundary adherence of two continuous columns.
 
         Args:
