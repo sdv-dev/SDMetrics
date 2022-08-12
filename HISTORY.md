@@ -1,5 +1,39 @@
 # History
 
+## v0.6.0 - 2022-08-12
+
+This release removes SDMetric's dependency on the RDT library, and also introduces new quality and diagnostic metrics. Additionally, we introduce a new `compute_breakdown` method that returns a breakdown of metric results.
+
+### New Features
+* Handle null values correctly - Issue [#194](https://github.com/sdv-dev/SDMetrics/issues/194) by @katxiao
+* Add wrapper classes for new single and multi table metrics - Issue [#169](https://github.com/sdv-dev/SDMetrics/issues/169) by @katxiao
+* Add CorrelationSimilarity metric - Issue [#143](https://github.com/sdv-dev/SDMetrics/issues/143) by @katxiao
+* Add CardinalityShapeSimilarity metric - Issue [#160](https://github.com/sdv-dev/SDMetrics/issues/160) by @katxiao
+* Add CardinalityStatisticSimilarity metric - Issue [#145](https://github.com/sdv-dev/SDMetrics/issues/145) by @katxiao
+* Add ContingencySimilarity Metric - Issue [#159](https://github.com/sdv-dev/SDMetrics/issues/159) by @katxiao
+* Add TVComplement metric - Issue [#142](https://github.com/sdv-dev/SDMetrics/issues/142) by @katxiao
+* Add MissingValueSimilarity metric - Issue [#139](https://github.com/sdv-dev/SDMetrics/issues/139) by @katxiao
+* Add CategoryCoverage metric - Issue [#140](https://github.com/sdv-dev/SDMetrics/issues/140) by @katxiao
+* Add compute breakdown column for single column - Issue [#152](https://github.com/sdv-dev/SDMetrics/issues/152) by @katxiao
+* Add BoundaryAdherence metric - Issue [#138](https://github.com/sdv-dev/SDMetrics/issues/138) by @katxiao
+* Get KSComplement Score Breakdown - Issue [#130](https://github.com/sdv-dev/SDMetrics/issues/130) by @katxiao
+* Add StatisticSimilarity Metric - Issue [#137](https://github.com/sdv-dev/SDMetrics/issues/130) by @katxiao
+* New features for KSTest.compute - Issue [#129](https://github.com/sdv-dev/SDMetrics/issues/129) by @amontanez24
+
+### Internal Improvements
+* Add integration tests and fixes - Issue [#183](https://github.com/sdv-dev/SDMetrics/issues/183) by @katxiao
+* Remove rdt hypertransformer dependency in timeseries metrics - Issue [#176](https://github.com/sdv-dev/SDMetrics/issues/178) by @katxiao
+* Replace rdt LabelEncoder with sklearn - Issue [#178](https://github.com/sdv-dev/SDMetrics/issues/178) by @katxiao
+* Remove rdt as a dependency - Issue [#182](https://github.com/sdv-dev/SDMetrics/issues/182) by @katxiao
+* Use sklearn's OneHotEncoder instead of rdt - Issue [#170](https://github.com/sdv-dev/SDMetrics/issues/170) by @katxiao
+* Remove KSTestExtended - Issue [#180](https://github.com/sdv-dev/SDMetrics/issues/180) by @katxiao
+* Remove TSFClassifierEfficacy and TSFCDetection metrics - Issue [#171](https://github.com/sdv-dev/SDMetrics/issues/171) by @katxiao
+* Update the default tags for a feature request - Issue [#172](https://github.com/sdv-dev/SDMetrics/issues/172) by @katxiao
+* Bump github macos version - Issue [#174](https://github.com/sdv-dev/SDMetrics/issues/174) by @katxiao
+* Fix pydocstyle to check sdmetrics - Issue [#153](https://github.com/sdv-dev/SDMetrics/issues/153) by @pvk-developer
+* Update the RDT version to 1.0 - Issue [#150](https://github.com/sdv-dev/SDMetrics/issues/150) by @pvk-developer
+* Update slack invite link - Issue [#132](https://github.com/sdv-dev/SDMetrics/issues/132) by @pvk-developer
+
 ## v0.5.0 - 2022-05-11
 
 This release fixes an error  where the relational `KSTest` crashes if a table doesn't have numerical columns.
