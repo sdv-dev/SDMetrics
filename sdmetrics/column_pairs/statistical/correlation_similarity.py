@@ -45,6 +45,9 @@ class CorrelationSimilarity(ColumnPairsMetric):
             dict:
                 A dict containing the score, and the real and synthetic metric values.
         """
+        real_data = real_data.copy()
+        synthetic_data = synthetic_data.copy()
+
         if not isinstance(real_data, pd.DataFrame):
             real_data = pd.DataFrame(real_data)
             synthetic_data = pd.DataFrame(synthetic_data)
@@ -57,8 +60,8 @@ class CorrelationSimilarity(ColumnPairsMetric):
             warnings.warn(ConstantInputWarning(msg))
             return {'score': np.nan}
 
-        real_data[pd.isna(real_data)] = 0.0
-        synthetic_data[pd.isna(synthetic_data)] = 0.0
+        real_data = real_data.dropna()
+        synthetic_data = synthetic_data.dropna()
         column1, column2 = real_data.columns[:2]
 
         if is_datetime(real_data):
@@ -76,8 +79,9 @@ class CorrelationSimilarity(ColumnPairsMetric):
 
         correlation_real, _ = correlation_fn(real_data[column1], real_data[column2])
         correlation_synthetic, _ = correlation_fn(synthetic_data[column1], synthetic_data[column2])
-        correlation_real = 0 if np.isnan(correlation_real) else correlation_real
-        correlation_synthetic = 0 if np.isnan(correlation_synthetic) else correlation_synthetic
+
+        if np.isnan(correlation_real) or np.isnan(correlation_synthetic):
+            return {'score': np.nan}
 
         return {
             'score': 1 - abs(correlation_real - correlation_synthetic) / 2,
