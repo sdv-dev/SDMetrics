@@ -12,7 +12,7 @@ from sdmetrics.single_table.multi_column_pairs import (
     ContingencySimilarity, ContinuousKLDivergence, DiscreteKLDivergence)
 from sdmetrics.single_table.multi_single_column import (
     BoundaryAdherence, CategoryCoverage, CSTest, KSComplement, MissingValueSimilarity,
-    StatisticSimilarity, TVComplement)
+    TVComplement)
 
 METRICS = [
     CSTest,
@@ -23,7 +23,6 @@ METRICS = [
     DiscreteKLDivergence,
     BNLikelihood,
     BNLogLikelihood,
-    StatisticSimilarity,
     BoundaryAdherence,
     MissingValueSimilarity,
     CategoryCoverage,

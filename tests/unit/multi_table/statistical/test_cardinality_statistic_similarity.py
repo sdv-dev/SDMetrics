@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from sdmetrics.multi_table.statistical import CardinalityStatisticSimilarity
+from sdmetrics.warnings import ConstantInputWarning
 
 
 class TestCardinalityStatisticSimilarity:
@@ -30,6 +31,38 @@ class TestCardinalityStatisticSimilarity:
 
         # Assert
         assert result == {'real': 2.2, 'synthetic': 2.4, 'score': 0.9500000000000001}
+
+    def test__compute_statistic_constant_input(self):
+        """Test the ``_compute_statistic`` method with constant input.
+
+        Expect that a warning is returned.
+
+        Input:
+        - real distribution
+        - synthetic distribution
+
+        Output:
+        - A metric breakdown, containing 'score'.
+
+        Side Effects:
+        - A ``ConstantInputWarning`` is thrown.
+        """
+        # Setup
+        real_distribution = pd.Series([1, 1, 1, 1])
+        synthetic_distribution = pd.Series([2, 2, 3, 1])
+        expected_warn_msg = (
+            'One or more columns of the real data input is constant. '
+            'The CardinalityStatisticSimilarity metric is either undefined or infinite '
+            'for those columns.'
+        )
+
+        # Run
+        with np.testing.assert_warns(ConstantInputWarning, match=expected_warn_msg):
+            result = CardinalityStatisticSimilarity._compute_statistic(
+                real_distribution, synthetic_distribution, 'mean')
+
+        # Assert
+        assert result == {'score': np.nan}
 
     def test_compute(self):
         """Test the ``compute`` method.

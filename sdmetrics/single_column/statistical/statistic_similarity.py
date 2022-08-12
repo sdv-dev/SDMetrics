@@ -1,10 +1,14 @@
 """Statistic Similarity Metric."""
 
+import warnings
+
+import numpy as np
 import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
 from sdmetrics.utils import is_datetime
+from sdmetrics.warnings import ConstantInputWarning
 
 
 class StatisticSimilarity(SingleColumnMetric):
@@ -59,6 +63,14 @@ class StatisticSimilarity(SingleColumnMetric):
         real_data = pd.Series(real_data).dropna()
         synthetic_data = pd.Series(synthetic_data).dropna()
 
+        if real_data.nunique() == 1:
+            msg = (
+                'The real data input array is constant. '
+                'The StatisticSimilarity metric is either undefined or infinite.'
+            )
+            warnings.warn(ConstantInputWarning(msg))
+            return {'score': np.nan}
+
         if is_datetime(real_data):
             real_data = pd.to_numeric(real_data)
             synthetic_data = pd.to_numeric(synthetic_data)
@@ -76,7 +88,7 @@ class StatisticSimilarity(SingleColumnMetric):
             raise ValueError(f'requested statistic {statistic} is not valid. '
                              'Please choose either mean, std, or median.')
 
-        score = 1 - abs(score_real - score_synthetic) / max((real_data.max() - real_data.min()), 1)
+        score = 1 - abs(score_real - score_synthetic) / (real_data.max() - real_data.min())
         return {'real': score_real, 'synthetic': score_synthetic, 'score': max(score, 0)}
 
     @classmethod

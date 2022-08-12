@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -6,34 +8,6 @@ from sdmetrics.multi_table.statistical import (
     CardinalityShapeSimilarity, CardinalityStatisticSimilarity)
 
 METRICS = [CardinalityShapeSimilarity, CardinalityStatisticSimilarity]
-
-
-def ones():
-    parent = pd.DataFrame({
-        'id': range(10),
-        'a': [1] * 10,
-        'b': [True] * 10,
-    })
-    child = pd.DataFrame({
-        'parent_id': list(range(10)) * 10,
-        'a': [1] * 100,
-        'b': [True] * 100,
-    })
-    return {'parent': parent, 'child': child}
-
-
-def zeros():
-    parent = pd.DataFrame({
-        'id': range(10),
-        'a': [0] * 10,
-        'b': [False] * 10,
-    })
-    child = pd.DataFrame({
-        'parent_id': list(range(10)) * 10,
-        'a': [0] * 100,
-        'b': [False] * 100,
-    })
-    return {'parent': parent, 'child': child}
 
 
 def real_data():
@@ -45,7 +19,7 @@ def real_data():
         'd': [True, True, True, True, True, False] * 10,
     })
     child = pd.DataFrame({
-        'parent_id': list(range(60)) * 10,
+        'parent_id': [random.randint(0, 60) for _ in range(600)],
         'a': np.random.normal(size=600),
         'b': np.random.randint(0, 10, size=600),
         'c': ['a', 'b', 'b', 'c', 'c', 'c'] * 100,
@@ -63,7 +37,7 @@ def good_data():
         'd': [True, True, True, True, True, False] * 10,
     })
     child = pd.DataFrame({
-        'parent_id': list(range(60)) * 10,
+        'parent_id': [random.randint(0, 60) for _ in range(600)],
         'a': np.random.normal(loc=0.01, size=600),
         'b': np.random.randint(1, 11, size=600),
         'c': ['a', 'b', 'b', 'c', 'c', 'c'] * 100,
@@ -81,7 +55,7 @@ def bad_data():
         'd': [True, False, False, False, False, False] * 10,
     })
     child = pd.DataFrame({
-        'parent_id': list(range(60)) * 10,
+        'parent_id': [random.randint(0, 60) for _ in range(600)],
         'a': np.random.normal(loc=5, scale=3, size=600),
         'b': np.random.randint(5, 15, size=600),
         'c': ['a', 'a', 'a', 'a', 'b', 'b'] * 100,

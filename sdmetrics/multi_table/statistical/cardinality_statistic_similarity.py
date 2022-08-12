@@ -1,10 +1,13 @@
 """The CardinalityStatisticSimilarity metric."""
 
+import warnings
+
 import numpy as np
 
 from sdmetrics.goal import Goal
 from sdmetrics.multi_table.base import MultiTableMetric
 from sdmetrics.utils import get_cardinality_distribution
+from sdmetrics.warnings import ConstantInputWarning
 
 
 class CardinalityStatisticSimilarity(MultiTableMetric):
@@ -42,6 +45,16 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
             dict:
                 A score breakdown of the real, synthetic, and comparison scores.
         """
+        if real_distribution.nunique() == 1:
+            msg = (
+                'One or more columns of the real data input is constant. '
+                'The CardinalityStatisticSimilarity metric is either undefined or infinite '
+                'for those columns.'
+            )
+            warnings.warn(ConstantInputWarning(msg))
+
+            return {'score': np.nan}
+
         if statistic == 'mean':
             score_real = real_distribution.mean()
             score_synthetic = synthetic_distribution.mean()
@@ -55,8 +68,8 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
             raise ValueError(f'requested statistic {statistic} is not valid. '
                              'Please choose either mean, std, or median.')
 
-        score = 1 - abs(score_real - score_synthetic) / max(
-            (real_distribution.max() - real_distribution.min()), 1)
+        score = 1 - abs(score_real - score_synthetic) / (
+            real_distribution.max() - real_distribution.min())
 
         return {'real': score_real, 'synthetic': score_synthetic, 'score': max(score, 0)}
 
