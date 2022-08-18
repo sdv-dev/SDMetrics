@@ -2,7 +2,7 @@
 name: Feature request
 about: Request a new feature that you would like to see implemented in SDMetrics
 title: ''
-labels: feature request, pending review
+labels: feature request, new
 assignees: ''
 
 ---
