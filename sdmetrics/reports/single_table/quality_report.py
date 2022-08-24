@@ -1,6 +1,7 @@
 """Single table quality report."""
 
 import itertools
+import pickle
 import sys
 
 import numpy as np
@@ -105,3 +106,28 @@ class QualityReport():
             pandas.DataFrame
                 The score breakdown.
         """
+
+    def save(self, filename):
+        """Save this report instance to the given path using pickle.
+
+        Args:
+            filename (str):
+                File where the report instance will be serialized.
+        """
+        with open(filename, 'wb') as output:
+            pickle.dump(self, output)
+
+    @classmethod
+    def load(cls, filename):
+        """Load a ``QualityReport`` instance from a given path.
+
+        Args:
+            filename (str):
+                File from which to load the instance.
+
+        Returns:
+            QualityReort:
+                The loaded quality report instance.
+        """
+        with open(filename, 'rb') as f:
+            return pickle.load(f)
