@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
+from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
 from sdmetrics.single_table import (
     ContingencySimilarity, CorrelationSimilarity, KSComplement, TVComplement)
 
@@ -31,13 +32,13 @@ class QualityReport():
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
-        out.write(f'Overall Quality Score: {self._overall_quality_score}\n')
+        out.write(f'Overall Quality Score: {self._overall_quality_score}\n\n')
 
         if len(self._property_breakdown) > 0:
-            out.write('Properties:')
+            out.write('Properties:\n')
 
         for prop, score in self._property_breakdown.items():
-            out.write(f'{prop}: {score * 100}%')
+            out.write(f'{prop}: {round(score * 100, 2)}%\n')
 
     def generate(self, real_data, synthetic_data, metadata):
         """Generate report.
@@ -60,7 +61,7 @@ class QualityReport():
         for prop, metrics in self.METRICS.items():
             prop_scores = []
             for metric in metrics:
-                score = np.mean(
+                score = np.nanmean(
                     [
                         breakdown['score'] for _, breakdown
                         in self._metric_results[metric.__name__].items()
@@ -69,6 +70,10 @@ class QualityReport():
                 prop_scores.append(score)
 
             self._property_breakdown[prop] = np.mean(prop_scores)
+
+        # Calculate and store the correlation matrices.
+        self._real_corr = real_data.dropna().corr()
+        self._synth_corr = synthetic_data.dropna().corr()
 
         self._overall_quality_score = np.mean(list(self._property_breakdown.values()))
 
@@ -106,6 +111,21 @@ class QualityReport():
             pandas.DataFrame
                 The score breakdown.
         """
+        if property_name == 'Column Shapes':
+            score_breakdowns = {
+                metric.__name__: self._metric_results[metric.__name__]
+                for metric in self.METRICS['Column Shapes']
+            }
+            fig = get_column_shapes_plot(score_breakdowns)
+
+        elif property_name == 'Column Pairs':
+            score_breakdowns = {
+                metric.__name__: self._metric_results[metric.__name__]
+                for metric in self.METRICS['Column Pair Trends']
+            }
+            fig = get_column_pairs_plot(score_breakdowns, self._real_corr, self._synth_corr)
+
+        fig.show()
 
     def save(self, filename):
         """Save this report instance to the given path using pickle.

@@ -97,6 +97,38 @@ class MultiColumnPairsMetric(
         return cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
 
     @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data, metadata=None, **kwargs):
+        """Compute the breakdown of this metric.
+
+        Args:
+            real_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the real dataset.
+            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the column pairs metric
+
+        Returns:
+            dict:
+                Metric output.
+        """
+        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
+
+        fields = cls._select_fields(metadata, cls.field_types)
+
+        breakdown = {}
+        for columns in combinations(fields, r=2):
+            real = real_data[list(columns)]
+            synthetic = synthetic_data[list(columns)]
+            breakdown[columns] = cls.column_pairs_metric.compute_breakdown(
+                real, synthetic, **kwargs)
+
+        return breakdown
+
+    @classmethod
     def normalize(cls, raw_score):
         """Return the `raw_score` as is, since it is already normalized.
 
