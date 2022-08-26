@@ -19,6 +19,7 @@ install_requires = [
     'scipy>=1.5.4,<2',
     'torch>=1.8.0,<2',
     'copulas>=0.7.0,<0.8',
+    'tqdm>=4.15,<5',
 ]
 
 pomegranate_requires = [
