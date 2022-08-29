@@ -1,4 +1,5 @@
-from unittest.mock import Mock, patch
+import pickle
+from unittest.mock import Mock, mock_open, patch
 
 import pandas as pd
 
@@ -148,3 +149,53 @@ class TestQualityReport:
                 'Score': [0.1, 0.2],
             }),
         )
+
+    @patch('sdmetrics.reports.single_table.quality_report.pickle')
+    def test_save(self, pickle_mock):
+        """Test the ``save`` method.
+
+        Expect that the instance is passed to pickle.
+
+        Input:
+        - filename
+
+        Side Effects:
+        - ``pickle`` is called with the instance.
+        """
+        # Setup
+        report = Mock()
+        open_mock = mock_open(read_data=pickle.dumps('test'))
+
+        # Run
+        with patch('sdmetrics.reports.single_table.quality_report.open', open_mock):
+            QualityReport.save(report, 'test-file.pkl')
+
+        # Assert
+        open_mock.assert_called_once_with('test-file.pkl', 'wb')
+        pickle_mock.dump.assert_called_once_with(report, open_mock())
+
+    @patch('sdmetrics.reports.single_table.quality_report.pickle')
+    def test_load(self, pickle_mock):
+        """Test the ``load`` method.
+
+        Expect that the report's load method is called with the expected args.
+
+        Input:
+        - filename
+
+        Output:
+        - the loaded model
+
+        Side Effects:
+        - Expect that ``pickle`` is called with the filename.
+        """
+        # Setup
+        open_mock = mock_open(read_data=pickle.dumps('test'))
+
+        # Run
+        with patch('sdmetrics.reports.single_table.quality_report.open', open_mock):
+            loaded = QualityReport.load('test-file.pkl')
+
+        # Assert
+        open_mock.assert_called_once_with('test-file.pkl', 'rb')
+        assert loaded == pickle_mock.load.return_value
