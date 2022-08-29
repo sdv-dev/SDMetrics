@@ -19,8 +19,8 @@ def plot_column(real_column, synthetic_column, sdtype):
             The data type of the column.
     """
     column_name = real_column.name
-    missing_data_real = round((real_column.is_na().sum() / len(real_column)) * 100, 2)
-    missing_data_synthetic = round((synthetic_column.is_na().sum() / len(synthetic_column)), 2)
+    missing_data_real = round((real_column.isna().sum() / len(real_column)) * 100, 2)
+    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)), 2)
 
     real_data = real_column.dropna()
     synthetic_data = synthetic_column.dropna()
