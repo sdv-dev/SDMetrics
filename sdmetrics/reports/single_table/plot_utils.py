@@ -87,7 +87,9 @@ def _get_similarity_correlation_matrix(score_breakdowns, real_correlation):
     similarity_correlation = pd.DataFrame(
         index=real_correlation.index,
         columns=real_correlation.columns,
+        dtype='float',
     )
+    np.fill_diagonal(similarity_correlation.to_numpy(), 1.0)
 
     for metric, score_breakdown in score_breakdowns.items():
         for column_pair, result in score_breakdown.items():

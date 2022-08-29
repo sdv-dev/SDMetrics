@@ -29,6 +29,8 @@ class QualityReport():
         self._overall_quality_score = None
         self._metric_results = {}
         self._property_breakdown = {}
+        self._real_corr = None
+        self._synth_corr = None
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
