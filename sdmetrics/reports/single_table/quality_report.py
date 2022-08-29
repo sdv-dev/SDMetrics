@@ -12,14 +12,31 @@ from sdmetrics.single_table import (
 
 
 class QualityReport():
-    """Single table quality report."""
+    """Single table quality report.
+
+    This class creates a quality report for single-table data. It calculates the quality
+    score along two properties - Column Shapes and Column Pair Trends.
+    """
 
     METRICS = {
         'Column Shapes': [KSComplement, TVComplement],
         'Column Pair Trends': [CorrelationSimilarity, ContingencySimilarity],
     }
 
-    _metric_results = {}
+    def __init__(self):
+        self._overall_quality_score = None
+        self._metric_results = {}
+        self._property_breakdown = {}
+
+    def _print_results(self, out=sys.stdout):
+        """Print the quality report results."""
+        out.write(f'Overall Quality Score: {self._overall_quality_score}\n')
+
+        if len(self._property_breakdown) > 0:
+            out.write('Properties:')
+
+        for prop, score in self._property_breakdown.items():
+            out.write(f'{prop}: {score * 100}%')
 
     def generate(self, real_data, synthetic_data, metadata):
         """Generate report.
@@ -55,16 +72,6 @@ class QualityReport():
         self._overall_quality_score = np.mean(list(self._property_breakdown.values()))
 
         self._print_results()
-
-    def _print_results(self, out=sys.stdout):
-        """Print the quality report results."""
-        out.write(f'Overall Quality Score: {self._overall_quality_score}\n')
-
-        if len(self._property_breakdown) > 0:
-            out.write('Properties:')
-
-        for prop, score in self._property_breakdown.items():
-            out.write(f'{prop}: {score * 100}%')
 
     def get_score(self):
         """Return the overall quality score.

@@ -7,6 +7,19 @@ from sdmetrics.reports.single_table import QualityReport
 
 class TestQualityReport:
 
+    def test___init__(self):
+        """Test the ``__init__`` method.
+
+        Expect that the correct attributes are initialized.
+        """
+        # Run
+        report = QualityReport()
+
+        # Assert
+        assert report._overall_quality_score is None
+        assert report._metric_results == {}
+        assert report._property_breakdown == {}
+
     def test_generate(self):
         """Test the ``generate`` method.
 
