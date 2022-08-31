@@ -201,8 +201,8 @@ class TestQualityReport:
         assert loaded == pickle_mock.load.return_value
 
     @patch('sdmetrics.reports.single_table.quality_report.get_column_shapes_plot')
-    def test_get_details_column_shapes(self, get_plot_mock):
-        """Test the ``get_details`` method with Column Shapes.
+    def test_show_details_column_shapes(self, get_plot_mock):
+        """Test the ``show_details`` method with Column Shapes.
 
         Input:
         - property='Column Shapes'
@@ -216,7 +216,7 @@ class TestQualityReport:
         report._metric_results['TVComplement'] = {'score': 'tv_complement_score'}
 
         # Run
-        report.get_details('Column Shapes')
+        report.show_details('Column Shapes')
 
         # Assert
         get_plot_mock.assert_called_once_with({
@@ -225,8 +225,8 @@ class TestQualityReport:
         })
 
     @patch('sdmetrics.reports.single_table.quality_report.get_column_pairs_plot')
-    def test_get_details_column_pairs(self, get_plot_mock):
-        """Test the ``get_details`` method with Column Pairs.
+    def test_show_details_column_pairs(self, get_plot_mock):
+        """Test the ``show_details`` method with Column Pairs.
 
         Input:
         - property='Column Pairs'
@@ -244,7 +244,7 @@ class TestQualityReport:
         report._synth_corr = mock_synth_corr
 
         # Run
-        report.get_details('Column Pairs')
+        report.show_details('Column Pairs')
 
         # Assert
         get_plot_mock.assert_called_once_with({

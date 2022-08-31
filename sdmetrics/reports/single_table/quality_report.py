@@ -102,16 +102,12 @@ class QualityReport():
             'Score': self._property_breakdown.values(),
         })
 
-    def get_details(self, property_name):
-        """Return the details for each score for the given property name.
+    def show_details(self, property_name):
+        """Display a visualization for each score for the given property name.
 
         Args:
             property_name (str):
                 The name of the property to return score details for.
-
-        Returns:
-            pandas.DataFrame
-                The score breakdown.
         """
         if property_name == 'Column Shapes':
             score_breakdowns = {
