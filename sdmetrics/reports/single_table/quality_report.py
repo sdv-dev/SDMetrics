@@ -125,6 +125,47 @@ class QualityReport():
 
         fig.show()
 
+    def get_details(self, property_name):
+        """Return the details for each score for the given property name.
+
+        Args:
+            property_name (str):
+                The name of the property to return score details for.
+
+        Returns:
+            pandas.DataFrame
+                The score breakdown.
+        """
+        columns = []
+        metrics = []
+        scores = []
+
+        for metric in self.METRICS[property_name]:
+            for column, score_breakdown in self._metric_results[metric.__name__].items():
+                columns.append(column)
+                metrics.append(metric.__name__)
+                scores.append(score_breakdown['score'])
+
+        return pd.DataFrame({'Column': columns, 'Metric': metrics, 'Quality Score': scores})
+
+    def get_raw_result(self, metric_name):
+        """Return the raw result of the given metric name.
+
+        Args:
+            metric_name (str):
+                The name of the desired metric.
+
+        Returns:
+            dict
+                The raw results
+        """
+        for metric, score_breakdowns in self._metric_results.items():
+            if metric == metric_name:
+                return {
+                    'metric': metric_name,
+                    'results': score_breakdowns,
+                }
+
     def save(self, filename):
         """Save this report instance to the given path using pickle.
 

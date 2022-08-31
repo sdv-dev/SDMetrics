@@ -251,3 +251,72 @@ class TestQualityReport:
             'CorrelationSimilarity': {'score': 'test_score_1'},
             'ContingencySimilarity': {'score': 'test_score_2'},
         }, mock_real_corr, mock_synth_corr)
+
+    def test_get_details(self):
+        """Test the ``get_details`` method.
+
+        Expect that the details of the desired property is returned.
+
+        Input:
+        - property name
+
+        Output:
+        - score details for the desired property
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results = {
+            'KSComplement': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            },
+            'TVComplement': {
+                'col1': {'score': 0.3},
+                'col2': {'score': 0.4},
+            }
+        }
+
+        # Run
+        out = report.get_details('Column Shapes')
+
+        # Assert
+        pd.testing.assert_frame_equal(
+            out,
+            pd.DataFrame({
+                'Column': ['col1', 'col2', 'col1', 'col2'],
+                'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
+                'Quality Score': [0.1, 0.2, 0.3, 0.4],
+            })
+        )
+
+    def test_get_raw_result(self):
+        """Test the ``get_raw_result`` method.
+
+        Expect that the raw result of the desired metric is returned.
+
+        Input:
+        - metric name
+
+        Output:
+        - Metric details
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results = {
+            'KSComplement': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            },
+        }
+
+        # Run
+        out = report.get_raw_result('KSComplement')
+
+        # Assert
+        assert out == {
+            'metric': 'KSComplement',
+            'results': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            }
+        }
