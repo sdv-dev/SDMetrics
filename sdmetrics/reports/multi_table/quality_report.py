@@ -65,8 +65,9 @@ class QualityReport():
             for metric in metrics:
                 score = np.mean(
                     [
-                        breakdown['score'] for _, breakdown
+                        breakdown['score'] for _, table_breakdowns
                         in self._metric_results[metric.__name__].items()
+                        for _, breakdown in table_breakdowns.items()
                     ]
                 )
                 prop_scores.append(score)
