@@ -20,6 +20,7 @@ install_requires = [
     'torch>=1.8.0,<2',
     'copulas>=0.7.0,<0.8',
     'tqdm>=4.15,<5',
+    'plotly>=5.10.0,<6',
 ]
 
 pomegranate_requires = [

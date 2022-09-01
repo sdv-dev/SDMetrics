@@ -199,3 +199,55 @@ class TestQualityReport:
         # Assert
         open_mock.assert_called_once_with('test-file.pkl', 'rb')
         assert loaded == pickle_mock.load.return_value
+
+    @patch('sdmetrics.reports.single_table.quality_report.get_column_shapes_plot')
+    def test_show_details_column_shapes(self, get_plot_mock):
+        """Test the ``show_details`` method with Column Shapes.
+
+        Input:
+        - property='Column Shapes'
+
+        Side Effects:
+        - get_column_shapes_plot is called with the expected score breakdowns.
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results['KSComplement'] = {'score': 'ks_complement_score'}
+        report._metric_results['TVComplement'] = {'score': 'tv_complement_score'}
+
+        # Run
+        report.show_details('Column Shapes')
+
+        # Assert
+        get_plot_mock.assert_called_once_with({
+            'KSComplement': {'score': 'ks_complement_score'},
+            'TVComplement': {'score': 'tv_complement_score'},
+        })
+
+    @patch('sdmetrics.reports.single_table.quality_report.get_column_pairs_plot')
+    def test_show_details_column_pairs(self, get_plot_mock):
+        """Test the ``show_details`` method with Column Pairs.
+
+        Input:
+        - property='Column Pairs'
+
+        Side Effects:
+        - get_column_pairs_plot is called with the expected score breakdowns.
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results['CorrelationSimilarity'] = {'score': 'test_score_1'}
+        report._metric_results['ContingencySimilarity'] = {'score': 'test_score_2'}
+        mock_real_corr = Mock()
+        report._real_corr = mock_real_corr
+        mock_synth_corr = Mock()
+        report._synth_corr = mock_synth_corr
+
+        # Run
+        report.show_details('Column Pairs')
+
+        # Assert
+        get_plot_mock.assert_called_once_with({
+            'CorrelationSimilarity': {'score': 'test_score_1'},
+            'ContingencySimilarity': {'score': 'test_score_2'},
+        }, mock_real_corr, mock_synth_corr)
