@@ -314,7 +314,7 @@ class TestQualityReport:
 
         # Assert
         assert out == {
-            'metric': 'KSComplement',
+            'metric': 'sdmetrics.single_table.multi_single_column.KSComplement',
             'results': {
                 'col1': {'score': 0.1},
                 'col2': {'score': 0.2},

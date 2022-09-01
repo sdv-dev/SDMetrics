@@ -159,11 +159,12 @@ class QualityReport():
             dict
                 The raw results
         """
-        for metric, score_breakdowns in self._metric_results.items():
-            if metric == metric_name:
+        metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
+        for metric in metrics:
+            if metric.__name__ == metric_name:
                 return {
-                    'metric': metric_name,
-                    'results': score_breakdowns,
+                    'metric': f'{metric.__module__}.{metric.__name__}',
+                    'results': self._metric_results[metric_name],
                 }
 
     def save(self, filename):
