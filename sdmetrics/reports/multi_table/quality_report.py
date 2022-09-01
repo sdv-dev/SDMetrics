@@ -37,10 +37,10 @@ class QualityReport():
         out.write(f'Overall Quality Score: {self._overall_quality_score}\n')
 
         if len(self._property_breakdown) > 0:
-            out.write('Properties:')
+            out.write('Properties:\n')
 
         for prop, score in self._property_breakdown.items():
-            out.write(f'{prop}: {score * 100}%')
+            out.write(f'{prop}: {round(score * 100, 2)}%\n')
 
     def generate(self, real_data, synthetic_data, metadata):
         """Generate report.
@@ -57,20 +57,30 @@ class QualityReport():
 
         for metric in tqdm.tqdm(metrics, desc='Creating report:'):
             self._metric_results[metric.__name__] = metric.compute_breakdown(
-                real_data, synthetic_data)
+                real_data, synthetic_data, metadata)
 
         self._property_breakdown = {}
         for prop, metrics in self.METRICS.items():
             prop_scores = []
-            for metric in metrics:
-                score = np.mean(
-                    [
-                        breakdown['score'] for _, table_breakdowns
-                        in self._metric_results[metric.__name__].items()
-                        for _, breakdown in table_breakdowns.items()
-                    ]
-                )
-                prop_scores.append(score)
+            if prop == 'Parent Child Relationships':
+                for metric in metrics:
+                    score = np.nanmean(
+                        [
+                            table_breakdown['score'] for _, table_breakdown
+                            in self._metric_results['CardinalityShapeSimilarity'].items()
+                        ]
+                    )
+                    prop_scores.append(score)
+            else:
+                for metric in metrics:
+                    score = np.nanmean(
+                        [
+                            breakdown['score'] for _, table_breakdowns
+                            in self._metric_results[metric.__name__].items()
+                            for _, breakdown in table_breakdowns.items()
+                        ]
+                    )
+                    prop_scores.append(score)
 
             self._property_breakdown[prop] = np.mean(prop_scores)
 
