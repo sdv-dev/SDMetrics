@@ -11,6 +11,8 @@ import tqdm
 from sdmetrics.multi_table import (
     CardinalityShapeSimilarity, ContingencySimilarity, CorrelationSimilarity, KSComplement,
     TVComplement)
+from sdmetrics.reports.multi_table.plot_utils import get_table_relationships_plot
+from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
 
 
 class QualityReport():
@@ -108,6 +110,38 @@ class QualityReport():
             'Property': self._property_breakdown.keys(),
             'Score': self._property_breakdown.values(),
         })
+
+    def show_details(self, property_name, table_name):
+        """Display a visualization for each score for the given property and table.
+
+        Args:
+            property_name (str):
+                The name of the property to return score details for.
+            table_name (str):
+                The table to show scores for.
+        """
+        if property_name == 'Column Shapes':
+            score_breakdowns = {
+                metric.__name__: self._metric_results[metric.__name__].get(table_name, {})
+                for metric in self.METRICS.get(property_name, [])
+            }
+            fig = get_column_shapes_plot(score_breakdowns)
+
+        elif property_name == 'Column Pair Trends':
+            score_breakdowns = {
+                metric.__name__: self._metric_results[metric.__name__].get(table_name, {})
+                for metric in self.METRICS.get(property_name, [])
+            }
+            fig = get_column_pairs_plot(score_breakdowns, self._real_corr, self._synth_corr)
+
+        elif property_name == 'Parent Child Relationships':
+            score_breakdowns = {
+                metric.__name__: self._metric_results[metric.__name__]
+                for metric in self.METRICS.get(property_name, [])
+            }
+            fig = get_table_relationships_plot(score_breakdowns)
+
+        fig.show()
 
     def get_details(self, property_name):
         """Return the details for each score for the given property name.

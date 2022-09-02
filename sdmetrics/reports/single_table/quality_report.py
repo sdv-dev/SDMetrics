@@ -109,18 +109,15 @@ class QualityReport():
             property_name (str):
                 The name of the property to return score details for.
         """
+        score_breakdowns = {
+            metric.__name__: self._metric_results[metric.__name__]
+            for metric in self.METRICS.get(property_name, [])
+        }
+
         if property_name == 'Column Shapes':
-            score_breakdowns = {
-                metric.__name__: self._metric_results[metric.__name__]
-                for metric in self.METRICS['Column Shapes']
-            }
             fig = get_column_shapes_plot(score_breakdowns)
 
-        elif property_name == 'Column Pairs':
-            score_breakdowns = {
-                metric.__name__: self._metric_results[metric.__name__]
-                for metric in self.METRICS['Column Pair Trends']
-            }
+        elif property_name == 'Column Pair Trends':
             fig = get_column_pairs_plot(score_breakdowns, self._real_corr, self._synth_corr)
 
         fig.show()
