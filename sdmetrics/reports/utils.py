@@ -18,7 +18,7 @@ def plot_column(real_column, synthetic_column, sdtype):
         sdtype (str):
             The data type of the column.
     """
-    column_name = real_column.name
+    column_name = real_column.name if hasattr(real_column, 'name') else ''
     missing_data_real = round((real_column.isna().sum() / len(real_column)) * 100, 2)
     missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)), 2)
 
@@ -26,8 +26,8 @@ def plot_column(real_column, synthetic_column, sdtype):
     synthetic_data = synthetic_column.dropna()
 
     if sdtype == 'datetime':
-        real_data = real_data.view(int)
-        synthetic_data = synthetic_data.view(int)
+        real_data = real_data.astype('int64')
+        synthetic_data = synthetic_data.astype('int64')
 
     fig = ff.create_distplot(
         [real_data, synthetic_data],

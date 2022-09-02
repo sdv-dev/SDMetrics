@@ -90,7 +90,10 @@ def test_plot_column_datetime(ff_mock):
 
     # Assert
     ff_mock.create_distplot.assert_called_once_with(
-        [SeriesMatcher(real_column.view(int)), SeriesMatcher(synthetic_column.view(int))],
+        [
+            SeriesMatcher(real_column.astype('int64')),
+            SeriesMatcher(synthetic_column.astype('int64')),
+        ],
         ['Real', 'Synthetic'],
         show_hist=False,
         show_rug=False,
