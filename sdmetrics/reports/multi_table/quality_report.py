@@ -111,15 +111,20 @@ class QualityReport():
             'Score': self._property_breakdown.values(),
         })
 
-    def show_details(self, property_name, table_name):
+    def show_details(self, property_name, table_name=None):
         """Display a visualization for each score for the given property and table.
 
         Args:
             property_name (str):
                 The name of the property to return score details for.
             table_name (str):
-                The table to show scores for.
+                The table to show scores for. Must be provided for 'Column Shapes'
+                and 'Column Pair Trends'
         """
+        if property_name in ['Column Shapes', 'Column Pair Trends'] and table_name is None:
+            raise ValueError('Table name must be provided when viewing details for '
+                             f'property {property_name}.')
+
         if property_name == 'Column Shapes':
             score_breakdowns = {
                 metric.__name__: self._metric_results[metric.__name__].get(table_name, {})

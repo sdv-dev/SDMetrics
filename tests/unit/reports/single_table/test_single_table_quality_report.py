@@ -229,7 +229,7 @@ class TestQualityReport:
         """Test the ``show_details`` method with Column Pairs.
 
         Input:
-        - property='Column Pairs'
+        - property='Column Pair Trends'
 
         Side Effects:
         - get_column_pairs_plot is called with the expected score breakdowns.
@@ -244,7 +244,7 @@ class TestQualityReport:
         report._synth_corr = mock_synth_corr
 
         # Run
-        report.show_details('Column Pairs')
+        report.show_details('Column Pair Trends')
 
         # Assert
         get_plot_mock.assert_called_once_with({

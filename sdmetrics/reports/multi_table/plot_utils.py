@@ -34,7 +34,7 @@ def _get_table_relationships_data(score_breakdowns):
 
 
 def get_table_relationships_plot(score_breakdowns):
-    """Get the table relationships plot from the parent child relationship scores.
+    """Get the table relationships plot from the parent child relationship scores for a table.
 
     Args:
         score_breakdowns (dict):
