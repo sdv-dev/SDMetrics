@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
+BAR_COLOR = '#000036'
+BACKGROUND_COLOR = '#F5F5F8'
+
 
 def _get_table_relationships_data(score_breakdowns):
     """Convert the score breakdowns into the desired table relationships data format.
@@ -52,7 +55,7 @@ def get_table_relationships_plot(score_breakdowns):
         y='Quality Score',
         title=f'Column Shapes Similarity (Average={average_score})',
         color='Metric',
-        color_discrete_sequence=['#000036'],
+        color_discrete_sequence=[BAR_COLOR],
         hover_name='Child → Parent Relationship',
         hover_data={
             'Child → Parent Relationship': False,
@@ -65,7 +68,7 @@ def get_table_relationships_plot(score_breakdowns):
 
     fig.update_layout(
         xaxis_categoryorder='total ascending',
-        plot_bgcolor='#F5F5F8',
+        plot_bgcolor=BACKGROUND_COLOR,
     )
 
     return fig
