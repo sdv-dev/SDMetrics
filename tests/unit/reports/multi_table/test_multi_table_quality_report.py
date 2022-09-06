@@ -344,7 +344,7 @@ class TestQualityReport:
                 ('table3', 'table2'): {'score': 'test_score_2'},
             },
         })
-    
+
     def test_get_details_column_shapes(self):
         """Test the ``get_details`` method with column shapes.
 
@@ -438,6 +438,40 @@ class TestQualityReport:
                 'Quality Score': [0.1, 0.2, 0.3, 0.4],
                 'Real Score': [0.1, 0.2, 0.3, 0.4],
                 'Synthetic Score': [0.1, 0.2, 0.3, 0.4],
+            })
+        )
+
+    def test_get_details_parent_child_relationships(self):
+        """Test the ``get_details`` method with parent child relationships.
+
+        Expect that the details of the desired property is returned.
+
+        Input:
+        - property name
+
+        Output:
+        - score details for the desired property
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results = {
+            'CardinalityShapeSimilarity': {
+                ('table1', 'table2'): {'score': 0.1},
+                ('table1', 'table3'): {'score': 0.2},
+            },
+        }
+
+        # Run
+        out = report.get_details('Parent Child Relationships')
+
+        # Assert
+        pd.testing.assert_frame_equal(
+            out,
+            pd.DataFrame({
+                'Child Table': ['table2', 'table3'],
+                'Parent Table': ['table1', 'table1'],
+                'Metric': ['CardinalityShapeSimilarity', 'CardinalityShapeSimilarity'],
+                'Quality Score': [0.1, 0.2],
             })
         )
 

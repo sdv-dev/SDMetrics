@@ -213,9 +213,9 @@ class QualityReport():
         elif property_name == 'Parent Child Relationships':
             child_tables = []
             for metric in self.METRICS[property_name]:
-                for tables, score_breakdown in self._metric_results[metric.__name__].items():
-                    tables.append(tables[0])
-                    child_tables.append(tables[1])
+                for table_pair, score_breakdown in self._metric_results[metric.__name__].items():
+                    tables.append(table_pair[0])
+                    child_tables.append(table_pair[1])
                     metrics.append(metric.__name__)
                     scores.append(score_breakdown['score'])
 
