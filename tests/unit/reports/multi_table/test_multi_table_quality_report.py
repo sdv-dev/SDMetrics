@@ -344,3 +344,135 @@ class TestQualityReport:
                 ('table3', 'table2'): {'score': 'test_score_2'},
             },
         })
+    
+    def test_get_details_column_shapes(self):
+        """Test the ``get_details`` method with column shapes.
+
+        Expect that the details of the desired property is returned.
+
+        Input:
+        - property name
+
+        Output:
+        - score details for the desired property
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results = {
+            'KSComplement': {
+                'table1': {
+                    'col1': {'score': 0.1},
+                    'col2': {'score': 0.2},
+                },
+            },
+            'TVComplement': {
+                'table1': {
+                    'col1': {'score': 0.3},
+                    'col2': {'score': 0.4},
+                },
+            }
+        }
+
+        # Run
+        out = report.get_details('Column Shapes')
+
+        # Assert
+        pd.testing.assert_frame_equal(
+            out,
+            pd.DataFrame({
+                'Table Name': ['table1', 'table1', 'table1', 'table1'],
+                'Column': ['col1', 'col2', 'col1', 'col2'],
+                'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
+                'Quality Score': [0.1, 0.2, 0.3, 0.4],
+            })
+        )
+
+    def test_get_details_column_pair_trends(self):
+        """Test the ``get_details`` method with column pair trends.
+
+        Expect that the details of the desired property is returned.
+
+        Input:
+        - property name
+
+        Output:
+        - score details for the desired property
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results = {
+            'CorrelationSimilarity': {
+                'table1': {
+                    ('col1', 'col3'): {'score': 0.1, 'real': 0.1, 'synthetic': 0.1},
+                    ('col2', 'col4'): {'score': 0.2, 'real': 0.2, 'synthetic': 0.2},
+                },
+            },
+            'ContingencySimilarity': {
+                'table1': {
+                    ('col1', 'col3'): {'score': 0.3, 'real': 0.3, 'synthetic': 0.3},
+                    ('col2', 'col4'): {'score': 0.4, 'real': 0.4, 'synthetic': 0.4},
+                },
+            }
+        }
+
+        # Run
+        out = report.get_details('Column Pair Trends')
+
+        # Assert
+        pd.testing.assert_frame_equal(
+            out,
+            pd.DataFrame({
+                'Table Name': ['table1', 'table1', 'table1', 'table1'],
+                'Columns': [
+                    ('col1', 'col3'),
+                    ('col2', 'col4'),
+                    ('col1', 'col3'),
+                    ('col2', 'col4'),
+                ],
+                'Metric': [
+                    'CorrelationSimilarity',
+                    'CorrelationSimilarity',
+                    'ContingencySimilarity',
+                    'ContingencySimilarity',
+                ],
+                'Quality Score': [0.1, 0.2, 0.3, 0.4],
+                'Real Score': [0.1, 0.2, 0.3, 0.4],
+                'Synthetic Score': [0.1, 0.2, 0.3, 0.4],
+            })
+        )
+
+    def test_get_raw_result(self):
+        """Test the ``get_raw_result`` method.
+
+        Expect that the raw result of the desired metric is returned.
+
+        Input:
+        - metric name
+
+        Output:
+        - Metric details
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results = {
+            'KSComplement': {
+                'table1': {
+                    'col1': {'score': 0.1},
+                    'col2': {'score': 0.2},
+                },
+            },
+        }
+
+        # Run
+        out = report.get_raw_result('KSComplement')
+
+        # Assert
+        assert out == {
+            'metric': 'sdmetrics.multi_table.multi_single_table.KSComplement',
+            'results': {
+                'table1': {
+                    'col1': {'score': 0.1},
+                    'col2': {'score': 0.2},
+                }
+            }
+        }

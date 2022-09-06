@@ -194,6 +194,7 @@ class QualityReport():
                         continue
 
                     for column_pair, score_breakdown in table_breakdown.items():
+                        tables.append(table)
                         columns.append(column_pair)
                         metrics.append(metric.__name__)
                         scores.append(score_breakdown['score'])
