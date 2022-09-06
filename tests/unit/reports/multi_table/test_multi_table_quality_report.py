@@ -2,6 +2,7 @@ import pickle
 from unittest.mock import Mock, mock_open, patch
 
 import pandas as pd
+import pytest
 
 from sdmetrics.reports.multi_table import QualityReport
 
@@ -228,3 +229,118 @@ class TestQualityReport:
         # Assert
         open_mock.assert_called_once_with('test-file.pkl', 'rb')
         assert loaded == pickle_mock.load.return_value
+
+    @patch('sdmetrics.reports.multi_table.quality_report.get_column_shapes_plot')
+    def test_show_details_column_shapes(self, get_plot_mock):
+        """Test the ``show_details`` method with Column Shapes.
+
+        Input:
+        - property='Column Shapes'
+
+        Side Effects:
+        - get_column_shapes_plot is called with the expected score breakdowns.
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results['KSComplement'] = {
+            'table1': {'col1': {'score': 'ks_complement_score'}},
+            'table2': {'col3': {'score': 'other_score'}},
+        }
+        report._metric_results['TVComplement'] = {
+            'table1': {'col2': {'score': 'tv_complement_score'}},
+            'table2': {'col4': {'score': 'other_score'}},
+        }
+
+        # Run
+        report.show_details('Column Shapes', table_name='table1')
+
+        # Assert
+        get_plot_mock.assert_called_once_with({
+            'KSComplement': {'col1': {'score': 'ks_complement_score'}},
+            'TVComplement': {'col2': {'score': 'tv_complement_score'}},
+        })
+
+    def test_show_details_column_shapes_no_table_name(self):
+        """Test the ``show_details`` method with Column Shapes and no table name.
+
+        Expect that a ``ValueError`` is thrown.
+
+        Input:
+        - property='Column Shapes'
+        - no table_name
+
+        Side Effects:
+        - a ``ValueError`` is thrown.
+        """
+        # Setup
+        report = QualityReport()
+
+        # Run and assert
+        with pytest.raises(
+            ValueError,
+            match='Table name must be provided when viewing details for property Column Shapes',
+        ):
+            report.show_details('Column Shapes')
+
+    @patch('sdmetrics.reports.multi_table.quality_report.get_column_pairs_plot')
+    def test_show_details_column_pairs(self, get_plot_mock):
+        """Test the ``show_details`` method with Column Pairs.
+
+        Input:
+        - property='Column Pairs'
+
+        Side Effects:
+        - get_column_pairs_plot is called with the expected score breakdowns.
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results['CorrelationSimilarity'] = {
+            'table1': {('col1', 'col2'): {'score': 'test_score_1'}},
+            'table2': {('col3', 'col4'): {'score': 'other_score'}},
+        }
+        report._metric_results['ContingencySimilarity'] = {
+            'table1': {('col5', 'col6'): {'score': 'test_score_2'}},
+            'table2': {('col7', 'col8'): {'score': 'other_score'}},
+        }
+
+        mock_real_corr = Mock()
+        report._real_corr = mock_real_corr
+        mock_synth_corr = Mock()
+        report._synth_corr = mock_synth_corr
+
+        # Run
+        report.show_details('Column Pair Trends', table_name='table1')
+
+        # Assert
+        get_plot_mock.assert_called_once_with({
+            'CorrelationSimilarity': {('col1', 'col2'): {'score': 'test_score_1'}},
+            'ContingencySimilarity': {('col5', 'col6'): {'score': 'test_score_2'}},
+        }, mock_real_corr, mock_synth_corr)
+
+    @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
+    def test_show_details_table_relationships(self, get_plot_mock):
+        """Test the ``show_details`` method with Parent Child Relationships.
+
+        Input:
+        - property='Parent Child Relationships'
+
+        Side Effects:
+        - get_parent_child_relationships_plot is called with the expected score breakdowns.
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results['CardinalityShapeSimilarity'] = {
+            ('table1', 'table2'): {'score': 'test_score_1'},
+            ('table3', 'table2'): {'score': 'test_score_2'},
+        }
+
+        # Run
+        report.show_details('Parent Child Relationships')
+
+        # Assert
+        get_plot_mock.assert_called_once_with({
+            'CardinalityShapeSimilarity': {
+                ('table1', 'table2'): {'score': 'test_score_1'},
+                ('table3', 'table2'): {'score': 'test_score_2'},
+            },
+        })
