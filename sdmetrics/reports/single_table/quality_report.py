@@ -12,6 +12,7 @@ import tqdm
 from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
 from sdmetrics.single_table import (
     ContingencySimilarity, CorrelationSimilarity, KSComplement, TVComplement)
+from sdmetrics.utils import is_datetime
 
 
 class QualityReport():
@@ -43,8 +44,11 @@ class QualityReport():
         for prop, score in self._property_breakdown.items():
             out.write(f'{prop}: {round(score * 100, 2)}%\n')
 
-    def _create_binned_data(self, real_data, synthetic_data, metadata):
-        """Create a copy of the real and synthetic data with binned categorical fields.
+    def _discretize_data(self, real_data, synthetic_data, metadata):
+        """Create a copy of the real and synthetic data with discretized data.
+
+        Convert numerical and datetime columns to discrete values, and label them
+        as categorical.
 
         Args:
             real_data (pandas.DataFrame):
@@ -63,14 +67,20 @@ class QualityReport():
         binned_metadata = copy.deepcopy(metadata)
 
         for field_name, field_meta in metadata['fields'].items():
-            if field_meta['type'] == 'categorical':
-                bin_edges = np.histogram_bin_edges(real_data[field_name])
-                binned_real_col, _ = np.histogram(real_data[field_name], bins=bin_edges)
-                binned_synthetic_col, _ = np.histogram(synthetic_data[field_name], bins=bin_edges)
+            if field_meta['type'] == 'numerical' or field_meta['type'] == 'datetime':
+                real_col = real_data[field_name]
+                synthetic_col = synthetic_data[field_name]
+                if is_datetime(real_col):
+                    real_col = pd.to_numeric(real_col)
+                    synthetic_col = pd.to_numeric(synthetic_col)
+
+                bin_edges = np.histogram_bin_edges(real_col)
+                binned_real_col = np.digitize(real_col, bins=bin_edges)
+                binned_synthetic_col = np.digitize(synthetic_col, bins=bin_edges)
 
                 binned_real[field_name] = binned_real_col
                 binned_synthetic[field_name] = binned_synthetic_col
-                binned_metadata['fields'][field_name] = {'type': 'numerical'}
+                binned_metadata['fields'][field_name] = {'type': 'categorical'}
 
         return binned_real, binned_synthetic, binned_metadata
 
@@ -89,7 +99,7 @@ class QualityReport():
 
         for metric in tqdm.tqdm(metrics, desc='Creating report:'):
             if metric in self.METRICS['Column Pair Trends']:
-                binned_real, binned_synthetic, binned_metadata = self._create_binned_data(
+                binned_real, binned_synthetic, binned_metadata = self._discretize_data(
                     real_data, synthetic_data, metadata)
                 self._metric_results[metric.__name__] = metric.compute_breakdown(
                     binned_real, binned_synthetic, binned_metadata)

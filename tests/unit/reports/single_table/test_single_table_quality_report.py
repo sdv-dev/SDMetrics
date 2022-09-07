@@ -1,4 +1,5 @@
 import pickle
+from datetime import datetime
 from unittest.mock import Mock, mock_open, patch
 
 import pandas as pd
@@ -80,6 +81,10 @@ class TestQualityReport:
             QualityReport,
             'METRICS',
             metrics_mock,
+        ), patch.object(
+            QualityReport,
+            '_discretize_data',
+            return_value=(real_data, synthetic_data, metadata),
         ):
             report = QualityReport()
             report.generate(real_data, synthetic_data, metadata)
@@ -373,4 +378,71 @@ class TestQualityReport:
                 'col1': {'score': 0.1},
                 'col2': {'score': 0.2},
             }
+        }
+
+    def test_discretize_data(self):
+        """Test the ``_discretize_data`` method.
+
+        Expect that numerical and datetime fields are discretized.
+
+        Input:
+        - real data
+        - synthetic data
+        - metadata
+
+        Output:
+        - discretized real data
+        - discretized synthetic data
+        - updated metadata
+        """
+        # Setup
+        report = QualityReport()
+        real_data = pd.DataFrame({
+            'col1': [1, 2, 3],
+            'col2': ['a', 'b', 'c'],
+            'col3': [datetime(2020, 1, 2), datetime(2019, 10, 1), datetime(2021, 3, 2)],
+            'col4': [True, False, True],
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': [3, 1, 4],
+            'col2': ['c', 'a', 'c'],
+            'col3': [datetime(2021, 3, 2), datetime(2018, 11, 2), datetime(2020, 5, 7)],
+            'col4': [False, False, True],
+        })
+        metadata = {
+            'fields': {
+                'col1': {'type': 'numerical'},
+                'col2': {'type': 'categorical'},
+                'col3': {'type': 'datetime'},
+                'col4': {'type': 'boolean'},
+            },
+        }
+
+        # Run
+        discretized_real, discretized_synth, updated_metadata = report._discretize_data(
+            real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_real = pd.DataFrame({
+            'col1': [1, 6, 11],
+            'col2': ['a', 'b', 'c'],
+            'col3': [2, 1, 11],
+            'col4': [True, False, True],
+        })
+        expected_synth = pd.DataFrame({
+            'col1': [11, 1, 11],
+            'col2': ['c', 'a', 'c'],
+            'col3': [11, 0, 5],
+            'col4': [False, False, True],
+        })
+
+        pd.testing.assert_frame_equal(discretized_real, expected_real)
+        pd.testing.assert_frame_equal(discretized_synth, expected_synth)
+        assert updated_metadata == {
+            'fields': {
+                'col1': {'type': 'categorical'},
+                'col2': {'type': 'categorical'},
+                'col3': {'type': 'categorical'},
+                'col4': {'type': 'boolean'},
+            },
         }
