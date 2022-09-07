@@ -1,5 +1,6 @@
 """Single table quality report."""
 
+import copy
 import itertools
 import pickle
 import sys
@@ -42,6 +43,37 @@ class QualityReport():
         for prop, score in self._property_breakdown.items():
             out.write(f'{prop}: {round(score * 100, 2)}%\n')
 
+    def _create_binned_data(self, real_data, synthetic_data, metadata):
+        """Create a copy of the real and synthetic data with binned categorical fields.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict)
+                The metadata.
+
+        Returns:
+            (pandas.DataFrame, pandas.DataFrame, dict):
+                The binned real and synthetic data, and the updated metadata.
+        """
+        binned_real = real_data.copy()
+        binned_synthetic = synthetic_data.copy()
+        binned_metadata = copy.deepcopy(metadata)
+
+        for field_name, field_meta in metadata['fields'].items():
+            if field_meta['type'] == 'categorical':
+                bin_edges = np.histogram_bin_edges(real_data[field_name])
+                binned_real_col, _ = np.histogram(real_data[field_name], bins=bin_edges)
+                binned_synthetic_col, _ = np.histogram(synthetic_data[field_name], bins=bin_edges)
+
+                binned_real[field_name] = binned_real_col
+                binned_synthetic[field_name] = binned_synthetic_col
+                binned_metadata['fields'][field_name] = {'type': 'numerical'}
+
+        return binned_real, binned_synthetic, binned_metadata
+
     def generate(self, real_data, synthetic_data, metadata):
         """Generate report.
 
@@ -56,8 +88,14 @@ class QualityReport():
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
 
         for metric in tqdm.tqdm(metrics, desc='Creating report:'):
-            self._metric_results[metric.__name__] = metric.compute_breakdown(
-                real_data, synthetic_data, metadata)
+            if metric in self.METRICS['Column Pair Trends']:
+                binned_real, binned_synthetic, binned_metadata = self._create_binned_data(
+                    real_data, synthetic_data, metadata)
+                self._metric_results[metric.__name__] = metric.compute_breakdown(
+                    binned_real, binned_synthetic, binned_metadata)
+            else:
+                self._metric_results[metric.__name__] = metric.compute_breakdown(
+                    real_data, synthetic_data, metadata)
 
         self._property_breakdown = {}
         for prop, metrics in self.METRICS.items():
