@@ -57,7 +57,7 @@ class QualityReport():
 
         for metric in tqdm.tqdm(metrics, desc='Creating report:'):
             self._metric_results[metric.__name__] = metric.compute_breakdown(
-                real_data, synthetic_data)
+                real_data, synthetic_data, metadata)
 
         self._property_breakdown = {}
         for prop, metrics in self.METRICS.items():

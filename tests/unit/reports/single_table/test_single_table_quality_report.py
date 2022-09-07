@@ -43,6 +43,7 @@ class TestQualityReport:
         real_data = Mock()
         synthetic_data = Mock()
         ks_complement_mock = Mock()
+        metadata = Mock()
         ks_complement_mock.__name__ = 'KSComplement'
         ks_complement_mock.compute_breakdown.return_value = {
             'col1': {'score': 0.1},
@@ -81,13 +82,17 @@ class TestQualityReport:
             metrics_mock,
         ):
             report = QualityReport()
-            report.generate(real_data, synthetic_data, Mock())
+            report.generate(real_data, synthetic_data, metadata)
 
         # Assert
-        ks_complement_mock.compute_breakdown.assert_called_once_with(real_data, synthetic_data)
-        tv_complement_mock.compute_breakdown.assert_called_once_with(real_data, synthetic_data)
-        corr_sim_mock.compute_breakdown.assert_called_once_with(real_data, synthetic_data)
-        cont_sim_mock.compute_breakdown.assert_called_once_with(real_data, synthetic_data)
+        ks_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        tv_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        corr_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cont_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
         assert report._overall_quality_score == 0.15000000000000002
         assert report._property_breakdown == {
             'Column Shapes': 0.15000000000000002,
