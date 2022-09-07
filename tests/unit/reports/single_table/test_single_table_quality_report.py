@@ -289,6 +289,55 @@ class TestQualityReport:
             })
         )
 
+    def test_get_details_column_pair_trends(self):
+        """Test the ``get_details`` method with column pair trends.
+
+        Expect that the details of the desired property is returned.
+
+        Input:
+        - property name
+
+        Output:
+        - score details for the desired property
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results = {
+            'CorrelationSimilarity': {
+                ('col1', 'col3'): {'score': 0.1, 'real': 0.1, 'synthetic': 0.1},
+                ('col2', 'col4'): {'score': 0.2, 'real': 0.2, 'synthetic': 0.2},
+            },
+            'ContingencySimilarity': {
+                ('col1', 'col3'): {'score': 0.3, 'real': 0.3, 'synthetic': 0.3},
+                ('col2', 'col4'): {'score': 0.4, 'real': 0.4, 'synthetic': 0.4},
+            }
+        }
+
+        # Run
+        out = report.get_details('Column Pair Trends')
+
+        # Assert
+        pd.testing.assert_frame_equal(
+            out,
+            pd.DataFrame({
+                'Columns': [
+                    ('col1', 'col3'),
+                    ('col2', 'col4'),
+                    ('col1', 'col3'),
+                    ('col2', 'col4'),
+                ],
+                'Metric': [
+                    'CorrelationSimilarity',
+                    'CorrelationSimilarity',
+                    'ContingencySimilarity',
+                    'ContingencySimilarity',
+                ],
+                'Quality Score': [0.1, 0.2, 0.3, 0.4],
+                'Real Score': [0.1, 0.2, 0.3, 0.4],
+                'Synthetic Score': [0.1, 0.2, 0.3, 0.4],
+            })
+        )
+
     def test_get_raw_result(self):
         """Test the ``get_raw_result`` method.
 

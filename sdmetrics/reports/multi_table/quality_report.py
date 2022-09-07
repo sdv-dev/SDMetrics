@@ -148,17 +148,102 @@ class QualityReport():
 
         fig.show()
 
-    def get_details(self, property_name):
+    def get_details(self, property_name, table_name=None):
         """Return the details for each score for the given property name.
 
         Args:
             property_name (str):
                 The name of the property to return score details for.
+            table_name (str):
+                Optionally filter results by table.
 
         Returns:
             pandas.DataFrame
                 The score breakdown.
         """
+        tables = []
+        columns = []
+        metrics = []
+        scores = []
+
+        if property_name == 'Column Shapes':
+            for metric in self.METRICS[property_name]:
+                for table, table_breakdown in self._metric_results[metric.__name__].items():
+                    if table_name is not None and table != table_name:
+                        continue
+
+                    for column, score_breakdown in table_breakdown.items():
+                        tables.append(table)
+                        columns.append(column)
+                        metrics.append(metric.__name__)
+                        scores.append(score_breakdown['score'])
+
+            return pd.DataFrame({
+                'Table Name': tables,
+                'Column': columns,
+                'Metric': metrics,
+                'Quality Score': scores,
+            })
+
+        elif property_name == 'Column Pair Trends':
+            real_scores = []
+            synthetic_scores = []
+            for metric in self.METRICS[property_name]:
+                for table, table_breakdown in self._metric_results[metric.__name__].items():
+                    if table_name is not None and table != table_name:
+                        continue
+
+                    for column_pair, score_breakdown in table_breakdown.items():
+                        tables.append(table)
+                        columns.append(column_pair)
+                        metrics.append(metric.__name__)
+                        scores.append(score_breakdown['score'])
+                        real_scores.append(score_breakdown['real'])
+                        synthetic_scores.append(score_breakdown['synthetic'])
+
+            return pd.DataFrame({
+                'Table Name': tables,
+                'Columns': columns,
+                'Metric': metrics,
+                'Quality Score': scores,
+                'Real Score': real_scores,
+                'Synthetic Score': synthetic_scores,
+            })
+
+        elif property_name == 'Parent Child Relationships':
+            child_tables = []
+            for metric in self.METRICS[property_name]:
+                for table_pair, score_breakdown in self._metric_results[metric.__name__].items():
+                    tables.append(table_pair[0])
+                    child_tables.append(table_pair[1])
+                    metrics.append(metric.__name__)
+                    scores.append(score_breakdown['score'])
+
+            return pd.DataFrame({
+                'Child Table': child_tables,
+                'Parent Table': tables,
+                'Metric': metrics,
+                'Quality Score': scores,
+            })
+
+    def get_raw_result(self, metric_name):
+        """Return the raw result of the given metric name.
+
+        Args:
+            metric_name (str):
+                The name of the desired metric.
+
+        Returns:
+            dict
+                The raw results
+        """
+        metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
+        for metric in metrics:
+            if metric.__name__ == metric_name:
+                return {
+                    'metric': f'{metric.__module__}.{metric.__name__}',
+                    'results': self._metric_results[metric_name],
+                }
 
     def save(self, filename):
         """Save this report instance to the given path using pickle.

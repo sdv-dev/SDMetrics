@@ -137,13 +137,37 @@ class QualityReport():
         metrics = []
         scores = []
 
-        for metric in self.METRICS[property_name]:
-            for column, score_breakdown in self._metric_results[metric.__name__].items():
-                columns.append(column)
-                metrics.append(metric.__name__)
-                scores.append(score_breakdown['score'])
+        if property_name == 'Column Shapes':
+            for metric in self.METRICS[property_name]:
+                for column, score_breakdown in self._metric_results[metric.__name__].items():
+                    columns.append(column)
+                    metrics.append(metric.__name__)
+                    scores.append(score_breakdown['score'])
 
-        return pd.DataFrame({'Column': columns, 'Metric': metrics, 'Quality Score': scores})
+            return pd.DataFrame({
+                'Column': columns,
+                'Metric': metrics,
+                'Quality Score': scores,
+            })
+
+        elif property_name == 'Column Pair Trends':
+            real_scores = []
+            synthetic_scores = []
+            for metric in self.METRICS[property_name]:
+                for column_pair, score_breakdown in self._metric_results[metric.__name__].items():
+                    columns.append(column_pair)
+                    metrics.append(metric.__name__)
+                    scores.append(score_breakdown['score'])
+                    real_scores.append(score_breakdown['real'])
+                    synthetic_scores.append(score_breakdown['synthetic'])
+
+            return pd.DataFrame({
+                'Columns': columns,
+                'Metric': metrics,
+                'Quality Score': scores,
+                'Real Score': real_scores,
+                'Synthetic Score': synthetic_scores,
+            })
 
     def get_raw_result(self, metric_name):
         """Return the raw result of the given metric name.
