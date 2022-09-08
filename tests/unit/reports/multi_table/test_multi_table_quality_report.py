@@ -22,7 +22,8 @@ class TestQualityReport:
         assert report._metric_results == {}
         assert report._property_breakdown == {}
 
-    def test_generate(self):
+    @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
+    def test_generate(self, mock_discretize_and_apply_metric):
         """Test the ``generate`` method.
 
         Expect that the multi-table metrics are called.
@@ -41,9 +42,21 @@ class TestQualityReport:
           are populated.
         """
         # Setup
-        real_data = Mock()
-        synthetic_data = Mock()
-        metadata = Mock()
+        mock_discretize_and_apply_metric.return_value = {}
+        real_data = {
+            'table1': pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']}),
+            'table2': pd.DataFrame({'col1': [1, 1, 1]}),
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({'col1': [1, 3, 3], 'col2': ['b', 'b', 'c']}),
+            'table2': pd.DataFrame({'col1': [3, 1, 3]}),
+        }
+        metadata = {
+            'tables': {
+                'table1': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
+                'table2': {'col1': {'type': 'numerical'}},
+            },
+        }
 
         ks_complement_mock = Mock()
         ks_complement_mock.__name__ = 'KSComplement'
@@ -304,9 +317,9 @@ class TestQualityReport:
         }
 
         mock_real_corr = Mock()
-        report._real_corr = mock_real_corr
+        report._real_corrs = {'table1': mock_real_corr}
         mock_synth_corr = Mock()
-        report._synth_corr = mock_synth_corr
+        report._synth_corrs = {'table1': mock_synth_corr}
 
         # Run
         report.show_details('Column Pair Trends', table_name='table1')

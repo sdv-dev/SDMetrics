@@ -13,6 +13,7 @@ from sdmetrics.multi_table import (
     TVComplement)
 from sdmetrics.reports.multi_table.plot_utils import get_table_relationships_plot
 from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
+from sdmetrics.reports.utils import discretize_and_apply_metric
 
 
 class QualityReport():
@@ -33,10 +34,12 @@ class QualityReport():
         self._overall_quality_score = None
         self._metric_results = {}
         self._property_breakdown = {}
+        self._real_corrs = {}
+        self._synth_corrs = {}
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
-        out.write(f'Overall Quality Score: {self._overall_quality_score}\n')
+        out.write(f'\nOverall Quality Score: {self._overall_quality_score}\n\n')
 
         if len(self._property_breakdown) > 0:
             out.write('Properties:\n')
@@ -57,9 +60,30 @@ class QualityReport():
         """
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
 
-        for metric in tqdm.tqdm(metrics, desc='Creating report:'):
+        for metric in tqdm.tqdm(metrics, desc='Creating report'):
             self._metric_results[metric.__name__] = metric.compute_breakdown(
                 real_data, synthetic_data, metadata)
+
+        for table_name, table_data in real_data.items():
+            existing_column_pairs = []
+            if table_name in self._metric_results['ContingencySimilarity']:
+                existing_column_pairs.append(
+                    list(self._metric_results['ContingencySimilarity'][table_name].keys()))
+            else:
+                self._metric_results['ContingencySimilarity'][table_name] = {}
+
+            if table_name in self._metric_results['CorrelationSimilarity']:
+                existing_column_pairs.append(
+                    list(self._metric_results['CorrelationSimilarity'][table_name].keys()))
+
+            additional_results = discretize_and_apply_metric(
+                real_data[table_name],
+                synthetic_data[table_name],
+                metadata['tables'][table_name],
+                ContingencySimilarity,
+                existing_column_pairs,
+            )
+            self._metric_results['ContingencySimilarity'][table_name].update(additional_results)
 
         self._property_breakdown = {}
         for prop, metrics in self.METRICS.items():
@@ -85,6 +109,11 @@ class QualityReport():
                     prop_scores.append(score)
 
             self._property_breakdown[prop] = np.mean(prop_scores)
+
+        # Calculate and store the correlation matrices.
+        for table_name, table_data in real_data.items():
+            self._real_corrs[table_name] = table_data.corr()
+            self._synth_corrs[table_name] = synthetic_data[table_name].corr()
 
         self._overall_quality_score = np.mean(list(self._property_breakdown.values()))
 
@@ -137,7 +166,11 @@ class QualityReport():
                 metric.__name__: self._metric_results[metric.__name__].get(table_name, {})
                 for metric in self.METRICS.get(property_name, [])
             }
-            fig = get_column_pairs_plot(score_breakdowns, self._real_corr, self._synth_corr)
+            fig = get_column_pairs_plot(
+                score_breakdowns,
+                self._real_corrs[table_name],
+                self._synth_corrs[table_name],
+            )
 
         elif property_name == 'Parent Child Relationships':
             score_breakdowns = {
@@ -173,6 +206,8 @@ class QualityReport():
                         continue
 
                     for column, score_breakdown in table_breakdown.items():
+                        if np.isnan(score_breakdown['score']):
+                            continue
                         tables.append(table)
                         columns.append(column)
                         metrics.append(metric.__name__)
@@ -198,8 +233,10 @@ class QualityReport():
                         columns.append(column_pair)
                         metrics.append(metric.__name__)
                         scores.append(score_breakdown['score'])
-                        real_scores.append(score_breakdown['real'])
-                        synthetic_scores.append(score_breakdown['synthetic'])
+                        real_scores.append(
+                            score_breakdown['real'] if 'real' in score_breakdown else np.nan)
+                        synthetic_scores.append(
+                            score_breakdown['synthetic'] if 'real' in score_breakdown else np.nan)
 
             return pd.DataFrame({
                 'Table Name': tables,
