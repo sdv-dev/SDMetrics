@@ -144,7 +144,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
                 A mapping of column name to metric output.
         """
         return cls._compute(
-            cls, real_data, synthetic_data, metadata=None, store_errors=True, **kwargs)
+            cls, real_data, synthetic_data, metadata, store_errors=True, **kwargs)
 
     @classmethod
     def normalize(cls, raw_score):
