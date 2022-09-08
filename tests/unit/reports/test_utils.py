@@ -1,15 +1,17 @@
 from datetime import datetime
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 import pandas as pd
 
-from sdmetrics.reports.utils import plot_column
-from tests.utils import SeriesMatcher
+from sdmetrics.reports.utils import (
+    discretize_and_apply_metric, discretize_table_data, make_continuous_column_plot,
+    make_discrete_column_plot, plot_column)
+from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
 @patch('sdmetrics.reports.utils.ff')
-def test_plot_column(ff_mock):
-    """Test the ``plot_column`` method.
+def test_make_continuous_column_plot(ff_mock):
+    """Test the ``make_continuous_column_plot`` method.
 
     Expect that it creates a distplot.
 
@@ -35,7 +37,7 @@ def test_plot_column(ff_mock):
     ff_mock.create_distplot.return_value = mock_figure
 
     # Run
-    plot_column(real_column, synthetic_column, sdtype)
+    fig = make_continuous_column_plot(real_column, synthetic_column, sdtype)
 
     # Assert
     ff_mock.create_distplot.assert_called_once_with(
@@ -47,12 +49,12 @@ def test_plot_column(ff_mock):
     )
     assert mock_figure.update_traces.call_count == 2
     assert mock_figure.update_layout.called_once()
-    mock_figure.show.assert_called_once_with()
+    assert fig == mock_figure
 
 
 @patch('sdmetrics.reports.utils.ff')
-def test_plot_column_datetime(ff_mock):
-    """Test the ``plot_column`` method with datetime inputs.
+def test_make_continuous_column_plot_datetime(ff_mock):
+    """Test the ``make_contuous_column_plot`` method with datetime inputs.
 
     Expect that it creates a distplot.
 
@@ -86,7 +88,7 @@ def test_plot_column_datetime(ff_mock):
     ff_mock.create_distplot.return_value = mock_figure
 
     # Run
-    plot_column(real_column, synthetic_column, sdtype)
+    fig = make_continuous_column_plot(real_column, synthetic_column, sdtype)
 
     # Assert
     ff_mock.create_distplot.assert_called_once_with(
@@ -101,4 +103,252 @@ def test_plot_column_datetime(ff_mock):
     )
     assert mock_figure.update_traces.call_count == 2
     assert mock_figure.update_layout.called_once()
-    mock_figure.show.assert_called_once_with()
+    assert fig == mock_figure
+
+
+@patch('sdmetrics.reports.utils.px')
+def test_make_discrete_column_plot(px_mock):
+    """Test the ``make_discrete_column_plot`` method.
+
+    Expect that it creates a histogram.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data type
+
+    Side Effects:
+    - A distplot is created.
+    """
+    # Setup
+    real_column = pd.Series([1, 2, 3, 4])
+    synthetic_column = pd.Series([1, 2, 4, 5])
+    sdtype = 'categorical'
+
+    mock_figure = Mock()
+    px_mock.histogram.return_value = mock_figure
+
+    # Run
+    fig = make_discrete_column_plot(real_column, synthetic_column, sdtype)
+
+    # Assert
+    px_mock.histogram.assert_called_once_with(
+        DataFrameMatcher(pd.DataFrame({
+            'values': [1, 2, 3, 4, 1, 2, 4, 5],
+            'Data': [
+                'Real',
+                'Real',
+                'Real',
+                'Real',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+            ],
+        })),
+        x='values',
+        color='Data',
+        barmode='group',
+        color_discrete_sequence=['#000036', '#01E0C9'],
+        pattern_shape='Data',
+        pattern_shape_sequence=['', '/'],
+        histnorm='probability density',
+    )
+    assert mock_figure.update_traces.call_count == 2
+    assert mock_figure.update_layout.called_once()
+    assert fig == mock_figure
+
+
+@patch('sdmetrics.reports.utils.make_continuous_column_plot')
+def test_plot_column_continuous_col(make_plot_mock):
+    """Test the ``plot_column`` method with a continuous column.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data type
+
+    Side Effects:
+    - The make continuous column plot method is called.
+    """
+    # Setup
+    real_column = pd.Series([1, 2, 3, 4])
+    synthetic_column = pd.Series([1, 2, 4, 5])
+    sdtype = 'numerical'
+
+    # Run
+    plot_column(real_column, synthetic_column, sdtype)
+
+    # Assert
+    make_plot_mock.assert_called_once_with(real_column, synthetic_column, sdtype)
+
+
+@patch('sdmetrics.reports.utils.make_discrete_column_plot')
+def test_plot_column_discrete_col(make_plot_mock):
+    """Test the ``plot_column`` method with a discrete column.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data type
+
+    Side Effects:
+    - The make discrete column plot method is called.
+    """
+    # Setup
+    real_column = pd.Series([1, 2, 3, 4])
+    synthetic_column = pd.Series([1, 2, 4, 5])
+    sdtype = 'categorical'
+
+    # Run
+    plot_column(real_column, synthetic_column, sdtype)
+
+    # Assert
+    make_plot_mock.assert_called_once_with(real_column, synthetic_column, sdtype)
+
+
+def test_discretize_table_data():
+    """Test the ``discretize_table_data`` method.
+
+    Expect that numerical and datetime fields are discretized.
+
+    Input:
+    - real data
+    - synthetic data
+    - metadata
+
+    Output:
+    - discretized real data
+    - discretized synthetic data
+    - updated metadata
+    """
+    # Setup
+    real_data = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': ['a', 'b', 'c'],
+        'col3': [datetime(2020, 1, 2), datetime(2019, 10, 1), datetime(2021, 3, 2)],
+        'col4': [True, False, True],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [3, 1, 4],
+        'col2': ['c', 'a', 'c'],
+        'col3': [datetime(2021, 3, 2), datetime(2018, 11, 2), datetime(2020, 5, 7)],
+        'col4': [False, False, True],
+    })
+    metadata = {
+        'fields': {
+            'col1': {'type': 'numerical'},
+            'col2': {'type': 'categorical'},
+            'col3': {'type': 'datetime'},
+            'col4': {'type': 'boolean'},
+        },
+    }
+
+    # Run
+    discretized_real, discretized_synth, updated_metadata = discretize_table_data(
+        real_data, synthetic_data, metadata)
+
+    # Assert
+    expected_real = pd.DataFrame({
+        'col1': [1, 6, 11],
+        'col2': ['a', 'b', 'c'],
+        'col3': [2, 1, 11],
+        'col4': [True, False, True],
+    })
+    expected_synth = pd.DataFrame({
+        'col1': [11, 1, 11],
+        'col2': ['c', 'a', 'c'],
+        'col3': [11, 0, 5],
+        'col4': [False, False, True],
+    })
+
+    pd.testing.assert_frame_equal(discretized_real, expected_real)
+    pd.testing.assert_frame_equal(discretized_synth, expected_synth)
+    assert updated_metadata == {
+        'fields': {
+            'col1': {'type': 'categorical'},
+            'col2': {'type': 'categorical'},
+            'col3': {'type': 'categorical'},
+            'col4': {'type': 'boolean'},
+        },
+    }
+
+
+@patch('sdmetrics.reports.utils.discretize_table_data')
+def test_discretize_and_apply_metric(discretize_table_data_mock):
+    """Test the ``discretize_and_apply_metric`` method.
+
+    Expect that the correct calls to ``compute_breakdown`` are made.
+
+    Input:
+    - real data
+    - synthetic data
+    - metadata
+    - metric
+
+    Output:
+    - metric results
+    """
+    # Setup
+    binned_real = pd.DataFrame({
+        'col1': [1, 6, 11],
+        'col2': ['a', 'b', 'c'],
+        'col3': [2, 1, 11],
+        'col4': [True, False, True],
+    })
+    binned_synthetic = pd.DataFrame({
+        'col1': [11, 1, 11],
+        'col2': ['c', 'a', 'c'],
+        'col3': [11, 0, 5],
+        'col4': [False, False, True],
+    })
+    metadata = {
+        'fields': {
+            'col1': {'type': 'numerical'},
+            'col2': {'type': 'categorical'},
+            'col3': {'type': 'datetime'},
+            'col4': {'type': 'boolean'},
+        },
+    }
+    discretize_table_data_mock.return_value = (binned_real, binned_synthetic, metadata)
+    mock_metric = Mock()
+    mock_metric.column_pairs_metric.compute_breakdown.side_effect = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+
+    # Run
+    metric_results = discretize_and_apply_metric(Mock(), Mock(), metadata, mock_metric)
+
+    # Assert
+    mock_metric.column_pairs_metric.compute_breakdown.assert_has_calls([
+        call(
+            DataFrameMatcher(binned_real[['col1', 'col2']]),
+            DataFrameMatcher(binned_synthetic[['col1', 'col2']]),
+        ),
+        call(
+            DataFrameMatcher(binned_real[['col1', 'col3']]),
+            DataFrameMatcher(binned_synthetic[['col1', 'col3']]),
+        ),
+        call(
+            DataFrameMatcher(binned_real[['col1', 'col4']]),
+            DataFrameMatcher(binned_synthetic[['col1', 'col4']]),
+        ),
+        call(
+            DataFrameMatcher(binned_real[['col2', 'col3']]),
+            DataFrameMatcher(binned_synthetic[['col2', 'col3']]),
+        ),
+        call(
+            DataFrameMatcher(binned_real[['col2', 'col4']]),
+            DataFrameMatcher(binned_synthetic[['col2', 'col4']]),
+        ),
+        call(
+            DataFrameMatcher(binned_real[['col3', 'col4']]),
+            DataFrameMatcher(binned_synthetic[['col3', 'col4']]),
+        ),
+    ])
+    assert metric_results == {
+        ('col1', 'col2'): 0.1,
+        ('col1', 'col3'): 0.2,
+        ('col1', 'col4'): 0.3,
+        ('col2', 'col3'): 0.4,
+        ('col2', 'col4'): 0.5,
+        ('col3', 'col4'): 0.6,
+    }
