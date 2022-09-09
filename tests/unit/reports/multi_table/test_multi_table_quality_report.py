@@ -462,6 +462,34 @@ class TestQualityReport:
             },
         })
 
+    @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
+    def test_show_details_table_relationships_with_table_name(self, get_plot_mock):
+        """Test the ``show_details`` method with Parent Child Relationships and a table.
+
+        Input:
+        - property='Parent Child Relationships'
+        - table name
+
+        Side Effects:
+        - get_parent_child_relationships_plot is called with the expected score breakdowns.
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results['CardinalityShapeSimilarity'] = {
+            ('table1', 'table2'): {'score': 'test_score_1'},
+            ('table3', 'table2'): {'score': 'test_score_2'},
+        }
+
+        # Run
+        report.show_details('Parent Child Relationships', table_name='table1')
+
+        # Assert
+        get_plot_mock.assert_called_once_with({
+            'CardinalityShapeSimilarity': {
+                ('table1', 'table2'): {'score': 'test_score_1'},
+            },
+        })
+
     def test_get_details_column_shapes(self):
         """Test the ``get_details`` method with column shapes.
 
@@ -589,6 +617,41 @@ class TestQualityReport:
                 'Parent Table': ['table1', 'table1'],
                 'Metric': ['CardinalityShapeSimilarity', 'CardinalityShapeSimilarity'],
                 'Quality Score': [0.1, 0.2],
+            })
+        )
+
+    def test_get_details_parent_child_relationships_with_table_name(self):
+        """Test the ``get_details`` method with parent child relationships with a table filter.
+
+        Expect that the details of the desired property is returned.
+
+        Input:
+        - property name
+        - table name
+
+        Output:
+        - score details for the desired property
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results = {
+            'CardinalityShapeSimilarity': {
+                ('table1', 'table2'): {'score': 0.1},
+                ('table1', 'table3'): {'score': 0.2},
+            },
+        }
+
+        # Run
+        out = report.get_details('Parent Child Relationships', table_name='table2')
+
+        # Assert
+        pd.testing.assert_frame_equal(
+            out,
+            pd.DataFrame({
+                'Child Table': ['table2'],
+                'Parent Table': ['table1'],
+                'Metric': ['CardinalityShapeSimilarity'],
+                'Quality Score': [0.1],
             })
         )
 

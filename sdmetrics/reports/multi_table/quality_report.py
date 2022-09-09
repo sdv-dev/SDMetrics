@@ -174,6 +174,13 @@ class QualityReport():
                 metric.__name__: self._metric_results[metric.__name__]
                 for metric in self.METRICS.get(property_name, [])
             }
+            if table_name is not None:
+                for metric, metric_results in score_breakdowns.items():
+                    score_breakdowns[metric] = {
+                        tables: results for tables, results in metric_results.items()
+                        if table_name in tables
+                    }
+
             fig = get_table_relationships_plot(score_breakdowns)
 
         fig.show()
@@ -248,6 +255,9 @@ class QualityReport():
             child_tables = []
             for metric in self.METRICS[property_name]:
                 for table_pair, score_breakdown in self._metric_results[metric.__name__].items():
+                    if table_name is not None and table_name not in table_pair:
+                        continue
+
                     tables.append(table_pair[0])
                     child_tables.append(table_pair[1])
                     metrics.append(metric.__name__)
