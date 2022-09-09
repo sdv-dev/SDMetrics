@@ -210,27 +210,27 @@ class QualityReport():
                     },
                 ]
 
-    def save(self, filename):
+    def save(self, filepath):
         """Save this report instance to the given path using pickle.
 
         Args:
-            filename (str):
-                File where the report instance will be serialized.
+            filepath (str):
+                The path to the file where the report instance will be serialized.
         """
-        with open(filename, 'wb') as output:
+        with open(filepath, 'wb') as output:
             pickle.dump(self, output)
 
     @classmethod
-    def load(cls, filename):
+    def load(cls, filepath):
         """Load a ``QualityReport`` instance from a given path.
 
         Args:
-            filename (str):
-                File from which to load the instance.
+            filepath (str):
+                The path to the file where the report is stored.
 
         Returns:
             QualityReort:
                 The loaded quality report instance.
         """
-        with open(filename, 'rb') as f:
+        with open(filepath, 'rb') as f:
             return pickle.load(f)

@@ -238,7 +238,7 @@ class TestQualityReport:
         Expect that the instance is passed to pickle.
 
         Input:
-        - filename
+        - filepath
 
         Side Effects:
         - ``pickle`` is called with the instance.
@@ -262,13 +262,13 @@ class TestQualityReport:
         Expect that the report's load method is called with the expected args.
 
         Input:
-        - filename
+        - filepath
 
         Output:
         - the loaded model
 
         Side Effects:
-        - Expect that ``pickle`` is called with the filename.
+        - Expect that ``pickle`` is called with the filepath.
         """
         # Setup
         open_mock = mock_open(read_data=pickle.dumps('test'))
