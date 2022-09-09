@@ -37,13 +37,16 @@ class QualityReport():
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
-        out.write(f'\nOverall Quality Score: {self._overall_quality_score}\n\n')
+        out.write(f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n')
 
         if len(self._property_breakdown) > 0:
             out.write('Properties:\n')
 
         for prop, score in self._property_breakdown.items():
-            out.write(f'{prop}: {round(score * 100, 2)}%\n')
+            if not np.isnan(score):
+                out.write(f'{prop}: {round(score * 100, 2)}%\n')
+            else:
+                out.write(f'{prop}: NaN\n')
 
     def generate(self, real_data, synthetic_data, metadata):
         """Generate report.
@@ -109,9 +112,7 @@ class QualityReport():
                     )
                     prop_scores.append(score)
 
-            self._property_breakdown[prop] = np.nan
-            if len(prop_scores) > 0:
-                self._property_breakdown[prop] = np.nanmean(prop_scores)
+            self._property_breakdown[prop] = np.nanmean(prop_scores)
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
 
