@@ -32,12 +32,13 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
 
     real_data = pd.DataFrame({'values': real_column.copy()})
     real_data['Data'] = 'Real'
-
     synthetic_data = pd.DataFrame({'values': synthetic_column.copy()})
     synthetic_data['Data'] = 'Synthetic'
 
+    missing_data_real = round((real_column.isna().sum() / len(real_column)) * 100, 2)
+    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)), 2)
+
     all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
-    all_data = all_data.fillna('NaN')
 
     fig = px.histogram(
         all_data,
@@ -65,6 +66,19 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
         xaxis_title='Category',
         yaxis_title='Frequency',
         plot_bgcolor='#F5F5F8',
+        annotations=[
+            {
+                'xref': 'paper',
+                'yref': 'paper',
+                'x': -0.08,
+                'y': -0.2,
+                'showarrow': False,
+                'text': (
+                    f'*Missing Values: Real Data ({missing_data_real}%), '
+                    f'Synthetic Data ({missing_data_synthetic}%)'
+                ),
+            },
+        ]
     )
 
     return fig
