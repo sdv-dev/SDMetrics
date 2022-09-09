@@ -22,7 +22,7 @@ class TestQualityReport:
         assert report._metric_results == {}
         assert report._property_breakdown == {}
 
-    @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
+    @patch('sdmetrics.reports.single_table.quality_report.discretize_and_apply_metric')
     def test_generate(self, mock_discretize_and_apply_metric):
         """Test the ``generate`` method.
 
@@ -96,11 +96,84 @@ class TestQualityReport:
             real_data, synthetic_data, metadata)
         cont_sim_mock.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
-        assert report._overall_quality_score == 0.1930555555555556
+        assert report._overall_quality_score == 0.15000000000000002
         assert report._property_breakdown == {
             'Column Shapes': 0.15000000000000002,
-            'Column Pair Trends': 0.23611111111111113,
+            'Column Pair Trends': 0.15000000000000002,
         }
+
+    @patch('sdmetrics.reports.single_table.quality_report.discretize_and_apply_metric')
+    def test_generate_empty_column_pairs_results(self, mock_discretize_and_apply_metric):
+        """Test the ``generate`` method when there are no column pair results.
+
+        Expect that the single-table metrics are called. Expect that the column pair
+        results is NaN but the overall score is not.
+
+        Setup:
+        - Mock the expected single-table metric compute breakdown calls.
+
+        Input:
+        - Real data.
+        - Synthetic data.
+        - Metadata.
+
+        Side Effects:
+        - Expect that each single table metric's ``compute_breakdown`` methods are called once.
+        - Expect that the ``_overall_quality_score`` and ``_property_breakdown`` attributes
+          are populated.
+        """
+        # Setup
+        real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
+        synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
+        ks_complement_mock = Mock()
+        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        ks_complement_mock.__name__ = 'KSComplement'
+        ks_complement_mock.compute_breakdown.return_value = {
+            'col1': {'score': 0.1},
+            'col2': {'score': 0.2},
+        }
+
+        tv_complement_mock = Mock()
+        tv_complement_mock.__name__ = 'TVComplement'
+        tv_complement_mock.compute_breakdown.return_value = {
+            'col1': {'score': 0.1},
+            'col2': {'score': 0.2},
+        }
+
+        corr_sim_mock = Mock()
+        corr_sim_mock.__name__ = 'CorrelationSimilarity'
+        corr_sim_mock.compute_breakdown.return_value = {}
+
+        cont_sim_mock = Mock()
+        cont_sim_mock.__name__ = 'ContingencySimilarity'
+        cont_sim_mock.compute_breakdown.return_value = {}
+
+        metrics_mock = {
+            'Column Shapes': [ks_complement_mock, tv_complement_mock],
+            'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
+        }
+        mock_discretize_and_apply_metric.return_value = {}
+
+        # Run
+        with patch.object(
+            QualityReport,
+            'METRICS',
+            metrics_mock,
+        ):
+            report = QualityReport()
+            report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        ks_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        tv_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        corr_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cont_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        assert report._overall_quality_score == 0.15000000000000002
+        assert np.isnan(report._property_breakdown['Column Pair Trends'])
 
     def test_get_score(self):
         """Test the ``get_score`` method.

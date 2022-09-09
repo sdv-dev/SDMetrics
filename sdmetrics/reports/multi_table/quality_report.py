@@ -109,7 +109,9 @@ class QualityReport():
                     )
                     prop_scores.append(score)
 
-            self._property_breakdown[prop] = np.nanmean(prop_scores)
+            self._property_breakdown[prop] = np.nan
+            if len(prop_scores) > 0:
+                self._property_breakdown[prop] = np.nanmean(prop_scores)
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
 

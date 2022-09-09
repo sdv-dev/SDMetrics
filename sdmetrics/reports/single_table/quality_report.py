@@ -55,9 +55,7 @@ class QualityReport():
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
 
         for metric in tqdm.tqdm(metrics, desc='Creating report'):
-            metric_name = metric.__name__
-
-            self._metric_results[metric_name] = metric.compute_breakdown(
+            self._metric_results[metric.__name__] = metric.compute_breakdown(
                 real_data, synthetic_data, metadata)
 
         existing_column_pairs = list(self._metric_results['ContingencySimilarity'].keys())
@@ -79,7 +77,9 @@ class QualityReport():
                 )
                 prop_scores.append(score)
 
-            self._property_breakdown[prop] = np.nanmean(prop_scores)
+            self._property_breakdown[prop] = np.nan
+            if len(prop_scores) > 0:
+                self._property_breakdown[prop] = np.nanmean(prop_scores)
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
 
