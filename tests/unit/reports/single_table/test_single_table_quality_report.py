@@ -412,8 +412,8 @@ class TestQualityReport:
                     'ContingencySimilarity',
                 ],
                 'Quality Score': [0.1, 0.2, 0.3, 0.4],
-                'Real Score': [0.1, 0.2, 0.3, 0.4],
-                'Synthetic Score': [0.1, 0.2, 0.3, 0.4],
+                'Real Correlation': [0.1, 0.2, 0.3, 0.4],
+                'Synthetic Correlation': [0.1, 0.2, 0.3, 0.4],
             })
         )
 

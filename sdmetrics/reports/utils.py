@@ -61,24 +61,28 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
         selector={'name': 'Synthetic'}
     )
 
+    show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
+
+    annotations = [] if not show_missing_values else [
+        {
+            'xref': 'paper',
+            'yref': 'paper',
+            'x': -0.08,
+            'y': -0.2,
+            'showarrow': False,
+            'text': (
+                f'*Missing Values: Real Data ({missing_data_real}%), '
+                f'Synthetic Data ({missing_data_synthetic}%)'
+            ),
+        },
+    ]
+
     fig.update_layout(
         title=f"Real vs. Synthetic Data for column '{column_name}'",
-        xaxis_title='Category',
+        xaxis_title='Category*' if show_missing_values else 'Category',
         yaxis_title='Frequency',
         plot_bgcolor='#F5F5F8',
-        annotations=[
-            {
-                'xref': 'paper',
-                'yref': 'paper',
-                'x': -0.08,
-                'y': -0.2,
-                'showarrow': False,
-                'text': (
-                    f'*Missing Values: Real Data ({missing_data_real}%), '
-                    f'Synthetic Data ({missing_data_synthetic}%)'
-                ),
-            },
-        ]
+        annotations=annotations,
     )
 
     return fig
@@ -131,24 +135,28 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
         selector={'name': 'Synthetic'}
     )
 
+    show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
+
+    annotations = [] if not show_missing_values else [
+        {
+            'xref': 'paper',
+            'yref': 'paper',
+            'x': -0.08,
+            'y': -0.2,
+            'showarrow': False,
+            'text': (
+                f'*Missing Values: Real Data ({missing_data_real}%), '
+                f'Synthetic Data ({missing_data_synthetic}%)'
+            ),
+        },
+    ]
+
     fig.update_layout(
         title=f'Real vs. Synthetic Data for column {column_name}',
-        xaxis_title='Value',
+        xaxis_title='Value*' if show_missing_values else 'Value',
         yaxis_title='Frequency',
         plot_bgcolor='#F5F5F8',
-        annotations=[
-            {
-                'xref': 'paper',
-                'yref': 'paper',
-                'x': -0.08,
-                'y': -0.2,
-                'showarrow': False,
-                'text': (
-                    f'*Missing Values: Real Data ({missing_data_real}%), '
-                    f'Synthetic Data ({missing_data_synthetic}%)'
-                ),
-            },
-        ]
+        annotations=annotations,
     )
 
     return fig

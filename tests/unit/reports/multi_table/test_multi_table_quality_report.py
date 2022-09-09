@@ -268,7 +268,7 @@ class TestQualityReport:
         assert score == mock_score
 
     def test_get_properties(self):
-        """Test the ``get_details`` method.
+        """Test the ``get_properties`` method.
 
         Expect that the property score breakdown is returned.
 
@@ -509,11 +509,17 @@ class TestQualityReport:
                     'col1': {'score': 0.1},
                     'col2': {'score': 0.2},
                 },
+                'table2': {
+                    'col3': {'score': 0.5},
+                },
             },
             'TVComplement': {
                 'table1': {
                     'col1': {'score': 0.3},
                     'col2': {'score': 0.4},
+                },
+                'table2': {
+                    'col3': {'score': 0.6},
                 },
             }
         }
@@ -525,10 +531,17 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             out,
             pd.DataFrame({
-                'Table Name': ['table1', 'table1', 'table1', 'table1'],
-                'Column': ['col1', 'col2', 'col1', 'col2'],
-                'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
-                'Quality Score': [0.1, 0.2, 0.3, 0.4],
+                'Table': ['table1', 'table1', 'table1', 'table1', 'table2', 'table2'],
+                'Column': ['col1', 'col2', 'col1', 'col2', 'col3', 'col3'],
+                'Metric': [
+                    'KSComplement',
+                    'KSComplement',
+                    'TVComplement',
+                    'TVComplement',
+                    'KSComplement',
+                    'TVComplement',
+                ],
+                'Quality Score': [0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
             })
         )
 
@@ -567,7 +580,7 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             out,
             pd.DataFrame({
-                'Table Name': ['table1', 'table1', 'table1', 'table1'],
+                'Table': ['table1', 'table1', 'table1', 'table1'],
                 'Columns': [
                     ('col1', 'col3'),
                     ('col2', 'col4'),
@@ -581,8 +594,8 @@ class TestQualityReport:
                     'ContingencySimilarity',
                 ],
                 'Quality Score': [0.1, 0.2, 0.3, 0.4],
-                'Real Score': [0.1, 0.2, 0.3, 0.4],
-                'Synthetic Score': [0.1, 0.2, 0.3, 0.4],
+                'Real Correlation': [0.1, 0.2, 0.3, 0.4],
+                'Synthetic Correlation': [0.1, 0.2, 0.3, 0.4],
             })
         )
 

@@ -178,8 +178,8 @@ class QualityReport():
                 'Columns': columns,
                 'Metric': metrics,
                 'Quality Score': scores,
-                'Real Score': real_scores,
-                'Synthetic Score': synthetic_scores,
+                'Real Correlation': real_scores,
+                'Synthetic Correlation': synthetic_scores,
             })
 
     def get_raw_result(self, metric_name):

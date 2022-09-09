@@ -218,11 +218,11 @@ class QualityReport():
                         scores.append(score_breakdown['score'])
 
             return pd.DataFrame({
-                'Table Name': tables,
+                'Table': tables,
                 'Column': columns,
                 'Metric': metrics,
                 'Quality Score': scores,
-            })
+            }).sort_values(by=['Table'], ignore_index=True)
 
         elif property_name == 'Column Pair Trends':
             real_scores = []
@@ -243,13 +243,13 @@ class QualityReport():
                             score_breakdown['synthetic'] if 'real' in score_breakdown else np.nan)
 
             return pd.DataFrame({
-                'Table Name': tables,
+                'Table': tables,
                 'Columns': columns,
                 'Metric': metrics,
                 'Quality Score': scores,
-                'Real Score': real_scores,
-                'Synthetic Score': synthetic_scores,
-            })
+                'Real Correlation': real_scores,
+                'Synthetic Correlation': synthetic_scores,
+            }).sort_values(by=['Table'], ignore_index=True)
 
         elif property_name == 'Parent Child Relationships':
             child_tables = []
