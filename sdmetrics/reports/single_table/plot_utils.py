@@ -104,8 +104,46 @@ def _get_similarity_correlation_matrix(score_breakdowns, columns):
     return similarity_correlation
 
 
-def get_column_pairs_plot(
-        score_breakdowns, real_correlation, synthetic_correlation, average_score=None):
+def _get_numerical_correlation_matrices(score_breakdowns):
+    """Convert the column pair score breakdowns to a numerical correlation matrix.
+
+    Args:
+        score_breakdowns (dict):
+            Mapping of metric to the score breakdown result.
+
+    Returns:
+        (pandas.DataFrame, pandas.DataFrame):
+            The real and synthetic numerical correlation matrices.
+    """
+    columns = []
+    for cols, _ in score_breakdowns['CorrelationSimilarity'].items():
+        columns.append(cols[0])
+        columns.append(cols[1])
+
+    real_correlation = pd.DataFrame(
+        index=columns,
+        columns=columns,
+        dtype='float',
+    )
+    synthetic_correlation = pd.DataFrame(
+        index=columns,
+        columns=columns,
+        dtype='float',
+    )
+    np.fill_diagonal(real_correlation.to_numpy(), 1.0)
+    np.fill_diagonal(synthetic_correlation.to_numpy(), 1.0)
+
+    for column_pair, result in score_breakdowns['CorrelationSimilarity'].items():
+        column1, column2 = column_pair
+        real_correlation.loc[column1, column2] = result['real']
+        real_correlation.loc[column2, column1] = result['real']
+        synthetic_correlation.loc[column1, column2] = result['synthetic']
+        synthetic_correlation.loc[column2, column1] = result['synthetic']
+
+    return (real_correlation, synthetic_correlation)
+
+
+def get_column_pairs_plot(score_breakdowns, average_score=None):
     """Create a plot to show the column pairs data.
 
     This plot will have one graph in the top row and two in the bottom row.
@@ -113,10 +151,6 @@ def get_column_pairs_plot(
     Args:
         score_breakdowns (dict):
             The score breakdowns of the column pairs metric scores.
-        real_correlation (pandas.DataFrame):
-            Correlation matrix for the real data.
-        synthetic_correlation (pandas.DataFrame):
-            Correlation matrix for the synthetic data.
         average_score (float):
             The average score. If None, the average score will be computed from
             ``score_breakdowns``.
@@ -136,6 +170,7 @@ def get_column_pairs_plot(
         average_score = np.mean(all_scores)
 
     similarity_correlation = _get_similarity_correlation_matrix(score_breakdowns, set(all_columns))
+    real_correlation, synthetic_correlation = _get_numerical_correlation_matrices(score_breakdowns)
 
     fig = make_subplots(
         rows=2,

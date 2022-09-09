@@ -37,6 +37,7 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
     synthetic_data['Data'] = 'Synthetic'
 
     all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+    all_data = all_data.fillna('NaN')
 
     fig = px.histogram(
         all_data,
@@ -231,7 +232,7 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
         field_meta['type'] != 'id'
     ]
     for columns in itertools.combinations(non_id_cols, r=2):
-        if columns not in keys_to_skip:
+        if columns not in keys_to_skip and (columns[1], columns[0]) not in keys_to_skip:
             result = metric.column_pairs_metric.compute_breakdown(
                 binned_real[list(columns)],
                 binned_synthetic[list(columns)],

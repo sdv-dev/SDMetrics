@@ -247,10 +247,6 @@ class TestQualityReport:
         report._metric_results['CorrelationSimilarity'] = {'score': 'test_score_1'}
         report._metric_results['ContingencySimilarity'] = {'score': 'test_score_2'}
         report._property_breakdown['Column Pair Trends'] = 0.78
-        mock_real_corr = Mock()
-        report._real_corr = mock_real_corr
-        mock_synth_corr = Mock()
-        report._synth_corr = mock_synth_corr
 
         # Run
         report.show_details('Column Pair Trends')
@@ -259,7 +255,7 @@ class TestQualityReport:
         get_plot_mock.assert_called_once_with({
             'CorrelationSimilarity': {'score': 'test_score_1'},
             'ContingencySimilarity': {'score': 'test_score_2'},
-        }, mock_real_corr, mock_synth_corr, 0.78)
+        }, 0.78)
 
     def test_get_details(self):
         """Test the ``get_details`` method.

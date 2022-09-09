@@ -316,11 +316,6 @@ class TestQualityReport:
             'table2': {('col7', 'col8'): {'score': 'other_score'}},
         }
 
-        mock_real_corr = Mock()
-        report._real_corrs = {'table1': mock_real_corr}
-        mock_synth_corr = Mock()
-        report._synth_corrs = {'table1': mock_synth_corr}
-
         # Run
         report.show_details('Column Pair Trends', table_name='table1')
 
@@ -328,7 +323,7 @@ class TestQualityReport:
         get_plot_mock.assert_called_once_with({
             'CorrelationSimilarity': {('col1', 'col2'): {'score': 'test_score_1'}},
             'ContingencySimilarity': {('col5', 'col6'): {'score': 'test_score_2'}},
-        }, mock_real_corr, mock_synth_corr)
+        })
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
     def test_show_details_table_relationships(self, get_plot_mock):

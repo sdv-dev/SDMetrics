@@ -34,8 +34,6 @@ class QualityReport():
         self._overall_quality_score = None
         self._metric_results = {}
         self._property_breakdown = {}
-        self._real_corrs = {}
-        self._synth_corrs = {}
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
@@ -110,11 +108,6 @@ class QualityReport():
 
             self._property_breakdown[prop] = np.mean(prop_scores)
 
-        # Calculate and store the correlation matrices.
-        for table_name, table_data in real_data.items():
-            self._real_corrs[table_name] = table_data.corr()
-            self._synth_corrs[table_name] = synthetic_data[table_name].corr()
-
         self._overall_quality_score = np.mean(list(self._property_breakdown.values()))
 
         self._print_results()
@@ -168,8 +161,6 @@ class QualityReport():
             }
             fig = get_column_pairs_plot(
                 score_breakdowns,
-                self._real_corrs[table_name],
-                self._synth_corrs[table_name],
             )
 
         elif property_name == 'Parent Child Relationships':
@@ -277,10 +268,15 @@ class QualityReport():
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
         for metric in metrics:
             if metric.__name__ == metric_name:
-                return {
-                    'metric': f'{metric.__module__}.{metric.__name__}',
-                    'results': self._metric_results[metric_name],
-                }
+                return [
+                    {
+                        'metric': {
+                            'method': f'{metric.__module__}.{metric.__name__}',
+                            'parameters': {},
+                        },
+                        'results': self._metric_results[metric_name],
+                    },
+                ]
 
     def save(self, filename):
         """Save this report instance to the given path using pickle.

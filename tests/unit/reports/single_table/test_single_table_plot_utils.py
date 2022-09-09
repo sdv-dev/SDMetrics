@@ -123,19 +123,12 @@ def test_get_column_pairs_plot(heatmap_mock, make_subplots_mock):
     """
     # Setup
     score_breakdowns = {
-        'METRIC1': {('col1', 'col2'): {'score': 0.1}, ('col2', 'col3'): {'score': 0.3}},
-        'METRIC2': {('col1', 'col3'): {'score': 0.2}},
+        'CorrelationSimilarity': {
+            ('col1', 'col2'): {'score': 0.1, 'real': 0.1, 'synthetic': 0.1},
+            ('col2', 'col3'): {'score': 0.3, 'real': 0.3, 'synthetic': 0.3},
+        },
+        'ContingencySimilarity': {('col1', 'col3'): {'score': 0.2}},
     }
-    real_correlation = pd.DataFrame(
-        [[1, 0.1, 0.1], [0.1, 1, 0.1], [0.1, 0.1, 1]],
-        columns=['col1', 'col2', 'col3'],
-        index=['col1', 'col2', 'col3'],
-    )
-    synthetic_correlation = pd.DataFrame(
-        [[1, 0.1, 0.1], [0.1, 1, 0.1], [0.1, 0.1, 1]],
-        columns=['col1', 'col2', 'col3'],
-        index=['col1', 'col2', 'col3'],
-    )
     mock_fig = Mock()
     make_subplots_mock.return_value = mock_fig
     mock_heatmap_1 = Mock()
@@ -144,7 +137,7 @@ def test_get_column_pairs_plot(heatmap_mock, make_subplots_mock):
     heatmap_mock.side_effect = [mock_heatmap_1, mock_heatmap_2, mock_heatmap_3]
 
     # Run
-    out = get_column_pairs_plot(score_breakdowns, real_correlation, synthetic_correlation)
+    out = get_column_pairs_plot(score_breakdowns)
 
     # Assert
     make_subplots_mock.assert_called_once()

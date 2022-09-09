@@ -30,8 +30,6 @@ class QualityReport():
         self._overall_quality_score = None
         self._metric_results = {}
         self._property_breakdown = {}
-        self._real_corr = None
-        self._synth_corr = None
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
@@ -63,7 +61,7 @@ class QualityReport():
                 real_data, synthetic_data, metadata)
 
         existing_column_pairs = list(self._metric_results['ContingencySimilarity'].keys())
-        existing_column_pairs.append(
+        existing_column_pairs.extend(
             list(self._metric_results['CorrelationSimilarity'].keys()))
         additional_results = discretize_and_apply_metric(
             real_data, synthetic_data, metadata, ContingencySimilarity, existing_column_pairs)
@@ -82,10 +80,6 @@ class QualityReport():
                 prop_scores.append(score)
 
             self._property_breakdown[prop] = np.mean(prop_scores)
-
-        # Calculate and store the correlation matrices.
-        self._real_corr = real_data.corr()
-        self._synth_corr = synthetic_data.corr()
 
         self._overall_quality_score = np.mean(list(self._property_breakdown.values()))
 
@@ -130,8 +124,6 @@ class QualityReport():
         elif property_name == 'Column Pair Trends':
             fig = get_column_pairs_plot(
                 score_breakdowns,
-                self._real_corr,
-                self._synth_corr,
                 self._property_breakdown[property_name],
             )
 
@@ -203,10 +195,15 @@ class QualityReport():
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
         for metric in metrics:
             if metric.__name__ == metric_name:
-                return {
-                    'metric': f'{metric.__module__}.{metric.__name__}',
-                    'results': self._metric_results[metric_name],
-                }
+                return [
+                    {
+                        'metric': {
+                            'method': f'{metric.__module__}.{metric.__name__}',
+                            'parameters': {},
+                        },
+                        'results': self._metric_results[metric_name],
+                    },
+                ]
 
     def save(self, filename):
         """Save this report instance to the given path using pickle.
