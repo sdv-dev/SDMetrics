@@ -244,7 +244,8 @@ class QualityReport():
 
             return pd.DataFrame({
                 'Table': tables,
-                'Columns': columns,
+                'Column 1': [col1 for col1, _ in columns],
+                'Column 2': [col2 for _, col2 in columns],
                 'Metric': metrics,
                 'Quality Score': scores,
                 'Real Correlation': real_scores,

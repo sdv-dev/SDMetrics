@@ -254,12 +254,16 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
         field_meta['type'] != 'id'
     ]
     for columns in itertools.combinations(non_id_cols, r=2):
-        if columns not in keys_to_skip and (columns[1], columns[0]) not in keys_to_skip:
+        sorted_columns = tuple(sorted(columns))
+        if (
+            sorted_columns not in keys_to_skip and
+            (sorted_columns[1], sorted_columns[0]) not in keys_to_skip
+        ):
             result = metric.column_pairs_metric.compute_breakdown(
-                binned_real[list(columns)],
-                binned_synthetic[list(columns)],
+                binned_real[list(sorted_columns)],
+                binned_synthetic[list(sorted_columns)],
             )
-            metric_results[columns] = result
-            metric_results[columns] = result
+            metric_results[sorted_columns] = result
+            metric_results[sorted_columns] = result
 
     return metric_results

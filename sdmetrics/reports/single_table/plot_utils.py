@@ -204,12 +204,14 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
         go.Heatmap(
             x=similarity_correlation.columns,
             y=similarity_correlation.columns,
-            z=similarity_correlation,
+            z=similarity_correlation.round(2),
             coloraxis='coloraxis',
             xaxis='x',
             yaxis='y',
-            hovertemplate=('<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: '
-                           '%{z:.2f}<extra></extra>'),
+            hovertemplate=(
+                '<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: '
+                '%{z}<extra></extra>'
+            ),
         ),
         1,
         1,
@@ -220,14 +222,16 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
         go.Heatmap(
             x=real_correlation.columns,
             y=real_correlation.columns,
-            z=real_correlation,
+            z=real_correlation.round(2),
             coloraxis='coloraxis2',
             xaxis='x2',
             yaxis='y2',
             # Compare against synthetic data in the tooltip.
-            customdata=synthetic_correlation,
-            hovertemplate=('<b>Correlation</b><br>(%{x},%{y})<br><br>Real: %{z:.2f}'
-                           '<br>(vs. Synthetic: %{customdata:.2f})<extra></extra>'),
+            customdata=synthetic_correlation.round(2),
+            hovertemplate=(
+                '<b>Correlation</b><br>(%{x},%{y})<br><br>Real: %{z}'
+                '<br>(vs. Synthetic: %{customdata})<extra></extra>'
+            ),
         ),
         2,
         1,
@@ -238,14 +242,16 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
         go.Heatmap(
             x=synthetic_correlation.columns,
             y=synthetic_correlation.columns,
-            z=synthetic_correlation,
+            z=synthetic_correlation.round(2),
             coloraxis='coloraxis2',
             xaxis='x3',
             yaxis='y3',
             # Compare against real data in the tooltip.
-            customdata=real_correlation,
-            hovertemplate=('<b>Correlation</b><br>(%{x},%{y})<br><br>Synthetic: '
-                           '%{z:.2f}<br>(vs. Real: %{customdata:.2f})<extra></extra>'),
+            customdata=real_correlation.round(2),
+            hovertemplate=(
+                '<b>Correlation</b><br>(%{x},%{y})<br><br>Synthetic: '
+                '%{z}<br>(vs. Real: %{customdata})<extra></extra>'
+            ),
         ),
         2,
         2,
@@ -260,7 +266,7 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
             'colorbar_y': 0.8,
             'cmin': 0,
             'cmax': 1,
-            'colorscale': 'Orrd_r'
+            'colorscale': ['#FF0000', '#F16141', '#36B37E'],
         },
         # Correlation heatmaps color axis
         coloraxis2={

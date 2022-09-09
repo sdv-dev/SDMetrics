@@ -399,12 +399,8 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             out,
             pd.DataFrame({
-                'Columns': [
-                    ('col1', 'col3'),
-                    ('col2', 'col4'),
-                    ('col1', 'col3'),
-                    ('col2', 'col4'),
-                ],
+                'Column 1': ['col1', 'col2', 'col1', 'col2'],
+                'Column 2': ['col3', 'col4', 'col3', 'col4'],
                 'Metric': [
                     'CorrelationSimilarity',
                     'CorrelationSimilarity',

@@ -175,7 +175,8 @@ class QualityReport():
                         score_breakdown['synthetic'] if 'synthetic' in score_breakdown else np.nan)
 
             return pd.DataFrame({
-                'Columns': columns,
+                'Column 1': [col1 for col1, _ in columns],
+                'Column 2': [col2 for _, col2 in columns],
                 'Metric': metrics,
                 'Quality Score': scores,
                 'Real Correlation': real_scores,
