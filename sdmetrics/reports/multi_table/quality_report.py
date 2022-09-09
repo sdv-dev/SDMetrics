@@ -88,13 +88,16 @@ class QualityReport():
             prop_scores = []
             if prop == 'Parent Child Relationships':
                 for metric in metrics:
-                    score = np.nanmean(
-                        [
-                            table_breakdown['score'] for _, table_breakdown
-                            in self._metric_results['CardinalityShapeSimilarity'].items()
-                        ]
-                    )
-                    prop_scores.append(score)
+                    if 'score' in self._metric_results[metric.__name__]:
+                        prop_scores.append(self._metric_results[metric.__name__]['score'])
+                    else:
+                        score = np.nanmean(
+                            [
+                                table_breakdown['score'] for _, table_breakdown
+                                in self._metric_results[metric.__name__].items()
+                            ]
+                        )
+                        prop_scores.append(score)
             else:
                 for metric in metrics:
                     score = np.nanmean(
@@ -106,9 +109,9 @@ class QualityReport():
                     )
                     prop_scores.append(score)
 
-            self._property_breakdown[prop] = np.mean(prop_scores)
+            self._property_breakdown[prop] = np.nanmean(prop_scores)
 
-        self._overall_quality_score = np.mean(list(self._property_breakdown.values()))
+        self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
 
         self._print_results()
 
