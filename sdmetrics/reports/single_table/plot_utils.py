@@ -117,8 +117,10 @@ def _get_numerical_correlation_matrices(score_breakdowns):
     """
     columns = []
     for cols, _ in score_breakdowns['CorrelationSimilarity'].items():
-        columns.append(cols[0])
-        columns.append(cols[1])
+        if cols[0] not in columns:
+            columns.append(cols[0])
+        if cols[1] not in columns:
+            columns.append(cols[1])
 
     real_correlation = pd.DataFrame(
         index=columns,

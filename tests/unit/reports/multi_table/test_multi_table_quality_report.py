@@ -509,12 +509,17 @@ class TestQualityReport:
         out = report.get_raw_result('KSComplement')
 
         # Assert
-        assert out == {
-            'metric': 'sdmetrics.multi_table.multi_single_table.KSComplement',
-            'results': {
-                'table1': {
-                    'col1': {'score': 0.1},
-                    'col2': {'score': 0.2},
+        assert out == [
+            {
+                'metric': {
+                    'method': 'sdmetrics.multi_table.multi_single_table.KSComplement',
+                    'parameters': {},
+                },
+                'results': {
+                    'table1': {
+                        'col1': {'score': 0.1},
+                        'col2': {'score': 0.2},
+                    }
                 }
             }
-        }
+        ]
