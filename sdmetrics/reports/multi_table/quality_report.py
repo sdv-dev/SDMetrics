@@ -268,13 +268,20 @@ class QualityReport():
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
         for metric in metrics:
             if metric.__name__ == metric_name:
+                filtered_results = {}
+                for table_name, table_results in self._metric_results[metric_name].items():
+                    filtered_results[table_name] = {
+                        key: result for key, result in table_results.items()
+                        if not np.isnan(result['score'])
+                    }
+
                 return [
                     {
                         'metric': {
                             'method': f'{metric.__module__}.{metric.__name__}',
                             'parameters': {},
                         },
-                        'results': self._metric_results[metric_name],
+                        'results': filtered_results,
                     },
                 ]
 

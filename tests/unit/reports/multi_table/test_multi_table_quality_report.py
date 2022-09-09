@@ -1,6 +1,7 @@
 import pickle
 from unittest.mock import Mock, mock_open, patch
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -486,7 +487,8 @@ class TestQualityReport:
     def test_get_raw_result(self):
         """Test the ``get_raw_result`` method.
 
-        Expect that the raw result of the desired metric is returned.
+        Expect that the raw result of the desired metric is returned. Expect that null scores
+        are excluded.
 
         Input:
         - metric name
@@ -501,6 +503,7 @@ class TestQualityReport:
                 'table1': {
                     'col1': {'score': 0.1},
                     'col2': {'score': 0.2},
+                    'col3': {'score': np.nan},
                 },
             },
         }

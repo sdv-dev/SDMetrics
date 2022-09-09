@@ -51,7 +51,7 @@ def get_column_shapes_plot(score_breakdowns, average_score=None):
         data,
         x='Column Name',
         y='Quality Score',
-        title=f'Column Shapes Similarity (Average={round(average_score, 2)})',
+        title=f'Data Quality: Column Shapes (Average Score={round(average_score, 2)})',
         category_orders={'group': data['Column Name']},
         color='Metric',
         color_discrete_map={
@@ -178,9 +178,9 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
         rows=2,
         cols=2,
         subplot_titles=[
-            f'Column Pairs Similarity ({round(average_score, 2)})',
-            'Numerical Correlation (Real)',
-            'Numerical Correlation (Synthetic)',
+            'Real vs. Synthetic Similarity',
+            'Real Trends (Numerical Data)',
+            'Real Trends (Synthetic Data)',
         ],
         specs=[[{'colspan': 2, 'l': 0.26, 'r': 0.26}, None], [{}, {}]])
 
@@ -237,7 +237,7 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
     )
 
     fig.update_layout(
-        title_text='Column Pair Trends',
+        title_text=f'Data Quality: Column Pair Trends (Average Score={round(average_score, 2)})',
         # Similarity heatmap color axis
         coloraxis={
             'colorbar_len': 0.5,

@@ -201,7 +201,11 @@ class QualityReport():
                             'method': f'{metric.__module__}.{metric.__name__}',
                             'parameters': {},
                         },
-                        'results': self._metric_results[metric_name],
+                        'results': {
+                            key: result for key, result in
+                            self._metric_results[metric_name].items()
+                            if not np.isnan(result['score'])
+                        },
                     },
                 ]
 
