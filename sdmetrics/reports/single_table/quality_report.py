@@ -9,6 +9,7 @@ import pandas as pd
 import tqdm
 
 from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
+from sdmetrics.reports.utils import discretize_and_apply_metric
 from sdmetrics.single_table import (
     ContingencySimilarity, CorrelationSimilarity, KSComplement, TVComplement)
 
@@ -34,7 +35,7 @@ class QualityReport():
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
-        out.write(f'Overall Quality Score: {self._overall_quality_score}\n\n')
+        out.write(f'\nOverall Quality Score: {self._overall_quality_score}\n\n')
 
         if len(self._property_breakdown) > 0:
             out.write('Properties:\n')
@@ -55,9 +56,18 @@ class QualityReport():
         """
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
 
-        for metric in tqdm.tqdm(metrics, desc='Creating report:'):
-            self._metric_results[metric.__name__] = metric.compute_breakdown(
-                real_data, synthetic_data)
+        for metric in tqdm.tqdm(metrics, desc='Creating report'):
+            metric_name = metric.__name__
+
+            self._metric_results[metric_name] = metric.compute_breakdown(
+                real_data, synthetic_data, metadata)
+
+        existing_column_pairs = list(self._metric_results['ContingencySimilarity'].keys())
+        existing_column_pairs.append(
+            list(self._metric_results['CorrelationSimilarity'].keys()))
+        additional_results = discretize_and_apply_metric(
+            real_data, synthetic_data, metadata, ContingencySimilarity, existing_column_pairs)
+        self._metric_results['ContingencySimilarity'].update(additional_results)
 
         self._property_breakdown = {}
         for prop, metrics in self.METRICS.items():
@@ -74,8 +84,8 @@ class QualityReport():
             self._property_breakdown[prop] = np.mean(prop_scores)
 
         # Calculate and store the correlation matrices.
-        self._real_corr = real_data.dropna().corr()
-        self._synth_corr = synthetic_data.dropna().corr()
+        self._real_corr = real_data.corr()
+        self._synth_corr = synthetic_data.corr()
 
         self._overall_quality_score = np.mean(list(self._property_breakdown.values()))
 
@@ -115,10 +125,15 @@ class QualityReport():
         }
 
         if property_name == 'Column Shapes':
-            fig = get_column_shapes_plot(score_breakdowns)
+            fig = get_column_shapes_plot(score_breakdowns, self._property_breakdown[property_name])
 
         elif property_name == 'Column Pair Trends':
-            fig = get_column_pairs_plot(score_breakdowns, self._real_corr, self._synth_corr)
+            fig = get_column_pairs_plot(
+                score_breakdowns,
+                self._real_corr,
+                self._synth_corr,
+                self._property_breakdown[property_name],
+            )
 
         fig.show()
 
@@ -140,6 +155,9 @@ class QualityReport():
         if property_name == 'Column Shapes':
             for metric in self.METRICS[property_name]:
                 for column, score_breakdown in self._metric_results[metric.__name__].items():
+                    if np.isnan(score_breakdown['score']):
+                        continue
+
                     columns.append(column)
                     metrics.append(metric.__name__)
                     scores.append(score_breakdown['score'])
@@ -158,8 +176,10 @@ class QualityReport():
                     columns.append(column_pair)
                     metrics.append(metric.__name__)
                     scores.append(score_breakdown['score'])
-                    real_scores.append(score_breakdown['real'])
-                    synthetic_scores.append(score_breakdown['synthetic'])
+                    real_scores.append(
+                        score_breakdown['real'] if 'real' in score_breakdown else np.nan)
+                    synthetic_scores.append(
+                        score_breakdown['synthetic'] if 'synthetic' in score_breakdown else np.nan)
 
             return pd.DataFrame({
                 'Columns': columns,

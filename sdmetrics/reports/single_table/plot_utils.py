@@ -30,24 +30,28 @@ def _get_column_shapes_data(score_breakdowns):
     return pd.DataFrame({'Column Name': column_names, 'Metric': metrics, 'Quality Score': scores})
 
 
-def get_column_shapes_plot(score_breakdowns):
+def get_column_shapes_plot(score_breakdowns, average_score=None):
     """Create a plot to show the column shape similarities.
 
     Args:
         score_breakdowns (dict):
             The score breakdowns of the column shape metrics.
+        average_score (float):
+            The average score. If None, the average score will be computed from
+            ``score_breakdowns``.
 
     Returns:
         plotly.graph_objects._figure.Figure
     """
     data = _get_column_shapes_data(score_breakdowns)
-    average_score = round(data['Quality Score'].mean(), 2)
+    if average_score is None:
+        average_score = data['Quality Score'].mean()
 
     fig = px.bar(
         data,
         x='Column Name',
         y='Quality Score',
-        title=f'Column Shapes Similarity (Average={average_score})',
+        title=f'Column Shapes Similarity (Average={round(average_score, 2)})',
         category_orders={'group': data['Column Name']},
         color='Metric',
         color_discrete_map={
@@ -74,7 +78,7 @@ def get_column_shapes_plot(score_breakdowns):
     return fig
 
 
-def _get_similarity_correlation_matrix(score_breakdowns, real_correlation):
+def _get_similarity_correlation_matrix(score_breakdowns, columns):
     """Convert the column pair score breakdowns to a similiarity correlation matrix.
 
     Args:
@@ -85,8 +89,8 @@ def _get_similarity_correlation_matrix(score_breakdowns, real_correlation):
         pandas.DataFrame
     """
     similarity_correlation = pd.DataFrame(
-        index=real_correlation.index,
-        columns=real_correlation.columns,
+        index=columns,
+        columns=columns,
         dtype='float',
     )
     np.fill_diagonal(similarity_correlation.to_numpy(), 1.0)
@@ -100,7 +104,8 @@ def _get_similarity_correlation_matrix(score_breakdowns, real_correlation):
     return similarity_correlation
 
 
-def get_column_pairs_plot(score_breakdowns, real_correlation, synthetic_correlation):
+def get_column_pairs_plot(
+        score_breakdowns, real_correlation, synthetic_correlation, average_score=None):
     """Create a plot to show the column pairs data.
 
     This plot will have one graph in the top row and two in the bottom row.
@@ -112,23 +117,31 @@ def get_column_pairs_plot(score_breakdowns, real_correlation, synthetic_correlat
             Correlation matrix for the real data.
         synthetic_correlation (pandas.DataFrame):
             Correlation matrix for the synthetic data.
+        average_score (float):
+            The average score. If None, the average score will be computed from
+            ``score_breakdowns``.
 
     Returns:
         plotly.graph_objects._figure.Figure
     """
-    all_scores = [
-        result['score'] for _, score_breakdown in score_breakdowns.items()
-        for column_pair, result in score_breakdown.items()
-    ]
-    average_quality_score = round(np.mean(all_scores), 2)
+    all_columns = []
+    all_scores = []
+    for _, score_breakdown in score_breakdowns.items():
+        for column_pair, result in score_breakdown.items():
+            all_columns.append(column_pair[0])
+            all_columns.append(column_pair[1])
+            all_scores.append(result['score'])
 
-    similarity_correlation = _get_similarity_correlation_matrix(score_breakdowns, real_correlation)
+    if average_score is None:
+        average_score = np.mean(all_scores)
+
+    similarity_correlation = _get_similarity_correlation_matrix(score_breakdowns, set(all_columns))
 
     fig = make_subplots(
         rows=2,
         cols=2,
         subplot_titles=[
-            f'Column Pairs Similarity ({average_quality_score})',
+            f'Column Pairs Similarity ({round(average_score, 2)})',
             'Numerical Correlation (Real)',
             'Numerical Correlation (Synthetic)',
         ],

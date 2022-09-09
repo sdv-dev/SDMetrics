@@ -21,7 +21,8 @@ class TestQualityReport:
         assert report._metric_results == {}
         assert report._property_breakdown == {}
 
-    def test_generate(self):
+    @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
+    def test_generate(self, mock_discretize_and_apply_metric):
         """Test the ``generate`` method.
 
         Expect that the single-table metrics are called.
@@ -40,9 +41,10 @@ class TestQualityReport:
           are populated.
         """
         # Setup
-        real_data = Mock()
-        synthetic_data = Mock()
+        real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
+        synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
         ks_complement_mock = Mock()
+        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
         ks_complement_mock.__name__ = 'KSComplement'
         ks_complement_mock.compute_breakdown.return_value = {
             'col1': {'score': 0.1},
@@ -73,6 +75,7 @@ class TestQualityReport:
             'Column Shapes': [ks_complement_mock, tv_complement_mock],
             'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
         }
+        mock_discretize_and_apply_metric.return_value = {}
 
         # Run
         with patch.object(
@@ -81,17 +84,21 @@ class TestQualityReport:
             metrics_mock,
         ):
             report = QualityReport()
-            report.generate(real_data, synthetic_data, Mock())
+            report.generate(real_data, synthetic_data, metadata)
 
         # Assert
-        ks_complement_mock.compute_breakdown.assert_called_once_with(real_data, synthetic_data)
-        tv_complement_mock.compute_breakdown.assert_called_once_with(real_data, synthetic_data)
-        corr_sim_mock.compute_breakdown.assert_called_once_with(real_data, synthetic_data)
-        cont_sim_mock.compute_breakdown.assert_called_once_with(real_data, synthetic_data)
-        assert report._overall_quality_score == 0.15000000000000002
+        ks_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        tv_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        corr_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cont_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        assert report._overall_quality_score == 0.1930555555555556
         assert report._property_breakdown == {
             'Column Shapes': 0.15000000000000002,
-            'Column Pair Trends': 0.15000000000000002,
+            'Column Pair Trends': 0.23611111111111113,
         }
 
     def test_get_score(self):
@@ -214,6 +221,7 @@ class TestQualityReport:
         report = QualityReport()
         report._metric_results['KSComplement'] = {'score': 'ks_complement_score'}
         report._metric_results['TVComplement'] = {'score': 'tv_complement_score'}
+        report._property_breakdown['Column Shapes'] = 0.78
 
         # Run
         report.show_details('Column Shapes')
@@ -222,7 +230,7 @@ class TestQualityReport:
         get_plot_mock.assert_called_once_with({
             'KSComplement': {'score': 'ks_complement_score'},
             'TVComplement': {'score': 'tv_complement_score'},
-        })
+        }, 0.78)
 
     @patch('sdmetrics.reports.single_table.quality_report.get_column_pairs_plot')
     def test_show_details_column_pairs(self, get_plot_mock):
@@ -238,6 +246,7 @@ class TestQualityReport:
         report = QualityReport()
         report._metric_results['CorrelationSimilarity'] = {'score': 'test_score_1'}
         report._metric_results['ContingencySimilarity'] = {'score': 'test_score_2'}
+        report._property_breakdown['Column Pair Trends'] = 0.78
         mock_real_corr = Mock()
         report._real_corr = mock_real_corr
         mock_synth_corr = Mock()
@@ -250,7 +259,7 @@ class TestQualityReport:
         get_plot_mock.assert_called_once_with({
             'CorrelationSimilarity': {'score': 'test_score_1'},
             'ContingencySimilarity': {'score': 'test_score_2'},
-        }, mock_real_corr, mock_synth_corr)
+        }, mock_real_corr, mock_synth_corr, 0.78)
 
     def test_get_details(self):
         """Test the ``get_details`` method.

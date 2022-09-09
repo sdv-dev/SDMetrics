@@ -88,14 +88,10 @@ def test__get_similarity_correlation_matrix():
         'METRIC1': {('col1', 'col2'): {'score': 0.1}, ('col2', 'col3'): {'score': 0.3}},
         'METRIC2': {('col1', 'col3'): {'score': 0.2}},
     }
-    real_correlation = pd.DataFrame(
-        [[1, 0.1, 0.1], [0.1, 1, 0.1], [0.1, 0.1, 1]],
-        columns=['col1', 'col2', 'col3'],
-        index=['col1', 'col2', 'col3'],
-    )
+    columns = ['col1', 'col2', 'col3']
 
     # Run
-    out = _get_similarity_correlation_matrix(score_breakdowns, real_correlation)
+    out = _get_similarity_correlation_matrix(score_breakdowns, columns)
 
     # Assert
     expected = pd.DataFrame(

@@ -53,10 +53,25 @@ class ContingencySimilarity(ColumnPairsMetric):
             normalize=True,
         )
 
+        real_append_cols = {}
         for col in set(contingency_synthetic.columns) - set(contingency_real.columns):
-            contingency_real[col] = [0 for _ in range(len(contingency_real))]
+            real_append_cols[col] = [0 for _ in range(len(contingency_real))]
+        contingency_real = pd.concat(
+            (contingency_real, pd.DataFrame(real_append_cols, index=contingency_real.index)),
+            axis=1,
+        )
+
+        synthetic_append_cols = {}
         for col in set(contingency_real.columns) - set(contingency_synthetic.columns):
-            contingency_synthetic[col] = [0 for _ in range(len(contingency_synthetic))]
+            synthetic_append_cols[col] = [0 for _ in range(len(contingency_synthetic))]
+        contingency_synthetic = pd.concat(
+            (
+                contingency_synthetic,
+                pd.DataFrame(synthetic_append_cols, index=contingency_synthetic.index),
+            ),
+            axis=1,
+        )
+
         for row in set(contingency_synthetic.index) - set(contingency_real.index):
             contingency_real.loc[row] = [0 for _ in range(len(contingency_real.columns))]
         for row in set(contingency_real.index) - set(contingency_synthetic.index):
