@@ -353,11 +353,14 @@ class TestQualityReport:
         assert loaded == pickle_mock.load.return_value
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_column_shapes_plot')
-    def test_show_details_column_shapes(self, get_plot_mock):
-        """Test the ``show_details`` method with Column Shapes.
+    def test_get_visualization_column_shapes(self, get_plot_mock):
+        """Test the ``get_visualization`` method with Column Shapes.
 
         Input:
         - property='Column Shapes'
+
+        Output:
+        - visualization
 
         Side Effects:
         - get_column_shapes_plot is called with the expected score breakdowns.
@@ -374,16 +377,17 @@ class TestQualityReport:
         }
 
         # Run
-        report.show_details('Column Shapes', table_name='table1')
+        out = report.get_visualization('Column Shapes', table_name='table1')
 
         # Assert
         get_plot_mock.assert_called_once_with({
             'KSComplement': {'col1': {'score': 'ks_complement_score'}},
             'TVComplement': {'col2': {'score': 'tv_complement_score'}},
         })
+        assert out == get_plot_mock.return_value
 
-    def test_show_details_column_shapes_no_table_name(self):
-        """Test the ``show_details`` method with Column Shapes and no table name.
+    def test_get_visualization_column_shapes_no_table_name(self):
+        """Test the ``get_visualization`` method with Column Shapes and no table name.
 
         Expect that a ``ValueError`` is thrown.
 
@@ -402,14 +406,17 @@ class TestQualityReport:
             ValueError,
             match='Table name must be provided when viewing details for property Column Shapes',
         ):
-            report.show_details('Column Shapes')
+            report.get_visualization('Column Shapes')
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_column_pairs_plot')
-    def test_show_details_column_pairs(self, get_plot_mock):
-        """Test the ``show_details`` method with Column Pairs.
+    def test_get_visualization_column_pairs(self, get_plot_mock):
+        """Test the ``get_visualization`` method with Column Pairs.
 
         Input:
         - property='Column Pairs'
+
+        Output:
+        - visualization
 
         Side Effects:
         - get_column_pairs_plot is called with the expected score breakdowns.
@@ -426,20 +433,24 @@ class TestQualityReport:
         }
 
         # Run
-        report.show_details('Column Pair Trends', table_name='table1')
+        out = report.get_visualization('Column Pair Trends', table_name='table1')
 
         # Assert
         get_plot_mock.assert_called_once_with({
             'CorrelationSimilarity': {('col1', 'col2'): {'score': 'test_score_1'}},
             'ContingencySimilarity': {('col5', 'col6'): {'score': 'test_score_2'}},
         })
+        assert out == get_plot_mock.return_value
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
-    def test_show_details_table_relationships(self, get_plot_mock):
-        """Test the ``show_details`` method with Parent Child Relationships.
+    def test_get_visualization_table_relationships(self, get_plot_mock):
+        """Test the ``get_visualization`` method with Parent Child Relationships.
 
         Input:
         - property='Parent Child Relationships'
+
+        Output:
+        - visualization
 
         Side Effects:
         - get_parent_child_relationships_plot is called with the expected score breakdowns.
@@ -452,7 +463,7 @@ class TestQualityReport:
         }
 
         # Run
-        report.show_details('Parent Child Relationships')
+        out = report.get_visualization('Parent Child Relationships')
 
         # Assert
         get_plot_mock.assert_called_once_with({
@@ -461,14 +472,18 @@ class TestQualityReport:
                 ('table3', 'table2'): {'score': 'test_score_2'},
             },
         })
+        assert out == get_plot_mock.return_value
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
-    def test_show_details_table_relationships_with_table_name(self, get_plot_mock):
-        """Test the ``show_details`` method with Parent Child Relationships and a table.
+    def test_get_visualization_table_relationships_with_table_name(self, get_plot_mock):
+        """Test the ``get_visualization`` method with Parent Child Relationships and a table.
 
         Input:
         - property='Parent Child Relationships'
         - table name
+
+        Output:
+        - visualization
 
         Side Effects:
         - get_parent_child_relationships_plot is called with the expected score breakdowns.
@@ -481,7 +496,7 @@ class TestQualityReport:
         }
 
         # Run
-        report.show_details('Parent Child Relationships', table_name='table1')
+        out = report.get_visualization('Parent Child Relationships', table_name='table1')
 
         # Assert
         get_plot_mock.assert_called_once_with({
@@ -489,6 +504,7 @@ class TestQualityReport:
                 ('table1', 'table2'): {'score': 'test_score_1'},
             },
         })
+        assert out == get_plot_mock.return_value
 
     def test_get_details_column_shapes(self):
         """Test the ``get_details`` method with column shapes.

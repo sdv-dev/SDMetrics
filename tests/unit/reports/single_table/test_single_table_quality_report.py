@@ -282,11 +282,14 @@ class TestQualityReport:
         assert loaded == pickle_mock.load.return_value
 
     @patch('sdmetrics.reports.single_table.quality_report.get_column_shapes_plot')
-    def test_show_details_column_shapes(self, get_plot_mock):
-        """Test the ``show_details`` method with Column Shapes.
+    def test_get_visualization_column_shapes(self, get_plot_mock):
+        """Test the ``get_visualization`` method with Column Shapes.
 
         Input:
         - property='Column Shapes'
+
+        Output:
+        - the visualization
 
         Side Effects:
         - get_column_shapes_plot is called with the expected score breakdowns.
@@ -298,20 +301,24 @@ class TestQualityReport:
         report._property_breakdown['Column Shapes'] = 0.78
 
         # Run
-        report.show_details('Column Shapes')
+        fig = report.get_visualization('Column Shapes')
 
         # Assert
         get_plot_mock.assert_called_once_with({
             'KSComplement': {'score': 'ks_complement_score'},
             'TVComplement': {'score': 'tv_complement_score'},
         }, 0.78)
+        assert fig == get_plot_mock.return_value
 
     @patch('sdmetrics.reports.single_table.quality_report.get_column_pairs_plot')
-    def test_show_details_column_pairs(self, get_plot_mock):
-        """Test the ``show_details`` method with Column Pairs.
+    def test_get_visualization_column_pairs(self, get_plot_mock):
+        """Test the ``get_visualization`` method with Column Pairs.
 
         Input:
         - property='Column Pair Trends'
+
+        Output:
+        - the visualization
 
         Side Effects:
         - get_column_pairs_plot is called with the expected score breakdowns.
@@ -323,13 +330,14 @@ class TestQualityReport:
         report._property_breakdown['Column Pair Trends'] = 0.78
 
         # Run
-        report.show_details('Column Pair Trends')
+        fig = report.get_visualization('Column Pair Trends')
 
         # Assert
         get_plot_mock.assert_called_once_with({
             'CorrelationSimilarity': {'score': 'test_score_1'},
             'ContingencySimilarity': {'score': 'test_score_2'},
         }, 0.78)
+        assert fig == get_plot_mock.return_value
 
     def test_get_details(self):
         """Test the ``get_details`` method.

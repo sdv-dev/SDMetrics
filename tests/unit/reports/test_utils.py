@@ -4,8 +4,8 @@ from unittest.mock import Mock, call, patch
 import pandas as pd
 
 from sdmetrics.reports.utils import (
-    discretize_and_apply_metric, discretize_table_data, make_continuous_column_plot,
-    make_discrete_column_plot, plot_column)
+    discretize_and_apply_metric, discretize_table_data, get_column_plot,
+    make_continuous_column_plot, make_discrete_column_plot)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -160,13 +160,16 @@ def test_make_discrete_column_plot(px_mock):
 
 
 @patch('sdmetrics.reports.utils.make_continuous_column_plot')
-def test_plot_column_continuous_col(make_plot_mock):
-    """Test the ``plot_column`` method with a continuous column.
+def test_get_column_plot_continuous_col(make_plot_mock):
+    """Test the ``get_column_plot`` method with a continuous column.
 
     Inputs:
     - real column data
     - synthetic column data
     - column data type
+
+    Output:
+    - column plot
 
     Side Effects:
     - The make continuous column plot method is called.
@@ -177,20 +180,24 @@ def test_plot_column_continuous_col(make_plot_mock):
     sdtype = 'numerical'
 
     # Run
-    plot_column(real_column, synthetic_column, sdtype)
+    out = get_column_plot(real_column, synthetic_column, sdtype)
 
     # Assert
     make_plot_mock.assert_called_once_with(real_column, synthetic_column, sdtype)
+    assert out == make_plot_mock.return_value
 
 
 @patch('sdmetrics.reports.utils.make_discrete_column_plot')
-def test_plot_column_discrete_col(make_plot_mock):
-    """Test the ``plot_column`` method with a discrete column.
+def test_get_column_plot_discrete_col(make_plot_mock):
+    """Test the ``get_column_plot`` method with a discrete column.
 
     Inputs:
     - real column data
     - synthetic column data
     - column data type
+
+    Output:
+    - column plot
 
     Side Effects:
     - The make discrete column plot method is called.
@@ -201,10 +208,11 @@ def test_plot_column_discrete_col(make_plot_mock):
     sdtype = 'categorical'
 
     # Run
-    plot_column(real_column, synthetic_column, sdtype)
+    out = get_column_plot(real_column, synthetic_column, sdtype)
 
     # Assert
     make_plot_mock.assert_called_once_with(real_column, synthetic_column, sdtype)
+    assert out == make_plot_mock.return_value
 
 
 def test_discretize_table_data():

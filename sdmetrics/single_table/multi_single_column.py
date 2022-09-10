@@ -182,7 +182,7 @@ class KSComplement(MultiSingleColumnMetric):
     of all the scores obtained.
     """
 
-    field_types = ('numerical', )
+    field_types = ('numerical', 'datetime')
     single_column_metric = single_column.statistical.KSComplement
 
 

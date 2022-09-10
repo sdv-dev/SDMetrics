@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
+from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.multi_table import (
     CardinalityShapeSimilarity, ContingencySimilarity, CorrelationSimilarity, KSComplement,
     TVComplement)
@@ -62,8 +63,13 @@ class QualityReport():
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
 
         for metric in tqdm.tqdm(metrics, desc='Creating report'):
-            self._metric_results[metric.__name__] = metric.compute_breakdown(
-                real_data, synthetic_data, metadata)
+            try:
+                self._metric_results[metric.__name__] = metric.compute_breakdown(
+                    real_data, synthetic_data, metadata)
+            except IncomputableMetricError:
+                # Metric is not compatible with this dataset.
+                self._metric_results[metric.__name__] = {}
+                continue
 
         for table_name, table_data in real_data.items():
             existing_column_pairs = []
@@ -94,25 +100,27 @@ class QualityReport():
                     if 'score' in self._metric_results[metric.__name__]:
                         prop_scores.append(self._metric_results[metric.__name__]['score'])
                     else:
-                        score = np.nanmean(
-                            [
-                                table_breakdown['score'] for _, table_breakdown
-                                in self._metric_results[metric.__name__].items()
-                            ]
-                        )
-                        prop_scores.append(score)
+                        metric_scores = [
+                            table_breakdown['score'] for _, table_breakdown
+                            in self._metric_results[metric.__name__].items()
+                            if not np.isnan(table_breakdown['score'])
+                        ]
+                        if len(metric_scores) > 0:
+                            prop_scores.append(np.mean(metric_scores))
             else:
                 for metric in metrics:
-                    score = np.nanmean(
-                        [
-                            breakdown['score'] for _, table_breakdowns
-                            in self._metric_results[metric.__name__].items()
-                            for _, breakdown in table_breakdowns.items()
-                        ]
-                    )
-                    prop_scores.append(score)
+                    metric_scores = [
+                        breakdown['score'] for _, table_breakdowns
+                        in self._metric_results[metric.__name__].items()
+                        for _, breakdown in table_breakdowns.items()
+                        if not np.isnan(breakdown['score'])
+                    ]
+                    if len(metric_scores) > 0:
+                        prop_scores.append(np.mean(metric_scores))
 
-            self._property_breakdown[prop] = np.nanmean(prop_scores)
+            self._property_breakdown[prop] = np.nanmean(prop_scores) if (
+                len(prop_scores) > 0
+            ) else np.nan
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
 
@@ -139,8 +147,8 @@ class QualityReport():
             'Score': self._property_breakdown.values(),
         })
 
-    def show_details(self, property_name, table_name=None):
-        """Display a visualization for each score for the given property and table.
+    def get_visualization(self, property_name, table_name=None):
+        """Return a visualization for each score for the given property and table.
 
         Args:
             property_name (str):
@@ -148,6 +156,10 @@ class QualityReport():
             table_name (str):
                 The table to show scores for. Must be provided for 'Column Shapes'
                 and 'Column Pair Trends'
+
+        Returns:
+            plotly.graph_objects._figure.Figure
+                A visualization of the requested property's scores.
         """
         if property_name in ['Column Shapes', 'Column Pair Trends'] and table_name is None:
             raise ValueError('Table name must be provided when viewing details for '
@@ -183,7 +195,7 @@ class QualityReport():
 
             fig = get_table_relationships_plot(score_breakdowns)
 
-        fig.show()
+        return fig
 
     def get_details(self, property_name, table_name=None):
         """Return the details for each score for the given property name.
