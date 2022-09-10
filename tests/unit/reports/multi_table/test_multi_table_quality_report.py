@@ -1,6 +1,7 @@
 import pickle
 from unittest.mock import Mock, mock_open, patch
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -133,6 +134,114 @@ class TestQualityReport:
             'Parent Child Relationships': 1.0,
         }
 
+    @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
+    def test_generate_single_table(self, mock_discretize_and_apply_metric):
+        """Test the ``generate`` method when there's only one table.
+
+        Expect that the multi-table metrics are called. Expect that the parent-child
+        property score is NaN.
+
+        Setup:
+        - Mock the expected multi-table metric compute breakdown calls.
+
+        Input:
+        - Real data.
+        - Synthetic data.
+        - Metadata.
+
+        Side Effects:
+        - Expect that each multi table metric's ``compute_breakdown`` methods are called once.
+        - Expect that the ``_overall_quality_score`` and ``_property_breakdown`` attributes
+          are populated.
+        """
+        # Setup
+        mock_discretize_and_apply_metric.return_value = {}
+        real_data = {
+            'table1': pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']}),
+            'table2': pd.DataFrame({'col1': [1, 1, 1]}),
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({'col1': [1, 3, 3], 'col2': ['b', 'b', 'c']}),
+            'table2': pd.DataFrame({'col1': [3, 1, 3]}),
+        }
+        metadata = {
+            'tables': {
+                'table1': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
+                'table2': {'col1': {'type': 'numerical'}},
+            },
+        }
+
+        ks_complement_mock = Mock()
+        ks_complement_mock.__name__ = 'KSComplement'
+        ks_complement_mock.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            }
+        }
+
+        tv_complement_mock = Mock()
+        tv_complement_mock.__name__ = 'TVComplement'
+        tv_complement_mock.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            }
+        }
+
+        corr_sim_mock = Mock()
+        corr_sim_mock.__name__ = 'CorrelationSimilarity'
+        corr_sim_mock.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            }
+        }
+
+        cont_sim_mock = Mock()
+        cont_sim_mock.__name__ = 'ContingencySimilarity'
+        cont_sim_mock.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            }
+        }
+
+        cardinality_mock = Mock()
+        cardinality_mock.__name__ = 'CardinalityShapeSimilarity'
+        cardinality_mock.compute_breakdown.return_value = {
+            'score': np.nan,
+        }
+        metrics_mock = {
+            'Column Shapes': [ks_complement_mock, tv_complement_mock],
+            'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
+            'Parent Child Relationships': [cardinality_mock],
+        }
+
+        # Run
+        with patch.object(
+            QualityReport,
+            'METRICS',
+            metrics_mock,
+        ):
+            report = QualityReport()
+            report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        ks_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        tv_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        corr_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cont_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cardinality_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+
+        assert report._overall_quality_score == 0.15000000000000002
+        assert np.isnan(report._property_breakdown['Parent Child Relationships'])
+
     def test_get_score(self):
         """Test the ``get_score`` method.
 
@@ -159,7 +268,7 @@ class TestQualityReport:
         assert score == mock_score
 
     def test_get_properties(self):
-        """Test the ``get_details`` method.
+        """Test the ``get_properties`` method.
 
         Expect that the property score breakdown is returned.
 
@@ -200,7 +309,7 @@ class TestQualityReport:
         Expect that the instance is passed to pickle.
 
         Input:
-        - filename
+        - filepath
 
         Side Effects:
         - ``pickle`` is called with the instance.
@@ -224,13 +333,13 @@ class TestQualityReport:
         Expect that the report's load method is called with the expected args.
 
         Input:
-        - filename
+        - filepath
 
         Output:
         - the loaded model
 
         Side Effects:
-        - Expect that ``pickle`` is called with the filename.
+        - Expect that ``pickle`` is called with the filepath.
         """
         # Setup
         open_mock = mock_open(read_data=pickle.dumps('test'))
@@ -316,11 +425,6 @@ class TestQualityReport:
             'table2': {('col7', 'col8'): {'score': 'other_score'}},
         }
 
-        mock_real_corr = Mock()
-        report._real_corrs = {'table1': mock_real_corr}
-        mock_synth_corr = Mock()
-        report._synth_corrs = {'table1': mock_synth_corr}
-
         # Run
         report.show_details('Column Pair Trends', table_name='table1')
 
@@ -328,7 +432,7 @@ class TestQualityReport:
         get_plot_mock.assert_called_once_with({
             'CorrelationSimilarity': {('col1', 'col2'): {'score': 'test_score_1'}},
             'ContingencySimilarity': {('col5', 'col6'): {'score': 'test_score_2'}},
-        }, mock_real_corr, mock_synth_corr)
+        })
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
     def test_show_details_table_relationships(self, get_plot_mock):
@@ -358,6 +462,34 @@ class TestQualityReport:
             },
         })
 
+    @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
+    def test_show_details_table_relationships_with_table_name(self, get_plot_mock):
+        """Test the ``show_details`` method with Parent Child Relationships and a table.
+
+        Input:
+        - property='Parent Child Relationships'
+        - table name
+
+        Side Effects:
+        - get_parent_child_relationships_plot is called with the expected score breakdowns.
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results['CardinalityShapeSimilarity'] = {
+            ('table1', 'table2'): {'score': 'test_score_1'},
+            ('table3', 'table2'): {'score': 'test_score_2'},
+        }
+
+        # Run
+        report.show_details('Parent Child Relationships', table_name='table1')
+
+        # Assert
+        get_plot_mock.assert_called_once_with({
+            'CardinalityShapeSimilarity': {
+                ('table1', 'table2'): {'score': 'test_score_1'},
+            },
+        })
+
     def test_get_details_column_shapes(self):
         """Test the ``get_details`` method with column shapes.
 
@@ -377,11 +509,17 @@ class TestQualityReport:
                     'col1': {'score': 0.1},
                     'col2': {'score': 0.2},
                 },
+                'table2': {
+                    'col3': {'score': 0.5},
+                },
             },
             'TVComplement': {
                 'table1': {
                     'col1': {'score': 0.3},
                     'col2': {'score': 0.4},
+                },
+                'table2': {
+                    'col3': {'score': 0.6},
                 },
             }
         }
@@ -393,10 +531,17 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             out,
             pd.DataFrame({
-                'Table Name': ['table1', 'table1', 'table1', 'table1'],
-                'Column': ['col1', 'col2', 'col1', 'col2'],
-                'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
-                'Quality Score': [0.1, 0.2, 0.3, 0.4],
+                'Table': ['table1', 'table1', 'table1', 'table1', 'table2', 'table2'],
+                'Column': ['col1', 'col2', 'col1', 'col2', 'col3', 'col3'],
+                'Metric': [
+                    'KSComplement',
+                    'KSComplement',
+                    'TVComplement',
+                    'TVComplement',
+                    'KSComplement',
+                    'TVComplement',
+                ],
+                'Quality Score': [0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
             })
         )
 
@@ -435,13 +580,9 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             out,
             pd.DataFrame({
-                'Table Name': ['table1', 'table1', 'table1', 'table1'],
-                'Columns': [
-                    ('col1', 'col3'),
-                    ('col2', 'col4'),
-                    ('col1', 'col3'),
-                    ('col2', 'col4'),
-                ],
+                'Table': ['table1', 'table1', 'table1', 'table1'],
+                'Column 1': ['col1', 'col2', 'col1', 'col2'],
+                'Column 2': ['col3', 'col4', 'col3', 'col4'],
                 'Metric': [
                     'CorrelationSimilarity',
                     'CorrelationSimilarity',
@@ -449,8 +590,8 @@ class TestQualityReport:
                     'ContingencySimilarity',
                 ],
                 'Quality Score': [0.1, 0.2, 0.3, 0.4],
-                'Real Score': [0.1, 0.2, 0.3, 0.4],
-                'Synthetic Score': [0.1, 0.2, 0.3, 0.4],
+                'Real Correlation': [0.1, 0.2, 0.3, 0.4],
+                'Synthetic Correlation': [0.1, 0.2, 0.3, 0.4],
             })
         )
 
@@ -488,10 +629,46 @@ class TestQualityReport:
             })
         )
 
+    def test_get_details_parent_child_relationships_with_table_name(self):
+        """Test the ``get_details`` method with parent child relationships with a table filter.
+
+        Expect that the details of the desired property is returned.
+
+        Input:
+        - property name
+        - table name
+
+        Output:
+        - score details for the desired property
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results = {
+            'CardinalityShapeSimilarity': {
+                ('table1', 'table2'): {'score': 0.1},
+                ('table1', 'table3'): {'score': 0.2},
+            },
+        }
+
+        # Run
+        out = report.get_details('Parent Child Relationships', table_name='table2')
+
+        # Assert
+        pd.testing.assert_frame_equal(
+            out,
+            pd.DataFrame({
+                'Child Table': ['table2'],
+                'Parent Table': ['table1'],
+                'Metric': ['CardinalityShapeSimilarity'],
+                'Quality Score': [0.1],
+            })
+        )
+
     def test_get_raw_result(self):
         """Test the ``get_raw_result`` method.
 
-        Expect that the raw result of the desired metric is returned.
+        Expect that the raw result of the desired metric is returned. Expect that null scores
+        are excluded.
 
         Input:
         - metric name
@@ -506,6 +683,7 @@ class TestQualityReport:
                 'table1': {
                     'col1': {'score': 0.1},
                     'col2': {'score': 0.2},
+                    'col3': {'score': np.nan},
                 },
             },
         }
@@ -514,12 +692,17 @@ class TestQualityReport:
         out = report.get_raw_result('KSComplement')
 
         # Assert
-        assert out == {
-            'metric': 'sdmetrics.multi_table.multi_single_table.KSComplement',
-            'results': {
-                'table1': {
-                    'col1': {'score': 0.1},
-                    'col2': {'score': 0.2},
+        assert out == [
+            {
+                'metric': {
+                    'method': 'sdmetrics.multi_table.multi_single_table.KSComplement',
+                    'parameters': {},
+                },
+                'results': {
+                    'table1': {
+                        'col1': {'score': 0.1},
+                        'col2': {'score': 0.2},
+                    }
                 }
             }
-        }
+        ]

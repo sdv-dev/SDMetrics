@@ -121,9 +121,10 @@ class MultiColumnPairsMetric(
 
         breakdown = {}
         for columns in combinations(fields, r=2):
-            real = real_data[list(columns)]
-            synthetic = synthetic_data[list(columns)]
-            breakdown[columns] = cls.column_pairs_metric.compute_breakdown(
+            sorted_columns = tuple(sorted(columns))
+            real = real_data[list(sorted_columns)]
+            synthetic = synthetic_data[list(sorted_columns)]
+            breakdown[sorted_columns] = cls.column_pairs_metric.compute_breakdown(
                 real, synthetic, **kwargs)
 
         return breakdown

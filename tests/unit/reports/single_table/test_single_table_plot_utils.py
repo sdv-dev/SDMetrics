@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 
 from sdmetrics.reports.single_table.plot_utils import (
-    _get_column_shapes_data, _get_similarity_correlation_matrix, get_column_pairs_plot,
-    get_column_shapes_plot)
+    _get_column_shapes_data, _get_numerical_correlation_matrices,
+    _get_similarity_correlation_matrix, get_column_pairs_plot, get_column_shapes_plot)
 
 
 def test__get_column_shapes_data():
@@ -107,6 +107,55 @@ def test__get_similarity_correlation_matrix():
     pd.testing.assert_frame_equal(out, expected)
 
 
+def test__get_numerical_correlation_matrices():
+    """Test the ``_get_numerical_correlation_matrices`` function.
+
+    Expect that the score breakdowns are converted into a real and synthetic numerical matrices.
+
+    Input:
+    - score breakdowns
+
+    Output:
+    - correlation matrix
+    """
+    # Setup
+    score_breakdowns = {
+        'CorrelationSimilarity': {
+            ('col1', 'col2'): {'score': 0.1, 'real': 0.1, 'synthetic': 0.4},
+            ('col1', 'col3'): {'score': 0.2, 'real': 0.2, 'synthetic': 0.5},
+            ('col2', 'col3'): {'score': 0.3, 'real': 0.3, 'synthetic': 0.6},
+        },
+        'METRIC2': {('col1', 'col3'): {'score': 0.2}},
+    }
+
+    # Run
+    (real_correlation, synthetic_correlation) = _get_numerical_correlation_matrices(
+        score_breakdowns)
+
+    # Assert
+    expected_real = pd.DataFrame(
+        [
+            [1, 0.1, 0.2],
+            [0.1, 1, 0.3],
+            [0.2, 0.3, 1],
+        ],
+        columns=['col1', 'col2', 'col3'],
+        index=['col1', 'col2', 'col3'],
+    )
+    expected_synthetic = pd.DataFrame(
+        [
+            [1, 0.4, 0.5],
+            [0.4, 1, 0.6],
+            [0.5, 0.6, 1],
+        ],
+        columns=['col1', 'col2', 'col3'],
+        index=['col1', 'col2', 'col3'],
+    )
+
+    pd.testing.assert_frame_equal(real_correlation, expected_real)
+    pd.testing.assert_frame_equal(synthetic_correlation, expected_synthetic)
+
+
 @patch('sdmetrics.reports.single_table.plot_utils.make_subplots')
 @patch('sdmetrics.reports.single_table.plot_utils.go.Heatmap')
 def test_get_column_pairs_plot(heatmap_mock, make_subplots_mock):
@@ -123,19 +172,12 @@ def test_get_column_pairs_plot(heatmap_mock, make_subplots_mock):
     """
     # Setup
     score_breakdowns = {
-        'METRIC1': {('col1', 'col2'): {'score': 0.1}, ('col2', 'col3'): {'score': 0.3}},
-        'METRIC2': {('col1', 'col3'): {'score': 0.2}},
+        'CorrelationSimilarity': {
+            ('col1', 'col2'): {'score': 0.1, 'real': 0.1, 'synthetic': 0.1},
+            ('col2', 'col3'): {'score': 0.3, 'real': 0.3, 'synthetic': 0.3},
+        },
+        'ContingencySimilarity': {('col1', 'col3'): {'score': 0.2}},
     }
-    real_correlation = pd.DataFrame(
-        [[1, 0.1, 0.1], [0.1, 1, 0.1], [0.1, 0.1, 1]],
-        columns=['col1', 'col2', 'col3'],
-        index=['col1', 'col2', 'col3'],
-    )
-    synthetic_correlation = pd.DataFrame(
-        [[1, 0.1, 0.1], [0.1, 1, 0.1], [0.1, 0.1, 1]],
-        columns=['col1', 'col2', 'col3'],
-        index=['col1', 'col2', 'col3'],
-    )
     mock_fig = Mock()
     make_subplots_mock.return_value = mock_fig
     mock_heatmap_1 = Mock()
@@ -144,7 +186,7 @@ def test_get_column_pairs_plot(heatmap_mock, make_subplots_mock):
     heatmap_mock.side_effect = [mock_heatmap_1, mock_heatmap_2, mock_heatmap_3]
 
     # Run
-    out = get_column_pairs_plot(score_breakdowns, real_correlation, synthetic_correlation)
+    out = get_column_pairs_plot(score_breakdowns)
 
     # Assert
     make_subplots_mock.assert_called_once()

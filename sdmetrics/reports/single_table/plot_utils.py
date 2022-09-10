@@ -51,7 +51,7 @@ def get_column_shapes_plot(score_breakdowns, average_score=None):
         data,
         x='Column Name',
         y='Quality Score',
-        title=f'Column Shapes Similarity (Average={round(average_score, 2)})',
+        title=f'Data Quality: Column Shapes (Average Score={round(average_score, 2)})',
         category_orders={'group': data['Column Name']},
         color='Metric',
         color_discrete_map={
@@ -72,7 +72,22 @@ def get_column_shapes_plot(score_breakdowns, average_score=None):
 
     fig.update_layout(
         xaxis_categoryorder='total ascending',
-        plot_bgcolor='#F5F5F8'
+        plot_bgcolor='#F5F5F8',
+        margin={'t': 150},
+        annotations=[
+            {
+                'font': {'color': 'black', 'size': 11},
+                'xref': 'paper',
+                'yref': 'paper',
+                'x': -0.045,
+                'y': 1.25,
+                'showarrow': False,
+                'text': (
+                    'KSComplement is applied to numerical & datetime columns. '
+                    'TVComplement is applied for boolean & categorical columns.'
+                ),
+            },
+        ],
     )
 
     return fig
@@ -104,8 +119,48 @@ def _get_similarity_correlation_matrix(score_breakdowns, columns):
     return similarity_correlation
 
 
-def get_column_pairs_plot(
-        score_breakdowns, real_correlation, synthetic_correlation, average_score=None):
+def _get_numerical_correlation_matrices(score_breakdowns):
+    """Convert the column pair score breakdowns to a numerical correlation matrix.
+
+    Args:
+        score_breakdowns (dict):
+            Mapping of metric to the score breakdown result.
+
+    Returns:
+        (pandas.DataFrame, pandas.DataFrame):
+            The real and synthetic numerical correlation matrices.
+    """
+    columns = []
+    for cols, _ in score_breakdowns['CorrelationSimilarity'].items():
+        if cols[0] not in columns:
+            columns.append(cols[0])
+        if cols[1] not in columns:
+            columns.append(cols[1])
+
+    real_correlation = pd.DataFrame(
+        index=columns,
+        columns=columns,
+        dtype='float',
+    )
+    synthetic_correlation = pd.DataFrame(
+        index=columns,
+        columns=columns,
+        dtype='float',
+    )
+    np.fill_diagonal(real_correlation.to_numpy(), 1.0)
+    np.fill_diagonal(synthetic_correlation.to_numpy(), 1.0)
+
+    for column_pair, result in score_breakdowns['CorrelationSimilarity'].items():
+        column1, column2 = column_pair
+        real_correlation.loc[column1, column2] = result['real']
+        real_correlation.loc[column2, column1] = result['real']
+        synthetic_correlation.loc[column1, column2] = result['synthetic']
+        synthetic_correlation.loc[column2, column1] = result['synthetic']
+
+    return (real_correlation, synthetic_correlation)
+
+
+def get_column_pairs_plot(score_breakdowns, average_score=None):
     """Create a plot to show the column pairs data.
 
     This plot will have one graph in the top row and two in the bottom row.
@@ -113,10 +168,6 @@ def get_column_pairs_plot(
     Args:
         score_breakdowns (dict):
             The score breakdowns of the column pairs metric scores.
-        real_correlation (pandas.DataFrame):
-            Correlation matrix for the real data.
-        synthetic_correlation (pandas.DataFrame):
-            Correlation matrix for the synthetic data.
         average_score (float):
             The average score. If None, the average score will be computed from
             ``score_breakdowns``.
@@ -136,14 +187,15 @@ def get_column_pairs_plot(
         average_score = np.mean(all_scores)
 
     similarity_correlation = _get_similarity_correlation_matrix(score_breakdowns, set(all_columns))
+    real_correlation, synthetic_correlation = _get_numerical_correlation_matrices(score_breakdowns)
 
     fig = make_subplots(
         rows=2,
         cols=2,
         subplot_titles=[
-            f'Column Pairs Similarity ({round(average_score, 2)})',
-            'Numerical Correlation (Real)',
-            'Numerical Correlation (Synthetic)',
+            'Real vs. Synthetic Similarity',
+            'Real Trends (Numerical Data)',
+            'Real Trends (Synthetic Data)',
         ],
         specs=[[{'colspan': 2, 'l': 0.26, 'r': 0.26}, None], [{}, {}]])
 
@@ -152,12 +204,14 @@ def get_column_pairs_plot(
         go.Heatmap(
             x=similarity_correlation.columns,
             y=similarity_correlation.columns,
-            z=similarity_correlation,
+            z=similarity_correlation.round(2),
             coloraxis='coloraxis',
             xaxis='x',
             yaxis='y',
-            hovertemplate=('<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: '
-                           '%{z:.2f}<extra></extra>'),
+            hovertemplate=(
+                '<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: '
+                '%{z}<extra></extra>'
+            ),
         ),
         1,
         1,
@@ -168,14 +222,16 @@ def get_column_pairs_plot(
         go.Heatmap(
             x=real_correlation.columns,
             y=real_correlation.columns,
-            z=real_correlation,
+            z=real_correlation.round(2),
             coloraxis='coloraxis2',
             xaxis='x2',
             yaxis='y2',
             # Compare against synthetic data in the tooltip.
-            customdata=synthetic_correlation,
-            hovertemplate=('<b>Correlation</b><br>(%{x},%{y})<br><br>Real: %{z:.2f}'
-                           '<br>(vs. Synthetic: %{customdata:.2f})<extra></extra>'),
+            customdata=synthetic_correlation.round(2),
+            hovertemplate=(
+                '<b>Correlation</b><br>(%{x},%{y})<br><br>Real: %{z}'
+                '<br>(vs. Synthetic: %{customdata})<extra></extra>'
+            ),
         ),
         2,
         1,
@@ -186,21 +242,23 @@ def get_column_pairs_plot(
         go.Heatmap(
             x=synthetic_correlation.columns,
             y=synthetic_correlation.columns,
-            z=synthetic_correlation,
+            z=synthetic_correlation.round(2),
             coloraxis='coloraxis2',
             xaxis='x3',
             yaxis='y3',
             # Compare against real data in the tooltip.
-            customdata=real_correlation,
-            hovertemplate=('<b>Correlation</b><br>(%{x},%{y})<br><br>Synthetic: '
-                           '%{z:.2f}<br>(vs. Real: %{customdata:.2f})<extra></extra>'),
+            customdata=real_correlation.round(2),
+            hovertemplate=(
+                '<b>Correlation</b><br>(%{x},%{y})<br><br>Synthetic: '
+                '%{z}<br>(vs. Real: %{customdata})<extra></extra>'
+            ),
         ),
         2,
         2,
     )
 
     fig.update_layout(
-        title_text='Column Pair Trends',
+        title_text=f'Data Quality: Column Pair Trends (Average Score={round(average_score, 2)})',
         # Similarity heatmap color axis
         coloraxis={
             'colorbar_len': 0.5,
@@ -208,7 +266,7 @@ def get_column_pairs_plot(
             'colorbar_y': 0.8,
             'cmin': 0,
             'cmax': 1,
-            'colorscale': 'Orrd_r'
+            'colorscale': ['#FF0000', '#F16141', '#36B37E'],
         },
         # Correlation heatmaps color axis
         coloraxis2={

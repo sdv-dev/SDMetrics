@@ -53,7 +53,7 @@ def get_table_relationships_plot(score_breakdowns):
         plot_data,
         x='Child → Parent Relationship',
         y='Quality Score',
-        title=f'Column Shapes Similarity (Average={average_score})',
+        title=f'Data Quality: Table Relationships (Average Score={average_score})',
         color='Metric',
         color_discrete_sequence=[BAR_COLOR],
         hover_name='Child → Parent Relationship',

@@ -34,18 +34,19 @@ class QualityReport():
         self._overall_quality_score = None
         self._metric_results = {}
         self._property_breakdown = {}
-        self._real_corrs = {}
-        self._synth_corrs = {}
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
-        out.write(f'\nOverall Quality Score: {self._overall_quality_score}\n\n')
+        out.write(f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n')
 
         if len(self._property_breakdown) > 0:
             out.write('Properties:\n')
 
         for prop, score in self._property_breakdown.items():
-            out.write(f'{prop}: {round(score * 100, 2)}%\n')
+            if not np.isnan(score):
+                out.write(f'{prop}: {round(score * 100, 2)}%\n')
+            else:
+                out.write(f'{prop}: NaN\n')
 
     def generate(self, real_data, synthetic_data, metadata):
         """Generate report.
@@ -90,13 +91,16 @@ class QualityReport():
             prop_scores = []
             if prop == 'Parent Child Relationships':
                 for metric in metrics:
-                    score = np.nanmean(
-                        [
-                            table_breakdown['score'] for _, table_breakdown
-                            in self._metric_results['CardinalityShapeSimilarity'].items()
-                        ]
-                    )
-                    prop_scores.append(score)
+                    if 'score' in self._metric_results[metric.__name__]:
+                        prop_scores.append(self._metric_results[metric.__name__]['score'])
+                    else:
+                        score = np.nanmean(
+                            [
+                                table_breakdown['score'] for _, table_breakdown
+                                in self._metric_results[metric.__name__].items()
+                            ]
+                        )
+                        prop_scores.append(score)
             else:
                 for metric in metrics:
                     score = np.nanmean(
@@ -108,14 +112,9 @@ class QualityReport():
                     )
                     prop_scores.append(score)
 
-            self._property_breakdown[prop] = np.mean(prop_scores)
+            self._property_breakdown[prop] = np.nanmean(prop_scores)
 
-        # Calculate and store the correlation matrices.
-        for table_name, table_data in real_data.items():
-            self._real_corrs[table_name] = table_data.corr()
-            self._synth_corrs[table_name] = synthetic_data[table_name].corr()
-
-        self._overall_quality_score = np.mean(list(self._property_breakdown.values()))
+        self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
 
         self._print_results()
 
@@ -168,8 +167,6 @@ class QualityReport():
             }
             fig = get_column_pairs_plot(
                 score_breakdowns,
-                self._real_corrs[table_name],
-                self._synth_corrs[table_name],
             )
 
         elif property_name == 'Parent Child Relationships':
@@ -177,6 +174,13 @@ class QualityReport():
                 metric.__name__: self._metric_results[metric.__name__]
                 for metric in self.METRICS.get(property_name, [])
             }
+            if table_name is not None:
+                for metric, metric_results in score_breakdowns.items():
+                    score_breakdowns[metric] = {
+                        tables: results for tables, results in metric_results.items()
+                        if table_name in tables
+                    }
+
             fig = get_table_relationships_plot(score_breakdowns)
 
         fig.show()
@@ -214,11 +218,11 @@ class QualityReport():
                         scores.append(score_breakdown['score'])
 
             return pd.DataFrame({
-                'Table Name': tables,
+                'Table': tables,
                 'Column': columns,
                 'Metric': metrics,
                 'Quality Score': scores,
-            })
+            }).sort_values(by=['Table'], ignore_index=True)
 
         elif property_name == 'Column Pair Trends':
             real_scores = []
@@ -239,18 +243,22 @@ class QualityReport():
                             score_breakdown['synthetic'] if 'real' in score_breakdown else np.nan)
 
             return pd.DataFrame({
-                'Table Name': tables,
-                'Columns': columns,
+                'Table': tables,
+                'Column 1': [col1 for col1, _ in columns],
+                'Column 2': [col2 for _, col2 in columns],
                 'Metric': metrics,
                 'Quality Score': scores,
-                'Real Score': real_scores,
-                'Synthetic Score': synthetic_scores,
-            })
+                'Real Correlation': real_scores,
+                'Synthetic Correlation': synthetic_scores,
+            }).sort_values(by=['Table'], ignore_index=True)
 
         elif property_name == 'Parent Child Relationships':
             child_tables = []
             for metric in self.METRICS[property_name]:
                 for table_pair, score_breakdown in self._metric_results[metric.__name__].items():
+                    if table_name is not None and table_name not in table_pair:
+                        continue
+
                     tables.append(table_pair[0])
                     child_tables.append(table_pair[1])
                     metrics.append(metric.__name__)
@@ -277,32 +285,44 @@ class QualityReport():
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
         for metric in metrics:
             if metric.__name__ == metric_name:
-                return {
-                    'metric': f'{metric.__module__}.{metric.__name__}',
-                    'results': self._metric_results[metric_name],
-                }
+                filtered_results = {}
+                for table_name, table_results in self._metric_results[metric_name].items():
+                    filtered_results[table_name] = {
+                        key: result for key, result in table_results.items()
+                        if not np.isnan(result['score'])
+                    }
 
-    def save(self, filename):
+                return [
+                    {
+                        'metric': {
+                            'method': f'{metric.__module__}.{metric.__name__}',
+                            'parameters': {},
+                        },
+                        'results': filtered_results,
+                    },
+                ]
+
+    def save(self, filepath):
         """Save this report instance to the given path using pickle.
 
         Args:
-            filename (str):
-                File where the report instance will be serialized.
+            filepath (str):
+                The path to the file where the report instance will be serialized.
         """
-        with open(filename, 'wb') as output:
+        with open(filepath, 'wb') as output:
             pickle.dump(self, output)
 
     @classmethod
-    def load(cls, filename):
+    def load(cls, filepath):
         """Load a ``QualityReport`` instance from a given path.
 
         Args:
-            filename (str):
-                File from which to load the instance.
+            filepath (str):
+                The path to the file where the report is stored.
 
         Returns:
             QualityReort:
                 The loaded quality report instance.
         """
-        with open(filename, 'rb') as f:
+        with open(filepath, 'rb') as f:
             return pickle.load(f)

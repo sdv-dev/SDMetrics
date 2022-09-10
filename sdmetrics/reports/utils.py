@@ -32,9 +32,11 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
 
     real_data = pd.DataFrame({'values': real_column.copy()})
     real_data['Data'] = 'Real'
-
     synthetic_data = pd.DataFrame({'values': synthetic_column.copy()})
     synthetic_data['Data'] = 'Synthetic'
+
+    missing_data_real = round((real_column.isna().sum() / len(real_column)) * 100, 2)
+    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)), 2)
 
     all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
 
@@ -59,11 +61,28 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
         selector={'name': 'Synthetic'}
     )
 
+    show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
+
+    annotations = [] if not show_missing_values else [
+        {
+            'xref': 'paper',
+            'yref': 'paper',
+            'x': -0.08,
+            'y': -0.2,
+            'showarrow': False,
+            'text': (
+                f'*Missing Values: Real Data ({missing_data_real}%), '
+                f'Synthetic Data ({missing_data_synthetic}%)'
+            ),
+        },
+    ]
+
     fig.update_layout(
         title=f"Real vs. Synthetic Data for column '{column_name}'",
-        xaxis_title='Category',
+        xaxis_title='Category*' if show_missing_values else 'Category',
         yaxis_title='Frequency',
         plot_bgcolor='#F5F5F8',
+        annotations=annotations,
     )
 
     return fig
@@ -116,24 +135,28 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
         selector={'name': 'Synthetic'}
     )
 
+    show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
+
+    annotations = [] if not show_missing_values else [
+        {
+            'xref': 'paper',
+            'yref': 'paper',
+            'x': -0.08,
+            'y': -0.2,
+            'showarrow': False,
+            'text': (
+                f'*Missing Values: Real Data ({missing_data_real}%), '
+                f'Synthetic Data ({missing_data_synthetic}%)'
+            ),
+        },
+    ]
+
     fig.update_layout(
         title=f'Real vs. Synthetic Data for column {column_name}',
-        xaxis_title='Value',
+        xaxis_title='Value*' if show_missing_values else 'Value',
         yaxis_title='Frequency',
         plot_bgcolor='#F5F5F8',
-        annotations=[
-            {
-                'xref': 'paper',
-                'yref': 'paper',
-                'x': -0.08,
-                'y': -0.2,
-                'showarrow': False,
-                'text': (
-                    f'*Missing Values: Real Data ({missing_data_real}%), '
-                    f'Synthetic Data ({missing_data_synthetic}%)'
-                ),
-            },
-        ]
+        annotations=annotations,
     )
 
     return fig
@@ -231,12 +254,16 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
         field_meta['type'] != 'id'
     ]
     for columns in itertools.combinations(non_id_cols, r=2):
-        if columns not in keys_to_skip:
+        sorted_columns = tuple(sorted(columns))
+        if (
+            sorted_columns not in keys_to_skip and
+            (sorted_columns[1], sorted_columns[0]) not in keys_to_skip
+        ):
             result = metric.column_pairs_metric.compute_breakdown(
-                binned_real[list(columns)],
-                binned_synthetic[list(columns)],
+                binned_real[list(sorted_columns)],
+                binned_synthetic[list(sorted_columns)],
             )
-            metric_results[columns] = result
-            metric_results[columns] = result
+            metric_results[sorted_columns] = result
+            metric_results[sorted_columns] = result
 
     return metric_results

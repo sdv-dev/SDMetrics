@@ -1,6 +1,7 @@
 import pickle
 from unittest.mock import Mock, mock_open, patch
 
+import numpy as np
 import pandas as pd
 
 from sdmetrics.reports.single_table import QualityReport
@@ -21,7 +22,7 @@ class TestQualityReport:
         assert report._metric_results == {}
         assert report._property_breakdown == {}
 
-    @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
+    @patch('sdmetrics.reports.single_table.quality_report.discretize_and_apply_metric')
     def test_generate(self, mock_discretize_and_apply_metric):
         """Test the ``generate`` method.
 
@@ -95,11 +96,84 @@ class TestQualityReport:
             real_data, synthetic_data, metadata)
         cont_sim_mock.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
-        assert report._overall_quality_score == 0.1930555555555556
+        assert report._overall_quality_score == 0.15000000000000002
         assert report._property_breakdown == {
             'Column Shapes': 0.15000000000000002,
-            'Column Pair Trends': 0.23611111111111113,
+            'Column Pair Trends': 0.15000000000000002,
         }
+
+    @patch('sdmetrics.reports.single_table.quality_report.discretize_and_apply_metric')
+    def test_generate_empty_column_pairs_results(self, mock_discretize_and_apply_metric):
+        """Test the ``generate`` method when there are no column pair results.
+
+        Expect that the single-table metrics are called. Expect that the column pair
+        results is NaN but the overall score is not.
+
+        Setup:
+        - Mock the expected single-table metric compute breakdown calls.
+
+        Input:
+        - Real data.
+        - Synthetic data.
+        - Metadata.
+
+        Side Effects:
+        - Expect that each single table metric's ``compute_breakdown`` methods are called once.
+        - Expect that the ``_overall_quality_score`` and ``_property_breakdown`` attributes
+          are populated.
+        """
+        # Setup
+        real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
+        synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
+        ks_complement_mock = Mock()
+        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        ks_complement_mock.__name__ = 'KSComplement'
+        ks_complement_mock.compute_breakdown.return_value = {
+            'col1': {'score': 0.1},
+            'col2': {'score': 0.2},
+        }
+
+        tv_complement_mock = Mock()
+        tv_complement_mock.__name__ = 'TVComplement'
+        tv_complement_mock.compute_breakdown.return_value = {
+            'col1': {'score': 0.1},
+            'col2': {'score': 0.2},
+        }
+
+        corr_sim_mock = Mock()
+        corr_sim_mock.__name__ = 'CorrelationSimilarity'
+        corr_sim_mock.compute_breakdown.return_value = {}
+
+        cont_sim_mock = Mock()
+        cont_sim_mock.__name__ = 'ContingencySimilarity'
+        cont_sim_mock.compute_breakdown.return_value = {}
+
+        metrics_mock = {
+            'Column Shapes': [ks_complement_mock, tv_complement_mock],
+            'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
+        }
+        mock_discretize_and_apply_metric.return_value = {}
+
+        # Run
+        with patch.object(
+            QualityReport,
+            'METRICS',
+            metrics_mock,
+        ):
+            report = QualityReport()
+            report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        ks_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        tv_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        corr_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cont_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        assert report._overall_quality_score == 0.15000000000000002
+        assert np.isnan(report._property_breakdown['Column Pair Trends'])
 
     def test_get_score(self):
         """Test the ``get_score`` method.
@@ -164,7 +238,7 @@ class TestQualityReport:
         Expect that the instance is passed to pickle.
 
         Input:
-        - filename
+        - filepath
 
         Side Effects:
         - ``pickle`` is called with the instance.
@@ -188,13 +262,13 @@ class TestQualityReport:
         Expect that the report's load method is called with the expected args.
 
         Input:
-        - filename
+        - filepath
 
         Output:
         - the loaded model
 
         Side Effects:
-        - Expect that ``pickle`` is called with the filename.
+        - Expect that ``pickle`` is called with the filepath.
         """
         # Setup
         open_mock = mock_open(read_data=pickle.dumps('test'))
@@ -247,10 +321,6 @@ class TestQualityReport:
         report._metric_results['CorrelationSimilarity'] = {'score': 'test_score_1'}
         report._metric_results['ContingencySimilarity'] = {'score': 'test_score_2'}
         report._property_breakdown['Column Pair Trends'] = 0.78
-        mock_real_corr = Mock()
-        report._real_corr = mock_real_corr
-        mock_synth_corr = Mock()
-        report._synth_corr = mock_synth_corr
 
         # Run
         report.show_details('Column Pair Trends')
@@ -259,7 +329,7 @@ class TestQualityReport:
         get_plot_mock.assert_called_once_with({
             'CorrelationSimilarity': {'score': 'test_score_1'},
             'ContingencySimilarity': {'score': 'test_score_2'},
-        }, mock_real_corr, mock_synth_corr, 0.78)
+        }, 0.78)
 
     def test_get_details(self):
         """Test the ``get_details`` method.
@@ -329,12 +399,8 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             out,
             pd.DataFrame({
-                'Columns': [
-                    ('col1', 'col3'),
-                    ('col2', 'col4'),
-                    ('col1', 'col3'),
-                    ('col2', 'col4'),
-                ],
+                'Column 1': ['col1', 'col2', 'col1', 'col2'],
+                'Column 2': ['col3', 'col4', 'col3', 'col4'],
                 'Metric': [
                     'CorrelationSimilarity',
                     'CorrelationSimilarity',
@@ -342,15 +408,16 @@ class TestQualityReport:
                     'ContingencySimilarity',
                 ],
                 'Quality Score': [0.1, 0.2, 0.3, 0.4],
-                'Real Score': [0.1, 0.2, 0.3, 0.4],
-                'Synthetic Score': [0.1, 0.2, 0.3, 0.4],
+                'Real Correlation': [0.1, 0.2, 0.3, 0.4],
+                'Synthetic Correlation': [0.1, 0.2, 0.3, 0.4],
             })
         )
 
     def test_get_raw_result(self):
         """Test the ``get_raw_result`` method.
 
-        Expect that the raw result of the desired metric is returned.
+        Expect that the raw result of the desired metric is returned. Expect that null
+        scores are excluded.
 
         Input:
         - metric name
@@ -364,6 +431,7 @@ class TestQualityReport:
             'KSComplement': {
                 'col1': {'score': 0.1},
                 'col2': {'score': 0.2},
+                'col3': {'score': np.nan},
             },
         }
 
@@ -371,10 +439,15 @@ class TestQualityReport:
         out = report.get_raw_result('KSComplement')
 
         # Assert
-        assert out == {
-            'metric': 'sdmetrics.single_table.multi_single_column.KSComplement',
-            'results': {
-                'col1': {'score': 0.1},
-                'col2': {'score': 0.2},
+        assert out == [
+            {
+                'metric': {
+                    'method': 'sdmetrics.single_table.multi_single_column.KSComplement',
+                    'parameters': {},
+                },
+                'results': {
+                    'col1': {'score': 0.1},
+                    'col2': {'score': 0.2},
+                }
             }
-        }
+        ]
