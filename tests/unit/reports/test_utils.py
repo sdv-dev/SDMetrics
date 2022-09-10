@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from unittest.mock import Mock, call, patch
 
 import pandas as pd
@@ -236,12 +236,14 @@ def test_discretize_table_data():
         'col2': ['a', 'b', 'c'],
         'col3': [datetime(2020, 1, 2), datetime(2019, 10, 1), datetime(2021, 3, 2)],
         'col4': [True, False, True],
+        'col5': [date(2020, 1, 2), date(2010, 10, 12), date(2021, 1, 2)],
     })
     synthetic_data = pd.DataFrame({
         'col1': [3, 1, 4],
         'col2': ['c', 'a', 'c'],
         'col3': [datetime(2021, 3, 2), datetime(2018, 11, 2), datetime(2020, 5, 7)],
         'col4': [False, False, True],
+        'col5': [date(2020, 5, 3), date(2015, 11, 15), date(2022, 3, 2)],
     })
     metadata = {
         'fields': {
@@ -249,6 +251,7 @@ def test_discretize_table_data():
             'col2': {'type': 'categorical'},
             'col3': {'type': 'datetime'},
             'col4': {'type': 'boolean'},
+            'col5': {'type': 'datetime', 'format': '%Y-%m-%d'},
         },
     }
 
@@ -262,12 +265,14 @@ def test_discretize_table_data():
         'col2': ['a', 'b', 'c'],
         'col3': [2, 1, 11],
         'col4': [True, False, True],
+        'col5': [10, 1, 11],
     })
     expected_synth = pd.DataFrame({
         'col1': [11, 1, 11],
         'col2': ['c', 'a', 'c'],
         'col3': [11, 0, 5],
         'col4': [False, False, True],
+        'col5': [10, 5, 11],
     })
 
     pd.testing.assert_frame_equal(discretized_real, expected_real)
@@ -278,6 +283,7 @@ def test_discretize_table_data():
             'col2': {'type': 'categorical'},
             'col3': {'type': 'categorical'},
             'col4': {'type': 'boolean'},
+            'col5': {'type': 'categorical'},
         },
     }
 
