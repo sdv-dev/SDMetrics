@@ -65,7 +65,6 @@ class QualityReport():
             except IncomputableMetricError:
                 # Metric is not compatible with this dataset.
                 self._metric_results[metric.__name__] = {}
-                continue
 
         existing_column_pairs = list(self._metric_results['ContingencySimilarity'].keys())
         existing_column_pairs.extend(
@@ -87,9 +86,8 @@ class QualityReport():
                     if len(metric_scores) > 0:
                         prop_scores.append(np.mean(metric_scores))
 
-            self._property_breakdown[prop] = np.mean(prop_scores) if (
-                len(prop_scores) > 0
-            ) else np.nan
+            self._property_breakdown[prop] = np.mean(
+                prop_scores) if (len(prop_scores) > 0) else np.nan
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
 
