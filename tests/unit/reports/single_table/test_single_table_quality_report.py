@@ -1,5 +1,5 @@
 import pickle
-from unittest.mock import Mock, mock_open, patch
+from unittest.mock import Mock, call, mock_open, patch
 
 import numpy as np
 import pandas as pd
@@ -175,6 +175,92 @@ class TestQualityReport:
             real_data, synthetic_data, metadata)
         assert report._overall_quality_score == 0.15000000000000002
         assert np.isnan(report._property_breakdown['Column Pair Trends'])
+
+    @patch('sdmetrics.reports.single_table.quality_report.discretize_and_apply_metric')
+    def test_generate_with_errored_metric(self, mock_discretize_and_apply_metric):
+        """Test the ``generate`` method when the is a metric that has an error.
+
+        Expect that the single-table metrics are called. Expect that the overall score is
+        computed without the error-ed out metric.
+
+        Setup:
+        - Mock the expected single-table metric compute breakdown calls.
+
+        Input:
+        - Real data.
+        - Synthetic data.
+        - Metadata.
+
+        Side Effects:
+        - Expect that each single table metric's ``compute_breakdown`` methods are called once.
+        - Expect that the ``_overall_quality_score`` and ``_property_breakdown`` attributes
+          are populated.
+        """
+        # Setup
+        real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
+        synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
+        ks_complement_mock = Mock()
+        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        ks_complement_mock.__name__ = 'KSComplement'
+        ks_complement_mock.compute_breakdown.return_value = {
+            'col1': {'score': 0.1},
+            'col2': {'score': 0.2},
+        }
+
+        tv_complement_mock = Mock()
+        tv_complement_mock.__name__ = 'TVComplement'
+        tv_complement_mock.compute_breakdown.return_value = {
+            'col1': {'score': 0.1},
+            'col2': {'score': 0.2},
+        }
+
+        corr_sim_mock = Mock()
+        corr_sim_mock.__name__ = 'CorrelationSimilarity'
+        corr_sim_mock.compute_breakdown.return_value = {
+            'col1': {'score': 0.1},
+            'col2': {'score': 0.2},
+        }
+
+        cont_sim_mock = Mock()
+        cont_sim_mock.__name__ = 'ContingencySimilarity'
+        cont_sim_mock.compute_breakdown.return_value = {
+            'col1': {'score': 0.1},
+            'col2': {'error': 'test error'},
+        }
+
+        metrics_mock = {
+            'Column Shapes': [ks_complement_mock, tv_complement_mock],
+            'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
+        }
+        mock_discretize_and_apply_metric.return_value = {}
+
+        # Run
+        with patch.object(
+            QualityReport,
+            'METRICS',
+            metrics_mock,
+        ):
+            report = QualityReport()
+            report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        ks_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        tv_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        corr_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cont_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        assert report._overall_quality_score == 0.1375
+        assert report._property_breakdown == {
+            'Column Shapes': 0.15000000000000002,
+            'Column Pair Trends': 0.125,
+        }
+        assert report._property_errors == {
+            'Column Shapes': 0,
+            'Column Pair Trends': 1,
+        }
 
     @patch('sdmetrics.reports.single_table.quality_report.discretize_and_apply_metric')
     def test_generate_non_applicable_metric(self, mock_discretize_and_apply_metric):
@@ -502,6 +588,53 @@ class TestQualityReport:
             })
         )
 
+    def test_get_details_column_pair_trends_with_errors(self):
+        """Test the ``get_details`` method with column pair trends with errors.
+
+        Expect that the details of the desired property is returned. Expect that the
+        details result has an Error column.
+
+        Input:
+        - property name
+
+        Output:
+        - score details for the desired property
+        """
+        # Setup
+        report = QualityReport()
+        report._metric_results = {
+            'CorrelationSimilarity': {
+                ('col1', 'col3'): {'score': 0.1, 'real': 0.1, 'synthetic': 0.1},
+                ('col2', 'col4'): {'score': 0.2, 'real': 0.2, 'synthetic': 0.2},
+            },
+            'ContingencySimilarity': {
+                ('col1', 'col3'): {'score': 0.3, 'real': 0.3, 'synthetic': 0.3},
+                ('col2', 'col4'): {'error': 'test error'},
+            }
+        }
+
+        # Run
+        out = report.get_details('Column Pair Trends')
+
+        # Assert
+        pd.testing.assert_frame_equal(
+            out,
+            pd.DataFrame({
+                'Column 1': ['col1', 'col2', 'col1', 'col2'],
+                'Column 2': ['col3', 'col4', 'col3', 'col4'],
+                'Metric': [
+                    'CorrelationSimilarity',
+                    'CorrelationSimilarity',
+                    'ContingencySimilarity',
+                    'ContingencySimilarity',
+                ],
+                'Quality Score': [0.1, 0.2, 0.3, np.nan],
+                'Real Correlation': [0.1, 0.2, 0.3, np.nan],
+                'Synthetic Correlation': [0.1, 0.2, 0.3, np.nan],
+                'Error': [np.nan, np.nan, np.nan, 'test error'],
+            })
+        )
+
     def test_get_raw_result(self):
         """Test the ``get_raw_result`` method.
 
@@ -540,3 +673,90 @@ class TestQualityReport:
                 }
             }
         ]
+
+    def test__print_result(self):
+        """Test the ``_print_results`` method.
+
+        Expect that the correct messages are written.
+
+        Input:
+        - out argument
+
+        Side Effects:
+        - messages are written to the output.
+        """
+        # Setup
+        report = QualityReport()
+        report._overall_quality_score = 0.7
+        report._property_breakdown = {'Column Shapes': 0.6, 'Column Pair Trends': 0.8}
+        report._property_errors = {'Column Shapes': 0, 'Column Pair Trends': 0}
+        mock_out = Mock()
+
+        # Run
+        report._print_results(mock_out)
+
+        # Assert
+        mock_out.write.assert_has_calls([
+            call('\nOverall Quality Score: 70.0%\n\n'),
+            call('Properties:\n'),
+            call('Column Shapes: 60.0%\n'),
+            call('Column Pair Trends: 80.0%\n'),
+        ])
+
+    def test__print_result_with_error(self):
+        """Test the ``_print_results`` method with errors.
+
+        Expect that the correct messages are written.
+
+        Input:
+        - out argument
+
+        Side Effects:
+        - messages are written to the output.
+        """
+        # Setup
+        report = QualityReport()
+        report._overall_quality_score = 0.6
+        report._property_breakdown = {'Column Shapes': 0.6, 'Column Pair Trends': np.nan}
+        report._property_errors = {'Column Shapes': 0, 'Column Pair Trends': 1}
+        mock_out = Mock()
+
+        # Run
+        report._print_results(mock_out)
+
+        # Assert
+        mock_out.write.assert_has_calls([
+            call('\nOverall Quality Score: 60.0%\n\n'),
+            call('Properties:\n'),
+            call('Column Shapes: 60.0%\n'),
+            call('Column Pair Trends: Error computing property.\n'),
+        ])
+
+    def test__print_result_with_all_errors(self):
+        """Test the ``_print_results`` method with all properties erroring out.
+
+        Expect that the correct messages are written.
+
+        Input:
+        - out argument
+
+        Side Effects:
+        - messages are written to the output.
+        """
+        # Setup
+        report = QualityReport()
+        report._overall_quality_score = np.nan
+        report._property_breakdown = {'Column Shapes': np.nan, 'Column Pair Trends': np.nan}
+        report._property_errors = {'Column Shapes': 1, 'Column Pair Trends': 1}
+        mock_out = Mock()
+
+        # Run
+        report._print_results(mock_out)
+
+        # Assert
+        mock_out.write.assert_has_calls([
+            call('\nOverall Quality Score: Error computing report.\n\n'),
+            call('Properties:\n'),
+            call('Column Shapes: Error computing property.\n'),
+            call('Column Pair Trends: Error computing property.\n'),
+        ])

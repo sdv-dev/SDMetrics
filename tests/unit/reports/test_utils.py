@@ -4,7 +4,7 @@ from unittest.mock import Mock, call, patch
 import pandas as pd
 
 from sdmetrics.reports.utils import (
-    discretize_and_apply_metric, discretize_table_data, get_column_plot,
+    aggregate_metric_results, discretize_and_apply_metric, discretize_table_data, get_column_plot,
     make_continuous_column_plot, make_discrete_column_plot)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
@@ -366,3 +366,30 @@ def test_discretize_and_apply_metric(discretize_table_data_mock):
         ('col2', 'col4'): 0.5,
         ('col3', 'col4'): 0.6,
     }
+
+
+def test_aggregate_metric_results():
+    """Test the ``aggregate_metric_results`` method.
+
+    Expect that the aggregated results are returned.
+
+    Input:
+    - metric results
+
+    Output:
+    - average score
+    - number of errors
+    """
+    # Setup
+    metric_results = {
+        'col1': {'score': 0.1},
+        'col2': {'score': 0.8},
+        'col3': {'error': 'test error'},
+    }
+
+    # Run
+    avg_score, num_errors = aggregate_metric_results(metric_results)
+
+    # Assert
+    assert avg_score == 0.45
+    assert num_errors == 1
