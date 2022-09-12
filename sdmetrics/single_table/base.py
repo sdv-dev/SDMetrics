@@ -2,6 +2,8 @@
 
 from operator import attrgetter
 
+import pandas as pd
+
 from sdmetrics.base import BaseMetric
 from sdmetrics.errors import IncomputableMetricError
 
@@ -101,11 +103,20 @@ class SingleTableMetric(BaseMetric):
                 if column not in fields:
                     raise ValueError(f'Column {column} not found in metadata')
 
-            for field in fields.keys():
+            for field, field_meta in fields.items():
                 if field not in real_data.columns:
                     raise ValueError(f'Field {field} not found in data')
+                if (
+                    field_meta['type'] == 'datetime' and
+                    'format' in field_meta and
+                    real_data[field].dtype == 'O'
+                ):
+                    real_data[field] = pd.to_datetime(
+                        real_data[field], format=field_meta['format'])
+                    synthetic_data[field] = pd.to_datetime(
+                        synthetic_data[field], format=field_meta['format'])
 
-            return metadata
+            return real_data, synthetic_data, metadata
 
         dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
         return {'fields': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict()}

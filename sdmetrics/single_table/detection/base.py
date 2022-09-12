@@ -65,7 +65,8 @@ class DetectionMetric(SingleTableMetric):
             float:
                 One minus the ROC AUC Cross Validation Score obtained by the classifier.
         """
-        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = cls._validate_inputs(
+            real_data, synthetic_data, metadata)
         ht = HyperTransformer()
         transformed_real_data = ht.fit_transform(real_data).to_numpy()
         transformed_synthetic_data = ht.transform(synthetic_data).to_numpy()
