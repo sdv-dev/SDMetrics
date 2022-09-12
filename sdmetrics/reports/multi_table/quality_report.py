@@ -14,7 +14,7 @@ from sdmetrics.multi_table import (
     TVComplement)
 from sdmetrics.reports.multi_table.plot_utils import get_table_relationships_plot
 from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
-from sdmetrics.reports.utils import discretize_and_apply_metric
+from sdmetrics.reports.utils import aggregate_metric_results, discretize_and_apply_metric
 
 
 class QualityReport():
@@ -35,10 +35,15 @@ class QualityReport():
         self._overall_quality_score = None
         self._metric_results = {}
         self._property_breakdown = {}
+        self._property_errors = {}
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
-        out.write(f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n')
+        if np.isnan(self._overall_quality_score) & any(self._property_errors.values()):
+            out.write('\nOverall Quality Score: Error computing report.\n\n')
+        else:
+            out.write(
+                f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n')
 
         if len(self._property_breakdown) > 0:
             out.write('Properties:\n')
@@ -46,6 +51,8 @@ class QualityReport():
         for prop, score in self._property_breakdown.items():
             if not np.isnan(score):
                 out.write(f'{prop}: {round(score * 100, 2)}%\n')
+            elif self._property_errors[prop] > 0:
+                out.write(f'{prop}: Error computing property.\n')
             else:
                 out.write(f'{prop}: NaN\n')
 
@@ -95,31 +102,32 @@ class QualityReport():
         self._property_breakdown = {}
         for prop, metrics in self.METRICS.items():
             prop_scores = []
+            num_prop_errors = 0
             if prop == 'Parent Child Relationships':
                 for metric in metrics:
                     if 'score' in self._metric_results[metric.__name__]:
                         prop_scores.append(self._metric_results[metric.__name__]['score'])
                     else:
-                        metric_scores = [
-                            table_breakdown['score'] for _, table_breakdown
-                            in self._metric_results[metric.__name__].items()
-                            if not np.isnan(table_breakdown['score'])
-                        ]
-                        if len(metric_scores) > 0:
-                            prop_scores.append(np.mean(metric_scores))
+                        avg_score, num_metric_errors = aggregate_metric_results(
+                            self._metric_results[metric.__name__])
+                        num_prop_errors += num_metric_errors
+                        if not np.isnan(avg_score):
+                            prop_scores.append(avg_score)
             else:
                 for metric in metrics:
-                    metric_scores = [
-                        breakdown['score'] for _, table_breakdowns
-                        in self._metric_results[metric.__name__].items()
-                        for _, breakdown in table_breakdowns.items()
-                        if not np.isnan(breakdown['score'])
-                    ]
+                    metric_scores = []
+                    for _, table_breakdowns in self._metric_results[metric.__name__].items():
+                        avg_score, num_metric_errors = aggregate_metric_results(table_breakdowns)
+                        num_prop_errors += num_metric_errors
+                        if not np.isnan(avg_score):
+                            metric_scores.append(avg_score)
+
                     if len(metric_scores) > 0:
                         prop_scores.append(np.mean(metric_scores))
 
             self._property_breakdown[prop] = np.nanmean(
                 prop_scores) if (len(prop_scores) > 0) else np.nan
+            self._property_errors[prop] = num_prop_errors
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
 
@@ -213,6 +221,8 @@ class QualityReport():
         columns = []
         metrics = []
         scores = []
+        errors = []
+        details = pd.DataFrame()
 
         if property_name == 'Column Shapes':
             for metric in self.METRICS[property_name]:
@@ -221,14 +231,15 @@ class QualityReport():
                         continue
 
                     for column, score_breakdown in table_breakdown.items():
-                        if np.isnan(score_breakdown['score']):
+                        if 'score' in score_breakdown and np.isnan(score_breakdown['score']):
                             continue
                         tables.append(table)
                         columns.append(column)
                         metrics.append(metric.__name__)
-                        scores.append(score_breakdown['score'])
+                        scores.append(score_breakdown.get('score', np.nan))
+                        errors.append(score_breakdown.get('error', np.nan))
 
-            return pd.DataFrame({
+            details = pd.DataFrame({
                 'Table': tables,
                 'Column': columns,
                 'Metric': metrics,
@@ -247,13 +258,12 @@ class QualityReport():
                         tables.append(table)
                         columns.append(column_pair)
                         metrics.append(metric.__name__)
-                        scores.append(score_breakdown['score'])
-                        real_scores.append(
-                            score_breakdown['real'] if 'real' in score_breakdown else np.nan)
-                        synthetic_scores.append(
-                            score_breakdown['synthetic'] if 'real' in score_breakdown else np.nan)
+                        scores.append(score_breakdown.get('score', np.nan))
+                        real_scores.append(score_breakdown.get('real', np.nan))
+                        synthetic_scores.append(score_breakdown.get('synthetic', np.nan))
+                        errors.append(score_breakdown.get('error', np.nan))
 
-            return pd.DataFrame({
+            details = pd.DataFrame({
                 'Table': tables,
                 'Column 1': [col1 for col1, _ in columns],
                 'Column 2': [col2 for _, col2 in columns],
@@ -273,14 +283,20 @@ class QualityReport():
                     tables.append(table_pair[0])
                     child_tables.append(table_pair[1])
                     metrics.append(metric.__name__)
-                    scores.append(score_breakdown['score'])
+                    scores.append(score_breakdown.get('score', np.nan))
+                    errors.append(score_breakdown.get('error', np.nan))
 
-            return pd.DataFrame({
+            details = pd.DataFrame({
                 'Child Table': child_tables,
                 'Parent Table': tables,
                 'Metric': metrics,
                 'Quality Score': scores,
             })
+
+        if pd.Series(errors).notna().sum() > 0:
+            details['Error'] = errors
+
+        return details
 
     def get_raw_result(self, metric_name):
         """Return the raw result of the given metric name.

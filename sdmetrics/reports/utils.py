@@ -272,3 +272,30 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
             metric_results[sorted_columns] = result
 
     return metric_results
+
+
+def aggregate_metric_results(metric_results):
+    """Aggregate the scores and errors in a metric results mapping.
+
+    Args:
+        metric_results (dict):
+            The metric results to aggregate.
+
+    Returns:
+        (float, int):
+            The average of the metric scores, and the number of errors.
+    """
+    if len(metric_results) == 0:
+        return np.nan, 0
+
+    metric_scores = []
+    num_errors = 0
+
+    for _, breakdown in metric_results.items():
+        metric_score = breakdown.get('score', np.nan)
+        if not np.isnan(metric_score):
+            metric_scores.append(metric_score)
+        if 'error' in breakdown:
+            num_errors += 1
+
+    return np.mean(metric_scores), num_errors
