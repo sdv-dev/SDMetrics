@@ -1,6 +1,6 @@
 """Reports for sdmetrics."""
-from sdmetrics.reports.utils import plot_column
+from sdmetrics.reports.utils import get_column_plot
 
 __all__ = [
-    'plot_column',
+    'get_column_plot',
 ]

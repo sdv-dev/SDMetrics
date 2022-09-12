@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
+from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
 from sdmetrics.reports.utils import discretize_and_apply_metric
 from sdmetrics.single_table import (
@@ -58,8 +59,12 @@ class QualityReport():
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
 
         for metric in tqdm.tqdm(metrics, desc='Creating report'):
-            self._metric_results[metric.__name__] = metric.compute_breakdown(
-                real_data, synthetic_data, metadata)
+            try:
+                self._metric_results[metric.__name__] = metric.compute_breakdown(
+                    real_data, synthetic_data, metadata)
+            except IncomputableMetricError:
+                # Metric is not compatible with this dataset.
+                self._metric_results[metric.__name__] = {}
 
         existing_column_pairs = list(self._metric_results['ContingencySimilarity'].keys())
         existing_column_pairs.extend(
@@ -72,15 +77,17 @@ class QualityReport():
         for prop, metrics in self.METRICS.items():
             prop_scores = []
             for metric in metrics:
-                score = np.nanmean(
-                    [
+                if len(self._metric_results[metric.__name__]) > 0:
+                    metric_scores = [
                         breakdown['score'] for _, breakdown
                         in self._metric_results[metric.__name__].items()
+                        if not np.isnan(breakdown['score'])
                     ]
-                )
-                prop_scores.append(score)
+                    if len(metric_scores) > 0:
+                        prop_scores.append(np.mean(metric_scores))
 
-            self._property_breakdown[prop] = np.nanmean(prop_scores)
+            self._property_breakdown[prop] = np.mean(
+                prop_scores) if (len(prop_scores) > 0) else np.nan
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
 
@@ -107,12 +114,16 @@ class QualityReport():
             'Score': self._property_breakdown.values(),
         })
 
-    def show_details(self, property_name):
-        """Display a visualization for each score for the given property name.
+    def get_visualization(self, property_name):
+        """Return a visualization for each score for the given property name.
 
         Args:
             property_name (str):
                 The name of the property to return score details for.
+
+        Returns:
+            plotly.graph_objects._figure.Figure
+                The visualization for the requested property.
         """
         score_breakdowns = {
             metric.__name__: self._metric_results[metric.__name__]
@@ -128,7 +139,7 @@ class QualityReport():
                 self._property_breakdown[property_name],
             )
 
-        fig.show()
+        return fig
 
     def get_details(self, property_name):
         """Return the details for each score for the given property name.

@@ -8,8 +8,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
 
-from sdmetrics.utils import is_datetime
-
 DATACEBO_DARK = '#000036'
 DATACEBO_LIGHT = '#01E0C9'
 
@@ -162,8 +160,8 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
     return fig
 
 
-def plot_column(real_column, synthetic_column, sdtype):
-    """Plot the real and synthetic data for a given column.
+def get_column_plot(real_column, synthetic_column, sdtype):
+    """Return a plot of the real and synthetic data for a given column.
 
     Args:
         real_column (pandas.Series):
@@ -172,13 +170,16 @@ def plot_column(real_column, synthetic_column, sdtype):
             The synthetic data for the desired column.
         sdtype (str):
             The data type of the column.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
     """
     if sdtype == 'numerical' or sdtype == 'datetime':
         fig = make_continuous_column_plot(real_column, synthetic_column, sdtype)
     elif sdtype == 'categorical' or sdtype == 'boolean':
         fig = make_discrete_column_plot(real_column, synthetic_column, sdtype)
 
-    fig.show()
+    return fig
 
 
 def discretize_table_data(real_data, synthetic_data, metadata):
@@ -210,7 +211,11 @@ def discretize_table_data(real_data, synthetic_data, metadata):
         if field_meta['type'] == 'numerical' or field_meta['type'] == 'datetime':
             real_col = real_data[field_name]
             synthetic_col = synthetic_data[field_name]
-            if is_datetime(real_col):
+            if field_meta['type'] == 'datetime':
+                if real_col.dtype == 'O' and field_meta.get('format', ''):
+                    real_col = pd.to_datetime(real_col, format=field_meta['format'])
+                    synthetic_col = pd.to_datetime(synthetic_col, format=field_meta['format'])
+
                 real_col = pd.to_numeric(real_col)
                 synthetic_col = pd.to_numeric(synthetic_col)
 

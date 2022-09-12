@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.reports.multi_table import QualityReport
 
 
@@ -242,6 +243,115 @@ class TestQualityReport:
         assert report._overall_quality_score == 0.15000000000000002
         assert np.isnan(report._property_breakdown['Parent Child Relationships'])
 
+    @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
+    def test_generate_with_non_applicable_metric(self, mock_discretize_and_apply_metric):
+        """Test the ``generate`` method with a non applicable metric.
+
+        Expect that the multi-table metrics are called. Expect that if a metric is not
+        applicable, it is skipped.
+
+        Setup:
+        - Mock the expected multi-table metric compute breakdown calls.
+        - Mock one metric to return an ``IncomputableMetricError``.
+
+        Input:
+        - Real data.
+        - Synthetic data.
+        - Metadata.
+
+        Side Effects:
+        - Expect that each multi table metric's ``compute_breakdown`` methods are called once.
+        - Expect that the ``_overall_quality_score`` and ``_property_breakdown`` attributes
+          are populated.
+        """
+        # Setup
+        mock_discretize_and_apply_metric.return_value = {}
+        real_data = {
+            'table1': pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']}),
+            'table2': pd.DataFrame({'col1': [1, 1, 1]}),
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({'col1': [1, 3, 3], 'col2': ['b', 'b', 'c']}),
+            'table2': pd.DataFrame({'col1': [3, 1, 3]}),
+        }
+        metadata = {
+            'tables': {
+                'table1': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
+                'table2': {'col1': {'type': 'numerical'}},
+            },
+        }
+
+        ks_complement_mock = Mock()
+        ks_complement_mock.__name__ = 'KSComplement'
+        ks_complement_mock.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            }
+        }
+
+        tv_complement_mock = Mock()
+        tv_complement_mock.__name__ = 'TVComplement'
+        tv_complement_mock.compute_breakdown.side_effect = IncomputableMetricError()
+
+        corr_sim_mock = Mock()
+        corr_sim_mock.__name__ = 'CorrelationSimilarity'
+        corr_sim_mock.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            }
+        }
+
+        cont_sim_mock = Mock()
+        cont_sim_mock.__name__ = 'ContingencySimilarity'
+        cont_sim_mock.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            }
+        }
+
+        cardinality_mock = Mock()
+        cardinality_mock.__name__ = 'CardinalityShapeSimilarity'
+        cardinality_mock.compute_breakdown.return_value = {
+            ('table1', 'table2'): {'score': 1.0},
+        }
+        metrics_mock = {
+            'Column Shapes': [ks_complement_mock, tv_complement_mock],
+            'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
+            'Parent Child Relationships': [cardinality_mock],
+        }
+
+        # Run
+        with patch.object(
+            QualityReport,
+            'METRICS',
+            metrics_mock,
+        ):
+            report = QualityReport()
+            report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        ks_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        tv_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        corr_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cont_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cardinality_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+
+        assert report._overall_quality_score == 0.43333333333333335
+        assert report._property_breakdown == {
+            'Column Shapes': 0.15000000000000002,
+            'Column Pair Trends': 0.15000000000000002,
+            'Parent Child Relationships': 1.0,
+        }
+        assert report._metric_results['TVComplement'] == {}
+
     def test_get_score(self):
         """Test the ``get_score`` method.
 
@@ -353,11 +463,14 @@ class TestQualityReport:
         assert loaded == pickle_mock.load.return_value
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_column_shapes_plot')
-    def test_show_details_column_shapes(self, get_plot_mock):
-        """Test the ``show_details`` method with Column Shapes.
+    def test_get_visualization_column_shapes(self, get_plot_mock):
+        """Test the ``get_visualization`` method with Column Shapes.
 
         Input:
         - property='Column Shapes'
+
+        Output:
+        - visualization
 
         Side Effects:
         - get_column_shapes_plot is called with the expected score breakdowns.
@@ -374,16 +487,17 @@ class TestQualityReport:
         }
 
         # Run
-        report.show_details('Column Shapes', table_name='table1')
+        out = report.get_visualization('Column Shapes', table_name='table1')
 
         # Assert
         get_plot_mock.assert_called_once_with({
             'KSComplement': {'col1': {'score': 'ks_complement_score'}},
             'TVComplement': {'col2': {'score': 'tv_complement_score'}},
         })
+        assert out == get_plot_mock.return_value
 
-    def test_show_details_column_shapes_no_table_name(self):
-        """Test the ``show_details`` method with Column Shapes and no table name.
+    def test_get_visualization_column_shapes_no_table_name(self):
+        """Test the ``get_visualization`` method with Column Shapes and no table name.
 
         Expect that a ``ValueError`` is thrown.
 
@@ -402,14 +516,17 @@ class TestQualityReport:
             ValueError,
             match='Table name must be provided when viewing details for property Column Shapes',
         ):
-            report.show_details('Column Shapes')
+            report.get_visualization('Column Shapes')
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_column_pairs_plot')
-    def test_show_details_column_pairs(self, get_plot_mock):
-        """Test the ``show_details`` method with Column Pairs.
+    def test_get_visualization_column_pairs(self, get_plot_mock):
+        """Test the ``get_visualization`` method with Column Pairs.
 
         Input:
         - property='Column Pairs'
+
+        Output:
+        - visualization
 
         Side Effects:
         - get_column_pairs_plot is called with the expected score breakdowns.
@@ -426,20 +543,24 @@ class TestQualityReport:
         }
 
         # Run
-        report.show_details('Column Pair Trends', table_name='table1')
+        out = report.get_visualization('Column Pair Trends', table_name='table1')
 
         # Assert
         get_plot_mock.assert_called_once_with({
             'CorrelationSimilarity': {('col1', 'col2'): {'score': 'test_score_1'}},
             'ContingencySimilarity': {('col5', 'col6'): {'score': 'test_score_2'}},
         })
+        assert out == get_plot_mock.return_value
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
-    def test_show_details_table_relationships(self, get_plot_mock):
-        """Test the ``show_details`` method with Parent Child Relationships.
+    def test_get_visualization_table_relationships(self, get_plot_mock):
+        """Test the ``get_visualization`` method with Parent Child Relationships.
 
         Input:
         - property='Parent Child Relationships'
+
+        Output:
+        - visualization
 
         Side Effects:
         - get_parent_child_relationships_plot is called with the expected score breakdowns.
@@ -452,7 +573,7 @@ class TestQualityReport:
         }
 
         # Run
-        report.show_details('Parent Child Relationships')
+        out = report.get_visualization('Parent Child Relationships')
 
         # Assert
         get_plot_mock.assert_called_once_with({
@@ -461,14 +582,18 @@ class TestQualityReport:
                 ('table3', 'table2'): {'score': 'test_score_2'},
             },
         })
+        assert out == get_plot_mock.return_value
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
-    def test_show_details_table_relationships_with_table_name(self, get_plot_mock):
-        """Test the ``show_details`` method with Parent Child Relationships and a table.
+    def test_get_visualization_table_relationships_with_table_name(self, get_plot_mock):
+        """Test the ``get_visualization`` method with Parent Child Relationships and a table.
 
         Input:
         - property='Parent Child Relationships'
         - table name
+
+        Output:
+        - visualization
 
         Side Effects:
         - get_parent_child_relationships_plot is called with the expected score breakdowns.
@@ -481,7 +606,7 @@ class TestQualityReport:
         }
 
         # Run
-        report.show_details('Parent Child Relationships', table_name='table1')
+        out = report.get_visualization('Parent Child Relationships', table_name='table1')
 
         # Assert
         get_plot_mock.assert_called_once_with({
@@ -489,6 +614,7 @@ class TestQualityReport:
                 ('table1', 'table2'): {'score': 'test_score_1'},
             },
         })
+        assert out == get_plot_mock.return_value
 
     def test_get_details_column_shapes(self):
         """Test the ``get_details`` method with column shapes.
