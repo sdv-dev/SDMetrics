@@ -62,7 +62,8 @@ class CategoricalPrivacyMetric(SingleTableMetric):
 
     @classmethod
     def _validate_inputs(cls, real_data, synthetic_data, metadata, key_fields, sensitive_fields):
-        metadata = super()._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = super()._validate_inputs(
+            real_data, synthetic_data, metadata)
         if 'key_fields' in metadata:
             key_fields = metadata['key_fields']
         elif key_fields is None:
@@ -208,7 +209,8 @@ class NumericalPrivacyMetric(SingleTableMetric):
 
     @classmethod
     def _validate_inputs(cls, real_data, synthetic_data, metadata, key_fields, sensitive_fields):
-        metadata = super()._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = super()._validate_inputs(
+            real_data, synthetic_data, metadata)
         if 'key_fields' in metadata:
             key_fields = metadata['key_fields']
         elif key_fields is None:

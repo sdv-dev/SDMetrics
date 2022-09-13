@@ -65,7 +65,8 @@ class MultiSingleColumnMetric(SingleTableMetric,
             Dict[string -> Union[float, tuple[float]]]:
                 A mapping of column name to metric output.
         """
-        metadata = self._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = self._validate_inputs(
+            real_data, synthetic_data, metadata)
 
         fields = self._select_fields(metadata, self.field_types)
         invalid_cols = set(metadata['fields'].keys()) - set(fields)

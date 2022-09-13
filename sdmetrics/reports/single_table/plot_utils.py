@@ -194,8 +194,8 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
         cols=2,
         subplot_titles=[
             'Real vs. Synthetic Similarity',
-            'Real Trends (Numerical Data)',
-            'Real Trends (Synthetic Data)',
+            'Numerical Correlation (Real Data)',
+            'Numerical Correlation (Synthetic Data)',
         ],
         specs=[[{'colspan': 2, 'l': 0.26, 'r': 0.26}, None], [{}, {}]])
 

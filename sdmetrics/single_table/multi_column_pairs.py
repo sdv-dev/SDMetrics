@@ -63,7 +63,8 @@ class MultiColumnPairsMetric(
             Union[float, tuple[float]]:
                 Metric output.
         """
-        metadata = self._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = self._validate_inputs(
+            real_data, synthetic_data, metadata)
 
         fields = self._select_fields(metadata, self.field_types)
 
@@ -115,7 +116,8 @@ class MultiColumnPairsMetric(
             dict:
                 Metric output.
         """
-        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = cls._validate_inputs(
+            real_data, synthetic_data, metadata)
 
         fields = cls._select_fields(metadata, cls.field_types)
 

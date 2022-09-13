@@ -70,7 +70,8 @@ class MLEfficacyMetric(SingleTableMetric):
 
     @classmethod
     def _validate_inputs(cls, real_data, synthetic_data, metadata, target):
-        metadata = super()._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = super()._validate_inputs(
+            real_data, synthetic_data, metadata)
         if 'target' in metadata:
             target = metadata['target']
         elif target is None:

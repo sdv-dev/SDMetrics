@@ -29,20 +29,20 @@ class TestMultiSingleColumnMetric:
         # Setup
         metadata = {'fields': {'a': {}, 'b': {}, 'c': {}, 'd': {}}}
 
-        metric_mock = Mock()
-        metric_mock._validate_inputs.return_value = metadata
-        metric_mock._select_fields.return_value = ['a', 'b']
-        metric_mock.single_column_metric.compute_breakdown.side_effect = [
-            {'score': 1.0}, {'score': 2.0},
-        ]
-        metric_mock.single_column_metric_kwargs = None
-
         data = pd.DataFrame({
             'a': [0, 1, 2, 3],
             'b': [100, 200, 300, 400],
             'c': ['one', 'two', 'three', 'four'],
             'd': ['a', 'b', 'c', 'd'],
         })
+
+        metric_mock = Mock()
+        metric_mock._validate_inputs.return_value = (data, data, metadata)
+        metric_mock._select_fields.return_value = ['a', 'b']
+        metric_mock.single_column_metric.compute_breakdown.side_effect = [
+            {'score': 1.0}, {'score': 2.0},
+        ]
+        metric_mock.single_column_metric_kwargs = None
 
         # Run
         result = MultiSingleColumnMetric._compute(metric_mock, data, data)
@@ -75,21 +75,21 @@ class TestMultiSingleColumnMetric:
         - An error is thrown.
         """
         # Setup
-        metadata = {'fields': {'a': {}, 'b': {}, 'c': {}, 'd': {}}}
-        test_error = ValueError('test error')
-
-        metric_mock = Mock()
-        metric_mock._validate_inputs.return_value = metadata
-        metric_mock._select_fields.return_value = ['a', 'b', 'c']
-        metric_mock.single_column_metric.compute_breakdown.side_effect = [1.0, 2.0, test_error]
-        metric_mock.single_column_metric_kwargs = None
-
         data = pd.DataFrame({
             'a': [0, 1, 2, 3],
             'b': [100, 200, 300, 400],
             'c': ['one', 'two', 'three', 'four'],
             'd': ['a', 'b', 'c', 'd'],
         })
+
+        metadata = {'fields': {'a': {}, 'b': {}, 'c': {}, 'd': {}}}
+        test_error = ValueError('test error')
+
+        metric_mock = Mock()
+        metric_mock._validate_inputs.return_value = (data, data, metadata)
+        metric_mock._select_fields.return_value = ['a', 'b', 'c']
+        metric_mock.single_column_metric.compute_breakdown.side_effect = [1.0, 2.0, test_error]
+        metric_mock.single_column_metric_kwargs = None
 
         # Run and assert
         with pytest.raises(ValueError, match='test error'):
@@ -120,20 +120,20 @@ class TestMultiSingleColumnMetric:
         metadata = {'fields': {'a': {}, 'b': {}, 'c': {}, 'd': {}}}
         test_error = ValueError('test error')
 
-        metric_mock = Mock()
-        metric_mock._validate_inputs.return_value = metadata
-        metric_mock._select_fields.return_value = ['a', 'b', 'c']
-        metric_mock.single_column_metric.compute_breakdown.side_effect = [
-            {'score': 1.0}, {'score': 2.0}, {'error': test_error},
-        ]
-        metric_mock.single_column_metric_kwargs = None
-
         data = pd.DataFrame({
             'a': [0, 1, 2, 3],
             'b': [100, 200, 300, 400],
             'c': ['one', 'two', 'three', 'four'],
             'd': ['a', 'b', 'c', 'd'],
         })
+
+        metric_mock = Mock()
+        metric_mock._validate_inputs.return_value = (data, data, metadata)
+        metric_mock._select_fields.return_value = ['a', 'b', 'c']
+        metric_mock.single_column_metric.compute_breakdown.side_effect = [
+            {'score': 1.0}, {'score': 2.0}, {'error': test_error},
+        ]
+        metric_mock.single_column_metric_kwargs = None
 
         # Run
         result = MultiSingleColumnMetric._compute(metric_mock, data, data, store_errors=True)
