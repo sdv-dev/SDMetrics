@@ -85,11 +85,23 @@ class SingleTableMetric(BaseMetric):
 
     @classmethod
     def _validate_inputs(cls, real_data, synthetic_data, metadata=None):
-        """Validate the inputs and return a valid metadata.
+        """Validate the inputs and return the validated data and metadata.
 
         If a metadata is passed, the data is validated against it.
 
         If no metadata is passed, one is built based on the ``real_data`` values.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data(pandas.DataFrame):
+                The synthetic data.
+            metadata (dict or Metadata or None):
+                The metadata, if any.
+
+        Returns:
+            (pandas.DataFrame, pandas.DataFrame, dict):
+                The validated data and metadata.
         """
         if set(real_data.columns) != set(synthetic_data.columns):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
@@ -119,7 +131,9 @@ class SingleTableMetric(BaseMetric):
             return real_data, synthetic_data, metadata
 
         dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
-        return {'fields': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict()}
+        return real_data, synthetic_data, {
+            'fields': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
+        }
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None):
