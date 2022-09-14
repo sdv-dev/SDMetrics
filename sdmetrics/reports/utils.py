@@ -71,8 +71,8 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
         {
             'xref': 'paper',
             'yref': 'paper',
-            'x': -0.08,
-            'y': -0.2,
+            'x': 1.0,
+            'y': 1.05,
             'showarrow': False,
             'text': (
                 f'*Missing Values: Real Data ({missing_data_real}%), '
@@ -83,7 +83,7 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
 
     fig.update_layout(
         title=f"Real vs. Synthetic Data for column '{column_name}'",
-        xaxis_title='Category*' if show_missing_values else 'Category',
+        xaxis_title='Category',
         yaxis_title='Frequency',
         plot_bgcolor=BACKGROUND_COLOR,
         annotations=annotations,
@@ -145,8 +145,8 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
         {
             'xref': 'paper',
             'yref': 'paper',
-            'x': -0.08,
-            'y': -0.2,
+            'x': 1.0,
+            'y': 1.05,
             'showarrow': False,
             'text': (
                 f'*Missing Values: Real Data ({missing_data_real}%), '
@@ -157,7 +157,7 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
 
     fig.update_layout(
         title=f'Real vs. Synthetic Data for column {column_name}',
-        xaxis_title='Value*' if show_missing_values else 'Value',
+        xaxis_title='Value',
         yaxis_title='Frequency',
         plot_bgcolor=BACKGROUND_COLOR,
         annotations=annotations,
