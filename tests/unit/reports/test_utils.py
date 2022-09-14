@@ -235,7 +235,7 @@ def test_get_column_plot_invalid_sdtype():
     sdtype = 'invalid'
 
     # Run and assert
-    with pytest.raises(ValueError, match='sdtype of invalid not recognized'):
+    with pytest.raises(ValueError, match="sdtype of type 'invalid' not recognized"):
         get_column_plot(real_column, synthetic_column, sdtype)
 
 
@@ -541,7 +541,7 @@ def test_get_column_pair_plot_invalid_sdtype():
     sdtypes = ('numerical', 'invalid')
 
     # Run and assert
-    with pytest.raises(ValueError, match='sdtype of invalid not recognized'):
+    with pytest.raises(ValueError, match="sdtype of type 'invalid' not recognized"):
         get_column_pair_plot(Mock(), Mock(), sdtypes)
 
 

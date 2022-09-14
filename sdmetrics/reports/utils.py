@@ -186,7 +186,7 @@ def get_column_plot(real_column, synthetic_column, sdtype):
     elif sdtype in DISCRETE_SDTYPES:
         fig = make_discrete_column_plot(real_column, synthetic_column, sdtype)
     else:
-        raise ValueError(f'sdtype of {sdtype} not recognized.')
+        raise ValueError(f"sdtype of type '{sdtype}' not recognized.")
 
     return fig
 
@@ -333,10 +333,10 @@ def get_column_pair_plot(real_data, synthetic_data, sdtypes):
         plotly.graph_objects._figure.Figure
     """
     all_sdtypes = CONTINUOUS_SDTYPES + DISCRETE_SDTYPES
-    if not sdtypes[0] in all_sdtypes:
-        raise ValueError(f'sdtype of {sdtypes[0]} not recognized.')
-    if not sdtypes[1] in all_sdtypes:
-        raise ValueError(f'sdtype of {sdtypes[1]} not recognized.')
+    if sdtypes[0] not in all_sdtypes:
+        raise ValueError(f"sdtype of type '{sdtypes[0]}' not recognized.")
+    if sdtypes[1] not in all_sdtypes:
+        raise ValueError(f"sdtype of type '{sdtypes[1]}' not recognized.")
 
     if all([t in DISCRETE_SDTYPES for t in sdtypes]):
         return make_discrete_column_pair_plot(real_data, synthetic_data)
