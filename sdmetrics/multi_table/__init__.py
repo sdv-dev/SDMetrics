@@ -38,4 +38,5 @@ __all__ = [
     'MissingValueSimilarity',
     'StatisticSimilarity',
     'TVComplement',
+    'RangeCoverage',
 ]

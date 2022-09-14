@@ -52,7 +52,7 @@ class RangeCoverage(SingleColumnMetric):
 
         normalized_min = max((min_s - min_r) / (max_r - min_r), 0)
         normalized_max = max((max_r - max_s) / (max_r - min_r), 0)
-        return 1 - abs(normalized_min - normalized_max)
+        return max(1 - (normalized_min + normalized_max), 0)
 
     @classmethod
     def normalize(cls, raw_score):
