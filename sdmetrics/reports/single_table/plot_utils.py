@@ -74,20 +74,6 @@ def get_column_shapes_plot(score_breakdowns, average_score=None):
         xaxis_categoryorder='total ascending',
         plot_bgcolor='#F5F5F8',
         margin={'t': 150},
-        annotations=[
-            {
-                'font': {'color': 'black', 'size': 11},
-                'xref': 'paper',
-                'yref': 'paper',
-                'x': -0.045,
-                'y': 1.25,
-                'showarrow': False,
-                'text': (
-                    'KSComplement is applied to numerical & datetime columns. '
-                    'TVComplement is applied for boolean & categorical columns.'
-                ),
-            },
-        ],
     )
 
     return fig
