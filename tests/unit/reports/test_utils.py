@@ -2,10 +2,13 @@ from datetime import date, datetime
 from unittest.mock import Mock, call, patch
 
 import pandas as pd
+import pytest
 
 from sdmetrics.reports.utils import (
-    aggregate_metric_results, discretize_and_apply_metric, discretize_table_data, get_column_plot,
-    make_continuous_column_plot, make_discrete_column_plot)
+    aggregate_metric_results, convert_to_datetime, discretize_and_apply_metric,
+    discretize_table_data, get_column_pair_plot, get_column_plot, make_continuous_column_pair_plot,
+    make_continuous_column_plot, make_discrete_column_pair_plot, make_discrete_column_plot,
+    make_mixed_column_pair_plot)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -213,6 +216,333 @@ def test_get_column_plot_discrete_col(make_plot_mock):
     # Assert
     make_plot_mock.assert_called_once_with(real_column, synthetic_column, sdtype)
     assert out == make_plot_mock.return_value
+
+
+def test_get_column_plot_invalid_sdtype():
+    """Test the ``get_column_plot`` method with an invalid sdtype.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data type
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_column = pd.Series([1, 2, 3, 4])
+    synthetic_column = pd.Series([1, 2, 4, 5])
+    sdtype = 'invalid'
+
+    # Run and assert
+    with pytest.raises(ValueError, match="sdtype of type 'invalid' not recognized"):
+        get_column_plot(real_column, synthetic_column, sdtype)
+
+
+def test_convert_to_datetime():
+    """Test the ``convert_to_datetime`` method with a datetime column.
+
+    Expect no conversion to happen since the input is already a pandas datetime type.
+
+    Inputs:
+    - datetime column
+
+    Output:
+    - datetime column
+    """
+    # Setup
+    column_data = pd.Series([datetime(2020, 1, 2), datetime(2021, 1, 2)])
+
+    # Run
+    out = convert_to_datetime(column_data)
+
+    # Assert
+    pd.testing.assert_series_equal(out, column_data)
+
+
+def test_convert_to_datetime_date_column():
+    """Test the ``convert_to_datetime`` method with a date column.
+
+    Expect the date column to be converted to a datetime column.
+
+    Inputs:
+    - date column
+
+    Output:
+    - datetime column
+    """
+    # Setup
+    column_data = pd.Series([date(2020, 1, 2), date(2021, 1, 2)])
+
+    # Run
+    out = convert_to_datetime(column_data)
+
+    # Assert
+    expected = pd.Series([datetime(2020, 1, 2), datetime(2021, 1, 2)])
+    pd.testing.assert_series_equal(out, expected)
+
+
+@patch('sdmetrics.reports.utils.px')
+def test_make_continuous_column_pair_plot(px_mock):
+    """Test the ``make_continuous_column_pair_plot`` method.
+
+    Expect that it creates a scatter plot.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data type
+
+    Side Effects:
+    - A distplot is created.
+    """
+    # Setup
+    real_column = pd.DataFrame({'col1': [1, 2, 3, 4], 'col2': [1.1, 1.2, 1.3, 1.4]})
+    synthetic_column = pd.DataFrame({'col1': [1, 2, 4, 5], 'col2': [1.1, 1.2, 1.3, 1.4]})
+
+    mock_figure = Mock()
+    px_mock.scatter.return_value = mock_figure
+
+    # Run
+    fig = make_continuous_column_pair_plot(real_column, synthetic_column)
+
+    # Assert
+    px_mock.scatter.assert_called_once_with(
+        DataFrameMatcher(pd.DataFrame({
+            'col1': [1, 2, 3, 4, 1, 2, 4, 5],
+            'col2': [1.1, 1.2, 1.3, 1.4, 1.1, 1.2, 1.3, 1.4],
+            'Data': [
+                'Real',
+                'Real',
+                'Real',
+                'Real',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+            ],
+        })),
+        x='col1',
+        y='col2',
+        color='Data',
+        color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'},
+        symbol='Data',
+    )
+    assert mock_figure.update_layout.called_once()
+    assert fig == mock_figure
+
+
+@patch('sdmetrics.reports.utils.px')
+def test_make_discrete_column_pair_plot(px_mock):
+    """Test the ``make_discrete_column_pair_plot`` method.
+
+    Expect that it creates a heatmap.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data type
+
+    Side Effects:
+    - A distplot is created.
+    """
+    # Setup
+    real_column = pd.DataFrame({'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
+    synthetic_column = pd.DataFrame({'col1': [1, 2, 4, 5], 'col2': ['a', 'b', 'c', 'd']})
+
+    mock_figure = Mock()
+    px_mock.density_heatmap.return_value = mock_figure
+
+    # Run
+    fig = make_discrete_column_pair_plot(real_column, synthetic_column)
+
+    # Assert
+    px_mock.density_heatmap.assert_called_once_with(
+        DataFrameMatcher(pd.DataFrame({
+            'col1': [1, 2, 3, 4, 1, 2, 4, 5],
+            'col2': ['a', 'b', 'c', 'd', 'a', 'b', 'c', 'd'],
+            'Data': [
+                'Real',
+                'Real',
+                'Real',
+                'Real',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+            ],
+        })),
+        x='col1',
+        y='col2',
+        facet_col='Data',
+        histnorm='probability',
+    )
+    assert mock_figure.update_layout.called_once()
+    assert mock_figure.for_each_annotation.called_once()
+    assert fig == mock_figure
+
+
+@patch('sdmetrics.reports.utils.px')
+def test_make_mixed_column_pair_plot(px_mock):
+    """Test the ``make_mixed_column_pair_plot`` method.
+
+    Expect that it creates a box plot.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data type
+
+    Side Effects:
+    - A distplot is created.
+    """
+    # Setup
+    real_column = pd.DataFrame({'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
+    synthetic_column = pd.DataFrame({'col1': [1, 2, 4, 5], 'col2': ['a', 'b', 'c', 'd']})
+
+    mock_figure = Mock()
+    px_mock.box.return_value = mock_figure
+
+    # Run
+    fig = make_mixed_column_pair_plot(real_column, synthetic_column)
+
+    # Assert
+    px_mock.box.assert_called_once_with(
+        DataFrameMatcher(pd.DataFrame({
+            'col1': [1, 2, 3, 4, 1, 2, 4, 5],
+            'col2': ['a', 'b', 'c', 'd', 'a', 'b', 'c', 'd'],
+            'Data': [
+                'Real',
+                'Real',
+                'Real',
+                'Real',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+            ],
+        })),
+        x='col1',
+        y='col2',
+        color='Data',
+        color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'},
+    )
+    assert mock_figure.update_layout.called_once()
+    assert fig == mock_figure
+
+
+@patch('sdmetrics.reports.utils.make_continuous_column_pair_plot')
+def test_get_column_pair_plot_continuous_columns(make_plot_mock):
+    """Test the ``get_column_plot_pair`` method with continuous sdtypes.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data types
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': [datetime(2020, 10, 1), datetime(2020, 11, 1), datetime(2021, 1, 2)],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': [datetime(2021, 10, 1), datetime(2021, 11, 1), datetime(2021, 12, 3)],
+    })
+    sdtypes = ('numerical', 'datetime')
+
+    # Run
+    out = get_column_pair_plot(real_data, synthetic_data, sdtypes)
+
+    # Assert
+    make_plot_mock.assert_called_once_with(real_data, synthetic_data)
+    assert out == make_plot_mock.return_value
+
+
+@patch('sdmetrics.reports.utils.make_mixed_column_pair_plot')
+def test_get_column_pair_plot_mixed_columns(make_plot_mock):
+    """Test the ``get_column_plot_pair`` method with mixed sdtypes.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data types
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': [
+            datetime(2020, 10, 1),
+            datetime(2020, 11, 1),
+            datetime(2020, 12, 1),
+        ],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': [
+            datetime(2021, 10, 1),
+            datetime(2021, 11, 1),
+            datetime(2021, 12, 3),
+        ],
+    })
+    sdtypes = ('categorical', 'datetime')
+
+    # Run
+    out = get_column_pair_plot(real_data, synthetic_data, sdtypes)
+
+    # Assert
+    make_plot_mock.assert_called_once_with(real_data, synthetic_data)
+    assert out == make_plot_mock.return_value
+
+
+@patch('sdmetrics.reports.utils.make_discrete_column_pair_plot')
+def test_get_column_pair_plot_discrete_columns(make_plot_mock):
+    """Test the ``get_column_plot_pair`` method with discrete sdtypes.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data types
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = Mock()
+    synthetic_data = Mock()
+    sdtypes = ('categorical', 'boolean')
+
+    # Run
+    out = get_column_pair_plot(real_data, synthetic_data, sdtypes)
+
+    # Assert
+    make_plot_mock.assert_called_once_with(real_data, synthetic_data)
+    assert out == make_plot_mock.return_value
+
+
+def test_get_column_pair_plot_invalid_sdtype():
+    """Test the ``get_column_plot_pair`` method with an invalid sdtype.
+
+    Inputs:
+    - real column data
+    - synthetic column data
+    - column data types
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    sdtypes = ('numerical', 'invalid')
+
+    # Run and assert
+    with pytest.raises(ValueError, match="sdtype of type 'invalid' not recognized"):
+        get_column_pair_plot(Mock(), Mock(), sdtypes)
 
 
 def test_discretize_table_data():
