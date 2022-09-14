@@ -236,3 +236,13 @@ class TVComplement(MultiSingleColumnMetric):
 
     field_types = ('categorical', 'boolean')
     single_column_metric = single_column.statistical.TVComplement
+
+
+class RangeCoverage(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn RangeCoverage.
+
+    Compute the complement of the total variaton distance between the real and synthetic data
+    """
+
+    field_types = ('numerical', 'datetime')
+    single_column_metric = single_column.statistical.RangeCoverage
