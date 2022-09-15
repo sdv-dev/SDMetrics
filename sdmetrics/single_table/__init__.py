@@ -31,6 +31,7 @@ from sdmetrics.single_table.privacy.ensemble import CategoricalEnsemble
 from sdmetrics.single_table.privacy.numerical_sklearn import (
     NumericalLR, NumericalMLP, NumericalSVR)
 from sdmetrics.single_table.privacy.radius_nearest_neighbor import NumericalRadiusNearestNeighbor
+from sdmetrics.single_table.synthetic_uniqueness import SyntheticUniqueness
 
 __all__ = [
     'bayesian_network',
@@ -88,4 +89,5 @@ __all__ = [
     'StatisticSimilarity',
     'TVComplement',
     'RangeCoverage',
+    'SyntheticUniqueness',
 ]

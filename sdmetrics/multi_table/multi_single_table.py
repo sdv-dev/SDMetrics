@@ -241,6 +241,12 @@ class BNLikelihood(MultiSingleTableMetric):
     single_table_metric = single_table.bayesian_network.BNLikelihood
 
 
+class SyntheticUniqueness(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable SyntheticUniqueness."""
+
+    single_table_metric = single_table.synthetic_uniqueness.SyntheticUniqueness
+
+
 class BNLogLikelihood(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable BNLogLikelihood."""
 
