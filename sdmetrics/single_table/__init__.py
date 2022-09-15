@@ -21,7 +21,7 @@ from sdmetrics.single_table.multi_column_pairs import (
     MultiColumnPairsMetric)
 from sdmetrics.single_table.multi_single_column import (
     BoundaryAdherence, CategoryCoverage, CSTest, KSComplement, MissingValueSimilarity,
-    MultiSingleColumnMetric, StatisticSimilarity, TVComplement)
+    MultiSingleColumnMetric, RangeCoverage, StatisticSimilarity, TVComplement)
 from sdmetrics.single_table.privacy.base import CategoricalPrivacyMetric, NumericalPrivacyMetric
 from sdmetrics.single_table.privacy.cap import (
     CategoricalCAP, CategoricalGeneralizedCAP, CategoricalZeroCAP)
@@ -87,4 +87,5 @@ __all__ = [
     'MissingValueSimilarity',
     'StatisticSimilarity',
     'TVComplement',
+    'RangeCoverage',
 ]
