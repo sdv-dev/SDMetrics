@@ -54,7 +54,7 @@ class BinaryEfficacyMetric(MLEfficacyMetric):
 class BinaryDecisionTreeClassifier(BinaryEfficacyMetric):
     """Binary DecisionTreeClassifier Efficacy based metric.
 
-    This fits a DecisionTreeClassifier to the train data and
+    This fits a DecisionTreeClassifier to the training data and
     then evaluates it making predictions on the test data.
     """
 
@@ -68,7 +68,7 @@ class BinaryDecisionTreeClassifier(BinaryEfficacyMetric):
 class BinaryAdaBoostClassifier(BinaryEfficacyMetric):
     """Binary AdaBoostClassifier Efficacy based metric.
 
-    This fits an AdaBoostClassifier to the train data and
+    This fits an AdaBoostClassifier to the training data and
     then evaluates it making predictions on the test data.
     """
 
@@ -78,7 +78,7 @@ class BinaryAdaBoostClassifier(BinaryEfficacyMetric):
 class BinaryLogisticRegression(BinaryEfficacyMetric):
     """Binary LogisticRegression Efficacy based metric.
 
-    This fits a LogisticRegression to the train data and
+    This fits a LogisticRegression to the training data and
     then evaluates it making predictions on the test data.
     """
 
@@ -94,7 +94,7 @@ class BinaryLogisticRegression(BinaryEfficacyMetric):
 class BinaryMLPClassifier(BinaryEfficacyMetric):
     """Binary MLPClassifier Efficacy based metric.
 
-    This fits a MLPClassifier to the train data and
+    This fits a MLPClassifier to the training data and
     then evaluates it making predictions on the test data.
     """
 

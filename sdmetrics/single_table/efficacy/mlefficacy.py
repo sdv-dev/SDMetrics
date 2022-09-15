@@ -48,7 +48,7 @@ class MLEfficacy(MLEfficacyMetric):
             test_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the test dataset.
             train_data (Union[numpy.ndarray, pandas.DataFrame]):
-                The values from the train dataset.
+                The values from the training dataset.
             target (str):
                 Name of the column to use as the target.
             scorer (Union[callable, list[callable], NoneType]):

@@ -26,7 +26,7 @@ class ScikitLearnClassifierDetectionMetric(DetectionMetric):
 
     @classmethod
     def _fit_predict(cls, X_train, y_train, X_test):
-        """Fit a pipeline to train data and then use it to make prediction on test data."""
+        """Fit a pipeline to the training data and then use it to make prediction on test data."""
         model = Pipeline([
             ('imputer', SimpleImputer()),
             ('scalar', RobustScaler()),

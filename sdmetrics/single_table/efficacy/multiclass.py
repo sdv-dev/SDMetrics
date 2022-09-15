@@ -40,7 +40,7 @@ class MulticlassEfficacyMetric(MLEfficacyMetric):
 class MulticlassDecisionTreeClassifier(MulticlassEfficacyMetric):
     """Multiclass DecisionTreeClassifier Efficacy based metric.
 
-    This fits a DecisionTreeClassifier to the train data and
+    This fits a DecisionTreeClassifier to the training data and
     then evaluates it making predictions on the test data.
     """
 
@@ -54,7 +54,7 @@ class MulticlassDecisionTreeClassifier(MulticlassEfficacyMetric):
 class MulticlassMLPClassifier(MulticlassEfficacyMetric):
     """Multiclass MLPClassifier Efficacy based metric.
 
-    This fits a MLPClassifier to the train data and
+    This fits a MLPClassifier to the training data and
     then evaluates it making predictions on the test data.
     """
 

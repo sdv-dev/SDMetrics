@@ -12,7 +12,7 @@ from sdmetrics.utils import HyperTransformer
 class MLEfficacyMetric(SingleTableMetric):
     """Base class for Machine Learning Efficacy metrics on single tables.
 
-    These metrics fit a Machine Learning model on the train data and
+    These metrics fit a Machine Learning model on the training data and
     then evaluate it making predictions on the test data.
 
     Attributes:
@@ -40,7 +40,7 @@ class MLEfficacyMetric(SingleTableMetric):
 
     @classmethod
     def _fit_predict(cls, train_data, train_target, test_data, test_target):
-        """Fit a model in the train data and make predictions for the test data."""
+        """Fit a model to the training data and make predictions for the test data."""
         del test_target  # delete argument which subclasses use but this method does not.
         unique_labels = np.unique(train_target)
         if len(unique_labels) == 1:
@@ -92,7 +92,7 @@ class MLEfficacyMetric(SingleTableMetric):
     def compute(cls, test_data, train_data, metadata=None, target=None, scorer=None):
         """Compute this metric.
 
-        This fits a Machine Learning model on the train data and
+        This fits a Machine Learning model on the training data and
         then evaluates it making predictions on the test data.
 
         A ``target`` column name must be given, either directly or as a first level
@@ -106,7 +106,7 @@ class MLEfficacyMetric(SingleTableMetric):
             test_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the test dataset.
             train_data (Union[numpy.ndarray, pandas.DataFrame]):
-                The values from the train dataset.
+                The values from the training dataset.
             target (str):
                 Name of the column to use as the target.
             scorer (Union[callable, list[callable], NoneType]):
