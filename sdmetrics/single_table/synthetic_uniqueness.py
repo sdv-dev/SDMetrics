@@ -1,4 +1,6 @@
 """Synthetic uniqueness metrics for single table."""
+import warnings
+
 import pandas as pd
 
 from sdmetrics.goal import Goal
@@ -57,7 +59,12 @@ class SyntheticUniqueness(SingleTableMetric):
                 The synthetic uniqueness score.
         """
         if synthetic_sample_size is not None:
-            synthetic_data = synthetic_data.sample(n=synthetic_sample_size)
+            if synthetic_sample_size > len(synthetic_data):
+                warnings.warn(f'The provided `synthetic_sample_size` of {synthetic_sample_size} '
+                              'is larger than the number of synthetic data rows '
+                              f'({len(synthetic_data)}). Proceeding without sampling.')
+            else:
+                synthetic_data = synthetic_data.sample(n=synthetic_sample_size)
 
         value_counts = pd.concat([real_data, synthetic_data]).value_counts(dropna=False)
         value_counts.name = 'value_counts'

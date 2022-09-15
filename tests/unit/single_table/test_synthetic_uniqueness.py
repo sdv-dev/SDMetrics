@@ -86,6 +86,51 @@ class TestSyntheticUniqueness:
         # Assert
         assert score == 1
 
+    @patch('sdmetrics.single_table.synthetic_uniqueness.warnings')
+    def test_compute_with_sample_size_too_large(self, warnings_mock):
+        """Test the ``compute`` method with a sample size larger than the number of rows.
+
+        Expect that the synthetic uniqueness is returned. Expect a warning to be raised.
+
+        Input:
+        - real data
+        - synthetic data
+
+        Output:
+        - the evaluated metric
+        """
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': [1, 2, 1, 3, 4],
+            'col2': ['a', 'b', 'c', 'd', 'b'],
+            'col3': [1.32, np.nan, 1.43, np.nan, 2.0],
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': [1, 3, 4, 2, 2],
+            'col2': ['a', 'b', 'c', 'd', 'e'],
+            'col3': [1.33, 1.56, 1.21, np.nan, 1.92],
+        })
+        metadata = {
+            'fields': {
+                'col1': {'type': 'numerical', 'subtype': 'int'},
+                'col2': {'type': 'categorical'},
+                'col3': {'type': 'numerical', 'subtype': 'float'},
+            },
+        }
+        sample_size = 15
+
+        # Run
+        metric = SyntheticUniqueness()
+        score = metric.compute(
+            real_data, synthetic_data, metadata, synthetic_sample_size=sample_size)
+
+        # Assert
+        assert score == 1
+        warnings_mock.warn.assert_called_once_with(
+            'The provided `synthetic_sample_size` of 15 is larger than the number of '
+            'synthetic data rows (5). Proceeding without sampling.'
+        )
+
     @patch('sdmetrics.single_table.synthetic_uniqueness.SingleTableMetric.normalize')
     def test_normalize(self, normalize_mock):
         """Test the ``normalize`` method.
