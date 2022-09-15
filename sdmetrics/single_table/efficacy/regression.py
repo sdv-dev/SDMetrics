@@ -35,8 +35,8 @@ class RegressionEfficacyMetric(MLEfficacyMetric):
 class LinearRegression(RegressionEfficacyMetric):
     """LinearRegression Efficacy based metric.
 
-    This fits a LinearRegression to the synthetic data and
-    then evaluates it making predictions on the real data.
+    This fits a LinearRegression to the train data and
+    then evaluates it making predictions on the test data.
     """
 
     MODEL = linear_model.LinearRegression
@@ -45,8 +45,8 @@ class LinearRegression(RegressionEfficacyMetric):
 class MLPRegressor(RegressionEfficacyMetric):
     """MLPRegressor Efficacy based metric.
 
-    This fits a MLPRegressor to the synthetic data and
-    then evaluates it making predictions on the real data.
+    This fits a MLPRegressor to the train data and
+    then evaluates it making predictions on the test data.
     """
 
     MODEL = neural_network.MLPRegressor

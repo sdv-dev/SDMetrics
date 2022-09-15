@@ -8,9 +8,9 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.efficacy.base import MLEfficacyMetric
 
 
-def f1_macro(real_target, predictions):
+def f1_macro(test_target, predictions):
     """Return the `f1_score` of the passed data."""
-    return f1_score(real_target, predictions, average='macro')
+    return f1_score(test_target, predictions, average='macro')
 
 
 class MulticlassEfficacyMetric(MLEfficacyMetric):
@@ -40,8 +40,8 @@ class MulticlassEfficacyMetric(MLEfficacyMetric):
 class MulticlassDecisionTreeClassifier(MulticlassEfficacyMetric):
     """Multiclass DecisionTreeClassifier Efficacy based metric.
 
-    This fits a DecisionTreeClassifier to the synthetic data and
-    then evaluates it making predictions on the real data.
+    This fits a DecisionTreeClassifier to the train data and
+    then evaluates it making predictions on the test data.
     """
 
     MODEL = DecisionTreeClassifier
@@ -54,8 +54,8 @@ class MulticlassDecisionTreeClassifier(MulticlassEfficacyMetric):
 class MulticlassMLPClassifier(MulticlassEfficacyMetric):
     """Multiclass MLPClassifier Efficacy based metric.
 
-    This fits a MLPClassifier to the synthetic data and
-    then evaluates it making predictions on the real data.
+    This fits a MLPClassifier to the train data and
+    then evaluates it making predictions on the test data.
     """
 
     MODEL = MLPClassifier
