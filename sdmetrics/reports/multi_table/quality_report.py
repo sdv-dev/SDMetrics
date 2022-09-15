@@ -3,9 +3,11 @@
 import itertools
 import pickle
 import sys
+import warnings
 
 import numpy as np
 import pandas as pd
+import pkg_resources
 import tqdm
 
 from sdmetrics.errors import IncomputableMetricError
@@ -336,6 +338,8 @@ class QualityReport():
             filepath (str):
                 The path to the file where the report instance will be serialized.
         """
+        self._package_version = pkg_resources.get_distribution('sdmetrics').version
+
         with open(filepath, 'wb') as output:
             pickle.dump(self, output)
 
@@ -351,5 +355,14 @@ class QualityReport():
             QualityReort:
                 The loaded quality report instance.
         """
+        current_version = pkg_resources.get_distribution('sdmetrics').version
+
         with open(filepath, 'rb') as f:
-            return pickle.load(f)
+            report = pickle.load(f)
+            if current_version != report._package_version:
+                warnings.warn(
+                    f'The report was created using SDMetrics version `{report._package_version}` '
+                    f'but you are currently using version `{current_version}`. '
+                    'Some features may not work as intended.')
+
+            return report
