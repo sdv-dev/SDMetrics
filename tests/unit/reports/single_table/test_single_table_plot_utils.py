@@ -111,6 +111,7 @@ def test__get_numerical_correlation_matrices():
     """Test the ``_get_numerical_correlation_matrices`` function.
 
     Expect that the score breakdowns are converted into a real and synthetic numerical matrices.
+    Expect that nan scores are ignored.
 
     Input:
     - score breakdowns
@@ -124,6 +125,7 @@ def test__get_numerical_correlation_matrices():
             ('col1', 'col2'): {'score': 0.1, 'real': 0.1, 'synthetic': 0.4},
             ('col1', 'col3'): {'score': 0.2, 'real': 0.2, 'synthetic': 0.5},
             ('col2', 'col3'): {'score': 0.3, 'real': 0.3, 'synthetic': 0.6},
+            ('col1', 'col4'): {'score': np.nan},
         },
         'METRIC2': {('col1', 'col3'): {'score': 0.2}},
     }
