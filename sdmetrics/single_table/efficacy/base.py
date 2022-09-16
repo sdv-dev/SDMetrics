@@ -12,8 +12,8 @@ from sdmetrics.utils import HyperTransformer
 class MLEfficacyMetric(SingleTableMetric):
     """Base class for Machine Learning Efficacy metrics on single tables.
 
-    These metrics fit a Machine Learning model on the synthetic data and
-    then evaluate it making predictions on the real data.
+    These metrics fit a Machine Learning model on the training data and
+    then evaluate it making predictions on the test data.
 
     Attributes:
         name (str):
@@ -39,19 +39,19 @@ class MLEfficacyMetric(SingleTableMetric):
     METRICS = None
 
     @classmethod
-    def _fit_predict(cls, synthetic_data, synthetic_target, real_data, real_target):
-        """Fit a model in the synthetic data and make predictions for the real data."""
-        del real_target  # delete argument which subclasses use but this method does not.
-        unique_labels = np.unique(synthetic_target)
+    def _fit_predict(cls, train_data, train_target, test_data, test_target):
+        """Fit a model to the training data and make predictions for the test data."""
+        del test_target  # delete argument which subclasses use but this method does not.
+        unique_labels = np.unique(train_target)
         if len(unique_labels) == 1:
-            predictions = np.full(len(real_data), unique_labels[0])
+            predictions = np.full(len(test_data), unique_labels[0])
         else:
             ht = HyperTransformer()
-            real_data = ht.fit_transform(real_data)
-            synthetic_data = ht.transform(synthetic_data)
+            test_data = ht.fit_transform(test_data)
+            train_data = ht.transform(train_data)
 
-            real_data[np.isin(real_data, [np.inf, -np.inf])] = None
-            synthetic_data[np.isin(synthetic_data, [np.inf, -np.inf])] = None
+            test_data[np.isin(test_data, [np.inf, -np.inf])] = None
+            train_data[np.isin(train_data, [np.inf, -np.inf])] = None
 
             model_kwargs = cls.MODEL_KWARGS.copy() if cls.MODEL_KWARGS else {}
             model = cls.MODEL(**model_kwargs)
@@ -62,16 +62,16 @@ class MLEfficacyMetric(SingleTableMetric):
                 ('model', model)
             ])
 
-            pipeline.fit(synthetic_data, synthetic_target)
+            pipeline.fit(train_data, train_target)
 
-            predictions = pipeline.predict(real_data)
+            predictions = pipeline.predict(test_data)
 
         return predictions
 
     @classmethod
-    def _validate_inputs(cls, real_data, synthetic_data, metadata, target):
-        real_data, synthetic_data, metadata = super()._validate_inputs(
-            real_data, synthetic_data, metadata)
+    def _validate_inputs(cls, test_data, train_data, metadata, target):
+        test_data, train_data, metadata = super()._validate_inputs(
+            test_data, train_data, metadata)
         if 'target' in metadata:
             target = metadata['target']
         elif target is None:
@@ -80,20 +80,20 @@ class MLEfficacyMetric(SingleTableMetric):
         return target
 
     @classmethod
-    def _score(cls, scorer, real_target, predictions):
+    def _score(cls, scorer, test_target, predictions):
         scorer = scorer or cls.SCORER
         if isinstance(scorer, (list, tuple)):
             scorers = scorer
-            return tuple((scorer(real_target, predictions) for scorer in scorers))
+            return tuple((scorer(test_target, predictions) for scorer in scorers))
         else:
-            return scorer(real_target, predictions)
+            return scorer(test_target, predictions)
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, target=None, scorer=None):
+    def compute(cls, test_data, train_data, metadata=None, target=None, scorer=None):
         """Compute this metric.
 
-        This fits a Machine Learning model on the synthetic data and
-        then evaluates it making predictions on the real data.
+        This fits a Machine Learning model on the training data and
+        then evaluates it making predictions on the test data.
 
         A ``target`` column name must be given, either directly or as a first level
         entry in the ``metadata`` dict, which will be used as the target column for the
@@ -103,10 +103,10 @@ class MLEfficacyMetric(SingleTableMetric):
         one for the type of problem is used.
 
         Args:
-            real_data (Union[numpy.ndarray, pandas.DataFrame]):
-                The values from the real dataset.
-            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
-                The values from the synthetic dataset.
+            test_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the test dataset.
+            train_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the training dataset.
             target (str):
                 Name of the column to use as the target.
             scorer (Union[callable, list[callable], NoneType]):
@@ -115,15 +115,15 @@ class MLEfficacyMetric(SingleTableMetric):
 
         Returns:
             union[float, tuple[float]]:
-                Scores obtained by the models when evaluated on the real data.
+                Scores obtained by the models when evaluated on the test data.
         """
-        target = cls._validate_inputs(real_data, synthetic_data, metadata, target)
+        target = cls._validate_inputs(test_data, train_data, metadata, target)
 
-        real_data = real_data.copy()
-        synthetic_data = synthetic_data.copy()
-        real_target = real_data.pop(target)
-        synthetic_target = synthetic_data.pop(target)
+        test_data = test_data.copy()
+        train_data = train_data.copy()
+        test_target = test_data.pop(target)
+        train_target = train_data.pop(target)
 
-        predictions = cls._fit_predict(synthetic_data, synthetic_target, real_data, real_target)
+        predictions = cls._fit_predict(train_data, train_target, test_data, test_target)
 
-        return cls._score(scorer, real_target, predictions)
+        return cls._score(scorer, test_target, predictions)

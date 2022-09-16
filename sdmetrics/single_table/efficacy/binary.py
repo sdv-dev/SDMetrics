@@ -20,21 +20,21 @@ class BinaryEfficacyMetric(MLEfficacyMetric):
     SCORER = f1_score
 
     @classmethod
-    def _score(cls, scorer, real_target, predictions):
-        if real_target.dtype == 'object':
-            first_label = real_target.unique()[0]
-            real_target = real_target == first_label
+    def _score(cls, scorer, test_target, predictions):
+        if test_target.dtype == 'object':
+            first_label = test_target.unique()[0]
+            test_target = test_target == first_label
             if predictions.dtype == 'object':
                 predictions = predictions == first_label
 
-        return super()._score(scorer, real_target, predictions)
+        return super()._score(scorer, test_target, predictions)
 
     @classmethod
-    def _fit_predict(cls, synthetic_data, synthetic_target, real_data, real_target):
-        if real_target.dtype == 'object':
-            synthetic_target = synthetic_target == real_target.unique()[0]
+    def _fit_predict(cls, train_data, train_target, test_data, test_target):
+        if test_target.dtype == 'object':
+            train_target = train_target == test_target.unique()[0]
 
-        return super()._fit_predict(synthetic_data, synthetic_target, real_data, real_target)
+        return super()._fit_predict(train_data, train_target, test_data, test_target)
 
     @classmethod
     def normalize(cls, raw_score):
@@ -54,8 +54,8 @@ class BinaryEfficacyMetric(MLEfficacyMetric):
 class BinaryDecisionTreeClassifier(BinaryEfficacyMetric):
     """Binary DecisionTreeClassifier Efficacy based metric.
 
-    This fits a DecisionTreeClassifier to the synthetic data and
-    then evaluates it making predictions on the real data.
+    This fits a DecisionTreeClassifier to the training data and
+    then evaluates it making predictions on the test data.
     """
 
     MODEL = DecisionTreeClassifier
@@ -68,8 +68,8 @@ class BinaryDecisionTreeClassifier(BinaryEfficacyMetric):
 class BinaryAdaBoostClassifier(BinaryEfficacyMetric):
     """Binary AdaBoostClassifier Efficacy based metric.
 
-    This fits an AdaBoostClassifier to the synthetic data and
-    then evaluates it making predictions on the real data.
+    This fits an AdaBoostClassifier to the training data and
+    then evaluates it making predictions on the test data.
     """
 
     MODEL = AdaBoostClassifier
@@ -78,8 +78,8 @@ class BinaryAdaBoostClassifier(BinaryEfficacyMetric):
 class BinaryLogisticRegression(BinaryEfficacyMetric):
     """Binary LogisticRegression Efficacy based metric.
 
-    This fits a LogisticRegression to the synthetic data and
-    then evaluates it making predictions on the real data.
+    This fits a LogisticRegression to the training data and
+    then evaluates it making predictions on the test data.
     """
 
     MODEL = LogisticRegression
@@ -94,8 +94,8 @@ class BinaryLogisticRegression(BinaryEfficacyMetric):
 class BinaryMLPClassifier(BinaryEfficacyMetric):
     """Binary MLPClassifier Efficacy based metric.
 
-    This fits a MLPClassifier to the synthetic data and
-    then evaluates it making predictions on the real data.
+    This fits a MLPClassifier to the training data and
+    then evaluates it making predictions on the test data.
     """
 
     MODEL = MLPClassifier

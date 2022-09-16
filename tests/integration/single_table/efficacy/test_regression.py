@@ -12,7 +12,7 @@ METRICS = [
 
 
 @pytest.fixture()
-def real_data():
+def test_data():
     boston = load_boston()
     data = pd.DataFrame(boston.data, columns=boston.feature_names)
     data['target'] = boston.target
@@ -56,14 +56,14 @@ def bad_data():
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_rank(metric, real_data, good_data, bad_data):
-    bad = metric.compute(real_data, bad_data, target='target')
-    good = metric.compute(real_data, good_data, target='target')
-    real = metric.compute(real_data, real_data, target='target')
+def test_rank(metric, test_data, good_data, bad_data):
+    bad = metric.compute(test_data, bad_data, target='target')
+    good = metric.compute(test_data, good_data, target='target')
+    test = metric.compute(test_data, test_data, target='target')
 
     normalized_bad = metric.normalize(bad)
     normalized_good = metric.normalize(good)
-    normalized_real = metric.normalize(real)
+    normalized_test = metric.normalize(test)
 
-    assert metric.min_value <= bad < good < real <= metric.max_value
-    assert 0.0 <= normalized_bad <= normalized_good <= normalized_real <= 1.0
+    assert metric.min_value <= bad < good < test <= metric.max_value
+    assert 0.0 <= normalized_bad <= normalized_good <= normalized_test <= 1.0
