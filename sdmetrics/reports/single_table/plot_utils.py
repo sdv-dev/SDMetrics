@@ -117,7 +117,12 @@ def _get_numerical_correlation_matrices(score_breakdowns):
             The real and synthetic numerical correlation matrices.
     """
     columns = []
-    for cols, _ in score_breakdowns['CorrelationSimilarity'].items():
+    valid_score_breakdowns = {
+        key: breakdown
+        for key, breakdown in score_breakdowns['CorrelationSimilarity'].items()
+        if not np.isnan(breakdown['score'])
+    }
+    for cols, _ in valid_score_breakdowns.items():
         if cols[0] not in columns:
             columns.append(cols[0])
         if cols[1] not in columns:
@@ -136,7 +141,7 @@ def _get_numerical_correlation_matrices(score_breakdowns):
     np.fill_diagonal(real_correlation.to_numpy(), 1.0)
     np.fill_diagonal(synthetic_correlation.to_numpy(), 1.0)
 
-    for column_pair, result in score_breakdowns['CorrelationSimilarity'].items():
+    for column_pair, result in valid_score_breakdowns.items():
         column1, column2 = column_pair
         real_correlation.loc[column1, column2] = result['real']
         real_correlation.loc[column2, column1] = result['real']
