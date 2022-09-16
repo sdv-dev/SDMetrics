@@ -356,10 +356,12 @@ def get_column_pair_plot(real_data, synthetic_data, columns, metadata):
         if invalid_columns:
             raise ValueError(f"Metadata for column(s) `{'`, `'.join(invalid_columns)}` "
                              "missing 'type' information.")
+
     invalid_columns = [column for column in columns if column not in real_data.columns]
     if invalid_columns:
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
                          'in the real table data.')
+
     invalid_columns = [column for column in columns if column not in synthetic_data.columns]
     if invalid_columns:
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
