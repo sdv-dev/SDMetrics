@@ -423,7 +423,7 @@ class TestQualityReport:
         get_distribution_mock.assert_called_once_with('sdmetrics')
         open_mock.assert_called_once_with('test-file.pkl', 'wb')
         pickle_mock.dump.assert_called_once_with(report, open_mock())
-        report._package_version == get_distribution_mock.return_value.version
+        assert report._package_version == get_distribution_mock.return_value.version
 
     @patch('sdmetrics.reports.single_table.quality_report.pkg_resources.get_distribution')
     @patch('sdmetrics.reports.single_table.quality_report.pickle')
