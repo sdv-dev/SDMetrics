@@ -118,7 +118,8 @@ def _get_numerical_correlation_matrices(score_breakdowns):
     """
     columns = []
     valid_score_breakdowns = {
-        k: breakdown for k, breakdown in score_breakdowns['CorrelationSimilarity'].items()
+        key: breakdown
+        for key, breakdown in score_breakdowns['CorrelationSimilarity'].items()
         if not np.isnan(breakdown['score'])
     }
     for cols, _ in valid_score_breakdowns.items():
