@@ -1,3 +1,4 @@
+import re
 from datetime import date, datetime
 from unittest.mock import Mock, call, patch
 
@@ -167,9 +168,10 @@ def test_get_column_plot_continuous_col(make_plot_mock):
     """Test the ``get_column_plot`` method with a continuous column.
 
     Inputs:
-    - real column data
-    - synthetic column data
-    - column data type
+    - real data
+    - synthetic data
+    - column name
+    - metadata
 
     Output:
     - column plot
@@ -178,15 +180,16 @@ def test_get_column_plot_continuous_col(make_plot_mock):
     - The make continuous column plot method is called.
     """
     # Setup
-    real_column = pd.Series([1, 2, 3, 4])
-    synthetic_column = pd.Series([1, 2, 4, 5])
     sdtype = 'numerical'
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
+    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
+    metadata = {'fields': {'col1': {'type': sdtype}}}
 
     # Run
-    out = get_column_plot(real_column, synthetic_column, sdtype)
+    out = get_column_plot(real_data, synthetic_data, 'col1', metadata)
 
     # Assert
-    make_plot_mock.assert_called_once_with(real_column, synthetic_column, sdtype)
+    make_plot_mock.assert_called_once_with(real_data['col1'], synthetic_data['col1'], sdtype)
     assert out == make_plot_mock.return_value
 
 
@@ -195,9 +198,10 @@ def test_get_column_plot_discrete_col(make_plot_mock):
     """Test the ``get_column_plot`` method with a discrete column.
 
     Inputs:
-    - real column data
-    - synthetic column data
-    - column data type
+    - real data
+    - synthetic data
+    - column name
+    - metadata
 
     Output:
     - column plot
@@ -206,15 +210,16 @@ def test_get_column_plot_discrete_col(make_plot_mock):
     - The make discrete column plot method is called.
     """
     # Setup
-    real_column = pd.Series([1, 2, 3, 4])
-    synthetic_column = pd.Series([1, 2, 4, 5])
     sdtype = 'categorical'
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
+    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
+    metadata = {'fields': {'col1': {'type': sdtype}}}
 
     # Run
-    out = get_column_plot(real_column, synthetic_column, sdtype)
+    out = get_column_plot(real_data, synthetic_data, 'col1', metadata)
 
     # Assert
-    make_plot_mock.assert_called_once_with(real_column, synthetic_column, sdtype)
+    make_plot_mock.assert_called_once_with(real_data['col1'], synthetic_data['col1'], sdtype)
     assert out == make_plot_mock.return_value
 
 
@@ -222,21 +227,110 @@ def test_get_column_plot_invalid_sdtype():
     """Test the ``get_column_plot`` method with an invalid sdtype.
 
     Inputs:
-    - real column data
-    - synthetic column data
-    - column data type
+    - real data
+    - synthetic data
+    - column name
+    - metadata
 
     Side Effects:
     - A ValueError is raised.
     """
     # Setup
-    real_column = pd.Series([1, 2, 3, 4])
-    synthetic_column = pd.Series([1, 2, 4, 5])
-    sdtype = 'invalid'
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
+    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
+    metadata = {'fields': {'col1': {'type': 'invalid'}}}
 
     # Run and assert
     with pytest.raises(ValueError, match="sdtype of type 'invalid' not recognized"):
-        get_column_plot(real_column, synthetic_column, sdtype)
+        get_column_plot(real_data, synthetic_data, 'col1', metadata)
+
+
+def test_get_column_plot_missing_column_name_metadata():
+    """Test the ``get_column_plot`` method with an incomplete metadata.
+
+    Inputs:
+    - real data
+    - synthetic data
+    - column name
+    - metadata
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
+    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
+    metadata = {'fields': {}}
+
+    # Run and assert
+    with pytest.raises(ValueError, match="Column 'col1' not found in metadata."):
+        get_column_plot(real_data, synthetic_data, 'col1', metadata)
+
+
+def test_get_column_plot_missing_column_type_metadata():
+    """Test the ``get_column_plot`` method with an incomplete metadata.
+
+    Inputs:
+    - real data
+    - synthetic data
+    - column name
+    - metadata
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
+    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
+    metadata = {'fields': {'col1': {}}}
+
+    # Run and assert
+    with pytest.raises(ValueError, match="Metadata for column 'col1' missing 'type' information."):
+        get_column_plot(real_data, synthetic_data, 'col1', metadata)
+
+
+def test_get_column_plot_missing_column_name_data():
+    """Test the ``get_column_plot`` method with an incomplete real data.
+
+    Inputs:
+    - real data
+    - synthetic data
+    - column name
+    - metadata
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({'col2': [1, 2, 3, 4]})
+    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
+    metadata = {'fields': {'col1': {'type': 'invalid'}}}
+
+    # Run and assert
+    with pytest.raises(ValueError, match="Column 'col1' not found in real table data."):
+        get_column_plot(real_data, synthetic_data, 'col1', metadata)
+
+
+def test_get_column_plot_missing_column_name_synthetic_data():
+    """Test the ``get_column_plot`` method with an incomplete synthetic data.
+
+    Inputs:
+    - real data
+    - synthetic data
+    - column name
+    - metadata
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
+    synthetic_data = pd.DataFrame({'col2': [1, 2, 4, 5]})
+    metadata = {'fields': {'col1': {'type': 'invalid'}}}
+
+    # Run and assert
+    with pytest.raises(ValueError, match="Column 'col1' not found in synthetic table data."):
+        get_column_plot(real_data, synthetic_data, 'col1', metadata)
 
 
 def test_convert_to_datetime():
@@ -436,12 +530,13 @@ def test_get_column_pair_plot_continuous_columns(make_plot_mock):
     """Test the ``get_column_plot_pair`` method with continuous sdtypes.
 
     Inputs:
-    - real column data
-    - synthetic column data
-    - column data types
+    - real data
+    - synthetic data
+    - column names
+    - metadata
 
-    Side Effects:
-    - A ValueError is raised.
+    Outputs:
+    - The column pair plot.
     """
     # Setup
     real_data = pd.DataFrame({
@@ -452,13 +547,17 @@ def test_get_column_pair_plot_continuous_columns(make_plot_mock):
         'col1': [2, 2, 3],
         'col2': [datetime(2021, 10, 1), datetime(2021, 11, 1), datetime(2021, 12, 3)],
     })
-    sdtypes = ('numerical', 'datetime')
+    columns = ['col1', 'col2']
+    metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'datetime'}}}
 
     # Run
-    out = get_column_pair_plot(real_data, synthetic_data, sdtypes)
+    out = get_column_pair_plot(real_data, synthetic_data, columns, metadata)
 
     # Assert
-    make_plot_mock.assert_called_once_with(real_data, synthetic_data)
+    make_plot_mock.assert_called_once_with(
+        DataFrameMatcher(real_data[columns]),
+        DataFrameMatcher(synthetic_data[columns]),
+    )
     assert out == make_plot_mock.return_value
 
 
@@ -467,12 +566,13 @@ def test_get_column_pair_plot_mixed_columns(make_plot_mock):
     """Test the ``get_column_plot_pair`` method with mixed sdtypes.
 
     Inputs:
-    - real column data
-    - synthetic column data
-    - column data types
+    - real data
+    - synthetic data
+    - column names
+    - metadata
 
-    Side Effects:
-    - A ValueError is raised.
+    Outputs:
+    - The column pair plot.
     """
     # Setup
     real_data = pd.DataFrame({
@@ -491,13 +591,17 @@ def test_get_column_pair_plot_mixed_columns(make_plot_mock):
             datetime(2021, 12, 3),
         ],
     })
-    sdtypes = ('categorical', 'datetime')
+    columns = ['col1', 'col2']
+    metadata = {'fields': {'col1': {'type': 'categorical'}, 'col2': {'type': 'datetime'}}}
 
     # Run
-    out = get_column_pair_plot(real_data, synthetic_data, sdtypes)
+    out = get_column_pair_plot(real_data, synthetic_data, columns, metadata)
 
     # Assert
-    make_plot_mock.assert_called_once_with(real_data, synthetic_data)
+    make_plot_mock.assert_called_once_with(
+        DataFrameMatcher(real_data[columns]),
+        DataFrameMatcher(synthetic_data[columns]),
+    )
     assert out == make_plot_mock.return_value
 
 
@@ -506,23 +610,34 @@ def test_get_column_pair_plot_discrete_columns(make_plot_mock):
     """Test the ``get_column_plot_pair`` method with discrete sdtypes.
 
     Inputs:
-    - real column data
-    - synthetic column data
-    - column data types
+    - real data
+    - synthetic data
+    - column names
+    - metadata
 
-    Side Effects:
-    - A ValueError is raised.
+    Outputs:
+    - The column pair plot.
     """
     # Setup
-    real_data = Mock()
-    synthetic_data = Mock()
-    sdtypes = ('categorical', 'boolean')
+    real_data = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': [True, False, True],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': [False, False, False],
+    })
+    columns = ['col1', 'col2']
+    metadata = {'fields': {'col1': {'type': 'categorical'}, 'col2': {'type': 'boolean'}}}
 
     # Run
-    out = get_column_pair_plot(real_data, synthetic_data, sdtypes)
+    out = get_column_pair_plot(real_data, synthetic_data, columns, metadata)
 
     # Assert
-    make_plot_mock.assert_called_once_with(real_data, synthetic_data)
+    make_plot_mock.assert_called_once_with(
+        DataFrameMatcher(real_data[columns]),
+        DataFrameMatcher(synthetic_data[columns]),
+    )
     assert out == make_plot_mock.return_value
 
 
@@ -530,19 +645,184 @@ def test_get_column_pair_plot_invalid_sdtype():
     """Test the ``get_column_plot_pair`` method with an invalid sdtype.
 
     Inputs:
-    - real column data
-    - synthetic column data
-    - column data types
+    - real data
+    - synthetic data
+    - column names
+    - metadata
 
     Side Effects:
     - A ValueError is raised.
     """
     # Setup
-    sdtypes = ('numerical', 'invalid')
+    real_data = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': [True, False, True],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': [False, False, False],
+    })
+    columns = ['col1', 'col2']
+    metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'invalid'}}}
 
     # Run and assert
-    with pytest.raises(ValueError, match="sdtype of type 'invalid' not recognized"):
-        get_column_pair_plot(Mock(), Mock(), sdtypes)
+    with pytest.raises(ValueError, match=re.escape('sdtype(s) of type `invalid` not recognized.')):
+        get_column_pair_plot(real_data, synthetic_data, columns, metadata)
+
+
+def test_get_column_pair_plot_missing_column_metadata():
+    """Test the ``get_column_plot_pair`` method with a missing column in the metadata.
+
+    Inputs:
+    - real data
+    - synthetic data
+    - column names
+    - metadata
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': [True, False, True],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': [False, False, False],
+    })
+    columns = ['col1', 'col2']
+    metadata = {'fields': {'col1': {'type': 'numerical'}}}
+
+    # Run and assert
+    with pytest.raises(ValueError, match=re.escape('Column(s) `col2` not found in metadata.')):
+        get_column_pair_plot(real_data, synthetic_data, columns, metadata)
+
+
+def test_get_column_pair_plot_missing_column_type_metadata():
+    """Test the ``get_column_plot_pair`` method with a missing column type in the metadata.
+
+    Inputs:
+    - real data
+    - synthetic data
+    - column names
+    - metadata
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': [True, False, True],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': [False, False, False],
+    })
+    columns = ['col1', 'col2']
+    metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {}}}
+
+    # Run and assert
+    with pytest.raises(
+        ValueError,
+        match=re.escape("Metadata for column(s) `col2` missing 'type' information."),
+    ):
+        get_column_pair_plot(real_data, synthetic_data, columns, metadata)
+
+
+def test_get_column_pair_plot_missing_columns_metadata():
+    """Test the ``get_column_plot_pair`` method with two missing columns in the metadata.
+
+    Inputs:
+    - real data
+    - synthetic data
+    - column names
+    - metadata
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': [True, False, True],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': [False, False, False],
+    })
+    columns = ['col1', 'col2']
+    metadata = {'fields': {}}
+
+    # Run and assert
+    with pytest.raises(
+        ValueError,
+        match=re.escape('Column(s) `col1`, `col2` not found in metadata.'),
+    ):
+        get_column_pair_plot(real_data, synthetic_data, columns, metadata)
+
+
+def test_get_column_pair_plot_missing_column_real_data():
+    """Test the ``get_column_plot_pair`` method with a missing column in the real data.
+
+    Inputs:
+    - real data
+    - synthetic data
+    - column names
+    - metadata
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({
+        'col2': [True, False, True],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': [False, False, False],
+    })
+    columns = ['col1', 'col2']
+    metadata = {'fields': {'col1': {'type': 'categorical'}, 'col2': {'type': 'boolean'}}}
+
+    # Run and assert
+    with pytest.raises(
+        ValueError,
+        match=re.escape('Column(s) `col1` not found in the real table data.'),
+    ):
+        get_column_pair_plot(real_data, synthetic_data, columns, metadata)
+
+
+def test_get_column_pair_plot_missing_column_synthetic_data():
+    """Test the ``get_column_plot_pair`` method with a missing column in the synthetic data.
+
+    Inputs:
+    - real data
+    - synthetic data
+    - column names
+    - metadata
+
+    Side Effects:
+    - A ValueError is raised.
+    """
+    # Setup
+    real_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': [True, False, True],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+    })
+    columns = ['col1', 'col2']
+    metadata = {'fields': {'col1': {'type': 'categorical'}, 'col2': {'type': 'boolean'}}}
+
+    # Run and assert
+    with pytest.raises(
+        ValueError,
+        match=re.escape('Column(s) `col2` not found in the synthetic table data.'),
+    ):
+        get_column_pair_plot(real_data, synthetic_data, columns, metadata)
 
 
 def test_discretize_table_data():

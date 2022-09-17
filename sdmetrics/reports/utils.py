@@ -166,21 +166,34 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
     return fig
 
 
-def get_column_plot(real_column, synthetic_column, sdtype):
+def get_column_plot(real_data, synthetic_data, column_name, metadata):
     """Return a plot of the real and synthetic data for a given column.
 
     Args:
-        real_column (pandas.Series):
-            The real data for the desired column.
-        synthetic_column (pandas.Series):
-            The synthetic data for the desired column.
-        sdtype (str):
-            The data type of the column. Must be one of
-            ('numerical', 'datetime', 'categorical', or 'boolean').
+        real_data (pandas.DataFrame):
+            The real table data.
+        synthetic_data (pandas.DataFrame):
+            The synthetic table data.
+        column_name (str):
+            The name of the column.
+        metadata (dict):
+            The table metadata.
 
     Returns:
         plotly.graph_objects._figure.Figure
     """
+    if column_name not in metadata['fields']:
+        raise ValueError(f"Column '{column_name}' not found in metadata.")
+    elif 'type' not in metadata['fields'][column_name]:
+        raise ValueError(f"Metadata for column '{column_name}' missing 'type' information.")
+    if column_name not in real_data.columns:
+        raise ValueError(f"Column '{column_name}' not found in real table data.")
+    if column_name not in synthetic_data.columns:
+        raise ValueError(f"Column '{column_name}' not found in synthetic table data.")
+
+    sdtype = metadata['fields'][column_name]['type']
+    real_column = real_data[column_name]
+    synthetic_column = synthetic_data[column_name]
     if sdtype in CONTINUOUS_SDTYPES:
         fig = make_continuous_column_plot(real_column, synthetic_column, sdtype)
     elif sdtype in DISCRETE_SDTYPES:
@@ -317,26 +330,51 @@ def make_mixed_column_pair_plot(real_data, synthetic_data):
     return fig
 
 
-def get_column_pair_plot(real_data, synthetic_data, sdtypes):
+def get_column_pair_plot(real_data, synthetic_data, columns, metadata):
     """Return a plot of the real and synthetic data for a given column pair.
 
     Args:
         real_data (pandas.DataFrame):
-            The real data for the desired column pair.
+            The real table data.
         synthetic_column (pandas.Dataframe):
-            The synthetic data for the desired column pair.
-        sdtypes (list[string]):
-            The data type of the column pair. The data type string must be one of
-            ('numerical', 'datetime', 'categorical', or 'boolean').
+            The synthetic table data.
+        columns (list[string]):
+            The two columns to plot.
+        metadata (dict):
+            The table metadata.
 
     Returns:
         plotly.graph_objects._figure.Figure
     """
+    invalid_columns = [column for column in columns if column not in metadata['fields']]
+    if invalid_columns:
+        raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found in metadata.")
+    else:
+        invalid_columns = [
+            column for column in columns if 'type' not in metadata['fields'][column]
+        ]
+        if invalid_columns:
+            raise ValueError(f"Metadata for column(s) `{'`, `'.join(invalid_columns)}` "
+                             "missing 'type' information.")
+
+    invalid_columns = [column for column in columns if column not in real_data.columns]
+    if invalid_columns:
+        raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
+                         'in the real table data.')
+
+    invalid_columns = [column for column in columns if column not in synthetic_data.columns]
+    if invalid_columns:
+        raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
+                         'in the synthetic table data.')
+
+    sdtypes = (metadata['fields'][columns[0]]['type'], metadata['fields'][columns[1]]['type'])
+    real_data = real_data[columns]
+    synthetic_data = synthetic_data[columns]
+
     all_sdtypes = CONTINUOUS_SDTYPES + DISCRETE_SDTYPES
-    if sdtypes[0] not in all_sdtypes:
-        raise ValueError(f"sdtype of type '{sdtypes[0]}' not recognized.")
-    if sdtypes[1] not in all_sdtypes:
-        raise ValueError(f"sdtype of type '{sdtypes[1]}' not recognized.")
+    invalid_sdtypes = [sdtype for sdtype in sdtypes if sdtype not in all_sdtypes]
+    if invalid_sdtypes:
+        raise ValueError(f"sdtype(s) of type `{'`, `'.join(invalid_sdtypes)}` not recognized.")
 
     if all([t in DISCRETE_SDTYPES for t in sdtypes]):
         return make_discrete_column_pair_plot(real_data, synthetic_data)
