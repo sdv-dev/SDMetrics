@@ -59,6 +59,9 @@ class NewRowSynthesis(SingleTableMetric):
             float:
                 The new row synthesis score.
         """
+        real_data, synthetic_data, metadata = cls._validate_inputs(
+            real_data, synthetic_data, metadata)
+
         if synthetic_sample_size is not None:
             if synthetic_sample_size > len(synthetic_data):
                 warnings.warn(f'The provided `synthetic_sample_size` of {synthetic_sample_size} '
