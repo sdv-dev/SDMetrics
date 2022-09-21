@@ -1,4 +1,4 @@
-"""Synthetic uniqueness metrics for single table."""
+"""New Row Synthesis metric for single table."""
 import warnings
 
 import pandas as pd
@@ -7,10 +7,10 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 
 
-class SyntheticUniqueness(SingleTableMetric):
-    """SyntheticUniqueness Single Table metric.
+class NewRowSynthesis(SingleTableMetric):
+    """NewRowSynthesis Single Table metric.
 
-    This metric measures whether each row in the synthetic data is unique,
+    This metric measures whether each row in the synthetic data is new,
     or whether it exactly matches a row in the real data.
 
     Attributes:
@@ -24,7 +24,7 @@ class SyntheticUniqueness(SingleTableMetric):
             Maximum value or values that this metric can take.
     """
 
-    name = 'SyntheticUniqueness'
+    name = 'NewRowSynthesis'
     goal = Goal.MAXIMIZE
     min_value = 0
     max_value = 1
@@ -56,7 +56,7 @@ class SyntheticUniqueness(SingleTableMetric):
 
         Returns:
             float:
-                The synthetic uniqueness score.
+                The new row synthesis score.
         """
         if synthetic_sample_size is not None:
             if synthetic_sample_size > len(synthetic_data):

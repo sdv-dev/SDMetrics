@@ -3,23 +3,13 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 
-from sdmetrics.single_table import SyntheticUniqueness
+from sdmetrics.single_table import NewRowSynthesis
 
 
-class TestSyntheticUniqueness:
+class TestNewRowSynthesis:
 
     def test_compute(self):
-        """Test the ``compute`` method.
-
-        Expect that the synthetic uniqueness is returned.
-
-        Input:
-        - real data
-        - synthetic data
-
-        Output:
-        - the evaluated metric
-        """
+        """Test the ``compute`` method and expect that the new row synthesis score is returned."""
         # Setup
         real_data = pd.DataFrame({
             'col1': [1, 2, 1, 3, 4],
@@ -38,9 +28,9 @@ class TestSyntheticUniqueness:
                 'col3': {'type': 'numerical', 'subtype': 'float'},
             },
         }
+        metric = NewRowSynthesis()
 
         # Run
-        metric = SyntheticUniqueness()
         score = metric.compute(real_data, synthetic_data, metadata)
 
         # Assert
@@ -49,14 +39,7 @@ class TestSyntheticUniqueness:
     def test_compute_with_sample_size(self):
         """Test the ``compute`` method with a sample size.
 
-        Expect that the synthetic uniqueness is returned.
-
-        Input:
-        - real data
-        - synthetic data
-
-        Output:
-        - the evaluated metric
+        Expect that the new row synthesis score is returned.
         """
         # Setup
         real_data = pd.DataFrame({
@@ -77,27 +60,20 @@ class TestSyntheticUniqueness:
             },
         }
         sample_size = 2
+        metric = NewRowSynthesis()
 
         # Run
-        metric = SyntheticUniqueness()
         score = metric.compute(
             real_data, synthetic_data, metadata, synthetic_sample_size=sample_size)
 
         # Assert
         assert score == 1
 
-    @patch('sdmetrics.single_table.synthetic_uniqueness.warnings')
+    @patch('sdmetrics.single_table.new_row_synthesis.warnings')
     def test_compute_with_sample_size_too_large(self, warnings_mock):
         """Test the ``compute`` method with a sample size larger than the number of rows.
 
-        Expect that the synthetic uniqueness is returned. Expect a warning to be raised.
-
-        Input:
-        - real data
-        - synthetic data
-
-        Output:
-        - the evaluated metric
+        Expect that the new row synthesis is returned. Expect a warning to be raised.
         """
         # Setup
         real_data = pd.DataFrame({
@@ -118,9 +94,9 @@ class TestSyntheticUniqueness:
             },
         }
         sample_size = 15
+        metric = NewRowSynthesis()
 
         # Run
-        metric = SyntheticUniqueness()
         score = metric.compute(
             real_data, synthetic_data, metadata, synthetic_sample_size=sample_size)
 
@@ -131,20 +107,14 @@ class TestSyntheticUniqueness:
             'synthetic data rows (5). Proceeding without sampling.'
         )
 
-    @patch('sdmetrics.single_table.synthetic_uniqueness.SingleTableMetric.normalize')
+    @patch('sdmetrics.single_table.new_row_synthesis.SingleTableMetric.normalize')
     def test_normalize(self, normalize_mock):
         """Test the ``normalize`` method.
 
         Expect that the inherited ``normalize`` method is called.
-
-        Input:
-        - raw score
-
-        Output:
-        - the output of the inherited ``normalize`` method.
         """
         # Setup
-        metric = SyntheticUniqueness()
+        metric = NewRowSynthesis()
         raw_score = 0.9
 
         # Run

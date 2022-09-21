@@ -22,6 +22,7 @@ from sdmetrics.single_table.multi_column_pairs import (
 from sdmetrics.single_table.multi_single_column import (
     BoundaryAdherence, CategoryCoverage, CSTest, KSComplement, MissingValueSimilarity,
     MultiSingleColumnMetric, RangeCoverage, StatisticSimilarity, TVComplement)
+from sdmetrics.single_table.new_row_synthesis import NewRowSynthesis
 from sdmetrics.single_table.privacy.base import CategoricalPrivacyMetric, NumericalPrivacyMetric
 from sdmetrics.single_table.privacy.cap import (
     CategoricalCAP, CategoricalGeneralizedCAP, CategoricalZeroCAP)
@@ -31,7 +32,6 @@ from sdmetrics.single_table.privacy.ensemble import CategoricalEnsemble
 from sdmetrics.single_table.privacy.numerical_sklearn import (
     NumericalLR, NumericalMLP, NumericalSVR)
 from sdmetrics.single_table.privacy.radius_nearest_neighbor import NumericalRadiusNearestNeighbor
-from sdmetrics.single_table.synthetic_uniqueness import SyntheticUniqueness
 
 __all__ = [
     'bayesian_network',
@@ -89,5 +89,5 @@ __all__ = [
     'StatisticSimilarity',
     'TVComplement',
     'RangeCoverage',
-    'SyntheticUniqueness',
+    'NewRowSynthesis',
 ]
