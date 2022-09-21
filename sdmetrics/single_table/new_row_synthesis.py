@@ -1,6 +1,7 @@
 """New Row Synthesis metric for single table."""
 import warnings
 
+import numpy as np
 import pandas as pd
 
 from sdmetrics.goal import Goal
@@ -66,14 +67,32 @@ class NewRowSynthesis(SingleTableMetric):
             else:
                 synthetic_data = synthetic_data.sample(n=synthetic_sample_size)
 
-        value_counts = pd.concat([real_data, synthetic_data]).value_counts(dropna=False)
-        value_counts.name = 'value_counts'
-        value_counts = value_counts.reset_index()
+        numerical_fields = []
+        discrete_fields = []
+        for field, field_meta in metadata['fields'].items():
+            if field_meta['type'] == 'datetime':
+                real_data[field] = pd.to_datetime(real_data[field])
+                synthetic_data[field] = pd.to_datetime(synthetic_data[field])
+                numerical_fields.append(field)
+            elif field_meta['type'] == 'numerical':
+                numerical_fields.append(field)
+            else:
+                discrete_fields.append(field)
 
-        columns = real_data.columns.to_list()
-        synthetic_value_counts = synthetic_data.merge(
-            value_counts, how='left', left_on=columns, right_on=columns)
-        num_unique_rows = (synthetic_value_counts['value_counts'] == 1).sum()
+        num_unique_rows = 0
+        for index, row in synthetic_data.iterrows():
+            row_filter = []
+            for field in real_data.columns:
+                if field in numerical_fields:
+                    field_filter = f'{field}.isnull()' if np.isnan(row[field]) else (
+                        f'abs({field} - {row[field]}) < {numerical_match_tolerance * row[field]}')
+                    row_filter.append(field_filter)
+                else:
+                    row_filter.append(f"{field} == '{row[field]}'")
+
+            matches = real_data.query(' and '.join(row_filter))
+            if matches is None or matches.empty:
+                num_unique_rows += 1
 
         return num_unique_rows / len(synthetic_data)
 
