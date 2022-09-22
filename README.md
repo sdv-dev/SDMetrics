@@ -54,7 +54,7 @@ The SDMetrics library is **model-agnostic**, meaning you can use any synthetic d
 
 Quickly generate insights and share results with your team using **SDMetrics Reports**. For example, the Diagnostic Report quickly checks for common problems, and the Quality Report provides visualizations comparing the real and synthetic data.
 
-<a href="https://datacebo.com"><img align="center" width=40% src="docs/images/column_comparison.png"></img></a>
+<img align="center" src="docs/images/column_comparison.png"></img>
 
 You can also explore and apply individual metrics as needed. The SDMetrics library includes a variety of metrics for different goals:
 
@@ -109,7 +109,7 @@ Once you generate the report, you can drill down on the details and visualize th
 ```bash
 >>> my_report.get_visualization(property_name='Column Pair Trends')
 ```
-<a href="https://datacebo.com"><img align="center" width=40% src="docs/images/interactive_heatmaps.gif"></img></a>
+<img align="center" src="docs/images/interactive_heatmaps.gif"></img>
 
 Save the report and share it with your team.
 ```bash
