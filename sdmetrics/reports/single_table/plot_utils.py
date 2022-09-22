@@ -89,6 +89,9 @@ def _get_similarity_correlation_matrix(score_breakdowns, columns):
     Returns:
         pandas.DataFrame
     """
+    if isinstance(columns, set):
+        columns = list(columns)
+
     similarity_correlation = pd.DataFrame(
         index=columns,
         columns=columns,

@@ -50,7 +50,7 @@ class TestNewRowSynthesis:
         synthetic_data = pd.DataFrame({
             'col1': [1, 3, 4, 2, 2],
             'col2': ['a', 'b', 'c', 'd', 'e'],
-            'col3': [1.33, 1.56, 1.21, np.nan, 1.92],
+            'col3': [1.46, 1.56, 1.21, np.nan, 1.92],
         })
         metadata = {
             'fields': {
