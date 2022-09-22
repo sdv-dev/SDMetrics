@@ -37,17 +37,17 @@ The SDMetrics library is **model-agnostic**, meaning you can use any synthetic d
 | :scroll: **[License]**                        | The library is published under the MIT License.                      |
 | :keyboard: **[Development Status]**           | This software is in its Pre-Alpha stage.                             |
 | [![][Slack Logo] **Community**][Community]    | Join our Slack Workspace for announcements and discussions.          |
-| [![][MyBinder Logo] **Tutorials**][Tutorials] | Get started with SDMetrics in a notebook.                            |
+| [![][Google Colab Logo] **Tutorials**][Tutorials] | Get started with SDMetrics in a notebook.                        |
 
 [Website]: https://sdv.dev
-[SDV Blog]: https://sdv.dev/blog
+[Blog]: https://sdv.dev/blog
 [Documentation]: https://docs.sdv.dev/sdmetrics
 [Repository]: https://github.com/sdv-dev/SDMetrics
 [License]: https://github.com/sdv-dev/SDMetrics/blob/master/LICENSE
 [Development Status]: https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha
 [Slack Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/slack.png
 [Community]: https://bit.ly/sdv-slack-invite
-[MyBinder Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/mybinder.png
+[Google Colab Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/google_colab.png
 [Tutorials]: https://bit.ly/sdmetrics-demo
 
 ## Features
@@ -86,15 +86,16 @@ For more installation options please visit the [SDMetrics installation Guide](ht
 
 Get started with **SDMetrics Reports** using some demo data,
 
-```bash
->>> from sdmetrics import load_demo
->>> from sdmetrics.reports.single_table import QualityReport
+```python
+from sdmetrics import load_demo
+from sdmetrics.reports.single_table import QualityReport
 
->>> real_data, synthetic_data, metadata = load_demo(modality='single_table')
+real_data, synthetic_data, metadata = load_demo(modality='single_table')
 
->>> my_report = QualityReport()
->>> my_report.generate(real_data, synthetic_data, metadata)
-
+my_report = QualityReport()
+my_report.generate(real_data, synthetic_data, metadata)
+```
+```
 Creating report: 100%|██████████| 4/4 [00:00<00:00,  5.22it/s]
 
 Overall Quality Score: 82.84%
@@ -106,44 +107,49 @@ Column Pair Trends: 82.9%
 
 Once you generate the report, you can drill down on the details and visualize the results.
 
-```bash
->>> my_report.get_visualization(property_name='Column Pair Trends')
+```python
+my_report.get_visualization(property_name='Column Pair Trends')
 ```
-<img align="center" src="docs/images/interactive_heatmaps.gif"></img>
+<img align="center" src="docs/images/column_pairs.png"></img>
 
 Save the report and share it with your team.
-```bash
->>> my_report.save(filepath='demo_data_quality_report.pkl')
+```python
+my_report.save(filepath='demo_data_quality_report.pkl')
 
 # load it at any point in the future
->>> my_report = QualityReport.load(filepath='demo_data_quality_report.pkl')
+my_report = QualityReport.load(filepath='demo_data_quality_report.pkl')
 ```
 
 **Want more metrics?** You can also manually apply any of the metrics in this library to your data.
 
-```bash
+```python
 # calculate whether the synthetic data respects the min/max bounds
 # set by the real data
->>> from sdmetrics.single_table import BoundaryAdherence
+from sdmetrics.single_table import BoundaryAdherence
 
->>> BoundaryAdherence.compute(
-        real_data['start_date'],
-        synthetic_data['start_date']
-    )
+BoundaryAdherence.compute(
+    real_data['start_date'],
+    synthetic_data['start_date']
+)
+```
+```
 0.8503937007874016
+```
 
-
+```python
 # calculate whether an attacker will be able to guess sensitive 
 # information based on combination of synthetic data and their
 # own information
->>> from sdmetrics.single_table import CategoricalCAP
+from sdmetrics.single_table import CategoricalCAP
 
->>> CategoricalCAP.compute(
-        real_data,
-        synthetic_data,
-        key_fields=['gender', 'work_experience'],
-        sensitive_fields=['degree_type']
-    )
+CategoricalCAP.compute(
+    real_data,
+    synthetic_data,
+    key_fields=['gender', 'work_experience'],
+    sensitive_fields=['degree_type']
+)
+```
+```
 0.4601209799017264
 ```
 
