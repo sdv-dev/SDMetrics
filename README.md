@@ -40,7 +40,7 @@ The SDMetrics library is **model-agnostic**, meaning you can use any synthetic d
 | [![][Google Colab Logo] **Tutorials**][Tutorials] | Get started with SDMetrics in a notebook.                        |
 
 [Website]: https://sdv.dev
-[Blog]: https://sdv.dev/blog
+[Blog]: https://datacebo.com/blog
 [Documentation]: https://docs.sdv.dev/sdmetrics
 [Repository]: https://github.com/sdv-dev/SDMetrics
 [License]: https://github.com/sdv-dev/SDMetrics/blob/master/LICENSE
