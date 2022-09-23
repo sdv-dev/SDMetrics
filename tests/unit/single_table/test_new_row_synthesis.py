@@ -12,20 +12,29 @@ class TestNewRowSynthesis:
         """Test the ``compute`` method and expect that the new row synthesis score is returned."""
         # Setup
         real_data = pd.DataFrame({
-            'col1': [1, 2, 1, 3, 4],
-            'col2': ['a', 'b', 'c', 'd', 'b'],
-            'col3': [1.32, np.nan, 1.43, np.nan, 2.0],
+            'col1': [0, 1, 2, 3, 4],
+            'col2': [1, 2, 1, 3, 4],
+            'col3': ['a', 'b', 'c', 'd', 'b'],
+            'col4': [1.32, np.nan, 1.43, np.nan, 2.0],
+            'col5': [51, 52, 53, 54, 55],
+            'col6': ['2020-01-02', '2021-01-04', '2021-05-03', '2022-10-11', '2022-11-13'],
         })
         synthetic_data = pd.DataFrame({
-            'col1': [1, 3, 4, 2, 2],
-            'col2': ['a', 'b', 'c', 'b', 'e'],
-            'col3': [1.32, 1.56, 1.21, np.nan, 1.90],
+            'col1': [0, 1, 2, 3, 4],
+            'col2': [1, 3, 4, 2, 2],
+            'col3': ['a', 'b', 'c', 'b', 'e'],
+            'col4': [1.32, 1.56, 1.21, np.nan, 1.90],
+            'col5': [51, 51, 54, 55, 53],
+            'col6': ['2020-01-02', '2022-11-24', '2022-06-01', '2021-04-12', '2020-12-11'],
         })
         metadata = {
             'fields': {
-                'col1': {'type': 'numerical', 'subtype': 'int'},
-                'col2': {'type': 'categorical'},
-                'col3': {'type': 'numerical', 'subtype': 'float'},
+                'col1': {'type': 'id', 'subtype': 'int'},
+                'col2': {'type': 'numerical', 'subtype': 'int'},
+                'col3': {'type': 'categorical'},
+                'col4': {'type': 'numerical', 'subtype': 'float'},
+                'col5': {'type': 'categorical'},
+                'col6': {'type': 'datetime', 'format': '%Y-%m-%d'},
             },
         }
         metric = NewRowSynthesis()
@@ -34,7 +43,7 @@ class TestNewRowSynthesis:
         score = metric.compute(real_data, synthetic_data, metadata)
 
         # Assert
-        assert score == 0.6
+        assert score == 0.8
 
     def test_compute_with_sample_size(self):
         """Test the ``compute`` method with a sample size.
