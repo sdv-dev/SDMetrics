@@ -71,7 +71,6 @@ class NewRowSynthesis(SingleTableMetric):
 
         numerical_fields = []
         discrete_fields = []
-        categorical_fields = []
         for field, field_meta in metadata['fields'].items():
             if field_meta['type'] == 'datetime':
                 real_data[field] = pd.to_numeric(real_data[field])
@@ -79,8 +78,6 @@ class NewRowSynthesis(SingleTableMetric):
                 numerical_fields.append(field)
             elif field_meta['type'] == 'numerical':
                 numerical_fields.append(field)
-            elif field_meta['type'] == 'categorical':
-                categorical_fields.append(field)
             else:
                 discrete_fields.append(field)
 
@@ -95,10 +92,11 @@ class NewRowSynthesis(SingleTableMetric):
                         f'abs({field} - {row[field]}) <= '
                         f'{abs(numerical_match_tolerance * row[field])}'
                     )
-                elif field in categorical_fields:
-                    field_filter = f"{field} == '{row[field]}'"
                 else:
-                    field_filter = f'{field} == {row[field]}'
+                    if real_data[field].dtype == 'O':
+                        field_filter = f"{field} == '{row[field]}'"
+                    else:
+                        field_filter = f'{field} == {row[field]}'
 
                 row_filter.append(field_filter)
 
