@@ -85,10 +85,15 @@ def _get_similarity_correlation_matrix(score_breakdowns, columns):
     Args:
         score_breakdowns (dict):
             Mapping of metric to the score breakdown result.
+        columns (list[string] or set[string]):
+            A list or set of column names.
 
     Returns:
         pandas.DataFrame
     """
+    if isinstance(columns, set):
+        columns = list(columns)
+
     similarity_correlation = pd.DataFrame(
         index=columns,
         columns=columns,

@@ -241,6 +241,12 @@ class BNLikelihood(MultiSingleTableMetric):
     single_table_metric = single_table.bayesian_network.BNLikelihood
 
 
+class NewRowSynthesis(MultiSingleTableMetric):
+    """MultiSingleTableMetric based on SingleTable NewRowSynthesis."""
+
+    single_table_metric = single_table.new_row_synthesis.NewRowSynthesis
+
+
 class BNLogLikelihood(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable BNLogLikelihood."""
 

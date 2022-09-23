@@ -1,5 +1,6 @@
 """Base Single Table metric class."""
 
+import copy
 from operator import attrgetter
 
 import pandas as pd
@@ -103,6 +104,11 @@ class SingleTableMetric(BaseMetric):
             (pandas.DataFrame, pandas.DataFrame, dict):
                 The validated data and metadata.
         """
+        real_data = real_data.copy()
+        synthetic_data = synthetic_data.copy()
+        if metadata is not None:
+            metadata = copy.deepcopy(metadata)
+
         if set(real_data.columns) != set(synthetic_data.columns):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 
