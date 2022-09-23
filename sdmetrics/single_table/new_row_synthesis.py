@@ -1,7 +1,6 @@
 """New Row Synthesis metric for single table."""
 import warnings
 
-import numpy as np
 import pandas as pd
 
 from sdmetrics.goal import Goal
@@ -46,8 +45,8 @@ class NewRowSynthesis(SingleTableMetric):
             metadata (dict):
                 Table metadata dict.
             numerical_match_tolerance (float):
-                A float >0.0 representing how close two numerical values have to be
-                in order to be considered a match.
+                A float larger than 0 representing how close two numerical values have to be
+                in order to be considered a match. Defaults to `0.01`.
             synthetic_sample_size (int):
                 The number of synthetic rows to sample before computing this metric.
                 Use this to speed up the computation time if you have a large amount
@@ -72,13 +71,16 @@ class NewRowSynthesis(SingleTableMetric):
 
         numerical_fields = []
         discrete_fields = []
+        categorical_fields = []
         for field, field_meta in metadata['fields'].items():
             if field_meta['type'] == 'datetime':
-                real_data[field] = pd.to_datetime(real_data[field])
-                synthetic_data[field] = pd.to_datetime(synthetic_data[field])
+                real_data[field] = pd.to_numeric(real_data[field])
+                synthetic_data[field] = pd.to_numeric(synthetic_data[field])
                 numerical_fields.append(field)
             elif field_meta['type'] == 'numerical':
                 numerical_fields.append(field)
+            elif field_meta['type'] == 'categorical':
+                categorical_fields.append(field)
             else:
                 discrete_fields.append(field)
 
@@ -86,12 +88,19 @@ class NewRowSynthesis(SingleTableMetric):
         for index, row in synthetic_data.iterrows():
             row_filter = []
             for field in real_data.columns:
-                if field in numerical_fields:
-                    field_filter = f'{field}.isnull()' if np.isnan(row[field]) else (
-                        f'abs({field} - {row[field]}) < {numerical_match_tolerance * row[field]}')
-                    row_filter.append(field_filter)
+                if pd.isna(row[field]):
+                    field_filter = f'{field}.isnull()'
+                elif field in numerical_fields:
+                    field_filter = (
+                        f'abs({field} - {row[field]}) <= '
+                        f'{abs(numerical_match_tolerance * row[field])}'
+                    )
+                elif field in categorical_fields:
+                    field_filter = f"{field} == '{row[field]}'"
                 else:
-                    row_filter.append(f"{field} == '{row[field]}'")
+                    field_filter = f'{field} == {row[field]}'
+
+                row_filter.append(field_filter)
 
             matches = real_data.query(' and '.join(row_filter))
             if matches is None or matches.empty:
