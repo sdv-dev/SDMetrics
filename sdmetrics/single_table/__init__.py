@@ -6,7 +6,8 @@ from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection.base import DetectionMetric
 from sdmetrics.single_table.detection.sklearn import (
-    LogisticDetection, ScikitLearnClassifierDetectionMetric, SVCDetection, GradientBoostingDetection)
+    GradientBoostingDetection, LogisticDetection, ScikitLearnClassifierDetectionMetric,
+    SVCDetection)
 from sdmetrics.single_table.efficacy.base import MLEfficacyMetric
 from sdmetrics.single_table.efficacy.binary import (
     BinaryAdaBoostClassifier, BinaryDecisionTreeClassifier, BinaryEfficacyMetric,
