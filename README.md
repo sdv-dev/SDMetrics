@@ -23,59 +23,50 @@
 
 # Overview
 
-The **SDMetrics** library provides a set of **dataset-agnostic tools** for evaluating the **quality
-of a synthetic database** by comparing it to the real database that it is modeled after.
+The SDMetrics library evaluates synthetic data by comparing it to the real data that you're trying to mimic. It includes a variety of metrics to capture different aspects of the data, for example **quality and privacy**. It also includes reports that you can run to generate insights and share with your team.
+
+The SDMetrics library is **model-agnostic**, meaning you can use any synthetic data. The library does not need to know how you created the data. 
+
 
 | Important Links                               |                                                                      |
 | --------------------------------------------- | -------------------------------------------------------------------- |
 | :computer: **[Website]**                      | Check out the SDV Website for more information about the project.    |
-| :orange_book: **[SDV Blog]**                  | Regular publshing of useful content about Synthetic Data Generation. |
+| :orange_book: **[Blog]**                      | A deeper look at open source, synthetic data creation and evaluation.|
 | :book: **[Documentation]**                    | Quickstarts, User and Development Guides, and API Reference.         |
 | :octocat: **[Repository]**                    | The link to the Github Repository of this library.                   |
-| :scroll: **[License]**                        | The entire ecosystem is published under the MIT License.             |
+| :scroll: **[License]**                        | The library is published under the MIT License.                      |
 | :keyboard: **[Development Status]**           | This software is in its Pre-Alpha stage.                             |
 | [![][Slack Logo] **Community**][Community]    | Join our Slack Workspace for announcements and discussions.          |
-| [![][MyBinder Logo] **Tutorials**][Tutorials] | Run the SDV Tutorials in a Binder environment.                       |
+| [![][Google Colab Logo] **Tutorials**][Tutorials] | Get started with SDMetrics in a notebook.                        |
 
 [Website]: https://sdv.dev
-[SDV Blog]: https://sdv.dev/blog
-[Documentation]: https://sdv.dev/SDV
+[Blog]: https://datacebo.com/blog
+[Documentation]: https://docs.sdv.dev/sdmetrics
 [Repository]: https://github.com/sdv-dev/SDMetrics
 [License]: https://github.com/sdv-dev/SDMetrics/blob/master/LICENSE
 [Development Status]: https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha
 [Slack Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/slack.png
 [Community]: https://bit.ly/sdv-slack-invite
-[MyBinder Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/mybinder.png
-[Tutorials]: https://mybinder.org/v2/gh/sdv-dev/SDV/master?filepath=tutorials
+[Google Colab Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/google_colab.png
+[Tutorials]: https://bit.ly/sdmetrics-demo
 
 ## Features
 
-It supports multiple data modalities:
+Quickly generate insights and share results with your team using **SDMetrics Reports**. For example, the Diagnostic Report quickly checks for common problems, and the Quality Report provides visualizations comparing the real and synthetic data.
 
-* **Single Columns**: Compare 1 dimensional `numpy` arrays representing individual columns.
-* **Column Pairs**: Compare how columns in a `pandas.DataFrame` relate to each other, in groups of 2.
-* **Single Table**: Compare an entire table, represented as a `pandas.DataFrame`.
-* **Multi Table**: Compare multi-table and relational datasets represented as a python `dict` with
-  multiple tables passed as `pandas.DataFrame`s.
-* **Time Series**: Compare tables representing ordered sequences of events.
+<img align="center" src="docs/images/column_comparison.png"></img>
 
-It includes a variety of metrics such as:
+You can also explore and apply individual metrics as needed. The SDMetrics library includes a variety of metrics for different goals:
 
-* **Statistical metrics** which use statistical tests to compare the distributions of the real
-  and synthetic distributions.
-* **Detection metrics** which use machine learning to try to distinguish between real and synthetic data.
-* **Efficacy metrics** which compare the performance of machine learning models when run on the synthetic and real data.
-* **Bayesian Network and Gaussian Mixture metrics** which learn the distribution of the real data
-  and evaluate the likelihood of the synthetic data belonging to the learned distribution.
-* **Privacy metrics** which evaluate whether the synthetic data is leaking information about the real data.
+* Privacy metrics evaluate whether the synthetic data is leaking information about the real data
+* ML Efficacy metrics estimate the outcomes of using the synthetic data to solve machine learning problems
+* … and more! 
+
+Some of these metrics are experimental and actively being researched by the data science community.
 
 # Install
 
-**SDMetrics** is part of the **SDV** project and is automatically installed alongside it. For
-details about this process please visit the [SDV Installation Guide](
-https://sdv.dev/SDV/getting_started/install.html)
-
-Optionally, **SDMetrics** can also be installed as a standalone library using the following commands:
+Install SDMetrics using pip or conda. We recommend using a virtual environment to avoid conflicts with other software on your device.
 
 **Using `pip`:**
 
@@ -89,61 +80,82 @@ pip install sdmetrics
 conda install -c conda-forge -c pytorch sdmetrics
 ```
 
-For more installation options please visit the [SDMetrics installation Guide](INSTALL.md)
+For more installation options please visit the [SDMetrics installation Guide](https://github.com/sdv-dev/SDMetrics/blob/master/INSTALL.md).
 
 # Usage
 
-**SDMetrics** is included as part of the framework offered by SDV to evaluate the quality of
-your synthetic dataset. For more details about how to use it please visit the corresponding
-User Guide:
+Get started with **SDMetrics Reports** using some demo data,
 
-* [Evaluating Synthetic Data](https://sdv.dev/SDV/user_guides/evaluation/index.html)
+```python
+from sdmetrics import load_demo
+from sdmetrics.reports.single_table import QualityReport
 
-## Standalone usage
+real_data, synthetic_data, metadata = load_demo(modality='single_table')
 
-**SDMetrics** can also be used as a standalone library to run metrics individually.
+my_report = QualityReport()
+my_report.generate(real_data, synthetic_data, metadata)
+```
+```
+Creating report: 100%|██████████| 4/4 [00:00<00:00,  5.22it/s]
 
-In this short example we show how to use it to evaluate a toy multi-table dataset and its
-synthetic replica by running all the compatible multi-table metrics on it:
+Overall Quality Score: 82.84%
 
-```python3
-import sdmetrics
-
-# Load the demo data, which includes:
-# - A dict containing the real tables as pandas.DataFrames.
-# - A dict containing the synthetic clones of the real data.
-# - A dict containing metadata about the tables.
-real_data, synthetic_data, metadata = sdmetrics.load_demo()
-
-# Obtain the list of multi table metrics, which is returned as a dict
-# containing the metric names and the corresponding metric classes.
-metrics = sdmetrics.multi_table.MultiTableMetric.get_subclasses()
-
-# Run all the compatible metrics and get a report
-sdmetrics.compute_metrics(metrics, real_data, synthetic_data, metadata=metadata)
+Properties:
+Column Shapes: 82.78%
+Column Pair Trends: 82.9%
 ```
 
-The output will be a table with all the details about the executed metrics and their score:
+Once you generate the report, you can drill down on the details and visualize the results.
 
-| metric                       | name                                         |      score |   min_value |   max_value | goal     |
-|------------------------------|----------------------------------------------|------------|-------------|-------------|----------|
-| CSTest                       | Chi-Squared                                  |   0.76651  |           0 |           1 | MAXIMIZE |
-| KSComplement                 | Complement to Kolmogorov-Smirnov D statistic |   0.75     |           0 |           1 | MAXIMIZE |
-| LogisticDetection            | LogisticRegression Detection                 |   0.882716 |           0 |           1 | MAXIMIZE |
-| SVCDetection                 | SVC Detection                                |   0.833333 |           0 |           1 | MAXIMIZE |
-| BNLikelihood                 | BayesianNetwork Likelihood                   | nan        |           0 |           1 | MAXIMIZE |
-| BNLogLikelihood              | BayesianNetwork Log Likelihood               | nan        |        -inf |           0 | MAXIMIZE |
-| LogisticParentChildDetection | LogisticRegression Detection                 |   0.619444 |           0 |           1 | MAXIMIZE |
-| SVCParentChildDetection      | SVC Detection                                |   0.916667 |           0 |           1 | MAXIMIZE |
+```python
+my_report.get_visualization(property_name='Column Pair Trends')
+```
+<img align="center" src="docs/images/column_pairs.png"></img>
+
+Save the report and share it with your team.
+```python
+my_report.save(filepath='demo_data_quality_report.pkl')
+
+# load it at any point in the future
+my_report = QualityReport.load(filepath='demo_data_quality_report.pkl')
+```
+
+**Want more metrics?** You can also manually apply any of the metrics in this library to your data.
+
+```python
+# calculate whether the synthetic data respects the min/max bounds
+# set by the real data
+from sdmetrics.single_table import BoundaryAdherence
+
+BoundaryAdherence.compute(
+    real_data['start_date'],
+    synthetic_data['start_date']
+)
+```
+```
+0.8503937007874016
+```
+
+```python
+# calculate whether an attacker will be able to guess sensitive 
+# information based on combination of synthetic data and their
+# own information
+from sdmetrics.single_table import CategoricalCAP
+
+CategoricalCAP.compute(
+    real_data,
+    synthetic_data,
+    key_fields=['gender', 'work_experience'],
+    sensitive_fields=['degree_type']
+)
+```
+```
+0.4601209799017264
+```
 
 # What's next?
 
-If you want to read more about each individual metric, please visit the following folders:
-
-* Single Column Metrics: [sdmetrics/single_column](sdmetrics/single_column)
-* Single Table Metrics: [sdmetrics/single_table](sdmetrics/single_table)
-* Multi Table Metrics: [sdmetrics/multi_table](sdmetrics/multi_table)
-* Time Series Metrics: [sdmetrics/timeseries](sdmetrics/timeseries)
+To learn more about the reports and metrics, visit the [SDMetrics Documentation](https://docs.sdv.dev/sdmetrics). 
 
 ---
 

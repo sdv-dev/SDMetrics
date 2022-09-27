@@ -7,6 +7,7 @@ from sdmetrics.single_column.statistical.category_coverage import CategoryCovera
 from sdmetrics.single_column.statistical.cstest import CSTest
 from sdmetrics.single_column.statistical.kscomplement import KSComplement
 from sdmetrics.single_column.statistical.missing_value_similarity import MissingValueSimilarity
+from sdmetrics.single_column.statistical.range_coverage import RangeCoverage
 from sdmetrics.single_column.statistical.statistic_similarity import StatisticSimilarity
 from sdmetrics.single_column.statistical.tv_complement import TVComplement
 
@@ -18,6 +19,7 @@ __all__ = [
     'CSTest',
     'KSComplement',
     'MissingValueSimilarity',
+    'RangeCoverage',
     'StatisticSimilarity',
     'TVComplement',
 ]

@@ -30,7 +30,7 @@ class MLEfficacy(MLEfficacyMetric):
     max_value = np.inf
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, target=None):
+    def compute(cls, test_data, train_data, metadata=None, target=None):
         """Compute this metric.
 
         A ``target`` column name must be given, either directly or as a first level
@@ -45,10 +45,10 @@ class MLEfficacy(MLEfficacyMetric):
         chosen type.
 
         Args:
-            real_data (Union[numpy.ndarray, pandas.DataFrame]):
-                The values from the real dataset.
-            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
-                The values from the synthetic dataset.
+            test_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the test dataset.
+            train_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the training dataset.
             target (str):
                 Name of the column to use as the target.
             scorer (Union[callable, list[callable], NoneType]):
@@ -57,11 +57,11 @@ class MLEfficacy(MLEfficacyMetric):
 
         Returns:
             union[float, tuple[float]]:
-                Scores obtained by the models when evaluated on the real data.
+                Scores obtained by the models when evaluated on the test data.
         """
-        target = cls._validate_inputs(real_data, synthetic_data, metadata, target)
+        target = cls._validate_inputs(test_data, train_data, metadata, target)
         target_type = metadata['fields'][target]['type']
-        target_data = real_data[target]
+        target_data = test_data[target]
         uniques = target_data.unique()
         if len(uniques) == 2:
             LOGGER.info('MLEfficacy: Selecting Binary Classification metrics')
@@ -78,7 +78,7 @@ class MLEfficacy(MLEfficacyMetric):
         scores = []
         for name, metric in metrics.items():
             LOGGER.info('MLEfficacy: Computing %s', name)
-            scores.append(metric.compute(real_data, synthetic_data, metadata, target))
+            scores.append(metric.compute(test_data, train_data, metadata, target))
 
     @classmethod
     def normalize(cls, raw_score):

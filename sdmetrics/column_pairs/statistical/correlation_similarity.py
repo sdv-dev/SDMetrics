@@ -64,9 +64,13 @@ class CorrelationSimilarity(ColumnPairsMetric):
         synthetic_data = synthetic_data.dropna()
         column1, column2 = real_data.columns[:2]
 
-        if is_datetime(real_data):
-            real_data = pd.to_numeric(real_data)
-            synthetic_data = pd.to_numeric(synthetic_data)
+        if is_datetime(real_data[column1]):
+            real_data[column1] = pd.to_numeric(real_data[column1])
+            synthetic_data[column1] = pd.to_numeric(synthetic_data[column1])
+
+        if is_datetime(real_data[column2]):
+            real_data[column2] = pd.to_numeric(real_data[column2])
+            synthetic_data[column2] = pd.to_numeric(synthetic_data[column2])
 
         correlation_fn = None
         if coefficient == 'Pearson':

@@ -1,0 +1,81 @@
+from datetime import date, datetime
+
+import pandas as pd
+
+from sdmetrics.reports.multi_table.quality_report import QualityReport
+
+
+def load_test_data():
+    real_data = {
+        'table1': pd.DataFrame({
+            'col1': [0, 1, 2, 3],
+            'col2': ['a', 'b', 'c', 'd'],
+            'col3': [True, False, False, True],
+        }),
+        'table2': pd.DataFrame({
+            'col4': [
+                datetime(2020, 10, 1),
+                datetime(2021, 1, 2),
+                datetime(2021, 9, 12),
+                datetime(2022, 10, 1),
+            ],
+            'col5': [date(2020, 9, 13), date(2020, 12, 1), date(2021, 1, 12), date(2022, 8, 13)],
+            'col6': [0, 1, 1, 0],
+            'col7': [0.1, 0.2, 0.3, 0.4],
+        }),
+    }
+
+    synthetic_data = {
+        'table1': pd.DataFrame({
+            'col1': [0, 2, 2, 3],
+            'col2': ['a', 'c', 'c', 'b'],
+            'col3': [False, False, False, True],
+        }),
+        'table2': pd.DataFrame({
+            'col4': [
+                datetime(2020, 11, 4),
+                datetime(2021, 2, 1),
+                datetime(2021, 8, 1),
+                datetime(2022, 12, 1),
+            ],
+            'col5': [date(2020, 10, 13), date(2020, 2, 4), date(2021, 3, 11), date(2022, 7, 23)],
+            'col6': [0, 1, 1, 0],
+            'col7': [0.1, 0.2, 0.3, 0.4],
+        }),
+    }
+
+    metadata = {
+        'tables': {
+            'table1': {
+                'fields': {
+                    'col1': {'type': 'id'},
+                    'col2': {'type': 'categorical'},
+                    'col3': {'type': 'boolean'},
+                },
+            },
+            'table2': {
+                'fields': {
+                    'col4': {'type': 'datetime', 'format': '%Y-%m-%d'},
+                    'col5': {'type': 'datetime', 'format': '%Y-%m-%d'},
+                    'col6': {'type': 'id', 'ref': {'table': 'table1', 'field': 'col1'}},
+                    'col7': {'type': 'numerical', 'subtype': 'float'},
+                },
+            }
+        }
+    }
+
+    return (real_data, synthetic_data, metadata)
+
+
+def test_multi_table_quality_report():
+    """Test the multi table quality report."""
+    real_data, synthetic_data, metadata = load_test_data()
+
+    report = QualityReport()
+    report.generate(real_data, synthetic_data, metadata)
+
+    properties = report.get_properties()
+    pd.testing.assert_frame_equal(properties, pd.DataFrame({
+        'Property': ['Column Shapes', 'Column Pair Trends', 'Parent Child Relationships'],
+        'Score': [0.7916666666666667, 0.678052339757824, 0.75],
+    }))

@@ -14,7 +14,7 @@ class KSComplement(SingleColumnMetric):
     This function uses the two-sample Kolmogorov–Smirnov test to compare
     the distributions of the two continuous columns using the empirical CDF.
     It returns 1 minus the KS Test D statistic, which indicates the maximum
-    distance between the expteced CDF and the observed CDF values.
+    distance between the expected CDF and the observed CDF values.
 
     As a result, the output value is 1.0 if the distributions are identical
     and 0.0 if they are completely different.

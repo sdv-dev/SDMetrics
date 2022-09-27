@@ -63,7 +63,8 @@ class MultiColumnPairsMetric(
             Union[float, tuple[float]]:
                 Metric output.
         """
-        metadata = self._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = self._validate_inputs(
+            real_data, synthetic_data, metadata)
 
         fields = self._select_fields(metadata, self.field_types)
 
@@ -95,6 +96,40 @@ class MultiColumnPairsMetric(
                 Metric output.
         """
         return cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
+
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data, metadata=None, **kwargs):
+        """Compute the breakdown of this metric.
+
+        Args:
+            real_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the real dataset.
+            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict.
+            **kwargs:
+                Any additional keyword arguments will be passed down
+                to the column pairs metric
+
+        Returns:
+            dict:
+                Metric output.
+        """
+        real_data, synthetic_data, metadata = cls._validate_inputs(
+            real_data, synthetic_data, metadata)
+
+        fields = cls._select_fields(metadata, cls.field_types)
+
+        breakdown = {}
+        for columns in combinations(fields, r=2):
+            sorted_columns = tuple(sorted(columns))
+            real = real_data[list(sorted_columns)]
+            synthetic = synthetic_data[list(sorted_columns)]
+            breakdown[sorted_columns] = cls.column_pairs_metric.compute_breakdown(
+                real, synthetic, **kwargs)
+
+        return breakdown
 
     @classmethod
     def normalize(cls, raw_score):

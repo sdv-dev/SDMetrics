@@ -65,7 +65,8 @@ class MultiSingleColumnMetric(SingleTableMetric,
             Dict[string -> Union[float, tuple[float]]]:
                 A mapping of column name to metric output.
         """
-        metadata = self._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = self._validate_inputs(
+            real_data, synthetic_data, metadata)
 
         fields = self._select_fields(metadata, self.field_types)
         invalid_cols = set(metadata['fields'].keys()) - set(fields)
@@ -144,7 +145,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
                 A mapping of column name to metric output.
         """
         return cls._compute(
-            cls, real_data, synthetic_data, metadata=None, store_errors=True, **kwargs)
+            cls, real_data, synthetic_data, metadata, store_errors=True, **kwargs)
 
     @classmethod
     def normalize(cls, raw_score):
@@ -182,7 +183,7 @@ class KSComplement(MultiSingleColumnMetric):
     of all the scores obtained.
     """
 
-    field_types = ('numerical', )
+    field_types = ('numerical', 'datetime')
     single_column_metric = single_column.statistical.KSComplement
 
 
@@ -235,3 +236,13 @@ class TVComplement(MultiSingleColumnMetric):
 
     field_types = ('categorical', 'boolean')
     single_column_metric = single_column.statistical.TVComplement
+
+
+class RangeCoverage(MultiSingleColumnMetric):
+    """MultiSingleColumnMetric based on SingleColumn RangeCoverage.
+
+    Compute the complement of the total variaton distance between the real and synthetic data
+    """
+
+    field_types = ('numerical', 'datetime')
+    single_column_metric = single_column.statistical.RangeCoverage

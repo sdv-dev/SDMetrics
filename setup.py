@@ -19,6 +19,8 @@ install_requires = [
     'scipy>=1.5.4,<2',
     'torch>=1.8.0,<2',
     'copulas>=0.7.0,<0.8',
+    'tqdm>=4.15,<5',
+    'plotly>=5.10.0,<6',
 ]
 
 pomegranate_requires = [
@@ -117,6 +119,6 @@ setup(
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.6.0',
+    version='0.7.0.dev1',
     zip_safe=False,
 )

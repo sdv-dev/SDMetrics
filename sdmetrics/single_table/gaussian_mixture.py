@@ -121,7 +121,8 @@ class GMLogLikelihood(SingleTableMetric):
             float:
                 Average score returned by the GaussianMixtures.
         """
-        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = cls._validate_inputs(
+            real_data, synthetic_data, metadata)
         fields = cls._select_fields(metadata, 'numerical')
 
         real_data = real_data[fields]

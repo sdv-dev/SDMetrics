@@ -42,7 +42,8 @@ class BNLikelihood(SingleTableMetric):
         except ImportError:
             raise ImportError('Please install pomegranate with `pip install pomegranate`')
 
-        metadata = cls._validate_inputs(real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata = cls._validate_inputs(
+            real_data, synthetic_data, metadata)
         structure = metadata.get('structure', structure)
         fields = cls._select_fields(metadata, ('categorical', 'boolean'))
 
