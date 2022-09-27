@@ -100,7 +100,15 @@ class NewRowSynthesis(SingleTableMetric):
 
                 row_filter.append(field_filter)
 
-            matches = real_data.query(' and '.join(row_filter))
+            try:
+                matches = real_data.query(' and '.join(row_filter))
+            except TypeError:
+                if len(real_data) > 10000:
+                    warnings.warn('Unable to optimize query. For better formance, set the '
+                                  '`synthetic_sample_size` parameter or upgrade to Python 3.8')
+
+                matches = real_data.query(' and '.join(row_filter), engine='python')
+
             if matches is None or matches.empty:
                 num_unique_rows += 1
 
