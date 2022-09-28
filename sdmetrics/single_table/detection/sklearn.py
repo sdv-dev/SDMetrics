@@ -79,7 +79,7 @@ class GradientBoostingDetection(ScikitLearnClassifierDetectionMetric):
     The output of the metric is one minus the average ROC AUC score obtained.
     """
 
-    name = 'SVC Detection'
+    name = 'GradientBoosting Detection'
 
     @staticmethod
     def _get_classifier():
