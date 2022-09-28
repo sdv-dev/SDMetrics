@@ -1,5 +1,38 @@
 # History
 
+## v0.7.0 - 2022-09-27
+
+This release introduces the `QualityReport`, which evaluates how well synthetic data captures mathematical properties from the real data. The `QualityReport` incorporates the new metrics introduced in the previous release, and allows users to get detailed results, visualize the scores, and save the report for future viewing. We also add utility methods for visualizing columns and pairs of columns.
+
+### New Features
+* Catch typeerror in new row synthesis query - Issue [#234](https://github.com/sdv-dev/SDMetrics/issues/234) by @katxiao
+* Add NewRowSynthesis Metric - Issue [#207](https://github.com/sdv-dev/SDMetrics/issues/207) by @katxiao
+* Update plot utilities API - Issue [#228](https://github.com/sdv-dev/SDMetrics/issues/228) by @katxiao
+* Fix column pairs visualization bug - Issue [#230](https://github.com/sdv-dev/SDMetrics/issues/230) by @katxiao
+* Save version - Issue [#229](https://github.com/sdv-dev/SDMetrics/issues/229) by @katxiao
+* Update efficacy metrics API - Issue [#227](https://github.com/sdv-dev/SDMetrics/issues/227) by @katxiao
+* Add RangeCoverage Metric - Issue [#208](https://github.com/sdv-dev/SDMetrics/issues/208) by @katxiao
+* Add get_column_pairs_plot utility method - Issue [#223](https://github.com/sdv-dev/SDMetrics/issues/223) by @katxiao
+* Parse date as datetime - Issue [#222](https://github.com/sdv-dev/SDMetrics/issues/222) by @katxiao
+* Update error handling for reports - Issue [#221](https://github.com/sdv-dev/SDMetrics/issues/221) by @katxiao
+* Visualization API update - Issue [#220](https://github.com/sdv-dev/SDMetrics/issues/220) by @katxiao
+* Bug fixes for QualityReport - Issue [#219](https://github.com/sdv-dev/SDMetrics/issues/219) by @katxiao
+* Update column pair metric calculation - Issue [#214](https://github.com/sdv-dev/SDMetrics/issues/214) by @katxiao
+* Add get score methods for multi table QualityReport - Issue [#190](https://github.com/sdv-dev/SDMetrics/issues/190) by @katxiao
+* Add multi table QualityReport visualization methods - Issue [#192](https://github.com/sdv-dev/SDMetrics/issues/192) by @katxiao
+* Add plot_column visualization utility method - Issue [#193](https://github.com/sdv-dev/SDMetrics/issues/193) by @katxiao
+* Add save and load behavior to multi table QualityReport - Issue [#188](https://github.com/sdv-dev/SDMetrics/issues/188) by @katxiao
+* Create multi-table QualityReport - Issue [#186](https://github.com/sdv-dev/SDMetrics/issues/186) by @katxiao
+* Add single table QualityReport visualization methods - Issue [#191](https://github.com/sdv-dev/SDMetrics/issues/191) by @katxiao
+* Add save and load behavior to single table QualityReport - Issue [#187](https://github.com/sdv-dev/SDMetrics/issues/187) by @katxiao
+* Add get score methods for single table Quality Report - Issue [#189](https://github.com/sdv-dev/SDMetrics/issues/189) by @katxiao
+* Create single-table QualityReport - Issue [#185](https://github.com/sdv-dev/SDMetrics/issues/185) by @katxiao
+
+### Internal Improvements
+* Auto apply "new" label instead of "pending review" - Issue [#164](https://github.com/sdv-dev/SDMetrics/issues/164) by @katxiao
+* fix typo - Issue [#195](https://github.com/sdv-dev/SDMetrics/issues/195) by @fealho
+
+
 ## v0.6.0 - 2022-08-12
 
 This release removes SDMetric's dependency on the RDT library, and also introduces new quality and diagnostic metrics. Additionally, we introduce a new `compute_breakdown` method that returns a breakdown of metric results.
