@@ -12,6 +12,7 @@ import pkg_resources
 import tqdm
 
 from sdmetrics.errors import IncomputableMetricError
+from sdmetrics.reports.utils import aggregate_metric_results
 from sdmetrics.single_table import (
     BoundaryAdherence, CategoryCoverage, NewRowSynthesis, RangeCoverage)
 
@@ -77,6 +78,7 @@ class DiagnosticReport():
 
     def __init__(self):
         self._metric_results = {}
+        self._metric_averages = {}
         self._results = {}
 
     def _print_results(self, out=sys.stdout):
@@ -85,7 +87,7 @@ class DiagnosticReport():
         self._results['WARNING'] = []
         self._results['DANGER'] = []
 
-        for metric, score in self._metric_scores.items():
+        for metric, score in self._metric_averages.items():
             if np.isnan(score):
                 continue
             if score >= 0.9:
@@ -128,6 +130,13 @@ class DiagnosticReport():
             try:
                 self._metric_results[metric_name] = metric.compute_breakdown(
                     real_data, synthetic_data, metadata)
+
+                if 'score' in self._metric_results[metric_name]:
+                    self._metric_averages[metric_name] = self._metric_results[metric_name]['score']
+                else:
+                    avg_score, _ = aggregate_metric_results(self._metric_results[metric_name])
+                    self._metric_averages[metric_name] = avg_score
+
             except IncomputableMetricError:
                 # Metric is not compatible with this dataset.
                 self._metric_results[metric_name] = {}
@@ -150,7 +159,12 @@ class DiagnosticReport():
             pandas.DataFrame
                 The property score breakdown.
         """
-        return copy.deepcopy(self._metric_scores)
+        properties = {}
+        for prop, metrics in self.METRICS.items():
+            prop_scores = [self._metric_averages[metric.__name__] for metric in metrics]
+            properties[prop] = np.nanmean(prop_scores)
+
+        return properties
 
     def get_visualization(self, property_name):
         """Return a visualization for each score for the given property name.
@@ -183,11 +197,12 @@ class DiagnosticReport():
         details = pd.DataFrame()
 
         if property_name == 'Synthesis':
+            metric_name = self.METRICS[property_name][0]
             details = pd.DataFrame({
-                'Metric': property_name,
-                'Diagnostic Score': self._metric_scores[property_name],
+                'Metric': metric_name,
+                'Diagnostic Score': self._metric_scores[metric_name],
             })
-            errors.append(self._metric_scores[property_name].get('error', np.nan))
+            errors.append(self._metric_scores[metric_name].get('error', np.nan))
 
         else:
             for metric in self.METRICS[property_name]:
@@ -207,34 +222,6 @@ class DiagnosticReport():
             details['Error'] = errors
 
         return details
-
-    def get_raw_result(self, metric_name):
-        """Return the raw result of the given metric name.
-
-        Args:
-            metric_name (str):
-                The name of the desired metric.
-
-        Returns:
-            dict
-                The raw results
-        """
-        metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
-        for metric in metrics:
-            if metric.__name__ == metric_name:
-                return [
-                    {
-                        'metric': {
-                            'method': f'{metric.__module__}.{metric.__name__}',
-                            'parameters': {},
-                        },
-                        'results': {
-                            key: result for key, result in
-                            self._metric_results[metric_name].items()
-                            if not np.isnan(result.get('score', np.nan))
-                        },
-                    },
-                ]
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
