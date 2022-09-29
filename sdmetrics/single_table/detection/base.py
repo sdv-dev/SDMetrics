@@ -85,8 +85,7 @@ class DetectionMetric(SingleTableMetric):
                 y_pred = cls._fit_predict(X[train_index], y[train_index], X[test_index])
                 roc_auc = roc_auc_score(y[test_index], y_pred)
 
-                #scores.append(max(0.5, roc_auc) * 2 - 1)
-                scores.append(roc_auc)
+                scores.append(max(0.5,roc_auc))
 
             return np.mean(scores)
         except ValueError as err:
@@ -94,7 +93,7 @@ class DetectionMetric(SingleTableMetric):
 
     @classmethod
     def normalize(cls, raw_score):
-        """Return the `raw_score` as is, since it is already normalized.
+        """Return the `raw_score`normalized to be higher-is-better in [0,1]
 
         Args:
             raw_score (float):
@@ -102,7 +101,8 @@ class DetectionMetric(SingleTableMetric):
 
         Returns:
             float:
-                Simply returns `raw_score`.
+                Returns `2*(1-raw_score)`.
         """
-        score = 2 - 2 * max(0.5,raw_score)
+        assert raw_score >= 0.5, "raw auc score should be in [0.5,1]"
+        score = 2 * (1 - raw_score)
         return super().normalize(score)
