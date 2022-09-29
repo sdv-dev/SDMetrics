@@ -16,7 +16,6 @@ from sdmetrics.reports.utils import aggregate_metric_results
 from sdmetrics.single_table import (
     BoundaryAdherence, CategoryCoverage, NewRowSynthesis, RangeCoverage)
 
-
 RESULT_DETAILS = {
     'BoundaryAdherence': {
         'SUCCESS': (
@@ -91,26 +90,27 @@ class DiagnosticReport():
             if np.isnan(score):
                 continue
             if score >= 0.9:
-                self._results['SUCCESS'].append(metric)
+                self._results['SUCCESS'].append(RESULT_DETAILS[metric]['SUCCESS'])
             elif score >= 0.5:
-                self._results['WARNING'].append(metric)
+                self._results['WARNING'].append(RESULT_DETAILS[metric]['WARNING'])
             else:
-                self._results['DANGER'].append(metric)
+                self._results['DANGER'].append(RESULT_DETAILS[metric]['DANGER'])
 
+        out.write('DiagnosticResults:\n')
         if len(self._results['SUCCESS']) > 0:
-            out.write('SUCCESS:\n')
-            for metric in self._results['SUCCESS']:
-                out.write(f"{RESULT_DETAILS[metric]['SUCCESS']}")
+            out.write('\nSUCCESS:\n')
+            for result in self._results['SUCCESS']:
+                out.write(f'{result}\n')
 
         if len(self._results['WARNING']) > 0:
-            out.write('WARNING:\n')
-            for metric in self._results['WARNING']:
-                out.write(f"{RESULT_DETAILS[metric]['WARNING']}")
+            out.write('\nWARNING:\n')
+            for result in self._results['WARNING']:
+                out.write(f'{result}\n')
 
         if len(self._results['DANGER']) > 0:
-            out.write('DANGER:\n')
-            for metric in self._results['DANGER']:
-                out.write(f"{RESULT_DETAILS[metric]['DANGER']}")
+            out.write('\nDANGER:\n')
+            for result in self._results['DANGER']:
+                out.write(f'{result}\n')
 
     def generate(self, real_data, synthetic_data, metadata):
         """Generate report.
@@ -177,7 +177,6 @@ class DiagnosticReport():
             plotly.graph_objects._figure.Figure
                 The visualization for the requested property.
         """
-        pass
 
     def get_details(self, property_name):
         """Return the details for each score for the given property name.
@@ -207,10 +206,15 @@ class DiagnosticReport():
         else:
             for metric in self.METRICS[property_name]:
                 for column, score_breakdown in self._metric_results[metric.__name__].items():
+                    metric_score = score_breakdown.get('score', np.nan)
+                    metric_error = score_breakdown.get('error', np.nan)
+                    if np.isnan(metric_score) and np.isnan(metric_error):
+                        continue
+
                     columns.append(column)
                     metrics.append(metric.__name__)
-                    scores.append(score_breakdown.get('score', np.nan))
-                    errors.append(score_breakdown.get('error', np.nan))
+                    scores.append(metric_score)
+                    errors.append(metric_error)
 
             details = pd.DataFrame({
                 'Column': columns,

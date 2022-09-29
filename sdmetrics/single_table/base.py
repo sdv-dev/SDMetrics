@@ -165,3 +165,25 @@ class SingleTableMetric(BaseMetric):
                 Metric output.
         """
         raise NotImplementedError()
+
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data, metadata=None):
+        """Compute this metric breakdown.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The values from the real dataset, passed as a pandas.DataFrame.
+            synthetic_data (pandas.DataFrame):
+                The values from the synthetic dataset, passed as a pandas.DataFrame.
+            metadata (dict):
+                Table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
+            real_data (Union[numpy.ndarray, pandas.Series]):
+                The values from the real dataset, passed as a 1d numpy
+                array or as a pandas.Series.
+
+        Returns:
+            dict
+                Mapping of the metric output. Must include the key 'score'.
+        """
+        return {'score': cls.compute(real_data, synthetic_data, metadata)}

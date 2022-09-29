@@ -322,7 +322,8 @@ class TestDiagnosticReport:
 
         # Assert
         mock_out.write.assert_has_calls([
-            call('WARNING:\n'),
+            call('DiagnosticResults:\n'),
+            call('\nWARNING:\n'),
             call('! More than 10% the synthetic data does not follow the min/max boundaries '
-                 'set by the real data'),
+                 'set by the real data\n'),
         ])
