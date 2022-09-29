@@ -50,7 +50,7 @@ class DetectionMetric(SingleTableMetric):
         This builds a Machine Learning Classifier that learns to tell the synthetic
         data apart from the real data, which later on is evaluated using Cross Validation.
 
-        The output of the metric is one minus the average ROC AUC score obtained.
+        The output of the metric is the average ROC AUC score obtained.
 
         Args:
             real_data (Union[numpy.ndarray, pandas.DataFrame]):
@@ -85,9 +85,10 @@ class DetectionMetric(SingleTableMetric):
                 y_pred = cls._fit_predict(X[train_index], y[train_index], X[test_index])
                 roc_auc = roc_auc_score(y[test_index], y_pred)
 
-                scores.append(max(0.5, roc_auc) * 2 - 1)
+                #scores.append(max(0.5, roc_auc) * 2 - 1)
+                scores.append(roc_auc)
 
-            return 1 - np.mean(scores)
+            return np.mean(scores)
         except ValueError as err:
             raise IncomputableMetricError(f'DetectionMetric: Unable to be fit with error {err}')
 
@@ -103,4 +104,5 @@ class DetectionMetric(SingleTableMetric):
             float:
                 Simply returns `raw_score`.
         """
-        return super().normalize(raw_score)
+        score = 2 - 2 * max(0.5,raw_score)
+        return super().normalize(score)
