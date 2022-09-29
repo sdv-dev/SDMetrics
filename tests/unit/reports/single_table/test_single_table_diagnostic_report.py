@@ -1,10 +1,8 @@
 import pickle
 from unittest.mock import Mock, call, mock_open, patch
 
-import numpy as np
 import pandas as pd
 
-from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.reports.single_table import DiagnosticReport
 
 
@@ -23,28 +21,13 @@ class TestDiagnosticReport:
         assert report._metric_averages == {}
         assert report._results == {}
 
-    def test_generate(self, mock_discretize_and_apply_metric):
-        """Test the ``generate`` method.
-
-        Expect that the single-table metrics are called.
-
-        Setup:
-        - Mock the expected single-table metric compute breakdown calls.
-
-        Input:
-        - Real data.
-        - Synthetic data.
-        - Metadata.
-
-        Side Effects:
-        - Expect that each single table metric's ``compute_breakdown`` methods are called once.
-          are populated.
-        """
+    def test_generate(self):
+        """Test the ``generate`` method. Expect that the single-table metrics are called."""
         # Setup
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
-        range_coverage = Mock()
         metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        range_coverage = Mock()
         range_coverage.__name__ = 'RangeCoverage'
         range_coverage.compute_breakdown.return_value = {
             'col1': {'score': 0.1},
@@ -95,33 +78,22 @@ class TestDiagnosticReport:
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         assert report._metric_averages == {
-            'RangeCoverage': 0.15,
-            'CategoryCoverage': 0.15,
+            'RangeCoverage': 0.15000000000000002,
+            'CategoryCoverage': 0.15000000000000002,
             'NewRowSynthesis': 0.1,
-            'BoundaryAdherence': 0.15,
+            'BoundaryAdherence': 0.15000000000000002,
         }
 
-    @patch('sdmetrics.reports.single_table.quality_report.discretize_and_apply_metric')
-    def test_generate_with_errored_metric(self, mock_discretize_and_apply_metric):
+    def test_generate_with_errored_metric(self):
         """Test the ``generate`` method when the is a metric that has an error.
 
         Expect that the single-table metrics are called. Expect that the results are computed
         without the error-ed out metric.
-
-        Setup:
-        - Mock the expected single-table metric compute breakdown calls.
-
-        Input:
-        - Real data.
-        - Synthetic data.
-        - Metadata.
-
-        Side Effects:
-        - Expect that each single table metric's ``compute_breakdown`` methods are called once.
         """
         # Setup
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
+        range_coverage = Mock()
         range_coverage.__name__ = 'RangeCoverage'
         range_coverage.compute_breakdown.return_value = {
             'col1': {'score': 0.1},
@@ -168,7 +140,7 @@ class TestDiagnosticReport:
             real_data, synthetic_data, metadata)
         category_coverage.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
-        new_row_synthesis.compute_breakdown.assert_called_once_with(
+        new_row_synth.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
@@ -195,7 +167,7 @@ class TestDiagnosticReport:
         Expect that the property score breakdown is returned.
         """
         # Setup
-        report = QualityReport()
+        report = DiagnosticReport()
         report._metric_averages = {
             'RangeCoverage': 0.1,
             'CategoryCoverage': 0.2,
@@ -209,24 +181,21 @@ class TestDiagnosticReport:
         # Assert
         assert properties == {
             'Synthesis': 0.3,
-            'Coverage': 0.15,
+            'Coverage': 0.15000000000000002,
             'Boundaries': 0.4,
         }
 
     @patch('sdmetrics.reports.single_table.diagnostic_report.pkg_resources.get_distribution')
     @patch('sdmetrics.reports.single_table.diagnostic_report.pickle')
     def test_save(self, pickle_mock, get_distribution_mock):
-        """Test the ``save`` method.
-
-        Expect that the instance is passed to pickle.
-        """
+        """Test the ``save`` method. Expect that the instance is passed to pickle."""
         # Setup
         report = Mock()
         open_mock = mock_open(read_data=pickle.dumps('test'))
 
         # Run
         with patch('sdmetrics.reports.single_table.diagnostic_report.open', open_mock):
-            QualityReport.save(report, 'test-file.pkl')
+            DiagnosticReport.save(report, 'test-file.pkl')
 
         # Assert
         get_distribution_mock.assert_called_once_with('sdmetrics')
@@ -249,7 +218,7 @@ class TestDiagnosticReport:
 
         # Run
         with patch('sdmetrics.reports.single_table.diagnostic_report.open', open_mock):
-            loaded = QualityReport.load('test-file.pkl')
+            loaded = DiagnosticReport.load('test-file.pkl')
 
         # Assert
         open_mock.assert_called_once_with('test-file.pkl', 'rb')
@@ -272,7 +241,7 @@ class TestDiagnosticReport:
 
         # Run
         with patch('sdmetrics.reports.single_table.diagnostic_report.open', open_mock):
-            loaded = QualityReport.load('test-file.pkl')
+            loaded = DiagnosticReport.load('test-file.pkl')
 
         # Assert
         open_mock.assert_called_once_with('test-file.pkl', 'rb')
@@ -288,7 +257,7 @@ class TestDiagnosticReport:
         Expect that the details of the desired property is returned.
         """
         # Setup
-        report = QualityReport()
+        report = DiagnosticReport()
         report._metric_results = {
             'RangeCoverage': {
                 'col1': {'score': 0.1},
@@ -324,7 +293,7 @@ class TestDiagnosticReport:
         Expect that the details of the desired property is returned.
         """
         # Setup
-        report = QualityReport()
+        report = DiagnosticReport()
         report._metric_results = {
             'NewRowSynthesis': {'score': 0.1},
         }
@@ -353,6 +322,7 @@ class TestDiagnosticReport:
 
         # Assert
         mock_out.write.assert_has_calls([
-            call('WARNING:\n')
-            call('Properties:\n'),
+            call('WARNING:\n'),
+            call('! More than 10% the synthetic data does not follow the min/max boundaries '
+                 'set by the real data'),
         ])

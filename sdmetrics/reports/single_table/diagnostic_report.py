@@ -91,26 +91,26 @@ class DiagnosticReport():
             if np.isnan(score):
                 continue
             if score >= 0.9:
-                self._results['SUCCESS'].append(metric.__name__)
+                self._results['SUCCESS'].append(metric)
             elif score >= 0.5:
-                self._results['WARNING'].append(metric.__name__)
+                self._results['WARNING'].append(metric)
             else:
-                self._results['DANGER'].append(metric.__name__)
+                self._results['DANGER'].append(metric)
 
         if len(self._results['SUCCESS']) > 0:
             out.write('SUCCESS:\n')
             for metric in self._results['SUCCESS']:
-                out.write(f'{RESULT_DETAILS[metric]}')
+                out.write(f"{RESULT_DETAILS[metric]['SUCCESS']}")
 
         if len(self._results['WARNING']) > 0:
             out.write('WARNING:\n')
             for metric in self._results['WARNING']:
-                out.write(f'{RESULT_DETAILS[metric]}')
+                out.write(f"{RESULT_DETAILS[metric]['WARNING']}")
 
         if len(self._results['DANGER']) > 0:
             out.write('DANGER:\n')
             for metric in self._results['DANGER']:
-                out.write(f'{RESULT_DETAILS[metric]}')
+                out.write(f"{RESULT_DETAILS[metric]['DANGER']}")
 
     def generate(self, real_data, synthetic_data, metadata):
         """Generate report.
@@ -197,12 +197,12 @@ class DiagnosticReport():
         details = pd.DataFrame()
 
         if property_name == 'Synthesis':
-            metric_name = self.METRICS[property_name][0]
+            metric_name = self.METRICS[property_name][0].__name__
             details = pd.DataFrame({
-                'Metric': metric_name,
-                'Diagnostic Score': self._metric_scores[metric_name],
+                'Metric': [metric_name],
+                'Diagnostic Score': [self._metric_results[metric_name].get('score', np.nan)],
             })
-            errors.append(self._metric_scores[metric_name].get('error', np.nan))
+            errors.append(self._metric_results[metric_name].get('error', np.nan))
 
         else:
             for metric in self.METRICS[property_name]:
