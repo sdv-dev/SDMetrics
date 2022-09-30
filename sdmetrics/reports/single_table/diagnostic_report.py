@@ -80,6 +80,18 @@ class DiagnosticReport():
         self._metric_averages = {}
         self._results = {}
 
+    def _print_results_for_level(self, out, level):
+        """Print the result for a given level.
+
+        Args:
+            level (string):
+                The level to print results for.
+        """
+        if len(self._results[level]) > 0:
+            out.write(f'\n{level}:\n')
+            for result in self._results[level]:
+                out.write(f'{result}\n')
+
     def _print_results(self, out=sys.stdout):
         """Print the diagnostic report results."""
         self._results['SUCCESS'] = []
@@ -97,20 +109,9 @@ class DiagnosticReport():
                 self._results['DANGER'].append(RESULT_DETAILS[metric]['DANGER'])
 
         out.write('DiagnosticResults:\n')
-        if len(self._results['SUCCESS']) > 0:
-            out.write('\nSUCCESS:\n')
-            for result in self._results['SUCCESS']:
-                out.write(f'{result}\n')
-
-        if len(self._results['WARNING']) > 0:
-            out.write('\nWARNING:\n')
-            for result in self._results['WARNING']:
-                out.write(f'{result}\n')
-
-        if len(self._results['DANGER']) > 0:
-            out.write('\nDANGER:\n')
-            for result in self._results['DANGER']:
-                out.write(f'{result}\n')
+        self._print_results_for_level(out, 'SUCCESS')
+        self._print_results_for_level(out, 'WARNING')
+        self._print_results_for_level(out, 'DANGER')
 
     def generate(self, real_data, synthetic_data, metadata):
         """Generate report.
