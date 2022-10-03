@@ -2,7 +2,6 @@
 
 import numpy as np
 import pandas as pd
-import torch
 from sklearn.preprocessing import LabelEncoder
 
 
@@ -14,7 +13,7 @@ def _to_numpy(dataframe):
     return np.stack(dataframe.apply(_stack, axis=1))  # noqa
 
 
-def _x_to_packed_sequence(X):
+def _x_to_packed_sequence(X, torch):
     sequences = []
     for _, row in X.iterrows():
         sequence = []
@@ -28,6 +27,11 @@ def _x_to_packed_sequence(X):
 
 def lstm_classifier(X_train, X_test, y_train, y_test):
     """ML Scorer based on a simple LSTM based NN implemented using torch."""
+    try:
+        import torch
+    except ImportError:
+        raise ImportError('Please install torch with `pip install torch`')
+
     input_dim = len(X_train.columns)
     output_dim = len(set(y_train))
     hidden_dim = 32
@@ -36,8 +40,8 @@ def lstm_classifier(X_train, X_test, y_train, y_test):
     lstm = torch.nn.LSTM(input_dim, hidden_dim).to(device)
     linear = torch.nn.Linear(hidden_dim, output_dim).to(device)
 
-    X_train = _x_to_packed_sequence(X_train).to(device)
-    X_test = _x_to_packed_sequence(X_test).to(device)
+    X_train = _x_to_packed_sequence(X_train, torch).to(device)
+    X_test = _x_to_packed_sequence(X_test, torch).to(device)
 
     transformer = LabelEncoder()
     column = 'target'

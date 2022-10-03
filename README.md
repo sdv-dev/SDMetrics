@@ -77,7 +77,7 @@ pip install sdmetrics
 **Using `conda`:**
 
 ```bash
-conda install -c conda-forge -c pytorch sdmetrics
+conda install -c conda-forge sdmetrics
 ```
 
 For more installation options please visit the [SDMetrics installation Guide](https://github.com/sdv-dev/SDMetrics/blob/master/INSTALL.md).
