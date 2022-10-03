@@ -2,6 +2,7 @@ import pickle
 from unittest.mock import Mock, call, mock_open, patch
 
 import pandas as pd
+import pytest
 
 from sdmetrics.reports.single_table import DiagnosticReport
 
@@ -168,11 +169,10 @@ class TestDiagnosticReport:
         """
         # Setup
         report = DiagnosticReport()
-        report._metric_averages = {
-            'RangeCoverage': 0.1,
-            'CategoryCoverage': 0.2,
-            'NewRowSynthesis': 0.3,
-            'BoundaryAdherence': 0.4,
+        report._property_scores = {
+            'Synthesis': 0.3,
+            'Coverage': 0.15000000000000002,
+            'Boundaries': 0.4,
         }
 
         # Run
@@ -295,7 +295,7 @@ class TestDiagnosticReport:
         # Setup
         report = DiagnosticReport()
         report._metric_results = {
-            'NewRowSynthesis': {'score': 0.1},
+            'NewRowSynthesis': {'score': 0.1, 'num_matched_rows': 15, 'num_new_rows': 5},
         }
 
         # Run
@@ -307,6 +307,8 @@ class TestDiagnosticReport:
             pd.DataFrame({
                 'Metric': ['NewRowSynthesis'],
                 'Diagnostic Score': [0.1],
+                'Num Matched Rows': [15],
+                'Num New Rows': [5],
             })
         )
 
@@ -327,3 +329,77 @@ class TestDiagnosticReport:
             call('! More than 10% the synthetic data does not follow the min/max boundaries '
                  'set by the real data\n'),
         ])
+
+    @patch('sdmetrics.reports.single_table.diagnostic_report.get_column_coverage_plot')
+    def test_get_visualization_coverage(self, get_plot_mock):
+        """Test the ``get_visualization`` method with the Coverage property.
+
+        Expect that ``get_column_shapes_plot`` is called with the expected score breakdowns.
+        """
+        # Setup
+        report = DiagnosticReport()
+        report._metric_results['RangeCoverage'] = {'score': 'range_coverage_score'}
+        report._metric_results['CategoryCoverage'] = {'score': 'category_coverage_score'}
+        report._property_scores['Coverage'] = 0.78
+
+        # Run
+        fig = report.get_visualization('Coverage')
+
+        # Assert
+        get_plot_mock.assert_called_once_with({
+            'RangeCoverage': {'score': 'range_coverage_score'},
+            'CategoryCoverage': {'score': 'category_coverage_score'},
+        }, 0.78)
+        assert fig == get_plot_mock.return_value
+
+    @patch('sdmetrics.reports.single_table.diagnostic_report.get_column_boundaries_plot')
+    def test_get_visualization_boundaries(self, get_plot_mock):
+        """Test the ``get_visualization`` method with the Boundaries property.
+
+        Expect that ``get_column_pairs_plot`` is called with the expected score breakdowns.
+        """
+        # Setup
+        report = DiagnosticReport()
+        report._metric_results['BoundaryAdherence'] = {'score': 'test_score'}
+        report._property_scores['Boundaries'] = 0.78
+
+        # Run
+        fig = report.get_visualization('Boundaries')
+
+        # Assert
+        get_plot_mock.assert_called_once_with({
+            'BoundaryAdherence': {'score': 'test_score'},
+        }, 0.78)
+        assert fig == get_plot_mock.return_value
+
+    @patch('sdmetrics.reports.single_table.diagnostic_report.get_synthesis_plot')
+    def test_get_visualization_synthesis(self, get_plot_mock):
+        """Test the ``get_visualization`` method with the Synthesis property.
+
+        Expect that the ``get_synthesis_plot`` method is called with the expected values.
+        """
+        # Setup
+        report = DiagnosticReport()
+        report._metric_results['NewRowSynthesis'] = {'score': 'test_score'}
+
+        # Run
+        fig = report.get_visualization('Synthesis')
+
+        # Assert
+        get_plot_mock.assert_called_once_with({'score': 'test_score'})
+        assert fig == get_plot_mock.return_value
+
+    def test_get_visualization_invalid_property(self):
+        """Test the ``get_visualization`` method with an invalid property name.
+
+        Expect that a ``ValueError`` is raised.
+        """
+        # Setup
+        report = DiagnosticReport()
+
+        # Run and assert
+        with pytest.raises(ValueError, match=(
+            'Property name `invalid` is not recognized. '
+            'Please choose either `Coverage`, `Boundaries`, or `Synthesis`.'
+        )):
+            report.get_visualization('invalid')

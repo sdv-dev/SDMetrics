@@ -27,7 +27,7 @@ def _get_column_shapes_data(score_breakdowns):
                 metrics.append(metric)
                 scores.append(result['score'])
 
-    return pd.DataFrame({'Column Name': column_names, 'Metric': metrics, 'Quality Score': scores})
+    return pd.DataFrame({'Column Name': column_names, 'Metric': metrics, 'Score': scores})
 
 
 def get_column_shapes_plot(score_breakdowns, average_score=None):
@@ -44,6 +44,7 @@ def get_column_shapes_plot(score_breakdowns, average_score=None):
         plotly.graph_objects._figure.Figure
     """
     data = _get_column_shapes_data(score_breakdowns)
+    data = data.rename(columns={'Score': 'Quality Score'})
     if average_score is None:
         average_score = data['Quality Score'].mean()
 
@@ -65,6 +66,105 @@ def get_column_shapes_plot(score_breakdowns, average_score=None):
             'Column Name': False,
             'Metric': True,
             'Quality Score': True,
+        },
+    )
+
+    fig.update_yaxes(range=[0, 1])
+
+    fig.update_layout(
+        xaxis_categoryorder='total ascending',
+        plot_bgcolor='#F5F5F8',
+        margin={'t': 150},
+    )
+
+    return fig
+
+
+def get_column_coverage_plot(score_breakdowns, average_score=None):
+    """Create a plot to show the column coverage scores.
+
+    Args:
+        score_breakdowns (dict):
+            The score breakdowns of the column shape metrics.
+        average_score (float):
+            The average score. If None, the average score will be computed from
+            ``score_breakdowns``.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    data = _get_column_shapes_data(score_breakdowns)
+    data = data.rename(columns={'Score': 'Diagnostic Score'})
+    if average_score is None:
+        average_score = data['Diagnostic Score'].mean()
+
+    fig = px.bar(
+        data,
+        x='Column Name',
+        y='Diagnostic Score',
+        title=f'Data Diagnostics: Column Coverage (Average Score={round(average_score, 2)})',
+        category_orders={'group': data['Column Name']},
+        color='Metric',
+        color_discrete_map={
+            'RangeCoverage': '#000036',
+            'CategoryCoverage': '#03AFF1',
+        },
+        pattern_shape='Metric',
+        pattern_shape_sequence=['', '/'],
+        hover_name='Column Name',
+        hover_data={
+            'Column Name': False,
+            'Metric': True,
+            'Diagnostic Score': True,
+        },
+    )
+
+    fig.update_yaxes(range=[0, 1])
+
+    fig.update_layout(
+        xaxis_categoryorder='total ascending',
+        plot_bgcolor='#F5F5F8',
+        margin={'t': 150},
+    )
+
+    return fig
+
+
+def get_column_boundaries_plot(score_breakdowns, average_score=None):
+    """Create a plot to show the column boundary scores.
+
+    Args:
+        score_breakdowns (dict):
+            The score breakdowns of the column shape metrics.
+        average_score (float):
+            The average score. If None, the average score will be computed from
+            ``score_breakdowns``.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    data = _get_column_shapes_data(score_breakdowns)
+    data = data.rename(columns={'Score': 'Diagnostic Score'})
+    if average_score is None:
+        average_score = data['Diagnostic Score'].mean()
+
+    fig = px.bar(
+        data,
+        x='Column Name',
+        y='Diagnostic Score',
+        title=f'Data Diagnostics: Column Boundaries (Average Score={round(average_score, 2)})',
+        category_orders={'group': data['Column Name']},
+        color='Metric',
+        color_discrete_map={
+            'BoundaryAdherence': '#000036',
+        },
+        pattern_shape='Metric',
+        pattern_shape_sequence=['', '/'],
+        hover_name='Column Name',
+        hover_data={
+            'Column Name': False,
+            'Metric': True,
+            'Diagnostic Score': True,
         },
     )
 
@@ -280,5 +380,42 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
     )
 
     fig.update_yaxes(autorange='reversed')
+
+    return fig
+
+
+def get_synthesis_plot(score_breakdown):
+    """Create a plot to show the synthesis score.
+
+    Args:
+        score_breakdown (dict):
+            The new row synthesis score breakdown.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    labels = ['Exact Matches', 'Novel Rows']
+    values = [
+        score_breakdown.get('num_matched_rows', np.nan),
+        score_breakdown.get('num_new_rows', np.nan),
+    ]
+
+    average_score = score_breakdown.get('score', np.nan)
+    if not np.isnan(average_score):
+        average_score = round(average_score, 2)
+
+    fig = px.pie(
+        values=values,
+        names=labels,
+        color=['Exact Matches', 'Novel Rows'],
+        color_discrete_map={
+            'Exact Matches': '#F16141',
+            'Novel Rows': '#36B37E'
+        },
+        hole=0.4,
+        title=f'Data Diagnostic: Synthesis (Score={average_score})'
+    )
+
+    fig.update_traces(hovertemplate='<b>%{label}</b><br>%{value} rows')
 
     return fig

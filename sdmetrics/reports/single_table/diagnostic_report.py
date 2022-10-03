@@ -12,6 +12,8 @@ import pkg_resources
 import tqdm
 
 from sdmetrics.errors import IncomputableMetricError
+from sdmetrics.reports.single_table.plot_utils import (
+    get_column_boundaries_plot, get_column_coverage_plot, get_synthesis_plot)
 from sdmetrics.reports.utils import aggregate_metric_results
 from sdmetrics.single_table import (
     BoundaryAdherence, CategoryCoverage, NewRowSynthesis, RangeCoverage)
@@ -78,6 +80,7 @@ class DiagnosticReport():
     def __init__(self):
         self._metric_results = {}
         self._metric_averages = {}
+        self._property_scores = {}
         self._results = {}
 
     def _print_results_for_level(self, out, level):
@@ -142,6 +145,11 @@ class DiagnosticReport():
                 # Metric is not compatible with this dataset.
                 self._metric_results[metric_name] = {}
 
+        self._property_scores = {}
+        for prop, metrics in self.METRICS.items():
+            prop_scores = [self._metric_averages[metric.__name__] for metric in metrics]
+            self._property_scores[prop] = np.nanmean(prop_scores)
+
         self._print_results()
 
     def get_results(self):
@@ -160,12 +168,7 @@ class DiagnosticReport():
             pandas.DataFrame
                 The property score breakdown.
         """
-        properties = {}
-        for prop, metrics in self.METRICS.items():
-            prop_scores = [self._metric_averages[metric.__name__] for metric in metrics]
-            properties[prop] = np.nanmean(prop_scores)
-
-        return properties
+        return copy.deepcopy(self._property_scores)
 
     def get_visualization(self, property_name):
         """Return a visualization for each score for the given property name.
@@ -178,6 +181,26 @@ class DiagnosticReport():
             plotly.graph_objects._figure.Figure
                 The visualization for the requested property.
         """
+        score_breakdowns = {
+            metric.__name__: self._metric_results[metric.__name__]
+            for metric in self.METRICS.get(property_name, [])
+        }
+
+        if property_name == 'Coverage':
+            fig = get_column_coverage_plot(score_breakdowns, self._property_scores[property_name])
+
+        elif property_name == 'Boundaries':
+            fig = get_column_boundaries_plot(
+                score_breakdowns, self._property_scores[property_name])
+
+        elif property_name == 'Synthesis':
+            fig = get_synthesis_plot(score_breakdowns.get('NewRowSynthesis', {}))
+
+        else:
+            raise ValueError(f'Property name `{property_name}` is not recognized. '
+                             'Please choose either `Coverage`, `Boundaries`, or `Synthesis`.')
+
+        return fig
 
     def get_details(self, property_name):
         """Return the details for each score for the given property name.
@@ -198,11 +221,14 @@ class DiagnosticReport():
 
         if property_name == 'Synthesis':
             metric_name = self.METRICS[property_name][0].__name__
+            metric_result = self._metric_results[metric_name]
             details = pd.DataFrame({
                 'Metric': [metric_name],
-                'Diagnostic Score': [self._metric_results[metric_name].get('score', np.nan)],
+                'Diagnostic Score': [metric_result.get('score', np.nan)],
+                'Num Matched Rows': [metric_result.get('num_matched_rows', np.nan)],
+                'Num New Rows': [metric_result.get('num_new_rows', np.nan)],
             })
-            errors.append(self._metric_results[metric_name].get('error', np.nan))
+            errors.append(metric_result.get('error', np.nan))
 
         else:
             for metric in self.METRICS[property_name]:
