@@ -6,7 +6,8 @@ import pandas as pd
 
 from sdmetrics.reports.single_table.plot_utils import (
     _get_column_shapes_data, _get_numerical_correlation_matrices,
-    _get_similarity_correlation_matrix, get_column_pairs_plot, get_column_shapes_plot)
+    _get_similarity_correlation_matrix, get_column_boundaries_plot, get_column_coverage_plot,
+    get_column_pairs_plot, get_column_shapes_plot, get_synthesis_plot)
 
 
 def test__get_column_shapes_data():
@@ -34,7 +35,7 @@ def test__get_column_shapes_data():
     pd.testing.assert_frame_equal(out, pd.DataFrame({
         'Column Name': ['col2', 'col1'],
         'Metric': ['METRIC1', 'METRIC2'],
-        'Quality Score': [0.1, 0.2],
+        'Score': [0.1, 0.2],
     }))
 
 
@@ -64,6 +65,54 @@ def test_get_column_shapes_plot(bar_mock):
 
     # Run
     out = get_column_shapes_plot(score_breakdowns)
+
+    # Assert
+    bar_mock.assert_called_once()
+    mock_fig.update_yaxes.assert_called_once_with(range=[0, 1])
+    mock_fig.update_layout.assert_called_once()
+    assert out == mock_fig
+
+
+@patch('sdmetrics.reports.single_table.plot_utils.px.bar')
+def test_get_column_coverage_plot(bar_mock):
+    """Test the ``get_column_coverage_plot`` function.
+
+    Expect that the bar method is called the expected number of times.
+    """
+    # Setup
+    score_breakdowns = {
+        'METRIC1': {'col1': {'score': np.nan}, 'col2': {'score': 0.1}},
+        'METRIC2': {'col1': {'score': 0.2}, 'col2': {'score': np.nan}},
+    }
+    mock_fig = Mock()
+    bar_mock.return_value = mock_fig
+
+    # Run
+    out = get_column_coverage_plot(score_breakdowns)
+
+    # Assert
+    bar_mock.assert_called_once()
+    mock_fig.update_yaxes.assert_called_once_with(range=[0, 1])
+    mock_fig.update_layout.assert_called_once()
+    assert out == mock_fig
+
+
+@patch('sdmetrics.reports.single_table.plot_utils.px.bar')
+def test_get_column_boundaries_plot(bar_mock):
+    """Test the ``get_column_boundaries_plot`` function.
+
+    Expect that the bar method is called the expected number of times.
+    """
+    # Setup
+    score_breakdowns = {
+        'METRIC1': {'col1': {'score': np.nan}, 'col2': {'score': 0.1}},
+        'METRIC2': {'col1': {'score': 0.2}, 'col2': {'score': np.nan}},
+    }
+    mock_fig = Mock()
+    bar_mock.return_value = mock_fig
+
+    # Run
+    out = get_column_boundaries_plot(score_breakdowns)
 
     # Assert
     bar_mock.assert_called_once()
@@ -198,4 +247,31 @@ def test_get_column_pairs_plot(heatmap_mock, make_subplots_mock):
     mock_fig.update_layout.assert_called_once()
     mock_fig.update_yaxes.assert_called_once_with(autorange='reversed')
 
+    assert out == mock_fig
+
+
+@patch('sdmetrics.reports.single_table.plot_utils.px.pie')
+def test_get_synthesis_plot(pie_mock):
+    """Test the ``get_synthesis_plot`` function.
+
+    Expect that the plotly express ``pie`` method is called with the expected arguments.
+    """
+    # Setup
+    score_breakdown = {'score': 0.25, 'num_matched_rows': 15, 'num_new_rows': 5}
+    mock_fig = Mock()
+    pie_mock.return_value = mock_fig
+
+    # Run
+    out = get_synthesis_plot(score_breakdown)
+
+    # Assert
+    pie_mock.assert_called_once_with(
+        values=[15, 5],
+        names=['Exact Matches', 'Novel Rows'],
+        color=['Exact Matches', 'Novel Rows'],
+        color_discrete_map={'Exact Matches': '#F16141', 'Novel Rows': '#36B37E'},
+        hole=0.4,
+        title='Data Diagnostic: Synthesis (Score=0.25)',
+    )
+    mock_fig.update_traces.assert_called_once()
     assert out == mock_fig
