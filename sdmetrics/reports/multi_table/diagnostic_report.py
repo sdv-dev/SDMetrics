@@ -12,11 +12,11 @@ import pkg_resources
 import tqdm
 
 from sdmetrics.errors import IncomputableMetricError
+from sdmetrics.multi_table import (
+    BoundaryAdherence, CategoryCoverage, NewRowSynthesis, RangeCoverage)
 from sdmetrics.reports.single_table.plot_utils import (
     get_column_boundaries_plot, get_column_coverage_plot, get_synthesis_plot)
 from sdmetrics.reports.utils import aggregate_metric_results
-from sdmetrics.multi_table import (
-    BoundaryAdherence, CategoryCoverage, NewRowSynthesis, RangeCoverage)
 
 RESULT_DETAILS = {
     'BoundaryAdherence': {
