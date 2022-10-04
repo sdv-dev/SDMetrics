@@ -101,6 +101,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
@@ -118,7 +119,7 @@ setup(
     keywords='sdmetrics sdmetrics SDMetrics',
     name='sdmetrics',
     packages=find_packages(include=['sdmetrics', 'sdmetrics.*']),
-    python_requires='>=3.6,<3.10',
+    python_requires='>=3.6,<3.11',
     setup_requires=setup_requires,
     test_suite='tests',
     tests_require=tests_require,
