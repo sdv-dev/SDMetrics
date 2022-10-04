@@ -137,12 +137,11 @@ class DiagnosticReport():
 
                 metric_scores = []
                 for _, table_breakdown in self._metric_results[metric_name].items():
-                    if 'score' in self._metric_results[metric_name]:
-                        if not np.isnan(self._metric_results[metric_name]['score']):
-                            metric_scores.append(self._metric_results[metric_name]['score'])
+                    if 'score' in table_breakdown:
+                        if not np.isnan(table_breakdown['score']):
+                            metric_scores.append(table_breakdown['score'])
                     else:
-                        avg_table_score, _ = aggregate_metric_results(
-                            self._metric_results[metric_name])
+                        avg_table_score, _ = aggregate_metric_results(table_breakdown)
                         if not np.isnan(avg_table_score):
                             metric_scores.append(avg_table_score)
 
