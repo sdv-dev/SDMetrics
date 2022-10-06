@@ -10,10 +10,7 @@ from sdmetrics.reports.multi_table import DiagnosticReport
 class TestDiagnosticReport:
 
     def test___init__(self):
-        """Test the ``__init__`` method.
-
-        Expect that the correct attributes are initialized.
-        """
+        """Test that the ``__init__`` method has the correct attributes initialized."""
         # Run
         report = DiagnosticReport()
 
@@ -23,7 +20,7 @@ class TestDiagnosticReport:
         assert report._results == {}
 
     def test_generate(self):
-        """Test the ``generate`` method. Expect that the multi-table metrics are called."""
+        """Test that the ``generate`` method calls the expected multi-table metrics."""
         # Setup
         real_data = pd.DataFrame({
             'table1': {'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']},
@@ -179,10 +176,7 @@ class TestDiagnosticReport:
             real_data, synthetic_data, metadata)
 
     def test_get_results(self):
-        """Test the ``get_results`` method.
-
-        Expect that the overall diagnostic results are returned.
-        """
+        """Test that the ``get_results`` method returns the overall diagnostic results."""
         # Setup
         report = DiagnosticReport()
         mock_results = {'test_entry': 'test_result'}
@@ -220,7 +214,7 @@ class TestDiagnosticReport:
     @patch('sdmetrics.reports.multi_table.diagnostic_report.pkg_resources.get_distribution')
     @patch('sdmetrics.reports.multi_table.diagnostic_report.pickle')
     def test_save(self, pickle_mock, get_distribution_mock):
-        """Test the ``save`` method. Expect that the instance is passed to pickle."""
+        """Test that the ``save`` method passes the instance to pickle."""
         # Setup
         report = Mock()
         open_mock = mock_open(read_data=pickle.dumps('test'))
@@ -238,10 +232,7 @@ class TestDiagnosticReport:
     @patch('sdmetrics.reports.multi_table.diagnostic_report.pkg_resources.get_distribution')
     @patch('sdmetrics.reports.multi_table.diagnostic_report.pickle')
     def test_load(self, pickle_mock, get_distribution_mock):
-        """Test the ``load`` method.
-
-        Expect that the report's load method is called with the expected args.
-        """
+        """Test that the ``load`` method opens a file with the expected args."""
         # Setup
         open_mock = mock_open(read_data=pickle.dumps('test'))
         report = Mock()
@@ -284,10 +275,7 @@ class TestDiagnosticReport:
         assert loaded == pickle_mock.load.return_value
 
     def test_get_details(self):
-        """Test the ``get_details`` method.
-
-        Expect that the details of the desired property is returned.
-        """
+        """Test that the ``get_details`` method returns the details of the desired property."""
         # Setup
         report = DiagnosticReport()
         report._metric_results = {
@@ -346,10 +334,7 @@ class TestDiagnosticReport:
         )
 
     def test_get_details_with_table(self):
-        """Test the ``get_details`` method.
-
-        Expect that the details of the desired property and table is returned.
-        """
+        """Test that the ``get_details`` method returns the details of the desired property."""
         # Setup
         report = DiagnosticReport()
         report._metric_results = {
@@ -416,7 +401,7 @@ class TestDiagnosticReport:
         )
 
     def test_get_details_with_table_name(self):
-        """Test the ``get_details`` method with synthesis metrics.
+        """Test the ``get_details`` method with synthesis metrics and a table filter.
 
         Expect that the details of the desired property and table are returned.
         """
@@ -445,7 +430,7 @@ class TestDiagnosticReport:
         )
 
     def test__print_result(self):
-        """Test the ``_print_results`` method. Expect that the correct messages are written."""
+        """Test that the ``_print_results`` method writes the expected messages."""
         # Setup
         report = DiagnosticReport()
         report._metric_averages = {'BoundaryAdherence': 0.6}

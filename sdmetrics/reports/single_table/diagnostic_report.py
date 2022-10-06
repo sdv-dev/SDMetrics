@@ -14,54 +14,10 @@ import tqdm
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.reports.single_table.plot_utils import (
     get_column_boundaries_plot, get_column_coverage_plot, get_synthesis_plot)
-from sdmetrics.reports.utils import aggregate_metric_results
+from sdmetrics.reports.utils import (
+    DIAGNOSTIC_REPORT_RESULT_DETAILS, aggregate_metric_results, print_results_for_level)
 from sdmetrics.single_table import (
     BoundaryAdherence, CategoryCoverage, NewRowSynthesis, RangeCoverage)
-
-RESULT_DETAILS = {
-    'BoundaryAdherence': {
-        'SUCCESS': (
-            '✓ The synthetic data general follows the min/max boundaries set by the real data'
-        ),
-        'WARNING': (
-            '! More than 10% the synthetic data does not follow the min/max boundaries set by '
-            'the real data'
-        ),
-        'DANGER': (
-            'x More than 50% the synthetic data does not follow the min/max boundaries set by '
-            'the real data'
-        ),
-    },
-    'CategoryCoverage': {
-        'SUCCESS': '✓ The synthetic data generally covers categories present in the real data',
-        'WARNING': (
-            '! The synthetic data is missing more than 10% of the categories present in the '
-            'real data'
-        ),
-        'DANGER': (
-            'x The synthetic data is missing more than 50% of the categories present in the '
-            'real data'
-        ),
-    },
-    'NewRowSynthesis': {
-        'SUCCESS': '✓ The synthetic rows are generally not copies of the real data',
-        'WARNING': '! More than 10% of the synthetic rows are copies of the real data',
-        'DANGER': 'x More than 50% of the synthetic rows are copies of the real data',
-    },
-    'RangeCoverage': {
-        'SUCCESS': (
-            '✓ The synthetic data generally covers numerical ranges present in the real data'
-        ),
-        'WARNING': (
-            '! The synthetic data is missing more than 10% of the numerical ranges present in '
-            'the real data'
-        ),
-        'DANGER': (
-            'x The synthetic data is missing more than 50% of the numerical ranges present in '
-            'the real data'
-        ),
-    }
-}
 
 
 class DiagnosticReport():
@@ -83,18 +39,6 @@ class DiagnosticReport():
         self._property_scores = {}
         self._results = {}
 
-    def _print_results_for_level(self, out, level):
-        """Print the result for a given level.
-
-        Args:
-            level (string):
-                The level to print results for.
-        """
-        if len(self._results[level]) > 0:
-            out.write(f'\n{level}:\n')
-            for result in self._results[level]:
-                out.write(f'{result}\n')
-
     def _print_results(self, out=sys.stdout):
         """Print the diagnostic report results."""
         self._results['SUCCESS'] = []
@@ -105,16 +49,19 @@ class DiagnosticReport():
             if np.isnan(score):
                 continue
             if score >= 0.9:
-                self._results['SUCCESS'].append(RESULT_DETAILS[metric]['SUCCESS'])
+                self._results['SUCCESS'].append(
+                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['SUCCESS'])
             elif score >= 0.5:
-                self._results['WARNING'].append(RESULT_DETAILS[metric]['WARNING'])
+                self._results['WARNING'].append(
+                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['WARNING'])
             else:
-                self._results['DANGER'].append(RESULT_DETAILS[metric]['DANGER'])
+                self._results['DANGER'].append(
+                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
 
         out.write('DiagnosticResults:\n')
-        self._print_results_for_level(out, 'SUCCESS')
-        self._print_results_for_level(out, 'WARNING')
-        self._print_results_for_level(out, 'DANGER')
+        print_results_for_level(out, self._results, 'SUCCESS')
+        print_results_for_level(out, self._results, 'WARNING')
+        print_results_for_level(out, self._results, 'DANGER')
 
     def generate(self, real_data, synthetic_data, metadata):
         """Generate report.
