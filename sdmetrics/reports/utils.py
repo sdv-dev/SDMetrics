@@ -16,6 +16,50 @@ DATACEBO_LIGHT = '#01E0C9'
 BACKGROUND_COLOR = '#F5F5F8'
 CONTINUOUS_SDTYPES = ['numerical', 'datetime']
 DISCRETE_SDTYPES = ['categorical', 'boolean']
+DIAGNOSTIC_REPORT_RESULT_DETAILS = {
+    'BoundaryAdherence': {
+        'SUCCESS': (
+            '✓ The synthetic data general follows the min/max boundaries set by the real data'
+        ),
+        'WARNING': (
+            '! More than 10% the synthetic data does not follow the min/max boundaries set by '
+            'the real data'
+        ),
+        'DANGER': (
+            'x More than 50% the synthetic data does not follow the min/max boundaries set by '
+            'the real data'
+        ),
+    },
+    'CategoryCoverage': {
+        'SUCCESS': '✓ The synthetic data generally covers categories present in the real data',
+        'WARNING': (
+            '! The synthetic data is missing more than 10% of the categories present in the '
+            'real data'
+        ),
+        'DANGER': (
+            'x The synthetic data is missing more than 50% of the categories present in the '
+            'real data'
+        ),
+    },
+    'NewRowSynthesis': {
+        'SUCCESS': '✓ The synthetic rows are generally not copies of the real data',
+        'WARNING': '! More than 10% of the synthetic rows are copies of the real data',
+        'DANGER': 'x More than 50% of the synthetic rows are copies of the real data',
+    },
+    'RangeCoverage': {
+        'SUCCESS': (
+            '✓ The synthetic data generally covers numerical ranges present in the real data'
+        ),
+        'WARNING': (
+            '! The synthetic data is missing more than 10% of the numerical ranges present in '
+            'the real data'
+        ),
+        'DANGER': (
+            'x The synthetic data is missing more than 50% of the numerical ranges present in '
+            'the real data'
+        ),
+    }
+}
 
 
 def make_discrete_column_plot(real_column, synthetic_column, sdtype):
@@ -507,3 +551,20 @@ def aggregate_metric_results(metric_results):
             num_errors += 1
 
     return np.mean(metric_scores), num_errors
+
+
+def print_results_for_level(out, results, level):
+    """Print the result for a given level.
+
+    Args:
+        out:
+            Where to write to.
+        results (dict):
+            The results.
+        level (string):
+            The level to print results for.
+    """
+    if len(results[level]) > 0:
+        out.write(f'\n{level}:\n')
+        for result in results[level]:
+            out.write(f'{result}\n')

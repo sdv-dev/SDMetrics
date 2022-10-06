@@ -1,4 +1,4 @@
-"""Single table diagnostic report."""
+"""Multi table diagnostic report."""
 
 import copy
 import itertools
@@ -12,18 +12,18 @@ import pkg_resources
 import tqdm
 
 from sdmetrics.errors import IncomputableMetricError
+from sdmetrics.multi_table import (
+    BoundaryAdherence, CategoryCoverage, NewRowSynthesis, RangeCoverage)
 from sdmetrics.reports.single_table.plot_utils import (
     get_column_boundaries_plot, get_column_coverage_plot, get_synthesis_plot)
 from sdmetrics.reports.utils import (
     DIAGNOSTIC_REPORT_RESULT_DETAILS, aggregate_metric_results, print_results_for_level)
-from sdmetrics.single_table import (
-    BoundaryAdherence, CategoryCoverage, NewRowSynthesis, RangeCoverage)
 
 
 class DiagnosticReport():
-    """Single table diagnostic report.
+    """Multi table diagnostic report.
 
-    This class creates a diagnostic report for single-table data. It calculates the diagnostic
+    This class creates a diagnostic report for multi-table data. It calculates the diagnostic
     score along three properties - synthesis, coverage, and boundaries.
     """
 
@@ -82,11 +82,18 @@ class DiagnosticReport():
                 self._metric_results[metric_name] = metric.compute_breakdown(
                     real_data, synthetic_data, metadata)
 
-                if 'score' in self._metric_results[metric_name]:
-                    self._metric_averages[metric_name] = self._metric_results[metric_name]['score']
-                else:
-                    avg_score, _ = aggregate_metric_results(self._metric_results[metric_name])
-                    self._metric_averages[metric_name] = avg_score
+                metric_scores = []
+                for _, table_breakdown in self._metric_results[metric_name].items():
+                    if 'score' in table_breakdown:
+                        if not np.isnan(table_breakdown['score']):
+                            metric_scores.append(table_breakdown['score'])
+                    else:
+                        avg_table_score, _ = aggregate_metric_results(table_breakdown)
+                        if not np.isnan(avg_table_score):
+                            metric_scores.append(avg_table_score)
+
+                self._metric_averages[metric_name] = np.mean(metric_scores) if (
+                    len(metric_scores) > 0) else np.nan
 
             except IncomputableMetricError:
                 # Metric is not compatible with this dataset.
@@ -117,19 +124,21 @@ class DiagnosticReport():
         """
         return copy.deepcopy(self._property_scores)
 
-    def get_visualization(self, property_name):
+    def get_visualization(self, property_name, table_name):
         """Return a visualization for each score for the given property name.
 
         Args:
             property_name (str):
-                The name of the property to return score details for.
+                The name of the property to generate a visualization for.
+            table_name (str):
+                The table to generate a visualization for.
 
         Returns:
             plotly.graph_objects._figure.Figure
                 The visualization for the requested property.
         """
         score_breakdowns = {
-            metric.__name__: self._metric_results[metric.__name__]
+            metric.__name__: self._metric_results[metric.__name__].get(table_name, {})
             for metric in self.METRICS.get(property_name, [])
         }
 
@@ -149,17 +158,20 @@ class DiagnosticReport():
 
         return fig
 
-    def get_details(self, property_name):
+    def get_details(self, property_name, table_name=None):
         """Return the details for each score for the given property name.
 
         Args:
             property_name (str):
                 The name of the property to return score details for.
+            table_name (str):
+                If provided, filter the details by the given table.
 
         Returns:
             pandas.DataFrame
                 The score breakdown.
         """
+        tables = []
         columns = []
         metrics = []
         scores = []
@@ -167,30 +179,48 @@ class DiagnosticReport():
         details = pd.DataFrame()
 
         if property_name == 'Synthesis':
+            matched_rows = []
+            new_rows = []
             metric_name = self.METRICS[property_name][0].__name__
-            metric_result = self._metric_results[metric_name]
+            for table, table_breakdown in self._metric_results[metric_name].items():
+                if table_name is not None and table != table_name:
+                    continue
+
+                tables.append(table)
+                metrics.append(metric_name)
+                scores.append(table_breakdown.get('score', np.nan))
+                matched_rows.append(table_breakdown.get('num_matched_rows', np.nan))
+                new_rows.append(table_breakdown.get('num_new_rows', np.nan))
+                errors.append(table_breakdown.get('error', np.nan))
+
             details = pd.DataFrame({
-                'Metric': [metric_name],
-                'Diagnostic Score': [metric_result.get('score', np.nan)],
-                'Num Matched Rows': [metric_result.get('num_matched_rows', np.nan)],
-                'Num New Rows': [metric_result.get('num_new_rows', np.nan)],
+                'Table': tables,
+                'Metric': metrics,
+                'Diagnostic Score': scores,
+                'Num Matched Rows': matched_rows,
+                'Num New Rows': new_rows,
             })
-            errors.append(metric_result.get('error', np.nan))
 
         else:
             for metric in self.METRICS[property_name]:
-                for column, score_breakdown in self._metric_results[metric.__name__].items():
-                    metric_score = score_breakdown.get('score', np.nan)
-                    metric_error = score_breakdown.get('error', np.nan)
-                    if np.isnan(metric_score) and np.isnan(metric_error):
+                for table, table_breakdown in self._metric_results[metric.__name__].items():
+                    if table_name is not None and table != table_name:
                         continue
 
-                    columns.append(column)
-                    metrics.append(metric.__name__)
-                    scores.append(metric_score)
-                    errors.append(metric_error)
+                    for column, score_breakdown in table_breakdown.items():
+                        metric_score = score_breakdown.get('score', np.nan)
+                        metric_error = score_breakdown.get('error', np.nan)
+                        if np.isnan(metric_score) and np.isnan(metric_error):
+                            continue
+
+                        tables.append(table)
+                        columns.append(column)
+                        metrics.append(metric.__name__)
+                        scores.append(metric_score)
+                        errors.append(metric_error)
 
             details = pd.DataFrame({
+                'Table': tables,
                 'Column': columns,
                 'Metric': metrics,
                 'Diagnostic Score': scores,
@@ -199,7 +229,7 @@ class DiagnosticReport():
         if pd.Series(errors).notna().sum() > 0:
             details['Error'] = errors
 
-        return details
+        return details.sort_values(by=['Table'], ignore_index=True)
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
