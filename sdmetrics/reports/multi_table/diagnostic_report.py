@@ -36,6 +36,7 @@ class DiagnosticReport():
     def __init__(self):
         self._metric_results = {}
         self._metric_averages = {}
+        self._metric_averages_by_table = {}
         self._property_scores = {}
         self._results = {}
 
@@ -81,16 +82,18 @@ class DiagnosticReport():
             try:
                 self._metric_results[metric_name] = metric.compute_breakdown(
                     real_data, synthetic_data, metadata)
+                self._metric_averages_by_table[metric_name] = {}
 
                 metric_scores = []
-                for _, table_breakdown in self._metric_results[metric_name].items():
+                for table_name, table_breakdown in self._metric_results[metric_name].items():
                     if 'score' in table_breakdown:
-                        if not np.isnan(table_breakdown['score']):
-                            metric_scores.append(table_breakdown['score'])
+                        avg_table_score = table_breakdown['score']
                     else:
                         avg_table_score, _ = aggregate_metric_results(table_breakdown)
-                        if not np.isnan(avg_table_score):
-                            metric_scores.append(avg_table_score)
+
+                    self._metric_averages_by_table[metric_name][table_name] = avg_table_score
+                    if not np.isnan(avg_table_score):
+                        metric_scores.append(avg_table_score)
 
                 self._metric_averages[metric_name] = np.mean(metric_scores) if (
                     len(metric_scores) > 0) else np.nan
@@ -137,17 +140,26 @@ class DiagnosticReport():
             plotly.graph_objects._figure.Figure
                 The visualization for the requested property.
         """
-        score_breakdowns = {
-            metric.__name__: self._metric_results[metric.__name__].get(table_name, {})
-            for metric in self.METRICS.get(property_name, [])
-        }
+        score_breakdowns = {}
+        table_scores = []
+        for metric in self.METRICS.get(property_name, []):
+            score_breakdowns[metric.__name__] = self._metric_results[metric.__name__].get(
+                table_name, {})
+
+            metric_table_score = self._metric_averages_by_table[metric.__name__].get(
+                table_name, np.nan)
+            if not np.isnan(metric_table_score):
+                table_scores.append(metric_table_score)
+
+        average_table_score = np.nan
+        if len(table_scores) > 0:
+            average_table_score = np.mean(table_scores)
 
         if property_name == 'Coverage':
-            fig = get_column_coverage_plot(score_breakdowns, self._property_scores[property_name])
+            fig = get_column_coverage_plot(score_breakdowns, average_table_score)
 
         elif property_name == 'Boundaries':
-            fig = get_column_boundaries_plot(
-                score_breakdowns, self._property_scores[property_name])
+            fig = get_column_boundaries_plot(score_breakdowns, average_table_score)
 
         elif property_name == 'Synthesis':
             fig = get_synthesis_plot(score_breakdowns.get('NewRowSynthesis', {}))
