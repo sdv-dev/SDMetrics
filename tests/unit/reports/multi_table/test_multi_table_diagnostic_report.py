@@ -459,7 +459,8 @@ class TestDiagnosticReport:
         report._metric_results['CategoryCoverage'] = {
             'table1': {'score': 'category_coverage_score'},
         }
-        report._property_scores['Coverage'] = 0.78
+        report._metric_averages_by_table['RangeCoverage'] = {'table1': 0.70}
+        report._metric_averages_by_table['CategoryCoverage'] = {'table1': 0.86}
 
         # Run
         fig = report.get_visualization('Coverage', 'table1')
@@ -480,7 +481,7 @@ class TestDiagnosticReport:
         # Setup
         report = DiagnosticReport()
         report._metric_results['BoundaryAdherence'] = {'table1': {'score': 'test_score'}}
-        report._property_scores['Boundaries'] = 0.78
+        report._metric_averages_by_table['BoundaryAdherence'] = {'table1': 0.78}
 
         # Run
         fig = report.get_visualization('Boundaries', 'table1')
@@ -500,6 +501,7 @@ class TestDiagnosticReport:
         # Setup
         report = DiagnosticReport()
         report._metric_results['NewRowSynthesis'] = {'table1': {'score': 'test_score'}}
+        report._metric_averages_by_table['NewRowSynthesis'] = {'table1': 0.78}
 
         # Run
         fig = report.get_visualization('Synthesis', 'table1')
