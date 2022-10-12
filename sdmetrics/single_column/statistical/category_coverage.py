@@ -61,13 +61,14 @@ class CategoryCoverage(SingleColumnMetric):
         real_data = pd.Series(real_data).dropna()
         synthetic_data = pd.Series(synthetic_data).dropna()
 
-        real_data_value = real_data.nunique()
-        synthetic_data_value = synthetic_data.nunique()
+        real_data_values = set(real_data.value_counts().index)
+        synthetic_data_values = set(synthetic_data.value_counts().index)
+        synthetic_coverage = synthetic_data_values.intersection(real_data_values)
 
         return {
-            'score': synthetic_data_value / real_data_value,
-            'real': real_data_value,
-            'synthetic': synthetic_data_value,
+            'score': len(synthetic_coverage) / len(real_data_values),
+            'real': len(real_data_values),
+            'synthetic': len(synthetic_coverage),
         }
 
     @classmethod

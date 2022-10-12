@@ -86,17 +86,17 @@ class NewRowSynthesis(SingleTableMetric):
             row_filter = []
             for field in real_data.columns:
                 if pd.isna(row[field]):
-                    field_filter = f'{field}.isnull()'
+                    field_filter = f'`{field}`.isnull()'
                 elif field in numerical_fields:
                     field_filter = (
-                        f'abs({field} - {row[field]}) <= '
+                        f'abs(`{field}` - {row[field]}) <= '
                         f'{abs(numerical_match_tolerance * row[field])}'
                     )
                 else:
                     if real_data[field].dtype == 'O':
-                        field_filter = f"{field} == '{row[field]}'"
+                        field_filter = f'`{field}` == {repr(row[field])}'
                     else:
-                        field_filter = f'{field} == {row[field]}'
+                        field_filter = f'`{field}` == {row[field]}'
 
                 row_filter.append(field_filter)
 

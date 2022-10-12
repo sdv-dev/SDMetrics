@@ -31,6 +31,23 @@ class TestCategoryCoverage:
         # Assert
         assert result == {'score': 2 / 3, 'real': 3, 'synthetic': 2}
 
+    def test_compute_breakdown_missing_categories(self):
+        """Test the ``compute_breakdown`` method with missing categorical values.
+
+        Expect that the number of unique categories is computed for both real and synthetic data.
+        """
+        # Setup
+        real_data = pd.Series(['a', 'b', 'a', 'b', 'c'])
+        synthetic_data = pd.Series(['d', 'e', 'f', 'f', 'e'])
+
+        metric = CategoryCoverage()
+
+        # Run
+        result = metric.compute_breakdown(real_data, synthetic_data)
+
+        # Assert
+        assert result == {'score': 0, 'real': 3, 'synthetic': 0}
+
     def test_compute(self):
         """Test the ``compute`` method.
 

@@ -45,6 +45,30 @@ class TestNewRowSynthesis:
         # Assert
         assert score == 0.8
 
+    def test_compute_breakdown_multi_line(self):
+        """Test the ``compute_breakdown`` method with a multi-line value.
+
+        Expect that the match is made correctly."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': ['PSC 0481, Box 5945\nAPO AP 37588', 'Unit 9759 Box 8761\nDPO AE 97614'],
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': ['PSC 0481, Box 5945\nAPO AP 37588', '9759 8761\nDPO AE 97614'],
+        })
+        metadata = {
+            'fields': {
+                'col1': {'type': 'categorical'},
+            },
+        }
+        metric = NewRowSynthesis()
+
+        # Run
+        score = metric.compute(real_data, synthetic_data, metadata)
+
+        # Assert
+        assert score == 0.5
+
     def test_compute_with_sample_size(self):
         """Test the ``compute`` method with a sample size.
 

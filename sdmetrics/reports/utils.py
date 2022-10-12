@@ -19,43 +19,43 @@ DISCRETE_SDTYPES = ['categorical', 'boolean']
 DIAGNOSTIC_REPORT_RESULT_DETAILS = {
     'BoundaryAdherence': {
         'SUCCESS': (
-            '✓ The synthetic data general follows the min/max boundaries set by the real data'
+            'The synthetic data follows over 90% of the min/max boundaries set by the real data'
         ),
         'WARNING': (
-            '! More than 10% the synthetic data does not follow the min/max boundaries set by '
+            'More than 10% the synthetic data does not follow the min/max boundaries set by '
             'the real data'
         ),
         'DANGER': (
-            'x More than 50% the synthetic data does not follow the min/max boundaries set by '
+            'More than 50% the synthetic data does not follow the min/max boundaries set by '
             'the real data'
         ),
     },
     'CategoryCoverage': {
-        'SUCCESS': '✓ The synthetic data generally covers categories present in the real data',
+        'SUCCESS': 'The synthetic data covers over 90% of the categories present in the real data',
         'WARNING': (
-            '! The synthetic data is missing more than 10% of the categories present in the '
+            'The synthetic data is missing more than 10% of the categories present in the '
             'real data'
         ),
         'DANGER': (
-            'x The synthetic data is missing more than 50% of the categories present in the '
+            'The synthetic data is missing more than 50% of the categories present in the '
             'real data'
         ),
     },
     'NewRowSynthesis': {
-        'SUCCESS': '✓ The synthetic rows are generally not copies of the real data',
-        'WARNING': '! More than 10% of the synthetic rows are copies of the real data',
-        'DANGER': 'x More than 50% of the synthetic rows are copies of the real data',
+        'SUCCESS': 'Over 90% of the synthetic rows are not copies of the real data',
+        'WARNING': 'More than 10% of the synthetic rows are copies of the real data',
+        'DANGER': 'More than 50% of the synthetic rows are copies of the real data',
     },
     'RangeCoverage': {
         'SUCCESS': (
-            '✓ The synthetic data generally covers numerical ranges present in the real data'
+            'The synthetic data covers over 90% of the numerical ranges present in the real data'
         ),
         'WARNING': (
-            '! The synthetic data is missing more than 10% of the numerical ranges present in '
+            'The synthetic data is missing more than 10% of the numerical ranges present in '
             'the real data'
         ),
         'DANGER': (
-            'x The synthetic data is missing more than 50% of the numerical ranges present in '
+            'The synthetic data is missing more than 50% of the numerical ranges present in '
             'the real data'
         ),
     }
@@ -564,7 +564,9 @@ def print_results_for_level(out, results, level):
         level (string):
             The level to print results for.
     """
+    level_marks = {'SUCCESS': '✓', 'WARNING': '!', 'DANGER': 'x'}
+
     if len(results[level]) > 0:
         out.write(f'\n{level}:\n')
         for result in results[level]:
-            out.write(f'{result}\n')
+            out.write(f'{level_marks[level]} {result}\n')
