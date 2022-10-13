@@ -1,9 +1,11 @@
 import pickle
 from unittest.mock import Mock, call, mock_open, patch
 
+import numpy as np
 import pandas as pd
 import pytest
 
+from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.reports.multi_table import DiagnosticReport
 
 
@@ -99,7 +101,7 @@ class TestDiagnosticReport:
         }
 
     def test_generate_with_errored_metric(self):
-        """Test the ``generate`` method when the is a metric that has an error.
+        """Test the ``generate`` method when a metric has an error.
 
         Expect that the multi-table metrics are called. Expect that the results are computed
         without the error-ed out metric.
@@ -174,6 +176,81 @@ class TestDiagnosticReport:
             real_data, synthetic_data, metadata)
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
+
+    def test_generate_with_incomputable_metric_error(self):
+        """Test the ``generate`` method when a metric throws an error.
+
+        Expect that the error is caught and the metric score is set to None.
+        """
+        # Setup
+        real_data = pd.DataFrame({
+            'table1': {'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']},
+        })
+        synthetic_data = pd.DataFrame({
+            'table1': {'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']}
+        })
+        range_coverage = Mock()
+        range_coverage.__name__ = 'RangeCoverage'
+        range_coverage.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            },
+        }
+
+        category_coverage = Mock()
+        category_coverage.__name__ = 'CategoryCoverage'
+        category_coverage.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            },
+        }
+
+        new_row_synth = Mock()
+        new_row_synth.__name__ = 'NewRowSynthesis'
+        new_row_synth.compute_breakdown.side_effect = IncomputableMetricError()
+
+        boundary_adherence = Mock()
+        boundary_adherence.__name__ = 'BoundaryAdherence'
+        boundary_adherence.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'error': 'test error'},
+            },
+        }
+        metrics_mock = {
+            'Coverage': [range_coverage, category_coverage],
+            'Synthesis': [new_row_synth],
+            'Boundaries': [boundary_adherence],
+        }
+        metadata = {
+            'tables': {
+                'table1': {
+                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
+                },
+            }
+        }
+
+        # Run
+        with patch.object(
+            DiagnosticReport,
+            'METRICS',
+            metrics_mock,
+        ):
+            report = DiagnosticReport()
+            report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        range_coverage.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        category_coverage.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        new_row_synth.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        boundary_adherence.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        assert np.isnan(report._property_scores['Synthesis'])
 
     def test_get_results(self):
         """Test that the ``get_results`` method returns the overall diagnostic results."""
@@ -441,7 +518,7 @@ class TestDiagnosticReport:
 
         # Assert
         mock_out.write.assert_has_calls([
-            call('DiagnosticResults:\n'),
+            call('\nDiagnosticResults:\n'),
             call('\nWARNING:\n'),
             call('! More than 10% the synthetic data does not follow the min/max boundaries '
                  'set by the real data\n'),

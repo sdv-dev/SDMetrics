@@ -58,7 +58,7 @@ class DiagnosticReport():
                 self._results['DANGER'].append(
                     DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
 
-        out.write('DiagnosticResults:\n')
+        out.write('\nDiagnosticResults:\n')
         print_results_for_level(out, self._results, 'SUCCESS')
         print_results_for_level(out, self._results, 'WARNING')
         print_results_for_level(out, self._results, 'DANGER')
@@ -91,6 +91,7 @@ class DiagnosticReport():
             except IncomputableMetricError:
                 # Metric is not compatible with this dataset.
                 self._metric_results[metric_name] = {}
+                self._metric_averages[metric_name] = np.nan
 
         self._property_scores = {}
         for prop, metrics in self.METRICS.items():
