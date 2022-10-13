@@ -70,16 +70,16 @@ class NewRowSynthesis(SingleTableMetric):
                 synthetic_data = synthetic_data.sample(n=synthetic_sample_size)
 
         numerical_fields = []
-        discrete_fields = []
-        for field, field_meta in metadata['fields'].items():
-            if field_meta['type'] == 'datetime':
+
+        for field, field_meta in cls._get_columns_from_metadata(metadata).items():
+            field_type = cls._get_type_from_column_meta(field_meta)
+
+            if field_type == 'datetime':
                 real_data[field] = pd.to_numeric(real_data[field])
                 synthetic_data[field] = pd.to_numeric(synthetic_data[field])
                 numerical_fields.append(field)
-            elif field_meta['type'] == 'numerical':
+            elif field_type == 'numerical':
                 numerical_fields.append(field)
-            else:
-                discrete_fields.append(field)
 
         num_unique_rows = 0
         for index, row in synthetic_data.iterrows():

@@ -52,6 +52,26 @@ class SingleTableMetric(BaseMetric):
     }
 
     @classmethod
+    def _get_columns_from_metadata(cls, metadata):
+        if 'fields' in metadata:
+            return metadata['fields']
+
+        if 'columns' in metadata:
+            return metadata['columns']
+
+        return []
+
+    @classmethod
+    def _get_type_from_column_meta(cls, column_metadata):
+        if 'type' in column_metadata:
+            return column_metadata['type']
+
+        if 'sdtype' in column_metadata:
+            return column_metadata['sdtype']
+
+        return ''
+
+    @classmethod
     def _select_fields(cls, metadata, types):
         """Select fields from metadata that match the specified types.
 
@@ -73,8 +93,8 @@ class SingleTableMetric(BaseMetric):
         if isinstance(types, str):
             types = (types, )
 
-        for field_name, field_meta in metadata['fields'].items():
-            field_type = field_meta['type']
+        for field_name, field_meta in cls._get_columns_from_metadata(metadata).items():
+            field_type = cls._get_type_from_column_meta(field_meta)
             field_subtype = field_meta.get('subtype')
             if any(t in types for t in (field_type, (field_type, ), (field_type, field_subtype))):
                 fields.append(field_name)
@@ -116,29 +136,33 @@ class SingleTableMetric(BaseMetric):
             if not isinstance(metadata, dict):
                 metadata = metadata.to_dict()
 
-            fields = metadata['fields']
+            fields = cls._get_columns_from_metadata(metadata)
             for column in real_data.columns:
                 if column not in fields:
                     raise ValueError(f'Column {column} not found in metadata')
 
             for field, field_meta in fields.items():
+                field_type = cls._get_type_from_column_meta(field_meta)
                 if field not in real_data.columns:
                     raise ValueError(f'Field {field} not found in data')
                 if (
-                    field_meta['type'] == 'datetime' and
-                    'format' in field_meta and
+                    field_type == 'datetime' and
+                    ('format' in field_meta or 'datetime_format' in field_meta) and
                     real_data[field].dtype == 'O'
                 ):
-                    real_data[field] = pd.to_datetime(
-                        real_data[field], format=field_meta['format'])
-                    synthetic_data[field] = pd.to_datetime(
-                        synthetic_data[field], format=field_meta['format'])
+                    if 'format' in field_meta:
+                        dt_format = field_meta['format']
+                    if 'datetime_format' in field_meta:
+                        dt_format = field_meta['datetime_format']
+                    real_data[field] = pd.to_datetime(real_data[field], format=dt_format)
+                    synthetic_data[field] = pd.to_datetime(synthetic_data[field], format=dt_format)
 
             return real_data, synthetic_data, metadata
 
         dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
+        col_key = 'columns' if metadata is not None and 'columns' in metadata else 'fields'
         return real_data, synthetic_data, {
-            'fields': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
+            col_key: dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
         }
 
     @classmethod
