@@ -24,9 +24,8 @@ def load_demo(modality='multi_table', new_metadata=False):
     """
     demo_path = pathlib.Path(__file__).parent / 'demos' / f'{modality}.pkl'
     with open(demo_path, 'rb') as demo_file:
-        last_index = 3
-        if new_metadata:
-            last_index = 4
+        # Return the new metadata if requested.
+        last_index = 4 if new_metadata else 3
         return pickle.load(demo_file)[:last_index]
 
 
