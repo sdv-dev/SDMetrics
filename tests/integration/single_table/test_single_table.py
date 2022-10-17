@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from sdmetrics import compute_metrics
-from sdmetrics.demos import load_single_table_demo
+from sdmetrics.demos import load_demo, load_single_table_demo
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
@@ -114,6 +114,25 @@ def test_compute_all():
         real_data,
         synthetic_data,
         metadata=metadata
+    )
+
+    assert not pd.isna(output.raw_score.mean())
+
+    scores = output[output.raw_score.notna()]
+    assert scores.raw_score.between(scores.min_value, scores.max_value).all()
+
+    scores = output[output.normalized_score.notna()]
+    assert scores.normalized_score.between(0.0, 1.0).all()
+
+
+def test_compute_all_with_new_metadata():
+    real_data, synthetic_data, _, new_metadata = load_demo('single_table', True)
+
+    output = compute_metrics(
+        SingleTableMetric.get_subclasses(),
+        real_data,
+        synthetic_data,
+        metadata=new_metadata,
     )
 
     assert not pd.isna(output.raw_score.mean())

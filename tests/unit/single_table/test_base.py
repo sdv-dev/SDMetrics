@@ -220,3 +220,59 @@ class TestSingleTableMetric:
         pd.testing.assert_frame_equal(validated_real, expected_real_data)
         pd.testing.assert_frame_equal(validated_synthetic, expected_synthetic_data)
         assert metadata == metadata
+
+    def test__get_columns_from_metadata(self):
+        """Test the ``_get_columns_from_metadata`` method with current metadata format.
+
+        Expect that the columns are returned.
+        """
+        # Setup
+        metadata = {'fields': {'col1': {'type': 'numerical'}}}
+
+        # Run
+        out = SingleTableMetric._get_columns_from_metadata(metadata)
+
+        # Assert
+        assert out == {'col1': {'type': 'numerical'}}
+
+    def test__get_columns_from_metadata_new_metadata(self):
+        """Test the ``_get_columns_from_metadata`` method with the new metadata format.
+
+        Expect that the column type is returned.
+        """
+        # Setup
+        metadata = {'columns': {'col1': {'type': 'numerical'}}}
+
+        # Run
+        out = SingleTableMetric._get_columns_from_metadata(metadata)
+
+        # Assert
+        assert out == {'col1': {'type': 'numerical'}}
+
+    def test__get_type_from_column_meta(self):
+        """Test the ``_get_columns_from_column_meta`` method with the current metadata format.
+
+        Expect that the column type is returned.
+        """
+        # Setup
+        field_meta = {'type': 'numerical'}
+
+        # Run
+        out = SingleTableMetric._get_type_from_column_meta(field_meta)
+
+        # Assert
+        assert out == 'numerical'
+
+    def test__get_type_from_column_meta_new_metadata(self):
+        """Test the ``_get_columns_from_column_meta`` method with the new metadata format.
+
+        Expect that the column type is returned.
+        """
+        # Setup
+        field_meta = {'sdtype': 'numerical'}
+
+        # Run
+        out = SingleTableMetric._get_type_from_column_meta(field_meta)
+
+        # Assert
+        assert out == 'numerical'
