@@ -33,6 +33,10 @@ class DiagnosticReport():
         'Boundaries': [BoundaryAdherence],
     }
 
+    _METRIC_ARGS = {
+        'NewRowSynthesis': {'synthetic_sample_size': 10000},
+    }
+
     def __init__(self):
         self._metric_results = {}
         self._metric_averages = {}
@@ -75,12 +79,15 @@ class DiagnosticReport():
                 The metadata, which contains each column's data type as well as relationships.
         """
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
+        self._METRIC_ARGS['NewRowSynthesis']['synthetic_sample_size'] = min(
+            len(real_data), self._METRIC_ARGS['NewRowSynthesis']['synthetic_sample_size'])
 
         for metric in tqdm.tqdm(metrics, desc='Creating report'):
             metric_name = metric.__name__
             try:
+                args = self._METRIC_ARGS.get(metric_name, {})
                 self._metric_results[metric_name] = metric.compute_breakdown(
-                    real_data, synthetic_data, metadata)
+                    real_data, synthetic_data, metadata, **args)
 
                 if 'score' in self._metric_results[metric_name]:
                     self._metric_averages[metric_name] = self._metric_results[metric_name]['score']
