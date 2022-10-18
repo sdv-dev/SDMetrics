@@ -94,6 +94,9 @@ class SingleTableMetric(BaseMetric):
             types = (types, )
 
         for field_name, field_meta in cls._get_columns_from_metadata(metadata).items():
+            if 'pii' in field_meta:
+                continue
+
             field_type = cls._get_type_from_column_meta(field_meta)
             field_subtype = field_meta.get('subtype')
             if any(t in types for t in (field_type, (field_type, ), (field_type, field_subtype))):

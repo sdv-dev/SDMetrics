@@ -276,3 +276,20 @@ class TestSingleTableMetric:
 
         # Assert
         assert out == 'numerical'
+
+    def test__select_fields(self):
+        """Test the ``_select_fields`` method with pii. Expect that pii column is skipped."""
+        # Setup
+        metadata = {
+            'fields': {
+                'colA': {'type': 'datetime'},
+                'colB': {'type': 'categorical'},
+                'colC': {'type': 'categorical', 'pii': True},
+            },
+        }
+
+        # Run
+        out = SingleTableMetric._select_fields(metadata, 'categorical')
+
+        # Assert
+        assert out == ['colB']
