@@ -32,16 +32,16 @@ class DiagnosticReport():
         'Synthesis': [NewRowSynthesis],
         'Boundaries': [BoundaryAdherence],
     }
+    _METRIC_ARGS = {
+        'NewRowSynthesis': {'synthetic_sample_size': 10000},
+    }
 
     def __init__(self):
         self._metric_results = {}
         self._metric_averages = {}
         self._property_scores = {}
         self._results = {}
-        self._metric_args = {
-            'NewRowSynthesis': {'synthetic_sample_size': 10000},
-        }
-
+        self._metric_args = copy.deepcopy(self._METRIC_ARGS)
 
     def _print_results(self, out=sys.stdout):
         """Print the diagnostic report results."""
@@ -85,9 +85,9 @@ class DiagnosticReport():
         for metric in tqdm.tqdm(metrics, desc='Creating report'):
             metric_name = metric.__name__
             try:
-                args = self._metric_args.get(metric_name, {})
+                metric_args = self._metric_args.get(metric_name, {})
                 self._metric_results[metric_name] = metric.compute_breakdown(
-                    real_data, synthetic_data, metadata, **args)
+                    real_data, synthetic_data, metadata, **metric_args)
 
                 if 'score' in self._metric_results[metric_name]:
                     self._metric_averages[metric_name] = self._metric_results[metric_name]['score']
