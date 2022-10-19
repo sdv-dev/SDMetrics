@@ -23,64 +23,23 @@
 
 # Overview
 
-The SDMetrics library evaluates synthetic data by comparing it to the real data that you're trying to mimic. It includes a variety of metrics to capture different aspects of the data, for example **quality and privacy**. It also includes reports that you can run to generate insights and share with your team.
+The SDMetrics library evaluates synthetic data by comparing it to the real data that you're trying to mimic. It includes a variety of metrics to capture different aspects of the data, for example **quality and privacy**. It also includes reports that you can run to generate insights, visualize data and share with your team.
 
 The SDMetrics library is **model-agnostic**, meaning you can use any synthetic data. The library does not need to know how you created the data. 
 
-
-| Important Links                               |                                                                      |
-| --------------------------------------------- | -------------------------------------------------------------------- |
-| :computer: **[Website]**                      | Check out the SDV Website for more information about the project.    |
-| :orange_book: **[Blog]**                      | A deeper look at open source, synthetic data creation and evaluation.|
-| :book: **[Documentation]**                    | Quickstarts, User and Development Guides, and API Reference.         |
-| :octocat: **[Repository]**                    | The link to the Github Repository of this library.                   |
-| :scroll: **[License]**                        | The library is published under the MIT License.                      |
-| :keyboard: **[Development Status]**           | This software is in its Pre-Alpha stage.                             |
-| [![][Slack Logo] **Community**][Community]    | Join our Slack Workspace for announcements and discussions.          |
-| [![][Google Colab Logo] **Tutorials**][Tutorials] | Get started with SDMetrics in a notebook.                        |
-
-[Website]: https://sdv.dev
-[Blog]: https://datacebo.com/blog
-[Documentation]: https://docs.sdv.dev/sdmetrics
-[Repository]: https://github.com/sdv-dev/SDMetrics
-[License]: https://github.com/sdv-dev/SDMetrics/blob/master/LICENSE
-[Development Status]: https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha
-[Slack Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/slack.png
-[Community]: https://bit.ly/sdv-slack-invite
-[Google Colab Logo]: https://github.com/sdv-dev/SDV/blob/master/docs/images/google_colab.png
-[Tutorials]: https://bit.ly/sdmetrics-demo
-
-## Features
-
-Quickly generate insights and share results with your team using **SDMetrics Reports**. For example, the Diagnostic Report quickly checks for common problems, and the Quality Report provides visualizations comparing the real and synthetic data.
-
 <img align="center" src="docs/images/column_comparison.png"></img>
-
-You can also explore and apply individual metrics as needed. The SDMetrics library includes a variety of metrics for different goals:
-
-* Privacy metrics evaluate whether the synthetic data is leaking information about the real data
-* ML Efficacy metrics estimate the outcomes of using the synthetic data to solve machine learning problems
-* … and more! 
-
-Some of these metrics are experimental and actively being researched by the data science community.
 
 # Install
 
 Install SDMetrics using pip or conda. We recommend using a virtual environment to avoid conflicts with other software on your device.
 
-**Using `pip`:**
-
 ```bash
 pip install sdmetrics
 ```
 
-**Using `conda`:**
-
 ```bash
 conda install -c conda-forge sdmetrics
 ```
-
-For more installation options please visit the [SDMetrics installation Guide](https://github.com/sdv-dev/SDMetrics/blob/master/INSTALL.md).
 
 # Usage
 
@@ -137,20 +96,17 @@ BoundaryAdherence.compute(
 ```
 
 ```python
-# calculate whether an attacker will be able to guess sensitive 
-# information based on combination of synthetic data and their
-# own information
-from sdmetrics.single_table import CategoricalCAP
+# calculate whether the synthetic data is new or whether it's an exact copy of the real data
+from sdmetrics.single_table import NewRowSynthesis
 
-CategoricalCAP.compute(
+NewRowSynthesis.compute(
     real_data,
     synthetic_data,
-    key_fields=['gender', 'work_experience'],
-    sensitive_fields=['degree_type']
+    metadata
 )
 ```
 ```
-0.4601209799017264
+1.0
 ```
 
 # What's next?
