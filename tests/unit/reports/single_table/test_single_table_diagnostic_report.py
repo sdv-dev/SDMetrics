@@ -78,7 +78,7 @@ class TestDiagnosticReport:
         category_coverage.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         new_row_synth.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata, synthetic_sample_size=3)
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         assert report._metric_averages == {
@@ -145,7 +145,7 @@ class TestDiagnosticReport:
         category_coverage.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         new_row_synth.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata, synthetic_sample_size=3)
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
 
@@ -203,7 +203,7 @@ class TestDiagnosticReport:
         category_coverage.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         new_row_synth.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata, synthetic_sample_size=3)
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         assert np.isnan(report._property_scores['Synthesis'])
