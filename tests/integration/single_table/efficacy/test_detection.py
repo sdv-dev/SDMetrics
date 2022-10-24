@@ -12,7 +12,7 @@ METRICS = [
 @pytest.mark.parametrize('metric', METRICS)
 def test_primary_key(metric):
     """
-    Test that primary keys don't affect detection metric.
+    Test that primary keys don't affect detection metric
     """
     real_data_with_primary_key, synthetic_data_with_primary_key, metadata = load_demo(
         modality='single_table')
