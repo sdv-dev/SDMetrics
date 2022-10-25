@@ -68,8 +68,6 @@ class DetectionMetric(SingleTableMetric):
         real_data, synthetic_data, metadata = cls._validate_inputs(
             real_data, synthetic_data, metadata)
 
-        real_data, synthetic_data, metadata = cls._validate_inputs(
-            real_data, synthetic_data, metadata)
         if metadata is not None and 'primary_key' in metadata:
             transformed_real_data = real_data.drop(metadata['primary_key'], axis=1)
             transformed_synthetic_data = synthetic_data.drop(metadata['primary_key'], axis=1)
