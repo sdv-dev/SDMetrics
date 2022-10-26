@@ -11,8 +11,11 @@ class TestDetectionMetric:
     @patch('sdmetrics.utils.HyperTransformer.transform')
     @patch('sdmetrics.utils.HyperTransformer.fit_transform')
     def test_primary_key_detection_metrics(self, fit_transform_mock, transform_mock):
-        """This test checks that 'primary_key' columns of dataset are ignored for Detection metrics
-        Expect that the match is made correctly."""
+        """This test checks that ``primary_key`` columns of dataset are ignored.
+
+        Ensure that ``primary_keys`` are ignored for Detection metrics expect that the match
+        is made correctly.
+        """
 
         # Setup
         real_data = pd.DataFrame({
@@ -55,10 +58,8 @@ class TestDetectionMetric:
 
         # Assert
 
-        # check that fit_transform received the good argument
+        # check that ``fit_transform`` and  ``transform`` received the good argument.
         call_1 = pd.DataFrame(fit_transform_mock.call_args_list[0][0][0])
-
-        # check that transform received the good argument
         call_2 = pd.DataFrame(transform_mock.call_args_list[0][0][0])
 
         transform_mock.assert_called_with(expected_return_synthetic)
