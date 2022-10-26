@@ -18,8 +18,8 @@ def test_primary_key(metric):
         modality='single_table')
 
     real_data_sin_primary_key = real_data_with_primary_key.drop(metadata['primary_key'], axis=1)
-    synthetic_data_sin_primary_key = \
-        synthetic_data_with_primary_key.drop(metadata['primary_key'], axis=1)
+    synthetic_data_sin_primary_key = synthetic_data_with_primary_key.drop(
+        metadata['primary_key'], axis=1)
 
     test_with_primary_key = metric.compute(real_data_with_primary_key,
                                            synthetic_data_with_primary_key, metadata)

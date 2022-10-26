@@ -75,6 +75,7 @@ class DetectionMetric(SingleTableMetric):
         else:
             transformed_real_data = real_data
             transformed_synthetic_data = synthetic_data
+
         ht = HyperTransformer()
         transformed_real_data = ht.fit_transform(transformed_real_data).to_numpy()
         transformed_synthetic_data = ht.transform(transformed_synthetic_data).to_numpy()
