@@ -67,10 +67,18 @@ class DetectionMetric(SingleTableMetric):
         """
         real_data, synthetic_data, metadata = cls._validate_inputs(
             real_data, synthetic_data, metadata)
-        ht = HyperTransformer()
-        transformed_real_data = ht.fit_transform(real_data).to_numpy()
-        transformed_synthetic_data = ht.transform(synthetic_data).to_numpy()
 
+        if metadata is not None and 'primary_key' in metadata:
+            transformed_real_data = real_data.drop(metadata['primary_key'], axis=1)
+            transformed_synthetic_data = synthetic_data.drop(metadata['primary_key'], axis=1)
+
+        else:
+            transformed_real_data = real_data
+            transformed_synthetic_data = synthetic_data
+
+        ht = HyperTransformer()
+        transformed_real_data = ht.fit_transform(transformed_real_data).to_numpy()
+        transformed_synthetic_data = ht.transform(transformed_synthetic_data).to_numpy()
         X = np.concatenate([transformed_real_data, transformed_synthetic_data])
         y = np.hstack([
             np.ones(len(transformed_real_data)), np.zeros(len(transformed_synthetic_data))
