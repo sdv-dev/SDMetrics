@@ -5,7 +5,7 @@ from scipy.stats import ks_2samp
 
 from sdmetrics.goal import Goal
 from sdmetrics.multi_table.base import MultiTableMetric
-from sdmetrics.utils import get_cardinality_distribution
+from sdmetrics.utils import get_cardinality_distribution, get_columns_from_metadata
 
 
 class CardinalityShapeSimilarity(MultiTableMetric):
@@ -58,7 +58,7 @@ class CardinalityShapeSimilarity(MultiTableMetric):
 
         score_breakdowns = {}
         for table_name, table in metadata['tables'].items():
-            for field_name, field in table['fields'].items():
+            for field_name, field in get_columns_from_metadata(table).items():
                 if 'ref' in field:
                     parent_table_name = field['ref']['table']
                     parent_field_name = field['ref']['field']

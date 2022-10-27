@@ -4,7 +4,9 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pandas as pd
 
-from sdmetrics.utils import HyperTransformer, get_cardinality_distribution
+from sdmetrics.utils import (
+    HyperTransformer, get_cardinality_distribution, get_columns_from_metadata,
+    get_type_from_column_meta)
 
 
 def test_get_cardinality_distribution():
@@ -26,6 +28,66 @@ def test_get_cardinality_distribution():
 
     # Assert
     assert cardinality_distribution.to_list() == [2.0, 0.0, 1.0, 3.0, 1.0]
+
+
+def test_get_columns_from_metadata():
+    """Test the ``get_columns_from_metadata`` method with current metadata format.
+
+    Expect that the columns are returned.
+    """
+    # Setup
+    metadata = {'fields': {'col1': {'type': 'numerical'}}}
+
+    # Run
+    out = get_columns_from_metadata(metadata)
+
+    # Assert
+    assert out == {'col1': {'type': 'numerical'}}
+
+
+def test_get_columns_from_metadata_new_metadata():
+    """Test the ``get_columns_from_metadata`` method with the new metadata format.
+
+    Expect that the column type is returned.
+    """
+    # Setup
+    metadata = {'columns': {'col1': {'type': 'numerical'}}}
+
+    # Run
+    out = get_columns_from_metadata(metadata)
+
+    # Assert
+    assert out == {'col1': {'type': 'numerical'}}
+
+
+def test_get_type_from_column_meta():
+    """Test the ``get_columns_from_column_meta`` method with the current metadata format.
+
+    Expect that the column type is returned.
+    """
+    # Setup
+    field_meta = {'type': 'numerical'}
+
+    # Run
+    out = get_type_from_column_meta(field_meta)
+
+    # Assert
+    assert out == 'numerical'
+
+
+def test_get_type_from_column_meta_new_metadata():
+    """Test the ``get_columns_from_column_meta`` method with the new metadata format.
+
+    Expect that the column type is returned.
+    """
+    # Setup
+    field_meta = {'sdtype': 'numerical'}
+
+    # Run
+    out = get_type_from_column_meta(field_meta)
+
+    # Assert
+    assert out == 'numerical'
 
 
 class TestHyperTransformer:

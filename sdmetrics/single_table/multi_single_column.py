@@ -4,7 +4,7 @@ import numpy as np
 
 from sdmetrics import single_column
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.utils import nested_attrs_meta
+from sdmetrics.utils import get_columns_from_metadata, nested_attrs_meta
 
 
 class MultiSingleColumnMetric(SingleTableMetric,
@@ -69,7 +69,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
             real_data, synthetic_data, metadata)
 
         fields = self._select_fields(metadata, self.field_types)
-        invalid_cols = set(self._get_columns_from_metadata(metadata).keys()) - set(fields)
+        invalid_cols = set(get_columns_from_metadata(metadata).keys()) - set(fields)
 
         scores = {col: {'score': np.nan} for col in invalid_cols}
         for column_name, real_column in real_data.items():

@@ -7,6 +7,7 @@ import pandas as pd
 
 from sdmetrics.base import BaseMetric
 from sdmetrics.errors import IncomputableMetricError
+from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
 
 
 class SingleTableMetric(BaseMetric):
@@ -52,26 +53,6 @@ class SingleTableMetric(BaseMetric):
     }
 
     @classmethod
-    def _get_columns_from_metadata(cls, metadata):
-        if 'fields' in metadata:
-            return metadata['fields']
-
-        if 'columns' in metadata:
-            return metadata['columns']
-
-        return []
-
-    @classmethod
-    def _get_type_from_column_meta(cls, column_metadata):
-        if 'type' in column_metadata:
-            return column_metadata['type']
-
-        if 'sdtype' in column_metadata:
-            return column_metadata['sdtype']
-
-        return ''
-
-    @classmethod
     def _select_fields(cls, metadata, types):
         """Select fields from metadata that match the specified types.
 
@@ -93,11 +74,11 @@ class SingleTableMetric(BaseMetric):
         if isinstance(types, str):
             types = (types, )
 
-        for field_name, field_meta in cls._get_columns_from_metadata(metadata).items():
+        for field_name, field_meta in get_columns_from_metadata(metadata).items():
             if 'pii' in field_meta:
                 continue
 
-            field_type = cls._get_type_from_column_meta(field_meta)
+            field_type = get_type_from_column_meta(field_meta)
             field_subtype = field_meta.get('subtype')
             if any(t in types for t in (field_type, (field_type, ), (field_type, field_subtype))):
                 fields.append(field_name)
@@ -139,13 +120,13 @@ class SingleTableMetric(BaseMetric):
             if not isinstance(metadata, dict):
                 metadata = metadata.to_dict()
 
-            fields = cls._get_columns_from_metadata(metadata)
+            fields = get_columns_from_metadata(metadata)
             for column in real_data.columns:
                 if column not in fields:
                     raise ValueError(f'Column {column} not found in metadata')
 
             for field, field_meta in fields.items():
-                field_type = cls._get_type_from_column_meta(field_meta)
+                field_type = get_type_from_column_meta(field_meta)
                 if field not in real_data.columns:
                     raise ValueError(f'Field {field} not found in data')
                 if (

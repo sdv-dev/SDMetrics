@@ -9,6 +9,7 @@ from sdmetrics.single_table.efficacy.base import MLEfficacyMetric
 from sdmetrics.single_table.efficacy.binary import BinaryEfficacyMetric
 from sdmetrics.single_table.efficacy.multiclass import MulticlassEfficacyMetric
 from sdmetrics.single_table.efficacy.regression import RegressionEfficacyMetric
+from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
 
 LOGGER = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class MLEfficacy(MLEfficacyMetric):
                 Scores obtained by the models when evaluated on the test data.
         """
         target = cls._validate_inputs(test_data, train_data, metadata, target)
-        target_type = metadata['fields'][target]['type']
+        target_type = get_type_from_column_meta(get_columns_from_metadata(metadata)[target])
         target_data = test_data[target]
         uniques = target_data.unique()
         if len(uniques) == 2:

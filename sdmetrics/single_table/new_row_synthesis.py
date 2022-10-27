@@ -5,6 +5,7 @@ import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
+from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
 
 
 class NewRowSynthesis(SingleTableMetric):
@@ -71,8 +72,8 @@ class NewRowSynthesis(SingleTableMetric):
 
         numerical_fields = []
 
-        for field, field_meta in cls._get_columns_from_metadata(metadata).items():
-            field_type = cls._get_type_from_column_meta(field_meta)
+        for field, field_meta in get_columns_from_metadata(metadata).items():
+            field_type = get_type_from_column_meta(field_meta)
 
             if field_type == 'datetime':
                 real_data[field] = pd.to_numeric(real_data[field])

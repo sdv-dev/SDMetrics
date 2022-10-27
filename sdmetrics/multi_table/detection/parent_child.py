@@ -4,7 +4,7 @@ import numpy as np
 
 from sdmetrics.multi_table.detection.base import DetectionMetric
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
-from sdmetrics.utils import nested_attrs_meta
+from sdmetrics.utils import get_columns_from_metadata, nested_attrs_meta
 
 
 class ParentChildDetectionMetric(DetectionMetric,
@@ -41,7 +41,7 @@ class ParentChildDetectionMetric(DetectionMetric,
 
         foreign_keys = []
         for child_table, child_meta in metadata['tables'].items():
-            for child_key, field_meta in child_meta['fields'].items():
+            for child_key, field_meta in get_columns_from_metadata(child_meta).items():
                 ref = field_meta.get('ref')
                 if ref:
                     foreign_keys.append((ref['table'], ref['field'], child_table, child_key))
