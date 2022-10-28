@@ -229,7 +229,7 @@ def get_column_plot(real_data, synthetic_data, column_name, metadata):
     columns = get_columns_from_metadata(metadata)
     if column_name not in columns:
         raise ValueError(f"Column '{column_name}' not found in metadata.")
-    elif 'type' not in columns[column_name]:
+    elif 'type' not in columns[column_name] and 'sdtype' not in columns[column_name]:
         raise ValueError(f"Metadata for column '{column_name}' missing 'type' information.")
     if column_name not in real_data.columns:
         raise ValueError(f"Column '{column_name}' not found in real table data.")
@@ -397,7 +397,8 @@ def get_column_pair_plot(real_data, synthetic_data, columns, metadata):
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found in metadata.")
     else:
         invalid_columns = [
-            column for column in columns if 'type' not in all_columns[column]
+            column for column in columns if (
+                'type' not in all_columns[column] and 'sdtype' not in all_columns[column])
         ]
         if invalid_columns:
             raise ValueError(f"Metadata for column(s) `{'`, `'.join(invalid_columns)}` "
@@ -462,13 +463,14 @@ def discretize_table_data(real_data, synthetic_data, metadata):
     binned_metadata = copy.deepcopy(metadata)
 
     for field_name, field_meta in get_columns_from_metadata(metadata).items():
-        if field_meta['type'] == 'id':
+        field_type = get_type_from_column_meta(field_meta)
+        if field_type == 'id':
             continue
 
-        if field_meta['type'] == 'numerical' or field_meta['type'] == 'datetime':
+        if field_type == 'numerical' or field_type == 'datetime':
             real_col = real_data[field_name]
             synthetic_col = synthetic_data[field_name]
-            if field_meta['type'] == 'datetime':
+            if field_type == 'datetime':
                 if real_col.dtype == 'O' and field_meta.get('format', ''):
                     real_col = pd.to_datetime(real_col, format=field_meta['format'])
                     synthetic_col = pd.to_datetime(synthetic_col, format=field_meta['format'])
@@ -482,7 +484,8 @@ def discretize_table_data(real_data, synthetic_data, metadata):
 
             binned_real[field_name] = binned_real_col
             binned_synthetic[field_name] = binned_synthetic_col
-            get_columns_from_metadata(binned_metadata)[field_name] = {'type': 'categorical'}
+            get_columns_from_metadata(binned_metadata)[field_name] = {'type': 'categorical'} if (
+                'type' in field_meta) else {'sdtype': 'categorical'}
 
     return binned_real, binned_synthetic, binned_metadata
 
@@ -513,7 +516,11 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
 
     non_id_cols = [
         field for field, field_meta in get_columns_from_metadata(binned_metadata).items() if
-        field_meta['type'] != 'id'
+        (
+            get_type_from_column_meta(field_meta) != 'id' and
+            field != metadata.get('primary_key', '') and
+            not field_meta.get('pii', False)
+        )
     ]
     for columns in itertools.combinations(non_id_cols, r=2):
         sorted_columns = tuple(sorted(columns))

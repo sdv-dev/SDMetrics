@@ -74,8 +74,10 @@ class SingleTableMetric(BaseMetric):
         if isinstance(types, str):
             types = (types, )
 
+        primary_key = metadata.get('primary_key', '')
+
         for field_name, field_meta in get_columns_from_metadata(metadata).items():
-            if 'pii' in field_meta:
+            if 'pii' in field_meta or field_name == primary_key:
                 continue
 
             field_type = get_type_from_column_meta(field_meta)
