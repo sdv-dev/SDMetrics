@@ -6,6 +6,7 @@ import numpy as np
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.loss import InverseCDFDistance
+from sdmetrics.utils import get_columns_from_metadata
 
 
 class CategoricalType(Enum):
@@ -125,7 +126,7 @@ class CategoricalPrivacyMetric(SingleTableMetric):
         )
 
         for col in key_fields + sensitive_fields:
-            data_type = metadata['fields'][col]
+            data_type = get_columns_from_metadata(metadata)[col]
             if (data_type != cls._DTYPES_TO_TYPES['i']
                and data_type != cls._DTYPES_TO_TYPES['O']
                and data_type != cls._DTYPES_TO_TYPES['b']):  # check data type
@@ -274,7 +275,7 @@ class NumericalPrivacyMetric(SingleTableMetric):
         )
 
         for col in key_fields + sensitive_fields:
-            data_type = metadata['fields'][col]
+            data_type = get_columns_from_metadata(metadata)[col]
 
             # check data type
             if data_type != cls._DTYPES_TO_TYPES['i'] and data_type != cls._DTYPES_TO_TYPES['f']:

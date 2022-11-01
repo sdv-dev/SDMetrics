@@ -3,6 +3,7 @@
 from operator import attrgetter
 
 from sdmetrics.base import BaseMetric
+from sdmetrics.utils import get_columns_from_metadata
 
 
 class TimeSeriesMetric(BaseMetric):
@@ -53,7 +54,7 @@ class TimeSeriesMetric(BaseMetric):
             if not isinstance(metadata, dict):
                 metadata = metadata.to_dict()
 
-            fields = metadata['fields']
+            fields = get_columns_from_metadata(metadata)
             for column in real_data.columns:
                 if column not in fields:
                     raise ValueError(f'Column {column} not found in metadata')

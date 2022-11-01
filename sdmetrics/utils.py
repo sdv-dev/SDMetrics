@@ -214,3 +214,43 @@ class HyperTransformer():
         """
         self.fit(data)
         return self.transform(data)
+
+
+def get_columns_from_metadata(metadata):
+    """Get the column info from a metadata dict.
+
+    Args:
+        metadata (dict):
+            The metadata dict.
+
+    Returns:
+        dict:
+            The columns metadata.
+    """
+    if 'fields' in metadata:
+        return metadata['fields']
+
+    if 'columns' in metadata:
+        return metadata['columns']
+
+    return []
+
+
+def get_type_from_column_meta(column_metadata):
+    """Get the type of a given column from the column metadata.
+
+    Args:
+        column_metadata (dict):
+            The column metadata.
+
+    Returns:
+        string:
+            The column type.
+    """
+    if 'type' in column_metadata:
+        return column_metadata['type']
+
+    if 'sdtype' in column_metadata:
+        return column_metadata['sdtype']
+
+    return ''

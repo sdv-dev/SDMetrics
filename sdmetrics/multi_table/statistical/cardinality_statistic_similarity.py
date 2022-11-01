@@ -6,7 +6,7 @@ import numpy as np
 
 from sdmetrics.goal import Goal
 from sdmetrics.multi_table.base import MultiTableMetric
-from sdmetrics.utils import get_cardinality_distribution
+from sdmetrics.utils import get_cardinality_distribution, get_columns_from_metadata
 from sdmetrics.warnings import ConstantInputWarning
 
 
@@ -108,22 +108,37 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
             metadata = metadata.to_dict()
 
         score_breakdowns = {}
-        for table_name, table in metadata['tables'].items():
-            for field_name, field in table['fields'].items():
-                if 'ref' in field:
-                    parent_table_name = field['ref']['table']
-                    parent_field_name = field['ref']['field']
-                    cardinality_real = get_cardinality_distribution(
-                        real_data[parent_table_name][parent_field_name],
-                        real_data[table_name][field_name],
-                    )
-                    cardinality_synthetic = get_cardinality_distribution(
-                        synthetic_data[parent_table_name][parent_field_name],
-                        synthetic_data[table_name][field_name],
-                    )
-                    score_breakdown = cls._compute_statistic(
-                        cardinality_real, cardinality_synthetic, statistic)
-                    score_breakdowns[(parent_table_name, table_name)] = score_breakdown
+        if 'relationships' in metadata:
+            for rel in metadata['relationships']:
+                cardinality_real = get_cardinality_distribution(
+                    real_data[rel['parent_table_name']][rel['parent_primary_key']],
+                    real_data[rel['child_table_name']][rel['child_foreign_key']],
+                )
+                cardinality_synthetic = get_cardinality_distribution(
+                    synthetic_data[rel['parent_table_name']][rel['parent_primary_key']],
+                    synthetic_data[rel['child_table_name']][rel['child_foreign_key']],
+                )
+                score_breakdown = cls._compute_statistic(
+                    cardinality_real, cardinality_synthetic, statistic)
+                score_breakdowns[
+                    (rel['parent_table_name'], rel['child_table_name'])] = score_breakdown
+        else:
+            for table_name, table in metadata['tables'].items():
+                for field_name, field in get_columns_from_metadata(table).items():
+                    if 'ref' in field:
+                        parent_table_name = field['ref']['table']
+                        parent_field_name = field['ref']['field']
+                        cardinality_real = get_cardinality_distribution(
+                            real_data[parent_table_name][parent_field_name],
+                            real_data[table_name][field_name],
+                        )
+                        cardinality_synthetic = get_cardinality_distribution(
+                            synthetic_data[parent_table_name][parent_field_name],
+                            synthetic_data[table_name][field_name],
+                        )
+                        score_breakdown = cls._compute_statistic(
+                            cardinality_real, cardinality_synthetic, statistic)
+                        score_breakdowns[(parent_table_name, table_name)] = score_breakdown
 
         if len(score_breakdowns) == 0:
             return {'score': np.nan}

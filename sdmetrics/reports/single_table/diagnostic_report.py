@@ -80,7 +80,9 @@ class DiagnosticReport():
         """
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
         self._metric_args['NewRowSynthesis']['synthetic_sample_size'] = min(
-            len(real_data), self._metric_args['NewRowSynthesis']['synthetic_sample_size'])
+            min(len(real_data), len(synthetic_data)),
+            self._metric_args['NewRowSynthesis']['synthetic_sample_size'],
+        )
 
         for metric in tqdm.tqdm(metrics, desc='Creating report'):
             metric_name = metric.__name__
