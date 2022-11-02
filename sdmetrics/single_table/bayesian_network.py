@@ -11,29 +11,8 @@ from sdmetrics.single_table.base import SingleTableMetric
 LOGGER = logging.getLogger(__name__)
 
 
-class BNLikelihood(SingleTableMetric):
-    """BayesianNetwork Likelihood Single Table metric.
-
-    This metric fits a BayesianNetwork to the real data and then evaluates how
-    likely it is that the synthetic data belongs to the same distribution.
-
-    The output is the average probability across all the synthetic rows.
-
-    Attributes:
-        name (str):
-            Name to use when reports about this metric are printed.
-        goal (sdmetrics.goal.Goal):
-            The goal of this metric.
-        min_value (Union[float, tuple[float]]):
-            Minimum value or values that this metric can take.
-        max_value (Union[float, tuple[float]]):
-            Maximum value or values that this metric can take.
-    """
-
-    name = 'BayesianNetwork Likelihood'
-    goal = Goal.MAXIMIZE
-    min_value = 0.0
-    max_value = 1.0
+class BNLikelihoodBase(SingleTableMetric):
+    """BayesianNetwork Likelihood Single Table base metric."""
 
     @classmethod
     def _likelihoods(cls, real_data, synthetic_data, metadata=None, structure=None):
@@ -68,6 +47,31 @@ class BNLikelihood(SingleTableMetric):
                 probabilities.append(0)
 
         return np.asarray(probabilities)
+
+
+class BNLikelihood(BNLikelihoodBase):
+    """BayesianNetwork Likelihood Single Table metric.
+
+    This metric fits a BayesianNetwork to the real data and then evaluates how
+    likely it is that the synthetic data belongs to the same distribution.
+
+    The output is the average probability across all the synthetic rows.
+
+    Attributes:
+        name (str):
+            Name to use when reports about this metric are printed.
+        goal (sdmetrics.goal.Goal):
+            The goal of this metric.
+        min_value (Union[float, tuple[float]]):
+            Minimum value or values that this metric can take.
+        max_value (Union[float, tuple[float]]):
+            Maximum value or values that this metric can take.
+    """
+
+    name = 'BayesianNetwork Likelihood'
+    goal = Goal.MAXIMIZE
+    min_value = 0.0
+    max_value = 1.0
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None, structure=None):
@@ -117,7 +121,7 @@ class BNLikelihood(SingleTableMetric):
         return np.mean(cls._likelihoods(real_data, synthetic_data, metadata, structure))
 
 
-class BNLogLikelihood(BNLikelihood):
+class BNLogLikelihood(BNLikelihoodBase):
     """BayesianNetwork Log Likelihood Single Table metric.
 
     This metric fits a BayesianNetwork to the real data and then evaluates how
