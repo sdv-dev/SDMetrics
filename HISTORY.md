@@ -1,5 +1,34 @@
 # History
 
+## v0.8.0 - 2022-10-02
+
+This release introduces the `DiagnosticReport`, which helps a user verify – at a quick glance – that their data is valid. We also fix an existing bug with detection metrics.
+
+### New Features
+* Fixes for new metadata - Issue [#253](https://github.com/sdv-dev/SDMetrics/issues/253) by @katxiao
+* Add default synthetic sample size to DiagnosticReport - Issue [#248](https://github.com/sdv-dev/SDMetrics/issues/248) by @katxiao
+* Exclude pii columns from single table metrics - Issue [#245](https://github.com/sdv-dev/SDMetrics/issues/245) by @katxiao
+* Accept both old and new metadata - Issue [#244](https://github.com/sdv-dev/SDMetrics/issues/244) by @katxiao
+* Address Diagnostic Report and metric edge cases - Issue [#243](https://github.com/sdv-dev/SDMetrics/issues/243) by @katxiao
+* Update visualization average per table - Issue [#242](https://github.com/sdv-dev/SDMetrics/issues/242) by @katxiao
+* Add save and load functionality to multi-table DiagnosticReport - Issue [#218](https://github.com/sdv-dev/SDMetrics/issues/218) by @katxiao
+* Visualization methods for the multi-table DiagnosticReport - Issue [#217](https://github.com/sdv-dev/SDMetrics/issues/217) by @katxiao
+* Add getter methods to multi-table DiagnosticReport - Issue [#216](https://github.com/sdv-dev/SDMetrics/issues/216) by @katxiao
+* Create multi-table DiagnosticReport - Issue [#215](https://github.com/sdv-dev/SDMetrics/issues/215) by @katxiao
+* Visualization methods for the single-table DiagnosticReport - Issue [#211](https://github.com/sdv-dev/SDMetrics/issues/211) by @katxiao
+* Add getter methods to single-table DiagnosticReport - Issue [#210](https://github.com/sdv-dev/SDMetrics/issues/210) by @katxiao
+* Create single-table DiagnosticReport - Issue [#209](https://github.com/sdv-dev/SDMetrics/issues/209) by @katxiao
+* Add save and load functionality to single-table DiagnosticReport - Issue [#212](https://github.com/sdv-dev/SDMetrics/issues/212) by @katxiao
+* Add single table diagnostic report - Issue [#237](https://github.com/sdv-dev/SDMetrics/issues/237) by @katxiao
+
+### Bug Fixes
+* Detection test test doesn't look at metadata when determining which columns to use - Issue [#119](https://github.com/sdv-dev/SDMetrics/issues/119) by @R-Palazzo
+
+### Internal Improvements
+* Remove torch dependency - Issue [#233](https://github.com/sdv-dev/SDMetrics/issues/233) by @katxiao
+* Update README - Issue [#250](https://github.com/sdv-dev/SDMetrics/issues/250) by @katxiao
+
+
 ## v0.7.0 - 2022-09-27
 
 This release introduces the `QualityReport`, which evaluates how well synthetic data captures mathematical properties from the real data. The `QualityReport` incorporates the new metrics introduced in the previous release, and allows users to get detailed results, visualize the scores, and save the report for future viewing. We also add utility methods for visualizing columns and pairs of columns.
