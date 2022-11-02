@@ -7,6 +7,7 @@ import pandas as pd
 
 from sdmetrics.base import BaseMetric
 from sdmetrics.errors import IncomputableMetricError
+from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
 
 
 class SingleTableMetric(BaseMetric):
@@ -73,8 +74,13 @@ class SingleTableMetric(BaseMetric):
         if isinstance(types, str):
             types = (types, )
 
-        for field_name, field_meta in metadata['fields'].items():
-            field_type = field_meta['type']
+        primary_key = metadata.get('primary_key', '')
+
+        for field_name, field_meta in get_columns_from_metadata(metadata).items():
+            if 'pii' in field_meta or field_name == primary_key:
+                continue
+
+            field_type = get_type_from_column_meta(field_meta)
             field_subtype = field_meta.get('subtype')
             if any(t in types for t in (field_type, (field_type, ), (field_type, field_subtype))):
                 fields.append(field_name)
@@ -116,29 +122,33 @@ class SingleTableMetric(BaseMetric):
             if not isinstance(metadata, dict):
                 metadata = metadata.to_dict()
 
-            fields = metadata['fields']
+            fields = get_columns_from_metadata(metadata)
             for column in real_data.columns:
                 if column not in fields:
                     raise ValueError(f'Column {column} not found in metadata')
 
             for field, field_meta in fields.items():
+                field_type = get_type_from_column_meta(field_meta)
                 if field not in real_data.columns:
                     raise ValueError(f'Field {field} not found in data')
                 if (
-                    field_meta['type'] == 'datetime' and
-                    'format' in field_meta and
+                    field_type == 'datetime' and
+                    ('format' in field_meta or 'datetime_format' in field_meta) and
                     real_data[field].dtype == 'O'
                 ):
-                    real_data[field] = pd.to_datetime(
-                        real_data[field], format=field_meta['format'])
-                    synthetic_data[field] = pd.to_datetime(
-                        synthetic_data[field], format=field_meta['format'])
+                    if 'format' in field_meta:
+                        dt_format = field_meta['format']
+                    if 'datetime_format' in field_meta:
+                        dt_format = field_meta['datetime_format']
+                    real_data[field] = pd.to_datetime(real_data[field], format=dt_format)
+                    synthetic_data[field] = pd.to_datetime(synthetic_data[field], format=dt_format)
 
             return real_data, synthetic_data, metadata
 
         dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
+        col_key = 'columns' if metadata is not None and 'columns' in metadata else 'fields'
         return real_data, synthetic_data, {
-            'fields': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
+            col_key: dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
         }
 
     @classmethod
@@ -165,3 +175,25 @@ class SingleTableMetric(BaseMetric):
                 Metric output.
         """
         raise NotImplementedError()
+
+    @classmethod
+    def compute_breakdown(cls, real_data, synthetic_data, metadata=None):
+        """Compute this metric breakdown.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The values from the real dataset, passed as a pandas.DataFrame.
+            synthetic_data (pandas.DataFrame):
+                The values from the synthetic dataset, passed as a pandas.DataFrame.
+            metadata (dict):
+                Table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
+            real_data (Union[numpy.ndarray, pandas.Series]):
+                The values from the real dataset, passed as a 1d numpy
+                array or as a pandas.Series.
+
+        Returns:
+            dict
+                Mapping of the metric output. Must include the key 'score'.
+        """
+        return {'score': cls.compute(real_data, synthetic_data, metadata)}

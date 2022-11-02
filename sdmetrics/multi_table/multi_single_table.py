@@ -37,7 +37,7 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
         self.single_table_metric = single_table_metric
         self.compute = self._compute
 
-    def _compute(self, real_data, synthetic_data, metadata=None):
+    def _compute(self, real_data, synthetic_data, metadata=None, **kwargs):
         """Compute this metric.
 
         This applies the underlying single table metric to all the tables
@@ -75,11 +75,11 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
 
             try:
                 score_breakdown = self.single_table_metric.compute_breakdown(
-                    real_table, synthetic_table, table_meta)
+                    real_table, synthetic_table, table_meta, **kwargs)
                 scores[table_name] = score_breakdown
             except AttributeError:
                 score = self.single_table_metric.compute(
-                    real_table, synthetic_table, table_meta)
+                    real_table, synthetic_table, table_meta, **kwargs)
                 scores[table_name] = score
             except Exception as error:
                 errors[table_name] = error
@@ -115,10 +115,16 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
         scores = cls._compute(cls, real_data, synthetic_data, metadata, **kwargs)
         scores = list(scores.values())
         if len(scores) > 0 and isinstance(scores[0], dict):
-            scores = [
-                result['score'] for table_scores in scores for result in table_scores.values()
-                if 'score' in result
-            ]
+            all_scores = []
+            for table_scores in scores:
+                if 'score' in table_scores:
+                    all_scores.append(table_scores['score'])
+                else:
+                    all_scores.extend([
+                        result['score'] for result in table_scores.values() if 'score' in result
+                    ])
+
+            scores = all_scores
 
         return np.nanmean(scores)
 

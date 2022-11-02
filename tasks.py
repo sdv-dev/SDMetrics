@@ -70,7 +70,8 @@ def install_minimum(c):
                 versions.append(requirement)
 
         elif (line.startswith('install_requires = [') or
-             line.startswith('pomegranate_requires = [')):
+             line.startswith('pomegranate_requires = [') or
+             line.startswith('torch_requires = [')):
             started = True
 
     c.run(f'python -m pip install {" ".join(versions)}')

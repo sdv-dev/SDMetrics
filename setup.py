@@ -17,7 +17,6 @@ install_requires = [
     'pandas>=1.1.3,<2',
     'scikit-learn>=0.24,<2',
     'scipy>=1.5.4,<2',
-    'torch>=1.8.0,<2',
     'copulas>=0.7.0,<0.8',
     'tqdm>=4.15,<5',
     'plotly>=5.10.0,<6',
@@ -26,6 +25,10 @@ install_requires = [
 pomegranate_requires = [
     "pomegranate>=0.13.4,<0.14.2;python_version<'3.7'",
     "pomegranate>=0.14.1,<0.14.7;python_version>='3.7'",
+]
+
+torch_requires = [
+    'torch>=1.8.0,<2',
 ]
 
 setup_requires = [
@@ -101,9 +104,10 @@ setup(
     ],
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
-        'test': tests_require + pomegranate_requires,
+        'test': tests_require + pomegranate_requires + torch_requires,
+        'torch': torch_requires,
         'pomegranate': pomegranate_requires,
-        'dev': development_requires + tests_require + pomegranate_requires,
+        'dev': development_requires + tests_require + pomegranate_requires + torch_requires,
     },
     install_package_data=True,
     install_requires=install_requires,
@@ -119,6 +123,6 @@ setup(
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.7.0',
+    version='0.8.0.dev1',
     zip_safe=False,
 )
