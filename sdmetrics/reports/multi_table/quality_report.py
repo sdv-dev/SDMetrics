@@ -116,25 +116,18 @@ class QualityReport():
                     if 'score' in self._metric_results[metric.__name__]:
                         prop_scores.append(self._metric_results[metric.__name__]['score'])
                     else:
-                        avg_score, num_metric_errors = aggregate_metric_results(
+                        _, num_metric_errors = aggregate_metric_results(
                             self._metric_results[metric.__name__])
                         num_prop_errors += num_metric_errors
-                        if not np.isnan(avg_score):
-                            prop_scores.append(avg_score)
             else:
                 for metric in metrics:
                     metric_scores = []
                     for _, table_breakdowns in self._metric_results[metric.__name__].items():
-                        avg_score, num_metric_errors = aggregate_metric_results(table_breakdowns)
+                        _, num_metric_errors = aggregate_metric_results(table_breakdowns)
                         num_prop_errors += num_metric_errors
-                        if not np.isnan(avg_score):
-                            metric_scores.append(avg_score)
 
-                    if len(metric_scores) > 0:
-                        prop_scores.append(np.mean(metric_scores))
-
-            self._property_breakdown[prop] = np.nanmean(
-                prop_scores) if (len(prop_scores) > 0) else np.nan
+            self._property_breakdown[prop] = np.nanmean(prop_scores) if (
+                len(prop_scores) > 0) else self.get_details(prop)['Quality Score'].mean()
             self._property_errors[prop] = num_prop_errors
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
