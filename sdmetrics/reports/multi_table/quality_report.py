@@ -121,7 +121,6 @@ class QualityReport():
                         num_prop_errors += num_metric_errors
             else:
                 for metric in metrics:
-                    metric_scores = []
                     for _, table_breakdowns in self._metric_results[metric.__name__].items():
                         _, num_metric_errors = aggregate_metric_results(table_breakdowns)
                         num_prop_errors += num_metric_errors
