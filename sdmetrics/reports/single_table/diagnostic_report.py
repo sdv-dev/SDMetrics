@@ -50,7 +50,7 @@ class DiagnosticReport():
         self._results['DANGER'] = []
 
         for metric, score in self._metric_averages.items():
-            if np.isnan(score):
+            if pd.isna(score):
                 continue
             if score >= 0.9:
                 self._results['SUCCESS'].append(
@@ -103,9 +103,8 @@ class DiagnosticReport():
                 self._metric_averages[metric_name] = np.nan
 
         self._property_scores = {}
-        for prop, metrics in self.METRICS.items():
-            prop_scores = [self._metric_averages[metric.__name__] for metric in metrics]
-            self._property_scores[prop] = np.nanmean(prop_scores)
+        for prop, _ in self.METRICS.items():
+            self._property_scores[prop] = self.get_details(prop)['Diagnostic Score'].mean()
 
         self._print_results()
 
@@ -192,7 +191,7 @@ class DiagnosticReport():
                 for column, score_breakdown in self._metric_results[metric.__name__].items():
                     metric_score = score_breakdown.get('score', np.nan)
                     metric_error = score_breakdown.get('error', np.nan)
-                    if np.isnan(metric_score) and np.isnan(metric_error):
+                    if pd.isna(metric_score) and pd.isna(metric_error):
                         continue
 
                     columns.append(column)

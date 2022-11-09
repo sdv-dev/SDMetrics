@@ -52,7 +52,7 @@ class DiagnosticReport():
         self._results['DANGER'] = []
 
         for metric, score in self._metric_averages.items():
-            if np.isnan(score):
+            if pd.isna(score):
                 continue
             if score >= 0.9:
                 self._results['SUCCESS'].append(
@@ -106,7 +106,7 @@ class DiagnosticReport():
                         avg_table_score, _ = aggregate_metric_results(table_breakdown)
 
                     self._metric_averages_by_table[metric_name][table_name] = avg_table_score
-                    if not np.isnan(avg_table_score):
+                    if not pd.isna(avg_table_score):
                         metric_scores.append(avg_table_score)
 
                 self._metric_averages[metric_name] = np.mean(metric_scores) if (
@@ -118,9 +118,8 @@ class DiagnosticReport():
                 self._metric_averages[metric_name] = np.nan
 
         self._property_scores = {}
-        for prop, metrics in self.METRICS.items():
-            prop_scores = [self._metric_averages[metric.__name__] for metric in metrics]
-            self._property_scores[prop] = np.nanmean(prop_scores)
+        for prop, _ in self.METRICS.items():
+            self._property_scores[prop] = self.get_details(prop)['Diagnostic Score'].mean()
 
         self._print_results()
 
@@ -163,7 +162,7 @@ class DiagnosticReport():
 
             metric_table_score = self._metric_averages_by_table[metric.__name__].get(
                 table_name, np.nan)
-            if not np.isnan(metric_table_score):
+            if not pd.isna(metric_table_score):
                 table_scores.append(metric_table_score)
 
         average_table_score = np.nan
@@ -237,7 +236,7 @@ class DiagnosticReport():
                     for column, score_breakdown in table_breakdown.items():
                         metric_score = score_breakdown.get('score', np.nan)
                         metric_error = score_breakdown.get('error', np.nan)
-                        if np.isnan(metric_score) and np.isnan(metric_error):
+                        if pd.isna(metric_score) and pd.isna(metric_error):
                             continue
 
                         tables.append(table)

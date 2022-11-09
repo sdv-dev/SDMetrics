@@ -41,7 +41,7 @@ class QualityReport():
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
-        if np.isnan(self._overall_quality_score) & any(self._property_errors.values()):
+        if pd.isna(self._overall_quality_score) & any(self._property_errors.values()):
             out.write('\nOverall Quality Score: Error computing report.\n\n')
         else:
             out.write(
@@ -51,7 +51,7 @@ class QualityReport():
             out.write('Properties:\n')
 
         for prop, score in self._property_breakdown.items():
-            if not np.isnan(score):
+            if not pd.isna(score):
                 out.write(f'{prop}: {round(score * 100, 2)}%\n')
             elif self._property_errors[prop] > 0:
                 out.write(f'{prop}: Error computing property.\n')
@@ -231,7 +231,7 @@ class QualityReport():
                         continue
 
                     for column, score_breakdown in table_breakdown.items():
-                        if 'score' in score_breakdown and np.isnan(score_breakdown['score']):
+                        if 'score' in score_breakdown and pd.isna(score_breakdown['score']):
                             continue
                         tables.append(table)
                         columns.append(column)
@@ -316,7 +316,7 @@ class QualityReport():
                 for table_name, table_results in self._metric_results[metric_name].items():
                     filtered_results[table_name] = {
                         key: result for key, result in table_results.items()
-                        if not np.isnan(result['score'])
+                        if not pd.isna(result['score'])
                     }
 
                 return [
