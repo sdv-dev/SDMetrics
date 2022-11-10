@@ -43,6 +43,8 @@ pip install sdmetrics
 conda install -c conda-forge sdmetrics
 ```
 
+For more information about using SDMetrics, visit the [SDMetrics Documentation](https://docs.sdv.dev/sdmetrics).
+
 # Usage
 
 Get started with **SDMetrics Reports** using some demo data,

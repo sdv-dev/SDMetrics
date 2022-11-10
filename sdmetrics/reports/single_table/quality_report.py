@@ -37,7 +37,7 @@ class QualityReport():
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
-        if np.isnan(self._overall_quality_score) & any(self._property_errors.values()):
+        if pd.isna(self._overall_quality_score) & any(self._property_errors.values()):
             out.write('\nOverall Quality Score: Error computing report.\n\n')
         else:
             out.write(
@@ -47,7 +47,7 @@ class QualityReport():
             out.write('Properties:\n')
 
         for prop, score in self._property_breakdown.items():
-            if not np.isnan(score):
+            if not pd.isna(score):
                 out.write(f'{prop}: {round(score * 100, 2)}%\n')
             elif self._property_errors[prop] > 0:
                 out.write(f'{prop}: Error computing property.\n')
@@ -84,18 +84,14 @@ class QualityReport():
 
         self._property_breakdown = {}
         for prop, metrics in self.METRICS.items():
-            prop_scores = []
+
             num_prop_errors = 0
             for metric in metrics:
-                avg_score, num_metric_errors = aggregate_metric_results(
+                _, num_metric_errors = aggregate_metric_results(
                     self._metric_results[metric.__name__])
                 num_prop_errors += num_metric_errors
 
-                if not np.isnan(avg_score):
-                    prop_scores.append(avg_score)
-
-            self._property_breakdown[prop] = np.mean(
-                prop_scores) if (len(prop_scores) > 0) else np.nan
+            self._property_breakdown[prop] = self.get_details(prop)['Quality Score'].mean()
             self._property_errors[prop] = num_prop_errors
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
@@ -170,7 +166,7 @@ class QualityReport():
         if property_name == 'Column Shapes':
             for metric in self.METRICS[property_name]:
                 for column, score_breakdown in self._metric_results[metric.__name__].items():
-                    if 'score' in score_breakdown and np.isnan(score_breakdown['score']):
+                    if 'score' in score_breakdown and pd.isna(score_breakdown['score']):
                         continue
 
                     columns.append(column)
@@ -233,7 +229,7 @@ class QualityReport():
                         'results': {
                             key: result for key, result in
                             self._metric_results[metric_name].items()
-                            if not np.isnan(result.get('score', np.nan))
+                            if not pd.isna(result.get('score', np.nan))
                         },
                     },
                 ]

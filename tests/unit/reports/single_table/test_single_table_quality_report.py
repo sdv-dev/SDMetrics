@@ -63,15 +63,15 @@ class TestQualityReport:
         corr_sim_mock = Mock()
         corr_sim_mock.__name__ = 'CorrelationSimilarity'
         corr_sim_mock.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'score': 0.2},
+            ('col1', 'col2'): {'score': 0.1},
+            ('col2', 'col3'): {'score': 0.2},
         }
 
         cont_sim_mock = Mock()
         cont_sim_mock.__name__ = 'ContingencySimilarity'
         cont_sim_mock.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'score': 0.2},
+            ('col1', 'col2'): {'score': 0.1},
+            ('col2', 'col3'): {'score': 0.2},
         }
         metrics_mock = {
             'Column Shapes': [ks_complement_mock, tv_complement_mock],
@@ -217,15 +217,15 @@ class TestQualityReport:
         corr_sim_mock = Mock()
         corr_sim_mock.__name__ = 'CorrelationSimilarity'
         corr_sim_mock.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'score': 0.2},
+            ('col1', 'col2'): {'score': 0.1},
+            ('col2', 'col3'): {'score': 0.2},
         }
 
         cont_sim_mock = Mock()
         cont_sim_mock.__name__ = 'ContingencySimilarity'
         cont_sim_mock.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'error': 'test error'},
+            ('col1', 'col2'): {'score': 0.1},
+            ('col2', 'col3'): {'error': 'test error'},
         }
 
         metrics_mock = {
@@ -252,10 +252,10 @@ class TestQualityReport:
             real_data, synthetic_data, metadata)
         cont_sim_mock.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
-        assert report._overall_quality_score == 0.1375
+        assert report._overall_quality_score == 0.14166666666666666
         assert report._property_breakdown == {
             'Column Shapes': 0.15000000000000002,
-            'Column Pair Trends': 0.125,
+            'Column Pair Trends': 0.13333333333333333,
         }
         assert report._property_errors == {
             'Column Shapes': 0,
@@ -301,15 +301,15 @@ class TestQualityReport:
         corr_sim_mock = Mock()
         corr_sim_mock.__name__ = 'CorrelationSimilarity'
         corr_sim_mock.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'score': 0.2},
+            ('col1', 'col2'): {'score': 0.1},
+            ('col2', 'col3'): {'score': 0.2},
         }
 
         cont_sim_mock = Mock()
         cont_sim_mock.__name__ = 'ContingencySimilarity'
         cont_sim_mock.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'score': 0.2},
+            ('col1', 'col2'): {'score': 0.1},
+            ('col2', 'col3'): {'score': 0.2},
         }
         metrics_mock = {
             'Column Shapes': [ks_complement_mock, tv_complement_mock],

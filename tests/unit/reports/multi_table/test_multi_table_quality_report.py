@@ -82,8 +82,8 @@ class TestQualityReport:
         corr_sim_mock.__name__ = 'CorrelationSimilarity'
         corr_sim_mock.compute_breakdown.return_value = {
             'table1': {
-                'col1': {'score': 0.1},
-                'col2': {'score': 0.2},
+                ('col1', 'col2'): {'score': 0.1},
+                ('col2', 'col3'): {'score': 0.2},
             }
         }
 
@@ -91,8 +91,8 @@ class TestQualityReport:
         cont_sim_mock.__name__ = 'ContingencySimilarity'
         cont_sim_mock.compute_breakdown.return_value = {
             'table1': {
-                'col1': {'score': 0.1},
-                'col2': {'score': 0.2},
+                ('col1', 'col2'): {'score': 0.1},
+                ('col2', 'col3'): {'score': 0.2},
             }
         }
 
@@ -194,8 +194,8 @@ class TestQualityReport:
         corr_sim_mock.__name__ = 'CorrelationSimilarity'
         corr_sim_mock.compute_breakdown.return_value = {
             'table1': {
-                'col1': {'score': 0.1},
-                'col2': {'score': 0.2},
+                ('col1', 'col2'): {'score': 0.1},
+                ('col2', 'col3'): {'score': 0.2},
             }
         }
 
@@ -203,8 +203,8 @@ class TestQualityReport:
         cont_sim_mock.__name__ = 'ContingencySimilarity'
         cont_sim_mock.compute_breakdown.return_value = {
             'table1': {
-                'col1': {'score': 0.1},
-                'col2': {'score': 0.2},
+                ('col1', 'col2'): {'score': 0.1},
+                ('col2', 'col3'): {'score': 0.2},
             }
         }
 
@@ -240,9 +240,9 @@ class TestQualityReport:
         cardinality_mock.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
 
-        assert report._overall_quality_score == 0.425
+        assert report._overall_quality_score == 0.42777777777777776
         assert report._property_breakdown == {
-            'Column Shapes': 0.125,
+            'Column Shapes': 0.13333333333333333,
             'Column Pair Trends': 0.15000000000000002,
             'Parent Child Relationships': 1.0,
         }
@@ -311,8 +311,8 @@ class TestQualityReport:
         corr_sim_mock.__name__ = 'CorrelationSimilarity'
         corr_sim_mock.compute_breakdown.return_value = {
             'table1': {
-                'col1': {'score': 0.1},
-                'col2': {'score': 0.2},
+                ('col1', 'col2'): {'score': 0.1},
+                ('col2', 'col3'): {'score': 0.2},
             }
         }
 
@@ -320,8 +320,8 @@ class TestQualityReport:
         cont_sim_mock.__name__ = 'ContingencySimilarity'
         cont_sim_mock.compute_breakdown.return_value = {
             'table1': {
-                'col1': {'score': 0.1},
-                'col2': {'score': 0.2},
+                ('col1', 'col2'): {'score': 0.1},
+                ('col2', 'col3'): {'score': 0.2},
             }
         }
 
@@ -415,8 +415,8 @@ class TestQualityReport:
         corr_sim_mock.__name__ = 'CorrelationSimilarity'
         corr_sim_mock.compute_breakdown.return_value = {
             'table1': {
-                'col1': {'score': 0.1},
-                'col2': {'score': 0.2},
+                ('col1', 'col2'): {'score': 0.1},
+                ('col2', 'col3'): {'score': 0.2},
             }
         }
 
@@ -424,8 +424,8 @@ class TestQualityReport:
         cont_sim_mock.__name__ = 'ContingencySimilarity'
         cont_sim_mock.compute_breakdown.return_value = {
             'table1': {
-                'col1': {'score': 0.1},
-                'col2': {'score': 0.2},
+                ('col1', 'col2'): {'score': 0.1},
+                ('col2', 'col3'): {'score': 0.2},
             }
         }
 
