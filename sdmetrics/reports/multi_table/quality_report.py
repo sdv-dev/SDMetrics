@@ -126,7 +126,8 @@ class QualityReport():
                         num_prop_errors += num_metric_errors
 
             self._property_breakdown[prop] = np.nanmean(prop_scores) if (
-                len(prop_scores) > 0) else self.get_details(prop)['Quality Score'].mean()
+                len(prop_scores) > 0
+            ) else self.get_details(prop)['Quality Score'].mean()
             self._property_errors[prop] = num_prop_errors
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
