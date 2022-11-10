@@ -375,7 +375,7 @@ def make_mixed_column_pair_plot(real_data, synthetic_data):
     return fig
 
 
-def get_column_pair_plot(real_data, synthetic_data, columns, metadata):
+def get_column_pair_plot(real_data, synthetic_data, column_names, metadata):
     """Return a plot of the real and synthetic data for a given column pair.
 
     Args:
@@ -383,8 +383,8 @@ def get_column_pair_plot(real_data, synthetic_data, columns, metadata):
             The real table data.
         synthetic_column (pandas.Dataframe):
             The synthetic table data.
-        columns (list[string]):
-            The two columns to plot.
+        column_names (list[string]):
+            The names of the two columns to plot.
         metadata (dict):
             The table metadata.
 
@@ -392,34 +392,34 @@ def get_column_pair_plot(real_data, synthetic_data, columns, metadata):
         plotly.graph_objects._figure.Figure
     """
     all_columns = get_columns_from_metadata(metadata)
-    invalid_columns = [column for column in columns if column not in all_columns]
+    invalid_columns = [column for column in column_names if column not in all_columns]
     if invalid_columns:
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found in metadata.")
     else:
         invalid_columns = [
-            column for column in columns if (
+            column for column in column_names if (
                 'type' not in all_columns[column] and 'sdtype' not in all_columns[column])
         ]
         if invalid_columns:
             raise ValueError(f"Metadata for column(s) `{'`, `'.join(invalid_columns)}` "
                              "missing 'type' information.")
 
-    invalid_columns = [column for column in columns if column not in real_data.columns]
+    invalid_columns = [column for column in column_names if column not in real_data.columns]
     if invalid_columns:
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
                          'in the real table data.')
 
-    invalid_columns = [column for column in columns if column not in synthetic_data.columns]
+    invalid_columns = [column for column in column_names if column not in synthetic_data.columns]
     if invalid_columns:
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
                          'in the synthetic table data.')
 
     sdtypes = (
-        get_type_from_column_meta(all_columns[columns[0]]),
-        get_type_from_column_meta(all_columns[columns[1]]),
+        get_type_from_column_meta(all_columns[column_names[0]]),
+        get_type_from_column_meta(all_columns[column_names[1]]),
     )
-    real_data = real_data[columns]
-    synthetic_data = synthetic_data[columns]
+    real_data = real_data[column_names]
+    synthetic_data = synthetic_data[column_names]
 
     all_sdtypes = CONTINUOUS_SDTYPES + DISCRETE_SDTYPES
     invalid_sdtypes = [sdtype for sdtype in sdtypes if sdtype not in all_sdtypes]
