@@ -5,7 +5,6 @@ import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
 
 
 class NewRowSynthesis(SingleTableMetric):
@@ -72,20 +71,16 @@ class NewRowSynthesis(SingleTableMetric):
 
         numerical_fields = []
 
-        for field, field_meta in get_columns_from_metadata(metadata).items():
-            field_type = get_type_from_column_meta(field_meta)
-
-            if field_type == 'datetime':
-                real_data[field] = pd.to_numeric(real_data[field])
-                synthetic_data[field] = pd.to_numeric(synthetic_data[field])
-                numerical_fields.append(field)
-            elif field_type == 'numerical':
-                numerical_fields.append(field)
+        numerical_fields = cls._select_fields(metadata, ('numerical', 'datetime'))
+        categorical_fields = cls._select_fields(metadata, ('categorical', 'boolean'))
 
         num_unique_rows = 0
         for index, row in synthetic_data.iterrows():
             row_filter = []
             for field in real_data.columns:
+                if field not in numerical_fields and field not in categorical_fields:
+                    continue
+
                 if pd.isna(row[field]):
                     field_filter = f'`{field}`.isnull()'
                 elif field in numerical_fields:
@@ -93,7 +88,7 @@ class NewRowSynthesis(SingleTableMetric):
                         f'abs(`{field}` - {row[field]}) <= '
                         f'{abs(numerical_match_tolerance * row[field])}'
                     )
-                else:
+                elif field in categorical_fields:
                     if real_data[field].dtype == 'O':
                         field_filter = f'`{field}` == {repr(row[field])}'
                     else:
