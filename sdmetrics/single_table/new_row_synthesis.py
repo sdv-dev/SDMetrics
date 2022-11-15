@@ -3,8 +3,10 @@ import warnings
 
 import pandas as pd
 
+from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
+from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
 
 
 class NewRowSynthesis(SingleTableMetric):
@@ -69,10 +71,20 @@ class NewRowSynthesis(SingleTableMetric):
             else:
                 synthetic_data = synthetic_data.sample(n=synthetic_sample_size)
 
-        numerical_fields = []
+        for field, field_meta in get_columns_from_metadata(metadata).items():
+            if get_type_from_column_meta(field_meta) == 'datetime':
+                real_data[field] = pd.to_numeric(real_data[field])
+                synthetic_data[field] = pd.to_numeric(synthetic_data[field])
 
-        numerical_fields = cls._select_fields(metadata, ('numerical', 'datetime'))
-        categorical_fields = cls._select_fields(metadata, ('categorical', 'boolean'))
+        try:
+            numerical_fields = cls._select_fields(metadata, ('numerical', 'datetime'))
+        except IncomputableMetricError:
+            numerical_fields = []
+
+        try:
+            categorical_fields = cls._select_fields(metadata, ('categorical', 'boolean'))
+        except IncomputableMetricError:
+            categorical_fields = []
 
         num_unique_rows = 0
         for index, row in synthetic_data.iterrows():
