@@ -12,6 +12,7 @@ class TestNewRowSynthesis:
         """Test the ``compute`` method and expect that the new row synthesis score is returned."""
         # Setup
         real_data = pd.DataFrame({
+            'pk': [0, 1, 2, 3, 4],
             'col1': [0, 1, 2, 3, 4],
             'col2': [1, 2, 1, 3, 4],
             'col3': ['a', 'b', 'c', 'd', 'b'],
@@ -20,6 +21,7 @@ class TestNewRowSynthesis:
             'col6': ['2020-01-02', '2021-01-04', '2021-05-03', '2022-10-11', '2022-11-13'],
         })
         synthetic_data = pd.DataFrame({
+            'pk': [5, 6, 7, 8, 9],
             'col1': [0, 1, 2, 3, 4],
             'col2': [1, 3, 4, 2, 2],
             'col3': ['a', 'b', 'c', 'b', 'e'],
@@ -28,7 +30,9 @@ class TestNewRowSynthesis:
             'col6': ['2020-01-02', '2022-11-24', '2022-06-01', '2021-04-12', '2020-12-11'],
         })
         metadata = {
+            'primary_key': 'pk',
             'fields': {
+                'pk': {'type': 'id', 'subtype': 'int'},
                 'col1': {'type': 'id', 'subtype': 'int'},
                 'col2': {'type': 'numerical', 'subtype': 'int'},
                 'col3': {'type': 'categorical'},
