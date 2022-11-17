@@ -91,8 +91,8 @@ my_report = QualityReport.load(filepath='demo_data_quality_report.pkl')
 from sdmetrics.single_table import BoundaryAdherence
 
 BoundaryAdherence.compute(
-    real_data['start_date'],
-    synthetic_data['start_date']
+    real_data[['start_date']],
+    synthetic_data[['start_date']]
 )
 ```
 ```
