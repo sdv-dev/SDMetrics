@@ -88,11 +88,11 @@ my_report = QualityReport.load(filepath='demo_data_quality_report.pkl')
 ```python
 # calculate whether the synthetic data respects the min/max bounds
 # set by the real data
-from sdmetrics.single_table import BoundaryAdherence
+from sdmetrics.single_column import BoundaryAdherence
 
 BoundaryAdherence.compute(
-    real_data[['start_date']],
-    synthetic_data[['start_date']]
+    real_data['start_date'],
+    synthetic_data['start_date']
 )
 ```
 ```
