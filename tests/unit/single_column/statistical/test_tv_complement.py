@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
 
 from sdmetrics.single_column.statistical import TVComplement
@@ -30,6 +31,30 @@ class TestTVComplement:
 
         # Assert
         assert result == 0.8333333333333333
+
+    def test_compute_with_all_nans(self):
+        """Test the ``compute`` method when the synthetic data is all NaNs.
+
+        Expect that a score of 0 is returned.
+
+        Input:
+        - Real data.
+        - Synthetic data.
+
+        Output:
+        - The evaluated metric.
+        """
+        # Setup
+        real_data = pd.Series(['a', 'b', np.nan, 'a', np.nan, 'b'])
+        synthetic_data = pd.Series([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
+
+        metric = TVComplement()
+
+        # Run
+        result = metric.compute(real_data, synthetic_data)
+
+        # Assert
+        assert result == 0
 
     @patch('sdmetrics.single_column.statistical.tv_complement.SingleColumnMetric.normalize')
     def test_normalize(self, normalize_mock):
