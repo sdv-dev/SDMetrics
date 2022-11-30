@@ -74,6 +74,8 @@ class QualityReport():
             except IncomputableMetricError:
                 # Metric is not compatible with this dataset.
                 self._metric_results[metric.__name__] = {}
+            except Exception as error:
+                self._metric_results[metric.__name__] = {'error': error}
 
         existing_column_pairs = list(self._metric_results['ContingencySimilarity'].keys())
         existing_column_pairs.extend(

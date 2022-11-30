@@ -116,6 +116,9 @@ class DiagnosticReport():
                 # Metric is not compatible with this dataset.
                 self._metric_results[metric_name] = {}
                 self._metric_averages[metric_name] = np.nan
+            except Exception as error:
+                self._metric_results[metric_name] = {'error': error}
+                self._metric_averages[metric_name] = np.nan
 
         self._property_scores = {}
         for prop, _ in self.METRICS.items():

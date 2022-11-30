@@ -84,7 +84,8 @@ class QualityReport():
             except IncomputableMetricError:
                 # Metric is not compatible with this dataset.
                 self._metric_results[metric.__name__] = {}
-                continue
+            except Exception as error:
+                self._metric_results[metric.__name__] = {'error': error}
 
         for table_name, table_data in real_data.items():
             existing_column_pairs = []
