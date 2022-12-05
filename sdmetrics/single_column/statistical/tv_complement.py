@@ -45,6 +45,9 @@ class TVComplement(SingleColumnMetric):
         real_data = pd.Series(real_data).dropna()
         synthetic_data = pd.Series(synthetic_data).dropna()
 
+        if len(synthetic_data) == 0:
+            return 0
+
         f_obs, f_exp = get_frequencies(real_data, synthetic_data)
         total_variation = 0
         for i in range(len(f_obs)):
