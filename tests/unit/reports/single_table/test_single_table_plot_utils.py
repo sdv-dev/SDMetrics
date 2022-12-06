@@ -24,8 +24,12 @@ def test__get_column_shapes_data():
     """
     # Setup
     score_breakdowns = {
-        'METRIC1': {'col1': {'score': np.nan}, 'col2': {'score': 0.1}},
-        'METRIC2': {'col1': {'score': 0.2}, 'col2': {'score': np.nan}},
+        'METRIC1': {'col1': {'score': np.nan}, 'col2': {'score': 0.1}, 'col3': {'score': 0.3}},
+        'METRIC2': {
+            'col1': {'score': 0.2},
+            'col2': {'score': np.nan},
+            'col3': {'error': 'test error'},
+        },
     }
 
     # Run
@@ -33,9 +37,9 @@ def test__get_column_shapes_data():
 
     # Assert
     pd.testing.assert_frame_equal(out, pd.DataFrame({
-        'Column Name': ['col2', 'col1'],
-        'Metric': ['METRIC1', 'METRIC2'],
-        'Score': [0.1, 0.2],
+        'Column Name': ['col2', 'col3', 'col1'],
+        'Metric': ['METRIC1', 'METRIC1', 'METRIC2'],
+        'Score': [0.1, 0.3, 0.2],
     }))
 
 

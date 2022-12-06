@@ -22,6 +22,9 @@ def _get_column_shapes_data(score_breakdowns):
     scores = []
     for metric, score_breakdown in score_breakdowns.items():
         for column, result in score_breakdown.items():
+            if 'score' not in result:
+                continue
+
             if not np.isnan(result['score']):
                 column_names.append(column)
                 metrics.append(metric)
