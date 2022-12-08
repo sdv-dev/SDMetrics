@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from sdmetrics.utils import (
-    HyperTransformer, get_cardinality_distribution, get_columns_from_metadata,
+    HyperTransformer, get_alternate_keys, get_cardinality_distribution, get_columns_from_metadata,
     get_type_from_column_meta)
 
 
@@ -88,6 +88,18 @@ def test_get_type_from_column_meta_new_metadata():
 
     # Assert
     assert out == 'numerical'
+
+
+def test_get_alternate_keys():
+    """Test that the list of alternate keys is returned from the metadata."""
+    # Setup
+    metadata = {'alternate_keys': ['A', ['B', 'C']]}
+
+    # Run
+    out = get_alternate_keys(metadata)
+
+    # Assert
+    assert out == ['A', 'B', 'C']
 
 
 class TestHyperTransformer:

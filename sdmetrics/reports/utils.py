@@ -9,7 +9,8 @@ import plotly.express as px
 import plotly.figure_factory as ff
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
-from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta, is_datetime
+from sdmetrics.utils import (
+    get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta, is_datetime)
 
 DATACEBO_DARK = '#000036'
 DATACEBO_LIGHT = '#01E0C9'
@@ -60,6 +61,7 @@ DIAGNOSTIC_REPORT_RESULT_DETAILS = {
         ),
     }
 }
+VALID_SDTYPES = ['numerical', 'categorical', 'boolean', 'datetime']
 
 
 def make_discrete_column_plot(real_column, synthetic_column, sdtype):
@@ -514,12 +516,14 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
     binned_real, binned_synthetic, binned_metadata = discretize_table_data(
         real_data, synthetic_data, metadata)
 
+    alternate_keys = get_alternate_keys(metadata)
     non_id_cols = [
         field for field, field_meta in get_columns_from_metadata(binned_metadata).items() if
         (
-            get_type_from_column_meta(field_meta) != 'id' and
+            get_type_from_column_meta(field_meta) in VALID_SDTYPES and
             field != metadata.get('primary_key', '') and
-            not field_meta.get('pii', False)
+            not field_meta.get('pii', False) and
+            field not in alternate_keys
         )
     ]
     for columns in itertools.combinations(non_id_cols, r=2):
