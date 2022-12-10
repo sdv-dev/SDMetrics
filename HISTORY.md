@@ -1,6 +1,6 @@
 # History
 
-## v0.8.0 - 2022-10-02
+## v0.8.0 - 2022-11-02
 
 This release introduces the `DiagnosticReport`, which helps a user verify – at a quick glance – that their data is valid. We also fix an existing bug with detection metrics.
 

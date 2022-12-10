@@ -77,5 +77,5 @@ def test_multi_table_quality_report():
     properties = report.get_properties()
     pd.testing.assert_frame_equal(properties, pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Parent Child Relationships'],
-        'Score': [0.7916666666666667, 0.678052339757824, 0.75],
+        'Score': [0.8, 0.6704734340781349, 0.75],
     }))

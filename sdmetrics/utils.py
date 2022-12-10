@@ -254,3 +254,24 @@ def get_type_from_column_meta(column_metadata):
         return column_metadata['sdtype']
 
     return ''
+
+
+def get_alternate_keys(metadata):
+    """Get the alternate keys from a metadata dict.
+
+    Args:
+        metadata (dict):
+            The metadata dict.
+
+    Returns:
+        list:
+            The list of alternate keys.
+    """
+    alternate_keys = []
+    for alternate_key in metadata.get('alternate_keys', []):
+        if type(alternate_key) is list:
+            alternate_keys.extend(alternate_key)
+        else:
+            alternate_keys.append(alternate_key)
+
+    return alternate_keys

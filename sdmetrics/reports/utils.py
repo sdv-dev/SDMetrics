@@ -9,7 +9,8 @@ import plotly.express as px
 import plotly.figure_factory as ff
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
-from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta, is_datetime
+from sdmetrics.utils import (
+    get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta, is_datetime)
 
 DATACEBO_DARK = '#000036'
 DATACEBO_LIGHT = '#01E0C9'
@@ -60,6 +61,7 @@ DIAGNOSTIC_REPORT_RESULT_DETAILS = {
         ),
     }
 }
+VALID_SDTYPES = ['numerical', 'categorical', 'boolean', 'datetime']
 
 
 def make_discrete_column_plot(real_column, synthetic_column, sdtype):
@@ -375,7 +377,7 @@ def make_mixed_column_pair_plot(real_data, synthetic_data):
     return fig
 
 
-def get_column_pair_plot(real_data, synthetic_data, columns, metadata):
+def get_column_pair_plot(real_data, synthetic_data, column_names, metadata):
     """Return a plot of the real and synthetic data for a given column pair.
 
     Args:
@@ -383,8 +385,8 @@ def get_column_pair_plot(real_data, synthetic_data, columns, metadata):
             The real table data.
         synthetic_column (pandas.Dataframe):
             The synthetic table data.
-        columns (list[string]):
-            The two columns to plot.
+        column_names (list[string]):
+            The names of the two columns to plot.
         metadata (dict):
             The table metadata.
 
@@ -392,34 +394,34 @@ def get_column_pair_plot(real_data, synthetic_data, columns, metadata):
         plotly.graph_objects._figure.Figure
     """
     all_columns = get_columns_from_metadata(metadata)
-    invalid_columns = [column for column in columns if column not in all_columns]
+    invalid_columns = [column for column in column_names if column not in all_columns]
     if invalid_columns:
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found in metadata.")
     else:
         invalid_columns = [
-            column for column in columns if (
+            column for column in column_names if (
                 'type' not in all_columns[column] and 'sdtype' not in all_columns[column])
         ]
         if invalid_columns:
             raise ValueError(f"Metadata for column(s) `{'`, `'.join(invalid_columns)}` "
                              "missing 'type' information.")
 
-    invalid_columns = [column for column in columns if column not in real_data.columns]
+    invalid_columns = [column for column in column_names if column not in real_data.columns]
     if invalid_columns:
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
                          'in the real table data.')
 
-    invalid_columns = [column for column in columns if column not in synthetic_data.columns]
+    invalid_columns = [column for column in column_names if column not in synthetic_data.columns]
     if invalid_columns:
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
                          'in the synthetic table data.')
 
     sdtypes = (
-        get_type_from_column_meta(all_columns[columns[0]]),
-        get_type_from_column_meta(all_columns[columns[1]]),
+        get_type_from_column_meta(all_columns[column_names[0]]),
+        get_type_from_column_meta(all_columns[column_names[1]]),
     )
-    real_data = real_data[columns]
-    synthetic_data = synthetic_data[columns]
+    real_data = real_data[column_names]
+    synthetic_data = synthetic_data[column_names]
 
     all_sdtypes = CONTINUOUS_SDTYPES + DISCRETE_SDTYPES
     invalid_sdtypes = [sdtype for sdtype in sdtypes if sdtype not in all_sdtypes]
@@ -514,12 +516,14 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
     binned_real, binned_synthetic, binned_metadata = discretize_table_data(
         real_data, synthetic_data, metadata)
 
+    alternate_keys = get_alternate_keys(metadata)
     non_id_cols = [
         field for field, field_meta in get_columns_from_metadata(binned_metadata).items() if
         (
-            get_type_from_column_meta(field_meta) != 'id' and
+            get_type_from_column_meta(field_meta) in VALID_SDTYPES and
             field != metadata.get('primary_key', '') and
-            not field_meta.get('pii', False)
+            not field_meta.get('pii', False) and
+            field not in alternate_keys
         )
     ]
     for columns in itertools.combinations(non_id_cols, r=2):

@@ -919,12 +919,16 @@ def test_discretize_and_apply_metric(discretize_table_data_mock):
         'col2': ['a', 'b', 'c'],
         'col3': [2, 1, 11],
         'col4': [True, False, True],
+        'col5': ['', '', ''],
+        'col6': ['', '', ''],
     })
     binned_synthetic = pd.DataFrame({
         'col1': [11, 1, 11],
         'col2': ['c', 'a', 'c'],
         'col3': [11, 0, 5],
         'col4': [False, False, True],
+        'col5': ['', '', ''],
+        'col6': ['', '', ''],
     })
     metadata = {
         'fields': {
@@ -932,6 +936,8 @@ def test_discretize_and_apply_metric(discretize_table_data_mock):
             'col2': {'type': 'categorical'},
             'col3': {'type': 'datetime'},
             'col4': {'type': 'boolean'},
+            'col5': {'type': 'address'},
+            'col6': {'type': 'text'},
         },
     }
     discretize_table_data_mock.return_value = (binned_real, binned_synthetic, metadata)

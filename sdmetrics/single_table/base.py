@@ -7,7 +7,8 @@ import pandas as pd
 
 from sdmetrics.base import BaseMetric
 from sdmetrics.errors import IncomputableMetricError
-from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
+from sdmetrics.utils import (
+    get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta)
 
 
 class SingleTableMetric(BaseMetric):
@@ -75,9 +76,10 @@ class SingleTableMetric(BaseMetric):
             types = (types, )
 
         primary_key = metadata.get('primary_key', '')
+        alternate_keys = get_alternate_keys(metadata)
 
         for field_name, field_meta in get_columns_from_metadata(metadata).items():
-            if 'pii' in field_meta or field_name == primary_key:
+            if 'pii' in field_meta or field_name == primary_key or field_name in alternate_keys:
                 continue
 
             field_type = get_type_from_column_meta(field_meta)

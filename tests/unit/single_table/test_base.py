@@ -225,10 +225,14 @@ class TestSingleTableMetric:
         """Test the ``_select_fields`` method with pii. Expect that pii column is skipped."""
         # Setup
         metadata = {
+            'alternate_keys': ['colD', ['colE', 'colF']],
             'fields': {
                 'colA': {'type': 'datetime'},
                 'colB': {'type': 'categorical'},
                 'colC': {'type': 'categorical', 'pii': True},
+                'colD': {'type': 'categorical'},
+                'colE': {'type': 'categorical'},
+                'colF': {'type': 'categorical'},
             },
         }
 

@@ -1,6 +1,7 @@
 """Range Coverage Metric."""
 
 import numpy as np
+import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
@@ -42,10 +43,16 @@ class RangeCoverage(SingleColumnMetric):
             float:
                 The range coverage of the synthetic data over the real data.
         """
-        min_r = min(real_data)
-        max_r = max(real_data)
-        min_s = min(synthetic_data)
-        max_s = max(synthetic_data)
+        if not isinstance(real_data, pd.Series):
+            real_data = pd.Series(real_data)
+
+        if not isinstance(synthetic_data, pd.Series):
+            synthetic_data = pd.Series(synthetic_data)
+
+        min_r = real_data.min()
+        max_r = real_data.max()
+        min_s = synthetic_data.min()
+        max_s = synthetic_data.max()
 
         if min_r == max_r:
             return np.nan
