@@ -12,19 +12,20 @@ with open('HISTORY.md', encoding='utf-8') as history_file:
     history = history_file.read()
 
 install_requires = [
-    "numpy>=1.18.0,<1.20.0;python_version<'3.7'",
-    "numpy>=1.20.0,<2;python_version>='3.7'",
-    'pandas>=1.1.3,<2',
+    "numpy>=1.20.0,<2;python_version<'3.10'",
+    "numpy>=1.23.3,<2;python_version>='3.10'",
+    "pandas>=1.1.3,<2;python_version<'3.10'",
+    "pandas>=1.5.0,<2;python_version>='3.10'",
     'scikit-learn>=0.24,<2',
-    'scipy>=1.5.4,<2',
-    'copulas>=0.7.0,<0.8',
+    "scipy>=1.5.4,<2;python_version<'3.10'",
+    "scipy>=1.9.2,<2;python_version>='3.10'",
+    'copulas>=0.8.0,<0.9',
     'tqdm>=4.15,<5',
     'plotly>=5.10.0,<6',
 ]
 
 pomegranate_requires = [
-    "pomegranate>=0.13.4,<0.14.2;python_version<'3.7'",
-    "pomegranate>=0.14.1,<0.14.7;python_version>='3.7'",
+    'pomegranate>=0.14.1,<0.14.7',
 ]
 
 torch_requires = [
@@ -36,8 +37,8 @@ setup_requires = [
 ]
 
 tests_require = [
-    'pytest>=3.4.2',
-    'pytest-cov>=2.6.0',
+    'pytest>=6.2.5,<7',
+    'pytest-cov>=2.6.0,<3',
     'pytest-rerunfailures>=10',
     'jupyter>=1.0.0,<2',
     'rundoc>=0.4.3,<0.5',
@@ -97,10 +98,10 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
@@ -118,7 +119,7 @@ setup(
     keywords='sdmetrics sdmetrics SDMetrics',
     name='sdmetrics',
     packages=find_packages(include=['sdmetrics', 'sdmetrics.*']),
-    python_requires='>=3.6,<3.10',
+    python_requires='>=3.7,<3.11',
     setup_requires=setup_requires,
     test_suite='tests',
     tests_require=tests_require,
