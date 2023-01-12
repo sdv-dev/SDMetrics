@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.datasets import load_boston
+from sklearn.datasets import load_diabetes
 
 from sdmetrics.single_table.efficacy.regression import LinearRegression, MLPRegressor
 
@@ -13,7 +13,7 @@ METRICS = [
 
 @pytest.fixture()
 def test_data():
-    boston = load_boston()
+    boston = load_diabetes()
     data = pd.DataFrame(boston.data, columns=boston.feature_names)
     data['target'] = boston.target
     return data
@@ -21,7 +21,7 @@ def test_data():
 
 @pytest.fixture()
 def good_data():
-    boston = load_boston()
+    boston = load_diabetes()
     data = pd.DataFrame(boston.data, columns=boston.feature_names)
 
     columns = len(data.columns)
@@ -40,7 +40,7 @@ def good_data():
 
 @pytest.fixture()
 def bad_data():
-    boston = load_boston()
+    boston = load_diabetes()
     data = pd.DataFrame(boston.data, columns=boston.feature_names)
 
     stds = data.std(axis=0)
