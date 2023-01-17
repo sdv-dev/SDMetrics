@@ -67,7 +67,7 @@ class DiagnosticReport():
         print_results_for_level(out, self._results, 'WARNING')
         print_results_for_level(out, self._results, 'DANGER')
 
-    def generate(self, real_data, synthetic_data, metadata):
+    def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
 
         Args:
@@ -77,6 +77,8 @@ class DiagnosticReport():
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
+            verbose (bool):
+                Whether or not to print report summary and progress.
         """
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
         self._metric_args['NewRowSynthesis']['synthetic_sample_size'] = min(
@@ -84,7 +86,7 @@ class DiagnosticReport():
             self._metric_args['NewRowSynthesis']['synthetic_sample_size'],
         )
 
-        for metric in tqdm.tqdm(metrics, desc='Creating report'):
+        for metric in tqdm.tqdm(metrics, desc='Creating report', disable=(not verbose)):
             metric_name = metric.__name__
             try:
                 metric_args = self._metric_args.get(metric_name, {})
@@ -106,7 +108,8 @@ class DiagnosticReport():
         for prop, _ in self.METRICS.items():
             self._property_scores[prop] = self.get_details(prop)['Diagnostic Score'].mean()
 
-        self._print_results()
+        if verbose:
+            self._print_results()
 
     def get_results(self):
         """Return the diagnostic results.
