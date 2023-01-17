@@ -1,3 +1,5 @@
+import contextlib
+import io
 import pickle
 from unittest.mock import Mock, call, mock_open, patch
 
@@ -134,6 +136,103 @@ class TestQualityReport:
             'Column Pair Trends': 0.15000000000000002,
             'Parent Child Relationships': 1.0,
         }
+
+    @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
+    def test_generate_verbose_false(self, mock_discretize_and_apply_metric):
+        """Test the ``generate`` method with silent mode. Expect that nothing is printed."""
+        # Setup
+        mock_discretize_and_apply_metric.return_value = {}
+        real_data = {
+            'table1': pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']}),
+            'table2': pd.DataFrame({'col1': [1, 1, 1]}),
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({'col1': [1, 3, 3], 'col2': ['b', 'b', 'c']}),
+            'table2': pd.DataFrame({'col1': [3, 1, 3]}),
+        }
+        metadata = {
+            'tables': {
+                'table1': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
+                'table2': {'col1': {'type': 'numerical'}},
+            },
+        }
+
+        ks_complement_mock = Mock()
+        ks_complement_mock.__name__ = 'KSComplement'
+        ks_complement_mock.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            }
+        }
+
+        tv_complement_mock = Mock()
+        tv_complement_mock.__name__ = 'TVComplement'
+        tv_complement_mock.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            }
+        }
+
+        corr_sim_mock = Mock()
+        corr_sim_mock.__name__ = 'CorrelationSimilarity'
+        corr_sim_mock.compute_breakdown.return_value = {
+            'table1': {
+                ('col1', 'col2'): {'score': 0.1},
+                ('col2', 'col3'): {'score': 0.2},
+            }
+        }
+
+        cont_sim_mock = Mock()
+        cont_sim_mock.__name__ = 'ContingencySimilarity'
+        cont_sim_mock.compute_breakdown.return_value = {
+            'table1': {
+                ('col1', 'col2'): {'score': 0.1},
+                ('col2', 'col3'): {'score': 0.2},
+            }
+        }
+
+        cardinality_mock = Mock()
+        cardinality_mock.__name__ = 'CardinalityShapeSimilarity'
+        cardinality_mock.compute_breakdown.return_value = {
+            ('table1', 'table2'): {'score': 1.0},
+        }
+        metrics_mock = {
+            'Column Shapes': [ks_complement_mock, tv_complement_mock],
+            'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
+            'Parent Child Relationships': [cardinality_mock],
+        }
+
+        # Run
+        prints = io.StringIO()
+        with contextlib.redirect_stderr(prints), patch.object(
+            QualityReport,
+            'METRICS',
+            metrics_mock,
+        ):
+            report = QualityReport()
+            report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+        # Assert
+        ks_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        tv_complement_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        corr_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cont_sim_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        cardinality_mock.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+
+        assert report._overall_quality_score == 0.43333333333333335
+        assert report._property_breakdown == {
+            'Column Shapes': 0.15000000000000002,
+            'Column Pair Trends': 0.15000000000000002,
+            'Parent Child Relationships': 1.0,
+        }
+        assert prints.getvalue() == ''
 
     @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
     def test_generate_with_errored_metric(self, mock_discretize_and_apply_metric):

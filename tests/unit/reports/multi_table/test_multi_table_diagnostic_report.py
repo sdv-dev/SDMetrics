@@ -1,3 +1,5 @@
+import contextlib
+import io
 import pickle
 from unittest.mock import Mock, call, mock_open, patch
 
@@ -99,6 +101,87 @@ class TestDiagnosticReport:
             'NewRowSynthesis': 0.1,
             'BoundaryAdherence': 0.15000000000000002,
         }
+
+    def test_generate_verbose_false(self):
+        """Test the ``generate`` method on silent mode. Expect that nothing is printed."""
+        # Setup
+        real_data = pd.DataFrame({
+            'table1': {'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']},
+        })
+        synthetic_data = pd.DataFrame({
+            'table1': {'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']},
+        })
+        metadata = {
+            'tables': {
+                'table1': {
+                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
+                },
+            },
+        }
+        range_coverage = Mock()
+        range_coverage.__name__ = 'RangeCoverage'
+        range_coverage.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            },
+        }
+
+        category_coverage = Mock()
+        category_coverage.__name__ = 'CategoryCoverage'
+        category_coverage.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            },
+        }
+
+        new_row_synth = Mock()
+        new_row_synth.__name__ = 'NewRowSynthesis'
+        new_row_synth.compute_breakdown.return_value = {
+            'table1': {'score': 0.1},
+        }
+
+        boundary_adherence = Mock()
+        boundary_adherence.__name__ = 'BoundaryAdherence'
+        boundary_adherence.compute_breakdown.return_value = {
+            'table1': {
+                'col1': {'score': 0.1},
+                'col2': {'score': 0.2},
+            },
+        }
+        metrics_mock = {
+            'Coverage': [range_coverage, category_coverage],
+            'Synthesis': [new_row_synth],
+            'Boundaries': [boundary_adherence],
+        }
+
+        # Run
+        prints = io.StringIO()
+        with contextlib.redirect_stderr(prints), patch.object(
+            DiagnosticReport,
+            'METRICS',
+            metrics_mock,
+        ):
+            report = DiagnosticReport()
+            report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+        # Assert
+        range_coverage.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        category_coverage.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        new_row_synth.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata, synthetic_sample_size=2)
+        boundary_adherence.compute_breakdown.assert_called_once_with(
+            real_data, synthetic_data, metadata)
+        assert report._metric_averages == {
+            'RangeCoverage': 0.15000000000000002,
+            'CategoryCoverage': 0.15000000000000002,
+            'NewRowSynthesis': 0.1,
+            'BoundaryAdherence': 0.15000000000000002,
+        }
+        assert prints.getvalue() == ''
 
     def test_generate_with_errored_metric(self):
         """Test the ``generate`` method when a metric has an error.
