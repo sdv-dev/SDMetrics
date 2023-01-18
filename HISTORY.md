@@ -1,5 +1,32 @@
 # History
 
+## v0.9.0 - 2023-01-18
+
+This release supports Python 3.10 and drops support for Python 3.6. We also add a verbosity argument to report generation.
+
+### New Features
+* Silent mode when creating reports. - Issue [#269](https://github.com/sdv-dev/SDMetrics/issues/269) by @katxiao
+* Support Python versions >=3.7 and <3.11 - Issue [287](https://github.com/sdv-dev/SDMetrics/issues/287) by @katxiao
+
+## v0.8.1 - 2022-12-09
+
+This release fixes bugs in the existing metrics and reports. We also make the reports compatible with future SDV versions.
+
+### New Features
+* Filter out additional sdtypes that will be available in future versions of SDV - Issue [#265](https://github.com/sdv-dev/SDMetrics/issues/265) by @katxiao
+* NewRowSynthesis should ignore PrimaryKey column - Issue [#260](https://github.com/sdv-dev/SDMetrics/issues/260) by @katxiao
+
+### Bug Fixes
+* Visualization crashes if there are metric errors - Issue [#272](https://github.com/sdv-dev/SDMetrics/issues/272) by @katxiao
+* Score for TVComplement if synthetic data only has missing values - Issue [#271](https://github.com/sdv-dev/SDMetrics/issues/271) by @katxiao
+* Fix 'timestamp' column metadata in the multi table demo - Issue [#267](https://github.com/sdv-dev/SDMetrics/issues/267) by @katxiao
+* Fix 'duration' column in the single table demo - Issue [#266](https://github.com/sdv-dev/SDMetrics/issues/266) by @katxiao
+* README.md example has a bug - Issue [#262](https://github.com/sdv-dev/SDMetrics/issues/262) by @katxiao
+* Update README.md to fix a bug - Issue [#263](https://github.com/sdv-dev/SDMetrics/issues/263) by @katxiao
+* Visualization get_column_pair_plot: update parameter name to column_names - Issue [#258](https://github.com/sdv-dev/SDMetrics/issues/258) by @katxiao
+* "Column Shapes" and "Column Pair Trends" Calculation Inconsistency - Issue [#254](https://github.com/sdv-dev/SDMetrics/issues/254) by @katxiao
+* Diagnostic Report missing RangeCoverage for numerical columns - Issue [#255](https://github.com/sdv-dev/SDMetrics/issues/255) by @katxiao
+
 ## v0.8.0 - 2022-11-02
 
 This release introduces the `DiagnosticReport`, which helps a user verify – at a quick glance – that their data is valid. We also fix an existing bug with detection metrics.

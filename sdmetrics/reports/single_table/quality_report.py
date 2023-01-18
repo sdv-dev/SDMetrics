@@ -54,7 +54,7 @@ class QualityReport():
             else:
                 out.write(f'{prop}: NaN\n')
 
-    def generate(self, real_data, synthetic_data, metadata):
+    def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
 
         Args:
@@ -64,10 +64,12 @@ class QualityReport():
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
+            verbose (bool):
+                Whether or not to print report summary and progress.
         """
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
 
-        for metric in tqdm.tqdm(metrics, desc='Creating report'):
+        for metric in tqdm.tqdm(metrics, desc='Creating report', disable=(not verbose)):
             try:
                 self._metric_results[metric.__name__] = metric.compute_breakdown(
                     real_data, synthetic_data, metadata)
@@ -96,7 +98,8 @@ class QualityReport():
 
         self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
 
-        self._print_results()
+        if verbose:
+            self._print_results()
 
     def get_score(self):
         """Return the overall quality score.
