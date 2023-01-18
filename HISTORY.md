@@ -1,5 +1,13 @@
 # History
 
+## v0.9.0 - 2023-01-18
+
+This release supports Python 3.10 and drops support for Python 3.6. We also add a verbosity argument to report generation.
+
+### New Features
+* Silent mode when creating reports. - Issue [#269](https://github.com/sdv-dev/SDMetrics/issues/269) by @katxiao
+* Support Python versions >=3.7 and <3.11 - Issue [287](https://github.com/sdv-dev/SDMetrics/issues/287) by @katxiao
+
 ## v0.8.1 - 2022-12-09
 
 This release fixes bugs in the existing metrics and reports. We also make the reports compatible with future SDV versions.
