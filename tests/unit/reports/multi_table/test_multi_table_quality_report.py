@@ -1224,9 +1224,9 @@ class TestQualityReport:
         mock_out.write.assert_has_calls([
             call('\nOverall Quality Score: 80.0%\n\n'),
             call('Properties:\n'),
-            call('Column Shapes: 60.0%\n'),
-            call('Column Pair Trends: 80.0%\n'),
-            call('Parent Child Relationships: 90.0%\n'),
+            call('- Column Shapes: 60.0%\n'),
+            call('- Column Pair Trends: 80.0%\n'),
+            call('- Parent Child Relationships: 90.0%\n'),
         ])
 
     def test__print_result_with_error(self):
@@ -1262,9 +1262,9 @@ class TestQualityReport:
         mock_out.write.assert_has_calls([
             call('\nOverall Quality Score: 70.0%\n\n'),
             call('Properties:\n'),
-            call('Column Shapes: 60.0%\n'),
-            call('Column Pair Trends: Error computing property.\n'),
-            call('Parent Child Relationships: 80.0%\n'),
+            call('- Column Shapes: 60.0%\n'),
+            call('- Column Pair Trends: Error computing property.\n'),
+            call('- Parent Child Relationships: 80.0%\n'),
         ])
 
     def test__print_result_with_all_errors(self):
@@ -1300,7 +1300,7 @@ class TestQualityReport:
         mock_out.write.assert_has_calls([
             call('\nOverall Quality Score: Error computing report.\n\n'),
             call('Properties:\n'),
-            call('Column Shapes: Error computing property.\n'),
-            call('Column Pair Trends: Error computing property.\n'),
-            call('Parent Child Relationships: Error computing property.\n'),
+            call('- Column Shapes: Error computing property.\n'),
+            call('- Column Pair Trends: Error computing property.\n'),
+            call('- Parent Child Relationships: Error computing property.\n'),
         ])

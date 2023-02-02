@@ -48,11 +48,11 @@ class QualityReport():
 
         for prop, score in self._property_breakdown.items():
             if not pd.isna(score):
-                out.write(f'{prop}: {round(score * 100, 2)}%\n')
+                out.write(f'- {prop}: {round(score * 100, 2)}%\n')
             elif self._property_errors[prop] > 0:
-                out.write(f'{prop}: Error computing property.\n')
+                out.write(f'- {prop}: Error computing property.\n')
             else:
-                out.write(f'{prop}: NaN\n')
+                out.write(f'- {prop}: NaN\n')
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
