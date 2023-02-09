@@ -86,7 +86,7 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
     synthetic_data['Data'] = 'Synthetic'
 
     missing_data_real = round((real_column.isna().sum() / len(real_column)) * 100, 2)
-    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)), 2)
+    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)) * 100, 2)
 
     all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
 
@@ -154,7 +154,7 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
     """
     column_name = real_column.name if hasattr(real_column, 'name') else ''
     missing_data_real = round((real_column.isna().sum() / len(real_column)) * 100, 2)
-    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)), 2)
+    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)) * 100, 2)
 
     real_data = real_column.dropna()
     synthetic_data = synthetic_column.dropna()
