@@ -84,7 +84,6 @@ def get_missing_percentage(data_column):
         pandas.Series:
             Percentage of missing values inside the column.
     """
-    
     return (data_column.isna().sum() / len(data_column)) * 100
 
 
