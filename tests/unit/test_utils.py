@@ -29,6 +29,7 @@ def test_get_cardinality_distribution():
     # Assert
     assert cardinality_distribution.to_list() == [2.0, 0.0, 1.0, 3.0, 1.0]
 
+
 def test_get_missing_percentage():
     """Test the ``get_missing_percentage`` utility function.
 
@@ -39,7 +40,7 @@ def test_get_missing_percentage():
     - the expected percentage of NaN inside the column.
     """
     # Setup
-    column = pd.Series([1, 2, 3, np.nan, 5,6,np.nan])
+    column = pd.Series([1, 2, 3, np.nan, 5, 6, np.nan])
 
     # Run
     percentage_nan = get_missing_percentage(column)
