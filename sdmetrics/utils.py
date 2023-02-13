@@ -79,7 +79,8 @@ def get_missing_percentage(data_column):
 
     Args:
         data_column (pandas.Series):
-            The data for the desired column.
+            The data of the desired column.
+
     Returns:
         pandas.Series:
             Percentage of missing values inside the column.

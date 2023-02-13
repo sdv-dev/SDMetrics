@@ -10,8 +10,8 @@ import plotly.figure_factory as ff
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
 from sdmetrics.utils import (
-    get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta, is_datetime,
-    get_missing_percentage)
+    get_alternate_keys, get_columns_from_metadata, get_missing_percentage,
+    get_type_from_column_meta, is_datetime)
 
 DATACEBO_DARK = '#000036'
 DATACEBO_LIGHT = '#01E0C9'

@@ -6,7 +6,7 @@ import pandas as pd
 
 from sdmetrics.utils import (
     HyperTransformer, get_alternate_keys, get_cardinality_distribution, get_columns_from_metadata,
-    get_type_from_column_meta, get_missing_percentage)
+    get_missing_percentage, get_type_from_column_meta)
 
 
 def test_get_cardinality_distribution():
