@@ -86,8 +86,8 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
     synthetic_data = pd.DataFrame({'values': synthetic_column.copy()})
     synthetic_data['Data'] = 'Synthetic'
 
-    missing_data_real = round(get_missing_percentage(real_column), 2)
-    missing_data_synthetic = round(get_missing_percentage(synthetic_column), 2)
+    missing_data_real = get_missing_percentage(real_column)
+    missing_data_synthetic = get_missing_percentage(synthetic_column)
 
     all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
 
@@ -154,8 +154,8 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
         plotly.graph_objects._figure.Figure
     """
     column_name = real_column.name if hasattr(real_column, 'name') else ''
-    missing_data_real = round(get_missing_percentage(real_column), 2)
-    missing_data_synthetic = round(get_missing_percentage(synthetic_column), 2)
+    missing_data_real = get_missing_percentage(real_column)
+    missing_data_synthetic = get_missing_percentage(synthetic_column)
 
     real_data = real_column.dropna()
     synthetic_data = synthetic_column.dropna()

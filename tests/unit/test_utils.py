@@ -46,7 +46,7 @@ def test_get_missing_percentage():
     percentage_nan = get_missing_percentage(column)
 
     # Assert
-    assert percentage_nan == 28.57142857142857
+    assert percentage_nan == 28.57
 
 
 def test_get_columns_from_metadata():

@@ -85,7 +85,7 @@ def get_missing_percentage(data_column):
         pandas.Series:
             Percentage of missing values inside the column.
     """
-    return (data_column.isna().sum() / len(data_column)) * 100
+    return round((data_column.isna().sum() / len(data_column)) * 100, 2)
 
 
 def get_cardinality_distribution(parent_column, child_column):
