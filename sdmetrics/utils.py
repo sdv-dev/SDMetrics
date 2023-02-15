@@ -74,6 +74,20 @@ def get_frequencies(real, synthetic):
     return f_obs, f_exp
 
 
+def get_missing_percentage(data_column):
+    """Compute the missing value percentage of a column.
+
+    Args:
+        data_column (pandas.Series):
+            The data of the desired column.
+
+    Returns:
+        pandas.Series:
+            Percentage of missing values inside the column.
+    """
+    return round((data_column.isna().sum() / len(data_column)) * 100, 2)
+
+
 def get_cardinality_distribution(parent_column, child_column):
     """Compute the cardinality distribution of the (parent, child) pairing.
 

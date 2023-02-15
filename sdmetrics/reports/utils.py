@@ -10,7 +10,8 @@ import plotly.figure_factory as ff
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
 from sdmetrics.utils import (
-    get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta, is_datetime)
+    get_alternate_keys, get_columns_from_metadata, get_missing_percentage,
+    get_type_from_column_meta, is_datetime)
 
 DATACEBO_DARK = '#000036'
 DATACEBO_LIGHT = '#01E0C9'
@@ -85,8 +86,8 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
     synthetic_data = pd.DataFrame({'values': synthetic_column.copy()})
     synthetic_data['Data'] = 'Synthetic'
 
-    missing_data_real = round((real_column.isna().sum() / len(real_column)) * 100, 2)
-    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)), 2)
+    missing_data_real = get_missing_percentage(real_column)
+    missing_data_synthetic = get_missing_percentage(synthetic_column)
 
     all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
 
@@ -153,8 +154,8 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
         plotly.graph_objects._figure.Figure
     """
     column_name = real_column.name if hasattr(real_column, 'name') else ''
-    missing_data_real = round((real_column.isna().sum() / len(real_column)) * 100, 2)
-    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)), 2)
+    missing_data_real = get_missing_percentage(real_column)
+    missing_data_synthetic = get_missing_percentage(synthetic_column)
 
     real_data = real_column.dropna()
     synthetic_data = synthetic_column.dropna()
