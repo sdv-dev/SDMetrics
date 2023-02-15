@@ -473,10 +473,10 @@ def discretize_table_data(real_data, synthetic_data, metadata):
             real_col = real_data[field_name]
             synthetic_col = synthetic_data[field_name]
             if field_type == 'datetime':
-                format = field_meta.get('format', '') or field_meta.get('datetime_format', '')
-                if real_col.dtype == 'O' and format:
-                    real_col = pd.to_datetime(real_col, format=format)
-                    synthetic_col = pd.to_datetime(synthetic_col, format=format)
+                datetime_format = field_meta.get('format') or field_meta.get('datetime_format')
+                if real_col.dtype == 'O' and datetime_format:
+                    real_col = pd.to_datetime(real_col, format=datetime_format)
+                    synthetic_col = pd.to_datetime(synthetic_col, format=datetime_format)
 
                 real_col = pd.to_numeric(real_col)
                 synthetic_col = pd.to_numeric(synthetic_col)
