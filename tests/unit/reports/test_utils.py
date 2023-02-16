@@ -898,6 +898,79 @@ def test_discretize_table_data():
     }
 
 
+def test_discretize_table_data_new_metadata():
+    """Test the ``discretize_table_data`` method with new metadata.
+
+    Expect that numerical and datetime fields are discretized.
+
+    Input:
+    - real data
+    - synthetic data
+    - metadata
+
+    Output:
+    - discretized real data
+    - discretized synthetic data
+    - updated metadata
+    """
+    # Setup
+    real_data = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': ['a', 'b', 'c'],
+        'col3': [datetime(2020, 1, 2), datetime(2019, 10, 1), datetime(2021, 3, 2)],
+        'col4': [True, False, True],
+        'col5': [date(2020, 1, 2), date(2010, 10, 12), date(2021, 1, 2)],
+    })
+    synthetic_data = pd.DataFrame({
+        'col1': [3, 1, 4],
+        'col2': ['c', 'a', 'c'],
+        'col3': [datetime(2021, 3, 2), datetime(2018, 11, 2), datetime(2020, 5, 7)],
+        'col4': [False, False, True],
+        'col5': [date(2020, 5, 3), date(2015, 11, 15), date(2022, 3, 2)],
+    })
+    metadata = {
+        'fields': {
+            'col1': {'sdtype': 'numerical'},
+            'col2': {'sdtype': 'categorical'},
+            'col3': {'sdtype': 'datetime'},
+            'col4': {'sdtype': 'boolean'},
+            'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+        },
+    }
+
+    # Run
+    discretized_real, discretized_synth, updated_metadata = discretize_table_data(
+        real_data, synthetic_data, metadata)
+
+    # Assert
+    expected_real = pd.DataFrame({
+        'col1': [1, 6, 11],
+        'col2': ['a', 'b', 'c'],
+        'col3': [2, 1, 11],
+        'col4': [True, False, True],
+        'col5': [10, 1, 11],
+    })
+    expected_synth = pd.DataFrame({
+        'col1': [11, 1, 11],
+        'col2': ['c', 'a', 'c'],
+        'col3': [11, 0, 5],
+        'col4': [False, False, True],
+        'col5': [10, 5, 11],
+    })
+
+    pd.testing.assert_frame_equal(discretized_real, expected_real)
+    pd.testing.assert_frame_equal(discretized_synth, expected_synth)
+    assert updated_metadata == {
+        'fields': {
+            'col1': {'sdtype': 'categorical'},
+            'col2': {'sdtype': 'categorical'},
+            'col3': {'sdtype': 'categorical'},
+            'col4': {'sdtype': 'boolean'},
+            'col5': {'sdtype': 'categorical'},
+        },
+    }
+
+
 @patch('sdmetrics.reports.utils.discretize_table_data')
 def test_discretize_and_apply_metric(discretize_table_data_mock):
     """Test the ``discretize_and_apply_metric`` method.
