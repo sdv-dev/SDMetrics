@@ -1,5 +1,13 @@
 # History
 
+## v0.9.1 - 2023-02-17
+
+This release fixes bugs in the existing metrics and reports.
+
+### Bug Fixes
+* Fix issue-296 for discrete and continuous columns - Issue [#296](https://github.com/sdv-dev/SDMetrics/issues/296) by @R-Palazzo
+* Support new metadata for datetime_format - Issue [#303](https://github.com/sdv-dev/SDMetrics/issues/303) by @frances-h
+
 ## v0.9.0 - 2023-01-18
 
 This release supports Python 3.10 and drops support for Python 3.6. We also add a verbosity argument to report generation.
