@@ -113,7 +113,7 @@ class NewRowSynthesis(SingleTableMetric):
                 engine = 'python'
             try:
                 matches = real_data.query(' and '.join(row_filter), engine=engine)
-            except (TypeError, ValueError):
+            except TypeError:
                 if len(real_data) > 10000:
                     warnings.warn('Unable to optimize query. For better formance, set the '
                                   '`synthetic_sample_size` parameter or upgrade to Python 3.8')
