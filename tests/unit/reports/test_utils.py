@@ -376,6 +376,23 @@ def test_convert_to_datetime_date_column():
     pd.testing.assert_series_equal(out, expected)
 
 
+def test_convert_to_datetime_str_format():
+    """Test the ``convert_to_datetime`` method with a string column.
+
+    Expect the string date column to be converted to a datetime column
+    using the provided format.
+    """
+    # Setup
+    column_data = pd.Series(['2020-01-02', '2021-01-02'])
+
+    # Run
+    out = convert_to_datetime(column_data)
+
+    # Assert
+    expected = pd.Series([datetime(2020, 1, 2), datetime(2021, 1, 2)])
+    pd.testing.assert_series_equal(out, expected)
+
+
 @patch('sdmetrics.reports.utils.px')
 def test_make_continuous_column_pair_plot(px_mock):
     """Test the ``make_continuous_column_pair_plot`` method.
@@ -637,6 +654,60 @@ def test_get_column_pair_plot_discrete_columns(make_plot_mock):
     make_plot_mock.assert_called_once_with(
         DataFrameMatcher(real_data[columns]),
         DataFrameMatcher(synthetic_data[columns]),
+    )
+    assert out == make_plot_mock.return_value
+
+
+@patch('sdmetrics.reports.utils.make_mixed_column_pair_plot')
+def test_get_column_pair_plot_str_datetimes(make_plot_mock):
+    """Test the ``get_column_pair_plot`` method with string datetime columns.
+
+    Expect that the string datetime columns are converted to datetimes.
+    """
+    # Setup
+    dt_format = '%Y-%m-%d'
+    real_datetimes = [
+        datetime(2020, 10, 1),
+        datetime(2020, 11, 1),
+        datetime(2020, 12, 1),
+    ]
+    real_data = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': [dt.strftime(dt_format) for dt in real_datetimes],
+    })
+    real_expected = pd.DataFrame({
+        'col1': [1, 2, 3],
+        'col2': real_datetimes,
+    })
+
+    synthetic_datetimes = [
+        datetime(2021, 10, 1),
+        datetime(2021, 11, 1),
+        datetime(2021, 12, 3),
+    ]
+    synthetic_data = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': [dt.strftime(dt_format) for dt in synthetic_datetimes],
+    })
+    synthetic_expected = pd.DataFrame({
+        'col1': [2, 2, 3],
+        'col2': synthetic_datetimes,
+    })
+    columns = ['col1', 'col2']
+    metadata = {
+        'fields': {
+            'col1': {'type': 'categorical'},
+            'col2': {'type': 'datetime', 'format': dt_format}
+        }
+    }
+
+    # Run
+    out = get_column_pair_plot(real_data, synthetic_data, columns, metadata)
+
+    # Assert
+    make_plot_mock.assert_called_once_with(
+        DataFrameMatcher(real_expected[columns]),
+        DataFrameMatcher(synthetic_expected[columns]),
     )
     assert out == make_plot_mock.return_value
 
