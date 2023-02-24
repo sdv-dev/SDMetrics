@@ -381,12 +381,6 @@ def test_convert_to_datetime_str_format():
 
     Expect the string date column to be converted to a datetime column
     using the provided format.
-
-    Inputs:
-    - date column
-
-    Output:
-    - datetime column
     """
     # Setup
     column_data = pd.Series(['2020-01-02', '2021-01-02'])

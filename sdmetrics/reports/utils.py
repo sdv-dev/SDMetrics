@@ -271,6 +271,7 @@ def convert_to_datetime(column_data, datetime_format=None):
 
     if datetime_format is None:
         datetime_format = _guess_datetime_format_for_array(column_data.astype(str).to_numpy())
+
     return pd.to_datetime(column_data, format=datetime_format)
 
 
@@ -437,14 +438,12 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, metadata):
     if all([t in DISCRETE_SDTYPES for t in sdtypes]):
         return make_discrete_column_pair_plot(real_data, synthetic_data)
 
-    if sdtypes[0] == 'datetime':
-        datetime_format = col_meta[0].get('format') or col_meta[0].get('datetime_format')
-        real_data.iloc[:, 0] = convert_to_datetime(real_data.iloc[:, 0], datetime_format)
-        synthetic_data.iloc[:, 0] = convert_to_datetime(synthetic_data.iloc[:, 0], datetime_format)
-    if sdtypes[1] == 'datetime':
-        datetime_format = col_meta[1].get('format') or col_meta[1].get('datetime_format')
-        real_data.iloc[:, 1] = convert_to_datetime(real_data.iloc[:, 1], datetime_format)
-        synthetic_data.iloc[:, 1] = convert_to_datetime(synthetic_data.iloc[:, 1], datetime_format)
+    for i, sdtype in enumerate(sdtypes):
+        if sdtype == 'datetime':
+            datetime_format = col_meta[i].get('format') or col_meta[i].get('datetime_format')
+            real_data.iloc[:, i] = convert_to_datetime(real_data.iloc[:, i], datetime_format)
+            synthetic_data.iloc[:, i] = convert_to_datetime(
+                synthetic_data.iloc[:, i], datetime_format)
 
     if all([t in CONTINUOUS_SDTYPES for t in sdtypes]):
         return make_continuous_column_pair_plot(real_data, synthetic_data)
