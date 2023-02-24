@@ -420,6 +420,7 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, metadata):
     if invalid_columns:
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
                          'in the synthetic table data.')
+
     col_meta = (all_columns[column_names[0]], all_columns[column_names[1]])
     sdtypes = (
         get_type_from_column_meta(col_meta[0]),
