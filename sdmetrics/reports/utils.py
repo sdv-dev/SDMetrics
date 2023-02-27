@@ -65,6 +65,29 @@ DIAGNOSTIC_REPORT_RESULT_DETAILS = {
 VALID_SDTYPES = ['numerical', 'categorical', 'boolean', 'datetime']
 
 
+def convert_to_datetime(column_data, datetime_format=None):
+    """Convert a column data to pandas datetime.
+
+    Args:
+        column_data (pandas.Series):
+            The column data
+        format (str):
+            Optional string format of datetime. If ``None``, will attempt to infer the datetime
+            format from the column data. Defaults to ``None``.
+
+    Returns:
+        pandas.Series:
+            The converted column data.
+    """
+    if is_datetime(column_data):
+        return column_data
+
+    if datetime_format is None:
+        datetime_format = _guess_datetime_format_for_array(column_data.astype(str).to_numpy())
+
+    return pd.to_datetime(column_data, format=datetime_format)
+
+
 def make_discrete_column_plot(real_column, synthetic_column, sdtype):
     """Plot the real and synthetic data for a categorical or boolean column.
 
@@ -239,9 +262,15 @@ def get_column_plot(real_data, synthetic_data, column_name, metadata):
     if column_name not in synthetic_data.columns:
         raise ValueError(f"Column '{column_name}' not found in synthetic table data.")
 
+    column_meta = columns[column_name]
     sdtype = get_type_from_column_meta(columns[column_name])
-    real_column = real_data[column_name]
-    synthetic_column = synthetic_data[column_name]
+    if sdtype == 'datetime':
+        datetime_format = column_meta.get('format') or column_meta.get('datetime_format')
+        real_column = convert_to_datetime(real_data[column_name], datetime_format)
+        synthetic_column = convert_to_datetime(synthetic_data[column_name], datetime_format)
+    else:
+        real_column = real_data[column_name]
+        synthetic_column = synthetic_data[column_name]
     if sdtype in CONTINUOUS_SDTYPES:
         fig = make_continuous_column_plot(real_column, synthetic_column, sdtype)
     elif sdtype in DISCRETE_SDTYPES:
@@ -250,29 +279,6 @@ def get_column_plot(real_data, synthetic_data, column_name, metadata):
         raise ValueError(f"sdtype of type '{sdtype}' not recognized.")
 
     return fig
-
-
-def convert_to_datetime(column_data, datetime_format=None):
-    """Convert a column data to pandas datetime.
-
-    Args:
-        column_data (pandas.Series):
-            The column data
-        format (str):
-            Optional string format of datetime. If ``None``, will attempt to infer the datetime
-            format from the column data. Defaults to ``None``.
-
-    Returns:
-        pandas.Series:
-            The converted column data.
-    """
-    if is_datetime(column_data):
-        return column_data
-
-    if datetime_format is None:
-        datetime_format = _guess_datetime_format_for_array(column_data.astype(str).to_numpy())
-
-    return pd.to_datetime(column_data, format=datetime_format)
 
 
 def make_continuous_column_pair_plot(real_data, synthetic_data):
