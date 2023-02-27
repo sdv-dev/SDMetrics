@@ -147,7 +147,7 @@ class TestNewRowSynthesis:
     def test_compute_with_many_columns(self):
         """Test the ``compute`` method with more than 32 columns.
 
-           Expect that the new row synthesis is returned.
+        Expect that the new row synthesis is returned.
         """
         # Setup
         num_cols = 32
