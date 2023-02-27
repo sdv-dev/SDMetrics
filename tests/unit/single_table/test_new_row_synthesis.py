@@ -144,6 +144,32 @@ class TestNewRowSynthesis:
             'synthetic data rows (5). Proceeding without sampling.'
         )
 
+    def test_compute_with_many_columns(self):
+        """Test the ``compute`` method with more than 32 columns.
+
+        Expect that the new row synthesis is returned.
+        """
+        # Setup
+        num_cols = 32
+        real_data = pd.DataFrame({
+            f'col{i}': list(np.random.uniform(low=0, high=10, size=100)) for i in range(num_cols)
+        })
+        synthetic_data = pd.DataFrame({
+            f'col{i}': list(np.random.uniform(low=0, high=10, size=100)) for i in range(num_cols)
+        })
+        metadata = {
+            'fields': {
+                f'col{i}': {'type': 'numerical', 'subtype': 'float'} for i in range(num_cols)
+            },
+        }
+        metric = NewRowSynthesis()
+
+        # Run
+        score = metric.compute(real_data, synthetic_data, metadata)
+
+        # Assert
+        assert score == 1
+
     @patch('sdmetrics.single_table.new_row_synthesis.SingleTableMetric.normalize')
     def test_normalize(self, normalize_mock):
         """Test the ``normalize`` method.
