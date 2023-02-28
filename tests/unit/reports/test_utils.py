@@ -223,6 +223,42 @@ def test_get_column_plot_discrete_col(make_plot_mock):
     assert out == make_plot_mock.return_value
 
 
+@patch('sdmetrics.reports.utils.make_continuous_column_plot')
+def test_get_column_plot_datetime_col(make_plot_mock):
+    """Test the ``get_column_plot`` method with a string datetime column."""
+    # Setup
+    sdtype = 'datetime'
+    datetime_format = '%Y-%m-%d'
+    real_datetimes = [
+        datetime(2020, 10, 1),
+        datetime(2020, 11, 1),
+        datetime(2020, 12, 1),
+    ]
+    real_data = pd.DataFrame({
+        'col1': [dt.strftime(datetime_format) for dt in real_datetimes]
+    })
+    real_expected = pd.DataFrame({'col1': real_datetimes})
+    synthetic_datetimes = [
+        datetime(2021, 10, 1),
+        datetime(2021, 11, 1),
+        datetime(2021, 12, 3),
+    ]
+    synthetic_data = pd.DataFrame({
+        'col1': [dt.strftime(datetime_format) for dt in synthetic_datetimes]
+    })
+    synthetic_expected = pd.DataFrame({'col1': synthetic_datetimes})
+    metadata = {'fields': {'col1': {'type': sdtype, 'format': datetime_format}}}
+
+    # Run
+    out = get_column_plot(real_data, synthetic_data, 'col1', metadata)
+
+    # Assert
+    make_plot_mock.assert_called_once_with(SeriesMatcher(real_expected['col1']),
+                                           SeriesMatcher(synthetic_expected['col1']),
+                                           sdtype)
+    assert out == make_plot_mock.return_value
+
+
 def test_get_column_plot_invalid_sdtype():
     """Test the ``get_column_plot`` method with an invalid sdtype.
 
