@@ -285,9 +285,11 @@ def get_column_plot(real_data, synthetic_data, column_name, metadata):
     column_meta = columns[column_name]
     sdtype = get_type_from_column_meta(columns[column_name])
     if sdtype == 'datetime':
-        real_column, synthetic_column = convert_datetime_columns(real_data[column_name],
-                                                                 synthetic_data[column_name],
-                                                                 column_meta)
+        real_column, synthetic_column = convert_datetime_columns(
+            real_data[column_name],
+            synthetic_data[column_name],
+            column_meta
+        )
     else:
         real_column = real_data[column_name]
         synthetic_column = synthetic_data[column_name]
