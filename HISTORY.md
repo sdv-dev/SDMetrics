@@ -1,5 +1,13 @@
 # History
 
+## v0.9.2 - 2023-03-07
+This release fixes bugs in the  `NewRowSynthesis` metric when too many columns were present. It also fixes bugs around datetime columns that are formatted as strings in both `get_column_pair_plot` and `get_column_plot`.
+
+### Bug Fixes
+* Method get_column_pair_plot: Does not plot synthetic data if datetime column is formatted as a string - Issue [#310] (https://github.com/sdv-dev/SDMetrics/issues/310) by @frances-h
+* Method get_column_plot: ValueError if a datetime column is formatted as a string - Issue [#309](https://github.com/sdv-dev/SDMetrics/issues/309) by @frances-h
+* Fix ValueError in the NewRowSynthesis metric (also impacts DiagnosticReport) - Issue [#307](https://github.com/sdv-dev/SDMetrics/issues/307) by @frances-h
+
 ## v0.9.1 - 2023-02-17
 
 This release fixes bugs in the existing metrics and reports.
