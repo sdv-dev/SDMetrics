@@ -1,6 +1,7 @@
 # History
 
-## v0.9.2 - 2023-03-07
+## v0.9.2 - 2023-03-08
+
 This release fixes bugs in the  `NewRowSynthesis` metric when too many columns were present. It also fixes bugs around datetime columns that are formatted as strings in both `get_column_pair_plot` and `get_column_plot`.
 
 ### Bug Fixes
