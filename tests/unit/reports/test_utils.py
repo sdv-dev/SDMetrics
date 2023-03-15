@@ -1,6 +1,7 @@
 import re
 from datetime import date, datetime
 from unittest.mock import Mock, call, patch
+import warnings
 
 import pandas as pd
 import pytest
@@ -9,7 +10,8 @@ from sdmetrics.reports.utils import (
     aggregate_metric_results, convert_to_datetime, discretize_and_apply_metric,
     discretize_table_data, get_column_pair_plot, get_column_plot, make_continuous_column_pair_plot,
     make_continuous_column_plot, make_discrete_column_pair_plot, make_discrete_column_plot,
-    make_mixed_column_pair_plot)
+    make_mixed_column_pair_plot, _validate_categorical_values, validate_multi_table_inputs,
+    validate_single_table_inputs)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -1189,3 +1191,126 @@ def test_aggregate_metric_results():
     # Assert
     assert avg_score == 0.45
     assert num_errors == 1
+
+
+def test__validate_categorical_values():
+    """Test no extra categoricals does not crash."""
+    # Setup
+    sdtype = 'categorical'
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
+    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 4]})
+    metadata = {'fields': {'col1': {'type': sdtype}}}
+    warnings.filterwarnings('error', category=UserWarning)
+
+    # Run
+    _validate_categorical_values(real_data, synthetic_data, metadata)
+
+    warnings.resetwarnings()
+
+def test__validate_categorical_values_single_table():
+    """Test validating categoricals for single table."""
+    # Setup
+    sdtype = 'categorical'
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 3]})
+    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
+    metadata = {'fields': {'col1': {'type': sdtype}}}
+    warning_msg = re.escape('Unexpected values ("4", "5") in column "col1"')
+
+    warnings.filterwarnings('error', category=UserWarning)
+
+    # Run
+    with pytest.raises(UserWarning, match=warning_msg):
+        _validate_categorical_values(real_data, synthetic_data, metadata)
+
+    warnings.resetwarnings()
+
+
+def test__validate_categorical_values_multi_table():
+    """Test validating categoricals with table name."""
+    # Setup
+    sdtype = 'categorical'
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 3]})
+    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
+    metadata = {'fields': {'col1': {'type': sdtype}}}
+    warning_msg = re.escape('Unexpected values ("4", "5") in column "col1" and table "table1"')
+
+    warnings.filterwarnings('error', category=UserWarning)
+
+    # Run
+    with pytest.raises(UserWarning, match=warning_msg):
+        _validate_categorical_values(real_data, synthetic_data, metadata, table='table1')
+
+    warnings.resetwarnings()
+
+
+def test__validate_categorical_many_extra_values():
+    """Test validating categoricals with table name."""
+    # Setup
+    sdtype = 'categorical'
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 3, 4, 4]})
+    synthetic_data = pd.DataFrame({'col1': ['a', 'b', 'c', 'd', 'e', 'f']})
+    metadata = {'fields': {'col1': {'type': sdtype}}}
+    warning_msg = re.escape('Unexpected values ("a", "b", "c", "d", "e" + more) in column "col1"')
+
+    warnings.filterwarnings('error', category=UserWarning)
+
+    # Run
+    with pytest.raises(UserWarning, match=warning_msg):
+        _validate_categorical_values(real_data, synthetic_data, metadata)
+
+    warnings.resetwarnings()
+
+
+def test_validate_single_table():
+    """Test validating single table."""
+    # Setup
+    sdtype = 'categorical'
+    real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
+    synthetic_data = pd.DataFrame({'col1': [1, 1, 1, 3]})
+    extra_value_synthtetic_data = pd.DataFrame({'col1': [1, 1, 1, 5]})
+    metadata = {'fields': {'col1': {'type': sdtype}}}
+
+    warning_msg = re.escape('Unexpected values ("5") in column "col1"')
+    warnings.filterwarnings('error', category=UserWarning)
+
+    # Run
+    validate_single_table_inputs(real_data, synthetic_data, metadata)
+
+    with pytest.raises(UserWarning, match=warning_msg):
+        validate_single_table_inputs(real_data, extra_value_synthtetic_data, metadata)
+
+    warnings.resetwarnings()
+
+
+def test_validate_multi_table():
+    """Test validating categoricals for single table."""
+    # Setup
+    sdtype = 'categorical'
+    real_data = {
+        'table1': pd.DataFrame({'col1': [1, 2, 3, 3]}),
+        'table2': pd.DataFrame({'col2': ['a', 'b', 'c', 'a']})
+    }
+    synthetic_data = {
+        'table1': pd.DataFrame({'col1': [1, 2, 3, 1]}),
+        'table2': pd.DataFrame({'col2': ['a', 'b', 'c', 'c']})
+    }
+    extra_value_synthetic_data = {
+        'table1': pd.DataFrame({'col1': [1, 2, 3, 1]}),
+        'table2': pd.DataFrame({'col2': ['a', 'b', 'c', 'd']})
+    }
+    metadata = {
+        'tables': {
+            'table1': {'fields': {'col1': {'type': sdtype}}},
+            'table2': {'fields': {'col2': {'type': sdtype}}}
+        }
+    }
+    warning_msg = re.escape('Unexpected values ("d") in column "col2" and table "table2"')
+
+    warnings.filterwarnings('error', category=UserWarning)
+
+    # Run 
+    validate_multi_table_inputs(real_data, synthetic_data, metadata)
+    with pytest.raises(UserWarning, match=warning_msg):
+        validate_multi_table_inputs(real_data, extra_value_synthetic_data, metadata)
+
+    warnings.resetwarnings()
