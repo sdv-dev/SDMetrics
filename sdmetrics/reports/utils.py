@@ -639,10 +639,6 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
             The metadata.
         table (str, optional):
             The name of the current table, if one exists
-
-    Returns:
-        Dict of values found in the synthetic data not present in the real data for
-        each column in the table.
     """
     if table:
         warning_format = 'Unexpected values ({values}) in column "{column}" '\
