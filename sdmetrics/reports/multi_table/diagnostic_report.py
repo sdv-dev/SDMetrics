@@ -17,7 +17,8 @@ from sdmetrics.multi_table import (
 from sdmetrics.reports.single_table.plot_utils import (
     get_column_boundaries_plot, get_column_coverage_plot, get_synthesis_plot)
 from sdmetrics.reports.utils import (
-    DIAGNOSTIC_REPORT_RESULT_DETAILS, aggregate_metric_results, print_results_for_level)
+    DIAGNOSTIC_REPORT_RESULT_DETAILS, aggregate_metric_results, print_results_for_level,
+    validate_multi_table_inputs)
 
 
 class DiagnosticReport():
@@ -82,6 +83,8 @@ class DiagnosticReport():
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
+        validate_multi_table_inputs(real_data, synthetic_data, metadata)
+
         metadata = metadata.copy()
         if 'relationships' in metadata:
             for rel in metadata['relationships']:
