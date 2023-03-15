@@ -1,16 +1,16 @@
 import re
+import warnings
 from datetime import date, datetime
 from unittest.mock import Mock, call, patch
-import warnings
 
 import pandas as pd
 import pytest
 
 from sdmetrics.reports.utils import (
-    aggregate_metric_results, convert_to_datetime, discretize_and_apply_metric,
-    discretize_table_data, get_column_pair_plot, get_column_plot, make_continuous_column_pair_plot,
-    make_continuous_column_plot, make_discrete_column_pair_plot, make_discrete_column_plot,
-    make_mixed_column_pair_plot, _validate_categorical_values, validate_multi_table_inputs,
+    _validate_categorical_values, aggregate_metric_results, convert_to_datetime,
+    discretize_and_apply_metric, discretize_table_data, get_column_pair_plot, get_column_plot,
+    make_continuous_column_pair_plot, make_continuous_column_plot, make_discrete_column_pair_plot,
+    make_discrete_column_plot, make_mixed_column_pair_plot, validate_multi_table_inputs,
     validate_single_table_inputs)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
@@ -1207,6 +1207,7 @@ def test__validate_categorical_values():
 
     warnings.resetwarnings()
 
+
 def test__validate_categorical_values_single_table():
     """Test validating categoricals for single table."""
     # Setup
@@ -1308,7 +1309,7 @@ def test_validate_multi_table():
 
     warnings.filterwarnings('error', category=UserWarning)
 
-    # Run 
+    # Run
     validate_multi_table_inputs(real_data, synthetic_data, metadata)
     with pytest.raises(UserWarning, match=warning_msg):
         validate_multi_table_inputs(real_data, extra_value_synthetic_data, metadata)

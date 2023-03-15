@@ -654,8 +654,10 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
     for column, column_meta in columns.items():
         column_type = get_type_from_column_meta(column_meta)
         if column_type == 'categorical':
-            extra_categories = [value for value in synthetic_data[column].unique()
-                                if value not in real_data[column].unique()]
+            extra_categories = [
+                value for value in synthetic_data[column].unique()
+                if value not in real_data[column].unique()
+            ]
             if extra_categories:
                 if len(extra_categories) > 5:
                     value_list = '", "'.join(str(value) for value in extra_categories[:5])
