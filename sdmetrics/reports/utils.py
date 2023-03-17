@@ -656,7 +656,8 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
             ]
             if extra_categories:
                 value_list = '", "'.join(str(value) for value in extra_categories[:5])
-                values = f'"{value_list}" + more' if len(extra_categories) > 5 else f'"{value_list}"'
+                values = f'"{value_list}" + more' if len(
+                    extra_categories) > 5 else f'"{value_list}"'
                 warnings.warn(warning_format.format(values=values, column=column))
 
 
