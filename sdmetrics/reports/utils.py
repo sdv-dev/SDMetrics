@@ -641,8 +641,8 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
             The name of the current table, if one exists
     """
     if table:
-        warning_format = 'Unexpected values ({values}) in column "{column}" '\
-                         f'and table "{table}"'
+        warning_format = ('Unexpected values ({values}) in column "{column}" '
+                          f'and table "{table}"')
     else:
         warning_format = 'Unexpected values ({values}) in column "{column}"'
 
