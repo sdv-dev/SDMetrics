@@ -1315,3 +1315,40 @@ def test_validate_multi_table():
         validate_multi_table_inputs(real_data, extra_value_synthetic_data, metadata)
 
     warnings.resetwarnings()
+
+
+def test_validate_multi_table_parent_child_dtype_mismatch():
+    """Test validating categoricals for single table."""
+    # Setup
+    sdtype = 'numerical'
+    real_data = {
+        'table1': pd.DataFrame({'primary_key': [1, 2, 3, 4]}),
+        'table2': pd.DataFrame({'foreign_key': ['1', '2', '2', '3']})
+    }
+    synthetic_data = {
+        'table1': pd.DataFrame({'primary_key': [1, 2, 3, 1]}),
+        'table2': pd.DataFrame({'foreign_key': ['2', '2', '1', '3']})
+    }
+    metadata = {
+        'tables': {
+            'table1': {'fields': {'primary_key': {'type': sdtype}}},
+            'table2': {'fields': {'foreign_key': {'type': sdtype}}}
+        },
+        'relationships': [
+            {
+                'parent_table_name': 'table1',
+                'child_table_name': 'table2',
+                'parent_primary_key': 'primary_key',
+                'child_foreign_key': 'foreign_key'
+            }
+        ]
+    }
+    error_msg = re.escape(
+        'The "table1" table and "table2" table cannot be merged. Please make sure the primary key '
+        'in "table1" ("primary_key") and the foreign key in "table2" ("foreign_key") have the same'
+        ' data type.'
+    )
+
+    # Run and Assert
+    with pytest.raises(ValueError, match=error_msg):
+        validate_multi_table_inputs(real_data, synthetic_data, metadata)
