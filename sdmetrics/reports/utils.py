@@ -682,6 +682,20 @@ def validate_multi_table_inputs(real_data, synthetic_data, metadata):
                                      table_metadata,
                                      table=table)
 
+    for rel in metadata.get('relationships', []):
+        parent_dtype = real_data[rel['parent_table_name']][rel['parent_primary_key']].dtype
+        child_dtype = real_data[rel['child_table_name']][rel['child_foreign_key']].dtype
+        if (parent_dtype == 'object' and child_dtype != 'object') or (
+                parent_dtype != 'object' and child_dtype == 'object'):
+            parent = rel['parent_table_name']
+            parent_key = rel['parent_primary_key']
+            child = rel['child_table_name']
+            child_key = rel['child_foreign_key']
+            error_msg = (f"The '{parent}' table and '{child}' table cannot be merged. Please "
+                         f"make sure the primary key in '{parent}' ('{parent_key}') and the "
+                         f"foreign key in '{child}' ('{child_key}') have the same data type.")
+            raise ValueError(error_msg)
+
 
 def validate_single_table_inputs(real_data, synthetic_data, metadata):
     """Validate single table inputs for report generation.
