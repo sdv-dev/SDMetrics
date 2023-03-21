@@ -49,7 +49,7 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
             synthetic_data (dict[str, pandas.DataFrame]):
                 The tables from the synthetic dataset.
             metadata (dict):
-                Multi-table metadata dict. If not passed, it is build based on the
+                Multi-table metadata dict. If not passed, it is built based on the
                 real_data fields and dtypes.
             **kwargs:
                 Any additional keyword arguments will be passed down
@@ -102,7 +102,7 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
             synthetic_data (dict[str, pandas.DataFrame]):
                 The tables from the synthetic dataset.
             metadata (dict):
-                Multi-table metadata dict. If not passed, it is build based on the
+                Multi-table metadata dict. If not passed, it is built based on the
                 real_data fields and dtypes.
             **kwargs:
                 Any additional keyword arguments will be passed down
@@ -141,7 +141,7 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
             synthetic_data (dict[str, pandas.DataFrame]):
                 The tables from the synthetic dataset.
             metadata (dict):
-                Multi-table metadata dict. If not passed, it is build based on the
+                Multi-table metadata dict. If not passed, it is built based on the
                 real_data fields and dtypes.
             **kwargs:
                 Any additional keyword arguments will be passed down
@@ -264,7 +264,7 @@ class NewRowSynthesis(MultiSingleTableMetric):
             synthetic_data (dict[str, pandas.DataFrame]):
                 The tables from the synthetic dataset.
             metadata (dict):
-                Multi-table metadata dict. If not passed, it is build based on the
+                Multi-table metadata dict. If not passed, it is built based on the
                 real_data fields and dtypes.
             **kwargs:
                 Any additional keyword arguments will be passed down
