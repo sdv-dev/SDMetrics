@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pandas as pd
 
-from sdmetrics.multi_table import MultiSingleTableMetric, NewRowSynthesis
+from sdmetrics.multi_table import MultiSingleTableMetric
 
 
 class TestMultiSingleTableMetric:
@@ -119,37 +119,3 @@ class TestMultiSingleTableMetric:
 
         # Assert
         assert result == metric_breakdown
-
-
-class TestNewRowSynthesis:
-
-    def test__compute(self):
-        """Test the ``_compute`` method.
-
-        Ensure that ``NewRowSynthesis`` is called with the minimum number between the
-        length of the ``real_data`` and 10_000 for each table individually.
-        """
-        # Setup
-        data = {
-            'tableA': pd.DataFrame({
-                'a': [0, 1, 2, 3],
-                'b': [100, 200, 300, 400],
-                'c': ['one', 'two', 'three', 'four'],
-                'd': ['a', 'b', 'c', 'd'],
-            }),
-            'tableB': pd.DataFrame({
-                'col1': [0, 1, 2, 3, 4] * 3000,
-                'col2': ['a', 'b', 'c', 'd', 'e'] * 3000,
-                'col3': [4.3, 2.1, 4.1, 1.2, 3.2] * 3000,
-            })
-        }
-
-        # Run
-        with patch.object(NewRowSynthesis, 'single_table_metric', return_value=None) as metric:
-            NewRowSynthesis.compute_breakdown(data, data)
-
-        # Assert
-        assert metric.compute_breakdown.call_args_list[0][1] == {'synthetic_sample_size': 4}
-        assert metric.compute_breakdown.call_args_list[1][1] == {
-            'synthetic_sample_size': 10_000
-        }

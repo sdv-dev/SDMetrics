@@ -252,69 +252,6 @@ class NewRowSynthesis(MultiSingleTableMetric):
 
     single_table_metric = single_table.new_row_synthesis.NewRowSynthesis
 
-    def _compute(self, real_data, synthetic_data, metadata=None, **kwargs):
-        """Compute this metric.
-
-        This applies the underlying single table metric to all the tables
-        found in the dataset and then returns the average score obtained.
-
-        Args:
-            real_data (dict[str, pandas.DataFrame]):
-                The tables from the real dataset.
-            synthetic_data (dict[str, pandas.DataFrame]):
-                The tables from the synthetic dataset.
-            metadata (dict):
-                Multi-table metadata dict. If not passed, it is built based on the
-                real_data fields and dtypes.
-            **kwargs:
-                Any additional keyword arguments will be passed down
-                to the single table metric
-
-        Returns:
-            Union[float, tuple[float]]:
-                Metric output.
-        """
-        if set(real_data.keys()) != set(synthetic_data.keys()):
-            raise ValueError('`real_data` and `synthetic_data` must have the same tables')
-
-        if metadata is None:
-            metadata = {'tables': defaultdict(type(None))}
-        elif not isinstance(metadata, dict):
-            metadata = metadata.to_dict()
-
-        scores = {}
-        errors = {}
-        for table_name, real_table in real_data.items():
-            synthetic_table = synthetic_data[table_name]
-            table_meta = metadata['tables'][table_name]
-            kwargs['synthetic_sample_size'] = min(len(real_table), 10_000)
-
-            try:
-                score_breakdown = self.single_table_metric.compute_breakdown(
-                    real_table,
-                    synthetic_table,
-                    table_meta,
-                    **kwargs
-                )
-                scores[table_name] = score_breakdown
-
-            except AttributeError:
-                score = self.single_table_metric.compute(
-                    real_table,
-                    synthetic_table,
-                    table_meta,
-                    **kwargs
-                )
-                scores[table_name] = score
-
-            except Exception as error:
-                errors[table_name] = error
-
-        if not scores:
-            raise IncomputableMetricError(f'Encountered the following errors: {errors}')
-
-        return scores
-
 
 class BNLogLikelihood(MultiSingleTableMetric):
     """MultiSingleTableMetric based on SingleTable BNLogLikelihood."""
