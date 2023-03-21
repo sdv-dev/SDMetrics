@@ -1344,9 +1344,9 @@ def test_validate_multi_table_parent_child_dtype_mismatch():
         ]
     }
     error_msg = re.escape(
-        'The "table1" table and "table2" table cannot be merged. Please make sure the primary key '
-        'in "table1" ("primary_key") and the foreign key in "table2" ("foreign_key") have the same'
-        ' data type.'
+        "The 'table1' table and 'table2' table cannot be merged. Please make sure the primary key "
+        "in 'table1' ('primary_key') and the foreign key in 'table2' ('foreign_key') have the same"
+        " data type."
     )
 
     # Run and Assert
