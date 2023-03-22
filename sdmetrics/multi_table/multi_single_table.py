@@ -40,8 +40,8 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
         self.compute = self._compute
 
     @staticmethod
-    def _multitable_warning(catched_warnings, table_name):
-        for warning in catched_warnings:
+    def _multitable_warning(caught_warnings, table_name):
+        for warning in caught_warnings:
             if issubclass(warning.category, SDMetricsWarning):
                 prefixes = ['The real data in', 'The synthetic data in']
                 message = str(warning.message)
@@ -86,7 +86,7 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
             synthetic_table = synthetic_data[table_name]
             table_meta = metadata['tables'][table_name]
 
-            with warnings.catch_warnings(record=True) as catched_warnings:
+            with warnings.catch_warnings(record=True) as caught_warnings:
                 try:
                     score_breakdown = self.single_table_metric.compute_breakdown(
                         real_table, synthetic_table, table_meta, **kwargs)
@@ -98,8 +98,8 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
                 except Exception as error:
                     errors[table_name] = error
 
-            if catched_warnings:
-                self._multitable_warning(catched_warnings, table_name)
+            if caught_warnings:
+                self._multitable_warning(caught_warnings, table_name)
 
         if not scores:
             raise IncomputableMetricError(f'Encountered the following errors: {errors}')
