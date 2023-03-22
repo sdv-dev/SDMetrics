@@ -33,7 +33,6 @@ class CorrelationSimilarity(ColumnPairsMetric):
 
     @staticmethod
     def _generate_warning_msg(columns, prefix, warning_messages):
-        msg = None
         if len(columns) > 1:
             cols = ', '.join(columns)
             warning_messages.append(

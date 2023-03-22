@@ -1,7 +1,9 @@
 """Warnings for sdmetrics."""
 
+
 class SDMetricsWarning(RuntimeWarning):
     """Class to represent SDMetrics warnings."""
+
     pass
 
 
