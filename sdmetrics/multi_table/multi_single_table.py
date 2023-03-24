@@ -1,5 +1,6 @@
 """MultiTable metrics based on applying SingleTable metrics on all the tables."""
 
+import warnings
 from collections import defaultdict
 
 import numpy as np
@@ -8,6 +9,7 @@ from sdmetrics import single_table
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.multi_table.base import MultiTableMetric
 from sdmetrics.utils import nested_attrs_meta
+from sdmetrics.warnings import SDMetricsWarning
 
 
 class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('single_table_metric')):
@@ -36,6 +38,17 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
     def __init__(self, single_table_metric):
         self.single_table_metric = single_table_metric
         self.compute = self._compute
+
+    @staticmethod
+    def _multitable_warning(caught_warnings, table_name):
+        for warning in caught_warnings:
+            if issubclass(warning.category, SDMetricsWarning):
+                prefixes = ['The real data in', 'The synthetic data in']
+                message = str(warning.message)
+                for prefix in prefixes:
+                    message = message.replace(prefix, f"{prefix[:-3]} in table '{table_name}',")
+
+                warnings.warn(warning.category(message))
 
     def _compute(self, real_data, synthetic_data, metadata=None, **kwargs):
         """Compute this metric.
@@ -73,16 +86,20 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
             synthetic_table = synthetic_data[table_name]
             table_meta = metadata['tables'][table_name]
 
-            try:
-                score_breakdown = self.single_table_metric.compute_breakdown(
-                    real_table, synthetic_table, table_meta, **kwargs)
-                scores[table_name] = score_breakdown
-            except AttributeError:
-                score = self.single_table_metric.compute(
-                    real_table, synthetic_table, table_meta, **kwargs)
-                scores[table_name] = score
-            except Exception as error:
-                errors[table_name] = error
+            with warnings.catch_warnings(record=True) as caught_warnings:
+                try:
+                    score_breakdown = self.single_table_metric.compute_breakdown(
+                        real_table, synthetic_table, table_meta, **kwargs)
+                    scores[table_name] = score_breakdown
+                except AttributeError:
+                    score = self.single_table_metric.compute(
+                        real_table, synthetic_table, table_meta, **kwargs)
+                    scores[table_name] = score
+                except Exception as error:
+                    errors[table_name] = error
+
+            if caught_warnings:
+                self._multitable_warning(caught_warnings, table_name)
 
         if not scores:
             raise IncomputableMetricError(f'Encountered the following errors: {errors}')
