@@ -7,16 +7,18 @@ __email__ = 'dailabmit@gmail.com'
 __version__ = '0.9.3.dev0'
 
 import warnings
-try:
-    from importlib_metadata import entry_points
-except ImportError:
-    from importlib.metadata import entry_points
 
 import pandas as pd
 
 from sdmetrics import (
     column_pairs, demos, goal, multi_table, single_column, single_table, timeseries)
 from sdmetrics.demos import load_demo
+
+try:
+    from importlib_metadata import entry_points
+except ImportError:
+    from importlib.metadata import entry_points
+
 
 __all__ = [
     'demos',
