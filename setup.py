@@ -22,7 +22,7 @@ install_requires = [
     'copulas>=0.8.0,<0.9',
     'tqdm>=4.15,<5',
     'plotly>=5.10.0,<6',
-    "importlib-metadata>=4.6;python_version<'3.10'"
+    "importlib-metadata>=4.6,<6;python_version<'3.10'"
 ]
 
 pomegranate_requires = [
