@@ -6,19 +6,14 @@ __author__ = 'MIT Data To AI Lab'
 __email__ = 'dailabmit@gmail.com'
 __version__ = '0.9.3.dev0'
 
-import warnings
+from warnings import warn
 
 import pandas as pd
+from pkg_resources import iter_entry_points
 
 from sdmetrics import (
     column_pairs, demos, goal, multi_table, single_column, single_table, timeseries)
 from sdmetrics.demos import load_demo
-
-try:
-    from importlib_metadata import entry_points
-except ImportError:
-    from importlib.metadata import entry_points
-
 
 __all__ = [
     'demos',
@@ -83,12 +78,12 @@ def compute_metrics(metrics, real_data, synthetic_data, metadata=None, **kwargs)
 
 
 def _add_version():
-    for entry_point in entry_points(name='version', group='sdmetrics_modules'):
+    for entry_point in iter_entry_points(name='version', group='sdmetrics_modules'):
         try:
             module = entry_point.load()
         except Exception:
-            msg = f'Failed to load "{entry_point.name}" from "{entry_point.module}". '
-            warnings.warn(msg)
+            msg = f'Failed to load "{entry_point.name}" from "{entry_point.module}".'
+            warn(msg)
             continue
 
         if 'version' not in globals():
