@@ -10,6 +10,7 @@ import pandas as pd
 
 from sdmetrics import (
     column_pairs, demos, goal, multi_table, single_column, single_table, timeseries)
+from sdmetrics._addons import _find_addons
 from sdmetrics.demos import load_demo
 
 __all__ = [
@@ -22,6 +23,8 @@ __all__ = [
     'single_table',
     'timeseries',
 ]
+
+_find_addons(group='sdmetrics_modules', parent_globals=globals())
 
 
 def compute_metrics(metrics, real_data, synthetic_data, metadata=None, **kwargs):
