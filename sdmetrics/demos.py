@@ -4,7 +4,7 @@ import pathlib
 import pickle
 
 
-def load_demo(modality='multi_table', new_metadata=False):
+def load_demo(modality='multi_table'):
     """Load demo data of the indicated data modality.
 
     By default, multi_table demo is loaded.
@@ -15,8 +15,6 @@ def load_demo(modality='multi_table', new_metadata=False):
         modality (str):
             Data modality to load. It can be multi_table, single_table
             or timeseries.
-        new_metadata (bool):
-            Whether or not to return the new metadata.
 
     Returns:
         tuple:
@@ -25,8 +23,7 @@ def load_demo(modality='multi_table', new_metadata=False):
     demo_path = pathlib.Path(__file__).parent / 'demos' / f'{modality}.pkl'
     with open(demo_path, 'rb') as demo_file:
         # Return the new metadata if requested.
-        last_index = 4 if new_metadata else 3
-        return pickle.load(demo_file)[:last_index]
+        return pickle.load(demo_file)
 
 
 def load_multi_table_demo():

@@ -123,22 +123,3 @@ def test_compute_all():
 
     scores = output[output.normalized_score.notna()]
     assert scores.normalized_score.between(0.0, 1.0).all()
-
-
-def test_compute_all_with_new_metadata():
-    real_data, synthetic_data, _, new_metadata = load_demo('single_table', True)
-
-    output = compute_metrics(
-        SingleTableMetric.get_subclasses(),
-        real_data,
-        synthetic_data,
-        metadata=new_metadata,
-    )
-
-    assert not pd.isna(output.raw_score.mean())
-
-    scores = output[output.raw_score.notna()]
-    assert scores.raw_score.between(scores.min_value, scores.max_value).all()
-
-    scores = output[output.normalized_score.notna()]
-    assert scores.normalized_score.between(0.0, 1.0).all()

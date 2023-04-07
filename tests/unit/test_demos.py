@@ -10,7 +10,7 @@ def test_load_single_table_demo():
     real_data, synthetic_data, metadata = load_demo(modality)
 
     # Assert
-    assert metadata['fields']['duration'] == {'type': 'numerical', 'subtype': 'integer'}
+    assert metadata['fields']['duration'] == {'type': 'numerical'}
     assert real_data['duration'].dtype == 'float64'
     assert synthetic_data['duration'].dtype == 'float64'
 

@@ -33,12 +33,12 @@ def load_test_data():
     })
 
     metadata = {
-        'fields': {
-            'col1': {'type': 'numerical', 'subtype': 'integer'},
-            'col2': {'type': 'categorical'},
-            'col3': {'type': 'boolean'},
-            'col4': {'type': 'datetime', 'format': '%Y-%m-%d'},
-            'col5': {'type': 'datetime', 'format': '%Y-%m-%d'},
+        'columns': {
+            'col1': {'sdtype': 'numerical'},
+            'col2': {'sdtype': 'categorical'},
+            'col3': {'sdtype': 'boolean'},
+            'col4': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+            'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
         }
     }
 
