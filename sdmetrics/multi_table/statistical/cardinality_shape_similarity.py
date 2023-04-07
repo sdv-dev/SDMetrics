@@ -57,7 +57,7 @@ class CardinalityShapeSimilarity(MultiTableMetric):
             metadata = metadata.to_dict()
 
         score_breakdowns = {}
-        for rel in metadata['relationships']:
+        for rel in metadata.get('relationships', []):
             cardinality_real = get_cardinality_distribution(
                 real_data[rel['parent_table_name']][rel['parent_primary_key']],
                 real_data[rel['child_table_name']][rel['child_foreign_key']],

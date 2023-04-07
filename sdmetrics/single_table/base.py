@@ -35,21 +35,19 @@ class SingleTableMetric(BaseMetric):
 
     _DTYPES_TO_TYPES = {
         'i': {
-            'type': 'numerical',
-            'subtype': 'integer',
+            'sdtype': 'numerical'
         },
         'f': {
-            'type': 'numerical',
-            'subtype': 'float',
+            'sdtype': 'numerical'
         },
         'O': {
-            'type': 'categorical',
+            'sdtype': 'categorical'
         },
         'b': {
-            'type': 'boolean',
+            'sdtype': 'boolean'
         },
         'M': {
-            'type': 'datetime',
+            'sdtype': 'datetime'
         }
     }
 
@@ -135,22 +133,18 @@ class SingleTableMetric(BaseMetric):
                     raise ValueError(f'Field {field} not found in data')
                 if (
                     field_type == 'datetime' and
-                    ('format' in field_meta or 'datetime_format' in field_meta) and
+                    'datetime_format' in field_meta and
                     real_data[field].dtype == 'O'
                 ):
-                    if 'format' in field_meta:
-                        dt_format = field_meta['format']
-                    if 'datetime_format' in field_meta:
-                        dt_format = field_meta['datetime_format']
+                    dt_format = field_meta['datetime_format']
                     real_data[field] = pd.to_datetime(real_data[field], format=dt_format)
                     synthetic_data[field] = pd.to_datetime(synthetic_data[field], format=dt_format)
 
             return real_data, synthetic_data, metadata
 
         dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
-        col_key = 'columns' if metadata is not None and 'columns' in metadata else 'fields'
         return real_data, synthetic_data, {
-            col_key: dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
+            'columns': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
         }
 
     @classmethod

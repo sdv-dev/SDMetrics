@@ -48,7 +48,12 @@ class TestQualityReport:
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
         ks_complement_mock = Mock()
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'}, 
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
         ks_complement_mock.__name__ = 'KSComplement'
         ks_complement_mock.compute_breakdown.return_value = {
             'col1': {'score': 0.1},
@@ -113,7 +118,12 @@ class TestQualityReport:
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
         ks_complement_mock = Mock()
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'}, 
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
         ks_complement_mock.__name__ = 'KSComplement'
         ks_complement_mock.compute_breakdown.return_value = {
             'col1': {'score': 0.1},
@@ -196,7 +206,12 @@ class TestQualityReport:
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
         ks_complement_mock = Mock()
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'}, 
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
         ks_complement_mock.__name__ = 'KSComplement'
         ks_complement_mock.compute_breakdown.return_value = {
             'col1': {'score': 0.1},
@@ -269,7 +284,12 @@ class TestQualityReport:
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
         ks_complement_mock = Mock()
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'}, 
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
         ks_complement_mock.__name__ = 'KSComplement'
         ks_complement_mock.compute_breakdown.return_value = {
             'col1': {'score': 0.1},
@@ -356,7 +376,12 @@ class TestQualityReport:
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
         ks_complement_mock = Mock()
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'}, 
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
         ks_complement_mock.__name__ = 'KSComplement'
         ks_complement_mock.compute_breakdown.return_value = {
             'col1': {'score': 0.1},

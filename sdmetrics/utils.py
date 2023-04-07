@@ -239,7 +239,7 @@ def get_columns_from_metadata(metadata):
         dict:
             The columns metadata.
     """
-    return metadata.get('columns', [])
+    return metadata.get('columns', {})
 
 
 def get_type_from_column_meta(column_metadata):
