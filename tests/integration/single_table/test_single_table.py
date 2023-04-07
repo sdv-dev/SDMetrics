@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from sdmetrics import compute_metrics
-from sdmetrics.demos import load_demo, load_single_table_demo
+from sdmetrics.demos import load_single_table_demo
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood

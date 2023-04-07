@@ -50,7 +50,7 @@ class TestQualityReport:
         ks_complement_mock = Mock()
         metadata = {
             'columns': {
-                'col1': {'sdtype': 'numerical'}, 
+                'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'categorical'}
             }
         }
@@ -120,7 +120,7 @@ class TestQualityReport:
         ks_complement_mock = Mock()
         metadata = {
             'columns': {
-                'col1': {'sdtype': 'numerical'}, 
+                'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'categorical'}
             }
         }
@@ -208,7 +208,7 @@ class TestQualityReport:
         ks_complement_mock = Mock()
         metadata = {
             'columns': {
-                'col1': {'sdtype': 'numerical'}, 
+                'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'categorical'}
             }
         }
@@ -286,7 +286,7 @@ class TestQualityReport:
         ks_complement_mock = Mock()
         metadata = {
             'columns': {
-                'col1': {'sdtype': 'numerical'}, 
+                'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'categorical'}
             }
         }
@@ -378,7 +378,7 @@ class TestQualityReport:
         ks_complement_mock = Mock()
         metadata = {
             'columns': {
-                'col1': {'sdtype': 'numerical'}, 
+                'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'categorical'}
             }
         }
