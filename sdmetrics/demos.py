@@ -1,7 +1,18 @@
 """Functions to load demos with real and synthetic data of different data modalities."""
 
+import json
 import pathlib
-import pickle
+
+import pandas as pd
+
+
+def _load_table(metadata, path):
+    datetime_columns = []
+    for column, column_meta in metadata['columns'].items():
+        if column_meta['sdtype'] == 'datetime':
+            datetime_columns.append(column)
+
+    return pd.read_csv(path, parse_dates=datetime_columns)
 
 
 def load_demo(modality='multi_table'):
@@ -17,13 +28,25 @@ def load_demo(modality='multi_table'):
             or timeseries.
 
     Returns:
-        tuple:
+        tuple:.
             Real data, Synthetic data, Metadata.
     """
-    demo_path = pathlib.Path(__file__).parent / 'demos' / f'{modality}.pkl'
-    with open(demo_path, 'rb') as demo_file:
-        # Return the new metadata if requested.
-        return pickle.load(demo_file)
+    demo_path = pathlib.Path(__file__).parent / 'demos' / modality
+    with open(demo_path / 'metadata.json', 'r') as metadata_file:
+        metadata = json.loads(metadata_file.read())
+
+    if modality == 'multi_table':
+        real_data = {}
+        synthetic_data = {}
+        for table, table_meta in metadata['tables'].items():
+            real_data[table] = _load_table(table_meta, demo_path / f'{table}_real.csv')
+            synthetic_data[table] = _load_table(table_meta, demo_path / f'{table}_synthetic.csv')
+
+    else:
+        real_data = _load_table(metadata, demo_path / 'real.csv')
+        synthetic_data = _load_table(metadata, demo_path / 'synthetic.csv')
+
+    return real_data, synthetic_data, metadata
 
 
 def load_multi_table_demo():
