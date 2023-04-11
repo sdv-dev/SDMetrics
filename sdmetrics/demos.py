@@ -28,7 +28,7 @@ def load_demo(modality='multi_table'):
             or timeseries.
 
     Returns:
-        tuple:.
+        tuple:
             Real data, Synthetic data, Metadata.
     """
     demo_path = pathlib.Path(__file__).parent / 'demos' / modality
