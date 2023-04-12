@@ -63,7 +63,6 @@ DIAGNOSTIC_REPORT_RESULT_DETAILS = {
         ),
     }
 }
-VALID_SDTYPES = ['numerical', 'categorical', 'boolean', 'datetime']
 
 
 def convert_to_datetime(column_data, datetime_format=None):
@@ -276,7 +275,7 @@ def get_column_plot(real_data, synthetic_data, column_name, metadata):
     columns = get_columns_from_metadata(metadata)
     if column_name not in columns:
         raise ValueError(f"Column '{column_name}' not found in metadata.")
-    elif 'type' not in columns[column_name] and 'sdtype' not in columns[column_name]:
+    elif 'sdtype' not in columns[column_name]:
         raise ValueError(f"Metadata for column '{column_name}' missing 'type' information.")
     if column_name not in real_data.columns:
         raise ValueError(f"Column '{column_name}' not found in real table data.")
@@ -434,8 +433,7 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, metadata):
         raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found in metadata.")
     else:
         invalid_columns = [
-            column for column in column_names if (
-                'type' not in all_columns[column] and 'sdtype' not in all_columns[column])
+            column for column in column_names if 'sdtype' not in all_columns[column]
         ]
         if invalid_columns:
             raise ValueError(f"Metadata for column(s) `{'`, `'.join(invalid_columns)}` "
@@ -502,16 +500,14 @@ def discretize_table_data(real_data, synthetic_data, metadata):
     binned_synthetic = synthetic_data.copy()
     binned_metadata = copy.deepcopy(metadata)
 
-    for field_name, field_meta in get_columns_from_metadata(metadata).items():
-        field_type = get_type_from_column_meta(field_meta)
-        if field_type == 'id':
-            continue
+    for column_name, column_meta in get_columns_from_metadata(metadata).items():
+        sdtype = get_type_from_column_meta(column_meta)
 
-        if field_type == 'numerical' or field_type == 'datetime':
-            real_col = real_data[field_name]
-            synthetic_col = synthetic_data[field_name]
-            if field_type == 'datetime':
-                datetime_format = field_meta.get('format') or field_meta.get('datetime_format')
+        if sdtype in ('numerical', 'datetime'):
+            real_col = real_data[column_name]
+            synthetic_col = synthetic_data[column_name]
+            if sdtype == 'datetime':
+                datetime_format = column_meta.get('format') or column_meta.get('datetime_format')
                 if real_col.dtype == 'O' and datetime_format:
                     real_col = pd.to_datetime(real_col, format=datetime_format)
                     synthetic_col = pd.to_datetime(synthetic_col, format=datetime_format)
@@ -523,12 +519,23 @@ def discretize_table_data(real_data, synthetic_data, metadata):
             binned_real_col = np.digitize(real_col, bins=bin_edges)
             binned_synthetic_col = np.digitize(synthetic_col, bins=bin_edges)
 
-            binned_real[field_name] = binned_real_col
-            binned_synthetic[field_name] = binned_synthetic_col
-            get_columns_from_metadata(binned_metadata)[field_name] = {'type': 'categorical'} if (
-                'type' in field_meta) else {'sdtype': 'categorical'}
+            binned_real[column_name] = binned_real_col
+            binned_synthetic[column_name] = binned_synthetic_col
+            get_columns_from_metadata(binned_metadata)[column_name] = {'sdtype': 'categorical'}
 
     return binned_real, binned_synthetic, binned_metadata
+
+
+def _get_non_id_columns(metadata, binned_metadata):
+    valid_sdtypes = ['numerical', 'categorical', 'boolean', 'datetime']
+    alternate_keys = get_alternate_keys(metadata)
+    non_id_columns = []
+    for column, column_meta in get_columns_from_metadata(binned_metadata).items():
+        is_key = column == metadata.get('primary_key', '') or column in alternate_keys
+        if get_type_from_column_meta(column_meta) in valid_sdtypes and not is_key:
+            non_id_columns.append(column)
+
+    return non_id_columns
 
 
 def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, keys_to_skip=[]):
@@ -543,7 +550,7 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
             The metadata.
         metric (sdmetrics.single_table.MultiColumnPairMetric):
             The column pair metric to apply.
-        existing_keys (list[tuple(str)] or None):
+        keys_to_skip (list[tuple(str)] or None):
             A list of keys for which to skip computing the metric.
 
     Returns:
@@ -555,16 +562,7 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
     binned_real, binned_synthetic, binned_metadata = discretize_table_data(
         real_data, synthetic_data, metadata)
 
-    alternate_keys = get_alternate_keys(metadata)
-    non_id_cols = [
-        field for field, field_meta in get_columns_from_metadata(binned_metadata).items() if
-        (
-            get_type_from_column_meta(field_meta) in VALID_SDTYPES and
-            field != metadata.get('primary_key', '') and
-            not field_meta.get('pii', False) and
-            field not in alternate_keys
-        )
-    ]
+    non_id_cols = _get_non_id_columns(metadata, binned_metadata)
     for columns in itertools.combinations(non_id_cols, r=2):
         sorted_columns = tuple(sorted(columns))
         if (

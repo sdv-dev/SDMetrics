@@ -47,21 +47,29 @@ def load_test_data():
     metadata = {
         'tables': {
             'table1': {
-                'fields': {
-                    'col1': {'type': 'id'},
-                    'col2': {'type': 'categorical'},
-                    'col3': {'type': 'boolean'},
+                'columns': {
+                    'col1': {'sdtype': 'id'},
+                    'col2': {'sdtype': 'categorical'},
+                    'col3': {'sdtype': 'boolean'},
                 },
             },
             'table2': {
-                'fields': {
-                    'col4': {'type': 'datetime', 'format': '%Y-%m-%d'},
-                    'col5': {'type': 'datetime', 'format': '%Y-%m-%d'},
-                    'col6': {'type': 'id', 'ref': {'table': 'table1', 'field': 'col1'}},
-                    'col7': {'type': 'numerical', 'subtype': 'float'},
+                'columns': {
+                    'col4': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                    'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                    'col6': {'sdtype': 'id'},
+                    'col7': {'sdtype': 'numerical'},
                 },
             }
-        }
+        },
+        'relationships': [
+            {
+                'parent_table_name': 'table1',
+                'parent_primary_key': 'col1',
+                'child_table_name': 'table2',
+                'child_foreign_key': 'col6'
+            }
+        ]
     }
 
     return (real_data, synthetic_data, metadata)

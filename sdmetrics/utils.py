@@ -239,13 +239,7 @@ def get_columns_from_metadata(metadata):
         dict:
             The columns metadata.
     """
-    if 'fields' in metadata:
-        return metadata['fields']
-
-    if 'columns' in metadata:
-        return metadata['columns']
-
-    return []
+    return metadata.get('columns', {})
 
 
 def get_type_from_column_meta(column_metadata):
@@ -259,13 +253,7 @@ def get_type_from_column_meta(column_metadata):
         string:
             The column type.
     """
-    if 'type' in column_metadata:
-        return column_metadata['type']
-
-    if 'sdtype' in column_metadata:
-        return column_metadata['sdtype']
-
-    return ''
+    return column_metadata.get('sdtype', '')
 
 
 def get_alternate_keys(metadata):

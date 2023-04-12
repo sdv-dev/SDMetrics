@@ -74,12 +74,6 @@ class QualityReport():
         """
         validate_multi_table_inputs(real_data, synthetic_data, metadata)
 
-        metadata = metadata.copy()
-        if 'relationships' in metadata:
-            for rel in metadata['relationships']:
-                table_meta = metadata['tables'][rel['child_table_name']]
-                table_meta['columns'][rel['child_foreign_key']] = {'sdtype': 'id'}
-
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
 
         for metric in tqdm.tqdm(metrics, desc='Creating report', disable=(not verbose)):

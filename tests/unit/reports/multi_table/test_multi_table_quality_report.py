@@ -57,12 +57,8 @@ class TestQualityReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}
-                },
-                'table2': {
-                    'fields': {'col1': {'type': 'numerical'}}
-                },
+                'table1': {},
+                'table2': {},
             },
         }
         ks_complement_mock = Mock()
@@ -155,12 +151,8 @@ class TestQualityReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}
-                },
-                'table2': {
-                    'fields': {'col1': {'type': 'numerical'}}
-                },
+                'table1': {},
+                'table2': {},
             },
         }
 
@@ -273,12 +265,8 @@ class TestQualityReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}
-                },
-                'table2': {
-                    'fields': {'col1': {'type': 'numerical'}}
-                },
+                'table1': {},
+                'table2': {},
             },
         }
 
@@ -394,12 +382,8 @@ class TestQualityReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}
-                },
-                'table2': {
-                    'fields': {'col1': {'type': 'numerical'}}
-                },
+                'table1': {},
+                'table2': {},
             },
         }
 
@@ -507,12 +491,8 @@ class TestQualityReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}
-                },
-                'table2': {
-                    'fields': {'col1': {'type': 'numerical'}}
-                },
+                'table1': {},
+                'table2': {},
             },
         }
 

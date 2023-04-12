@@ -159,12 +159,26 @@ class TestCardinalityStatisticSimilarity:
                 'tableA': {'fields': {'col1': {}}},
                 'tableB': {
                     'fields': {
-                        'col1': {'ref': {'table': 'tableA', 'field': 'col1'}},
+                        'col1': {},
                         'col2': {},
                     },
                 },
-                'tableC': {'fields': {'col2': {'ref': {'table': 'tableB', 'field': 'col2'}}}},
+                'tableC': {'fields': {'col2': {}}},
             },
+            'relationships': [
+                {
+                    'parent_table_name': 'tableA',
+                    'parent_primary_key': 'col1',
+                    'child_table_name': 'tableB',
+                    'child_foreign_key': 'col1'
+                },
+                {
+                    'parent_table_name': 'tableB',
+                    'parent_primary_key': 'col2',
+                    'child_table_name': 'tableC',
+                    'child_foreign_key': 'col2'
+                }
+            ]
         }
         real_data = {
             'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),

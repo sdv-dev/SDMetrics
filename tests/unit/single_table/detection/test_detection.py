@@ -31,11 +31,11 @@ class TestDetectionMetric:
             'col4': [55, 66, 77, 88, 99]
         })
         metadata = {
-            'fields': {
-                'ID_1': {'type': 'numerical', 'subtype': 'int'},
-                'col2': {'type': 'numerical', 'subtype': 'float'},
-                'ID_2': {'type': 'categorical'},
-                'col4': {'type': 'numerical', 'subtype': 'int'}
+            'columns': {
+                'ID_1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'numerical'},
+                'ID_2': {'sdtype': 'categorical'},
+                'col4': {'sdtype': 'numerical'}
             },
             'primary_key': {'ID_1', 'ID_2'}
         }

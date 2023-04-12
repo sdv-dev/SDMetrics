@@ -185,7 +185,7 @@ def test_get_column_plot_continuous_col(make_plot_mock):
     sdtype = 'numerical'
     real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
     synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
-    metadata = {'fields': {'col1': {'type': sdtype}}}
+    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
 
     # Run
     out = get_column_plot(real_data, synthetic_data, 'col1', metadata)
@@ -215,7 +215,7 @@ def test_get_column_plot_discrete_col(make_plot_mock):
     sdtype = 'categorical'
     real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
     synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
-    metadata = {'fields': {'col1': {'type': sdtype}}}
+    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
 
     # Run
     out = get_column_plot(real_data, synthetic_data, 'col1', metadata)
@@ -249,7 +249,7 @@ def test_get_column_plot_datetime_col(make_plot_mock):
         'col1': [dt.strftime(datetime_format) for dt in synthetic_datetimes]
     })
     synthetic_expected = pd.DataFrame({'col1': synthetic_datetimes})
-    metadata = {'fields': {'col1': {'type': sdtype, 'format': datetime_format}}}
+    metadata = {'columns': {'col1': {'sdtype': sdtype, 'format': datetime_format}}}
 
     # Run
     out = get_column_plot(real_data, synthetic_data, 'col1', metadata)
@@ -276,7 +276,7 @@ def test_get_column_plot_invalid_sdtype():
     # Setup
     real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
     synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
-    metadata = {'fields': {'col1': {'type': 'invalid'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'invalid'}}}
 
     # Run and assert
     with pytest.raises(ValueError, match="sdtype of type 'invalid' not recognized"):
@@ -298,7 +298,7 @@ def test_get_column_plot_missing_column_name_metadata():
     # Setup
     real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
     synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
-    metadata = {'fields': {}}
+    metadata = {'columns': {}}
 
     # Run and assert
     with pytest.raises(ValueError, match="Column 'col1' not found in metadata."):
@@ -320,7 +320,7 @@ def test_get_column_plot_missing_column_type_metadata():
     # Setup
     real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
     synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
-    metadata = {'fields': {'col1': {}}}
+    metadata = {'columns': {'col1': {}}}
 
     # Run and assert
     with pytest.raises(ValueError, match="Metadata for column 'col1' missing 'type' information."):
@@ -342,7 +342,7 @@ def test_get_column_plot_missing_column_name_data():
     # Setup
     real_data = pd.DataFrame({'col2': [1, 2, 3, 4]})
     synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
-    metadata = {'fields': {'col1': {'type': 'invalid'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'invalid'}}}
 
     # Run and assert
     with pytest.raises(ValueError, match="Column 'col1' not found in real table data."):
@@ -364,7 +364,7 @@ def test_get_column_plot_missing_column_name_synthetic_data():
     # Setup
     real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
     synthetic_data = pd.DataFrame({'col2': [1, 2, 4, 5]})
-    metadata = {'fields': {'col1': {'type': 'invalid'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'invalid'}}}
 
     # Run and assert
     with pytest.raises(ValueError, match="Column 'col1' not found in synthetic table data."):
@@ -603,7 +603,7 @@ def test_get_column_pair_plot_continuous_columns(make_plot_mock):
         'col2': [datetime(2021, 10, 1), datetime(2021, 11, 1), datetime(2021, 12, 3)],
     })
     columns = ['col1', 'col2']
-    metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'datetime'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'datetime'}}}
 
     # Run
     out = get_column_pair_plot(real_data, synthetic_data, columns, metadata)
@@ -647,7 +647,7 @@ def test_get_column_pair_plot_mixed_columns(make_plot_mock):
         ],
     })
     columns = ['col1', 'col2']
-    metadata = {'fields': {'col1': {'type': 'categorical'}, 'col2': {'type': 'datetime'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'categorical'}, 'col2': {'sdtype': 'datetime'}}}
 
     # Run
     out = get_column_pair_plot(real_data, synthetic_data, columns, metadata)
@@ -683,7 +683,7 @@ def test_get_column_pair_plot_discrete_columns(make_plot_mock):
         'col2': [False, False, False],
     })
     columns = ['col1', 'col2']
-    metadata = {'fields': {'col1': {'type': 'categorical'}, 'col2': {'type': 'boolean'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'categorical'}, 'col2': {'sdtype': 'boolean'}}}
 
     # Run
     out = get_column_pair_plot(real_data, synthetic_data, columns, metadata)
@@ -733,9 +733,9 @@ def test_get_column_pair_plot_str_datetimes(make_plot_mock):
     })
     columns = ['col1', 'col2']
     metadata = {
-        'fields': {
-            'col1': {'type': 'categorical'},
-            'col2': {'type': 'datetime', 'format': dt_format}
+        'columns': {
+            'col1': {'sdtype': 'categorical'},
+            'col2': {'sdtype': 'datetime', 'format': dt_format}
         }
     }
 
@@ -772,7 +772,7 @@ def test_get_column_pair_plot_invalid_sdtype():
         'col2': [False, False, False],
     })
     columns = ['col1', 'col2']
-    metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'invalid'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'invalid'}}}
 
     # Run and assert
     with pytest.raises(ValueError, match=re.escape('sdtype(s) of type `invalid` not recognized.')):
@@ -801,7 +801,7 @@ def test_get_column_pair_plot_missing_column_metadata():
         'col2': [False, False, False],
     })
     columns = ['col1', 'col2']
-    metadata = {'fields': {'col1': {'type': 'numerical'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'numerical'}}}
 
     # Run and assert
     with pytest.raises(ValueError, match=re.escape('Column(s) `col2` not found in metadata.')):
@@ -830,7 +830,7 @@ def test_get_column_pair_plot_missing_column_type_metadata():
         'col2': [False, False, False],
     })
     columns = ['col1', 'col2']
-    metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {}}}
+    metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {}}}
 
     # Run and assert
     with pytest.raises(
@@ -862,7 +862,7 @@ def test_get_column_pair_plot_missing_columns_metadata():
         'col2': [False, False, False],
     })
     columns = ['col1', 'col2']
-    metadata = {'fields': {}}
+    metadata = {'columns': {}}
 
     # Run and assert
     with pytest.raises(
@@ -893,7 +893,7 @@ def test_get_column_pair_plot_missing_column_real_data():
         'col2': [False, False, False],
     })
     columns = ['col1', 'col2']
-    metadata = {'fields': {'col1': {'type': 'categorical'}, 'col2': {'type': 'boolean'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'categorical'}, 'col2': {'sdtype': 'boolean'}}}
 
     # Run and assert
     with pytest.raises(
@@ -924,7 +924,7 @@ def test_get_column_pair_plot_missing_column_synthetic_data():
         'col1': [2, 2, 3],
     })
     columns = ['col1', 'col2']
-    metadata = {'fields': {'col1': {'type': 'categorical'}, 'col2': {'type': 'boolean'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'categorical'}, 'col2': {'sdtype': 'boolean'}}}
 
     # Run and assert
     with pytest.raises(
@@ -937,7 +937,7 @@ def test_get_column_pair_plot_missing_column_synthetic_data():
 def test_discretize_table_data():
     """Test the ``discretize_table_data`` method.
 
-    Expect that numerical and datetime fields are discretized.
+    Expect that numerical and datetime columns are discretized.
 
     Input:
     - real data
@@ -965,12 +965,12 @@ def test_discretize_table_data():
         'col5': [date(2020, 5, 3), date(2015, 11, 15), date(2022, 3, 2)],
     })
     metadata = {
-        'fields': {
-            'col1': {'type': 'numerical'},
-            'col2': {'type': 'categorical'},
-            'col3': {'type': 'datetime'},
-            'col4': {'type': 'boolean'},
-            'col5': {'type': 'datetime', 'format': '%Y-%m-%d'},
+        'columns': {
+            'col1': {'sdtype': 'numerical'},
+            'col2': {'sdtype': 'categorical'},
+            'col3': {'sdtype': 'datetime'},
+            'col4': {'sdtype': 'boolean'},
+            'col5': {'sdtype': 'datetime', 'format': '%Y-%m-%d'},
         },
     }
 
@@ -997,12 +997,12 @@ def test_discretize_table_data():
     pd.testing.assert_frame_equal(discretized_real, expected_real)
     pd.testing.assert_frame_equal(discretized_synth, expected_synth)
     assert updated_metadata == {
-        'fields': {
-            'col1': {'type': 'categorical'},
-            'col2': {'type': 'categorical'},
-            'col3': {'type': 'categorical'},
-            'col4': {'type': 'boolean'},
-            'col5': {'type': 'categorical'},
+        'columns': {
+            'col1': {'sdtype': 'categorical'},
+            'col2': {'sdtype': 'categorical'},
+            'col3': {'sdtype': 'categorical'},
+            'col4': {'sdtype': 'boolean'},
+            'col5': {'sdtype': 'categorical'},
         },
     }
 
@@ -1010,7 +1010,7 @@ def test_discretize_table_data():
 def test_discretize_table_data_new_metadata():
     """Test the ``discretize_table_data`` method with new metadata.
 
-    Expect that numerical and datetime fields are discretized.
+    Expect that numerical and datetime columns are discretized.
 
     Input:
     - real data
@@ -1038,7 +1038,7 @@ def test_discretize_table_data_new_metadata():
         'col5': [date(2020, 5, 3), date(2015, 11, 15), date(2022, 3, 2)],
     })
     metadata = {
-        'fields': {
+        'columns': {
             'col1': {'sdtype': 'numerical'},
             'col2': {'sdtype': 'categorical'},
             'col3': {'sdtype': 'datetime'},
@@ -1070,7 +1070,7 @@ def test_discretize_table_data_new_metadata():
     pd.testing.assert_frame_equal(discretized_real, expected_real)
     pd.testing.assert_frame_equal(discretized_synth, expected_synth)
     assert updated_metadata == {
-        'fields': {
+        'columns': {
             'col1': {'sdtype': 'categorical'},
             'col2': {'sdtype': 'categorical'},
             'col3': {'sdtype': 'categorical'},
@@ -1113,13 +1113,13 @@ def test_discretize_and_apply_metric(discretize_table_data_mock):
         'col6': ['', '', ''],
     })
     metadata = {
-        'fields': {
-            'col1': {'type': 'numerical'},
-            'col2': {'type': 'categorical'},
-            'col3': {'type': 'datetime'},
-            'col4': {'type': 'boolean'},
-            'col5': {'type': 'address'},
-            'col6': {'type': 'text'},
+        'columns': {
+            'col1': {'sdtype': 'numerical'},
+            'col2': {'sdtype': 'categorical'},
+            'col3': {'sdtype': 'datetime'},
+            'col4': {'sdtype': 'boolean'},
+            'col5': {'sdtype': 'address'},
+            'col6': {'sdtype': 'text'},
         },
     }
     discretize_table_data_mock.return_value = (binned_real, binned_synthetic, metadata)
@@ -1199,7 +1199,7 @@ def test__validate_categorical_values():
     sdtype = 'categorical'
     real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
     synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 4]})
-    metadata = {'fields': {'col1': {'type': sdtype}}}
+    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
     warnings.filterwarnings('error', category=UserWarning)
 
     # Run
@@ -1214,7 +1214,7 @@ def test__validate_categorical_values_single_table():
     sdtype = 'categorical'
     real_data = pd.DataFrame({'col1': [1, 2, 3, 3]})
     synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
-    metadata = {'fields': {'col1': {'type': sdtype}}}
+    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
     warning_msg = re.escape('Unexpected values ("4", "5") in column "col1"')
 
     warnings.filterwarnings('error', category=UserWarning)
@@ -1232,7 +1232,7 @@ def test__validate_categorical_values_multi_table():
     sdtype = 'categorical'
     real_data = pd.DataFrame({'col1': [1, 2, 3, 3]})
     synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
-    metadata = {'fields': {'col1': {'type': sdtype}}}
+    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
     warning_msg = re.escape('Unexpected values ("4", "5") in column "col1" and table "table1"')
 
     warnings.filterwarnings('error', category=UserWarning)
@@ -1250,7 +1250,7 @@ def test__validate_categorical_many_extra_values():
     sdtype = 'categorical'
     real_data = pd.DataFrame({'col1': [1, 2, 3, 3, 4, 4]})
     synthetic_data = pd.DataFrame({'col1': ['a', 'b', 'c', 'd', 'e', 'f']})
-    metadata = {'fields': {'col1': {'type': sdtype}}}
+    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
     warning_msg = re.escape('Unexpected values ("a", "b", "c", "d", "e" + more) in column "col1"')
 
     warnings.filterwarnings('error', category=UserWarning)
@@ -1269,7 +1269,7 @@ def test_validate_single_table():
     real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
     synthetic_data = pd.DataFrame({'col1': [1, 1, 1, 3]})
     extra_value_synthtetic_data = pd.DataFrame({'col1': [1, 1, 1, 5]})
-    metadata = {'fields': {'col1': {'type': sdtype}}}
+    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
 
     warning_msg = re.escape('Unexpected values ("5") in column "col1"')
     warnings.filterwarnings('error', category=UserWarning)
@@ -1301,8 +1301,8 @@ def test_validate_multi_table():
     }
     metadata = {
         'tables': {
-            'table1': {'fields': {'col1': {'type': sdtype}}},
-            'table2': {'fields': {'col2': {'type': sdtype}}}
+            'table1': {'columns': {'col1': {'sdtype': sdtype}}},
+            'table2': {'columns': {'col2': {'sdtype': sdtype}}}
         }
     }
     warning_msg = re.escape('Unexpected values ("d") in column "col2" and table "table2"')
@@ -1331,8 +1331,8 @@ def test_validate_multi_table_parent_child_dtype_mismatch():
     }
     metadata = {
         'tables': {
-            'table1': {'fields': {'primary_key': {'type': sdtype}}},
-            'table2': {'fields': {'foreign_key': {'type': sdtype}}}
+            'table1': {'columns': {'primary_key': {'sdtype': sdtype}}},
+            'table2': {'columns': {'foreign_key': {'sdtype': sdtype}}}
         },
         'relationships': [
             {

@@ -27,26 +27,24 @@ class TimeSeriesMetric(BaseMetric):
 
     _DTYPES_TO_TYPES = {
         'i': {
-            'type': 'numerical',
-            'subtype': 'integer',
+            'sdtype': 'numerical',
         },
         'f': {
-            'type': 'numerical',
-            'subtype': 'float',
+            'sdtype': 'numerical',
         },
         'O': {
-            'type': 'categorical',
+            'sdtype': 'categorical',
         },
         'b': {
-            'type': 'boolean',
+            'sdtype': 'boolean',
         },
         'M': {
-            'type': 'datetime',
+            'sdtype': 'datetime',
         }
     }
 
     @classmethod
-    def _validate_inputs(cls, real_data, synthetic_data, metadata=None, entity_columns=None):
+    def _validate_inputs(cls, real_data, synthetic_data, metadata=None, sequence_key=None):
         if set(real_data.columns) != set(synthetic_data.columns):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 
@@ -65,14 +63,15 @@ class TimeSeriesMetric(BaseMetric):
 
         else:
             dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
-            metadata = {'fields': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict()}
+            metadata = {'columns': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict()}
 
-        entity_columns = metadata.get('entity_columns', entity_columns or [])
+        sequence_key = metadata.get('sequence_key', sequence_key or [])
+        sequence_key = [sequence_key] if not isinstance(sequence_key, list) else sequence_key
 
-        return metadata, entity_columns
+        return metadata, sequence_key
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, entity_columns=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, sequence_key=None):
         """Compute this metric.
 
         Args:
@@ -83,7 +82,7 @@ class TimeSeriesMetric(BaseMetric):
             metadata (dict):
                 TimeSeries metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
-            entity_columns (list[str]):
+            sequence_key (list[str]):
                 Names of the columns which identify different time series
                 sequences.
 

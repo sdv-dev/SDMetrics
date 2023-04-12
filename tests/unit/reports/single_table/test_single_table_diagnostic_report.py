@@ -32,7 +32,12 @@ class TestDiagnosticReport:
         # Setup
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
         range_coverage = Mock()
         range_coverage.__name__ = 'RangeCoverage'
         range_coverage.compute_breakdown.return_value = {
@@ -95,7 +100,12 @@ class TestDiagnosticReport:
         # Setup
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
         range_coverage = Mock()
         range_coverage.__name__ = 'RangeCoverage'
         range_coverage.compute_breakdown.return_value = {
@@ -195,7 +205,12 @@ class TestDiagnosticReport:
             'Synthesis': [new_row_synth],
             'Boundaries': [boundary_adherence],
         }
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
 
         # Run
         with patch.object(
@@ -253,7 +268,12 @@ class TestDiagnosticReport:
             'Synthesis': [new_row_synth],
             'Boundaries': [boundary_adherence],
         }
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
 
         # Run
         with patch.object(
