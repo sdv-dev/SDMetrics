@@ -2,7 +2,7 @@
 
 ## v0.9.3 - 2023-04-12
 
-This release improves the clarity of warning/error messages. We also add a version add-on, update the workflow to optimize the runtime and fix bug in the `NewRowSynthesis` metric when computing the `synthetic_sample_size` for multi table.
+This release improves the clarity of warning/error messages. We also add a version add-on, update the workflow to optimize the runtime and fix a bug in the `NewRowSynthesis` metric when computing the `synthetic_sample_size` for multi-table.
 
 ### New Features
 * Add functionality to find version add-on - Issue [#321](https://github.com/sdv-dev/SDMetrics/issues/321) by @frances-h
@@ -10,7 +10,7 @@ This release improves the clarity of warning/error messages. We also add a versi
 * Make error more informative in QualityReport when tables cannot be merged - Issue [#317](https://github.com/sdv-dev/SDMetrics/issues/317) by @frances-h
 * More detailed warning in QualityReport for unexpected category values - Issue [#315](https://github.com/sdv-dev/SDMetrics/issues/315) by @frances-h
 
-### Buf Fixes
+### Bug Fixes
 * Multi table DiagnosticReport sets synthetic_sample_size too low for NewRowSynthesis - Issue [#320](https://github.com/sdv-dev/SDMetrics/issues/320) by @pvk-developer
 
 
