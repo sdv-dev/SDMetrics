@@ -12,7 +12,8 @@ import tqdm
 
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
-from sdmetrics.reports.utils import aggregate_metric_results, discretize_and_apply_metric
+from sdmetrics.reports.utils import (
+    aggregate_metric_results, discretize_and_apply_metric, validate_single_table_inputs)
 from sdmetrics.single_table import (
     ContingencySimilarity, CorrelationSimilarity, KSComplement, TVComplement)
 
@@ -67,6 +68,8 @@ class QualityReport():
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
+        validate_single_table_inputs(real_data, synthetic_data, metadata)
+
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
 
         for metric in tqdm.tqdm(metrics, desc='Creating report', disable=(not verbose)):

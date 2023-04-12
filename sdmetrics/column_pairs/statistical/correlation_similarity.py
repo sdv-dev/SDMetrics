@@ -31,6 +31,21 @@ class CorrelationSimilarity(ColumnPairsMetric):
     min_value = 0.0
     max_value = 1.0
 
+    @staticmethod
+    def _generate_warning_msg(columns, prefix, warning_messages):
+        if len(columns) > 1:
+            cols = ', '.join(columns)
+            warning_messages.append(
+                f"The {prefix} in columns '{cols}' contain a constant value. "
+                'Correlation is undefined for constant data.'
+            )
+
+        elif len(columns):
+            warning_messages.append(
+                f"The {prefix} in column '{columns[0]}' contains a constant value. "
+                'Correlation is undefined for constant data.'
+            )
+
     @classmethod
     def compute_breakdown(cls, real_data, synthetic_data, coefficient='Pearson'):
         """Compare the breakdown of correlation similarity of two continuous columns.
@@ -53,11 +68,15 @@ class CorrelationSimilarity(ColumnPairsMetric):
             synthetic_data = pd.DataFrame(synthetic_data)
 
         if (real_data.nunique() == 1).any() or (synthetic_data.nunique() == 1).any():
-            msg = (
-                'One or both of the input arrays is constant. '
-                'The CorrelationSimilarity metric is either undefined or infinite.'
-            )
-            warnings.warn(ConstantInputWarning(msg))
+            warning_messages = []
+            real_columns = list(real_data.loc[:, real_data.nunique() == 1].columns)
+            synthetic_columns = list(synthetic_data.loc[:, synthetic_data.nunique() == 1].columns)
+            cls._generate_warning_msg(real_columns, 'real data', warning_messages)
+            cls._generate_warning_msg(synthetic_columns, 'synthetic data', warning_messages)
+
+            for msg in warning_messages:
+                warnings.warn(ConstantInputWarning(msg))
+
             return {'score': np.nan}
 
         real_data = real_data.dropna()

@@ -1,6 +1,5 @@
 """SDMetrics utils to be used across all the project."""
 
-import warnings
 from collections import Counter
 from datetime import datetime
 
@@ -64,7 +63,6 @@ def get_frequencies(real, synthetic):
     real, synthetic = Counter(real), Counter(synthetic)
     for value in synthetic:
         if value not in real:
-            warnings.warn(f'Unexpected value {value} in synthetic data.')
             real[value] += 1e-6  # Regularization to prevent NaN.
 
     for value in real:
@@ -283,7 +281,7 @@ def get_alternate_keys(metadata):
     """
     alternate_keys = []
     for alternate_key in metadata.get('alternate_keys', []):
-        if type(alternate_key) is list:
+        if isinstance(alternate_key, list):
             alternate_keys.extend(alternate_key)
         else:
             alternate_keys.append(alternate_key)
