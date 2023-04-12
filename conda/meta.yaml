@@ -1,4 +1,4 @@
-{% set version = '0.9.3' %}
+{% set version = '0.9.4.dev0' %}
 
 package:
   name: "{{ name|lower }}"
