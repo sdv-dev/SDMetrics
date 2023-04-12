@@ -34,9 +34,7 @@ class TestDiagnosticReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                },
+                'table1': {},
             },
         }
         range_coverage = Mock()
@@ -113,9 +111,7 @@ class TestDiagnosticReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                },
+                'table1': {},
             },
         }
         range_coverage = Mock()
@@ -235,9 +231,7 @@ class TestDiagnosticReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                },
+                'table1': {},
             }
         }
 
@@ -309,9 +303,7 @@ class TestDiagnosticReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                },
+                'table1': {},
             }
         }
 
