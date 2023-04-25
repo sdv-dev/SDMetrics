@@ -44,7 +44,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
                 column: entity_data[column].to_numpy()
                 for column in entity_data.columns
             }, name=entity_id)
-            X = X.append(entity_data)
+            X = X._append(entity_data, ignore_index=True)
 
         return X
 

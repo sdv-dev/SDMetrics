@@ -17,7 +17,7 @@ def _x_to_packed_sequence(X, torch):
     sequences = []
     for _, row in X.iterrows():
         sequence = []
-        for _, values in row.iteritems():
+        for _, values in row.items():
             sequence.append(values)
 
         sequences.append(torch.FloatTensor(sequence).T)
