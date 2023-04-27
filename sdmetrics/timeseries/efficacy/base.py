@@ -50,14 +50,16 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
         X = pd.DataFrame()
         y = pd.Series()
         for entity_id, group in data.groupby(sequence_key):
-            y = y.append(pd.Series({entity_id: group.pop(target_column).iloc[0]}))
+            y = pd.concat([y, pd.Series({entity_id: group.pop(target_column).iloc[0]})],
+                          ignore_index=True)
             entity_data = group.drop(sequence_key, axis=1)
             entity_data = hypertransformer.transform(entity_data)
             entity_data = pd.Series({
                 column: entity_data[column].to_numpy()
                 for column in entity_data.columns
             }, name=entity_id)
-            X = X.append(entity_data)
+
+            X = pd.concat([X, pd.DataFrame(entity_data).T], ignore_index=True)
 
         return X, y
 
