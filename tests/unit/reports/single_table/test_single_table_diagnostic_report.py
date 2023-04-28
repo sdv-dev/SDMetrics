@@ -234,6 +234,8 @@ class TestDiagnosticReport:
             real_data, synthetic_data, metadata)
         logger_msg = 'Unexpected error occured when calculating BoundaryAdherence metric:'
         logger_mock.error.assert_called_once_with(logger_msg, exc_info=1)
+        assert report._metric_results['BoundaryAdherence'] == {}
+        assert report._metric_averages['BoundaryAdherence'] is np.nan
 
     def test_generate_with_incomputable_metric_error(self):
         """Test the ``generate`` method when a metric throws an error.
