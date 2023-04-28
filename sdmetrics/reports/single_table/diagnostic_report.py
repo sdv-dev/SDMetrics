@@ -2,6 +2,7 @@
 
 import copy
 import itertools
+import logging
 import pickle
 import sys
 import warnings
@@ -19,6 +20,8 @@ from sdmetrics.reports.utils import (
     validate_single_table_inputs)
 from sdmetrics.single_table import (
     BoundaryAdherence, CategoryCoverage, NewRowSynthesis, RangeCoverage)
+
+LOGGER = logging.getLogger(__name__)
 
 
 class DiagnosticReport():
@@ -102,10 +105,13 @@ class DiagnosticReport():
                     avg_score, _ = aggregate_metric_results(self._metric_results[metric_name])
                     self._metric_averages[metric_name] = avg_score
 
-            except IncomputableMetricError:
+            except Exception as e:
                 # Metric is not compatible with this dataset.
                 self._metric_results[metric_name] = {}
                 self._metric_averages[metric_name] = np.nan
+                if not isinstance(e, IncomputableMetricError):
+                    msg = f'Unexpected error occured when calculating {metric_name} metric:'
+                    LOGGER.error(msg, exc_info=1)
 
         self._property_scores = {}
         for prop, _ in self.METRICS.items():
