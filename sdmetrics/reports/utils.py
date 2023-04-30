@@ -467,11 +467,12 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, metadata):
 
     for i, sdtype in enumerate(sdtypes):
         if sdtype == 'datetime':
-            real_data.iloc[:, i], synthetic_data.iloc[:, i] = convert_datetime_columns(
-                real_data.iloc[:, i],
-                synthetic_data.iloc[:, i],
+            real_data[column_names[i]], synthetic_data[column_names[i]] = convert_datetime_columns(
+                real_data[column_names[i]],
+                synthetic_data[column_names[i]],
                 col_meta[i]
             )
+
     if all([t in CONTINUOUS_SDTYPES for t in sdtypes]):
         return make_continuous_column_pair_plot(real_data, synthetic_data)
     else:
