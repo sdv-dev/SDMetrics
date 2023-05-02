@@ -86,12 +86,24 @@ class NewRowSynthesis(SingleTableMetric):
         except IncomputableMetricError:
             categorical_fields = []
 
+        def update_column_name(char, column_name):
+            return column_name.replace(char, '_') if char in column_name else column_name
+
+        def update_lists(column, new_column):
+            for field_list in [numerical_fields, categorical_fields]:
+                if column in field_list:
+                    field_list.remove(column)
+                    field_list.append(new_column)
+
         for column in real_data.columns:
-            if '\n' in column:
-                real_data = real_data.rename(columns={column: column.replace('\n', ' ')})
-                synthetic_data = synthetic_data.rename(columns={column: column.replace('\n', ' ')})
-        real_data.columns = real_data.columns.str.replace(r"[.']+", '_', regex=True)
-        synthetic_data.columns = synthetic_data.columns.str.replace(r"[.']", '_', regex=True)
+            new_column = column
+            for char in ['\n', '.', "'"]:
+                new_column = update_column_name(char, new_column)
+
+            if new_column != column:
+                real_data = real_data.rename(columns={column: new_column})
+                synthetic_data = synthetic_data.rename(columns={column: new_column})
+                update_lists(column, new_column)
 
         num_unique_rows = 0
         for index, row in synthetic_data.iterrows():
@@ -114,7 +126,6 @@ class NewRowSynthesis(SingleTableMetric):
                         field_filter = f'`{field}` == {row[field]}'
 
                 row_filter.append(field_filter)
-
             engine = None
             if len(row_filter) >= 32:  # Limit set by NPY_MAXARGS
                 engine = 'python'
