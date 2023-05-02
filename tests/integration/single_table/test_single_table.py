@@ -127,6 +127,7 @@ def test_compute_all():
 
 
 def test_newrowsynthesis_with_special_characters_in_column_names():
+    """Test the ``NewRowSynthesis`` metric when there is special characters in the column names."""
     # Setup
     real_data = pd.DataFrame({
         'a\nb': [1, 2, 3],
@@ -147,4 +148,5 @@ def test_newrowsynthesis_with_special_characters_in_column_names():
         synthetic_data=synthetic_data
     )
 
+    # Assert
     assert metric == 0.66666666666666667
