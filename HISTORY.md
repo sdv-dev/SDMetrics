@@ -1,5 +1,20 @@
 # History
 
+## v0.10.0 - 2023-05-03
+
+This release makes the `DiagnosticReport` more fault tolerant by preventing it from crashing if a metric it uses fails. It also adds support for Pandas 2.0!
+
+Additionally, support for the old `SDV` metadata format (pre `SDV` 1.0) has been dropped.
+
+### New Features
+
+* Cleanup SDMetrics to only accept SDV 1.0 metadata format - Issue [#331](https://github.com/sdv-dev/SDMetrics/issues/331) by @amontanez24
+* Make the diagnostic report more fault-tolerant - Issue [#332](https://github.com/sdv-dev/SDMetrics/issues/332) by @frances-h
+
+### Maintenance
+
+* Remove upper bound for pandas - Issue [#338](https://github.com/sdv-dev/SDMetrics/issues/338) by @pvk-developer
+
 ## v0.9.3 - 2023-04-12
 
 This release improves the clarity of warning/error messages. We also add a version add-on, update the workflow to optimize the runtime and fix a bug in the `NewRowSynthesis` metric when computing the `synthetic_sample_size` for multi-table.
