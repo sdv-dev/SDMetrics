@@ -86,6 +86,13 @@ class NewRowSynthesis(SingleTableMetric):
         except IncomputableMetricError:
             categorical_fields = []
 
+        for column in real_data.columns:
+            if '\n' in column:
+                real_data = real_data.rename(columns={column: column.replace('\n', ' ')})
+                synthetic_data = synthetic_data.rename(columns={column: column.replace('\n', ' ')})
+        real_data.columns = real_data.columns.str.replace("'", "_", regex=True).str.replace(".", "", regex=True)
+        synthetic_data.columns = synthetic_data.columns.str.replace("'", "_", regex=True).str.replace(".", "", regex=True)
+
         num_unique_rows = 0
         for index, row in synthetic_data.iterrows():
             row_filter = []
@@ -112,7 +119,7 @@ class NewRowSynthesis(SingleTableMetric):
             if len(row_filter) >= 32:  # Limit set by NPY_MAXARGS
                 engine = 'python'
             try:
-                matches = real_data.query(' and '.join(row_filter), engine=engine)
+                matches = real_data.query(' and '.join(row_filter))
             except TypeError:
                 if len(real_data) > 10000:
                     warnings.warn('Unable to optimize query. For better formance, set the '
