@@ -5,8 +5,8 @@ import pytest
 from sdmetrics import compute_metrics
 from sdmetrics.demos import load_single_table_demo
 from sdmetrics.goal import Goal
-from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table import NewRowSynthesis
+from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
 from sdmetrics.single_table.multi_column_pairs import (
@@ -125,7 +125,8 @@ def test_compute_all():
     scores = output[output.normalized_score.notna()]
     assert scores.normalized_score.between(0.0, 1.0).all()
 
-def test_NewRowSynthesis_with_special_characters_in_column_names():
+
+def test_newrowsynthesis_with_special_characters_in_column_names():
     # Setup
     real_data = pd.DataFrame({
         'a\nb': [1, 2, 3],
