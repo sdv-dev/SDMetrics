@@ -126,6 +126,7 @@ class NewRowSynthesis(SingleTableMetric):
                         field_filter = f'`{field}` == {row[field]}'
 
                 row_filter.append(field_filter)
+
             engine = None
             if len(row_filter) >= 32:  # Limit set by NPY_MAXARGS
                 engine = 'python'
