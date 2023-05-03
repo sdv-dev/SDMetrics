@@ -3,8 +3,8 @@ include CONTRIBUTING.rst
 include HISTORY.md
 include LICENSE
 include README.md
-include sdmetrics/demos/*.json
-include sdmetrics/demos/*.csv
+include sdmetrics/demos/*/*.json
+include sdmetrics/demos/*/*.csv
 
 recursive-include tests *
 recursive-exclude * __pycache__
