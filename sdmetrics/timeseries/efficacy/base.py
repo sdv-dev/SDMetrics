@@ -34,40 +34,42 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
     max_value = np.inf
 
     @classmethod
-    def _validate_inputs(cls, real_data, synthetic_data, metadata, entity_columns, target):
-        metadata, entity_columns = super()._validate_inputs(
-            real_data, synthetic_data, metadata, entity_columns)
+    def _validate_inputs(cls, real_data, synthetic_data, metadata, sequence_key, target):
+        metadata, sequence_key = super()._validate_inputs(
+            real_data, synthetic_data, metadata, sequence_key)
 
         if 'target' in metadata:
             target = metadata['target']
         elif target is None:
             raise TypeError('`target` must be passed either directly or inside `metadata`')
 
-        return entity_columns, target
+        return sequence_key, target
 
     @staticmethod
-    def _build_xy(hypertransformer, data, entity_columns, target_column):
+    def _build_xy(hypertransformer, data, sequence_key, target_column):
         X = pd.DataFrame()
         y = pd.Series()
-        for entity_id, group in data.groupby(entity_columns):
-            y = y.append(pd.Series({entity_id: group.pop(target_column).iloc[0]}))
-            entity_data = group.drop(entity_columns, axis=1)
+        for entity_id, group in data.groupby(sequence_key):
+            series = pd.Series({entity_id: group.pop(target_column).iloc[0]})
+            y = pd.concat([y, series], ignore_index=True)
+            entity_data = group.drop(sequence_key, axis=1)
             entity_data = hypertransformer.transform(entity_data)
             entity_data = pd.Series({
                 column: entity_data[column].to_numpy()
                 for column in entity_data.columns
             }, name=entity_id)
-            X = X.append(entity_data)
+
+            X = pd.concat([X, pd.DataFrame(entity_data).T], ignore_index=True)
 
         return X, y
 
     @classmethod
-    def _compute_score(cls, real_data, synthetic_data, entity_columns, target):
+    def _compute_score(cls, real_data, synthetic_data, sequence_key, target):
         ht = HyperTransformer()
-        ht.fit(real_data.drop(entity_columns + [target], axis=1))
+        ht.fit(real_data.drop(sequence_key + [target], axis=1))
 
-        real_x, real_y = cls._build_xy(ht, real_data, entity_columns, target)
-        synt_x, synt_y = cls._build_xy(ht, synthetic_data, entity_columns, target)
+        real_x, real_y = cls._build_xy(ht, real_data, sequence_key, target)
+        synt_x, synt_y = cls._build_xy(ht, synthetic_data, sequence_key, target)
 
         train, test = train_test_split(real_x.index, shuffle=True)
         real_x_train, real_x_test = real_x.loc[train], real_x.loc[test]
@@ -79,7 +81,7 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
         return synt_acc / real_acc
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, entity_columns=None, target=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, sequence_key=None, target=None):
         """Compute this metric.
 
         Args:
@@ -90,7 +92,7 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
             metadata (dict):
                 TimeSeries metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
-            entity_columns (list[str]):
+            sequence_key (list[str]):
                 Names of the columns which identify different time series
                 sequences.
             target (str):
@@ -100,7 +102,7 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
             Union[float, tuple[float]]:
                 Metric output.
         """
-        entity_columns, target = cls._validate_inputs(
-            real_data, synthetic_data, metadata, entity_columns, target)
+        sequence_key, target = cls._validate_inputs(
+            real_data, synthetic_data, metadata, sequence_key, target)
 
-        return cls._compute_score(real_data, synthetic_data, entity_columns, target)
+        return cls._compute_score(real_data, synthetic_data, sequence_key, target)

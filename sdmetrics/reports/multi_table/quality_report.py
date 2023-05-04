@@ -16,7 +16,8 @@ from sdmetrics.multi_table import (
     TVComplement)
 from sdmetrics.reports.multi_table.plot_utils import get_table_relationships_plot
 from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
-from sdmetrics.reports.utils import aggregate_metric_results, discretize_and_apply_metric
+from sdmetrics.reports.utils import (
+    aggregate_metric_results, discretize_and_apply_metric, validate_multi_table_inputs)
 
 
 class QualityReport():
@@ -71,11 +72,7 @@ class QualityReport():
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
-        metadata = metadata.copy()
-        if 'relationships' in metadata:
-            for rel in metadata['relationships']:
-                table_meta = metadata['tables'][rel['child_table_name']]
-                table_meta['columns'][rel['child_foreign_key']] = {'sdtype': 'id'}
+        validate_multi_table_inputs(real_data, synthetic_data, metadata)
 
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
 

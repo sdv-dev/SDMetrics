@@ -32,7 +32,12 @@ class TestDiagnosticReport:
         # Setup
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
         range_coverage = Mock()
         range_coverage.__name__ = 'RangeCoverage'
         range_coverage.compute_breakdown.return_value = {
@@ -95,7 +100,12 @@ class TestDiagnosticReport:
         # Setup
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
         range_coverage = Mock()
         range_coverage.__name__ = 'RangeCoverage'
         range_coverage.compute_breakdown.return_value = {
@@ -155,13 +165,17 @@ class TestDiagnosticReport:
         }
         assert prints.getvalue() == ''
 
-    def test_generate_with_errored_metric(self):
+    @patch('sdmetrics.reports.single_table.diagnostic_report.LOGGER')
+    def test_generate_with_errored_metric(self, logger_mock):
         """Test the ``generate`` method when a metric has an error.
 
         Expect that the single-table metrics are called. Expect that the results are computed
         without the error-ed out metric.
         """
         # Setup
+        def error_func():
+            raise RuntimeError('An error occured computing the metric!')
+
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
         range_coverage = Mock()
@@ -186,16 +200,19 @@ class TestDiagnosticReport:
 
         boundary_adherence = Mock()
         boundary_adherence.__name__ = 'BoundaryAdherence'
-        boundary_adherence.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'error': 'test error'},
-        }
+        boundary_adherence.compute_breakdown.side_effect = error_func
+
         metrics_mock = {
             'Coverage': [range_coverage, category_coverage],
             'Synthesis': [new_row_synth],
             'Boundaries': [boundary_adherence],
         }
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
 
         # Run
         with patch.object(
@@ -215,6 +232,10 @@ class TestDiagnosticReport:
             real_data, synthetic_data, metadata, synthetic_sample_size=3)
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
+        logger_msg = 'Unexpected error occured when calculating BoundaryAdherence metric:'
+        logger_mock.error.assert_called_once_with(logger_msg, exc_info=1)
+        assert report._metric_results['BoundaryAdherence'] == {}
+        assert report._metric_averages['BoundaryAdherence'] is np.nan
 
     def test_generate_with_incomputable_metric_error(self):
         """Test the ``generate`` method when a metric throws an error.
@@ -253,7 +274,12 @@ class TestDiagnosticReport:
             'Synthesis': [new_row_synth],
             'Boundaries': [boundary_adherence],
         }
-        metadata = {'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}}}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'}
+            }
+        }
 
         # Run
         with patch.object(

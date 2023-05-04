@@ -1,0 +1,68 @@
+{
+    "primary_key": "student_id",
+    "columns": {
+        "start_date": {
+            "sdtype": "datetime",
+            "datetime_format": "%Y-%m-%d"
+        },
+        "end_date": {
+            "sdtype": "datetime",
+            "datetime_format": "%Y-%m-%d"
+        },
+        "salary": {
+            "sdtype": "numerical",
+            "computer_representation": "Int64"
+        },
+        "duration": {
+            "sdtype": "numerical",
+            "computer_representation": "Int64"
+        },
+        "student_id": {
+            "sdtype": "id",
+            "regex_format": "\\d{30}"
+        },
+        "high_perc": {
+            "sdtype": "numerical",
+            "computer_representation": "Float"
+        },
+        "high_spec": {
+            "sdtype": "categorical"
+        },
+        "mba_spec": {
+            "sdtype": "categorical"
+        },
+        "second_perc": {
+            "sdtype": "numerical",
+            "computer_representation": "Float"
+        },
+        "gender": {
+            "sdtype": "categorical"
+        },
+        "degree_perc": {
+            "sdtype": "numerical",
+            "computer_representation": "Float"
+        },
+        "placed": {
+            "sdtype": "boolean"
+        },
+        "experience_years": {
+            "sdtype": "numerical",
+            "computer_representation": "Float"
+        },
+        "employability_perc": {
+            "sdtype": "numerical",
+            "computer_representation": "Float"
+        },
+        "mba_perc": {
+            "sdtype": "numerical",
+            "computer_representation": "Float"
+        },
+        "work_experience": {
+            "sdtype": "boolean"
+        },
+        "degree_type": {
+            "sdtype": "categorical"
+        }
+    },
+    "METADATA_SPEC_VERSION": "SINGLE_TABLE_V1"
+}

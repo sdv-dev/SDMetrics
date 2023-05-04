@@ -67,16 +67,24 @@ def bad_data():
 METADATA = {
     'tables': {
         'parent': {
-            'fields': {
+            'columns': {
                 'id': {}
             }
         },
         'child': {
-            'fields': {
-                'parent_id': {'ref': {'table': 'parent', 'field': 'id'}},
+            'columns': {
+                'parent_id': {},
             }
         },
-    }
+    },
+    'relationships': [
+        {
+            'parent_table_name': 'parent',
+            'parent_primary_key': 'id',
+            'child_table_name': 'child',
+            'child_foreign_key': 'parent_id'
+        }
+    ]
 }
 
 

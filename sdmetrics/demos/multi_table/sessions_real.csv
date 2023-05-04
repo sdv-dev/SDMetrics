@@ -1,0 +1,11 @@
+session_id,user_id,device,os
+0,0,mobile,android
+1,1,tablet,ios
+2,1,tablet,android
+3,2,mobile,android
+4,4,mobile,ios
+5,5,mobile,android
+6,6,mobile,ios
+7,6,tablet,ios
+8,6,mobile,ios
+9,8,tablet,ios

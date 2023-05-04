@@ -1,6 +1,5 @@
 """SDMetrics utils to be used across all the project."""
 
-import warnings
 from collections import Counter
 from datetime import datetime
 
@@ -64,7 +63,6 @@ def get_frequencies(real, synthetic):
     real, synthetic = Counter(real), Counter(synthetic)
     for value in synthetic:
         if value not in real:
-            warnings.warn(f'Unexpected value {value} in synthetic data.')
             real[value] += 1e-6  # Regularization to prevent NaN.
 
     for value in real:
@@ -241,13 +239,7 @@ def get_columns_from_metadata(metadata):
         dict:
             The columns metadata.
     """
-    if 'fields' in metadata:
-        return metadata['fields']
-
-    if 'columns' in metadata:
-        return metadata['columns']
-
-    return []
+    return metadata.get('columns', {})
 
 
 def get_type_from_column_meta(column_metadata):
@@ -261,13 +253,7 @@ def get_type_from_column_meta(column_metadata):
         string:
             The column type.
     """
-    if 'type' in column_metadata:
-        return column_metadata['type']
-
-    if 'sdtype' in column_metadata:
-        return column_metadata['sdtype']
-
-    return ''
+    return column_metadata.get('sdtype', '')
 
 
 def get_alternate_keys(metadata):
@@ -283,7 +269,7 @@ def get_alternate_keys(metadata):
     """
     alternate_keys = []
     for alternate_key in metadata.get('alternate_keys', []):
-        if type(alternate_key) is list:
+        if isinstance(alternate_key, list):
             alternate_keys.extend(alternate_key)
         else:
             alternate_keys.append(alternate_key)

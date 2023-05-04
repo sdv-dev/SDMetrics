@@ -57,11 +57,10 @@ class TestQualityReport:
         }
         metadata = {
             'tables': {
-                'table1': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                'table2': {'col1': {'type': 'numerical'}},
+                'table1': {},
+                'table2': {},
             },
         }
-
         ks_complement_mock = Mock()
         ks_complement_mock.__name__ = 'KSComplement'
         ks_complement_mock.compute_breakdown.return_value = {
@@ -152,8 +151,8 @@ class TestQualityReport:
         }
         metadata = {
             'tables': {
-                'table1': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                'table2': {'col1': {'type': 'numerical'}},
+                'table1': {},
+                'table2': {},
             },
         }
 
@@ -266,8 +265,8 @@ class TestQualityReport:
         }
         metadata = {
             'tables': {
-                'table1': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                'table2': {'col1': {'type': 'numerical'}},
+                'table1': {},
+                'table2': {},
             },
         }
 
@@ -383,8 +382,8 @@ class TestQualityReport:
         }
         metadata = {
             'tables': {
-                'table1': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                'table2': {'col1': {'type': 'numerical'}},
+                'table1': {},
+                'table2': {},
             },
         }
 
@@ -492,8 +491,8 @@ class TestQualityReport:
         }
         metadata = {
             'tables': {
-                'table1': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                'table2': {'col1': {'type': 'numerical'}},
+                'table1': {},
+                'table2': {},
             },
         }
 

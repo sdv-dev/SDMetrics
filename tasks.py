@@ -46,9 +46,9 @@ def _validate_python_version(line):
         version_number = python_version.split(comparison)[-1].replace("'", "")
         comparison_function = COMPARISONS[comparison]
         is_valid = is_valid and comparison_function(
-             pkg_resources.parse_version(platform.python_version()),
-             pkg_resources.parse_version(version_number),
-         )
+            pkg_resources.parse_version(platform.python_version()),
+            pkg_resources.parse_version(version_number),
+        )
 
     return is_valid
 
@@ -69,7 +69,7 @@ def install_minimum(c):
             if _validate_python_version(line):
                 requirement = re.match(r'[^>]*', line).group(0)
                 requirement = re.sub(r"""['",]""", '', requirement)
-                version = re.search(r'>=?[^(,|#)]*', line).group(0)
+                version = re.search(r'>=?(\d\.?)+', line).group(0)
                 if version:
                     version = re.sub(r'>=?', '==', version)
                     version = re.sub(r"""['",]""", '', version)

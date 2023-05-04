@@ -1,0 +1,29 @@
+{
+    "columns": {
+        "region": {
+            "sdtype": "categorical"
+        },
+        "store_id": {
+            "sdtype": "numerical",
+            "computer_representation": "Int64"
+        },
+        "nb_customers": {
+            "sdtype": "numerical",
+            "computer_representation": "Int64"
+        },
+        "total_sales": {
+            "sdtype": "numerical",
+            "computer_representation": "Float"
+        },
+        "date": {
+            "sdtype": "datetime"
+        },
+        "day_of_week": {
+            "sdtype": "numerical",
+            "computer_representation": "Int64"
+        }
+    },
+    "sequence_key": "store_id",
+    "sequence_index": "date",
+    "METADATA_SPEC_VERSION": "SINGLE_TABLE_V1"
+}

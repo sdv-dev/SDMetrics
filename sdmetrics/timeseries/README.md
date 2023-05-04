@@ -2,7 +2,7 @@
 
 The metrics found on this folder operate on individual tables which represent sequencial data.
 The tables need to be passed as two `pandas.DataFrame`s alongside optional lists of
-`entity_columns` and `context_columns` or a `metadata` dict which contains them.
+`sequence_key` and `context_columns` or a `metadata` dict which contains them.
 
 Implemented metrics:
 
@@ -38,7 +38,7 @@ All the timeseries metrics operate on at least three inputs:
 
 * `real_data`: A `pandas.DataFrame` with the data from the real dataset.
 * `synthetic_data`: A `pandas.DataFrame` with the data from the synthetic dataset.
-* `entity_columns`: A `list` indicating which columns represent entities to which
+* `sequence_key`: A `list` indicating which columns represent entities to which
   the different senquences from the dataset belong.
 
 For example, an `LSTMDetection` metric can be used on the `sunglasses` demo data as follows:
@@ -50,14 +50,14 @@ In [4]: from sdmetrics.demos import load_timeseries_demo
 
 In [5]: real_data, synthetic_data, metadata = load_timeseries_demo()
 
-In [6]: LSTMDetection.compute(real_data, synthetic_data, entity_columns=['store_id'])
+In [6]: LSTMDetection.compute(real_data, synthetic_data, sequence_key=['store_id'])
 Out[6]: 0.5
 ```
 
 Additionally, all the metrics accept a `metadata` argument which must be a dict following
 the Metadata JSON schema from SDV, which will be used to determine which columns are compatible
 with each one of the different metrics, as well as to extract any additional information required
-by the metrics, such as the `entity_columns`.
+by the metrics, such as the `sequence_key`.
 
 If this dictionary is not passed it will be built based on the data found in the real table,
 but in this case some field types may not represent the data accurately (e.g. categorical
@@ -68,7 +68,7 @@ For example, we could execute the same metric as before by adding the `target` e
 metadata dict:
 
 ```python
-In [7]: metadata['entity_columns'] = 'store_id'
+In [7]: metadata['sequence_key'] = 'store_id'
 
 In [8]: LSTMDetection.compute(real_data, synthetic_data, metadata=metadata)
 Out[8]: 0.5

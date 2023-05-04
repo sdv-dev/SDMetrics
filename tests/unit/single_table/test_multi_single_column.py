@@ -27,7 +27,7 @@ class TestMultiSingleColumnMetric:
           that are not valid for this metric.
         """
         # Setup
-        metadata = {'fields': {'a': {}, 'b': {}, 'c': {}, 'd': {}}}
+        metadata = {'columns': {'a': {}, 'b': {}, 'c': {}, 'd': {}}}
 
         data = pd.DataFrame({
             'a': [0, 1, 2, 3],
@@ -82,7 +82,7 @@ class TestMultiSingleColumnMetric:
             'd': ['a', 'b', 'c', 'd'],
         })
 
-        metadata = {'fields': {'a': {}, 'b': {}, 'c': {}, 'd': {}}}
+        metadata = {'columns': {'a': {}, 'b': {}, 'c': {}, 'd': {}}}
         test_error = ValueError('test error')
 
         metric_mock = Mock()
@@ -117,7 +117,7 @@ class TestMultiSingleColumnMetric:
           that are not valid for this metric, and errors for the columns that errored out.
         """
         # Setup
-        metadata = {'fields': {'a': {}, 'b': {}, 'c': {}, 'd': {}}}
+        metadata = {'columns': {'a': {}, 'b': {}, 'c': {}, 'd': {}}}
         test_error = ValueError('test error')
 
         data = pd.DataFrame({

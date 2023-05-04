@@ -31,14 +31,14 @@ class TestNewRowSynthesis:
         })
         metadata = {
             'primary_key': 'pk',
-            'fields': {
-                'pk': {'type': 'id', 'subtype': 'int'},
-                'col1': {'type': 'id', 'subtype': 'int'},
-                'col2': {'type': 'numerical', 'subtype': 'int'},
-                'col3': {'type': 'categorical'},
-                'col4': {'type': 'numerical', 'subtype': 'float'},
-                'col5': {'type': 'categorical'},
-                'col6': {'type': 'datetime', 'format': '%Y-%m-%d'},
+            'columns': {
+                'pk': {'sdtype': 'id'},
+                'col1': {'sdtype': 'id'},
+                'col2': {'sdtype': 'numerical'},
+                'col3': {'sdtype': 'categorical'},
+                'col4': {'sdtype': 'numerical'},
+                'col5': {'sdtype': 'categorical'},
+                'col6': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
             },
         }
         metric = NewRowSynthesis()
@@ -61,8 +61,8 @@ class TestNewRowSynthesis:
             'col1': ['PSC 0481, Box 5945\nAPO AP 37588', '9759 8761\nDPO AE 97614'],
         })
         metadata = {
-            'fields': {
-                'col1': {'type': 'categorical'},
+            'columns': {
+                'col1': {'sdtype': 'categorical'},
             },
         }
         metric = NewRowSynthesis()
@@ -90,10 +90,10 @@ class TestNewRowSynthesis:
             'col3': [1.46, 1.56, 1.21, np.nan, 1.92],
         })
         metadata = {
-            'fields': {
-                'col1': {'type': 'numerical', 'subtype': 'int'},
-                'col2': {'type': 'categorical'},
-                'col3': {'type': 'numerical', 'subtype': 'float'},
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'},
+                'col3': {'sdtype': 'numerical'},
             },
         }
         sample_size = 2
@@ -124,10 +124,10 @@ class TestNewRowSynthesis:
             'col3': [1.35, 1.56, 1.21, np.nan, 1.92],
         })
         metadata = {
-            'fields': {
-                'col1': {'type': 'numerical', 'subtype': 'int'},
-                'col2': {'type': 'categorical'},
-                'col3': {'type': 'numerical', 'subtype': 'float'},
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'},
+                'col3': {'sdtype': 'numerical'},
             },
         }
         sample_size = 15
@@ -158,8 +158,8 @@ class TestNewRowSynthesis:
             f'col{i}': list(np.random.uniform(low=0, high=10, size=100)) for i in range(num_cols)
         })
         metadata = {
-            'fields': {
-                f'col{i}': {'type': 'numerical', 'subtype': 'float'} for i in range(num_cols)
+            'columns': {
+                f'col{i}': {'sdtype': 'numerical'} for i in range(num_cols)
             },
         }
         metric = NewRowSynthesis()

@@ -55,13 +55,13 @@ def test_get_columns_from_metadata():
     Expect that the columns are returned.
     """
     # Setup
-    metadata = {'fields': {'col1': {'type': 'numerical'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'numerical'}}}
 
     # Run
     out = get_columns_from_metadata(metadata)
 
     # Assert
-    assert out == {'col1': {'type': 'numerical'}}
+    assert out == {'col1': {'sdtype': 'numerical'}}
 
 
 def test_get_columns_from_metadata_new_metadata():
@@ -70,13 +70,13 @@ def test_get_columns_from_metadata_new_metadata():
     Expect that the column type is returned.
     """
     # Setup
-    metadata = {'columns': {'col1': {'type': 'numerical'}}}
+    metadata = {'columns': {'col1': {'sdtype': 'numerical'}}}
 
     # Run
     out = get_columns_from_metadata(metadata)
 
     # Assert
-    assert out == {'col1': {'type': 'numerical'}}
+    assert out == {'col1': {'sdtype': 'numerical'}}
 
 
 def test_get_type_from_column_meta():
@@ -85,10 +85,10 @@ def test_get_type_from_column_meta():
     Expect that the column type is returned.
     """
     # Setup
-    field_meta = {'type': 'numerical'}
+    column_meta = {'sdtype': 'numerical'}
 
     # Run
-    out = get_type_from_column_meta(field_meta)
+    out = get_type_from_column_meta(column_meta)
 
     # Assert
     assert out == 'numerical'

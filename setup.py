@@ -14,12 +14,12 @@ with open('HISTORY.md', encoding='utf-8') as history_file:
 install_requires = [
     "numpy>=1.20.0,<2;python_version<'3.10'",
     "numpy>=1.23.3,<2;python_version>='3.10'",
-    "pandas>=1.1.3,<2;python_version<'3.10'",
-    "pandas>=1.5.0,<2;python_version>='3.10'",
+    "pandas>=1.1.3;python_version<'3.10'",
+    "pandas>=1.5.0;python_version>='3.10'",
     'scikit-learn>=0.24,<2',
     "scipy>=1.5.4,<2;python_version<'3.10'",
     "scipy>=1.9.2,<2;python_version>='3.10'",
-    'copulas>=0.8.0,<0.9',
+    'copulas>=0.9.0,<0.10',
     'tqdm>=4.15,<5',
     'plotly>=5.10.0,<6',
 ]
@@ -125,6 +125,6 @@ setup(
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.9.2',
+    version='0.10.0.dev3',
     zip_safe=False,
 )

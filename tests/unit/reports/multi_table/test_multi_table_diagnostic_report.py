@@ -26,17 +26,15 @@ class TestDiagnosticReport:
     def test_generate(self):
         """Test that the ``generate`` method calls the expected multi-table metrics."""
         # Setup
-        real_data = pd.DataFrame({
-            'table1': {'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']},
-        })
-        synthetic_data = pd.DataFrame({
-            'table1': {'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']},
-        })
+        real_data = {
+            'table1': pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']}),
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']}),
+        }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                },
+                'table1': {},
             },
         }
         range_coverage = Mock()
@@ -92,7 +90,7 @@ class TestDiagnosticReport:
         category_coverage.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         new_row_synth.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata, synthetic_sample_size=2)
+            real_data, synthetic_data, metadata, synthetic_sample_size=10000)
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         assert report._metric_averages == {
@@ -105,17 +103,15 @@ class TestDiagnosticReport:
     def test_generate_verbose_false(self):
         """Test the ``generate`` method on silent mode. Expect that nothing is printed."""
         # Setup
-        real_data = pd.DataFrame({
-            'table1': {'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']},
-        })
-        synthetic_data = pd.DataFrame({
-            'table1': {'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']},
-        })
+        real_data = {
+            'table1': pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']}),
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']}),
+        }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                },
+                'table1': {},
             },
         }
         range_coverage = Mock()
@@ -172,7 +168,7 @@ class TestDiagnosticReport:
         category_coverage.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         new_row_synth.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata, synthetic_sample_size=2)
+            real_data, synthetic_data, metadata, synthetic_sample_size=10000)
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         assert report._metric_averages == {
@@ -183,19 +179,23 @@ class TestDiagnosticReport:
         }
         assert prints.getvalue() == ''
 
-    def test_generate_with_errored_metric(self):
+    @patch('sdmetrics.reports.multi_table.diagnostic_report.LOGGER')
+    def test_generate_with_errored_metric(self, logger_mock):
         """Test the ``generate`` method when a metric has an error.
 
         Expect that the multi-table metrics are called. Expect that the results are computed
         without the error-ed out metric.
         """
         # Setup
-        real_data = pd.DataFrame({
-            'table1': {'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']},
-        })
-        synthetic_data = pd.DataFrame({
-            'table1': {'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']}
-        })
+        def error_func():
+            raise RuntimeError('An error occured!')
+
+        real_data = {
+            'table1': pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']}),
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
+        }
         range_coverage = Mock()
         range_coverage.__name__ = 'RangeCoverage'
         range_coverage.compute_breakdown.return_value = {
@@ -222,12 +222,8 @@ class TestDiagnosticReport:
 
         boundary_adherence = Mock()
         boundary_adherence.__name__ = 'BoundaryAdherence'
-        boundary_adherence.compute_breakdown.return_value = {
-            'table1': {
-                'col1': {'score': 0.1},
-                'col2': {'error': 'test error'},
-            },
-        }
+        boundary_adherence.compute_breakdown.side_effect = error_func
+
         metrics_mock = {
             'Coverage': [range_coverage, category_coverage],
             'Synthesis': [new_row_synth],
@@ -235,9 +231,7 @@ class TestDiagnosticReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                },
+                'table1': {},
             }
         }
 
@@ -256,9 +250,13 @@ class TestDiagnosticReport:
         category_coverage.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         new_row_synth.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata, synthetic_sample_size=2)
+            real_data, synthetic_data, metadata, synthetic_sample_size=10000)
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
+        logger_msg = 'Unexpected error occured when calculating BoundaryAdherence metric:'
+        logger_mock.error.assert_called_once_with(logger_msg, exc_info=1)
+        assert report._metric_results['BoundaryAdherence'] == {}
+        assert report._metric_averages['BoundaryAdherence'] is np.nan
 
     def test_generate_with_incomputable_metric_error(self):
         """Test the ``generate`` method when a metric throws an error.
@@ -266,12 +264,12 @@ class TestDiagnosticReport:
         Expect that the error is caught and the metric score is set to None.
         """
         # Setup
-        real_data = pd.DataFrame({
-            'table1': {'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']},
-        })
-        synthetic_data = pd.DataFrame({
-            'table1': {'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']}
-        })
+        real_data = {
+            'table1': pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']}),
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
+        }
         range_coverage = Mock()
         range_coverage.__name__ = 'RangeCoverage'
         range_coverage.compute_breakdown.return_value = {
@@ -309,9 +307,7 @@ class TestDiagnosticReport:
         }
         metadata = {
             'tables': {
-                'table1': {
-                    'fields': {'col1': {'type': 'numerical'}, 'col2': {'type': 'categorical'}},
-                },
+                'table1': {},
             }
         }
 
@@ -330,7 +326,7 @@ class TestDiagnosticReport:
         category_coverage.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         new_row_synth.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata, synthetic_sample_size=2)
+            real_data, synthetic_data, metadata, synthetic_sample_size=10000)
         boundary_adherence.compute_breakdown.assert_called_once_with(
             real_data, synthetic_data, metadata)
         assert np.isnan(report._property_scores['Synthesis'])

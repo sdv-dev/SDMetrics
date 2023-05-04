@@ -35,16 +35,17 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
     max_value = 1.0
 
     @staticmethod
-    def _build_x(data, hypertransformer, entity_columns):
+    def _build_x(data, hypertransformer, sequence_key):
         X = pd.DataFrame()
-        for entity_id, entity_data in data.groupby(entity_columns):
-            entity_data = entity_data.drop(entity_columns, axis=1)
+        for entity_id, entity_data in data.groupby(sequence_key):
+            entity_data = entity_data.drop(sequence_key, axis=1)
             entity_data = hypertransformer.transform(entity_data)
             entity_data = pd.Series({
                 column: entity_data[column].to_numpy()
                 for column in entity_data.columns
             }, name=entity_id)
-            X = X.append(entity_data)
+
+            X = pd.concat([X, pd.DataFrame(entity_data).T], ignore_index=True)
 
         return X
 
@@ -54,7 +55,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
         raise NotImplementedError()
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, entity_columns=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, sequence_key=None):
         """Compute this metric.
 
         Args:
@@ -65,7 +66,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
             metadata (dict):
                 TimeSeries metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
-            entity_columns (list[str]):
+            sequence_key (list[str]):
                 Names of the columns which identify different time series
                 sequences.
 
@@ -73,14 +74,14 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
             Union[float, tuple[float]]:
                 Metric output.
         """
-        _, entity_columns = cls._validate_inputs(
-            real_data, synthetic_data, metadata, entity_columns)
+        _, sequence_key = cls._validate_inputs(
+            real_data, synthetic_data, metadata, sequence_key)
 
         ht = HyperTransformer()
-        ht.fit(real_data.drop(entity_columns, axis=1))
+        ht.fit(real_data.drop(sequence_key, axis=1))
 
-        real_x = cls._build_x(real_data, ht, entity_columns)
-        synt_x = cls._build_x(synthetic_data, ht, entity_columns)
+        real_x = cls._build_x(real_data, ht, sequence_key)
+        synt_x = cls._build_x(synthetic_data, ht, sequence_key)
 
         X = pd.concat([real_x, synt_x])
         y = pd.Series(np.array([0] * len(real_x) + [1] * len(synt_x)))

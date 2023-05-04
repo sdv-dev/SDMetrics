@@ -29,9 +29,9 @@ class TestSingleTableMetric:
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['c', 'b', 'c']})
         metadata = {
-            'fields': {
-                'col1': {'type': 'numerical', 'subtype': 'integer'},
-                'col2': {'type': 'categorical'},
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'},
             },
         }
 
@@ -69,9 +69,9 @@ class TestSingleTableMetric:
 
         # Assert
         expected_metadata = {
-            'fields': {
-                'col1': {'type': 'numerical', 'subtype': 'integer'},
-                'col2': {'type': 'categorical'},
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'},
             },
         }
         pd.testing.assert_frame_equal(real_data, validated_real)
@@ -101,9 +101,9 @@ class TestSingleTableMetric:
             'col3': [1, 2, 3],
         })
         metadata = {
-            'fields': {
-                'col1': {'type': 'numerical', 'subtype': 'integer'},
-                'col2': {'type': 'categorical'},
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'},
             },
         }
 
@@ -131,10 +131,10 @@ class TestSingleTableMetric:
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['c', 'b', 'c']})
         metadata = {
-            'fields': {
-                'col1': {'type': 'numerical', 'subtype': 'integer'},
-                'col2': {'type': 'categorical'},
-                'col3': {'type': 'boolean'},
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'},
+                'col3': {'sdtype': 'boolean'},
             },
         }
 
@@ -195,10 +195,10 @@ class TestSingleTableMetric:
             'col3': [date(2020, 11, 12), date(2022, 11, 2), date(2022, 3, 13)],
         })
         metadata = {
-            'fields': {
-                'col1': {'type': 'numerical', 'subtype': 'integer'},
-                'col2': {'type': 'categorical'},
-                'col3': {'type': 'datetime', 'format': '%Y-%m-%d'},
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'categorical'},
+                'col3': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
             },
         }
 
@@ -226,13 +226,13 @@ class TestSingleTableMetric:
         # Setup
         metadata = {
             'alternate_keys': ['colD', ['colE', 'colF']],
-            'fields': {
-                'colA': {'type': 'datetime'},
-                'colB': {'type': 'categorical'},
-                'colC': {'type': 'categorical', 'pii': True},
-                'colD': {'type': 'categorical'},
-                'colE': {'type': 'categorical'},
-                'colF': {'type': 'categorical'},
+            'columns': {
+                'colA': {'sdtype': 'datetime'},
+                'colB': {'sdtype': 'categorical'},
+                'colC': {'sdtype': 'categorical', 'pii': True},
+                'colD': {'sdtype': 'categorical'},
+                'colE': {'sdtype': 'categorical'},
+                'colF': {'sdtype': 'categorical'},
             },
         }
 

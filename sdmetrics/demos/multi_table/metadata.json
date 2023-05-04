@@ -1,0 +1,81 @@
+{
+    "tables": {
+        "users": {
+            "primary_key": "user_id",
+            "columns": {
+                "user_id": {
+                    "sdtype": "id",
+                    "regex_format": "\\d{30}"
+                },
+                "country": {
+                    "sdtype": "categorical"
+                },
+                "gender": {
+                    "sdtype": "categorical"
+                },
+                "age": {
+                    "sdtype": "numerical",
+                    "computer_representation": "Int64"
+                }
+            }
+        },
+        "sessions": {
+            "primary_key": "session_id",
+            "columns": {
+                "session_id": {
+                    "sdtype": "id",
+                    "regex_format": "\\d{30}"
+                },
+                "user_id": {
+                    "sdtype": "id",
+                    "regex_format": "\\d{30}"
+                },
+                "device": {
+                    "sdtype": "categorical"
+                },
+                "os": {
+                    "sdtype": "categorical"
+                }
+            }
+        },
+        "transactions": {
+            "primary_key": "transaction_id",
+            "columns": {
+                "transaction_id": {
+                    "sdtype": "id",
+                    "regex_format": "\\d{30}"
+                },
+                "session_id": {
+                    "sdtype": "id",
+                    "regex_format": "\\d{30}"
+                },
+                "timestamp": {
+                    "sdtype": "datetime",
+                    "datetime_format": "%Y-%m-%d %H:%M:%S"
+                },
+                "amount": {
+                    "sdtype": "numerical",
+                    "computer_representation": "Float"
+                },
+                "approved": {
+                    "sdtype": "boolean"
+                }
+            }
+        }
+    },
+    "relationships": [
+        {
+            "parent_table_name": "users",
+            "parent_primary_key": "user_id",
+            "child_table_name": "sessions",
+            "child_foreign_key": "user_id"
+        },
+        {
+            "parent_table_name": "sessions",
+            "parent_primary_key": "session_id",
+            "child_table_name": "transactions",
+            "child_foreign_key": "session_id"
+        }
+    ],
+    "METADATA_SPEC_VERSION": "MULTI_TABLE_V1"
+}

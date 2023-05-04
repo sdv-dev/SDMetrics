@@ -1,6 +1,36 @@
 # History
 
-## v0.9.2 - 2023-03-07
+## v0.10.0 - 2023-05-03
+
+This release makes the `DiagnosticReport` more fault tolerant by preventing it from crashing if a metric it uses fails. It also adds support for Pandas 2.0!
+
+Additionally, support for the old `SDV` metadata format (pre `SDV` 1.0) has been dropped.
+
+### New Features
+
+* Cleanup SDMetrics to only accept SDV 1.0 metadata format - Issue [#331](https://github.com/sdv-dev/SDMetrics/issues/331) by @amontanez24
+* Make the diagnostic report more fault-tolerant - Issue [#332](https://github.com/sdv-dev/SDMetrics/issues/332) by @frances-h
+
+### Maintenance
+
+* Remove upper bound for pandas - Issue [#338](https://github.com/sdv-dev/SDMetrics/issues/338) by @pvk-developer
+
+## v0.9.3 - 2023-04-12
+
+This release improves the clarity of warning/error messages. We also add a version add-on, update the workflow to optimize the runtime and fix a bug in the `NewRowSynthesis` metric when computing the `synthetic_sample_size` for multi-table.
+
+### New Features
+* Add functionality to find version add-on - Issue [#321](https://github.com/sdv-dev/SDMetrics/issues/321) by @frances-h
+* More detailed warning in QualityReport when there is a constant input - Issue [#316](https://github.com/sdv-dev/SDMetrics/issues/316) by @pvk-developer
+* Make error more informative in QualityReport when tables cannot be merged - Issue [#317](https://github.com/sdv-dev/SDMetrics/issues/317) by @frances-h
+* More detailed warning in QualityReport for unexpected category values - Issue [#315](https://github.com/sdv-dev/SDMetrics/issues/315) by @frances-h
+
+### Bug Fixes
+* Multi table DiagnosticReport sets synthetic_sample_size too low for NewRowSynthesis - Issue [#320](https://github.com/sdv-dev/SDMetrics/issues/320) by @pvk-developer
+
+
+## v0.9.2 - 2023-03-08
+
 This release fixes bugs in the  `NewRowSynthesis` metric when too many columns were present. It also fixes bugs around datetime columns that are formatted as strings in both `get_column_pair_plot` and `get_column_plot`.
 
 ### Bug Fixes
