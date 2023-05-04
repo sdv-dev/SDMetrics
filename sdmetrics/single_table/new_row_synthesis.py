@@ -6,7 +6,7 @@ import pandas as pd
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
+from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta, strip_characters
 
 
 class NewRowSynthesis(SingleTableMetric):
@@ -86,24 +86,17 @@ class NewRowSynthesis(SingleTableMetric):
         except IncomputableMetricError:
             categorical_fields = []
 
-        def update_column_name(char, column_name):
-            return column_name.replace(char, '_') if char in column_name else column_name
-
-        def update_lists(column, new_column):
-            for field_list in [numerical_fields, categorical_fields]:
-                if column in field_list:
-                    field_list.remove(column)
-                    field_list.append(new_column)
-
-        for column in real_data.columns:
-            new_column = column
-            for char in ['\n', '.', "'"]:
-                new_column = update_column_name(char, new_column)
-
-            if new_column != column:
-                real_data = real_data.rename(columns={column: new_column})
-                synthetic_data = synthetic_data.rename(columns={column: new_column})
-                update_lists(column, new_column)
+        for column_name in real_data.columns:
+            new_column_name = strip_characters(['\n', '.', "'"], column_name)
+            if new_column_name != column_name:
+                real_data = real_data.rename(columns={column_name: new_column_name})
+                synthetic_data = synthetic_data.rename(columns={column_name: new_column_name})
+                if column_name in numerical_fields:
+                    numerical_fields.remove(column_name)
+                    numerical_fields.append(new_column_name)
+                elif column_name in categorical_fields:
+                    categorical_fields.remove(column_name)
+                    categorical_fields.append(new_column_name)
 
         num_unique_rows = 0
         for index, row in synthetic_data.iterrows():
