@@ -89,6 +89,9 @@ class NewRowSynthesis(SingleTableMetric):
         for column_name in real_data.columns:
             new_column_name = strip_characters(['\n', '.', "'"], column_name)
             if new_column_name != column_name:
+                if new_column_name in real_data.columns:
+                    while new_column_name in real_data.columns:
+                        new_column_name += '_'
                 real_data = real_data.rename(columns={column_name: new_column_name})
                 synthetic_data = synthetic_data.rename(columns={column_name: new_column_name})
                 if column_name in numerical_fields:
