@@ -29,8 +29,8 @@ pomegranate_requires = [
 ]
 
 torch_requires = [
-    "torch>=1.8.0,<2;python_version<'3.10'",
-    "torch>=1.11.0,<2;python_version>='3.10'",
+    "torch>=1.8.0;python_version<'3.10'",
+    "torch>=1.11.0;python_version>='3.10'",
 ]
 
 setup_requires = [
