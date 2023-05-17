@@ -1,5 +1,6 @@
 """scikit-learn based DetectionMetrics for single table datasets."""
 
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
@@ -67,3 +68,19 @@ class SVCDetection(ScikitLearnClassifierDetectionMetric):
     @staticmethod
     def _get_classifier():
         return SVC(probability=True, gamma='scale')
+
+
+class GradientBoostingDetection(ScikitLearnClassifierDetectionMetric):
+    """ScikitLearnClassifierDetectionMetric based on a GradientBoostingClassifier.
+
+    This metric builds a GradientBoostingClassifier Classifier that learns to tell the synthetic
+    data apart from the real data, which later on is evaluated using Cross Validation.
+
+    The output of the metric is one minus the average ROC AUC score obtained.
+    """
+
+    name = 'GradientBoosting Detection'
+
+    @staticmethod
+    def _get_classifier():
+        return GradientBoostingClassifier()

@@ -8,7 +8,8 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table import NewRowSynthesis
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
-from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
+from sdmetrics.single_table.detection import (
+    GradientBoostingDetection, LogisticDetection, SVCDetection)
 from sdmetrics.single_table.multi_column_pairs import (
     ContingencySimilarity, ContinuousKLDivergence, DiscreteKLDivergence)
 from sdmetrics.single_table.multi_single_column import (
@@ -18,6 +19,7 @@ from sdmetrics.single_table.multi_single_column import (
 METRICS = [
     CSTest,
     KSComplement,
+    GradientBoostingDetection,
     LogisticDetection,
     SVCDetection,
     ContinuousKLDivergence,
