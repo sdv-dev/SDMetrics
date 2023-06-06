@@ -29,8 +29,8 @@ pomegranate_requires = [
 ]
 
 torch_requires = [
-    "torch>=1.8.0,<2;python_version<'3.10'",
-    "torch>=1.11.0,<2;python_version>='3.10'",
+    "torch>=1.8.0;python_version<'3.10'",
+    "torch>=1.11.0;python_version>='3.10'",
 ]
 
 setup_requires = [
@@ -125,6 +125,6 @@ setup(
     test_suite='tests',
     tests_require=tests_require,
     url='https://github.com/sdv-dev/SDMetrics',
-    version='0.10.0',
+    version='0.10.1.dev1',
     zip_safe=False,
 )

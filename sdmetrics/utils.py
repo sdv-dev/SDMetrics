@@ -275,3 +275,24 @@ def get_alternate_keys(metadata):
             alternate_keys.append(alternate_key)
 
     return alternate_keys
+
+
+def strip_characters(list_character, a_string):
+    """Strip characters from a column name.
+
+    Args:
+        list_character (list):
+            The list of characters to strip.
+        a_string (string):
+            The string to be stripped.
+
+    Returns:
+        string:
+            The string with the characters stripped.
+    """
+    result = a_string
+    for character in list_character:
+        if character in result:
+            result = result.replace(character, '')
+
+    return result

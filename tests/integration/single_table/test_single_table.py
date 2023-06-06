@@ -5,6 +5,7 @@ import pytest
 from sdmetrics import compute_metrics
 from sdmetrics.demos import load_single_table_demo
 from sdmetrics.goal import Goal
+from sdmetrics.single_table import NewRowSynthesis
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
@@ -123,3 +124,29 @@ def test_compute_all():
 
     scores = output[output.normalized_score.notna()]
     assert scores.normalized_score.between(0.0, 1.0).all()
+
+
+def test_newrowsynthesis_with_special_characters_in_column_names():
+    """Test the ``NewRowSynthesis`` metric when there is special characters in the column names."""
+    # Setup
+    real_data = pd.DataFrame({
+        'a\nb': [1, 2, 3],
+        "c'": [4, 5, 6],
+        'd.': [7, 8, 9],
+        "e.'\n": [10, 11, 12],
+    })
+    synthetic_data = pd.DataFrame({
+        'a\nb': [1, 4, 5],
+        "c'": [4, 5, 6],
+        'd.': [7, 8, 9],
+        "e.'\n": [10, 11, 12],
+    })
+
+    # Run
+    metric = NewRowSynthesis.compute(
+        real_data=real_data,
+        synthetic_data=synthetic_data
+    )
+
+    # Assert
+    assert metric == 0.66666666666666667
