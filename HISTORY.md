@@ -1,5 +1,17 @@
 # History
 
+## v0.10.1 - 2023-06-06
+
+This release fixes a bug that was causing the `DiagnosticReport` to crash on the `NewRowSynthesis` metric. It also adds support for PyTorch 2.0!
+
+### Bug Fixes
+
+* ValueError: multi-line expressions (NewRowSynthesis metric in DiagnosticReport) - Issue [#327](https://github.com/sdv-dev/SDMetrics/issues/327) by @R-Palazzo
+
+### Maintenance
+
+* Upgrade to torch 2.0 - Issue [#347](https://github.com/sdv-dev/SDMetrics/issues/347) by @fealho
+
 ## v0.10.0 - 2023-05-03
 
 This release makes the `DiagnosticReport` more fault tolerant by preventing it from crashing if a metric it uses fails. It also adds support for Pandas 2.0!
