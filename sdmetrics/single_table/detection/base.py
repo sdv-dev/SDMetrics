@@ -75,10 +75,16 @@ class DetectionMetric(SingleTableMetric):
         else:
             transformed_real_data = real_data
             transformed_synthetic_data = synthetic_data
-
+        
+        for field in metadata['fields'].keys():
+            if 'ref' in metadata['fields'][field].keys():
+                transformed_real_data = transformed_real_data.drop(field, axis=1)
+                transformed_synthetic_data = transformed_synthetic_data.drop(field, axis=1)
+        
         ht = HyperTransformer()
-        transformed_real_data = ht.fit_transform(transformed_real_data).to_numpy()
-        transformed_synthetic_data = ht.transform(transformed_synthetic_data).to_numpy()
+        col_names = list(transformed_real_data.columns)
+        transformed_real_data = ht.fit_transform(transformed_real_data[col_names]).to_numpy()
+        transformed_synthetic_data = ht.transform(transformed_synthetic_data[col_names]).to_numpy()
         X = np.concatenate([transformed_real_data, transformed_synthetic_data])
         y = np.hstack([
             np.ones(len(transformed_real_data)), np.zeros(len(transformed_synthetic_data))
@@ -88,7 +94,7 @@ class DetectionMetric(SingleTableMetric):
 
         try:
             scores = []
-            kf = StratifiedKFold(n_splits=3, shuffle=True)
+            kf = StratifiedKFold(n_splits=3, shuffle=True, random_state=1234)
             for train_index, test_index in kf.split(X, y):
                 y_pred = cls._fit_predict(X[train_index], y[train_index], X[test_index])
                 roc_auc = roc_auc_score(y[test_index], y_pred)
