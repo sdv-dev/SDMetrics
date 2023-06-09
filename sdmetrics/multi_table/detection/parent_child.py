@@ -55,7 +55,7 @@ class ParentChildDetectionMetric(DetectionMetric,
 
         flat = data[parent_table].set_index(parent_key).merge(
             data[child_table].set_index(child_key),
-            how='outer',
+            how='right',
             left_index=True,
             right_index=True,
         ).reset_index(drop=True)
