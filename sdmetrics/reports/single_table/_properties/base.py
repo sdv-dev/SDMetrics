@@ -1,6 +1,9 @@
 """Single table base property class."""
-from sdmetrics.reports.utils import validate_single_table_inputs
 import pandas as pd
+from tqdm.auto import tqdm
+
+from sdmetrics.reports.utils import validate_single_table_inputs
+
 
 class BaseSingleTableProperty():
     """Base class for single table properties.
@@ -11,18 +14,18 @@ class BaseSingleTableProperty():
 
     _details = None
 
-    def _average_scores(self):
+    def _compute_average(self):
         """Average the scores for each column."""
-        if not isinstance(self._details, pd.DataFrame) or "Score" not in self._details.columns:
+        if not isinstance(self._details, pd.DataFrame) or 'Score' not in self._details.columns:
             raise ValueError("The property details must be a DataFrame with a 'Score' column.")
 
-        return self._details["Score"].mean(ignore_na=True)
+        return round(self._details['Score'].mean(), 3)
 
-    def _get_score_dataframe(self, real_data, synthetic_data, metadata, progress_bar):
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=tqdm):
         """Get the average score for the property on the data."""
         raise NotImplementedError()
 
-    def get_score(self, real_data, synthetic_data, metadata, progress_bar):
+    def get_score(self, real_data, synthetic_data, metadata, progress_bar=tqdm):
         """Get the average score for the property on the data.
 
         Args:
@@ -40,8 +43,8 @@ class BaseSingleTableProperty():
                 The average score for the property.
         """
         validate_single_table_inputs(real_data, synthetic_data, metadata)
-        self._details = self._get_score_dataframe(real_data, synthetic_data, metadata, progress_bar)
-        return self._average_scores() 
+        self._details = self._generate_details(real_data, synthetic_data, metadata, progress_bar)
+        return self._compute_average()
 
     def get_visualization(self):
         """Return a visualization for each score in the property.
