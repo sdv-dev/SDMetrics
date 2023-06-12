@@ -11,7 +11,14 @@ from sdmetrics.single_column.statistical.tv_complement import TVComplement
 
 
 class ColumnShapes(BaseSingleTableProperty):
-    """Column Shapes property class for single table."""
+    """Column Shapes property class for single table.
+
+    This property assesses the shape similarity between the real and synthetic data.
+    A metric score is computed column-wise and the final score is the average over all columns.
+    The KSComplement metric is used for numerical and datetime columns while the TVComplement
+    is used for categorical and boolean columns.
+    The other column types are ignored by this property.
+    """
 
     metrics = [KSComplement, TVComplement]
     _sdtype_to_metric = {

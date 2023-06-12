@@ -1,6 +1,8 @@
 """Test BaseSingleTableProperty class."""
+import re
 from unittest.mock import Mock, patch
 
+import pandas as pd
 import pytest
 
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
@@ -8,7 +10,7 @@ from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 
 class TestBaseSingleTableProperty:
 
-    def test__generate_details(self):
+    def test__generate_details_raises_error(self):
         """Test that the method raises a ``NotImplementedError``."""
         # Setup
         base_property = BaseSingleTableProperty()
@@ -25,6 +27,22 @@ class TestBaseSingleTableProperty:
         # Run and Assert
         with pytest.raises(NotImplementedError):
             base_property.get_visualization()
+
+    def test__compute_average_raises_error(self):
+        """Test that the method raises a ``ValueError`` when _details has not been computed."""
+        # Setup
+        base_property = BaseSingleTableProperty()
+
+        # Run and Assert
+        expected_error_message = re.escape(
+            "The property details must be a DataFrame with a 'Score' column."
+        )
+        with pytest.raises(ValueError, match=expected_error_message):
+            base_property._compute_average()
+
+        base_property._details = pd.DataFrame({'Column Name': ['a', 'b', 'c']})
+        with pytest.raises(ValueError, match=expected_error_message):
+            base_property._compute_average()
 
     @patch('sdmetrics.reports.single_table._properties.base.validate_single_table_inputs')
     def test_get_score(self, validate_single_table_inputs_mock):

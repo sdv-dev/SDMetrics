@@ -22,7 +22,7 @@ class BaseSingleTableProperty():
         return round(self._details['Score'].mean(), 3)
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=tqdm.tqdm):
-        """Get the average score for the property on the data."""
+        """Generate the _details dataframe for the property."""
         raise NotImplementedError()
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=tqdm.tqdm):
