@@ -1,6 +1,6 @@
 """Single table base property class."""
 import pandas as pd
-from tqdm.auto import tqdm
+import tqdm
 
 from sdmetrics.reports.utils import validate_single_table_inputs
 
@@ -21,11 +21,11 @@ class BaseSingleTableProperty():
 
         return round(self._details['Score'].mean(), 3)
 
-    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=tqdm):
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=tqdm.tqdm):
         """Get the average score for the property on the data."""
         raise NotImplementedError()
 
-    def get_score(self, real_data, synthetic_data, metadata, progress_bar=tqdm):
+    def get_score(self, real_data, synthetic_data, metadata, progress_bar=tqdm.tqdm):
         """Get the average score for the property on the data.
 
         Args:

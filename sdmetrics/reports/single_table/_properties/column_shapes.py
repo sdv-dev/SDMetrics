@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from tqdm.auto import tqdm
+import tqdm
 
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.single_column.statistical.kscomplement import KSComplement
@@ -21,7 +21,7 @@ class ColumnShapes(BaseSingleTableProperty):
         'boolean': TVComplement
     }
 
-    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=tqdm):
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=tqdm.tqdm):
         """Generate the _details dataframe for the column shapes property.
 
         Args:
