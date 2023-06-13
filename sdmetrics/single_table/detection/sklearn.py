@@ -50,7 +50,7 @@ class LogisticDetection(ScikitLearnClassifierDetectionMetric):
 
     @staticmethod
     def _get_classifier():
-        return LogisticRegression(solver='lbfgs')
+        return LogisticRegression(solver='lbfgs', max_iter=1000)
 
 
 class SVCDetection(ScikitLearnClassifierDetectionMetric):

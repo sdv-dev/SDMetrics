@@ -87,7 +87,7 @@ class BinaryLogisticRegression(BinaryEfficacyMetric):
         'solver': 'lbfgs',
         'n_jobs': 2,
         'class_weight': 'balanced',
-        'max_iter': 50
+        'max_iter': 200
     }
 
 
