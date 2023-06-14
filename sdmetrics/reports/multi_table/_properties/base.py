@@ -8,13 +8,9 @@ class BaseMultiTableProperty():
     and applies different base-level metrics based on the data type.
 
     Attributes:
-        metrics (list):
-            A list of metrics that make up the property.
         properties (dict):
             A dict mapping the table names to their single table properties.
     """
-
-    metrics = None
     _properties = None
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar):

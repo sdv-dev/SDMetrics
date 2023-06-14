@@ -18,7 +18,7 @@ def test_get_score_raises_error():
 
 
 def test_get_visualization():
-    """Test that the method returns the propertie's ``get_visualization``."""
+    """Test that the method returns the property's ``get_visualization``."""
     # Setup
     base_property = BaseMultiTableProperty()
     property_mock = Mock()
