@@ -11,6 +11,7 @@ class BaseMultiTableProperty():
         properties (dict):
             A dict mapping the table names to their single table properties.
     """
+
     _properties = None
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar):
