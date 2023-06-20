@@ -224,13 +224,90 @@ class TestColumnPairTrends:
             processed_synthetic[['col2', 'col4_discrete']],
             processed_synthetic[['col3', 'col4_discrete']],
         ]
-        for idx, call in enumerate(contingency_compute_mock.call_args_list):
-            _, contingency_kwargs = call
+        for idx, call1 in enumerate(contingency_compute_mock.call_args_list):
+            _, contingency_kwargs = call1
             assert contingency_kwargs['real_data'].equals(expected_real_data[idx])
             assert contingency_kwargs['synthetic_data'].equals(expected_synthetic_data[idx])
 
-    def test__get_correlation_matrix(self):
-        pass
+    def test__get_correlation_matrix_score(self):
+        """Test the ``_get_correlation_matrix`` method to generate the ``Score`` heatmap."""
+        # Setup
+        cpt_property = ColumnPairTrends()
+        cpt_property._details = pd.DataFrame({
+            'Column 1': ['col1', 'col1', 'col2'],
+            'Column 2': ['col2', 'col3', 'col3'],
+            'metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
+            'Score': [0.5, 0.6, 0.7],
+        })
 
-    def test__get_visualization(self):
-        pass
+        # Run
+        heatmap = cpt_property._get_correlation_matrix('Score')
+
+        # Assert
+        expected_heatmap = pd.DataFrame({
+            'col1': [1, 0.5, 0.6],
+            'col2': [0.5, 1, 0.7],
+            'col3': [0.6, 0.7, 1],
+        }, index=['col1', 'col2', 'col3'])
+
+        pd.testing.assert_frame_equal(heatmap, expected_heatmap)
+
+    def test__get_correlation_matrix_correlation(self):
+        """Test the ``_get_correlation_matrix`` method to generate the ``Correlation`` heatmap."""
+        # Setup
+        cpt_property = ColumnPairTrends()
+        cpt_property._details = pd.DataFrame({
+            'Column 1': ['col1', 'col1', 'col2'],
+            'Column 2': ['col2', 'col3', 'col3'],
+            'metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
+            'Score': [0.5, 0.6, 0.7],
+            'Real Correlation': [0.3, None, None],
+            'Synthetic Correlation': [0.4, None, None],
+        })
+
+        # Run
+        heatmap_real = cpt_property._get_correlation_matrix('Real Correlation')
+        heatmap_synthetic = cpt_property._get_correlation_matrix('Synthetic Correlation')
+
+        # Assert
+        expected_real_heatmap = pd.DataFrame({
+            'col1': [1, 0.3],
+            'col2': [0.3, 1],
+        }, index=['col1', 'col2'])
+
+        expected_synthetic_heatmap = pd.DataFrame({
+            'col1': [1, 0.4],
+            'col2': [0.4, 1],
+        }, index=['col1', 'col2'])
+
+        pd.testing.assert_frame_equal(heatmap_real, expected_real_heatmap)
+        pd.testing.assert_frame_equal(heatmap_synthetic, expected_synthetic_heatmap)
+
+    @patch('sdmetrics.reports.single_table._properties.column_pair_trends.make_subplots')
+    def test_get_visualization(self, mock_make_subplots):
+        """Test the ``get_visualization`` method."""
+        # Setup
+        cpt_property = ColumnPairTrends()
+
+        fig_mock = Mock()
+        fig_mock.add_trace = Mock()
+        mock_make_subplots.return_value = fig_mock
+
+        mock__get_correlation_matrix = Mock()
+        cpt_property._get_correlation_matrix = mock__get_correlation_matrix
+
+        mock_heatmap = Mock()
+        cpt_property._get_heatmap = Mock(return_value=mock_heatmap)
+
+        mock__update_layout = Mock()
+        cpt_property._update_layout = mock__update_layout
+
+        # Run
+        cpt_property.get_visualization()
+
+        # Assert
+        assert mock__get_correlation_matrix.call_count == 3
+        mock_make_subplots.assert_called()
+        assert cpt_property._get_heatmap.call_count == 3
+        assert fig_mock.add_trace.call_count == 3
+        cpt_property._update_layout.assert_called()
