@@ -1,21 +1,27 @@
+import itertools
 import warnings
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
 import tqdm
+from plotly import graph_objects as go
+from plotly.subplots import make_subplots
 
-from scipy.stats import pearsonr, spearmanr
-
-from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
-from sdmetrics.column_pairs.statistical.correlation_similarity import CorrelationSimilarity
 from sdmetrics.column_pairs.statistical.contingency_similarity import ContingencySimilarity
+from sdmetrics.column_pairs.statistical.correlation_similarity import CorrelationSimilarity
+from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import discretize_table_data
+from sdmetrics.utils import create_unique_name
 
 
 class ColumnPairTrends(BaseSingleTableProperty):
+    """Column pair trends property.
 
-    metrics = [CorrelationSimilarity, ContingencySimilarity]
+    This property evaluates the matching in trends between pairs of real
+    and synthetic data columns. Each pair's correlation is calculated and
+    The final score represents the average of these measures across all column pairs
+    """
+
     _sdtype_to_shape = {
         'numerical': 'continuous',
         'datetime': 'continuous',
@@ -23,72 +29,132 @@ class ColumnPairTrends(BaseSingleTableProperty):
         'boolean': 'discrete'
     }
 
-    def datetime_to_numeric(self, data, metadata):
-        data = data.copy()
-        for column_name in metadata['columns']:
-            sdtype = metadata['columns'][column_name]['sdtype']
-            if sdtype == 'datetime':
-                datetime_format = metadata['columns'][column_name].get('datetime_format', None)
-                data[column_name] = pd.to_datetime(
-                    data[column_name], format=datetime_format
-                ).astype(np.int64)
+    def _get_processed_data(self, real_data, synthetic_data, metadata):
+        """Get the processed data for the property.
 
-        return data
+        Preprocess the data by converting datetime columns to numeric and
+        adding a discrete version of datetime and numerical columns to the dataframes.
 
-    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=tqdm.tqdm):
-
-        real_data = self.datetime_to_numeric(real_data, metadata)
-        synthetic_data = self.datetime_to_numeric(synthetic_data, metadata)
-        discrete_real, discrete_synthetic, _ = discretize_table_data(
+        Args:
+            real_data (pandas.DataFrame):
+                The real data
+            synthetic_data (pandas.DataFrame):
+                The synthetic data
+            metadata (dict):
+                The metadata of the table
+        """
+        processed_real_data = real_data.copy()
+        processed_synthetic_data = synthetic_data.copy()
+        discrete_real_data, discrete_synthetic_data, _ = discretize_table_data(
             real_data, synthetic_data, metadata
         )
-        print(real_data.dtypes)
-        print(synthetic_data.dtypes)
+
+        for column_name in metadata['columns']:
+            metadata_col = metadata['columns'][column_name]
+            if metadata_col['sdtype'] == 'datetime':
+                real_col = real_data[column_name]
+                synthetic_col = synthetic_data[column_name]
+                datetime_format = metadata_col.get('format') or metadata_col.get('datetime_format')
+                if real_col.dtype == 'O' and datetime_format:
+                    real_col = pd.to_datetime(real_col, format=datetime_format)
+                    synthetic_col = pd.to_datetime(synthetic_col, format=datetime_format)
+
+                processed_real_data[column_name] = pd.to_numeric(real_col)
+                processed_synthetic_data[column_name] = pd.to_numeric(synthetic_col)
+
+                name_discrete = create_unique_name(column_name + '_discrete', metadata['columns'])
+                processed_real_data[name_discrete] = discrete_real_data[column_name]
+                processed_synthetic_data[name_discrete] = discrete_synthetic_data[column_name]
+
+            elif metadata_col['sdtype'] == 'numerical':
+                name_discrete = create_unique_name(column_name + '_discrete', metadata['columns'])
+                processed_real_data[name_discrete] = discrete_real_data[column_name]
+                processed_synthetic_data[name_discrete] = discrete_synthetic_data[column_name]
+
+        return processed_real_data, processed_synthetic_data
+
+    def _get_metric_and_columns(
+            self, column_name_1, column_name_2, real_data, synthetic_data, metadata):
+        """Get the metric and columns to use for the property.
+
+        If one of the columns is discrete, use the ContingencySimilarity metric.
+        Otherwise, use the CorrelationSimilarity metric.
+        If ContingencySimilarity metric is used and one of the column is numerical or datetime,
+        take the discrete version of the column.
+
+        Args:
+            column_name_1 (str):
+                The name of the first column
+            column_name_2 (str):
+                The name of the second column
+            real_data (pandas.DataFrame):
+                The real data
+            synthetic_data (pandas.DataFrame):
+                The synthetic data
+            metadata (dict):
+                The metadata of the table
+        """
+        sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
+        sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
+        is_col_1_discrete = self._sdtype_to_shape[sdtype_col_1] == 'discrete'
+        is_col_2_discrete = self._sdtype_to_shape[sdtype_col_2] == 'discrete'
+        if is_col_1_discrete or is_col_2_discrete:
+            metric = ContingencySimilarity
+            if sdtype_col_1 in ['datetime', 'numerical']:
+                col_name_1 = create_unique_name(column_name_1 + '_discrete', metadata['columns'])
+            if sdtype_col_2 in ['datetime', 'numerical']:
+                col_name_2 = create_unique_name(column_name_2 + '_discrete', metadata['columns'])
+        else:
+            col_name_1 = column_name_1
+            col_name_2 = column_name_2
+            metric = CorrelationSimilarity
+
+        columns_real = real_data[[col_name_1, col_name_2]]
+        columns_synthetic = synthetic_data[[col_name_1, col_name_2]]
+        return metric, columns_real, columns_synthetic
+
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=tqdm.tqdm):
+        """Generate the _details dataframe for the column pair trends property.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data
+            synthetic_data (pandas.DataFrame):
+                The synthetic data
+            metadata (dict):
+                The metadata of the table
+            progress_bar:
+                The progress bar to use. Defaults to tqdm.
+        """
+        processed_real_data, processed_synthetic_data = self._get_processed_data(
+            real_data, synthetic_data, metadata
+        )
+
         column_names_1 = []
         column_names_2 = []
         metric_names = []
         scores = []
         real_correlations = []
         synthetic_correaltions = []
+
         list_col_names = list(metadata['columns'])
-        idx = 1
-        for column_name_1 in progress_bar(list_col_names[:-1]):
+        list_dtypes = self._sdtype_to_shape.keys()
+        for column_names in progress_bar(itertools.combinations(list_col_names, r=2)):
+            column_name_1 = column_names[0]
+            column_name_2 = column_names[1]
             sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
-            for column_name_2 in list_col_names[idx:]:
-                sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
+            sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
+            if sdtype_col_1 in list_dtypes and sdtype_col_2 in list_dtypes:
                 try:
-                    if sdtype_col_1 in self._sdtype_to_shape and sdtype_col_2 in self._sdtype_to_shape:
-                        if self._sdtype_to_shape[sdtype_col_1] == self._sdtype_to_shape[sdtype_col_1]:
-                            columns_real = real_data[[column_name_1, column_name_2]]
-                            columns_synthetic = synthetic_data[[column_name_1, column_name_2]]
+                    metric, columns_real, columns_synthetic = self._get_metric_and_columns(
+                        column_name_1, column_name_2, processed_real_data,
+                        processed_synthetic_data, metadata
+                    )
 
-                            if self._sdtype_to_shape[sdtype_col_1] == 'continuous':
-                                metric = CorrelationSimilarity
-                            else:
-                                metric = ContingencySimilarity
-                        else:
-                            metric = ContingencySimilarity
-                            if self._sdtype_to_shape[sdtype_col_1] == 'continuous':
-                                columns_real = pd.concat(
-                                    [discrete_real[column_name_1], real_data[column_name_2]], axis=1
-                                )
-                                columns_synthetic = pd.concat(
-                                    [discrete_synthetic[column_name_1], synthetic_data[column_name_2]],
-                                    axis=1
-                                )
-                            else:
-                                columns_real = pd.concat(
-                                    [real_data[column_name_1], discrete_real[column_name_2]],
-                                    axis=1
-                                )
-                                columns_synthetic = pd.concat(
-                                    [synthetic_data[column_name_1], discrete_synthetic[column_name_2]],
-                                    axis=1
-                                )
-
-                    pair_score = metric.compute(
+                    score_breakdown = metric.compute_breakdown(
                         real_data=columns_real, synthetic_data=columns_synthetic
                     )
+                    pair_score = score_breakdown['score']
                 except Exception as e:
                     pair_score = np.nan
                     warnings.warn(
@@ -96,16 +162,11 @@ class ColumnPairTrends(BaseSingleTableProperty):
                             f"'{column_name_2}'). Encountered Error: {type(e).__name__} {e}"
                     )
 
-                try:
-                    real_correlation = pearsonr(
-                        real_data[column_name_1], real_data[column_name_2])[0]
-                except Exception as e:
+                if metric.__name__ == 'CorrelationSimilarity':
+                    real_correlation = score_breakdown['real']
+                    synthetic_correlation = score_breakdown['synthetic']
+                else:
                     real_correlation = np.nan
-
-                try:
-                    synthetic_correlation = pearsonr(
-                        synthetic_data[column_name_1], synthetic_data[column_name_2])[0]
-                except Exception as e:
                     synthetic_correlation = np.nan
 
                 column_names_1.append(column_name_1)
@@ -115,58 +176,83 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 real_correlations.append(real_correlation)
                 synthetic_correaltions.append(synthetic_correlation)
 
-            idx+=1
-
         result = pd.DataFrame({
-            'Column name 1': column_names_1,
-            'Column name 2': column_names_2,
+            'Column 1': column_names_1,
+            'Column 2': column_names_2,
             'Metric': metric_names,
             'Score': scores,
-            'Real correlation': real_correlations,
-            'Synthetic correlation': synthetic_correaltions
+            'Real Correlation': real_correlations,
+            'Synthetic Correlation': synthetic_correaltions
         })
 
         return result
 
     def _get_correlation_matrix(self, column_name):
+        """Get the correlation matrix for the given column name."""
+        if column_name not in ['Score', 'Real Correlation', 'Synthetic Correlation']:
+            raise ValueError(f"Invalid column name for _get_correlation_matrix : '{column_name}'")
 
-        if column_name not in ['Score', 'Real correlation', 'Synthetic correlation']:
-            raise ValueError(f"Invalid column name: {column_name}")
-        
-        pivoted = self._details.pivot(index='Column 1', columns='Column 2', values=column_name)
+        table = self._details.dropna(subset=[column_name])
+        names = list(pd.concat([table['Column 1'], table['Column 2']]).unique())
+        heatmap_df = pd.DataFrame(index=names, columns=names)
 
-        symmetric = pivoted.fillna(0) + pivoted.fillna(0).T
+        for idx_1, column_name_1 in enumerate(names):
+            for column_name_2 in names[idx_1:]:
+                if column_name_1 == column_name_2:
+                    heatmap_df.loc[column_name_1, column_name_2] = 1
+                    continue
 
-        for i in range(len(symmetric)):
-            symmetric.iloc[i,i] = 1
+                col_1_cond = (table['Column 1'] == column_name_1)
+                col_2_cond = (table['Column 2'] == column_name_2)
+                if table.loc[col_1_cond & col_2_cond].empty:
+                    col_1_cond = (table['Column 1'] == column_name_2)
+                    col_2_cond = (table['Column 2'] == column_name_1)
 
-        return symmetric
+                if not table.loc[col_1_cond & col_2_cond].empty:
+                    score = table.loc[col_1_cond & col_2_cond][column_name].array[0]
+                    heatmap_df.loc[column_name_1, column_name_2] = score
+                    heatmap_df.loc[column_name_2, column_name_1] = score
 
-    def _get_similarity_correlation_matrix(self):
-        """Convert the _details scores to a similiarity correlation matrix.
+        heatmap_df = heatmap_df.astype(float)
 
-        Returns:
-            pandas.DataFrame
-        """
-        column_names = self._details['Column name 1'].unique()
-        
-        similarity_correlation = pd.DataFrame(
-            index=column_names,
-            columns=column_names,
-            dtype='float',
+        return heatmap_df.round(3)
+
+    def _get_heatmap(self, correlation_matrix, coloraxis, hovertemplate, customdata=None):
+        """Get the heatmap for the given correlation matrix."""
+        fig = go.Heatmap(
+                x=correlation_matrix.columns,
+                y=correlation_matrix.columns,
+                z=correlation_matrix,
+                coloraxis=coloraxis,
+                customdata=customdata,
+                hovertemplate=hovertemplate,
+            )
+
+        return fig
+
+    def _update_layout(self, fig):
+        """Update the layout of the figure."""
+        average_score = self._compute_average()
+        color_dict = {
+            'colorbar_len': 0.5,
+            'cmin': 0,
+            'cmax': 1,
+        }
+
+        colors_1 = ['#FF0000', '#F16141', '#36B37E']
+        colors_2 = ['#03AFF1', '#000036', '#01E0C9']
+
+        fig.update_layout(
+            title_text=f'Data Quality: Column Pair Trends (Average Score={average_score})',
+            coloraxis={**color_dict, 'colorbar_x': 0.8, 'colorbar_y': 0.8, 'colorscale': colors_1},
+            coloraxis2={**color_dict, 'colorbar_y': 0.2, 'cmin': -1, 'colorscale': colors_2},
+            yaxis3={'visible': False, 'matches': 'y2'},
+            xaxis3={'matches': 'x2'},
+            height=900,
+            width=900,
         )
-        np.fill_diagonal(similarity_correlation.to_numpy(), 1.0)
 
-        for column_name_1, column_name_2 in zip(column_names, column_names[1:]):
-            rows_col_name_1 = self._details['Column name 1'] == column_name_1
-            rows_col_name_2 = self._details['Column name 2'] == column_name_2
-            score = self._details.loc[rows_col_name_1 * rows_col_name_2]['Score']
-
-            similarity_correlation.loc[column_name_1, column_name_2] = score
-            similarity_correlation.loc[column_name_2, column_name_1] = score
-
-        return similarity_correlation
-
+        fig.update_yaxes(autorange='reversed')
 
     def get_visualization(self):
         """Create a plot to show the column pairs data.
@@ -183,115 +269,34 @@ class ColumnPairTrends(BaseSingleTableProperty):
         Returns:
             plotly.graph_objects._figure.Figure
         """
-        all_columns = []
-        all_scores = []
-        for _, score_breakdown in score_breakdowns.items():
-            for column_pair, result in score_breakdown.items():
-                all_columns.append(column_pair[0])
-                all_columns.append(column_pair[1])
-                all_scores.append(result['score'])
+        similarity_correlation = self._get_correlation_matrix('Score')
+        real_correlation = self._get_correlation_matrix('Real Correlation')
+        synthetic_correlation = self._get_correlation_matrix('Synthetic Correlation')
 
-        if average_score is None:
-            average_score = np.mean(all_scores)
-
-        similarity_correlation = self._get_similarity_correlation_matrix()
-        real_correlation, synthetic_correlation = _get_numerical_correlation_matrices(score_breakdowns)
-
-        fig = make_subplots(
-            rows=2,
-            cols=2,
-            subplot_titles=[
+        titles = [
                 'Real vs. Synthetic Similarity',
                 'Numerical Correlation (Real Data)',
                 'Numerical Correlation (Synthetic Data)',
-            ],
-            specs=[[{'colspan': 2, 'l': 0.26, 'r': 0.26}, None], [{}, {}]])
+        ]
+        specs = [[{'colspan': 2, 'l': 0.26, 'r': 0.26}, None], [{}, {}]]
+        tmpl_1 = '<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: %{z}<extra></extra>'
+        tmpl_2 = (
+            '<b>Correlation</b><br>(%{x},%{y})<br><br>Synthetic: %{z}<br>(vs. Real: '
+            '%{customdata})<extra></extra>'
+        )
 
-        # Top row: Overall Similarity Graph
+        fig = make_subplots(rows=2, cols=2, subplot_titles=titles, specs=specs)
+
         fig.add_trace(
-            go.Heatmap(
-                x=similarity_correlation.columns,
-                y=similarity_correlation.columns,
-                z=similarity_correlation.round(2),
-                coloraxis='coloraxis',
-                xaxis='x',
-                yaxis='y',
-                hovertemplate=(
-                    '<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: '
-                    '%{z}<extra></extra>'
-                ),
-            ),
-            1,
-            1,
+            self._get_heatmap(similarity_correlation, 'coloraxis', tmpl_1), 1, 1
         )
-
-        # Real correlation heatmap
         fig.add_trace(
-            go.Heatmap(
-                x=real_correlation.columns,
-                y=real_correlation.columns,
-                z=real_correlation.round(2),
-                coloraxis='coloraxis2',
-                xaxis='x2',
-                yaxis='y2',
-                # Compare against synthetic data in the tooltip.
-                customdata=synthetic_correlation.round(2),
-                hovertemplate=(
-                    '<b>Correlation</b><br>(%{x},%{y})<br><br>Real: %{z}'
-                    '<br>(vs. Synthetic: %{customdata})<extra></extra>'
-                ),
-            ),
-            2,
-            1,
+            self._get_heatmap(real_correlation, 'coloraxis2', tmpl_2, synthetic_correlation), 2, 1
         )
-
-        # Synthetic correlation heatmap
         fig.add_trace(
-            go.Heatmap(
-                x=synthetic_correlation.columns,
-                y=synthetic_correlation.columns,
-                z=synthetic_correlation.round(2),
-                coloraxis='coloraxis2',
-                xaxis='x3',
-                yaxis='y3',
-                # Compare against real data in the tooltip.
-                customdata=real_correlation.round(2),
-                hovertemplate=(
-                    '<b>Correlation</b><br>(%{x},%{y})<br><br>Synthetic: '
-                    '%{z}<br>(vs. Real: %{customdata})<extra></extra>'
-                ),
-            ),
-            2,
-            2,
+            self._get_heatmap(synthetic_correlation, 'coloraxis2', tmpl_2, real_correlation), 2, 2
         )
 
-        fig.update_layout(
-            title_text=f'Data Quality: Column Pair Trends (Average Score={round(average_score, 2)})',
-            # Similarity heatmap color axis
-            coloraxis={
-                'colorbar_len': 0.5,
-                'colorbar_x': 0.8,
-                'colorbar_y': 0.8,
-                'cmin': 0,
-                'cmax': 1,
-                'colorscale': ['#FF0000', '#F16141', '#36B37E'],
-            },
-            # Correlation heatmaps color axis
-            coloraxis2={
-                'colorbar_len': 0.5,
-                'colorbar_y': 0.2,
-                'cmin': -1,
-                'cmax': 1,
-                'colorscale': ['#03AFF1', '#000036', '#01E0C9'],
-            },
-            # Sync the zoom and pan of the bottom 2 graphs
-            yaxis3={'visible': False, 'matches': 'y2'},
-            xaxis3={'matches': 'x2'},
-            height=900,
-            width=900,
-        )
-
-        fig.update_yaxes(autorange='reversed')
+        self._update_layout(fig)
 
         return fig
-
