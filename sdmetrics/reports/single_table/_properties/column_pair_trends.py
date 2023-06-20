@@ -48,7 +48,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
         discrete_real_data, discrete_synthetic_data, _ = discretize_table_data(
             real_data, synthetic_data, metadata
         )
-
         for column_name in metadata['columns']:
             metadata_col = metadata['columns'][column_name]
             if metadata_col['sdtype'] == 'datetime':
@@ -96,8 +95,12 @@ class ColumnPairTrends(BaseSingleTableProperty):
         """
         sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
         sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
+
         is_col_1_discrete = self._sdtype_to_shape[sdtype_col_1] == 'discrete'
         is_col_2_discrete = self._sdtype_to_shape[sdtype_col_2] == 'discrete'
+
+        col_name_1 = column_name_1
+        col_name_2 = column_name_2
         if is_col_1_discrete or is_col_2_discrete:
             metric = ContingencySimilarity
             if sdtype_col_1 in ['datetime', 'numerical']:
@@ -105,8 +108,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
             if sdtype_col_2 in ['datetime', 'numerical']:
                 col_name_2 = create_unique_name(column_name_2 + '_discrete', metadata['columns'])
         else:
-            col_name_1 = column_name_1
-            col_name_2 = column_name_2
             metric = CorrelationSimilarity
 
         columns_real = real_data[[col_name_1, col_name_2]]
@@ -145,12 +146,11 @@ class ColumnPairTrends(BaseSingleTableProperty):
             sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
             sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
             if sdtype_col_1 in list_dtypes and sdtype_col_2 in list_dtypes:
-                try:
-                    metric, columns_real, columns_synthetic = self._get_metric_and_columns(
+                metric, columns_real, columns_synthetic = self._get_metric_and_columns(
                         column_name_1, column_name_2, processed_real_data,
                         processed_synthetic_data, metadata
                     )
-
+                try:
                     score_breakdown = metric.compute_breakdown(
                         real_data=columns_real, synthetic_data=columns_synthetic
                     )
