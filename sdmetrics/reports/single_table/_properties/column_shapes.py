@@ -35,7 +35,7 @@ class ColumnShapes(BaseSingleTableProperty):
                 The synthetic data
             metadata (dict):
                 The metadata of the table
-            progress_bar:
+            progress_bar (tqdm.tqdm or None):
                 The progress bar to use. Defaults to tqdm.
         """
         column_names, metric_names, scores = [], [], []

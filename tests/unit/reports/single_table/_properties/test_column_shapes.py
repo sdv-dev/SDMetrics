@@ -1,6 +1,6 @@
 
 import re
-from unittest.mock import call, patch
+from unittest.mock import Mock, call, patch
 
 import pandas as pd
 import pytest
@@ -69,5 +69,33 @@ class TestColumnShapes:
         with pytest.warns(UserWarning, match=expected_message):
             column_shape_property._generate_details(real_data, synthetic_data, metadata)
 
-    def test_get_visualization(self):
-        assert True
+    @patch('sdmetrics.reports.single_table._properties.column_shapes.px')
+    def test_get_visualization(self, mock_px):
+        """Test the ``get_visualization`` method."""
+        # Setup
+        column_shape_property = ColumnShapes()
+
+        column_shape_property._details = {
+            'Column': ['Column1', 'Column2'],
+            'Score': [0.7, 0.3],
+            'Metric': ['KSComplement', 'TVComplement']
+        }
+
+        mock__compute_average = Mock(return_value=0.5)
+        column_shape_property._compute_average = mock__compute_average
+
+        mock_bar = Mock()
+        mock_update_yaxes = Mock()
+        mock_update_layout = Mock()
+        mock_px.bar.return_value = mock_bar
+        mock_bar.update_yaxes.return_value = mock_update_yaxes
+        mock_bar.update_layout.return_value = mock_update_layout
+
+        # Run
+        column_shape_property.get_visualization()
+
+        # Assert
+        mock__compute_average.assert_called_once()
+        mock_px.bar.assert_called_once()
+        mock_bar.update_yaxes.assert_called_once()
+        mock_bar.update_layout.assert_called_once()

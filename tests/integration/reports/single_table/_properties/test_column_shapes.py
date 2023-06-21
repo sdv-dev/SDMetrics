@@ -1,8 +1,8 @@
-import json
 import re
 
 import pandas as pd
 
+from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties.column_shapes import ColumnShapes
 
 
@@ -10,10 +10,7 @@ class TestColumnShapes:
 
     def test_get_score(self):
         # Setup
-        real_data = pd.read_csv('sdmetrics/demos/single_table/real.csv')
-        synthetic_data = pd.read_csv('sdmetrics/demos/single_table/synthetic.csv')
-        with open('sdmetrics/demos/single_table/metadata.json', 'r') as f:
-            metadata = json.load(f)
+        real_data, synthetic_data, metadata = load_demo('single_table')
 
         # Run
         column_shape_property = ColumnShapes()
@@ -44,10 +41,7 @@ class TestColumnShapes:
     def test_get_score_warnings(self, recwarn):
         """Test the ``get_score`` method when the metrics are raising erros for some columns."""
         # Setup
-        real_data = pd.read_csv('sdmetrics/demos/single_table/real.csv')
-        synthetic_data = pd.read_csv('sdmetrics/demos/single_table/synthetic.csv')
-        with open('sdmetrics/demos/single_table/metadata.json', 'r') as f:
-            metadata = json.load(f)
+        real_data, synthetic_data, metadata = load_demo('single_table')
 
         real_data['start_date'].iloc[0] = 0
         real_data['employability_perc'].iloc[2] = 'a'
@@ -56,8 +50,8 @@ class TestColumnShapes:
         column_shape_property = ColumnShapes()
 
         expected_message_1 = re.escape(
-            "Unable to compute Column Shape for column 'start_date'. "
-            "Encountered Error: TypeError '<' not supported between instances of 'str' and 'int'"
+            "Unable to compute Column Shape for column 'start_date'. Encountered Error:"
+            " TypeError '<' not supported between instances of 'Timestamp' and 'int'"
         )
         expected_message_2 = re.escape(
             "Unable to compute Column Shape for column 'employability_perc'. "

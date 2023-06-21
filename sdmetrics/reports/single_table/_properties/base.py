@@ -1,6 +1,5 @@
 """Single table base property class."""
 import pandas as pd
-import tqdm
 
 
 class BaseSingleTableProperty():
@@ -19,7 +18,7 @@ class BaseSingleTableProperty():
 
         return round(self._details['Score'].mean(), 3)
 
-    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=tqdm.tqdm):
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the property."""
         raise NotImplementedError()
 
@@ -33,7 +32,7 @@ class BaseSingleTableProperty():
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
-            progress_bar (tqdm.tqdm, optional):
+            progress_bar (tqdm.tqdm or None):
                 The progress bar object. Defaults to None.
 
         Returns:
