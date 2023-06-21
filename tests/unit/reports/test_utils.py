@@ -980,18 +980,18 @@ def test_discretize_table_data():
 
     # Assert
     expected_real = pd.DataFrame({
-        'col1': [0, 3, 6],
+        'col1': [1, 6, 11],
         'col2': ['a', 'b', 'c'],
-        'col3': [5, 3, 9],
+        'col3': [2, 1, 11],
         'col4': [True, False, True],
-        'col5': [8, 0, 8],
+        'col5': [10, 1, 11],
     })
     expected_synth = pd.DataFrame({
-        'col1': [6, 0, 9],
+        'col1': [11, 1, 11],
         'col2': ['c', 'a', 'c'],
-        'col3': [9, 0, 6],
+        'col3': [11, 0, 5],
         'col4': [False, False, True],
-        'col5': [8, 4, 9],
+        'col5': [10, 5, 11],
     })
 
     pd.testing.assert_frame_equal(discretized_real, expected_real)
@@ -1053,18 +1053,18 @@ def test_discretize_table_data_new_metadata():
 
     # Assert
     expected_real = pd.DataFrame({
-        'col1': [0, 3, 6],
+        'col1': [1, 6, 11],
         'col2': ['a', 'b', 'c'],
-        'col3': [5, 3, 9],
+        'col3': [2, 1, 11],
         'col4': [True, False, True],
-        'col5': [8, 0, 8],
+        'col5': [10, 1, 11],
     })
     expected_synth = pd.DataFrame({
-        'col1': [6, 0, 9],
+        'col1': [11, 1, 11],
         'col2': ['c', 'a', 'c'],
-        'col3': [9, 0, 6],
+        'col3': [11, 0, 5],
         'col4': [False, False, True],
-        'col5': [8, 4, 9],
+        'col5': [10, 5, 11],
     })
 
     pd.testing.assert_frame_equal(discretized_real, expected_real)
@@ -1097,17 +1097,17 @@ def test_discretize_and_apply_metric(discretize_table_data_mock):
     """
     # Setup
     binned_real = pd.DataFrame({
-        'col1': [0, 3, 6],
+        'col1': [1, 6, 11],
         'col2': ['a', 'b', 'c'],
-        'col3': [5, 3, 9],
+        'col3': [2, 1, 11],
         'col4': [True, False, True],
         'col5': ['', '', ''],
         'col6': ['', '', ''],
     })
     binned_synthetic = pd.DataFrame({
-        'col1': [6, 0, 9],
+        'col1': [11, 1, 11],
         'col2': ['c', 'a', 'c'],
-        'col3': [9, 0, 6],
+        'col3': [11, 0, 5],
         'col4': [False, False, True],
         'col5': ['', '', ''],
         'col6': ['', '', ''],

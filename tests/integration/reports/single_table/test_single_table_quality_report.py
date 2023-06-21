@@ -55,5 +55,5 @@ def test_single_table_quality_report():
     properties = report.get_properties()
     pd.testing.assert_frame_equal(properties, pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends'],
-        'Score': [0.75, 0.525575448192246],
+        'Score': [0.750000, 0.550575448192246],
     }))

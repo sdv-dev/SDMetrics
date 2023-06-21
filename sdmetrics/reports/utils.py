@@ -516,14 +516,12 @@ def discretize_table_data(real_data, synthetic_data, metadata):
                 real_col = pd.to_numeric(real_col)
                 synthetic_col = pd.to_numeric(synthetic_col)
 
-            combined_data = pd.concat([real_col, synthetic_col], ignore_index=True)
-            bin_edges = pd.Series(np.histogram_bin_edges(combined_data.dropna())).unique()
-            binned_real[column_name] = pd.cut(
-                real_col, bins=bin_edges, labels=False, include_lowest=True
-            )
-            binned_synthetic[column_name] = pd.cut(
-                synthetic_col, bins=bin_edges, labels=False, include_lowest=True
-            )
+            bin_edges = np.histogram_bin_edges(real_col.dropna())
+            binned_real_col = np.digitize(real_col, bins=bin_edges)
+            binned_synthetic_col = np.digitize(synthetic_col, bins=bin_edges)
+
+            binned_real[column_name] = binned_real_col
+            binned_synthetic[column_name] = binned_synthetic_col
             get_columns_from_metadata(binned_metadata)[column_name] = {'sdtype': 'categorical'}
 
     return binned_real, binned_synthetic, binned_metadata

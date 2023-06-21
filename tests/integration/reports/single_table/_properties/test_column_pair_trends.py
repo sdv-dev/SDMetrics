@@ -46,19 +46,19 @@ class TestColumnPairTrends:
                 'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'
             ],
             'Score': [
-                0.6436432438850543, 0.8093023255813954, 0.8930232558139535, 0.6651162790697674,
-                0.655813953488372, 0.8976744186046511
+                0.9854510263003199, 0.8, 0.8511627906976744, 0.627906976744186,
+                0.6139534883720931, 0.8976744186046511
             ],
             'Real Correlation': [
-                0.6079255273783251, np.nan, np.nan, np.nan, np.nan, np.nan
+                0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan
             ],
             'Synthetic Correlation': [
-                -0.10478798485156637, np.nan, np.nan, np.nan, np.nan, np.nan
+                0.07645134784253645, np.nan, np.nan, np.nan, np.nan, np.nan
             ]
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
-        assert score == 0.761
+        assert score == 0.796
 
     def test_get_score_warnings(self, recwarn):
         """Test the ``get_score`` method when the metrics are raising erros for some columns."""
@@ -75,19 +75,20 @@ class TestColumnPairTrends:
             key: val for key, val in metadata['columns'].items() if key in column_names
         }
 
-        real_data['start_date'].iloc[0] = 0
-        real_data['degree_type'].iloc[2] = 'a'
+        real_data['second_perc'].iloc[2] = 'a'
 
         # Run
         column_shape_property = ColumnPairTrends()
 
         expected_message_1 = re.escape(
-            "Unable to compute Column Shape for column 'start_date'. "
-            "Encountered Error: TypeError '<' not supported between instances of 'str' and 'int'"
+            "Unable to discretize 'second_perc'. No column pair trends metric will be "
+            'calculated between this column and boolean/categorical columns. Encountered '
+            'Error: ValueError Unable to parse string \"a\" at position 2'
         )
+
         expected_message_2 = re.escape(
-            "Unable to compute Column Shape for column 'degree_type'. "
-            "Encountered Error: TypeError '<' not supported between instances of 'str' and 'float'"
+            "Unable to compute Column Pair Trends for column ('start_date', 'second_perc'). "
+            "Encountered Error: ValueError could not convert string to float: 'a'"
         )
 
         score = column_shape_property.get_score(real_data, synthetic_data, metadata)
@@ -97,7 +98,6 @@ class TestColumnPairTrends:
         assert re.match(expected_message_2, str(recwarn[1].message))
 
         details = column_shape_property._details
-        column_names_nan = list(details.loc[pd.isna(details['Score'])]['Column name'])
-        assert column_names_nan == ['start_date', 'employability_perc']
-        assert score == 0.826
-
+        column_names_nan = list(details.loc[pd.isna(details['Score'])]['Column 2'])
+        assert column_names_nan == ['second_perc']
+        assert score == 0.51

@@ -42,19 +42,17 @@ class TestColumnPairTrends:
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_numeric(pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])),
-            'col1_discrete': [0, 1, 3],
-            'col4_discrete': [0, 1, 3],
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
+            'col1_discrete': [1, 6, 11],
+            'col4_discrete': [1, 6, 11],
         })
         expected_processed_synthetic = pd.DataFrame({
             'col1': [4, 5, 6],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_numeric(
-                pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06']).to_numpy()
-            ),
-            'col1_discrete': [5, 7, 9],
-            'col4_discrete': [5, 7, 9],
+            'col4': pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06']),
+            'col1_discrete': [11, 11, 11],
+            'col4_discrete': [11, 11, 11],
         })
 
         pd.testing.assert_frame_equal(processed_real, expected_processed_real)
@@ -201,7 +199,7 @@ class TestColumnPairTrends:
         column_shape_cpt_property._get_processed_data = mock_processed_data
 
         # Run
-        column_shape_cpt_property._generate_details(real_data, synthetic_data, metadata)
+        column_shape_cpt_property._generate_details(real_data, synthetic_data, metadata, None)
 
         # Assert
         mock_processed_data.assert_called_once_with(real_data, synthetic_data, metadata)
