@@ -5,8 +5,7 @@ import pandas as pd
 import plotly.express as px
 
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
-from sdmetrics.single_column.statistical.kscomplement import KSComplement
-from sdmetrics.single_column.statistical.tv_complement import TVComplement
+from sdmetrics.single_column import KSComplement, TVComplement
 
 
 class ColumnShapes(BaseSingleTableProperty):
