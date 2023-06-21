@@ -21,7 +21,7 @@ class TestColumnShapes:
 
         # Assert
         expected_details_dict = {
-            'Column name': [
+            'Column': [
                 'start_date', 'end_date', 'salary', 'duration', 'high_perc', 'high_spec',
                 'mba_spec', 'second_perc', 'gender', 'degree_perc', 'placed', 'experience_years',
                 'employability_perc', 'mba_perc', 'work_experience', 'degree_type'
@@ -71,6 +71,6 @@ class TestColumnShapes:
         assert re.match(expected_message_2, str(recwarn[1].message))
 
         details = column_shape_property._details
-        column_names_nan = list(details.loc[pd.isna(details['Score'])]['Column name'])
+        column_names_nan = list(details.loc[pd.isna(details['Score'])]['Column'])
         assert column_names_nan == ['start_date', 'employability_perc']
         assert score == 0.826

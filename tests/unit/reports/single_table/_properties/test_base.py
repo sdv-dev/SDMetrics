@@ -1,6 +1,6 @@
 """Test BaseSingleTableProperty class."""
 import re
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pandas as pd
 import pytest
@@ -40,15 +40,13 @@ class TestBaseSingleTableProperty:
         with pytest.raises(ValueError, match=expected_error_message):
             base_property._compute_average()
 
-        base_property._details = pd.DataFrame({'Column Name': ['a', 'b', 'c']})
+        base_property._details = pd.DataFrame({'Column': ['a', 'b', 'c']})
         with pytest.raises(ValueError, match=expected_error_message):
             base_property._compute_average()
 
-    @patch('sdmetrics.reports.single_table._properties.base.validate_single_table_inputs')
-    def test_get_score(self, validate_single_table_inputs_mock):
+    def test_get_score(self):
         """Test the ``get_score`` method."""
         # Setup
-        validate_single_table_inputs_mock.return_value = None
 
         real_data = Mock()
         synthetic_data = Mock()
@@ -66,9 +64,6 @@ class TestBaseSingleTableProperty:
         base_property.get_score(real_data, synthetic_data, metadata, progress_bar)
 
         # Assert
-        validate_single_table_inputs_mock.assert_called_once_with(
-            real_data, synthetic_data, metadata
-        )
         mock__generate_details.assert_called_once_with(
             real_data, synthetic_data, metadata, progress_bar
         )

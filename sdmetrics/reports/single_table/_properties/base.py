@@ -2,8 +2,6 @@
 import pandas as pd
 import tqdm
 
-from sdmetrics.reports.utils import validate_single_table_inputs
-
 
 class BaseSingleTableProperty():
     """Base class for single table properties.
@@ -25,7 +23,7 @@ class BaseSingleTableProperty():
         """Generate the _details dataframe for the property."""
         raise NotImplementedError()
 
-    def get_score(self, real_data, synthetic_data, metadata, progress_bar=tqdm.tqdm):
+    def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score for the property on the data.
 
         Args:
@@ -35,14 +33,13 @@ class BaseSingleTableProperty():
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
-            progress_bar (tqdm.tqdm):
-                The progress bar object.
+            progress_bar (tqdm.tqdm, optional):
+                The progress bar object. Defaults to None.
 
         Returns:
             float:
                 The average score for the property.
         """
-        validate_single_table_inputs(real_data, synthetic_data, metadata)
         self._details = self._generate_details(real_data, synthetic_data, metadata, progress_bar)
         return self._compute_average()
 
