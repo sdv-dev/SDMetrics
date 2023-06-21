@@ -31,7 +31,7 @@ class QualityReport():
     METRICS = {
         'Column Shapes': [KSComplement, TVComplement],
         'Column Pair Trends': [CorrelationSimilarity, ContingencySimilarity],
-        'Parent Child Relationships': [CardinalityShapeSimilarity],
+        'Cardinality': [CardinalityShapeSimilarity],
     }
 
     def __init__(self):
@@ -110,7 +110,7 @@ class QualityReport():
         for prop, metrics in self.METRICS.items():
             prop_scores = []
             num_prop_errors = 0
-            if prop == 'Parent Child Relationships':
+            if prop == 'Cardinality':
                 for metric in metrics:
                     if 'score' in self._metric_results[metric.__name__]:
                         prop_scores.append(self._metric_results[metric.__name__]['score'])
@@ -189,7 +189,15 @@ class QualityReport():
                 score_breakdowns,
             )
 
-        elif property_name == 'Parent Child Relationships':
+        elif property_name == 'Cardinality' or 'Parent Child Relationships':
+            if property_name == 'Parent Child Relationships':
+                property_name = 'Cardinality'
+                msg = (
+                    "The 'Parent Child Relationships' property name is no longer recognized. "
+                    "Please update to 'Cardinality' instead."
+                )
+                warnings.warn(msg, FutureWarning)
+
             score_breakdowns = {
                 metric.__name__: self._metric_results[metric.__name__]
                 for metric in self.METRICS.get(property_name, [])
@@ -274,7 +282,14 @@ class QualityReport():
                 'Synthetic Correlation': synthetic_scores,
             }).sort_values(by=['Table'], ignore_index=True)
 
-        elif property_name == 'Parent Child Relationships':
+        elif property_name == 'Cardinality' or 'Parent Child Relationships':
+            if property_name == 'Parent Child Relationships':
+                property_name = 'Cardinality'
+                msg = (
+                    "The 'Parent Child Relationships' property name is no longer recognized. "
+                    "Please update to 'Cardinality' instead.")
+                warnings.warn(msg, FutureWarning)
+
             child_tables = []
             for metric in self.METRICS[property_name]:
                 for table_pair, score_breakdown in self._metric_results[metric.__name__].items():
