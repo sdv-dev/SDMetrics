@@ -48,29 +48,37 @@ class ColumnPairTrends(BaseSingleTableProperty):
         discrete_real_data, discrete_synthetic_data, _ = discretize_table_data(
             real_data, synthetic_data, metadata
         )
+
+        columns_not_discretize = []
         for column_name in metadata['columns']:
             metadata_col = metadata['columns'][column_name]
             if metadata_col['sdtype'] == 'datetime':
                 real_col = real_data[column_name]
                 synthetic_col = synthetic_data[column_name]
                 datetime_format = metadata_col.get('format') or metadata_col.get('datetime_format')
-                if real_col.dtype == 'O' and datetime_format:
-                    real_col = pd.to_datetime(real_col, format=datetime_format)
-                    synthetic_col = pd.to_datetime(synthetic_col, format=datetime_format)
+                try:
+                    if real_col.dtype == 'O' and datetime_format:
+                        real_col = pd.to_datetime(real_col, format=datetime_format)
+                        synthetic_col = pd.to_datetime(synthetic_col, format=datetime_format)
 
-                processed_real_data[column_name] = pd.to_numeric(real_col)
-                processed_synthetic_data[column_name] = pd.to_numeric(synthetic_col)
+                    processed_real_data[column_name] = pd.to_numeric(real_col)
+                    processed_synthetic_data[column_name] = pd.to_numeric(synthetic_col)
 
-                name_discrete = create_unique_name(column_name + '_discrete', metadata['columns'])
-                processed_real_data[name_discrete] = discrete_real_data[column_name]
-                processed_synthetic_data[name_discrete] = discrete_synthetic_data[column_name]
+                    name_discrete = create_unique_name(column_name + '_discrete', metadata['columns'])
+                    processed_real_data[name_discrete] = discrete_real_data[column_name]
+                    processed_synthetic_data[name_discrete] = discrete_synthetic_data[column_name]
+                except Exception as e:
+                    pass
 
             elif metadata_col['sdtype'] == 'numerical':
                 name_discrete = create_unique_name(column_name + '_discrete', metadata['columns'])
-                processed_real_data[name_discrete] = discrete_real_data[column_name]
-                processed_synthetic_data[name_discrete] = discrete_synthetic_data[column_name]
+                try:
+                    processed_real_data[name_discrete] = discrete_real_data[column_name]
+                    processed_synthetic_data[name_discrete] = discrete_synthetic_data[column_name]
+                except Exception as e:
+                    pass
 
-        return processed_real_data, processed_synthetic_data
+        return processed_real_data, processed_synthetic_data, columns_not_discretize
 
     def _get_metric_and_columns(
             self, column_name_1, column_name_2, real_data, synthetic_data, metadata):
@@ -146,11 +154,11 @@ class ColumnPairTrends(BaseSingleTableProperty):
             sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
             sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
             if sdtype_col_1 in list_dtypes and sdtype_col_2 in list_dtypes:
-                metric, columns_real, columns_synthetic = self._get_metric_and_columns(
-                        column_name_1, column_name_2, processed_real_data,
-                        processed_synthetic_data, metadata
-                    )
                 try:
+                    metric, columns_real, columns_synthetic = self._get_metric_and_columns(
+                        column_name_1, column_name_2, processed_real_data,
+                            processed_synthetic_data, metadata
+                        )
                     score_breakdown = metric.compute_breakdown(
                         real_data=columns_real, synthetic_data=columns_synthetic
                     )

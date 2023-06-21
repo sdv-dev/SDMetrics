@@ -6,7 +6,7 @@ import pandas as pd
 
 from sdmetrics.utils import (
     HyperTransformer, get_alternate_keys, get_cardinality_distribution, get_columns_from_metadata,
-    get_missing_percentage, get_type_from_column_meta)
+    get_missing_percentage, get_type_from_column_meta, create_unique_name)
 
 
 def test_get_cardinality_distribution():
@@ -233,3 +233,15 @@ class TestHyperTransformer:
         ht.fit.assert_called_once_with(data)
         ht.transform.assert_called_once_with(data)
         assert out == ht.transform.return_value
+
+    def test_create_unique_name():
+        """Test the ``create_unique_name`` method."""
+        # Setup
+        name = 'name'
+        existing_names = ['name', 'name_', 'name__']
+
+        # Run
+        result = create_unique_name(name, existing_names)
+
+        # Assert
+        assert result == 'name___'
