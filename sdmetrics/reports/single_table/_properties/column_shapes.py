@@ -63,7 +63,7 @@ class ColumnShapes(BaseSingleTableProperty):
             error_messages.append(error_message)
 
         result = pd.DataFrame({
-            'Column name': column_names,
+            'Column': column_names,
             'Metric': metric_names,
             'Score': scores,
             'Error': error_messages,
