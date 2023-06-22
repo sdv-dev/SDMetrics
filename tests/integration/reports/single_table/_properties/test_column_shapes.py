@@ -1,5 +1,3 @@
-import re
-
 import pandas as pd
 
 from sdmetrics.demos import load_demo
@@ -38,8 +36,8 @@ class TestColumnShapes:
         pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
         assert score == 0.816
 
-    def test_get_score_warnings(self, recwarn):
-        """Test the ``get_score`` method when the metrics are raising erros for some columns."""
+    def test_get_score_warnings(self):
+        """Test the ``get_score`` method when the metrics are raising errors for some columns."""
         # Setup
         real_data, synthetic_data, metadata = load_demo('single_table')
 
@@ -49,22 +47,22 @@ class TestColumnShapes:
         # Run
         column_shape_property = ColumnShapes()
 
-        expected_message_1 = re.escape(
-            "Unable to compute Column Shape for column 'start_date'. Encountered Error:"
-            " TypeError '<' not supported between instances of 'Timestamp' and 'int'"
+        expected_message_1 = (
+            "Error: TypeError '<' not supported between instances of 'Timestamp' and 'int'"
         )
-        expected_message_2 = re.escape(
-            "Unable to compute Column Shape for column 'employability_perc'. "
-            "Encountered Error: TypeError '<' not supported between instances of 'str' and 'float'"
+        expected_message_2 = (
+            "Error: TypeError '<' not supported between instances of 'str' and 'float'"
         )
 
         score = column_shape_property.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        assert re.match(expected_message_1, str(recwarn[0].message))
-        assert re.match(expected_message_2, str(recwarn[1].message))
 
         details = column_shape_property._details
-        column_names_nan = list(details.loc[pd.isna(details['Score'])]['Column'])
+        details_nan = details.loc[pd.isna(details['Score'])]
+        column_names_nan = details_nan['Column'].tolist()
+        error_messages = details_nan['Error'].tolist()
         assert column_names_nan == ['start_date', 'employability_perc']
+        assert error_messages[0] == expected_message_1
+        assert error_messages[1] == expected_message_2
         assert score == 0.826

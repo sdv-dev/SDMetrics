@@ -1,5 +1,3 @@
-import warnings
-
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -39,7 +37,7 @@ class ColumnShapes(BaseSingleTableProperty):
                 The progress bar to use. Defaults to tqdm.
         """
         column_names, metric_names, scores = [], [], []
-        warning_messages = []
+        error_messages = []
         for column_name in metadata['columns']:
             sdtype = metadata['columns'][column_name]['sdtype']
             try:
@@ -48,14 +46,14 @@ class ColumnShapes(BaseSingleTableProperty):
                     column_score = metric.compute(
                         real_data[column_name], synthetic_data[column_name]
                     )
+                    error_message = None
                 else:
                     continue
 
             except Exception as e:
                 column_score = np.nan
-                warning_messages.append(
-                        f"Unable to compute Column Shape for column '{column_name}'. "
-                        f'Encountered Error: {type(e).__name__} {e}'
+                error_message = (
+                        f'Error: {type(e).__name__} {e}'
                 )
             finally:
                 if progress_bar:
@@ -64,18 +62,20 @@ class ColumnShapes(BaseSingleTableProperty):
             column_names.append(column_name)
             metric_names.append(metric.__name__)
             scores.append(column_score)
+            error_messages.append(error_message)
 
         if progress_bar:
             progress_bar.close()
-
-        for message in warning_messages:
-            warnings.warn(message)
 
         result = pd.DataFrame({
             'Column': column_names,
             'Metric': metric_names,
             'Score': scores,
+            'Error': error_messages,
         })
+
+        if result['Error'].isna().all():
+            result = result.drop('Error', axis=1)
 
         return result
 
