@@ -1,13 +1,11 @@
 import itertools
-import warnings
 
 import numpy as np
 import pandas as pd
 from plotly import graph_objects as go
 from plotly.subplots import make_subplots
 
-from sdmetrics.column_pairs.statistical.contingency_similarity import ContingencySimilarity
-from sdmetrics.column_pairs.statistical.correlation_similarity import CorrelationSimilarity
+from sdmetrics.column_pairs.statistical import ContingencySimilarity, CorrelationSimilarity
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.utils import create_unique_name, is_datetime
 
@@ -17,7 +15,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
     This property evaluates the matching in trends between pairs of real
     and synthetic data columns. Each pair's correlation is calculated and
-    The final score represents the average of these measures across all column pairs
+    the final score represents the average of these measures across all column pairs
     """
 
     _sdtype_to_shape = {
@@ -28,18 +26,56 @@ class ColumnPairTrends(BaseSingleTableProperty):
     }
 
     def __init__(self):
-        self._warning_messages_list = []
+        self._columns_datetime_conversion_failed = {}
+        self._columns_discretization_failed = {}
 
-    def _discretize_column(self, column_name, data, metadata, bin_edges=None):
+    def _convert_datetime_columns_to_numeric(self, data, metadata):
+        """Convert all the datetime columns to numeric columns.
+
+        Args:
+            data (pandas.DataFrame):
+                The data to convert.
+            metadata (dict):
+                The table metadata.
+
+        Returns:
+            pandas.Series:
+                The converted column.
+        """
+        for column_name in metadata['columns']:
+            column_meta = metadata['columns'][column_name]
+            col_sdtype = column_meta['sdtype']
+            try:
+                if col_sdtype == 'datetime':
+                    if not is_datetime(data[column_name]):
+                        datetime_format = column_meta.get(
+                            'datetime_format', column_meta.get('format')
+                        )
+                        data[column_name] = pd.to_datetime(
+                            data[column_name], format=datetime_format
+                        )
+
+                    data.loc[~pd.isna(data[column_name]), column_name] = pd.to_numeric(
+                        data[column_name]
+                    )
+                    data[column_name] = data[column_name].fillna(np.nan)
+
+                continue
+            except Exception as e:
+                message = f'Error: {type(e).__name__} {e}'
+                self._columns_datetime_conversion_failed[column_name] = message
+                continue
+
+        return data
+
+    def _discretize_column(self, column_name, data, bin_edges=None):
         """Discretize a column.
 
         Args:
             column_name (str):
-                The column name.
+                The name of the column to discretize.
             data (pandas.Series):
                 The column to discretize.
-            metadta (dict):
-                The table metadata.
             bin_edges (list):
                 The bin edges to use for discretization.
                 Defaults to None.
@@ -49,77 +85,73 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 The discretized column.
         """
         column_result = data.copy()
-        column_meta = metadata['columns'][column_name]
-        col_sdtype = column_meta['sdtype']
         try:
-            if col_sdtype == 'datetime' and not is_datetime(column_result):
-                datetime_format = column_meta.get('format') or column_meta.get('datetime_format')
-                column_result = pd.to_datetime(column_result, format=datetime_format)
-
-            column_result = pd.to_numeric(column_result)
             if bin_edges is None:
                 bin_edges = np.histogram_bin_edges(column_result.dropna())
 
             column_result = np.digitize(column_result, bins=bin_edges)
+
         except Exception as e:
-            column_result = None
-            message = (
-                f"Unable to discretize '{column_name}'. No column pair trends metric "
-                'will be calculated between this column and boolean/categorical columns.'
-                f' Encountered Error: {type(e).__name__} {e}'
-            )
-            self._warning_messages_list.append(message)
+            message = f'Error: {type(e).__name__} {e}'
+            self._columns_discretization_failed[column_name] = message
 
         return column_result, bin_edges
 
-    def _get_processed_data(self, real_data, synthetic_data, metadata):
+    def _get_processed_data(self, data, metadata):
         """Get the processed data for the property.
 
         Preprocess the data by converting datetime columns to numeric and
         adding a discrete version of datetime and numerical columns to the dataframes.
 
         Args:
-            real_data (pandas.DataFrame):
-                The real data
-            synthetic_data (pandas.DataFrame):
-                The synthetic data
+            data (pandas.DataFrame):
+                The data
             metadata (dict):
                 The metadata of the table
         """
-        processed_real_data = real_data.copy()
-        processed_synthetic_data = synthetic_data.copy()
+        processed_data = data.copy()
+
+        processed_data = self._convert_datetime_columns_to_numeric(
+            processed_data, metadata
+        )
 
         for column_name in metadata['columns']:
             column_meta = metadata['columns'][column_name]
             column_sdtype = column_meta['sdtype']
             if column_sdtype in ['numerical', 'datetime']:
                 name_discrete = create_unique_name(column_name + '_discrete', metadata['columns'])
-                processed_real_data[name_discrete], bin_edges = self._discretize_column(
-                    column_name, real_data[column_name], metadata
+                processed_data[name_discrete], bin_edges = self._discretize_column(
+                    column_name, processed_data[column_name]
                 )
-                processed_synthetic_data[name_discrete], _ = self._discretize_column(
-                    column_name, synthetic_data[column_name], metadata, bin_edges=bin_edges
-                )
-                is_datetime_sdtype = column_sdtype == 'datetime'
-                if (is_datetime_sdtype and not is_datetime(processed_real_data[column_name])):
-                    datetime_format = column_meta.get('format', column_meta.get('datetime_format'))
-                    processed_real_data[column_name] = pd.to_datetime(
-                        processed_real_data[column_name], format=datetime_format
-                    )
-                    processed_synthetic_data[column_name] = pd.to_datetime(
-                        processed_synthetic_data[column_name], format=datetime_format
-                    )
 
-        return processed_real_data, processed_synthetic_data
+        return processed_data
 
-    def _get_metric_and_columns(
-            self, column_name_1, column_name_2, real_data, synthetic_data, metadata):
-        """Get the metric and columns to use for the property.
+    def _get_metric(self, sdtype_col_1, sdtype_col_2):
+        """Get the metric to use for the property.
 
         If one of the columns is discrete, use the ContingencySimilarity metric.
         Otherwise, use the CorrelationSimilarity metric.
-        If ContingencySimilarity metric is used and one of the column is numerical or datetime,
-        take the discrete version of the column.
+
+        Args:
+            sdtype_col_1 (str):
+                The sdtype of the first column
+            sdtype_col_2 (str):
+                The sdtype of the second column
+        """
+        if self._sdtype_to_shape[sdtype_col_1] != self._sdtype_to_shape[sdtype_col_2]:
+            metric = ContingencySimilarity
+        elif self._sdtype_to_shape[sdtype_col_1] == 'continuous':
+            metric = CorrelationSimilarity
+        else:
+            metric = ContingencySimilarity
+
+        return metric
+
+    def _get_columns_data(self, column_name_1, column_name_2, real_data, synthetic_data, metadata):
+        """Get the data for the property.
+
+        If one is comparing a continuous column to a discrete column, use the discrete version
+        of the continuous column. Otherwise use the original columns.
 
         Args:
             column_name_1 (str):
@@ -135,86 +167,63 @@ class ColumnPairTrends(BaseSingleTableProperty):
         """
         sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
         sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
-
-        is_col_1_discrete = self._sdtype_to_shape[sdtype_col_1] == 'discrete'
-        is_col_2_discrete = self._sdtype_to_shape[sdtype_col_2] == 'discrete'
-
         col_name_1 = column_name_1
         col_name_2 = column_name_2
-        if is_col_1_discrete or is_col_2_discrete:
-            metric = ContingencySimilarity
-            if sdtype_col_1 in ['datetime', 'numerical']:
+        if self._sdtype_to_shape[sdtype_col_1] != self._sdtype_to_shape[sdtype_col_2]:
+
+            if self._sdtype_to_shape[sdtype_col_1] == 'continuous':
                 col_name_1 = create_unique_name(column_name_1 + '_discrete', metadata['columns'])
-            if sdtype_col_2 in ['datetime', 'numerical']:
+            else:
                 col_name_2 = create_unique_name(column_name_2 + '_discrete', metadata['columns'])
-        else:
-            metric = CorrelationSimilarity
 
         columns_real = real_data[[col_name_1, col_name_2]]
         columns_synthetic = synthetic_data[[col_name_1, col_name_2]]
 
-        return metric, columns_real, columns_synthetic
+        return columns_real, columns_synthetic
 
-    def _safe_get_metric_and_columns(
-            self, column_name_1, column_name_2, real_data, synthetic_data, metadata):
-        """Call ``_get_metric_and_columns`` and catch any exceptions.
+    def _required_preprocessing(self, sdtype_col_1, sdtype_col_2):
+        """Check if a processing of one of the columns was required to compute the metric.
+
+        Args:
+            sdtype_col_1 (str):
+                The sdtype of the first column
+            sdtype_col_2 (str):
+                The sdtype of the second column
+        """
+        if sdtype_col_1 == 'datetime' or sdtype_col_2 == 'datetime':
+            return True
+        elif self._sdtype_to_shape[sdtype_col_1] != self._sdtype_to_shape[sdtype_col_2]:
+            return True
+        else:
+            return False
+
+    def _preprocessing_failed(self, column_name_1, column_name_2, sdtype_col_1, sdtype_col_2):
+        """Check if a processing of one of the columns has failed.
 
         Args:
             column_name_1 (str):
                 The name of the first column
             column_name_2 (str):
                 The name of the second column
-            real_data (pandas.DataFrame):
-                The real data
-            synthetic_data (pandas.DataFrame):
-                The synthetic data
-            metadata (dict):
-                The metadata of the table
+            sdtype_col_1 (str):
+                The sdtype of the first column
+            sdtype_col_2 (str):
+                The sdtype of the second column
         """
-        try:
-            return self._get_metric_and_columns(
-                column_name_1, column_name_2, real_data, synthetic_data, metadata
-            )
-        except Exception:
-            return None, None, None
+        error = None
+        if column_name_1 in self._columns_datetime_conversion_failed.keys():
+            error = self._columns_datetime_conversion_failed[column_name_1]
 
-    def _safe_compute_breakdown(
-            self, column_name_1, column_name_2, metric, columns_real, columns_synthetic):
-        """Call ``metric.compute_breakdown`` and catch any exceptions.
+        elif column_name_2 in self._columns_datetime_conversion_failed.keys():
+            error = self._columns_datetime_conversion_failed[column_name_2]
 
-        Args:
-            column_name_1 (str):
-                The name of the first column
-            column_name_2 (str):
-                The name of the second column
-            metric (Metric):
-                The metric to use
-            columns_real (pandas.DataFrame):
-                The real data
-            columns_synthetic (pandas.DataFrame):
-                The synthetic data
-        """
-        try:
-            return metric.compute_breakdown(
-                real_data=columns_real, synthetic_data=columns_synthetic
-            )
-        except Exception as e:
-            message = (
-                f"Unable to compute Column Pair Trends for column ('{column_name_1}', "
-                f"'{column_name_2}'). Encountered Error: {type(e).__name__} {e}"
-            )
-            self._warning_messages_list.append(message)
-            return {'score': np.nan, 'real': np.nan, 'synthetic': np.nan}
+        elif self._sdtype_to_shape[sdtype_col_1] != self._sdtype_to_shape[sdtype_col_2]:
+            if column_name_1 in self._columns_discretization_failed.keys():
+                error = self._columns_discretization_failed[column_name_1]
+            elif column_name_2 in self._columns_discretization_failed.keys():
+                error = self._columns_discretization_failed[column_name_2]
 
-    def _handling_warning_messages(self):
-        """Handle warning messages.
-
-        Remove duplicate messages and raise the warnings.
-        """
-        if self._warning_messages_list:
-            self._warning_messages_list = list(dict.fromkeys(self._warning_messages_list).keys())
-            for message in self._warning_messages_list:
-                warnings.warn(message)
+        return error
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar):
         """Generate the _details dataframe for the column pair trends property.
@@ -229,53 +238,72 @@ class ColumnPairTrends(BaseSingleTableProperty):
             progress_bar:
                 The progress bar to use. Defaults to tqdm.
         """
-        processed_real_data, processed_synthetic_data = self._get_processed_data(
-            real_data, synthetic_data, metadata
-        )
+        processed_real_data = self._get_processed_data(real_data, metadata)
+        processed_synthetic_data = self._get_processed_data(synthetic_data, metadata)
 
         column_names_1 = []
         column_names_2 = []
         metric_names = []
         scores = []
         real_correlations = []
-        synthetic_correaltions = []
+        synthetic_correlations = []
+        error_messages = []
 
-        list_col_names = list(metadata['columns'])
         list_dtypes = self._sdtype_to_shape.keys()
-        for column_names in itertools.combinations(list_col_names, r=2):
+        for column_names in itertools.combinations(list(metadata['columns']), r=2):
             column_name_1 = column_names[0]
             column_name_2 = column_names[1]
 
             sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
             sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
 
+            error = None
             valid_sdtypes = sdtype_col_1 in list_dtypes and sdtype_col_2 in list_dtypes
-            if valid_sdtypes:
-                metric, columns_real, columns_synthetic = self._safe_get_metric_and_columns(
+            if not valid_sdtypes:
+                if progress_bar:
+                    progress_bar.update()
+
+                continue
+
+            metric = self._get_metric(sdtype_col_1, sdtype_col_2)
+            try:
+                if self._required_preprocessing(sdtype_col_1, sdtype_col_2):
+                    error = self._preprocessing_failed(
+                        column_name_1, column_name_2, sdtype_col_1, sdtype_col_2
+                    )
+                    if error:
+                        raise Exception('Preprocessing failed')
+
+                columns_real, columns_synthetic = self._get_columns_data(
                     column_name_1, column_name_2, processed_real_data,
                     processed_synthetic_data, metadata
                 )
-                if metric is None:
-                    pair_score = np.nan
+
+                score_breakdown = metric.compute_breakdown(
+                    real_data=columns_real, synthetic_data=columns_synthetic
+                )
+                pair_score = score_breakdown['score']
+                if metric.__name__ == 'CorrelationSimilarity':
+                    real_correlation = score_breakdown['real']
+                    synthetic_correlation = score_breakdown['synthetic']
+                else:
                     real_correlation = np.nan
                     synthetic_correlation = np.nan
-                else:
-                    score_breakdown = self._safe_compute_breakdown(
-                        column_name_1, column_name_2, metric, columns_real, columns_synthetic)
-                    pair_score = score_breakdown['score']
-                    if metric.__name__ == 'CorrelationSimilarity':
-                        real_correlation = score_breakdown['real']
-                        synthetic_correlation = score_breakdown['synthetic']
-                    else:
-                        real_correlation = np.nan
-                        synthetic_correlation = np.nan
 
-                column_names_1.append(column_name_1)
-                column_names_2.append(column_name_2)
-                metric_names.append(metric.__name__)
-                scores.append(pair_score)
-                real_correlations.append(real_correlation)
-                synthetic_correaltions.append(synthetic_correlation)
+            except Exception as e:
+                pair_score = np.nan
+                real_correlation = np.nan
+                synthetic_correlation = np.nan
+                if not str(e) == 'Preprocessing failed':
+                    error = f'Error: {type(e).__name__} {e}'
+
+            column_names_1.append(column_name_1)
+            column_names_2.append(column_name_2)
+            metric_names.append(metric.__name__)
+            scores.append(pair_score)
+            real_correlations.append(real_correlation)
+            synthetic_correlations.append(synthetic_correlation)
+            error_messages.append(error)
 
             if progress_bar:
                 progress_bar.update()
@@ -283,15 +311,18 @@ class ColumnPairTrends(BaseSingleTableProperty):
         if progress_bar:
             progress_bar.close()
 
-        self._handling_warning_messages()
         result = pd.DataFrame({
             'Column 1': column_names_1,
             'Column 2': column_names_2,
             'Metric': metric_names,
             'Score': scores,
             'Real Correlation': real_correlations,
-            'Synthetic Correlation': synthetic_correaltions
+            'Synthetic Correlation': synthetic_correlations,
+            'Error': error_messages
         })
+
+        if result['Error'].isna().all():
+            result = result.drop('Error', axis=1)
 
         return result
 
@@ -310,14 +341,14 @@ class ColumnPairTrends(BaseSingleTableProperty):
                     heatmap_df.loc[column_name_1, column_name_2] = 1
                     continue
 
-                col_1_cond = (table['Column 1'] == column_name_1)
-                col_2_cond = (table['Column 2'] == column_name_2)
-                if table.loc[col_1_cond & col_2_cond].empty:
-                    col_1_cond = (table['Column 1'] == column_name_2)
-                    col_2_cond = (table['Column 2'] == column_name_1)
+                col_1_loc = (table['Column 1'] == column_name_1)
+                col_2_loc = (table['Column 2'] == column_name_2)
+                if table.loc[col_1_loc & col_2_loc].empty:
+                    col_1_loc = (table['Column 1'] == column_name_2)
+                    col_2_loc = (table['Column 2'] == column_name_1)
 
-                if not table.loc[col_1_cond & col_2_cond].empty:
-                    score = table.loc[col_1_cond & col_2_cond][column_name].array[0]
+                if not table.loc[col_1_loc & col_2_loc].empty:
+                    score = table.loc[col_1_loc & col_2_loc][column_name].array[0]
                     heatmap_df.loc[column_name_1, column_name_2] = score
                     heatmap_df.loc[column_name_2, column_name_1] = score
 
