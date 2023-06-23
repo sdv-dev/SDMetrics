@@ -10,7 +10,10 @@ class CardinalityShapeSimilarityProperty(BaseMultiTableProperty):
     in order to compute and plot the scores of cardinality shape similarity in the given tables.
     """
 
-    def get_score(self, real_data, synthetic_data, metadata, progress_bar):
+    def __init__(self):
+        self._metric_results = {}
+
+    def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of cardinality shape similarity in the given tables.
 
         Args:
@@ -20,23 +23,35 @@ class CardinalityShapeSimilarityProperty(BaseMultiTableProperty):
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
-            progress_bar (tqdm.tqdm):
-                The progress bar object.
+            progress_bar (tqdm.tqdm or None):
+                The progress bar object. Defaults to ``None``.
 
         Returns:
             float:
                 The average score for the property for all the individual metric scores computed.
         """
-        self._metric_results = CardinalityShapeSimilarity.compute_breakdown(
-            real_data,
-            synthetic_data,
-            metadata
-        )
+        for relation in metadata.get('relationships', []):
+            relationships_metadata = {'relationships': [relation]}
+            try:
+                self._metric_results = CardinalityShapeSimilarity.compute_breakdown(
+                    real_data,
+                    synthetic_data,
+                    relationships_metadata
+                )
+            except Exception:
+                pass
+
+            if progress_bar is not None:
+                progress_bar.update()
+
+        if progress_bar is not None:
+            progress_bar.close()
+
         score = 0
-        for tables, result in self._metric_results.items():
+        for result in self._metric_results.values():
             score += result['score']
 
-        average_score = score / len(self._metric_results)
+        average_score = score / len(self._metric_results) if len(self._metric_results) else score
         return average_score
 
     def get_visualization(self, table_name):
