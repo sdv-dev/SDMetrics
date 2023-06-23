@@ -1,6 +1,7 @@
 from sdmetrics.reports.multi_table._properties import ColumnShapes, ColumnPairTrends
 from sdmetrics.demos import load_demo
-import tqdm
+from tqdm import tqdm
+from unittest.mock import Mock
 
 
 def test_column_shapes_property():
@@ -21,13 +22,18 @@ def test_column_shapes_property_with_progress_bar():
     real_data, synthetic_data, metadata = load_demo(modality='multi_table')
     column_shapes = ColumnShapes()
     num_columns = sum(len(table['columns']) for table in metadata['tables'].values())
-    progress_bar = tqdm.tqdm(num_columns)
+
+    progress_bar = tqdm(total=num_columns)
+    mock_update = Mock()
+    progress_bar.update = mock_update
 
     # Run
-    result = column_shapes.get_score(real_data, synthetic_data, metadata)
+    result = column_shapes.get_score(real_data, synthetic_data, metadata, progress_bar)
 
     # Assert
     assert result == 0.797
+    assert mock_update.call_count == num_columns
+
 
 def test_column_pair_trends_property():
     """Test ColumnPairTrends multi-table class."""
@@ -40,4 +46,3 @@ def test_column_pair_trends_property():
 
     # Assert
     assert result == 0.493
-

@@ -6,6 +6,7 @@ import pytest
 
 from sdmetrics.reports.multi_table._properties import BaseMultiTableProperty
 
+
 def test__init__():
     """Test the ``__init__`` method."""
     # Setup
@@ -36,35 +37,35 @@ def test_get_score_with_single_table_property():
 
     metadata = {
         'tables': {
-            'table_1': {},
-            'table_2': {},
-            'table_3': {}
+            'table1': {},
+            'table2': {},
+            'table3': {}
         }
     }
 
     real_data = {
-        'table_1': Mock(),
-        'table_2': Mock(),
-        'table_3': Mock()
+        'table1': Mock(),
+        'table2': Mock(),
+        'table3': Mock()
     }
 
     synthetic_data = {
-        'table_1': Mock(),
-        'table_2': Mock(),
-        'table_3': Mock()
+        'table1': Mock(),
+        'table2': Mock(),
+        'table3': Mock()
     }
 
-    progress_bar = Mock()
+    prg_bar = Mock()
 
     # Run
-    result = base_property.get_score(real_data, synthetic_data, metadata, progress_bar)
+    result = base_property.get_score(real_data, synthetic_data, metadata, prg_bar)
 
     # Assert
     expected_average_score = 1.0
     expected_calls = [
-        call(real_data['table_1'], synthetic_data['table_1'], metadata['tables']['table_1'], progress_bar),
-        call(real_data['table_2'], synthetic_data['table_2'], metadata['tables']['table_2'], progress_bar),
-        call(real_data['table_3'], synthetic_data['table_3'], metadata['tables']['table_3'], progress_bar)
+        call(real_data['table1'], synthetic_data['table1'], metadata['tables']['table1'], prg_bar),
+        call(real_data['table2'], synthetic_data['table2'], metadata['tables']['table2'], prg_bar),
+        call(real_data['table3'], synthetic_data['table3'], metadata['tables']['table3'], prg_bar)
     ]
 
     assert result == expected_average_score

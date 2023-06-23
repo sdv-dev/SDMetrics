@@ -1,6 +1,7 @@
 """Multi table base property class."""
 import numpy as np
 
+
 class BaseMultiTableProperty():
     """Base class for multi table properties.
 
@@ -36,14 +37,14 @@ class BaseMultiTableProperty():
         """
         if self._single_table_property is None:
             raise NotImplementedError()
-        else:
-            average_score = np.zeros(len(metadata['tables']))
-            for idx, table_name in enumerate(metadata['tables']):
-                self._properties[table_name] = self._single_table_property()
-                average_score[idx] = self._properties[table_name].get_score(
-                    real_data[table_name], synthetic_data[table_name], metadata['tables'][table_name],
-                    progress_bar
-                )
+
+        average_score = np.zeros(len(metadata['tables']))
+        for idx, table_name in enumerate(metadata['tables']):
+            self._properties[table_name] = self._single_table_property()
+            average_score[idx] = self._properties[table_name].get_score(
+                real_data[table_name], synthetic_data[table_name], metadata['tables'][table_name],
+                progress_bar
+            )
 
         return round(average_score.mean(), 3)
 
