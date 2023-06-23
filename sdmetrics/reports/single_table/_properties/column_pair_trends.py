@@ -308,9 +308,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
             if progress_bar:
                 progress_bar.update()
 
-        if progress_bar:
-            progress_bar.close()
-
         result = pd.DataFrame({
             'Column 1': column_names_1,
             'Column 2': column_names_2,
