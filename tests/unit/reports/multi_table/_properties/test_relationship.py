@@ -1,6 +1,6 @@
 """Test multi-table relationship properties."""
 
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from sdmetrics.reports.multi_table._properties.relationship import (
     CardinalityShapeSimilarityProperty)
