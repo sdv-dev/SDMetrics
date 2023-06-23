@@ -1,13 +1,78 @@
-from unittest.mock import Mock, patch, call
 import itertools
+from unittest.mock import Mock, patch
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from sdmetrics.reports.single_table._properties.column_pair_trends import ColumnPairTrends
 
 
 class TestColumnPairTrends:
+
+    def test__convert_datetime_columns_to_numeric(self):
+        """Test the ``_convert_datetime_columns_to_numeric`` method."""
+        # Setup
+        data = pd.DataFrame({
+            'col1': [1, 2, 3],
+            'col2': [False, True, True],
+            'col3': ['a', 'b', 'c'],
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-01']),
+            'col5': [None, '2020-01-02', '2020-01-03'],
+            'col6': ['error', '2020-01-02', '2020-01-03']
+        })
+
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'boolean'},
+                'col3': {'sdtype': 'categorical'},
+                'col4': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                'col6': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'}
+            }
+        }
+        cpt_property = ColumnPairTrends()
+
+        # Run
+        cpt_property._convert_datetime_columns_to_numeric(data, metadata)
+
+        # Assert
+        expected_error = (
+            'Error: ValueError time data "error" doesn\'t match format "%Y-%m-%d", at '
+            'position 0. You might want to try:\n    - passing `format` if your strings'
+            " have a consistent format;\n    - passing `format=\'ISO8601\'` if your"
+            ' strings are all ISO8601 but not necessarily in exactly the same format;\n'
+            "    - passing `format=\'mixed\'`, and the format will be inferred for each"
+            ' element individually. You might want to use `dayfirst` alongside this.'
+        )
+
+        assert data['col4'].dtype == np.int64
+        assert data['col5'].dtype == np.float64
+        assert 'col6' in list(cpt_property._columns_datetime_conversion_failed.keys())
+        assert cpt_property._columns_datetime_conversion_failed['col6'] == expected_error
+
+    def test__discretize_column(self):
+        """Test the ``_discretize_column`` method."""
+        # Setup
+        data = pd.DataFrame({
+            'err_col': ['a', 'b', 'c', 'd', 'e'],
+            'int_col': [1, 2, 3, None, 5],
+            'float_col': [1.1, np.nan, 3.3, 4.4, 5.5]
+        })
+        bin_edges = None
+        cpt_property = ColumnPairTrends()
+
+        # Run
+        col_err, bin_edges = cpt_property._discretize_column('err_col', data['err_col'])
+        col_int, bin_edges = cpt_property._discretize_column('int_col', data['int_col'])
+        col_float, bin_edges = cpt_property._discretize_column(
+            'float_col', data['float_col'], bin_edges
+        )
+
+        # Assert
+        assert 'err_col' in list(cpt_property._columns_discretization_failed.keys())
+        assert list(col_int) == [1, 3, 6, 11, 11]
+        assert list(col_float) == [1, 11, 6, 9, 11]
 
     def test__get_processed_data(self):
         """Test the ``_get_processed_data`` method."""
@@ -32,7 +97,9 @@ class TestColumnPairTrends:
         processed_data = cpt_property._get_processed_data(data, metadata)
 
         # Assert
-        expected_datetime = pd.to_numeric(pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']))
+        expected_datetime = pd.to_numeric(
+            pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
+        )
         expected_processed_real = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
@@ -83,7 +150,10 @@ class TestColumnPairTrends:
         pd.testing.assert_frame_equal(processed_data, expected_processed_real)
 
     def test__get_metric(self):
-        """Test the ``_get_metric`` method."""
+        """Test the ``_get_metric`` method.
+
+        The method should return the correct metric for each combination of column types.
+        """
         # Setup
         cpt = ColumnPairTrends()
 
@@ -99,11 +169,100 @@ class TestColumnPairTrends:
         cpt._get_metric('categorical', 'categorical').__name__ == 'ContingencySimilarity'
         cpt._get_metric('boolean', 'boolean').__name__ == 'ContingencySimilarity'
 
-    @patch('sdmetrics.reports.single_table._properties.column_pair_trends'
-           '.CorrelationSimilarity.compute_breakdown')
-    @patch('sdmetrics.reports.single_table._properties.column_pair_trends'
-           '.ContingencySimilarity.compute_breakdown')
-    def test__generate_details(self, contingency_compute_mock, correlation_compute_mock):
+    def get_columns_data(self):
+        """Test the ``_get_columns_data`` method.
+
+        The method should return the correct data for each combination of column types.
+        """
+        # Setup
+        data = pd.DataFrame({
+            'col1': [1, 2, 3],
+            'col2': [False, True, True],
+            'col3': ['a', 'b', 'c'],
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
+            'col1_discrete': [1, 6, 11],
+            'col4_discrete': [1, 6, 11],
+        })
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'boolean'},
+                'col3': {'sdtype': 'categorical'},
+                'col4': {'sdtype': 'datetime'},
+            }
+        }
+
+        cpt_property = ColumnPairTrends()
+
+        # Run and Assert
+        expected_return = [
+            data[['col1_discrete', 'col2']],
+            data[['col1_discrete', 'col3']],
+            data[['col1', 'col4']],
+            data[['col2', 'col3']],
+            data[['col2', 'col4_discrete']],
+            data[['col3', 'col4_discrete']],
+        ]
+        for idx, col1, col2 in enumerate(itertools.combinations(data.columns, 2)):
+            columns_data = cpt_property._get_columns_data(data, metadata)
+            pd.testing.assert_frame_equal(columns_data, expected_return[idx])
+
+    def test_required_preprocessing(self):
+        """Test the ``_required_preprocessing`` method.
+
+        The method should return the correct boolean for each combination of column types.
+        The output is True if one of the column has been preprocessed.
+        """
+        # Setup
+        sdtype_pairs = [
+            ('datetime', 'datetime'),
+            ('numerical', 'numerical'),
+            ('datetime', 'numerical'),
+            ('datetime', 'categorical'),
+            ('datetime', 'boolean'),
+            ('numerical', 'categorical'),
+            ('numerical', 'boolean'),
+            ('categorical', 'boolean'),
+            ('categorical', 'categorical'),
+            ('boolean', 'boolean'),
+        ]
+
+        cpt_property = ColumnPairTrends()
+
+        # Run and Assert
+        expected_return = [
+            True, False, True, True, True, True, True, False, False, False
+        ]
+        for idx, sdtype_pair in enumerate(sdtype_pairs):
+            sdtype_1 = sdtype_pair[0]
+            sdtype_2 = sdtype_pair[1]
+            result = cpt_property._required_preprocessing(sdtype_1, sdtype_2)
+            assert result == expected_return[idx]
+
+    def test_preprocessing_failed(self):
+        """Test the ``_preprocessing_failed`` method."""
+        # Setup
+        cpt_property = ColumnPairTrends()
+        cpt_property._columns_datetime_conversion_failed = {'col1': 'Error1'}
+        cpt_property._columns_discretization_failed = {'col3': 'Error3'}
+
+        # Run
+        result_1 = cpt_property._preprocessing_failed('col1', 'col2', 'datetime', 'datetime')
+        result_2 = cpt_property._preprocessing_failed('col2', 'col1', 'datetime', 'datetime')
+        result_3 = cpt_property._preprocessing_failed('col3', 'col4', 'numerical', 'boolean')
+        result_4 = cpt_property._preprocessing_failed('col2', 'col4', 'datetime', 'boolean')
+
+        # Assert
+        assert result_1 == 'Error1'
+        assert result_2 == 'Error1'
+        assert result_3 == 'Error3'
+        assert result_4 is None
+
+    @patch('sdmetrics.reports.single_table._properties.column_pair_trends.'
+           'ContingencySimilarity.compute_breakdown')
+    @patch('sdmetrics.reports.single_table._properties.column_pair_trends.'
+           'CorrelationSimilarity.compute_breakdown')
+    def test__generate_details(self, correlation_compute_mock, contingency_compute_mock):
         """Test the ``_generate_details`` method."""
         # Setup
         real_data = pd.DataFrame({
@@ -114,62 +273,45 @@ class TestColumnPairTrends:
         })
 
         synthetic_data = pd.DataFrame({
-            'col1': [4, 5, 6],
+            'col1': [3, 1, 2],
             'col2': [False, False, True],
             'col3': ['a', 'b', 'b'],
-            'col4': pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06']),
+            'col4': pd.to_datetime(['2020-01-03', '2020-01-01', '2020-01-02']),
         })
 
-        metadata = {'columns': {
-            'col1': {'sdtype': 'numerical'},
-            'col2': {'sdtype': 'boolean'},
-            'col3': {'sdtype': 'categorical'},
-            'col4': {'sdtype': 'datetime'},
-        }}
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'boolean'},
+                'col3': {'sdtype': 'categorical'},
+                'col4': {'sdtype': 'datetime'},
+            }
+        }
 
         processed_real = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
-            'col1_discrete': [1, 2, 3],
-            'col4_discrete': [0, 1, 2],
+            'col4': [1577836800000000000, 1577923200000000000, 1578009600000000000],
+            'col1_discrete': [1, 6, 11],
+            'col4_discrete': [1, 6, 11],
         })
 
         processed_synthetic = pd.DataFrame({
-            'col1': [4, 5, 6],
+            'col1': [3, 1, 2],
             'col2': [False, False, True],
             'col3': ['a', 'b', 'b'],
-            'col4': pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06']),
-            'col1_discrete': [4, 5, 6],
-            'col4_discrete': [3, 4, 5],
+            'col4': [1578009600000000000, 1577836800000000000, 1577923200000000000],
+            'col1_discrete': [11, 1, 6],
+            'col4_discrete': [11, 1, 6],
         })
 
         cpt_property = ColumnPairTrends()
-
-        mock_processed_data = Mock()
-        cpt_property._get_processed_data = mock_processed_data
-
-        mock_get_columns_data = Mock()
-        cpt_property._get_columns_data = mock_get_columns_data
-
 
         # Run
         cpt_property._generate_details(real_data, synthetic_data, metadata, None)
 
         # Assert
-        mock_processed_data.assert_has_calls(
-            [call(real_data, metadata), call(synthetic_data, metadata)]
-        )
-
-        columns = ['col1', 'col2', 'col3', 'col4']
-        list_calls = [
-            call(col_name_1, col_name_2, processed_real, processed_synthetic, metadata)
-            for col_name_1, col_name_2 in itertools.combinations(columns, 2)
-        ]
-        mock_get_columns_data.assert_has_calls(list_calls)
-
-        
         _, correlation_kwargs = correlation_compute_mock.call_args
         assert correlation_kwargs['real_data'].equals(processed_real[['col1', 'col4']])
         assert correlation_kwargs['synthetic_data'].equals(processed_synthetic[['col1', 'col4']])
@@ -267,11 +409,12 @@ class TestColumnPairTrends:
         cpt_property._update_layout = mock__update_layout
 
         # Run
-        cpt_property.get_visualization()
+        result = cpt_property.get_visualization()
 
         # Assert
         assert mock__get_correlation_matrix.call_count == 3
         mock_make_subplots.assert_called()
         assert cpt_property._get_heatmap.call_count == 3
         assert fig_mock.add_trace.call_count == 3
-        cpt_property._update_layout.assert_called()
+        cpt_property._update_layout.assert_called_once_with(fig_mock)
+        assert result == fig_mock

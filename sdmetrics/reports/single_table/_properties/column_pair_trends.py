@@ -1,4 +1,5 @@
 import itertools
+import logging
 
 import numpy as np
 import pandas as pd
@@ -8,6 +9,8 @@ from plotly.subplots import make_subplots
 from sdmetrics.column_pairs.statistical import ContingencySimilarity, CorrelationSimilarity
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.utils import create_unique_name, is_datetime
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ColumnPairTrends(BaseSingleTableProperty):
@@ -64,6 +67,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             except Exception as e:
                 message = f'Error: {type(e).__name__} {e}'
                 self._columns_datetime_conversion_failed[column_name] = message
+                LOGGER.debug(message)
                 continue
 
         return data
@@ -94,6 +98,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
         except Exception as e:
             message = f'Error: {type(e).__name__} {e}'
             self._columns_discretization_failed[column_name] = message
+            LOGGER.debug(message)
 
         return column_result, bin_edges
 
@@ -147,7 +152,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         return metric
 
-    def _get_columns_data(self, column_name_1, column_name_2, real_data, synthetic_data, metadata):
+    def _get_columns_data(self, column_name_1, column_name_2, data, metadata):
         """Get the data for the property.
 
         If one is comparing a continuous column to a discrete column, use the discrete version
@@ -158,10 +163,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 The name of the first column
             column_name_2 (str):
                 The name of the second column
-            real_data (pandas.DataFrame):
-                The real data
-            synthetic_data (pandas.DataFrame):
-                The synthetic data
+            data (pandas.DataFrame):
+                The data
             metadata (dict):
                 The metadata of the table
         """
@@ -176,10 +179,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             else:
                 col_name_2 = create_unique_name(column_name_2 + '_discrete', metadata['columns'])
 
-        columns_real = real_data[[col_name_1, col_name_2]]
-        columns_synthetic = synthetic_data[[col_name_1, col_name_2]]
-
-        return columns_real, columns_synthetic
+        return data[[col_name_1, col_name_2]]
 
     def _required_preprocessing(self, sdtype_col_1, sdtype_col_2):
         """Check if a processing of one of the columns was required to compute the metric.
@@ -274,9 +274,11 @@ class ColumnPairTrends(BaseSingleTableProperty):
                     if error:
                         raise Exception('Preprocessing failed')
 
-                columns_real, columns_synthetic = self._get_columns_data(
-                    column_name_1, column_name_2, processed_real_data,
-                    processed_synthetic_data, metadata
+                columns_real = self._get_columns_data(
+                    column_name_1, column_name_2, processed_real_data, metadata
+                )
+                columns_synthetic = self._get_columns_data(
+                    column_name_1, column_name_2, processed_synthetic_data, metadata
                 )
 
                 score_breakdown = metric.compute_breakdown(
@@ -296,6 +298,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 synthetic_correlation = np.nan
                 if not str(e) == 'Preprocessing failed':
                     error = f'Error: {type(e).__name__} {e}'
+                    LOGGER.debug(error)
 
             column_names_1.append(column_name_1)
             column_names_2.append(column_name_2)
