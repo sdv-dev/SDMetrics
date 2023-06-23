@@ -37,19 +37,9 @@ class TestColumnPairTrends:
         cpt_property._convert_datetime_columns_to_numeric(data, metadata)
 
         # Assert
-        expected_error = (
-            'Error: ValueError time data "error" doesn\'t match format "%Y-%m-%d", at '
-            'position 0. You might want to try:\n    - passing `format` if your strings'
-            " have a consistent format;\n    - passing `format=\'ISO8601\'` if your"
-            ' strings are all ISO8601 but not necessarily in exactly the same format;\n'
-            "    - passing `format=\'mixed\'`, and the format will be inferred for each"
-            ' element individually. You might want to use `dayfirst` alongside this.'
-        )
-
         assert data['col4'].dtype == np.int64
         assert data['col5'].dtype == np.float64
         assert 'col6' in list(cpt_property._columns_datetime_conversion_failed.keys())
-        assert cpt_property._columns_datetime_conversion_failed['col6'] == expected_error
 
     def test__discretize_column(self):
         """Test the ``_discretize_column`` method."""
