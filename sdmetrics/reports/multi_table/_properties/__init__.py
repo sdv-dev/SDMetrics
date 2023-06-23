@@ -5,5 +5,7 @@ from sdmetrics.reports.multi_table._properties.cardinality import Cardinality
 
 __all__ = [
     'BaseMultiTableProperty',
-    'Cardinality'
+    'Cardinality',
+    'ColumnShapes',
+    'ColumnPairTrends'
 ]
