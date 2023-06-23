@@ -1,7 +1,9 @@
-from sdmetrics.reports.multi_table._properties import ColumnShapes, ColumnPairTrends
-from sdmetrics.demos import load_demo
-from tqdm import tqdm
 from unittest.mock import Mock
+
+from tqdm import tqdm
+
+from sdmetrics.demos import load_demo
+from sdmetrics.reports.multi_table._properties import ColumnPairTrends, ColumnShapes
 
 
 def test_column_shapes_property():
