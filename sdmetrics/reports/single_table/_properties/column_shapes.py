@@ -67,9 +67,6 @@ class ColumnShapes(BaseSingleTableProperty):
             scores.append(column_score)
             error_messages.append(error_message)
 
-        if progress_bar:
-            progress_bar.close()
-
         result = pd.DataFrame({
             'Column': column_names,
             'Metric': metric_names,
