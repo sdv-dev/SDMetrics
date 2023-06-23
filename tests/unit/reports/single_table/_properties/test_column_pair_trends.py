@@ -1,6 +1,8 @@
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call
+import itertools
 
 import pandas as pd
+import numpy as np
 
 from sdmetrics.reports.single_table._properties.column_pair_trends import ColumnPairTrends
 
@@ -10,17 +12,11 @@ class TestColumnPairTrends:
     def test__get_processed_data(self):
         """Test the ``_get_processed_data`` method."""
         # Setup
-        real_data = pd.DataFrame({
+        data = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
             'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
-        })
-        synthetic_data = pd.DataFrame({
-            'col1': [4, 5, 6],
-            'col2': [False, True, True],
-            'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06'])
         })
         metadata = {
             'columns': {
@@ -33,119 +29,75 @@ class TestColumnPairTrends:
 
         # Run
         cpt_property = ColumnPairTrends()
-        processed_real, processed_synthetic = cpt_property._get_processed_data(
-            real_data, synthetic_data, metadata
-        )
+        processed_data = cpt_property._get_processed_data(data, metadata)
 
         # Assert
+        expected_datetime = pd.to_numeric(pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']))
         expected_processed_real = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
+            'col4': expected_datetime,
             'col1_discrete': [1, 6, 11],
             'col4_discrete': [1, 6, 11],
         })
-        expected_processed_synthetic = pd.DataFrame({
-            'col1': [4, 5, 6],
-            'col2': [False, True, True],
-            'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06']),
-            'col1_discrete': [11, 11, 11],
-            'col4_discrete': [11, 11, 11],
-        })
 
-        pd.testing.assert_frame_equal(processed_real, expected_processed_real)
-        pd.testing.assert_frame_equal(processed_synthetic, expected_processed_synthetic)
+        pd.testing.assert_frame_equal(processed_data, expected_processed_real)
 
-    def test__get_metric_and_columns_continous(self):
-        """Test the ``_get_metric_and_columns`` method for continuous columns."""
+    def test__get_processed_data_with_nans(self):
+        """Test the ``_get_processed_data`` method."""
         # Setup
-        real_data = pd.DataFrame({
-            'col1': [1, 2, 3],
-            'col2': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
-        })
-        synthetic_data = pd.DataFrame({
-            'col1': [4, 5, 6],
-            'col2': pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06'])
+        data = pd.DataFrame({
+            'col1': [None, 2, 3],
+            'col2': [False, np.nan, True],
+            'col3': ['a', 'b', 'c'],
+            'col4': pd.to_datetime(['2020-01-01', None, '2020-01-03'])
         })
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'datetime'}
+                'col2': {'sdtype': 'boolean'},
+                'col3': {'sdtype': 'categorical'},
+                'col4': {'sdtype': 'datetime'}
             }
         }
-        cpt_property = ColumnPairTrends()
 
         # Run
-        metric, columns_real, columns_synthetic = cpt_property._get_metric_and_columns(
-            'col1', 'col2', real_data, synthetic_data, metadata
-        )
+        cpt_property = ColumnPairTrends()
+        processed_data = cpt_property._get_processed_data(data, metadata)
 
         # Assert
-        assert metric.__name__ == 'CorrelationSimilarity'
-        pd.testing.assert_frame_equal(columns_real, real_data)
-        pd.testing.assert_frame_equal(columns_synthetic, synthetic_data)
+        expected_datetime = pd.to_numeric(pd.to_datetime(['2020-01-01', None, '2020-01-03']))
+        expected_datetime = pd.Series(expected_datetime)
+        expected_datetime = expected_datetime.replace(-9223372036854775808, np.nan)
 
-    def test__get_metric_and_columns_discrete(self):
-        """Test the ``_get_metric_and_columns`` method for discrete columns."""
+        expected_processed_real = pd.DataFrame({
+            'col1': [None, 2, 3],
+            'col2': [False, np.nan, True],
+            'col3': ['a', 'b', 'c'],
+            'col4': expected_datetime,
+            'col1_discrete': [11, 1, 11],
+            'col4_discrete': [1, 11, 11],
+        })
+
+        pd.testing.assert_frame_equal(processed_data, expected_processed_real)
+
+    def test__get_metric(self):
+        """Test the ``_get_metric`` method."""
         # Setup
-        real_data = pd.DataFrame({
-            'col1': [True, False, False],
-            'col2': ['A', 'B', 'C']
-        })
-        synthetic_data = pd.DataFrame({
-            'col1': [True, True, False],
-            'col2': ['B', 'B', 'C']
-        })
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'boolean'},
-                'col2': {'sdtype': 'categorical'}
-            }
-        }
-        cpt_property = ColumnPairTrends()
+        cpt = ColumnPairTrends()
 
-        # Run
-        metric, columns_real, columns_synthetic = cpt_property._get_metric_and_columns(
-            'col1', 'col2', real_data, synthetic_data, metadata
-        )
-
-        # Assert
-        assert metric.__name__ == 'ContingencySimilarity'
-        pd.testing.assert_frame_equal(columns_real, real_data)
-        pd.testing.assert_frame_equal(columns_synthetic, synthetic_data)
-
-    def test__get_metric_and_columns_mixed(self):
-        """Test the ``_get_metric_and_columns`` method for mixed columns."""
-        # Setup
-        real_data = pd.DataFrame({
-            'col1': [True, False, False],
-            'col2': [1, 2, 3],
-            'col2_discrete': [1, 2, 3]
-        })
-        synthetic_data = pd.DataFrame({
-            'col1': [True, True, False],
-            'col2': [2, 2, 3],
-            'col2_discrete': [2, 2, 3]
-        })
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'boolean'},
-                'col2': {'sdtype': 'numerical'}
-            }
-        }
-        cpt_property = ColumnPairTrends()
-
-        # Run
-        metric, columns_real, columns_synthetic = cpt_property._get_metric_and_columns(
-            'col1', 'col2', real_data, synthetic_data, metadata
-        )
-
-        # Assert
-        assert metric.__name__ == 'ContingencySimilarity'
-        pd.testing.assert_frame_equal(columns_real, real_data[['col1', 'col2_discrete']])
-        pd.testing.assert_frame_equal(columns_synthetic, synthetic_data[['col1', 'col2_discrete']])
+        # Run and Assert
+        cpt._get_metric('datetime', 'datetime').__name__ == 'CorrelationSimilarity'
+        cpt._get_metric('numerical', 'numerical').__name__ == 'CorrelationSimilarity'
+        cpt._get_metric('datetime', 'numerical').__name__ == 'CorrelationSimilarity'
+        cpt._get_metric('datetime', 'categorical').__name__ == 'ContingencySimilarity'
+        cpt._get_metric('datetime', 'boolean').__name__ == 'ContingencySimilarity'
+        cpt._get_metric('numerical', 'categorical').__name__ == 'ContingencySimilarity'
+        cpt._get_metric('numerical', 'boolean').__name__ == 'ContingencySimilarity'
+        cpt._get_metric('categorical', 'boolean').__name__ == 'ContingencySimilarity'
+        cpt._get_metric('categorical', 'categorical').__name__ == 'ContingencySimilarity'
+        cpt._get_metric('boolean', 'boolean').__name__ == 'ContingencySimilarity'
 
     @patch('sdmetrics.reports.single_table._properties.column_pair_trends'
            '.CorrelationSimilarity.compute_breakdown')
@@ -158,22 +110,22 @@ class TestColumnPairTrends:
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
         })
+
         synthetic_data = pd.DataFrame({
             'col1': [4, 5, 6],
             'col2': [False, False, True],
             'col3': ['a', 'b', 'b'],
-            'col4': pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06'])
+            'col4': pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06']),
         })
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'boolean'},
-                'col3': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'datetime'}
-            }
-        }
+
+        metadata = {'columns': {
+            'col1': {'sdtype': 'numerical'},
+            'col2': {'sdtype': 'boolean'},
+            'col3': {'sdtype': 'categorical'},
+            'col4': {'sdtype': 'datetime'},
+        }}
 
         processed_real = pd.DataFrame({
             'col1': [1, 2, 3],
@@ -193,17 +145,31 @@ class TestColumnPairTrends:
             'col4_discrete': [3, 4, 5],
         })
 
-        column_shape_cpt_property = ColumnPairTrends()
+        cpt_property = ColumnPairTrends()
 
-        mock_processed_data = Mock(return_value=(processed_real, processed_synthetic))
-        column_shape_cpt_property._get_processed_data = mock_processed_data
+        mock_processed_data = Mock()
+        cpt_property._get_processed_data = mock_processed_data
+
+        mock_get_columns_data = Mock()
+        cpt_property._get_columns_data = mock_get_columns_data
+
 
         # Run
-        column_shape_cpt_property._generate_details(real_data, synthetic_data, metadata, None)
+        cpt_property._generate_details(real_data, synthetic_data, metadata, None)
 
         # Assert
-        mock_processed_data.assert_called_once_with(real_data, synthetic_data, metadata)
+        mock_processed_data.assert_has_calls(
+            [call(real_data, metadata), call(synthetic_data, metadata)]
+        )
 
+        columns = ['col1', 'col2', 'col3', 'col4']
+        list_calls = [
+            call(col_name_1, col_name_2, processed_real, processed_synthetic, metadata)
+            for col_name_1, col_name_2 in itertools.combinations(columns, 2)
+        ]
+        mock_get_columns_data.assert_has_calls(list_calls)
+
+        
         _, correlation_kwargs = correlation_compute_mock.call_args
         assert correlation_kwargs['real_data'].equals(processed_real[['col1', 'col4']])
         assert correlation_kwargs['synthetic_data'].equals(processed_synthetic[['col1', 'col4']])
