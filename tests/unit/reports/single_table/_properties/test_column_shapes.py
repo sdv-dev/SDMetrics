@@ -56,7 +56,7 @@ class TestColumnShapes:
     def test__generate_details_with_nans(
         self, tv_complement_compute_mock, ks_complement_compute_mock
     ):
-        """Test the ``_generate_details`` method when there is NaNs in the data."""
+        """Test the ``_generate_details`` method when there are NaNs in the data."""
         # Setup
         real_data = pd.DataFrame({
             'col1': [1, None, 3],
