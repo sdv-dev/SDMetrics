@@ -1,5 +1,5 @@
 import itertools
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 import numpy as np
 import pandas as pd
@@ -159,7 +159,7 @@ class TestColumnPairTrends:
         cpt._get_metric('categorical', 'categorical').__name__ == 'ContingencySimilarity'
         cpt._get_metric('boolean', 'boolean').__name__ == 'ContingencySimilarity'
 
-    def get_columns_data(self):
+    def test_get_columns_data(self):
         """Test the ``_get_columns_data`` method.
 
         The method should return the correct data for each combination of column types.
@@ -193,41 +193,51 @@ class TestColumnPairTrends:
             data[['col2', 'col4_discrete']],
             data[['col3', 'col4_discrete']],
         ]
-        for idx, col1, col2 in enumerate(itertools.combinations(data.columns, 2)):
-            columns_data = cpt_property._get_columns_data(data, metadata)
+        for idx, (col1, col2) in enumerate(itertools.combinations(metadata['columns'], 2)):
+            columns_data = cpt_property._get_columns_data(col1, col2, data, metadata)
             pd.testing.assert_frame_equal(columns_data, expected_return[idx])
 
-    def test_required_preprocessing(self):
-        """Test the ``_required_preprocessing`` method.
-
-        The method should return the correct boolean for each combination of column types.
-        The output is True if one of the column has been preprocessed.
-        """
+    def test__get_score_breakdown(self):
         # Setup
-        sdtype_pairs = [
-            ('datetime', 'datetime'),
-            ('numerical', 'numerical'),
-            ('datetime', 'numerical'),
-            ('datetime', 'categorical'),
-            ('datetime', 'boolean'),
-            ('numerical', 'categorical'),
-            ('numerical', 'boolean'),
-            ('categorical', 'boolean'),
-            ('categorical', 'categorical'),
-            ('boolean', 'boolean'),
-        ]
-
         cpt_property = ColumnPairTrends()
+        mock_metric = Mock()
+        mock_metric.compute_breakdown = Mock()
+        mock__get_columns_data = Mock()
+        cpt_property._get_columns_data = mock__get_columns_data
 
-        # Run and Assert
-        expected_return = [
-            True, False, True, True, True, True, True, False, False, False
-        ]
-        for idx, sdtype_pair in enumerate(sdtype_pairs):
-            sdtype_1 = sdtype_pair[0]
-            sdtype_2 = sdtype_pair[1]
-            result = cpt_property._required_preprocessing(sdtype_1, sdtype_2)
-            assert result == expected_return[idx]
+        col_name_1 = 'col1'
+        col_name_2 = 'col2'
+
+        real_data = pd.DataFrame({
+            col_name_1: [1, 2, 3],
+            col_name_2: [False, True, True],
+        })
+
+        synthetic_data = pd.DataFrame({
+            col_name_1: [1, 2, 3],
+            col_name_2: [False, True, True],
+        })
+
+        metadata = {
+            'columns': {
+                col_name_1: {'sdtype': 'numerical'},
+                col_name_2: {'sdtype': 'boolean'},
+            }
+        }
+
+        # Run
+        cpt_property._get_score_breakdown(
+            mock_metric, 'col1', 'col2', real_data, synthetic_data, metadata
+        )
+
+        # Assert
+        mock__get_columns_data.assert_has_calls(
+            [
+                call('col1', 'col2', real_data, metadata),
+                call('col1', 'col2', synthetic_data, metadata),
+            ]
+        )
+        mock_metric.compute_breakdown.assert_called_once()
 
     def test_preprocessing_failed(self):
         """Test the ``_preprocessing_failed`` method."""

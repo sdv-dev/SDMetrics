@@ -1,5 +1,4 @@
 import itertools
-import logging
 
 import numpy as np
 import pandas as pd
@@ -9,8 +8,6 @@ from plotly.subplots import make_subplots
 from sdmetrics.column_pairs.statistical import ContingencySimilarity, CorrelationSimilarity
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.utils import create_unique_name, is_datetime
-
-LOGGER = logging.getLogger(__name__)
 
 
 class ColumnPairTrends(BaseSingleTableProperty):
@@ -67,7 +64,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
             except Exception as e:
                 message = f'Error: {type(e).__name__} {e}'
                 self._columns_datetime_conversion_failed[column_name] = message
-                LOGGER.debug(message)
                 continue
 
         return data
@@ -98,7 +94,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
         except Exception as e:
             message = f'Error: {type(e).__name__} {e}'
             self._columns_discretization_failed[column_name] = message
-            LOGGER.debug(message)
 
         return column_result, bin_edges
 
@@ -181,22 +176,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         return data[[col_name_1, col_name_2]]
 
-    def _required_preprocessing(self, sdtype_col_1, sdtype_col_2):
-        """Check if a processing of one of the columns was required to compute the metric.
-
-        Args:
-            sdtype_col_1 (str):
-                The sdtype of the first column
-            sdtype_col_2 (str):
-                The sdtype of the second column
-        """
-        if sdtype_col_1 == 'datetime' or sdtype_col_2 == 'datetime':
-            return True
-        elif self._sdtype_to_shape[sdtype_col_1] != self._sdtype_to_shape[sdtype_col_2]:
-            return True
-        else:
-            return False
-
     def _preprocessing_failed(self, column_name_1, column_name_2, sdtype_col_1, sdtype_col_2):
         """Check if a processing of one of the columns has failed.
 
@@ -224,6 +203,36 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 error = self._columns_discretization_failed[column_name_2]
 
         return error
+
+    def _get_score_breakdown(
+            self, metric, col_name_1, col_name_2, real_data, synthetic_data, metadata):
+        """Get the score breakdown for the property.
+
+        Args:
+            metric (object):
+                The metric to use
+            col_name_1 (str):
+                The name of the first column
+            col_name_2 (str):
+                The name of the second column
+            real_data (pandas.DataFrame):
+                The real data
+            synthetic_data (pandas.DataFrame):
+                The synthetic data
+            metadata (dict):
+                The metadata of the table
+        """
+        columns_real = self._get_columns_data(
+            col_name_1, col_name_2, real_data, metadata
+        )
+        columns_synthetic = self._get_columns_data(
+            col_name_1, col_name_2, synthetic_data, metadata
+        )
+        score_breakdown = metric.compute_breakdown(
+            real_data=columns_real, synthetic_data=columns_synthetic
+        )
+
+        return score_breakdown
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar):
         """Generate the _details dataframe for the column pair trends property.
@@ -267,22 +276,19 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
             metric = self._get_metric(sdtype_col_1, sdtype_col_2)
             try:
-                if self._required_preprocessing(sdtype_col_1, sdtype_col_2):
-                    error = self._preprocessing_failed(
-                        column_name_1, column_name_2, sdtype_col_1, sdtype_col_2
-                    )
-                    if error:
-                        raise Exception('Preprocessing failed')
-
-                columns_real = self._get_columns_data(
-                    column_name_1, column_name_2, processed_real_data, metadata
+                error = self._preprocessing_failed(
+                    column_name_1, column_name_2, sdtype_col_1, sdtype_col_2
                 )
-                columns_synthetic = self._get_columns_data(
-                    column_name_1, column_name_2, processed_synthetic_data, metadata
-                )
+                if error:
+                    raise Exception('Preprocessing failed')
 
-                score_breakdown = metric.compute_breakdown(
-                    real_data=columns_real, synthetic_data=columns_synthetic
+                score_breakdown = self._get_score_breakdown(
+                    metric,
+                    column_name_1,
+                    column_name_2,
+                    processed_real_data,
+                    processed_synthetic_data,
+                    metadata,
                 )
                 pair_score = score_breakdown['score']
                 if metric.__name__ == 'CorrelationSimilarity':
@@ -298,7 +304,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 synthetic_correlation = np.nan
                 if not str(e) == 'Preprocessing failed':
                     error = f'Error: {type(e).__name__} {e}'
-                    LOGGER.debug(error)
 
             column_names_1.append(column_name_1)
             column_names_2.append(column_name_2)
