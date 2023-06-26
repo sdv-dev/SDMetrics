@@ -105,7 +105,7 @@ class TestQualityReport:
         metrics_mock = {
             'Column Shapes': [ks_complement_mock, tv_complement_mock],
             'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
-            'Parent Child Relationships': [cardinality_mock],
+            'Cardinality': [cardinality_mock],
         }
 
         # Run
@@ -133,7 +133,7 @@ class TestQualityReport:
         assert report._property_breakdown == {
             'Column Shapes': 0.15000000000000002,
             'Column Pair Trends': 0.15000000000000002,
-            'Parent Child Relationships': 1.0,
+            'Cardinality': 1.0,
         }
 
     @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
@@ -200,7 +200,7 @@ class TestQualityReport:
         metrics_mock = {
             'Column Shapes': [ks_complement_mock, tv_complement_mock],
             'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
-            'Parent Child Relationships': [cardinality_mock],
+            'Cardinality': [cardinality_mock],
         }
 
         # Run
@@ -229,7 +229,7 @@ class TestQualityReport:
         assert report._property_breakdown == {
             'Column Shapes': 0.15000000000000002,
             'Column Pair Trends': 0.15000000000000002,
-            'Parent Child Relationships': 1.0,
+            'Cardinality': 1.0,
         }
         assert prints.getvalue() == ''
 
@@ -314,7 +314,7 @@ class TestQualityReport:
         metrics_mock = {
             'Column Shapes': [ks_complement_mock, tv_complement_mock],
             'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
-            'Parent Child Relationships': [cardinality_mock],
+            'Cardinality': [cardinality_mock],
         }
 
         # Run
@@ -342,12 +342,12 @@ class TestQualityReport:
         assert report._property_breakdown == {
             'Column Shapes': 0.13333333333333333,
             'Column Pair Trends': 0.15000000000000002,
-            'Parent Child Relationships': 1.0,
+            'Cardinality': 1.0,
         }
         assert report._property_errors == {
             'Column Shapes': 1,
             'Column Pair Trends': 0,
-            'Parent Child Relationships': 0,
+            'Cardinality': 0,
         }
 
     @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
@@ -431,7 +431,7 @@ class TestQualityReport:
         metrics_mock = {
             'Column Shapes': [ks_complement_mock, tv_complement_mock],
             'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
-            'Parent Child Relationships': [cardinality_mock],
+            'Cardinality': [cardinality_mock],
         }
 
         # Run
@@ -456,7 +456,7 @@ class TestQualityReport:
             real_data, synthetic_data, metadata)
 
         assert report._overall_quality_score == 0.15000000000000002
-        assert np.isnan(report._property_breakdown['Parent Child Relationships'])
+        assert np.isnan(report._property_breakdown['Cardinality'])
 
     @patch('sdmetrics.reports.multi_table.quality_report.discretize_and_apply_metric')
     def test_generate_with_non_applicable_metric(self, mock_discretize_and_apply_metric):
@@ -535,7 +535,7 @@ class TestQualityReport:
         metrics_mock = {
             'Column Shapes': [ks_complement_mock, tv_complement_mock],
             'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
-            'Parent Child Relationships': [cardinality_mock],
+            'Cardinality': [cardinality_mock],
         }
 
         # Run
@@ -563,7 +563,7 @@ class TestQualityReport:
         assert report._property_breakdown == {
             'Column Shapes': 0.15000000000000002,
             'Column Pair Trends': 0.15000000000000002,
-            'Parent Child Relationships': 1.0,
+            'Cardinality': 1.0,
         }
         assert report._metric_results['TVComplement'] == {}
 
@@ -611,7 +611,7 @@ class TestQualityReport:
         mock_property_breakdown = {
             'Column Shapes': 0.1,
             'Column Pair Trends': 0.2,
-            'Parent Child Relationships': 0.3,
+            'Cardinality': 0.3,
         }
         report._property_breakdown = mock_property_breakdown
 
@@ -622,7 +622,7 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             properties,
             pd.DataFrame({
-                'Property': ['Column Shapes', 'Column Pair Trends', 'Parent Child Relationships'],
+                'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
                 'Score': [0.1, 0.2, 0.3],
             }),
         )
@@ -813,10 +813,10 @@ class TestQualityReport:
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
     def test_get_visualization_table_relationships(self, get_plot_mock):
-        """Test the ``get_visualization`` method with Parent Child Relationships.
+        """Test the ``get_visualization`` method with Cardinality.
 
         Input:
-        - property='Parent Child Relationships'
+        - property='Cardinality'
 
         Output:
         - visualization
@@ -832,7 +832,7 @@ class TestQualityReport:
         }
 
         # Run
-        out = report.get_visualization('Parent Child Relationships')
+        out = report.get_visualization('Cardinality')
 
         # Assert
         get_plot_mock.assert_called_once_with({
@@ -845,10 +845,10 @@ class TestQualityReport:
 
     @patch('sdmetrics.reports.multi_table.quality_report.get_table_relationships_plot')
     def test_get_visualization_table_relationships_with_table_name(self, get_plot_mock):
-        """Test the ``get_visualization`` method with Parent Child Relationships and a table.
+        """Test the ``get_visualization`` method with Cardinality and a table.
 
         Input:
-        - property='Parent Child Relationships'
+        - property='Cardinality'
         - table name
 
         Output:
@@ -865,7 +865,7 @@ class TestQualityReport:
         }
 
         # Run
-        out = report.get_visualization('Parent Child Relationships', table_name='table1')
+        out = report.get_visualization('Cardinality', table_name='table1')
 
         # Assert
         get_plot_mock.assert_called_once_with({
@@ -1037,8 +1037,8 @@ class TestQualityReport:
             })
         )
 
-    def test_get_details_parent_child_relationships(self):
-        """Test the ``get_details`` method with parent child relationships.
+    def test_get_details_cardinality(self):
+        """Test the ``get_details`` method with Cardinality.
 
         Expect that the details of the desired property is returned.
 
@@ -1056,9 +1056,15 @@ class TestQualityReport:
                 ('table1', 'table3'): {'score': 0.2},
             },
         }
+        warning_msg = (
+            "The 'Parent Child Relationships' property name is no longer recognized. Please "
+            "update to 'Cardinality' instead."
+        )
 
         # Run
-        out = report.get_details('Parent Child Relationships')
+        out = report.get_details('Cardinality')
+        with pytest.warns(FutureWarning, match=warning_msg):
+            out_parent_child_relationships = report.get_details('Parent Child Relationships')
 
         # Assert
         pd.testing.assert_frame_equal(
@@ -1070,9 +1076,10 @@ class TestQualityReport:
                 'Quality Score': [0.1, 0.2],
             })
         )
+        pd.testing.assert_frame_equal(out, out_parent_child_relationships)
 
-    def test_get_details_parent_child_relationships_with_error(self):
-        """Test the ``get_details`` method with parent child relationships with error.
+    def test_get_details_cardinality_with_error(self):
+        """Test the ``get_details`` method with Cardinality with error.
 
         Expect that the details of the desired property is returned, and that the
         details contains an Error column.
@@ -1094,7 +1101,7 @@ class TestQualityReport:
         }
 
         # Run
-        out = report.get_details('Parent Child Relationships')
+        out = report.get_details('Cardinality')
 
         # Assert
         pd.testing.assert_frame_equal(
@@ -1113,7 +1120,7 @@ class TestQualityReport:
         )
 
     def test_get_details_parent_child_relationships_with_table_name(self):
-        """Test the ``get_details`` method with parent child relationships with a table filter.
+        """Test the ``get_details`` method with Cardinality with a table filter.
 
         Expect that the details of the desired property is returned.
 
@@ -1134,7 +1141,7 @@ class TestQualityReport:
         }
 
         # Run
-        out = report.get_details('Parent Child Relationships', table_name='table2')
+        out = report.get_details('Cardinality', table_name='table2')
 
         # Assert
         pd.testing.assert_frame_equal(
@@ -1207,12 +1214,12 @@ class TestQualityReport:
         report._property_breakdown = {
             'Column Shapes': 0.6,
             'Column Pair Trends': 0.8,
-            'Parent Child Relationships': 0.9
+            'Cardinality': 0.9
         }
         report._property_errors = {
             'Column Shapes': 0,
             'Column Pair Trends': 0,
-            'Parent Child Relationships': 0,
+            'Cardinality': 0,
         }
         mock_out = Mock()
 
@@ -1225,7 +1232,7 @@ class TestQualityReport:
             call('Properties:\n'),
             call('Column Shapes: 60.0%\n'),
             call('Column Pair Trends: 80.0%\n'),
-            call('Parent Child Relationships: 90.0%\n'),
+            call('Cardinality: 90.0%\n'),
         ])
 
     def test__print_result_with_error(self):
@@ -1245,12 +1252,12 @@ class TestQualityReport:
         report._property_breakdown = {
             'Column Shapes': 0.6,
             'Column Pair Trends': np.nan,
-            'Parent Child Relationships': 0.8,
+            'Cardinality': 0.8,
         }
         report._property_errors = {
             'Column Shapes': 0,
             'Column Pair Trends': 1,
-            'Parent Child Relationships': 0,
+            'Cardinality': 0,
         }
         mock_out = Mock()
 
@@ -1263,7 +1270,7 @@ class TestQualityReport:
             call('Properties:\n'),
             call('Column Shapes: 60.0%\n'),
             call('Column Pair Trends: Error computing property.\n'),
-            call('Parent Child Relationships: 80.0%\n'),
+            call('Cardinality: 80.0%\n'),
         ])
 
     def test__print_result_with_all_errors(self):
@@ -1283,12 +1290,12 @@ class TestQualityReport:
         report._property_breakdown = {
             'Column Shapes': np.nan,
             'Column Pair Trends': np.nan,
-            'Parent Child Relationships': np.nan
+            'Cardinality': np.nan
         }
         report._property_errors = {
             'Column Shapes': 1,
             'Column Pair Trends': 1,
-            'Parent Child Relationships': 1,
+            'Cardinality': 1,
         }
         mock_out = Mock()
 
@@ -1301,5 +1308,5 @@ class TestQualityReport:
             call('Properties:\n'),
             call('Column Shapes: Error computing property.\n'),
             call('Column Pair Trends: Error computing property.\n'),
-            call('Parent Child Relationships: Error computing property.\n'),
+            call('Cardinality: Error computing property.\n'),
         ])
