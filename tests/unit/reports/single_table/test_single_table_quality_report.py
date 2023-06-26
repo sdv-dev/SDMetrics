@@ -8,179 +8,59 @@ import pandas as pd
 
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.reports.single_table import QualityReport
+from sdmetrics.reports.single_table._properties import ColumnPairTrends, ColumnShapes
+import pytest
 
+@pytest.fixture
+def output_stream():
+    return io.StringIO()
 
 class TestQualityReport:
 
     def test___init__(self):
-        """Test the ``__init__`` method.
-
-        Expect that the correct attributes are initialized.
-        """
+        """Test the ``__init__`` method."""
         # Run
         report = QualityReport()
 
         # Assert
         assert report._overall_quality_score is None
-        assert report._metric_results == {}
-        assert report._property_breakdown == {}
+        assert not report.is_generated
+        assert isinstance(report._properties['Column Shapes'], ColumnShapes)
+        assert isinstance(report._properties['Column Pair Trends'], ColumnPairTrends)
 
-    @patch('sdmetrics.reports.single_table.quality_report.discretize_and_apply_metric')
-    def test_generate(self, mock_discretize_and_apply_metric):
-        """Test the ``generate`` method.
-
-        Expect that the single-table metrics are called.
-
-        Setup:
-        - Mock the expected single-table metric compute breakdown calls.
-
-        Input:
-        - Real data.
-        - Synthetic data.
-        - Metadata.
-
-        Side Effects:
-        - Expect that each single table metric's ``compute_breakdown`` methods are called once.
-        - Expect that the ``_overall_quality_score`` and ``_property_breakdown`` attributes
-          are populated.
-        """
+    def test_generate(self):
+        """Test the ``generate`` method."""
         # Setup
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
-        ks_complement_mock = Mock()
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'categorical'}
             }
         }
-        ks_complement_mock.__name__ = 'KSComplement'
-        ks_complement_mock.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'score': 0.2},
-        }
 
-        tv_complement_mock = Mock()
-        tv_complement_mock.__name__ = 'TVComplement'
-        tv_complement_mock.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'score': 0.2},
-        }
+        report = QualityReport()
 
-        corr_sim_mock = Mock()
-        corr_sim_mock.__name__ = 'CorrelationSimilarity'
-        corr_sim_mock.compute_breakdown.return_value = {
-            ('col1', 'col2'): {'score': 0.1},
-            ('col2', 'col3'): {'score': 0.2},
-        }
+        mock_columnshapes = Mock()
+        mock_columnshapes.get_score.return_value = 1
+        mock_columnpairtrends = Mock()
+        mock_columnpairtrends.get_score.return_value = 1
 
-        cont_sim_mock = Mock()
-        cont_sim_mock.__name__ = 'ContingencySimilarity'
-        cont_sim_mock.compute_breakdown.return_value = {
-            ('col1', 'col2'): {'score': 0.1},
-            ('col2', 'col3'): {'score': 0.2},
-        }
-        metrics_mock = {
-            'Column Shapes': [ks_complement_mock, tv_complement_mock],
-            'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
-        }
-        mock_discretize_and_apply_metric.return_value = {}
+        report._properties['Column Shapes'] = mock_columnshapes
+        report._properties['Column Pair Trends'] = mock_columnpairtrends
 
         # Run
-        with patch.object(
-            QualityReport,
-            'METRICS',
-            metrics_mock,
-        ):
-            report = QualityReport()
-            report.generate(real_data, synthetic_data, metadata)
+        report.generate(real_data, synthetic_data, metadata, verbose=False)
 
         # Assert
-        ks_complement_mock.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
-        tv_complement_mock.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
-        corr_sim_mock.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
-        cont_sim_mock.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
-        assert report._overall_quality_score == 0.15000000000000002
-        assert report._property_breakdown == {
-            'Column Shapes': 0.15000000000000002,
-            'Column Pair Trends': 0.15000000000000002,
-        }
+        mock_columnshapes.get_score.assert_called_once_with(real_data, synthetic_data, metadata)
+        mock_columnpairtrends.get_score.assert_called_once_with(
+            real_data, synthetic_data, metadata
+        )
+        assert report._overall_quality_score == 1
+        assert report.is_generated
 
-    @patch('sdmetrics.reports.single_table.quality_report.discretize_and_apply_metric')
-    def test_generate_verbose_false(self, mock_discretize_and_apply_metric):
-        """Test the ``generate`` method with silent mode. Expect that nothing is printed.
-        """
-        # Setup
-        real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
-        synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['b', 'a', 'c']})
-        ks_complement_mock = Mock()
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'categorical'}
-            }
-        }
-        ks_complement_mock.__name__ = 'KSComplement'
-        ks_complement_mock.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'score': 0.2},
-        }
-
-        tv_complement_mock = Mock()
-        tv_complement_mock.__name__ = 'TVComplement'
-        tv_complement_mock.compute_breakdown.return_value = {
-            'col1': {'score': 0.1},
-            'col2': {'score': 0.2},
-        }
-
-        corr_sim_mock = Mock()
-        corr_sim_mock.__name__ = 'CorrelationSimilarity'
-        corr_sim_mock.compute_breakdown.return_value = {
-            ('col1', 'col2'): {'score': 0.1},
-            ('col2', 'col3'): {'score': 0.2},
-        }
-
-        cont_sim_mock = Mock()
-        cont_sim_mock.__name__ = 'ContingencySimilarity'
-        cont_sim_mock.compute_breakdown.return_value = {
-            ('col1', 'col2'): {'score': 0.1},
-            ('col2', 'col3'): {'score': 0.2},
-        }
-        metrics_mock = {
-            'Column Shapes': [ks_complement_mock, tv_complement_mock],
-            'Column Pair Trends': [corr_sim_mock, cont_sim_mock],
-        }
-        mock_discretize_and_apply_metric.return_value = {}
-
-        # Run
-        prints = io.StringIO()
-        with contextlib.redirect_stderr(prints), patch.object(
-            QualityReport,
-            'METRICS',
-            metrics_mock,
-        ):
-            report = QualityReport()
-            report.generate(real_data, synthetic_data, metadata, verbose=False)
-
-        # Assert
-        ks_complement_mock.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
-        tv_complement_mock.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
-        corr_sim_mock.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
-        cont_sim_mock.compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata)
-        assert report._overall_quality_score == 0.15000000000000002
-        assert report._property_breakdown == {
-            'Column Shapes': 0.15000000000000002,
-            'Column Pair Trends': 0.15000000000000002,
-        }
-        assert prints.getvalue() == ''
 
     @patch('sdmetrics.reports.single_table.quality_report.discretize_and_apply_metric')
     def test_generate_empty_column_pairs_results(self, mock_discretize_and_apply_metric):
@@ -585,27 +465,17 @@ class TestQualityReport:
         )
         assert loaded == pickle_mock.load.return_value
 
-    @patch('sdmetrics.reports.single_table.quality_report.get_column_shapes_plot')
-    def test_get_visualization_column_shapes(self, get_plot_mock):
-        """Test the ``get_visualization`` method with Column Shapes.
-
-        Input:
-        - property='Column Shapes'
-
-        Output:
-        - the visualization
-
-        Side Effects:
-        - get_column_shapes_plot is called with the expected score breakdowns.
-        """
+    def test_get_visualization(self):
+        """Test the ``get_visualization`` method."""
         # Setup
         report = QualityReport()
-        report._metric_results['KSComplement'] = {'score': 'ks_complement_score'}
-        report._metric_results['TVComplement'] = {'score': 'tv_complement_score'}
-        report._property_breakdown['Column Shapes'] = 0.78
+
+        mock__validate_property_generation = Mock()
+        report._validate_property_generation = mock__validate_property_generation
 
         # Run
-        fig = report.get_visualization('Column Shapes')
+        fig_column_shape = report.get_visualization('Column Shapes')
+        fig_column_pair = report.get_visualization('Column Pair Trends')
 
         # Assert
         get_plot_mock.assert_called_once_with({
@@ -772,73 +642,24 @@ class TestQualityReport:
             })
         )
 
-    def test_get_raw_result(self):
-        """Test the ``get_raw_result`` method.
-
-        Expect that the raw result of the desired metric is returned. Expect that null
-        scores are excluded.
-
-        Input:
-        - metric name
-
-        Output:
-        - Metric details
-        """
-        # Setup
-        report = QualityReport()
-        report._metric_results = {
-            'KSComplement': {
-                'col1': {'score': 0.1},
-                'col2': {'score': 0.2},
-                'col3': {'score': np.nan},
-            },
-        }
-
-        # Run
-        out = report.get_raw_result('KSComplement')
-
-        # Assert
-        assert out == [
-            {
-                'metric': {
-                    'method': 'sdmetrics.single_table.multi_single_column.KSComplement',
-                    'parameters': {},
-                },
-                'results': {
-                    'col1': {'score': 0.1},
-                    'col2': {'score': 0.2},
-                }
-            }
-        ]
-
-    def test__print_result(self):
-        """Test the ``_print_results`` method.
-
-        Expect that the correct messages are written.
-
-        Input:
-        - out argument
-
-        Side Effects:
-        - messages are written to the output.
-        """
+    def test__print_results(self, output_stream):
+        """Test the ``_print_results`` method."""
         # Setup
         report = QualityReport()
         report._overall_quality_score = 0.7
-        report._property_breakdown = {'Column Shapes': 0.6, 'Column Pair Trends': 0.8}
-        report._property_errors = {'Column Shapes': 0, 'Column Pair Trends': 0}
-        mock_out = Mock()
+        report.is_generated = True
 
         # Run
-        report._print_results(mock_out)
+        report._print_results()
 
         # Assert
-        mock_out.write.assert_has_calls([
-            call('\nOverall Quality Score: 70.0%\n\n'),
-            call('Properties:\n'),
-            call('Column Shapes: 60.0%\n'),
-            call('Column Pair Trends: 80.0%\n'),
-        ])
+        expected_results = (
+            '\nOverall Quality Score: 70.0%\n\n',
+            'Properties:\n',
+            '- Column Shapes: 60.0%\n',
+            '- Column Pair Trends: 80.0%\n',
+        )
+        assert output_stream.getvalue() == expected_results
 
     def test__print_result_with_error(self):
         """Test the ``_print_results`` method with errors.

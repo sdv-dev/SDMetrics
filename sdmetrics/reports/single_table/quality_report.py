@@ -1,6 +1,4 @@
 """Single table quality report."""
-
-import itertools
 import pickle
 import sys
 import warnings
@@ -12,12 +10,7 @@ import tqdm
 
 from sdmetrics.reports.single_table._properties import (
     ColumnPairTrends, ColumnShapes)
-from sdmetrics.errors import IncomputableMetricError
-from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
-from sdmetrics.reports.utils import (
-    aggregate_metric_results, discretize_and_apply_metric, validate_single_table_inputs)
-from sdmetrics.single_table import (
-    ContingencySimilarity, CorrelationSimilarity, KSComplement, TVComplement)
+from sdmetrics.reports.utils import validate_single_table_inputs
 
 
 class QualityReport():
@@ -27,16 +20,8 @@ class QualityReport():
     score along two properties - Column Shapes and Column Pair Trends.
     """
 
-    METRICS = {
-        'Column Shapes': [KSComplement, TVComplement],
-        'Column Pair Trends': [CorrelationSimilarity, ContingencySimilarity],
-    }
-
     def __init__(self):
         self._overall_quality_score = None
-        self._metric_results = {}
-        self._property_breakdown = {}
-        self._property_errors = {}
         self.is_generated = False
         self._properties = {
             'Column Shapes': ColumnShapes(),
@@ -45,22 +30,16 @@ class QualityReport():
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
-        if pd.isna(self._overall_quality_score) & any(self._property_errors.values()):
-            out.write('\nOverall Quality Score: Error computing report.\n\n')
-        else:
+        out.write(
+                f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n'
+        )
+        out.write('Properties:\n')
+
+        for property_name in self._properties:
+            property_score = self._properties[property_name]._compute_average()
             out.write(
-                f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n')
-
-        if len(self._property_breakdown) > 0:
-            out.write('Properties:\n')
-
-        for prop, score in self._property_breakdown.items():
-            if not pd.isna(score):
-                out.write(f'{prop}: {round(score * 100, 2)}%\n')
-            elif self._property_errors[prop] > 0:
-                out.write(f'{prop}: Error computing property.\n')
-            else:
-                out.write(f'{prop}: NaN\n')
+                f'- {property_name}: {property_score * 100}%\n'
+            )
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
@@ -78,32 +57,23 @@ class QualityReport():
         validate_single_table_inputs(real_data, synthetic_data, metadata)
 
         scores = []
-        num_columns = len(metadata['columns'])
         for property_name in self._properties:
-            if property_name == 'Column Shapes':
-                num_iterations = num_columns
-            elif property_name == 'Column Pair Trends':
-                num_iterations = int(0.5 * num_columns * num_columns - 1)
-            
-            if verbose:
-                out = tqdm.tqdm(total=num_iterations, file=sys.stdout)
-                out.set_description(f'Computing {property_name}...')
-
             scores.append(self._properties[property_name].get_score(
-                real_data, synthetic_data, metadata, progress_bar=out)
+                real_data, synthetic_data, metadata)
             )
 
         self._overall_quality_score = np.nanmean(scores)
+        self.is_generated = True
 
         if verbose:
             self._print_results()
 
     def _validate_property_generation(self, property_name):
         """Validate that the given property name is valid and that the report has been generated."""
-        if property_name not in ['ColumnShapes', 'ColumnPairTrends']:
+        if property_name not in ['Column Shapes', 'Column Pair Trends']:
             raise ValueError(
                 f"Invalid property name '{property_name}'."
-                "Valid property names are 'ColumnShapes' and 'ColumnPairTrends'."
+                "Valid property names are 'Column Shapes' and 'Column Pair Trends'."
             )
 
         if not self.is_generated:
@@ -121,15 +91,19 @@ class QualityReport():
         return self._overall_quality_score
 
     def get_properties(self):
-        """Return the property score breakdown.
+        """Return the property score.
 
         Returns:
             pandas.DataFrame
-                The property score breakdown.
+                The property score.
         """
+        name, score = [], []
+        for property_name in self._properties:
+            name.append(property_name)
+            score.append(self._properties[property_name]._compute_average())
         return pd.DataFrame({
-            'Property': self._property_breakdown.keys(),
-            'Score': self._property_breakdown.values(),
+            'Property': name,
+            'Score': score,
         })
 
     def get_visualization(self, property_name):
