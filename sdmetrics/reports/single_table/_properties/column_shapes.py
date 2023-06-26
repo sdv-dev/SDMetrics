@@ -1,13 +1,9 @@
-import logging
-
 import numpy as np
 import pandas as pd
 import plotly.express as px
 
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.single_column import KSComplement, TVComplement
-
-LOGGER = logging.getLogger(__name__)
 
 
 class ColumnShapes(BaseSingleTableProperty):
@@ -57,7 +53,6 @@ class ColumnShapes(BaseSingleTableProperty):
             except Exception as e:
                 column_score = np.nan
                 error_message = f'Error: {type(e).__name__} {e}'
-                LOGGER.debug(error_message)
             finally:
                 if progress_bar:
                     progress_bar.update()
