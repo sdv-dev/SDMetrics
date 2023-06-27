@@ -1,4 +1,5 @@
 """Single table base property class."""
+import pandas as pd
 
 
 class BaseSingleTableProperty():
@@ -10,7 +11,18 @@ class BaseSingleTableProperty():
 
     _details = None
 
-    def get_score(self, real_data, synthetic_data, metadata, progress_bar):
+    def _compute_average(self):
+        """Average the scores for each column."""
+        if not isinstance(self._details, pd.DataFrame) or 'Score' not in self._details.columns:
+            raise ValueError("The property details must be a DataFrame with a 'Score' column.")
+
+        return round(self._details['Score'].mean(), 3)
+
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
+        """Generate the _details dataframe for the property."""
+        raise NotImplementedError()
+
+    def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score for the property on the data.
 
         Args:
@@ -20,14 +32,15 @@ class BaseSingleTableProperty():
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
-            progress_bar (tqdm.tqdm):
-                The progress bar object.
+            progress_bar (tqdm.tqdm or None):
+                The progress bar object. Defaults to None.
 
         Returns:
             float:
                 The average score for the property.
         """
-        raise NotImplementedError()
+        self._details = self._generate_details(real_data, synthetic_data, metadata, progress_bar)
+        return self._compute_average()
 
     def get_visualization(self):
         """Return a visualization for each score in the property.
