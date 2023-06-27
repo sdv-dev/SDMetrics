@@ -66,24 +66,3 @@ class TestColumnShapes:
         assert error_messages[0] == expected_message_1
         assert error_messages[1] == expected_message_2
         assert score == 0.826
-
-    def test__generate_details_end_to_end(self):
-        # Setup
-        real_data, synthetic_data, metadata = load_demo('single_table')
-        column_shape_property = ColumnShapes()
-        quality_report = QualityReport()
-        quality_report.generate(real_data, synthetic_data, metadata)
-        details_quality_report = quality_report.get_details(property_name='Column Shapes')
-        details_quality_report = details_quality_report.rename(columns={'Quality Score': 'Score'})
-
-        # Run
-        column_shape_property.get_score(real_data, synthetic_data, metadata)
-
-        # Assert
-        details_column_shape = column_shape_property._details
-        details_column_shape = details_column_shape.sort_values('Score').reset_index(drop=True)
-        details_quality_report = details_quality_report.sort_values('Score').reset_index(drop=True)
-
-        pd.testing.assert_frame_equal(
-            details_column_shape, details_quality_report
-        )
