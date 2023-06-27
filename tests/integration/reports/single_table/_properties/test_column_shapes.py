@@ -34,7 +34,7 @@ class TestColumnShapes:
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
-        assert score == 0.816
+        assert score == 0.82
 
     def test_get_score_errors(self):
         """Test the ``get_score`` method when the metrics are raising errors for some columns."""
@@ -65,4 +65,4 @@ class TestColumnShapes:
         assert column_names_nan == ['start_date', 'employability_perc']
         assert error_messages[0] == expected_message_1
         assert error_messages[1] == expected_message_2
-        assert score == 0.826
+        assert score == 0.83

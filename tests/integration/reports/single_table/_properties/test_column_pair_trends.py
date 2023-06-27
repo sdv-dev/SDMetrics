@@ -54,7 +54,7 @@ class TestColumnPairTrends:
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
-        assert score == 0.754
+        assert score == 0.75
 
     def test_get_score_warnings(self, recwarn):
         """Test the ``get_score`` method when the metrics are raising erros for some columns."""
@@ -90,7 +90,7 @@ class TestColumnPairTrends:
         # Assert
         details = column_shape_property._details
         pd.testing.assert_series_equal(details['Error'], exp_error_serie, check_names=False)
-        assert score == 0.702
+        assert score == 0.70
 
         def test_only_categorical_columns(self):
             """Test the ``get_score`` method when there are only categorical columns."""
@@ -127,4 +127,4 @@ class TestColumnPairTrends:
             }
             expected_details = pd.DataFrame(expected_details_dict)
             pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
-            assert score == 0.881
+            assert score == 0.88

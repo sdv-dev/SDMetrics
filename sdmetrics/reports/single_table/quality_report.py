@@ -6,10 +6,8 @@ import warnings
 import numpy as np
 import pandas as pd
 import pkg_resources
-import tqdm
 
-from sdmetrics.reports.single_table._properties import (
-    ColumnPairTrends, ColumnShapes)
+from sdmetrics.reports.single_table._properties import ColumnPairTrends, ColumnShapes
 from sdmetrics.reports.utils import validate_single_table_inputs
 
 
@@ -109,7 +107,7 @@ class QualityReport():
             self._print_results()
 
     def _validate_property_generation(self, property_name):
-        """Validate that the given property name is valid and that the report has been generated."""
+        """Validate that the given property name and that the report has been generated."""
         if property_name not in ['Column Shapes', 'Column Pair Trends']:
             raise ValueError(
                 f"Invalid property name '{property_name}'."
@@ -172,7 +170,7 @@ class QualityReport():
             pandas.DataFrame
         """
         self._validate_property_generation(property_name)
-        
+
         return self._properties[property_name]._details.copy()
 
     def save(self, filepath):
