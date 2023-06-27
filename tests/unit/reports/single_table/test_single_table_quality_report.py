@@ -1,6 +1,7 @@
 import contextlib
 import io
 import pickle
+import re
 from unittest.mock import Mock, call, mock_open, patch
 
 import numpy as np

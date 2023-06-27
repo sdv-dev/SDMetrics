@@ -28,6 +28,46 @@ class QualityReport():
             'Column Pair Trends': ColumnPairTrends()
         }
 
+    def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
+        """Validate that the metadata matches the data.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict):
+                The metadata of the table.
+        """
+        real_columns = set(real_data.columns)
+        synthetic_columns = set(synthetic_data.columns)
+        metadata_columns = set(metadata['columns'].keys())
+
+        missing_column_real_data = metadata_columns - real_columns
+        missing_column_synthetic_data = metadata_columns - synthetic_columns
+        if missing_column_real_data or missing_column_synthetic_data:
+            missing_colums = missing_column_real_data.union(missing_column_synthetic_data)
+            error_message = (
+                'The metadata does not match the data. The following columns are in the metadata '
+                f'but not in the data ({", ".join(sorted(missing_colums))}).'
+            )
+
+            raise ValueError(error_message)
+
+    def validate(self, real_data, synthetic_data, metadata):
+        """Validate the inputs.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict):
+                The metadata of the table.
+        """
+        validate_single_table_inputs(real_data, synthetic_data, metadata)
+        self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
+
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
         out.write(
@@ -54,7 +94,7 @@ class QualityReport():
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
-        validate_single_table_inputs(real_data, synthetic_data, metadata)
+        self.validate(real_data, synthetic_data, metadata)
 
         scores = []
         for property_name in self._properties:
