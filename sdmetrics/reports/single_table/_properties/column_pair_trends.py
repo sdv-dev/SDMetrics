@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 
 from sdmetrics.column_pairs.statistical import ContingencySimilarity, CorrelationSimilarity
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
-from sdmetrics.utils import create_unique_name, is_datetime
+from sdmetrics.utils import is_datetime
 
 
 class ColumnPairTrends(BaseSingleTableProperty):
@@ -110,6 +110,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 The metadata of the table
         """
         processed_data = data.copy()
+        discretized_dict = {}
 
         processed_data = self._convert_datetime_columns_to_numeric(
             processed_data, metadata
@@ -119,12 +120,11 @@ class ColumnPairTrends(BaseSingleTableProperty):
             column_meta = metadata['columns'][column_name]
             column_sdtype = column_meta['sdtype']
             if column_sdtype in ['numerical', 'datetime']:
-                name_discrete = create_unique_name(column_name + '_discrete', metadata['columns'])
-                processed_data[name_discrete], bin_edges = self._discretize_column(
+                discretized_dict[column_name], bin_edges = self._discretize_column(
                     column_name, processed_data[column_name]
                 )
 
-        return processed_data
+        return processed_data, pd.DataFrame(discretized_dict)
 
     def _get_metric(self, sdtype_col_1, sdtype_col_2):
         """Get the metric to use for the property.
@@ -147,7 +147,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         return metric
 
-    def _get_columns_data(self, column_name_1, column_name_2, data, metadata):
+    def _get_columns_data(self, column_name_1, column_name_2, data, discrete_data, metadata):
         """Get the data for the property.
 
         If one is comparing a continuous column to a discrete column, use the discrete version
@@ -160,21 +160,25 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 The name of the second column
             data (pandas.DataFrame):
                 The data
+            discrete_data (pandas.DataFrame):
+                The discrete version of continuous columns
             metadata (dict):
                 The metadata of the table
         """
         sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
         sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
-        col_name_1 = column_name_1
-        col_name_2 = column_name_2
         if self._sdtype_to_shape[sdtype_col_1] != self._sdtype_to_shape[sdtype_col_2]:
 
             if self._sdtype_to_shape[sdtype_col_1] == 'continuous':
-                col_name_1 = create_unique_name(column_name_1 + '_discrete', metadata['columns'])
+                col_1 = discrete_data[column_name_1]
+                col_2 = data[column_name_2]
             else:
-                col_name_2 = create_unique_name(column_name_2 + '_discrete', metadata['columns'])
+                col_1 = data[column_name_1]
+                col_2 = discrete_data[column_name_2]
 
-        return data[[col_name_1, col_name_2]]
+            return pd.concat([col_1, col_2], axis=1)
+        else:
+            return data[[column_name_1, column_name_2]]
 
     def _preprocessing_failed(self, column_name_1, column_name_2, sdtype_col_1, sdtype_col_2):
         """Check if a processing of one of the columns has failed.
@@ -205,7 +209,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
         return error
 
     def _get_score_breakdown(
-            self, metric, col_name_1, col_name_2, real_data, synthetic_data, metadata):
+            self, metric, col_name_1, col_name_2, real_data, discrete_real,
+            synthetic_data, discrete_synthetic, metadata):
         """Get the score breakdown for the property.
 
         Args:
@@ -223,10 +228,10 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 The metadata of the table
         """
         columns_real = self._get_columns_data(
-            col_name_1, col_name_2, real_data, metadata
+            col_name_1, col_name_2, real_data, discrete_real, metadata
         )
         columns_synthetic = self._get_columns_data(
-            col_name_1, col_name_2, synthetic_data, metadata
+            col_name_1, col_name_2, synthetic_data, discrete_synthetic, metadata
         )
         score_breakdown = metric.compute_breakdown(
             real_data=columns_real, synthetic_data=columns_synthetic
@@ -247,8 +252,10 @@ class ColumnPairTrends(BaseSingleTableProperty):
             progress_bar:
                 The progress bar to use. Defaults to tqdm.
         """
-        processed_real_data = self._get_processed_data(real_data, metadata)
-        processed_synthetic_data = self._get_processed_data(synthetic_data, metadata)
+        processed_real_data, discrete_real = self._get_processed_data(real_data, metadata)
+        processed_synthetic_data, discrete_synthetic = self._get_processed_data(
+            synthetic_data, metadata
+        )
 
         column_names_1 = []
         column_names_2 = []
@@ -287,7 +294,9 @@ class ColumnPairTrends(BaseSingleTableProperty):
                     column_name_1,
                     column_name_2,
                     processed_real_data,
+                    discrete_real,
                     processed_synthetic_data,
+                    discrete_synthetic,
                     metadata,
                 )
                 pair_score = score_breakdown['score']

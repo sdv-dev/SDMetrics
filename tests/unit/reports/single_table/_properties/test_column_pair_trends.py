@@ -84,22 +84,26 @@ class TestColumnPairTrends:
 
         # Run
         cpt_property = ColumnPairTrends()
-        processed_data = cpt_property._get_processed_data(data, metadata)
+        processed_data, discrete_data = cpt_property._get_processed_data(data, metadata)
 
         # Assert
         expected_datetime = pd.to_numeric(
             pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
         )
-        expected_processed_real = pd.DataFrame({
+        expected_processed_data = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': expected_datetime,
-            'col1_discrete': [1, 6, 11],
-            'col4_discrete': [1, 6, 11],
+            'col4': expected_datetime
         })
 
-        pd.testing.assert_frame_equal(processed_data, expected_processed_real)
+        expected_discrete_data = pd.DataFrame({
+            'col1': [1, 6, 11],
+            'col4': [1, 6, 11],
+        })
+
+        pd.testing.assert_frame_equal(processed_data, expected_processed_data)
+        pd.testing.assert_frame_equal(discrete_data, expected_discrete_data)
 
     def test__get_processed_data_with_nans(self):
         """Test the ``_get_processed_data`` method."""
@@ -121,23 +125,27 @@ class TestColumnPairTrends:
 
         # Run
         cpt_property = ColumnPairTrends()
-        processed_data = cpt_property._get_processed_data(data, metadata)
+        processed_data, discrete_data = cpt_property._get_processed_data(data, metadata)
 
         # Assert
         expected_datetime = pd.to_numeric(pd.to_datetime(['2020-01-01', None, '2020-01-03']))
         expected_datetime = pd.Series(expected_datetime)
         expected_datetime = expected_datetime.replace(-9223372036854775808, np.nan)
 
-        expected_processed_real = pd.DataFrame({
+        expected_processed_data = pd.DataFrame({
             'col1': [None, 2, 3],
             'col2': [False, np.nan, True],
             'col3': ['a', 'b', 'c'],
             'col4': expected_datetime,
-            'col1_discrete': [11, 1, 11],
-            'col4_discrete': [1, 11, 11],
         })
 
-        pd.testing.assert_frame_equal(processed_data, expected_processed_real)
+        expected_discrete_data = pd.DataFrame({
+            'col1': [11, 1, 11],
+            'col4': [1, 11, 11],
+        })
+
+        pd.testing.assert_frame_equal(processed_data, expected_processed_data)
+        pd.testing.assert_frame_equal(discrete_data, expected_discrete_data)
 
     def test__get_metric(self):
         """Test the ``_get_metric`` method.
@@ -170,9 +178,13 @@ class TestColumnPairTrends:
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
             'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
-            'col1_discrete': [1, 6, 11],
-            'col4_discrete': [1, 6, 11],
         })
+
+        discrete_data = pd.DataFrame({
+            'col1': [1, 6, 11],
+            'col4': [1, 6, 11],
+        })
+
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
@@ -186,15 +198,17 @@ class TestColumnPairTrends:
 
         # Run and Assert
         expected_return = [
-            data[['col1_discrete', 'col2']],
-            data[['col1_discrete', 'col3']],
+            pd.concat([discrete_data['col1'], data['col2']], axis=1),
+            pd.concat([discrete_data['col1'], data['col3']], axis=1),
             data[['col1', 'col4']],
             data[['col2', 'col3']],
-            data[['col2', 'col4_discrete']],
-            data[['col3', 'col4_discrete']],
+            pd.concat([data['col2'], discrete_data['col4']], axis=1),
+            pd.concat([data['col3'], discrete_data['col4']], axis=1),
         ]
         for idx, (col1, col2) in enumerate(itertools.combinations(metadata['columns'], 2)):
-            columns_data = cpt_property._get_columns_data(col1, col2, data, metadata)
+            columns_data = cpt_property._get_columns_data(
+                col1, col2, data, discrete_data, metadata
+            )
             pd.testing.assert_frame_equal(columns_data, expected_return[idx])
 
     def test__get_score_breakdown(self):
@@ -205,36 +219,42 @@ class TestColumnPairTrends:
         mock__get_columns_data = Mock()
         cpt_property._get_columns_data = mock__get_columns_data
 
-        col_name_1 = 'col1'
-        col_name_2 = 'col2'
-
         real_data = pd.DataFrame({
-            col_name_1: [1, 2, 3],
-            col_name_2: [False, True, True],
+            'col1': [1, 2, 3],
+            'col2': [False, True, True],
+        })
+
+        discrete_real = pd.DataFrame({
+            'col1': [1, 6, 11],
         })
 
         synthetic_data = pd.DataFrame({
-            col_name_1: [1, 2, 3],
-            col_name_2: [False, True, True],
+            'col1': [1, 2, 3],
+            'col2': [False, True, True],
+        })
+
+        discrete_synthetic = pd.DataFrame({
+            'col1': [1, 6, 11],
         })
 
         metadata = {
             'columns': {
-                col_name_1: {'sdtype': 'numerical'},
-                col_name_2: {'sdtype': 'boolean'},
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'boolean'},
             }
         }
 
         # Run
         cpt_property._get_score_breakdown(
-            mock_metric, 'col1', 'col2', real_data, synthetic_data, metadata
+            mock_metric, 'col1', 'col2', real_data, discrete_real,
+            synthetic_data, discrete_synthetic, metadata
         )
 
         # Assert
         mock__get_columns_data.assert_has_calls(
             [
-                call('col1', 'col2', real_data, metadata),
-                call('col1', 'col2', synthetic_data, metadata),
+                call('col1', 'col2', real_data, discrete_real, metadata),
+                call('col1', 'col2', synthetic_data, discrete_synthetic, metadata),
             ]
         )
         mock_metric.compute_breakdown.assert_called_once()
@@ -293,8 +313,11 @@ class TestColumnPairTrends:
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
             'col4': [1577836800000000000, 1577923200000000000, 1578009600000000000],
-            'col1_discrete': [1, 6, 11],
-            'col4_discrete': [1, 6, 11],
+        })
+
+        discrete_real = pd.DataFrame({
+            'col1': [1, 6, 11],
+            'col4': [1, 6, 11],
         })
 
         processed_synthetic = pd.DataFrame({
@@ -302,8 +325,11 @@ class TestColumnPairTrends:
             'col2': [False, False, True],
             'col3': ['a', 'b', 'b'],
             'col4': [1578009600000000000, 1577836800000000000, 1577923200000000000],
-            'col1_discrete': [11, 1, 6],
-            'col4_discrete': [11, 1, 6],
+        })
+
+        discrete_synthetic = pd.DataFrame({
+            'col1': [11, 1, 6],
+            'col4': [11, 1, 6],
         })
 
         cpt_property = ColumnPairTrends()
@@ -317,18 +343,18 @@ class TestColumnPairTrends:
         assert correlation_kwargs['synthetic_data'].equals(processed_synthetic[['col1', 'col4']])
 
         expected_real_data = [
-            processed_real[['col1_discrete', 'col2']],
-            processed_real[['col1_discrete', 'col3']],
+            pd.concat([discrete_real['col1'], processed_real['col2']], axis=1),
+            pd.concat([discrete_real['col1'], processed_real['col3']], axis=1),
             processed_real[['col2', 'col3']],
-            processed_real[['col2', 'col4_discrete']],
-            processed_real[['col3', 'col4_discrete']],
+            pd.concat([processed_real['col2'], discrete_real['col4']], axis=1),
+            pd.concat([processed_real['col3'], discrete_real['col4']], axis=1),
         ]
         expected_synthetic_data = [
-            processed_synthetic[['col1_discrete', 'col2']],
-            processed_synthetic[['col1_discrete', 'col3']],
+            pd.concat([discrete_synthetic['col1'], processed_synthetic['col2']], axis=1),
+            pd.concat([discrete_synthetic['col1'], processed_synthetic['col3']], axis=1),
             processed_synthetic[['col2', 'col3']],
-            processed_synthetic[['col2', 'col4_discrete']],
-            processed_synthetic[['col3', 'col4_discrete']],
+            pd.concat([processed_synthetic['col2'], discrete_synthetic['col4']], axis=1),
+            pd.concat([processed_synthetic['col3'], discrete_synthetic['col4']], axis=1),
         ]
         for idx, call1 in enumerate(contingency_compute_mock.call_args_list):
             _, contingency_kwargs = call1
