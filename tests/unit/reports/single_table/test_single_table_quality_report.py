@@ -46,7 +46,12 @@ class TestQualityReport:
         mock_write.assert_has_calls(calls, any_order=True)
 
     def test__validate_metadata_matches_data(self):
-        """Test the ``_validate_metadata_matches_data`` method."""
+        """Test the ``_validate_metadata_matches_data`` method.
+
+        This test checks that the method raises an error when there is a column
+        mismatch between the data and the metadata.
+        At the first call, there is a mismatch, not in the second call.
+        """
         # Setup
         quality_report = QualityReport()
         real_data = pd.DataFrame({
@@ -62,26 +67,60 @@ class TestQualityReport:
         metadata = {
             'columns': {
                 'column1': {'sdtype': 'numerical'},
-                'column2': {'sdtype': 'categorical'},
+                'column5': {'sdtype': 'categorical'},
             }
         }
 
-        # Run
-        quality_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
-
-        # Assert
-        metadata['columns']['column3'] = {'sdtype': 'numerical'}
-        metadata['columns']['column4'] = {'sdtype': 'numerical'}
-        metadata['columns']['column5'] = {'sdtype': 'numerical'}
+        # Run and Assert
         expected_err_message = re.escape(
-            'The metadata does not match the data. The following columns are in the metadata '
-            'but not in the data (column3, column4, column5).'
+            'The metadata does not match the data. The following columns are missing'
+            ' in the real/synnthetic data or in the metadata: column2, column3, column4, column5'
         )
         with pytest.raises(ValueError, match=expected_err_message):
             quality_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
-    @patch('sdmetrics.reports.single_table.quality_report.validate_single_table_inputs')
-    def test_validate(self, mock_validate_single_table_inputs):
+        real_data['column4'] = [1, 2, 3]
+        real_data['column5'] = ['a', 'b', 'c']
+        synthetic_data['column3'] = [1, 2, 3]
+        synthetic_data['column5'] = ['a', 'b', 'c']
+
+        metadata['columns']['column2'] = {'sdtype': 'categorical'}
+        metadata['columns']['column3'] = {'sdtype': 'numerical'}
+        metadata['columns']['column4'] = {'sdtype': 'numerical'}
+
+        quality_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
+
+    def test__validate_metadata_matches_data_no_mismatch(self):
+        """Test the ``_validate_metadata_matches_data`` method.
+
+        This test checks that the method does not raise an error when there is no column mismatch
+        between the data and the metadata
+        """
+        # Setup
+        quality_report = QualityReport()
+        real_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c'],
+            'column3': [4, 5, 6]
+        })
+        synthetic_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c'],
+            'column3': [4, 5, 6]
+        })
+        metadata = {
+            'columns': {
+                'column1': {'sdtype': 'numerical'},
+                'column2': {'sdtype': 'categorical'},
+                'column3': {'sdtype': 'numerical'},
+            }
+        }
+
+        # Run and Assert
+        quality_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
+
+    @patch('sdmetrics.reports.single_table.quality_report._validate_categorical_values')
+    def test_validate(self, mock_validate_categorical_values):
         # Setup
         quality_report = QualityReport()
         mock__validate_metadata_matches_data = Mock()
@@ -108,10 +147,10 @@ class TestQualityReport:
         quality_report.validate(real_data, synthetic_data, metadata)
 
         # Assert
-        mock_validate_single_table_inputs.assert_called_once_with(
+        mock__validate_metadata_matches_data.assert_called_once_with(
             real_data, synthetic_data, metadata
         )
-        mock__validate_metadata_matches_data.assert_called_once_with(
+        mock_validate_categorical_values.assert_called_once_with(
             real_data, synthetic_data, metadata
         )
 

@@ -73,7 +73,7 @@ class TestQualityReport:
         report = QualityReport()
 
         # Run
-        report.generate(real_data, synthetic_data, metadata)
+        report.generate(real_data[column_names], synthetic_data[column_names], metadata)
 
         # Assert
         expected_details_column_shapes_dict = {
@@ -134,7 +134,7 @@ class TestQualityReport:
         report = QualityReport()
 
         # Run
-        report.generate(real_data, synthetic_data, metadata)
+        report.generate(real_data[column_names], synthetic_data[column_names], metadata)
 
         # Assert
         expected_details_column_shapes_dict = {
@@ -201,11 +201,12 @@ class TestQualityReport:
         real_data['nan_column'] = np.nan * len(real_data)
         synthetic_data['nan_column'] = np.nan * len(synthetic_data)
         metadata['columns']['nan_column'] = {'sdtype': 'numerical'}
+        column_names.append('nan_column')
 
         report = QualityReport()
 
         # Run
-        report.generate(real_data, synthetic_data, metadata)
+        report.generate(real_data[column_names], synthetic_data[column_names], metadata)
 
         # Assert
         expected_details_column_shapes_dict = {

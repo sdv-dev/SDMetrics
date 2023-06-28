@@ -8,7 +8,7 @@ import pandas as pd
 import pkg_resources
 
 from sdmetrics.reports.single_table._properties import ColumnPairTrends, ColumnShapes
-from sdmetrics.reports.utils import validate_single_table_inputs
+from sdmetrics.reports.utils import _validate_categorical_values
 
 
 class QualityReport():
@@ -37,19 +37,21 @@ class QualityReport():
             metadata (dict):
                 The metadata of the table.
         """
+        missing_columns = set()
         real_columns = set(real_data.columns)
         synthetic_columns = set(synthetic_data.columns)
         metadata_columns = set(metadata['columns'].keys())
 
-        missing_column_real_data = metadata_columns - real_columns
-        missing_column_synthetic_data = metadata_columns - synthetic_columns
-        if missing_column_real_data or missing_column_synthetic_data:
-            missing_colums = missing_column_real_data.union(missing_column_synthetic_data)
-            error_message = (
-                'The metadata does not match the data. The following columns are in the metadata '
-                f'but not in the data ({", ".join(sorted(missing_colums))}).'
-            )
+        missing_data = metadata_columns.difference(real_columns.union(synthetic_columns))
+        missing_metadata = real_columns.union(synthetic_columns).difference(metadata_columns)
+        missing_columns = missing_data.union(missing_metadata)
 
+        if missing_columns:
+            error_message = (
+                'The metadata does not match the data. The following columns are missing'
+                ' in the real/synnthetic data or in the metadata: '
+                f"{', '.join(sorted(missing_columns))}"
+            )
             raise ValueError(error_message)
 
     def validate(self, real_data, synthetic_data, metadata):
@@ -63,8 +65,11 @@ class QualityReport():
             metadata (dict):
                 The metadata of the table.
         """
-        validate_single_table_inputs(real_data, synthetic_data, metadata)
+        if not isinstance(metadata, dict):
+            metadata = metadata.to_dict()
+
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
+        _validate_categorical_values(real_data, synthetic_data, metadata)
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
