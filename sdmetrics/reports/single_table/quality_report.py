@@ -6,6 +6,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import pkg_resources
+import tqdm
 
 from sdmetrics.reports.single_table._properties import ColumnPairTrends, ColumnShapes
 from sdmetrics.reports.utils import _validate_categorical_values
@@ -101,16 +102,36 @@ class QualityReport():
         self.validate(real_data, synthetic_data, metadata)
 
         scores = []
-        for property_name in self._properties:
-            scores.append(self._properties[property_name].get_score(
-                real_data, synthetic_data, metadata)
+        num_columns = len(metadata['columns'])
+        progress_bar = None
+        out = sys.stdout if verbose else None
+        if verbose:
+            out.write('Generating report ...\n')
+
+        for ind, property_name in enumerate(self._properties):
+            if verbose:
+                if property_name == 'Column Shapes':
+                    num_iterations = num_columns
+                elif property_name == 'Column Pair Trends':
+                    num_iterations = int(0.5 * num_columns * (num_columns - 1))
+
+                progress_bar = tqdm.tqdm(total=num_iterations, file=out)
+                progress_bar.set_description(
+                    f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}: '
+                )
+
+            score = self._properties[property_name].get_score(
+                real_data, synthetic_data, metadata, progress_bar=progress_bar
             )
+            scores.append(score)
+            if verbose:
+                progress_bar.close()
 
         self._overall_quality_score = np.nanmean(scores)
         self.is_generated = True
 
         if verbose:
-            self._print_results()
+            self._print_results(out)
 
     def _validate_property_generated(self, property_name):
         """Validate that the given property name and that the report has been generated."""

@@ -176,7 +176,7 @@ class TestQualityReport:
             'column2': ['a', 'b', 'c']
         })
         metadata = {
-            'column': {
+            'columns': {
                 'column1': {'sdtypes': 'numerical'},
                 'column2': {'sdtypes': 'categorical'}
             }
@@ -188,10 +188,10 @@ class TestQualityReport:
         # Assert
         mock_validate.assert_called_once_with(real_data, synthetic_data, metadata)
         quality_report._properties['Column Shapes'].get_score.assert_called_with(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, progress_bar=None
         )
         quality_report._properties['Column Pair Trends'].get_score.assert_called_with(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, progress_bar=None
         )
 
     def test__validate_property_generated(self):

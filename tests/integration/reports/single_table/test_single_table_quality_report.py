@@ -1,3 +1,6 @@
+import contextlib
+import io
+import re
 from datetime import date, datetime
 
 import numpy as np
@@ -278,3 +281,36 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
+
+    def test_report_with_verbose(self):
+        """Test the report with verbose.
+
+        Check that the report prints the correct information.
+        """
+        # Setup
+        key_phrases = [
+            r'Generating\sreport\s\.\.\.',
+            r'\(1/2\)\sEvaluating\sColumn\sShapes',
+            r'\(2/2\)\sEvaluating\sColumn\sPair\sTrends',
+            r'Overall\sQuality\sScore:\s80\.5%',
+            r'Properties:',
+            r'-\sColumn\sShapes:\s82\.0%',
+            r'-\sColumn\sPair\sTrends:\s79\.0%',
+        ]
+
+        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+
+        real_data['nan_column'] = np.nan * len(real_data)
+        synthetic_data['nan_column'] = np.nan * len(synthetic_data)
+        metadata['columns']['nan_column'] = {'sdtype': 'numerical'}
+
+        report = QualityReport()
+
+        # Run
+        with contextlib.redirect_stdout(io.StringIO()) as my_stdout:
+            report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        for pattern in key_phrases:
+            match = re.search(pattern, my_stdout.getvalue())
+            assert match is not None
