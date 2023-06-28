@@ -1,14 +1,14 @@
-"""Test multi-table relationship properties."""
+"""Test multi-table cardinality properties."""
 from plotly.graph_objs._figure import Figure
 
 from sdmetrics.demos import load_multi_table_demo
-from sdmetrics.reports.multi_table._properties import CardinalityShapeSimilarityProperty
+from sdmetrics.reports.multi_table._properties import Cardinality
 
 
 def test_cardinality_shame_similarity_property():
-    """Test the ``CardinalityShapeSimilarityProperty`` with the multi table demo."""
+    """Test the ``Cardinality`` with the multi table demo."""
     # Setup
-    cardinality_property = CardinalityShapeSimilarityProperty()
+    cardinality_property = Cardinality()
     real_data, synthetic_data, metadata = load_multi_table_demo()
 
     # Run

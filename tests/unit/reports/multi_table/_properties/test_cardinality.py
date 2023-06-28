@@ -1,14 +1,13 @@
-"""Test multi-table relationship properties."""
+"""Test multi-table cardinality properties."""
 
 from unittest.mock import Mock, patch
 
-from sdmetrics.reports.multi_table._properties.relationship import (
-    CardinalityShapeSimilarityProperty)
+from sdmetrics.reports.multi_table._properties.cardinality import Cardinality
 
 
-class TestCardinalityShapeSimilarityProperty:
+class TestCardinality:
 
-    @patch('sdmetrics.reports.multi_table._properties.relationship.CardinalityShapeSimilarity')
+    @patch('sdmetrics.reports.multi_table._properties.cardinality.CardinalityShapeSimilarity')
     def test_get_score(self, mock_cardinalityshapesimilarity):
         """Test the ``get_score`` function.
 
@@ -20,7 +19,7 @@ class TestCardinalityShapeSimilarityProperty:
             ('users', 'sessions'): {'score': 1.0},
             ('sessions', 'transactions'): {'score': 0.25},
         }
-        instance = CardinalityShapeSimilarityProperty()
+        instance = Cardinality()
         progress_bar = Mock()
         metadata = {
             'relationships': [
@@ -38,12 +37,15 @@ class TestCardinalityShapeSimilarityProperty:
         assert progress_bar.update.call_count == 2
         progress_bar.close.assert_called_once_with()
 
-    @patch('sdmetrics.reports.multi_table._properties.relationship.CardinalityShapeSimilarity')
+    @patch('sdmetrics.reports.multi_table._properties.cardinality.CardinalityShapeSimilarity')
     def test_get_score_raises_errors(self, mock_cardinalityshapesimilarity):
         """Test the ``get_score`` function when CardinalityShapeSimilarity can't compute score."""
         # Setup
-        mock_cardinalityshapesimilarity.compute_breakdown.side_effect = [ValueError, ValueError]
-        instance = CardinalityShapeSimilarityProperty()
+        mock_cardinalityshapesimilarity.compute_breakdown.side_effect = [
+            ValueError('Users error'),
+            ValueError('Sessions error')
+        ]
+        instance = Cardinality()
         progress_bar = Mock()
         metadata = {
             'relationships': [
@@ -57,27 +59,33 @@ class TestCardinalityShapeSimilarityProperty:
 
         # Assert
         assert score == 0
+        assert instance._details == {
+            'Errors': {
+                'users': 'Users error',
+                'sessions': 'Sessions error'
+            }
+        }
         progress_bar.update.assert_called()
         assert progress_bar.update.call_count == 2
         progress_bar.close.assert_called_once_with()
 
-    @patch('sdmetrics.reports.multi_table._properties.relationship.get_table_relationships_plot')
+    @patch('sdmetrics.reports.multi_table._properties.cardinality.get_table_relationships_plot')
     def test_get_visualization(self, mock_get_table_relationships_plot):
         """Test that ``get_visualization`` calls ``get_table_relationships_plot``.
 
-        Test that ``get_visualization`` filters over the ``instance._metric_results`` to get
+        Test that ``get_visualization`` filters over the ``instance._details`` to get
         the tables that contain the table name and calls ``get_table_relationships_plot`` with
         the ``score_breakdowns``.
         """
         # Setup
         instance = Mock()
-        instance._metric_results = {
+        instance._details = {
             ('users', 'sessions'): 1.,
             ('users', 'transactions'): 0.5
         }
 
         # Run
-        result = CardinalityShapeSimilarityProperty.get_visualization(instance, 'sessions')
+        result = Cardinality.get_visualization(instance, 'sessions')
 
         # Assert
         assert result == mock_get_table_relationships_plot.return_value

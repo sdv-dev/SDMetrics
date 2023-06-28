@@ -3,15 +3,15 @@ from sdmetrics.reports.multi_table._properties.base import BaseMultiTablePropert
 from sdmetrics.reports.multi_table.plot_utils import get_table_relationships_plot
 
 
-class CardinalityShapeSimilarityProperty(BaseMultiTableProperty):
-    """``CardinalityShapeSimilarityProperty`` class.
+class Cardinality(BaseMultiTableProperty):
+    """``Cardinality`` class.
 
     Property that uses ``sdmetrics.multi_table.statistical.CardinalityShapeSimilarity`` metric
     in order to compute and plot the scores of cardinality shape similarity in the given tables.
     """
 
     def __init__(self):
-        self._metric_results = {}
+        self._details = {}
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of cardinality shape similarity in the given tables.
@@ -33,13 +33,15 @@ class CardinalityShapeSimilarityProperty(BaseMultiTableProperty):
         for relation in metadata.get('relationships', []):
             relationships_metadata = {'relationships': [relation]}
             try:
-                self._metric_results = CardinalityShapeSimilarity.compute_breakdown(
+                self._details = CardinalityShapeSimilarity.compute_breakdown(
                     real_data,
                     synthetic_data,
                     relationships_metadata
                 )
-            except Exception:
-                pass
+            except Exception as error:
+                errors = self._details.get('Errors', {})
+                errors[relation] = str(error)
+                self._details['Errors'] = errors
 
             if progress_bar is not None:
                 progress_bar.update()
@@ -48,10 +50,10 @@ class CardinalityShapeSimilarityProperty(BaseMultiTableProperty):
             progress_bar.close()
 
         score = 0
-        for result in self._metric_results.values():
-            score += result['score']
+        for result in self._details.values():
+            score += result.get('score', 0)
 
-        average_score = score / len(self._metric_results) if len(self._metric_results) else score
+        average_score = score / len(self._details) if len(self._details) else score
         return average_score
 
     def get_visualization(self, table_name):
@@ -65,10 +67,10 @@ class CardinalityShapeSimilarityProperty(BaseMultiTableProperty):
             plotly.graph_objects._figure.Figure
                 The visualization for the property.
         """
-        score_breakdowns = {'CardinalityShapeSimilarity': self._metric_results}
-        for metric, metric_results in score_breakdowns.items():
+        score_breakdowns = {'CardinalityShapeSimilarity': self._details}
+        for metric, details in score_breakdowns.items():
             score_breakdowns[metric] = {
-                tables: results for tables, results in metric_results.items()
+                tables: results for tables, results in details.items()
                 if table_name in tables
             }
 
