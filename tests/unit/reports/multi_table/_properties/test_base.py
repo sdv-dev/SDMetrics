@@ -15,6 +15,7 @@ def test__init__():
     # Assert
     assert base_property._properties == {}
     assert base_property._single_table_property is None
+    assert base_property.is_computed is False
 
 
 def test_get_score_raises_error():
@@ -79,9 +80,24 @@ def test_get_visualization():
     base_property = BaseMultiTableProperty()
     property_mock = Mock()
     base_property._properties = {'table': property_mock}
+    base_property.is_computed = True
 
     # Run
     result = base_property.get_visualization('table')
 
     # Assert
     assert result == property_mock.get_visualization.return_value
+
+
+def test_get_visualization_raises_error():
+    """Test that the method raises a ``ValueError`` when the table is not in the metadata."""
+    # Setup
+    base_property = BaseMultiTableProperty()
+
+    # Run and Assert
+    expected_message = (
+        'The property must be computed before getting a visualization.'
+        'Please call the ``get_score`` method first.'
+    )
+    with pytest.raises(ValueError, match=expected_message):
+        base_property.get_visualization('table')

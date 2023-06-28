@@ -17,6 +17,7 @@ class BaseMultiTableProperty():
 
     def __init__(self):
         self._properties = {}
+        self.is_computed = False
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.
@@ -28,8 +29,8 @@ class BaseMultiTableProperty():
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
-            progress_bar (tqdm.tqdm):
-                The progress bar object.
+            progress_bar (tqdm.tqdm or None):
+                The progress bar object. Defaults to None.
 
         Returns:
             float:
@@ -46,7 +47,9 @@ class BaseMultiTableProperty():
                 progress_bar
             )
 
-        return round(average_score.mean(), 3)
+        self.is_computed = True
+
+        return round(average_score.mean(), 2)
 
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.
@@ -59,4 +62,10 @@ class BaseMultiTableProperty():
             plotly.graph_objects._figure.Figure
                 The visualization for the property.
         """
+        if not self.is_computed:
+            raise ValueError(
+                'The property must be computed before getting a visualization.'
+                'Please call the ``get_score`` method first.'
+            )
+
         return self._properties[table_name].get_visualization()
