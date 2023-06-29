@@ -126,32 +126,14 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         return processed_data, pd.DataFrame(discretized_dict)
 
-    def _get_metric(self, sdtype_col_1, sdtype_col_2):
-        """Get the metric to use for the property.
-
-        If one of the columns is discrete, use the ContingencySimilarity metric.
-        Otherwise, use the CorrelationSimilarity metric.
-
-        Args:
-            sdtype_col_1 (str):
-                The sdtype of the first column
-            sdtype_col_2 (str):
-                The sdtype of the second column
-        """
-        if self._sdtype_to_shape[sdtype_col_1] != self._sdtype_to_shape[sdtype_col_2]:
-            metric = ContingencySimilarity
-        elif self._sdtype_to_shape[sdtype_col_1] == 'continuous':
-            metric = CorrelationSimilarity
-        else:
-            metric = ContingencySimilarity
-
-        return metric
-
-    def _get_columns_data(self, column_name_1, column_name_2, data, discrete_data, metadata):
-        """Get the data for the property.
+    def _get_columns_data_and_metric(
+            self, column_name_1, column_name_2, data, discrete_data, metadata):
+        """Get the data and the metric for the property.
 
         If one is comparing a continuous column to a discrete column, use the discrete version
-        of the continuous column. Otherwise use the original columns.
+        of the continuous column and the Contingency metric. Otherwise use the original columns.
+        If the columns are both continuous, use the Correlation metric. If the columns are both
+        discrete, use the Contingency metric.
 
         Args:
             column_name_1 (str):
@@ -168,7 +150,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
         sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
         sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
         if self._sdtype_to_shape[sdtype_col_1] != self._sdtype_to_shape[sdtype_col_2]:
-
+            metric = ContingencySimilarity
             if self._sdtype_to_shape[sdtype_col_1] == 'continuous':
                 col_1 = discrete_data[column_name_1]
                 col_2 = data[column_name_2]
@@ -176,9 +158,14 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 col_1 = data[column_name_1]
                 col_2 = discrete_data[column_name_2]
 
-            return pd.concat([col_1, col_2], axis=1)
+            return pd.concat([col_1, col_2], axis=1), metric
         else:
-            return data[[column_name_1, column_name_2]]
+            if self._sdtype_to_shape[sdtype_col_1] == 'continuous':
+                metric = CorrelationSimilarity
+            else:
+                metric = ContingencySimilarity
+
+            return data[[column_name_1, column_name_2]], metric
 
     def _preprocessing_failed(self, column_name_1, column_name_2, sdtype_col_1, sdtype_col_2):
         """Check if a processing of one of the columns has failed.
@@ -207,37 +194,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 error = self._columns_discretization_failed[column_name_2]
 
         return error
-
-    def _get_score_breakdown(
-            self, metric, col_name_1, col_name_2, real_data, discrete_real,
-            synthetic_data, discrete_synthetic, metadata):
-        """Get the score breakdown for the property.
-
-        Args:
-            metric (object):
-                The metric to use
-            col_name_1 (str):
-                The name of the first column
-            col_name_2 (str):
-                The name of the second column
-            real_data (pandas.DataFrame):
-                The real data
-            synthetic_data (pandas.DataFrame):
-                The synthetic data
-            metadata (dict):
-                The metadata of the table
-        """
-        columns_real = self._get_columns_data(
-            col_name_1, col_name_2, real_data, discrete_real, metadata
-        )
-        columns_synthetic = self._get_columns_data(
-            col_name_1, col_name_2, synthetic_data, discrete_synthetic, metadata
-        )
-        score_breakdown = metric.compute_breakdown(
-            real_data=columns_real, synthetic_data=columns_synthetic
-        )
-
-        return score_breakdown
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar):
         """Generate the _details dataframe for the column pair trends property.
@@ -281,7 +237,13 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
                 continue
 
-            metric = self._get_metric(sdtype_col_1, sdtype_col_2)
+            columns_real, metric = self._get_columns_data_and_metric(
+                column_name_1, column_name_2, processed_real_data, discrete_real, metadata
+            )
+            columns_synthetic, _ = self._get_columns_data_and_metric(
+                column_name_1, column_name_2, processed_synthetic_data,
+                discrete_synthetic, metadata
+            )
             try:
                 error = self._preprocessing_failed(
                     column_name_1, column_name_2, sdtype_col_1, sdtype_col_2
@@ -289,15 +251,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 if error:
                     raise Exception('Preprocessing failed')
 
-                score_breakdown = self._get_score_breakdown(
-                    metric,
-                    column_name_1,
-                    column_name_2,
-                    processed_real_data,
-                    discrete_real,
-                    processed_synthetic_data,
-                    discrete_synthetic,
-                    metadata,
+                score_breakdown = metric.compute_breakdown(
+                    real_data=columns_real, synthetic_data=columns_synthetic
                 )
                 pair_score = score_breakdown['score']
                 if metric.__name__ == 'CorrelationSimilarity':
@@ -355,6 +310,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
                     heatmap_df.loc[column_name_1, column_name_2] = 1
                     continue
 
+                # check wether the combination (Colunm 1, Column 2) or (Column 2, Column 1)
+                # is in the table
                 col_1_loc = (table['Column 1'] == column_name_1)
                 col_2_loc = (table['Column 2'] == column_name_2)
                 if table.loc[col_1_loc & col_2_loc].empty:

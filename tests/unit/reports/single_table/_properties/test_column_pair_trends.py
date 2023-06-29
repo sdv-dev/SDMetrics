@@ -1,5 +1,5 @@
 import itertools
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pandas as pd
@@ -147,28 +147,8 @@ class TestColumnPairTrends:
         pd.testing.assert_frame_equal(processed_data, expected_processed_data)
         pd.testing.assert_frame_equal(discrete_data, expected_discrete_data)
 
-    def test__get_metric(self):
-        """Test the ``_get_metric`` method.
-
-        The method should return the correct metric for each combination of column types.
-        """
-        # Setup
-        cpt = ColumnPairTrends()
-
-        # Run and Assert
-        cpt._get_metric('datetime', 'datetime').__name__ == 'CorrelationSimilarity'
-        cpt._get_metric('numerical', 'numerical').__name__ == 'CorrelationSimilarity'
-        cpt._get_metric('datetime', 'numerical').__name__ == 'CorrelationSimilarity'
-        cpt._get_metric('datetime', 'categorical').__name__ == 'ContingencySimilarity'
-        cpt._get_metric('datetime', 'boolean').__name__ == 'ContingencySimilarity'
-        cpt._get_metric('numerical', 'categorical').__name__ == 'ContingencySimilarity'
-        cpt._get_metric('numerical', 'boolean').__name__ == 'ContingencySimilarity'
-        cpt._get_metric('categorical', 'boolean').__name__ == 'ContingencySimilarity'
-        cpt._get_metric('categorical', 'categorical').__name__ == 'ContingencySimilarity'
-        cpt._get_metric('boolean', 'boolean').__name__ == 'ContingencySimilarity'
-
-    def test_get_columns_data(self):
-        """Test the ``_get_columns_data`` method.
+    def test_get_columns_data_and_metric(self):
+        """Test the ``_get_columns_data_and_metric`` method.
 
         The method should return the correct data for each combination of column types.
         """
@@ -197,7 +177,7 @@ class TestColumnPairTrends:
         cpt_property = ColumnPairTrends()
 
         # Run and Assert
-        expected_return = [
+        expected_data_return = [
             pd.concat([discrete_data['col1'], data['col2']], axis=1),
             pd.concat([discrete_data['col1'], data['col3']], axis=1),
             data[['col1', 'col4']],
@@ -205,59 +185,20 @@ class TestColumnPairTrends:
             pd.concat([data['col2'], discrete_data['col4']], axis=1),
             pd.concat([data['col3'], discrete_data['col4']], axis=1),
         ]
+        expected_metric_return = [
+            'ContingencySimilarity',
+            'ContingencySimilarity',
+            'CorrelationSimilarity',
+            'ContingencySimilarity',
+            'ContingencySimilarity',
+            'ContingencySimilarity',
+        ]
         for idx, (col1, col2) in enumerate(itertools.combinations(metadata['columns'], 2)):
-            columns_data = cpt_property._get_columns_data(
+            columns_data, metric = cpt_property._get_columns_data_and_metric(
                 col1, col2, data, discrete_data, metadata
             )
-            pd.testing.assert_frame_equal(columns_data, expected_return[idx])
-
-    def test__get_score_breakdown(self):
-        # Setup
-        cpt_property = ColumnPairTrends()
-        mock_metric = Mock()
-        mock_metric.compute_breakdown = Mock()
-        mock__get_columns_data = Mock()
-        cpt_property._get_columns_data = mock__get_columns_data
-
-        real_data = pd.DataFrame({
-            'col1': [1, 2, 3],
-            'col2': [False, True, True],
-        })
-
-        discrete_real = pd.DataFrame({
-            'col1': [1, 6, 11],
-        })
-
-        synthetic_data = pd.DataFrame({
-            'col1': [1, 2, 3],
-            'col2': [False, True, True],
-        })
-
-        discrete_synthetic = pd.DataFrame({
-            'col1': [1, 6, 11],
-        })
-
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'boolean'},
-            }
-        }
-
-        # Run
-        cpt_property._get_score_breakdown(
-            mock_metric, 'col1', 'col2', real_data, discrete_real,
-            synthetic_data, discrete_synthetic, metadata
-        )
-
-        # Assert
-        mock__get_columns_data.assert_has_calls(
-            [
-                call('col1', 'col2', real_data, discrete_real, metadata),
-                call('col1', 'col2', synthetic_data, discrete_synthetic, metadata),
-            ]
-        )
-        mock_metric.compute_breakdown.assert_called_once()
+            pd.testing.assert_frame_equal(columns_data, expected_data_return[idx])
+            assert metric.__name__ == expected_metric_return[idx]
 
     def test_preprocessing_failed(self):
         """Test the ``_preprocessing_failed`` method."""
