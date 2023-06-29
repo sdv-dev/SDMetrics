@@ -29,6 +29,8 @@ class QualityReport():
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
         """Validate that the metadata matches the data.
 
+        Raise an error if the column metadata does not match the column data.
+
         Args:
             real_data (pandas.DataFrame):
                 The real data.
@@ -37,7 +39,6 @@ class QualityReport():
             metadata (dict):
                 The metadata of the table.
         """
-        missing_columns = set()
         real_columns = set(real_data.columns)
         synthetic_columns = set(synthetic_data.columns)
         metadata_columns = set(metadata['columns'].keys())
@@ -49,7 +50,7 @@ class QualityReport():
         if missing_columns:
             error_message = (
                 'The metadata does not match the data. The following columns are missing'
-                ' in the real/synnthetic data or in the metadata: '
+                ' in the real/synthetic data or in the metadata: '
                 f"{', '.join(sorted(missing_columns))}"
             )
             raise ValueError(error_message)
@@ -111,12 +112,12 @@ class QualityReport():
         if verbose:
             self._print_results()
 
-    def _validate_property_generation(self, property_name):
+    def _validate_property_generated(self, property_name):
         """Validate that the given property name and that the report has been generated."""
         if property_name not in ['Column Shapes', 'Column Pair Trends']:
             raise ValueError(
                 f"Invalid property name '{property_name}'."
-                "Valid property names are 'Column Shapes' and 'Column Pair Trends'."
+                " Valid property names are 'Column Shapes' and 'Column Pair Trends'."
             )
 
         if not self.is_generated:
@@ -160,7 +161,7 @@ class QualityReport():
             plotly.graph_objects._figure.Figure
                 The visualization for the requested property.
         """
-        self._validate_property_generation(property_name)
+        self._validate_property_generated(property_name)
 
         return self._properties[property_name].get_visualization()
 
@@ -174,7 +175,7 @@ class QualityReport():
         Returns:
             pandas.DataFrame
         """
-        self._validate_property_generation(property_name)
+        self._validate_property_generated(property_name)
 
         return self._properties[property_name]._details.copy()
 

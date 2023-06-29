@@ -61,6 +61,10 @@ class TestQualityReport:
         }))
 
     def test_report_end_to_end(self):
+        """Test the quality report end to end.
+
+        The report must compute each property and the overall quality score.
+        """
         # Setup
         column_names = [
             'student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience'
@@ -117,8 +121,10 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
+        assert report.get_score() == 0.78
 
     def test_report_end_to_end_with_errors(self):
+        """Test the quality report end to end with errors in the proerties computation."""
         # Setup
         column_names = [
             'student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience'
@@ -185,6 +191,7 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
+        assert report.get_score() == 0.7849999999999999
 
     def test_report_with_column_nan(self):
         """Test the report with column full of NaNs."""

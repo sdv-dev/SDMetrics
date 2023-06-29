@@ -74,7 +74,7 @@ class TestQualityReport:
         # Run and Assert
         expected_err_message = re.escape(
             'The metadata does not match the data. The following columns are missing'
-            ' in the real/synnthetic data or in the metadata: column2, column3, column4, column5'
+            ' in the real/synthetic data or in the metadata: column2, column3, column4, column5'
         )
         with pytest.raises(ValueError, match=expected_err_message):
             quality_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
@@ -194,8 +194,8 @@ class TestQualityReport:
             real_data, synthetic_data, metadata
         )
 
-    def test__validate_property_generation(self):
-        """Test the ``_validate_property_generation`` method."""
+    def test__validate_property_generated(self):
+        """Test the ``_validate_property_generated`` method."""
         # Setup
         quality_report = QualityReport()
         wrong_property_name = 'Wrong Property Name'
@@ -206,15 +206,15 @@ class TestQualityReport:
             'Quality report must be generated before ''getting details. Call `generate` first.'
         )
         with pytest.raises(ValueError, match=expected_message_1):
-            quality_report._validate_property_generation('Column Shapes')
+            quality_report._validate_property_generated('Column Shapes')
 
         quality_report.is_generated = True
         expected_message_2 = (
-            "Invalid property name 'Wrong Property Name'.Valid property names"
+            "Invalid property name 'Wrong Property Name'. Valid property names"
             " are 'Column Shapes' and 'Column Pair Trends'."
         )
         with pytest.raises(ValueError, match=expected_message_2):
-            quality_report._validate_property_generation(wrong_property_name)
+            quality_report._validate_property_generated(wrong_property_name)
 
     def test_get_score(self):
         """Test the ``get_score`` method."""
@@ -272,8 +272,8 @@ class TestQualityReport:
         """Test the ``get_details`` method."""
         # Setup
         quality_report = QualityReport()
-        mock_validate_property_generation = Mock()
-        quality_report._validate_property_generation = mock_validate_property_generation
+        mock_validate_property_generated = Mock()
+        quality_report._validate_property_generated = mock_validate_property_generated
         quality_report._properties['Column Shapes'] = Mock()
         quality_report._properties['Column Pair Trends'] = Mock()
         quality_report.is_generated = True
@@ -283,7 +283,7 @@ class TestQualityReport:
         quality_report.get_details('Column Pair Trends')
 
         # Assert
-        mock_validate_property_generation.assert_has_calls([
+        mock_validate_property_generated.assert_has_calls([
             call('Column Shapes'), call('Column Pair Trends')
         ])
         quality_report._properties['Column Shapes']._details.copy.assert_called_once()
