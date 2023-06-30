@@ -124,7 +124,7 @@ class TestQualityReport:
         assert report.get_score() == 0.78
 
     def test_report_end_to_end_with_errors(self):
-        """Test the quality report end to end with errors in the proerties computation."""
+        """Test the quality report end to end with errors in the properties computation."""
         # Setup
         column_names = [
             'student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience'
