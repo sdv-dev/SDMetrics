@@ -1,6 +1,4 @@
 """Single table quality report."""
-
-import itertools
 import pickle
 import sys
 import warnings
@@ -8,14 +6,9 @@ import warnings
 import numpy as np
 import pandas as pd
 import pkg_resources
-import tqdm
 
-from sdmetrics.errors import IncomputableMetricError
-from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
-from sdmetrics.reports.utils import (
-    aggregate_metric_results, discretize_and_apply_metric, validate_single_table_inputs)
-from sdmetrics.single_table import (
-    ContingencySimilarity, CorrelationSimilarity, KSComplement, TVComplement)
+from sdmetrics.reports.single_table._properties import ColumnPairTrends, ColumnShapes
+from sdmetrics.reports.utils import _validate_categorical_values
 
 
 class QualityReport():
@@ -25,35 +18,72 @@ class QualityReport():
     score along two properties - Column Shapes and Column Pair Trends.
     """
 
-    METRICS = {
-        'Column Shapes': [KSComplement, TVComplement],
-        'Column Pair Trends': [CorrelationSimilarity, ContingencySimilarity],
-    }
-
     def __init__(self):
         self._overall_quality_score = None
-        self._metric_results = {}
-        self._property_breakdown = {}
-        self._property_errors = {}
+        self.is_generated = False
+        self._properties = {
+            'Column Shapes': ColumnShapes(),
+            'Column Pair Trends': ColumnPairTrends()
+        }
+
+    def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
+        """Validate that the metadata matches the data.
+
+        Raise an error if the column metadata does not match the column data.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict):
+                The metadata of the table.
+        """
+        real_columns = set(real_data.columns)
+        synthetic_columns = set(synthetic_data.columns)
+        metadata_columns = set(metadata['columns'].keys())
+
+        missing_data = metadata_columns.difference(real_columns.union(synthetic_columns))
+        missing_metadata = real_columns.union(synthetic_columns).difference(metadata_columns)
+        missing_columns = missing_data.union(missing_metadata)
+
+        if missing_columns:
+            error_message = (
+                'The metadata does not match the data. The following columns are missing'
+                ' in the real/synthetic data or in the metadata: '
+                f"{', '.join(sorted(missing_columns))}"
+            )
+            raise ValueError(error_message)
+
+    def validate(self, real_data, synthetic_data, metadata):
+        """Validate the inputs.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict):
+                The metadata of the table.
+        """
+        if not isinstance(metadata, dict):
+            metadata = metadata.to_dict()
+
+        self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
+        _validate_categorical_values(real_data, synthetic_data, metadata)
 
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
-        if pd.isna(self._overall_quality_score) & any(self._property_errors.values()):
-            out.write('\nOverall Quality Score: Error computing report.\n\n')
-        else:
+        out.write(
+                f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n'
+        )
+        out.write('Properties:\n')
+
+        for property_name in self._properties:
+            property_score = self._properties[property_name]._compute_average()
             out.write(
-                f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n')
-
-        if len(self._property_breakdown) > 0:
-            out.write('Properties:\n')
-
-        for prop, score in self._property_breakdown.items():
-            if not pd.isna(score):
-                out.write(f'{prop}: {round(score * 100, 2)}%\n')
-            elif self._property_errors[prop] > 0:
-                out.write(f'{prop}: Error computing property.\n')
-            else:
-                out.write(f'{prop}: NaN\n')
+                f'- {property_name}: {property_score * 100}%\n'
+            )
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
@@ -68,41 +98,32 @@ class QualityReport():
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
-        validate_single_table_inputs(real_data, synthetic_data, metadata)
+        self.validate(real_data, synthetic_data, metadata)
 
-        metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
+        scores = []
+        for property_name in self._properties:
+            scores.append(self._properties[property_name].get_score(
+                real_data, synthetic_data, metadata)
+            )
 
-        for metric in tqdm.tqdm(metrics, desc='Creating report', disable=(not verbose)):
-            try:
-                self._metric_results[metric.__name__] = metric.compute_breakdown(
-                    real_data, synthetic_data, metadata)
-            except IncomputableMetricError:
-                # Metric is not compatible with this dataset.
-                self._metric_results[metric.__name__] = {}
-
-        existing_column_pairs = list(self._metric_results['ContingencySimilarity'].keys())
-        existing_column_pairs.extend(
-            list(self._metric_results['CorrelationSimilarity'].keys()))
-        additional_results = discretize_and_apply_metric(
-            real_data, synthetic_data, metadata, ContingencySimilarity, existing_column_pairs)
-        self._metric_results['ContingencySimilarity'].update(additional_results)
-
-        self._property_breakdown = {}
-        for prop, metrics in self.METRICS.items():
-
-            num_prop_errors = 0
-            for metric in metrics:
-                _, num_metric_errors = aggregate_metric_results(
-                    self._metric_results[metric.__name__])
-                num_prop_errors += num_metric_errors
-
-            self._property_breakdown[prop] = self.get_details(prop)['Quality Score'].mean()
-            self._property_errors[prop] = num_prop_errors
-
-        self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
+        self._overall_quality_score = np.nanmean(scores)
+        self.is_generated = True
 
         if verbose:
             self._print_results()
+
+    def _validate_property_generated(self, property_name):
+        """Validate that the given property name and that the report has been generated."""
+        if property_name not in ['Column Shapes', 'Column Pair Trends']:
+            raise ValueError(
+                f"Invalid property name '{property_name}'."
+                " Valid property names are 'Column Shapes' and 'Column Pair Trends'."
+            )
+
+        if not self.is_generated:
+            raise ValueError(
+                'Quality report must be generated before getting details. Call `generate` first.'
+            )
 
     def get_score(self):
         """Return the overall quality score.
@@ -114,15 +135,19 @@ class QualityReport():
         return self._overall_quality_score
 
     def get_properties(self):
-        """Return the property score breakdown.
+        """Return the property score.
 
         Returns:
             pandas.DataFrame
-                The property score breakdown.
+                The property score.
         """
+        name, score = [], []
+        for property_name in self._properties:
+            name.append(property_name)
+            score.append(self._properties[property_name]._compute_average())
         return pd.DataFrame({
-            'Property': self._property_breakdown.keys(),
-            'Score': self._property_breakdown.values(),
+            'Property': name,
+            'Score': score,
         })
 
     def get_visualization(self, property_name):
@@ -136,109 +161,23 @@ class QualityReport():
             plotly.graph_objects._figure.Figure
                 The visualization for the requested property.
         """
-        score_breakdowns = {
-            metric.__name__: self._metric_results[metric.__name__]
-            for metric in self.METRICS.get(property_name, [])
-        }
+        self._validate_property_generated(property_name)
 
-        if property_name == 'Column Shapes':
-            fig = get_column_shapes_plot(score_breakdowns, self._property_breakdown[property_name])
-
-        elif property_name == 'Column Pair Trends':
-            fig = get_column_pairs_plot(
-                score_breakdowns,
-                self._property_breakdown[property_name],
-            )
-
-        return fig
+        return self._properties[property_name].get_visualization()
 
     def get_details(self, property_name):
-        """Return the details for each score for the given property name.
+        """Return the details table for the given property name.
 
         Args:
             property_name (str):
-                The name of the property to return score details for.
+                The name of the property to return details for.
 
         Returns:
             pandas.DataFrame
-                The score breakdown.
         """
-        columns = []
-        metrics = []
-        scores = []
-        errors = []
-        details = pd.DataFrame()
+        self._validate_property_generated(property_name)
 
-        if property_name == 'Column Shapes':
-            for metric in self.METRICS[property_name]:
-                for column, score_breakdown in self._metric_results[metric.__name__].items():
-                    if 'score' in score_breakdown and pd.isna(score_breakdown['score']):
-                        continue
-
-                    columns.append(column)
-                    metrics.append(metric.__name__)
-                    scores.append(score_breakdown.get('score', np.nan))
-                    errors.append(score_breakdown.get('error', np.nan))
-
-            details = pd.DataFrame({
-                'Column': columns,
-                'Metric': metrics,
-                'Quality Score': scores,
-            })
-
-        elif property_name == 'Column Pair Trends':
-            real_scores = []
-            synthetic_scores = []
-            for metric in self.METRICS[property_name]:
-                for column_pair, score_breakdown in self._metric_results[metric.__name__].items():
-                    columns.append(column_pair)
-                    metrics.append(metric.__name__)
-                    scores.append(score_breakdown.get('score', np.nan))
-                    real_scores.append(score_breakdown.get('real', np.nan))
-                    synthetic_scores.append(score_breakdown.get('synthetic', np.nan))
-                    errors.append(score_breakdown.get('error', np.nan))
-
-            details = pd.DataFrame({
-                'Column 1': [col1 for col1, _ in columns],
-                'Column 2': [col2 for _, col2 in columns],
-                'Metric': metrics,
-                'Quality Score': scores,
-                'Real Correlation': real_scores,
-                'Synthetic Correlation': synthetic_scores,
-            })
-
-        if pd.Series(errors).notna().sum() > 0:
-            details['Error'] = errors
-
-        return details
-
-    def get_raw_result(self, metric_name):
-        """Return the raw result of the given metric name.
-
-        Args:
-            metric_name (str):
-                The name of the desired metric.
-
-        Returns:
-            dict
-                The raw results
-        """
-        metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
-        for metric in metrics:
-            if metric.__name__ == metric_name:
-                return [
-                    {
-                        'metric': {
-                            'method': f'{metric.__module__}.{metric.__name__}',
-                            'parameters': {},
-                        },
-                        'results': {
-                            key: result for key, result in
-                            self._metric_results[metric_name].items()
-                            if not pd.isna(result.get('score', np.nan))
-                        },
-                    },
-                ]
+        return self._properties[property_name]._details.copy()
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
