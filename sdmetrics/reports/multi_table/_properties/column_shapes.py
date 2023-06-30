@@ -13,6 +13,4 @@ class ColumnShapes(BaseMultiTableProperty):
     The other column types are ignored by this property.
     """
 
-    def __init__(self):
-        super().__init__()
-        self._single_table_property = SingleTableColumnShapes
+    _single_table_property = SingleTableColumnShapes

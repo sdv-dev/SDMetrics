@@ -12,6 +12,4 @@ class ColumnPairTrends(BaseMultiTableProperty):
     the final score represents the average of these measures across all column pairs
     """
 
-    def __init__(self):
-        super().__init__()
-        self._single_table_property = SingleTableColumnPairTrends
+    _single_table_property = SingleTableColumnPairTrends
