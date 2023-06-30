@@ -36,6 +36,10 @@ class BaseMultiTableProperty():
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.
 
+        Args:
+            table_name (str):
+                Table name to get the visualization for.
+
         Returns:
             plotly.graph_objects._figure.Figure
                 The visualization for the property.
