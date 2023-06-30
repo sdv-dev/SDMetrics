@@ -153,16 +153,37 @@ class TestColumnPairTrends:
         The method should return the correct data for each combination of column types.
         """
         # Setup
-        data = pd.DataFrame({
+        real_data = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
             'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
         })
 
-        discrete_data = pd.DataFrame({
+        synthetic_data = pd.DataFrame({
+            'col1': [3, 1, 2],
+            'col2': [False, False, True],
+            'col3': ['a', 'b', 'b'],
+            'col4': pd.to_datetime(['2020-01-03', '2020-01-01', '2020-01-02']),
+        })
+
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'},
+                'col2': {'sdtype': 'boolean'},
+                'col3': {'sdtype': 'categorical'},
+                'col4': {'sdtype': 'datetime'},
+            }
+        }
+
+        discrete_real = pd.DataFrame({
             'col1': [1, 6, 11],
             'col4': [1, 6, 11],
+        })
+
+        discrete_synthetic = pd.DataFrame({
+            'col1': [11, 1, 6],
+            'col4': [11, 1, 6],
         })
 
         metadata = {
@@ -177,13 +198,21 @@ class TestColumnPairTrends:
         cpt_property = ColumnPairTrends()
 
         # Run and Assert
-        expected_data_return = [
-            pd.concat([discrete_data['col1'], data['col2']], axis=1),
-            pd.concat([discrete_data['col1'], data['col3']], axis=1),
-            data[['col1', 'col4']],
-            data[['col2', 'col3']],
-            pd.concat([data['col2'], discrete_data['col4']], axis=1),
-            pd.concat([data['col3'], discrete_data['col4']], axis=1),
+        expected_real_data_return = [
+            pd.concat([discrete_real['col1'], real_data['col2']], axis=1),
+            pd.concat([discrete_real['col1'], real_data['col3']], axis=1),
+            real_data[['col1', 'col4']],
+            real_data[['col2', 'col3']],
+            pd.concat([real_data['col2'], discrete_real['col4']], axis=1),
+            pd.concat([real_data['col3'], discrete_real['col4']], axis=1),
+        ]
+        expected_synthetic_data_return = [
+            pd.concat([discrete_synthetic['col1'], synthetic_data['col2']], axis=1),
+            pd.concat([discrete_synthetic['col1'], synthetic_data['col3']], axis=1),
+            synthetic_data[['col1', 'col4']],
+            synthetic_data[['col2', 'col3']],
+            pd.concat([synthetic_data['col2'], discrete_synthetic['col4']], axis=1),
+            pd.concat([synthetic_data['col3'], discrete_synthetic['col4']], axis=1),
         ]
         expected_metric_return = [
             'ContingencySimilarity',
@@ -194,10 +223,12 @@ class TestColumnPairTrends:
             'ContingencySimilarity',
         ]
         for idx, (col1, col2) in enumerate(itertools.combinations(metadata['columns'], 2)):
-            columns_data, metric = cpt_property._get_columns_data_and_metric(
-                col1, col2, data, discrete_data, metadata
+            cols_real, cols_synthetic, metric = cpt_property._get_columns_data_and_metric(
+                col1, col2, real_data, discrete_real, synthetic_data,
+                discrete_synthetic, metadata
             )
-            pd.testing.assert_frame_equal(columns_data, expected_data_return[idx])
+            pd.testing.assert_frame_equal(cols_real, expected_real_data_return[idx])
+            pd.testing.assert_frame_equal(cols_synthetic, expected_synthetic_data_return[idx])
             assert metric.__name__ == expected_metric_return[idx]
 
     def test_preprocessing_failed(self):

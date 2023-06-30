@@ -127,7 +127,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
         return processed_data, pd.DataFrame(discretized_dict)
 
     def _get_columns_data_and_metric(
-            self, column_name_1, column_name_2, data, discrete_data, metadata):
+            self, column_name_1, column_name_2, real_data, real_discrete_data,
+            synthetic_data, synthetic_discrete_data, metadata):
         """Get the data and the metric for the property.
 
         If one is comparing a continuous column to a discrete column, use the discrete version
@@ -140,10 +141,14 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 The name of the first column
             column_name_2 (str):
                 The name of the second column
-            data (pandas.DataFrame):
-                The data
-            discrete_data (pandas.DataFrame):
-                The discrete version of continuous columns
+            real_data (pandas.DataFrame):
+                The real data
+            real_discrete_data (pandas.DataFrame):
+                The real data with discrete versions of the continuous columns
+            synthetic_data (pandas.DataFrame):
+                The synthetic data
+            synthetic_discrete_data (pandas.DataFrame):
+                The synthetic data with discrete versions of the continuous columns
             metadata (dict):
                 The metadata of the table
         """
@@ -152,20 +157,28 @@ class ColumnPairTrends(BaseSingleTableProperty):
         if self._sdtype_to_shape[sdtype_col_1] != self._sdtype_to_shape[sdtype_col_2]:
             metric = ContingencySimilarity
             if self._sdtype_to_shape[sdtype_col_1] == 'continuous':
-                col_1 = discrete_data[column_name_1]
-                col_2 = data[column_name_2]
+                real_col_1 = real_discrete_data[column_name_1]
+                synthetic_col_1 = synthetic_discrete_data[column_name_1]
+                real_col_2 = real_data[column_name_2]
+                synthetic_col_2 = synthetic_data[column_name_2]
             else:
-                col_1 = data[column_name_1]
-                col_2 = discrete_data[column_name_2]
+                real_col_1 = real_data[column_name_1]
+                synthetic_col_1 = synthetic_data[column_name_1]
+                real_col_2 = real_discrete_data[column_name_2]
+                synthetic_col_2 = synthetic_discrete_data[column_name_2]
 
-            return pd.concat([col_1, col_2], axis=1), metric
+            data_real = pd.concat([real_col_1, real_col_2], axis=1)
+            data_synthetic = pd.concat([synthetic_col_1, synthetic_col_2], axis=1)
         else:
             if self._sdtype_to_shape[sdtype_col_1] == 'continuous':
                 metric = CorrelationSimilarity
             else:
                 metric = ContingencySimilarity
 
-            return data[[column_name_1, column_name_2]], metric
+            data_real = real_data[[column_name_1, column_name_2]]
+            data_synthetic = synthetic_data[[column_name_1, column_name_2]]
+
+        return data_real, data_synthetic, metric
 
     def _preprocessing_failed(self, column_name_1, column_name_2, sdtype_col_1, sdtype_col_2):
         """Check if a processing of one of the columns has failed.
@@ -237,13 +250,11 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
                 continue
 
-            columns_real, metric = self._get_columns_data_and_metric(
-                column_name_1, column_name_2, processed_real_data, discrete_real, metadata
+            columns_real, columns_synthetic, metric = self._get_columns_data_and_metric(
+                column_name_1, column_name_2, processed_real_data, discrete_real,
+                processed_synthetic_data, discrete_synthetic, metadata
             )
-            columns_synthetic, _ = self._get_columns_data_and_metric(
-                column_name_1, column_name_2, processed_synthetic_data,
-                discrete_synthetic, metadata
-            )
+
             try:
                 error = self._preprocessing_failed(
                     column_name_1, column_name_2, sdtype_col_1, sdtype_col_2
