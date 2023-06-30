@@ -1,4 +1,5 @@
 """Multi table base property class."""
+import numpy as np
 
 
 class BaseMultiTableProperty():
@@ -12,9 +13,13 @@ class BaseMultiTableProperty():
             A dict mapping the table names to their single table properties.
     """
 
-    _properties = None
+    _single_table_property = None
 
-    def get_score(self, real_data, synthetic_data, metadata, progress_bar):
+    def __init__(self):
+        self._properties = {}
+        self.is_computed = False
+
+    def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.
 
         Args:
@@ -24,14 +29,27 @@ class BaseMultiTableProperty():
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
-            progress_bar (tqdm.tqdm):
-                The progress bar object.
+            progress_bar (tqdm.tqdm or None):
+                The progress bar object. Defaults to None.
 
         Returns:
             float:
                 The average score for the property for all the individual metric scores computed.
         """
-        raise NotImplementedError()
+        if self._single_table_property is None:
+            raise NotImplementedError()
+
+        average_score = np.zeros(len(metadata['tables']))
+        for idx, table_name in enumerate(metadata['tables']):
+            self._properties[table_name] = self._single_table_property()
+            average_score[idx] = self._properties[table_name].get_score(
+                real_data[table_name], synthetic_data[table_name], metadata['tables'][table_name],
+                progress_bar
+            )
+
+        self.is_computed = True
+
+        return round(average_score.mean(), 2)
 
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.
@@ -44,4 +62,10 @@ class BaseMultiTableProperty():
             plotly.graph_objects._figure.Figure
                 The visualization for the property.
         """
+        if not self.is_computed:
+            raise ValueError(
+                'The property must be computed before getting a visualization.'
+                'Please call the ``get_score`` method first.'
+            )
+
         return self._properties[table_name].get_visualization()
