@@ -79,9 +79,9 @@ class CorrelationSimilarity(ColumnPairsMetric):
 
             return {'score': np.nan}
 
-        real_data = real_data.dropna()
-        synthetic_data = synthetic_data.dropna()
         column1, column2 = real_data.columns[:2]
+        real_data = real_data[[column1, column2]].dropna()
+        synthetic_data = synthetic_data[[column1, column2]].dropna()
 
         if is_datetime(real_data[column1]):
             real_data[column1] = pd.to_numeric(real_data[column1])
