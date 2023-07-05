@@ -1,6 +1,5 @@
 """BayesianNetwork based metrics for single table."""
 
-import json
 import logging
 
 import numpy as np
@@ -17,9 +16,13 @@ class BNLikelihoodBase(SingleTableMetric):
     @classmethod
     def _likelihoods(cls, real_data, synthetic_data, metadata=None, structure=None):
         try:
-            from pomegranate import BayesianNetwork
+            from pomegranate.bayesian_network import BayesianNetwork
         except ImportError:
-            raise ImportError('Please install pomegranate with `pip install pomegranate`')
+            try:
+                # pomegranate > 1.0 changed import location
+                from pomegranate.bayesian_network import BayesianNetwork
+            except ImportError:
+                raise ImportError('Please install pomegranate with `pip install pomegranate`')
 
         real_data, synthetic_data, metadata = cls._validate_inputs(
             real_data, synthetic_data, metadata)
@@ -30,13 +33,8 @@ class BNLikelihoodBase(SingleTableMetric):
             return np.full(len(real_data), np.nan)
 
         LOGGER.debug('Fitting the BayesianNetwork to the real data')
-        if structure:
-            if isinstance(structure, dict):
-                structure = BayesianNetwork.from_json(json.dumps(structure)).structure
-
-            bn = BayesianNetwork.from_structure(real_data[fields].to_numpy(), structure)
-        else:
-            bn = BayesianNetwork.from_samples(real_data[fields].to_numpy(), algorithm='chow-liu')
+        bn = BayesianNetwork(structure=structure, algorithm='chow-liu')
+        bn.fit(real_data[fields].to_numpy())
 
         LOGGER.debug('Evaluating likelihood of the synthetic data')
         probabilities = []
@@ -91,11 +89,8 @@ class BNLikelihood(BNLikelihoodBase):
         for fitting. Otherwise, the structure is learned from the data using the ``chow-liu``
         algorithm.
 
-        ``structure`` can be passed as either a tuple of tuples representing only the
-        network structure or as a ``dict`` representing a full serialization of a previously
-        fitted ``BayesianNetwork``. In the later scenario, only the ``structure`` will be
-        extracted from the ``BayesianNetwork`` instance, and then a new one will be fitted
-        to the given data.
+        ``structure`` can be passed as either a list or tuple of tuples representing only the
+        network structure.
 
         The output is the average probability across all the synthetic rows.
 
@@ -108,7 +103,7 @@ class BNLikelihood(BNLikelihoodBase):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes. Optionally, the metadata can include
                 a ``structure`` entry with the structure of the Bayesian Network.
-            structure (dict):
+            structure (list[tuples] or tuple[tuples]):
                 Optional. BayesianNetwork structure to use when fitting
                 to the real data. If not passed, learn it from the data
                 using the ``chow-liu`` algorith. This is ignored if ``metadata``
@@ -163,11 +158,8 @@ class BNLogLikelihood(BNLikelihoodBase):
         for fitting. Otherwise, the structure is learned from the data using the ``chow-liu``
         algorithm.
 
-        ``structure`` can be passed as either a tuple of tuples representing only the
-        network structure or as a ``dict`` representing a full serialization of a previously
-        fitted ``BayesianNetwork``. In the later scenario, only the ``structure`` will be
-        extracted from the ``BayesianNetwork`` instance, and then a new one will be fitted
-        to the given data.
+        ``structure`` can be passed as either a list or tuple of tuples representing only the
+        network structure.
 
         The output is the average log probability across all the synthetic rows.
 
@@ -180,7 +172,7 @@ class BNLogLikelihood(BNLikelihoodBase):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes. Optionally, the metadata can include
                 a ``structure`` entry with the structure of the Bayesian Network.
-            structure (dict):
+            structure (list[tuples] or tuple[tuples]):
                 Optional. BayesianNetwork structure to use when fitting
                 to the real data. If not passed, learn it from the data
                 using the ``chow-liu`` algorith. This is ignored if ``metadata``
