@@ -113,6 +113,8 @@ class QualityReport():
                 if property_name == 'Column Shapes':
                     num_iterations = num_columns
                 elif property_name == 'Column Pair Trends':
+                    # if n is the number of columns in the dataset, then the number of
+                    # combinations between 2 different columns is n * (n - 1) / 2
                     num_iterations = int(0.5 * num_columns * (num_columns - 1))
 
                 progress_bar = tqdm.tqdm(total=num_iterations, file=out)
