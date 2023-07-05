@@ -25,12 +25,14 @@ install_requires = [
 ]
 
 pomegranate_requires = [
-    'pomegranate>=0.14.1,<0.14.7',
+    "pomegranate>=0.14.1,<0.14.7;python_version<'3.11'",
+    "pomegranate>=1.0.0;python_version>='3.11'",
 ]
 
 torch_requires = [
     "torch>=1.8.0;python_version<'3.10'",
-    "torch>=1.11.0;python_version>='3.10'",
+    "torch>=1.11.0;python_version=='3.10'",
+    "torch>=2.0.0;python_version>='3.11'",
 ]
 
 setup_requires = [
@@ -102,6 +104,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
@@ -119,7 +122,7 @@ setup(
     keywords='sdmetrics sdmetrics SDMetrics',
     name='sdmetrics',
     packages=find_packages(include=['sdmetrics', 'sdmetrics.*']),
-    python_requires='>=3.8,<3.11',
+    python_requires='>=3.8,<3.12',
     setup_requires=setup_requires,
     test_suite='tests',
     tests_require=tests_require,
