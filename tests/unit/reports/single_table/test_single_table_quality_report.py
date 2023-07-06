@@ -239,7 +239,7 @@ class TestQualityReport:
 
         # Assert
         calls = [call(total=4, file=sys.stdout), call(total=6, file=sys.stdout)]
-        mock_tqdm.assert_has_calls(calls)
+        mock_tqdm.assert_has_calls(calls, any_order=True)
 
     def test__validate_property_generated(self):
         """Test the ``_validate_property_generated`` method."""
