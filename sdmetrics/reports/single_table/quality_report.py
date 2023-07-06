@@ -104,9 +104,8 @@ class QualityReport():
         scores = []
         num_columns = len(metadata['columns'])
         progress_bar = None
-        out = sys.stdout if verbose else None
         if verbose:
-            out.write('Generating report ...\n')
+            sys.stdout.write('Generating report ...\n')
 
         for ind, property_name in enumerate(self._properties):
             if verbose:
@@ -117,7 +116,7 @@ class QualityReport():
                     # combinations between 2 different columns is n * (n - 1) / 2
                     num_iterations = int(0.5 * num_columns * (num_columns - 1))
 
-                progress_bar = tqdm.tqdm(total=num_iterations, file=out)
+                progress_bar = tqdm.tqdm(total=num_iterations, file=sys.stdout)
                 progress_bar.set_description(
                     f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}: '
                 )
@@ -133,7 +132,7 @@ class QualityReport():
         self.is_generated = True
 
         if verbose:
-            self._print_results(out)
+            self._print_results(sys.stdout)
 
     def _validate_property_generated(self, property_name):
         """Validate that the given property name and that the report has been generated."""
