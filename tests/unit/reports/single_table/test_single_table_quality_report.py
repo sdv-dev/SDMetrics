@@ -1,5 +1,6 @@
 import pickle
 import re
+import sys
 from unittest.mock import Mock, call, mock_open, patch
 
 import pandas as pd
@@ -160,12 +161,10 @@ class TestQualityReport:
         quality_report = QualityReport()
         mock_validate = Mock()
         quality_report.validate = mock_validate
-        mock_columnshape_get_score = Mock(return_value=1.0)
-        mock_cpt_get_score = Mock(return_value=1.0)
         quality_report._properties['Column Shapes'] = Mock()
-        quality_report._properties['Column Shapes'].get_score = mock_columnshape_get_score
+        quality_report._properties['Column Shapes'].get_score.return_value = 1.0
         quality_report._properties['Column Pair Trends'] = Mock()
-        quality_report._properties['Column Pair Trends'].get_score = mock_cpt_get_score
+        quality_report._properties['Column Pair Trends'].get_score.return_value = 1.0
 
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
@@ -176,7 +175,7 @@ class TestQualityReport:
             'column2': ['a', 'b', 'c']
         })
         metadata = {
-            'column': {
+            'columns': {
                 'column1': {'sdtypes': 'numerical'},
                 'column2': {'sdtypes': 'categorical'}
             }
@@ -188,11 +187,53 @@ class TestQualityReport:
         # Assert
         mock_validate.assert_called_once_with(real_data, synthetic_data, metadata)
         quality_report._properties['Column Shapes'].get_score.assert_called_with(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, progress_bar=None
         )
         quality_report._properties['Column Pair Trends'].get_score.assert_called_with(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, progress_bar=None
         )
+
+    @patch('tqdm.tqdm')
+    def test_generate_verbose(self, mock_tqdm):
+        """Test the ``generate`` method with verbose=True."""
+        # Setup
+        quality_report = QualityReport()
+        mock_validate = Mock()
+        quality_report.validate = mock_validate
+        quality_report._properties['Column Shapes'] = Mock()
+        quality_report._properties['Column Shapes'].get_score.return_value = 1.0
+        quality_report._properties['Column Pair Trends'] = Mock()
+        quality_report._properties['Column Pair Trends'].get_score.return_value = 1.0
+        quality_report._properties['Column Shapes']._compute_average.return_value = 1.0
+        quality_report._properties['Column Pair Trends']._compute_average.return_value = 1.0
+
+        real_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c'],
+            'column3': [4, 5, 6],
+            'column4': [7, 8, 9],
+        })
+        synthetic_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c'],
+            'column3': [4, 5, 6],
+            'column4': [7, 8, 9],
+        })
+        metadata = {
+            'columns': {
+                'column1': {'sdtypes': 'numerical'},
+                'column2': {'sdtypes': 'categorical'},
+                'column3': {'sdtypes': 'numerical'},
+                'column4': {'sdtypes': 'numerical'},
+            }
+        }
+
+        # Run
+        quality_report.generate(real_data, synthetic_data, metadata, verbose=True)
+
+        # Assert
+        calls = [call(total=4, file=sys.stdout), call(total=6, file=sys.stdout)]
+        mock_tqdm.assert_has_calls(calls, any_order=True)
 
     def test__validate_property_generated(self):
         """Test the ``_validate_property_generated`` method."""
