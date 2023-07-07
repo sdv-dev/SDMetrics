@@ -3,6 +3,7 @@
 import logging
 
 import numpy as np
+import torch
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
@@ -34,7 +35,7 @@ class BNLikelihoodBase(SingleTableMetric):
 
         LOGGER.debug('Fitting the BayesianNetwork to the real data')
         bn = BayesianNetwork(structure=structure, algorithm='chow-liu')
-        bn.fit(real_data[fields].to_numpy())
+        bn.fit(real_data[fields].to_numpy(dtype=torch.int64))
 
         LOGGER.debug('Evaluating likelihood of the synthetic data')
         probabilities = []
