@@ -314,37 +314,6 @@ class QualityReport():
 
         return details
 
-    def get_raw_result(self, metric_name):
-        """Return the raw result of the given metric name.
-
-        Args:
-            metric_name (str):
-                The name of the desired metric.
-
-        Returns:
-            dict
-                The raw results
-        """
-        metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
-        for metric in metrics:
-            if metric.__name__ == metric_name:
-                filtered_results = {}
-                for table_name, table_results in self._metric_results[metric_name].items():
-                    filtered_results[table_name] = {
-                        key: result for key, result in table_results.items()
-                        if not pd.isna(result['score'])
-                    }
-
-                return [
-                    {
-                        'metric': {
-                            'method': f'{metric.__module__}.{metric.__name__}',
-                            'parameters': {},
-                        },
-                        'results': filtered_results,
-                    },
-                ]
-
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
 
