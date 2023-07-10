@@ -341,13 +341,13 @@ class ColumnPairTrends(BaseSingleTableProperty):
     def _get_heatmap(self, correlation_matrix, coloraxis, hovertemplate, customdata=None):
         """Get the heatmap for the given correlation matrix."""
         fig = go.Heatmap(
-                x=correlation_matrix.columns,
-                y=correlation_matrix.columns,
-                z=correlation_matrix,
-                coloraxis=coloraxis,
-                customdata=customdata,
-                hovertemplate=hovertemplate,
-            )
+            x=correlation_matrix.columns,
+            y=correlation_matrix.columns,
+            z=correlation_matrix,
+            coloraxis=coloraxis,
+            customdata=customdata,
+            hovertemplate=hovertemplate,
+        )
 
         return fig
 
@@ -395,9 +395,9 @@ class ColumnPairTrends(BaseSingleTableProperty):
         synthetic_correlation = self._get_correlation_matrix('Synthetic Correlation')
 
         titles = [
-                'Real vs. Synthetic Similarity',
-                'Numerical Correlation (Real Data)',
-                'Numerical Correlation (Synthetic Data)',
+            'Real vs. Synthetic Similarity',
+            'Numerical Correlation (Real Data)',
+            'Numerical Correlation (Synthetic Data)',
         ]
         specs = [[{'colspan': 2, 'l': 0.26, 'r': 0.26}, None], [{}, {}]]
         tmpl_1 = '<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: %{z}<extra></extra>'

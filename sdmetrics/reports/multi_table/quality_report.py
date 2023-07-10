@@ -1,23 +1,13 @@
 """Multi table quality report."""
 
-import itertools
 import pickle
-import sys
 import warnings
 
-import numpy as np
 import pandas as pd
 import pkg_resources
-import tqdm
 
-from sdmetrics.errors import IncomputableMetricError
-from sdmetrics.multi_table import (
-    CardinalityShapeSimilarity, ContingencySimilarity, CorrelationSimilarity, KSComplement,
-    TVComplement)
-from sdmetrics.reports.multi_table.plot_utils import get_table_relationships_plot
-from sdmetrics.reports.single_table.plot_utils import get_column_pairs_plot, get_column_shapes_plot
-from sdmetrics.reports.utils import (
-    aggregate_metric_results, discretize_and_apply_metric, validate_multi_table_inputs)
+from sdmetrics.reports.multi_table._properties import Cardinality, ColumnPairTrends, ColumnShapes
+from sdmetrics.reports.utils import validate_multi_table_inputs
 
 
 class QualityReport():
@@ -28,36 +18,12 @@ class QualityReport():
     Relationships.
     """
 
-    METRICS = {
-        'Column Shapes': [KSComplement, TVComplement],
-        'Column Pair Trends': [CorrelationSimilarity, ContingencySimilarity],
-        'Cardinality': [CardinalityShapeSimilarity],
-    }
-
     def __init__(self):
         self._overall_quality_score = None
-        self._metric_results = {}
-        self._property_breakdown = {}
-        self._property_errors = {}
-
-    def _print_results(self, out=sys.stdout):
-        """Print the quality report results."""
-        if pd.isna(self._overall_quality_score) & any(self._property_errors.values()):
-            out.write('\nOverall Quality Score: Error computing report.\n\n')
-        else:
-            out.write(
-                f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n')
-
-        if len(self._property_breakdown) > 0:
-            out.write('Properties:\n')
-
-        for prop, score in self._property_breakdown.items():
-            if not pd.isna(score):
-                out.write(f'{prop}: {round(score * 100, 2)}%\n')
-            elif self._property_errors[prop] > 0:
-                out.write(f'{prop}: Error computing property.\n')
-            else:
-                out.write(f'{prop}: NaN\n')
+        self._properties_instances = {}
+        self._properties_scores = {}
+        self._is_generated = False
+        self._package_version = None
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
@@ -71,68 +37,29 @@ class QualityReport():
                 The metadata, which contains each column's data type as well as relationships.
             verbose (bool):
                 Whether or not to print report summary and progress.
+                NOTE: todo
         """
         validate_multi_table_inputs(real_data, synthetic_data, metadata)
 
-        metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
+        self._properties_instances = {
+            'Column Shapes': ColumnShapes(),
+            'Column Pair Trends': ColumnPairTrends(),
+            'Cardinality': Cardinality()
+        }
 
-        for metric in tqdm.tqdm(metrics, desc='Creating report', disable=(not verbose)):
-            try:
-                self._metric_results[metric.__name__] = metric.compute_breakdown(
-                    real_data, synthetic_data, metadata)
-            except IncomputableMetricError:
-                # Metric is not compatible with this dataset.
-                self._metric_results[metric.__name__] = {}
-                continue
+        self._properties_scores = {
+            property_name: property_instance.get_score(real_data, synthetic_data, metadata)
+            for property_name, property_instance in self._properties_instances.items()
+        }
 
-        for table_name, table_data in real_data.items():
-            existing_column_pairs = []
-            if table_name in self._metric_results['ContingencySimilarity']:
-                existing_column_pairs.append(
-                    list(self._metric_results['ContingencySimilarity'][table_name].keys()))
-            else:
-                self._metric_results['ContingencySimilarity'][table_name] = {}
+        scores = self._properties_scores.values()
+        self._overall_quality_score = sum(scores) / len(scores)
+        self._is_generated = True
 
-            if table_name in self._metric_results['CorrelationSimilarity']:
-                existing_column_pairs.append(
-                    list(self._metric_results['CorrelationSimilarity'][table_name].keys()))
-
-            additional_results = discretize_and_apply_metric(
-                real_data[table_name],
-                synthetic_data[table_name],
-                metadata['tables'][table_name],
-                ContingencySimilarity,
-                existing_column_pairs,
-            )
-            self._metric_results['ContingencySimilarity'][table_name].update(additional_results)
-
-        self._property_breakdown = {}
-        for prop, metrics in self.METRICS.items():
-            prop_scores = []
-            num_prop_errors = 0
-            if prop == 'Cardinality':
-                for metric in metrics:
-                    if 'score' in self._metric_results[metric.__name__]:
-                        prop_scores.append(self._metric_results[metric.__name__]['score'])
-                    else:
-                        _, num_metric_errors = aggregate_metric_results(
-                            self._metric_results[metric.__name__])
-                        num_prop_errors += num_metric_errors
-            else:
-                for metric in metrics:
-                    for _, table_breakdowns in self._metric_results[metric.__name__].items():
-                        _, num_metric_errors = aggregate_metric_results(table_breakdowns)
-                        num_prop_errors += num_metric_errors
-
-            self._property_breakdown[prop] = np.nanmean(prop_scores) if (
-                len(prop_scores) > 0
-            ) else self.get_details(prop)['Quality Score'].mean()
-            self._property_errors[prop] = num_prop_errors
-
-        self._overall_quality_score = np.nanmean(list(self._property_breakdown.values()))
-
-        if verbose:
-            self._print_results()
+    def _validate_generated(self):
+        if not self._is_generated:
+            raise ValueError(
+                "The report has not been generated yet. Please call the 'generate' method.")
 
     def get_score(self):
         """Return the overall quality score.
@@ -141,19 +68,38 @@ class QualityReport():
             float
                 The overall quality score.
         """
+        self._validate_generated()
+
         return self._overall_quality_score
 
     def get_properties(self):
-        """Return the property score breakdown.
+        """Return the score for each property.
 
         Returns:
             pandas.DataFrame
                 The property score breakdown.
         """
+        self._validate_generated()
+
         return pd.DataFrame({
-            'Property': self._property_breakdown.keys(),
-            'Score': self._property_breakdown.values(),
+            'Property': self._properties_scores.keys(),
+            'Score': self._properties_scores.values(),
         })
+
+    def _validate_properties(self, property_name):
+        self._validate_generated()
+
+        valid_properties = self._properties_instances.keys()
+        if property_name not in valid_properties:
+            raise ValueError(
+                f"Invalid property name ('{property_name}'). "
+                f'It must be one of {valid_properties}.'
+            )
+
+    def _validate_table_name(self, property_name, table_name):
+        if property_name in ['Column Shapes', 'Column Pair Trends'] and table_name is None:
+            raise ValueError('Table name must be provided when viewing details for '
+                             f'property {property_name}.')
 
     def get_visualization(self, property_name, table_name=None):
         """Return a visualization for each score for the given property and table.
@@ -169,49 +115,10 @@ class QualityReport():
             plotly.graph_objects._figure.Figure
                 A visualization of the requested property's scores.
         """
-        if property_name in ['Column Shapes', 'Column Pair Trends'] and table_name is None:
-            raise ValueError('Table name must be provided when viewing details for '
-                             f'property {property_name}.')
+        self._validate_properties(property_name)
+        self._validate_table_name(property_name, table_name)
 
-        if property_name == 'Column Shapes':
-            score_breakdowns = {
-                metric.__name__: self._metric_results[metric.__name__].get(table_name, {})
-                for metric in self.METRICS.get(property_name, [])
-            }
-            fig = get_column_shapes_plot(score_breakdowns)
-
-        elif property_name == 'Column Pair Trends':
-            score_breakdowns = {
-                metric.__name__: self._metric_results[metric.__name__].get(table_name, {})
-                for metric in self.METRICS.get(property_name, [])
-            }
-            fig = get_column_pairs_plot(
-                score_breakdowns,
-            )
-
-        elif property_name == 'Cardinality' or 'Parent Child Relationships':
-            if property_name == 'Parent Child Relationships':
-                property_name = 'Cardinality'
-                msg = (
-                    "The 'Parent Child Relationships' property name is no longer recognized. "
-                    "Please update to 'Cardinality' instead."
-                )
-                warnings.warn(msg, FutureWarning)
-
-            score_breakdowns = {
-                metric.__name__: self._metric_results[metric.__name__]
-                for metric in self.METRICS.get(property_name, [])
-            }
-            if table_name is not None:
-                for metric, metric_results in score_breakdowns.items():
-                    score_breakdowns[metric] = {
-                        tables: results for tables, results in metric_results.items()
-                        if table_name in tables
-                    }
-
-            fig = get_table_relationships_plot(score_breakdowns)
-
-        return fig
+        return self._properties[property_name].get_visualization(table_name)
 
     def get_details(self, property_name, table_name=None):
         """Return the details for each score for the given property name.
@@ -226,93 +133,10 @@ class QualityReport():
             pandas.DataFrame
                 The score breakdown.
         """
-        tables = []
-        columns = []
-        metrics = []
-        scores = []
-        errors = []
-        details = pd.DataFrame()
-
-        if property_name == 'Column Shapes':
-            for metric in self.METRICS[property_name]:
-                for table, table_breakdown in self._metric_results[metric.__name__].items():
-                    if table_name is not None and table != table_name:
-                        continue
-
-                    for column, score_breakdown in table_breakdown.items():
-                        if 'score' in score_breakdown and pd.isna(score_breakdown['score']):
-                            continue
-                        tables.append(table)
-                        columns.append(column)
-                        metrics.append(metric.__name__)
-                        scores.append(score_breakdown.get('score', np.nan))
-                        errors.append(score_breakdown.get('error', np.nan))
-
-            details = pd.DataFrame({
-                'Table': tables,
-                'Column': columns,
-                'Metric': metrics,
-                'Quality Score': scores,
-            }).sort_values(by=['Table'], ignore_index=True)
-
-        elif property_name == 'Column Pair Trends':
-            real_scores = []
-            synthetic_scores = []
-            for metric in self.METRICS[property_name]:
-                for table, table_breakdown in self._metric_results[metric.__name__].items():
-                    if table_name is not None and table != table_name:
-                        continue
-
-                    for column_pair, score_breakdown in table_breakdown.items():
-                        tables.append(table)
-                        columns.append(column_pair)
-                        metrics.append(metric.__name__)
-                        scores.append(score_breakdown.get('score', np.nan))
-                        real_scores.append(score_breakdown.get('real', np.nan))
-                        synthetic_scores.append(score_breakdown.get('synthetic', np.nan))
-                        errors.append(score_breakdown.get('error', np.nan))
-
-            details = pd.DataFrame({
-                'Table': tables,
-                'Column 1': [col1 for col1, _ in columns],
-                'Column 2': [col2 for _, col2 in columns],
-                'Metric': metrics,
-                'Quality Score': scores,
-                'Real Correlation': real_scores,
-                'Synthetic Correlation': synthetic_scores,
-            }).sort_values(by=['Table'], ignore_index=True)
-
-        elif property_name == 'Cardinality' or 'Parent Child Relationships':
-            if property_name == 'Parent Child Relationships':
-                property_name = 'Cardinality'
-                msg = (
-                    "The 'Parent Child Relationships' property name is no longer recognized. "
-                    "Please update to 'Cardinality' instead.")
-                warnings.warn(msg, FutureWarning)
-
-            child_tables = []
-            for metric in self.METRICS[property_name]:
-                for table_pair, score_breakdown in self._metric_results[metric.__name__].items():
-                    if table_name is not None and table_name not in table_pair:
-                        continue
-
-                    tables.append(table_pair[0])
-                    child_tables.append(table_pair[1])
-                    metrics.append(metric.__name__)
-                    scores.append(score_breakdown.get('score', np.nan))
-                    errors.append(score_breakdown.get('error', np.nan))
-
-            details = pd.DataFrame({
-                'Child Table': child_tables,
-                'Parent Table': tables,
-                'Metric': metrics,
-                'Quality Score': scores,
-            })
-
-        if pd.Series(errors).notna().sum() > 0:
-            details['Error'] = errors
-
-        return details
+        self._validate_properties()
+        details = self._properties_instances[property_name]._details.copy()
+        # NOTE: how is table_name supposed to be used?
+        return details[table_name] if table_name else details
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
