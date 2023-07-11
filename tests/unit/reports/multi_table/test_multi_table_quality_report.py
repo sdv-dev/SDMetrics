@@ -1,9 +1,10 @@
 import pickle
+import re
 from unittest.mock import Mock, mock_open, patch
 
 import pandas as pd
 import pytest
-import re
+
 from sdmetrics.reports.multi_table import QualityReport
 from sdmetrics.reports.multi_table._properties.cardinality import Cardinality
 from sdmetrics.reports.multi_table._properties.column_pair_trends import ColumnPairTrends
@@ -175,7 +176,7 @@ class TestQualityReport:
         )
         with pytest.raises(ValueError, match=msg):
             report.get_visualization('invalid_name')
-    
+
     def test_get_visualization_missing_table_name(self):
         """Test it when table_name is missing and property is not Cardinality."""
         # Setup
@@ -226,7 +227,7 @@ class TestQualityReport:
         msg = "The report has not been generated yet. Please call the 'generate' method."
         with pytest.raises(ValueError, match=msg):
             report.get_details('property_name')
-    
+
     def test_get_details_invalid_property(self):
         """Test it when the given property_name doesn't exist."""
         # Setup
