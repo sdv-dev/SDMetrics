@@ -14,8 +14,7 @@ class QualityReport():
     """Multi table quality report.
 
     This class creates a quality report for multi-table data. It calculates the quality
-    score along three properties - Column Shapes, Column Pair Trends, and Parent Child
-    Relationships.
+    score along three properties - Column Shapes, Column Pair Trends, and Cardinality.
     """
 
     def __init__(self):
@@ -92,7 +91,7 @@ class QualityReport():
     def _validate_inputs(self, property_name, table_name):
         self._validate_generated()
 
-        valid_properties = self._properties_instances.keys()
+        valid_properties = list(self._properties_instances.keys())
         if property_name not in valid_properties:
             raise ValueError(
                 f"Invalid property name ('{property_name}'). "
@@ -104,7 +103,7 @@ class QualityReport():
 
         if property_name in ['Column Shapes', 'Column Pair Trends'] and table_name is None:
             raise ValueError('Table name must be provided when viewing details for '
-                             f'property {property_name}.')
+                             f"property '{property_name}'.")
 
     def get_visualization(self, property_name, table_name=None):
         """Return a visualization for each score for the given property and table.
@@ -114,7 +113,7 @@ class QualityReport():
                 The name of the property to return score details for.
             table_name (str):
                 The table to show scores for. Must be provided for 'Column Shapes'
-                and 'Column Pair Trends'
+                and 'Column Pair Trends'.
 
         Returns:
             plotly.graph_objects._figure.Figure
@@ -131,7 +130,8 @@ class QualityReport():
             property_name (str):
                 The name of the property to return score details for.
             table_name (str):
-                Optionally filter results by table.
+                Optionally filter results by table. Must be provided for 'Column Shapes'
+                and 'Column Pair Trends'.
 
         Returns:
             pandas.DataFrame

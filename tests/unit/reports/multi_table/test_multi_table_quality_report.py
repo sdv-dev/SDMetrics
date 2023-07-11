@@ -2,7 +2,8 @@ import pickle
 from unittest.mock import Mock, mock_open, patch
 
 import pandas as pd
-
+import pytest
+import re
 from sdmetrics.reports.multi_table import QualityReport
 from sdmetrics.reports.multi_table._properties.cardinality import Cardinality
 from sdmetrics.reports.multi_table._properties.column_pair_trends import ColumnPairTrends
@@ -90,6 +91,16 @@ class TestQualityReport:
         # Assert
         assert score == mock_score
 
+    def test_get_score_not_generated(self):
+        """Test the ``get_score`` method when the report hasn't been generated."""
+        # Setup
+        report = QualityReport()
+
+        # Run and Assert
+        msg = "The report has not been generated yet. Please call the 'generate' method."
+        with pytest.raises(ValueError, match=msg):
+            report.get_score()
+
     def test_get_properties(self):
         """Test the ``get_properties`` method."""
         # Setup
@@ -114,6 +125,16 @@ class TestQualityReport:
             }),
         )
 
+    def test_get_properties_not_generated(self):
+        """Test the ``get_properties`` method when the report hasn't been generated."""
+        # Setup
+        report = QualityReport()
+
+        # Run and Assert
+        msg = "The report has not been generated yet. Please call the 'generate' method."
+        with pytest.raises(ValueError, match=msg):
+            report.get_properties()
+
     def test_get_visualization(self):
         """Test the ``get_vizualization`` method."""
         # Setup
@@ -130,6 +151,57 @@ class TestQualityReport:
         instance.get_visualization.assert_called_once_with(None)
         assert visualization == 'visualization'
 
+    def test_get_visualization_not_generated(self):
+        """Test the ``get_visualization`` method when the report hasn't been generated."""
+        # Setup
+        report = QualityReport()
+
+        # Run and Assert
+        msg = "The report has not been generated yet. Please call the 'generate' method."
+        with pytest.raises(ValueError, match=msg):
+            report.get_visualization('property_name')
+
+    def test_get_visualization_invalid_property(self):
+        """Test it when the given property_name doesn't exist."""
+        # Setup
+        report = QualityReport()
+        report._is_generated = True
+        report._properties_instances = {'property_name': None}
+
+        # Run and Assert
+        msg = re.escape(
+            "Invalid property name ('invalid_name'). It must be one of "
+            "['property_name']."
+        )
+        with pytest.raises(ValueError, match=msg):
+            report.get_visualization('invalid_name')
+    
+    def test_get_visualization_missing_table_name(self):
+        """Test it when table_name is missing and property is not Cardinality."""
+        # Setup
+        report = QualityReport()
+        report._is_generated = True
+        report._properties_instances = {'Column Shapes': None}
+        report._tables = ['tab1']
+
+        # Run and Assert
+        msg = "Table name must be provided when viewing details for property 'Column Shapes'."
+        with pytest.raises(ValueError, match=msg):
+            report.get_visualization('Column Shapes')
+
+    def test_get_visualization_invalid_table_name(self):
+        """Test it when table_name is invalid."""
+        # Setup
+        report = QualityReport()
+        report._is_generated = True
+        report._properties_instances = {'Column Shapes': None}
+        report._tables = ['table']
+
+        # Run and Assert
+        msg = re.escape("Unknown table ('invalid_table'). Must be one of ['table'].")
+        with pytest.raises(ValueError, match=msg):
+            report.get_visualization('Column Shapes', 'invalid_table')
+
     def test_get_details(self):
         """Test the ``get_details`` method."""
         # Setup
@@ -144,6 +216,57 @@ class TestQualityReport:
 
         # Assert
         assert details == {'details'}
+
+    def test_get_details_not_generated(self):
+        """Test the ``get_details`` method when the report hasn't been generated."""
+        # Setup
+        report = QualityReport()
+
+        # Run and Assert
+        msg = "The report has not been generated yet. Please call the 'generate' method."
+        with pytest.raises(ValueError, match=msg):
+            report.get_details('property_name')
+    
+    def test_get_details_invalid_property(self):
+        """Test it when the given property_name doesn't exist."""
+        # Setup
+        report = QualityReport()
+        report._is_generated = True
+        report._properties_instances = {'property_name': None}
+
+        # Run and Assert
+        msg = re.escape(
+            "Invalid property name ('invalid_name'). It must be one of "
+            "['property_name']."
+        )
+        with pytest.raises(ValueError, match=msg):
+            report.get_details('invalid_name')
+
+    def test_get_details_missing_table_name(self):
+        """Test it when table_name is missing and property is not Cardinality."""
+        # Setup
+        report = QualityReport()
+        report._is_generated = True
+        report._properties_instances = {'Column Shapes': None}
+        report._tables = ['tab1']
+
+        # Run and Assert
+        msg = "Table name must be provided when viewing details for property 'Column Shapes'."
+        with pytest.raises(ValueError, match=msg):
+            report.get_details('Column Shapes')
+
+    def test_get_details_invalid_table_name(self):
+        """Test it when table_name is invalid."""
+        # Setup
+        report = QualityReport()
+        report._is_generated = True
+        report._properties_instances = {'Column Shapes': None}
+        report._tables = ['table']
+
+        # Run and Assert
+        msg = re.escape("Unknown table ('invalid_table'). Must be one of ['table'].")
+        with pytest.raises(ValueError, match=msg):
+            report.get_details('Column Shapes', 'invalid_table')
 
     @patch('sdmetrics.reports.multi_table.quality_report.pkg_resources.get_distribution')
     @patch('sdmetrics.reports.multi_table.quality_report.pickle')
