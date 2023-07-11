@@ -75,7 +75,7 @@ def test_get_score_with_single_table_property():
 
 
 def test_get_visualization():
-    """Test that the method returns the properties's ``get_visualization``."""
+    """Test that the method returns the property's ``get_visualization``."""
     # Setup
     base_property = BaseMultiTableProperty()
     property_mock = Mock()
