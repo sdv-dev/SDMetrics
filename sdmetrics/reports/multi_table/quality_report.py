@@ -19,6 +19,7 @@ class QualityReport():
     """
 
     def __init__(self):
+        self._tables = []
         self._overall_quality_score = None
         self._properties_instances = {}
         self._properties_scores = {}
@@ -40,6 +41,8 @@ class QualityReport():
                 NOTE: todo
         """
         validate_multi_table_inputs(real_data, synthetic_data, metadata)
+
+        self._tables = list(real_data.keys())
 
         self._properties_instances = {
             'Column Shapes': ColumnShapes(),
@@ -86,7 +89,7 @@ class QualityReport():
             'Score': self._properties_scores.values(),
         })
 
-    def _validate_properties(self, property_name):
+    def _validate_inputs(self, property_name, table_name):
         self._validate_generated()
 
         valid_properties = self._properties_instances.keys()
@@ -96,7 +99,9 @@ class QualityReport():
                 f'It must be one of {valid_properties}.'
             )
 
-    def _validate_table_name(self, property_name, table_name):
+        if (table_name is not None) and (table_name not in self._tables):
+            raise ValueError(f"Unknown table ('{table_name}'). Must be one of {self._tables}.")
+
         if property_name in ['Column Shapes', 'Column Pair Trends'] and table_name is None:
             raise ValueError('Table name must be provided when viewing details for '
                              f'property {property_name}.')
@@ -115,10 +120,9 @@ class QualityReport():
             plotly.graph_objects._figure.Figure
                 A visualization of the requested property's scores.
         """
-        self._validate_properties(property_name)
-        self._validate_table_name(property_name, table_name)
+        self._validate_inputs(property_name, table_name)
 
-        return self._properties[property_name].get_visualization(table_name)
+        return self._properties_instances[property_name].get_visualization(table_name)
 
     def get_details(self, property_name, table_name=None):
         """Return the details for each score for the given property name.
@@ -133,10 +137,17 @@ class QualityReport():
             pandas.DataFrame
                 The score breakdown.
         """
-        self._validate_properties()
+        self._validate_inputs(property_name, table_name)
+
+        if property_name != 'Cardinality':
+            return self._properties_instances[property_name]._properties[table_name]._details.copy(
+            )
+
         details = self._properties_instances[property_name]._details.copy()
-        # NOTE: how is table_name supposed to be used?
-        return details[table_name] if table_name else details
+        if table_name:
+            return {k: v for k, v in details.items() if k[0] == table_name or k[1] == table_name}
+
+        return details
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.

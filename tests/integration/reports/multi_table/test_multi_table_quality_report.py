@@ -1,5 +1,6 @@
 from datetime import date, datetime
 
+import numpy as np
 import pandas as pd
 
 from sdmetrics.reports.multi_table.quality_report import QualityReport
@@ -77,13 +78,44 @@ def load_test_data():
 
 def test_multi_table_quality_report():
     """Test the multi table quality report."""
+    # Setup
     real_data, synthetic_data, metadata = load_test_data()
-
     report = QualityReport()
-    report.generate(real_data, synthetic_data, metadata)
 
+    # Run
+    report.generate(real_data, synthetic_data, metadata)
     properties = report.get_properties()
+    score = report.get_score()
+    visualization, details = [], []
+    for property_ in report._properties_instances:
+        visualization.append(report.get_visualization(property_, 'table1'))
+        details.append(report.get_details(property_, 'table1'))
+
+    details.append(report.get_details('Cardinality'))
+
+    # Assert
+    np.testing.assert_almost_equal(score, .72)
     pd.testing.assert_frame_equal(properties, pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
         'Score': [0.79, 0.62, 0.75],
     }))
+
+    # Assert Column Shapes details
+    pd.testing.assert_frame_equal(details[0], pd.DataFrame({
+        'Column': ['col2', 'col3'],
+        'Metric': ['TVComplement', 'TVComplement'],
+        'Score': [.75, .75]
+    }))
+
+    # Assert Column Pair Trends details
+    pd.testing.assert_frame_equal(details[1], pd.DataFrame({
+        'Column 1': ['col2'],
+        'Column 2': ['col3'],
+        'Metric': ['ContingencySimilarity'],
+        'Score': [.25],
+        'Real Correlation': [np.nan],
+        'Synthetic Correlation': [np.nan],
+    }))
+
+    # Assert Cardinality details
+    assert details[2] == details[3] == {('table1', 'table2'): {'score': 0.75}}

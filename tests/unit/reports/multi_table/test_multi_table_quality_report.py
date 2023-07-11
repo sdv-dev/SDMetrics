@@ -20,6 +20,7 @@ class TestQualityReport:
         report = QualityReport()
 
         # Assert
+        assert report._tables == []
         assert report._overall_quality_score is None
         assert report._properties_instances == {}
         assert report._properties_scores == {}
@@ -81,6 +82,7 @@ class TestQualityReport:
         report = QualityReport()
         mock_score = Mock()
         report._overall_quality_score = mock_score
+        report._is_generated = True
 
         # Run
         score = report.get_score()
@@ -92,12 +94,13 @@ class TestQualityReport:
         """Test the ``get_properties`` method."""
         # Setup
         report = QualityReport()
-        mock_property_breakdown = {
+        mock_properties_scores = {
             'Column Shapes': 0.1,
             'Column Pair Trends': 0.2,
             'Cardinality': 0.3,
         }
-        report._property_breakdown = mock_property_breakdown
+        report._properties_scores = mock_properties_scores
+        report._is_generated = True
 
         # Run
         properties = report.get_properties()
@@ -115,14 +118,16 @@ class TestQualityReport:
         """Test the ``get_vizualization`` method."""
         # Setup
         report = QualityReport()
-        instance = Mock(return_value='visualization')
-        report._properties_instances = {'input1': instance}
+        instance = Mock()
+        instance.get_visualization = Mock(return_value='visualization')
+        report._properties_instances = {'Cardinality': instance}
+        report._is_generated = True
 
         # Run
-        visualization = report.get_visualization('input1', 'input2')
+        visualization = report.get_visualization('Cardinality')
 
         # Assert
-        instance.assert_called_once_with('input1', 'input2')
+        instance.get_visualization.assert_called_once_with(None)
         assert visualization == 'visualization'
 
     def test_get_details(self):
@@ -130,14 +135,15 @@ class TestQualityReport:
         # Setup
         report = QualityReport()
         instance = Mock()
-        instance._details = 'details'
-        report._properties_instances = {'input1': instance}
+        instance._details = {'details'}
+        report._properties_instances = {'Cardinality': instance}
+        report._is_generated = True
 
         # Run
-        details = report.get_details('input1', 'input2')
+        details = report.get_details('Cardinality')
 
         # Assert
-        assert details == 'details'
+        assert details == {'details'}
 
     @patch('sdmetrics.reports.multi_table.quality_report.pkg_resources.get_distribution')
     @patch('sdmetrics.reports.multi_table.quality_report.pickle')
