@@ -218,6 +218,24 @@ class TestQualityReport:
         # Assert
         assert details == {'details'}
 
+    def test_get_details_no_table_name(self):
+        """Test it works when table_name is None and property is not Cardinality."""
+        # Setup
+        report = QualityReport()
+        report._is_generated = True
+        instance = Mock()
+        details_mock = Mock()
+        details_mock._details = {'details'}
+        instance._properties = {'table': details_mock}
+        report._properties_instances = {'Column Shapes': instance}
+        report._tables = ['tab1']
+
+        # Run
+        details = report.get_details('Column Shapes')
+
+        # Assert
+        assert details == {'table': {'details'}}
+
     def test_get_details_not_generated(self):
         """Test the ``get_details`` method when the report hasn't been generated."""
         # Setup
@@ -242,19 +260,6 @@ class TestQualityReport:
         )
         with pytest.raises(ValueError, match=msg):
             report.get_details('invalid_name')
-
-    def test_get_details_missing_table_name(self):
-        """Test it when table_name is missing and property is not Cardinality."""
-        # Setup
-        report = QualityReport()
-        report._is_generated = True
-        report._properties_instances = {'Column Shapes': None}
-        report._tables = ['tab1']
-
-        # Run and Assert
-        msg = "Table name must be provided when viewing details for property 'Column Shapes'."
-        with pytest.raises(ValueError, match=msg):
-            report.get_details('Column Shapes')
 
     def test_get_details_invalid_table_name(self):
         """Test it when table_name is invalid."""

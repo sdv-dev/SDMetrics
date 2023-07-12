@@ -91,7 +91,8 @@ def test_multi_table_quality_report():
         visualization.append(report.get_visualization(property_, 'table1'))
         details.append(report.get_details(property_, 'table1'))
 
-    details.append(report.get_details('Cardinality'))
+    for property_ in report._properties_instances:
+        details.append(report.get_details(property_))
 
     # Assert
     np.testing.assert_almost_equal(score, .72)
@@ -118,4 +119,34 @@ def test_multi_table_quality_report():
     }))
 
     # Assert Cardinality details
-    assert details[2] == details[3] == {('table1', 'table2'): {'score': 0.75}}
+    assert details[2] == details[5] == {('table1', 'table2'): {'score': 0.75}}
+
+    # Assert Column Shapes details without table_name
+    pd.testing.assert_frame_equal(details[3]['table1'], pd.DataFrame({
+        'Column': ['col2', 'col3'],
+        'Metric': ['TVComplement', 'TVComplement'],
+        'Score': [.75, .75]
+    }))
+    pd.testing.assert_frame_equal(details[3]['table2'], pd.DataFrame({
+        'Column': ['col4', 'col5', 'col7'],
+        'Metric': ['KSComplement', 'KSComplement', 'KSComplement'],
+        'Score': [.75, .75, 1]
+    }))
+
+    # Assert Column Pair Trends details without table_name
+    pd.testing.assert_frame_equal(details[4]['table1'], pd.DataFrame({
+        'Column 1': ['col2'],
+        'Column 2': ['col3'],
+        'Metric': ['ContingencySimilarity'],
+        'Score': [.25],
+        'Real Correlation': [np.nan],
+        'Synthetic Correlation': [np.nan],
+    }))
+    pd.testing.assert_frame_equal(details[4]['table2'], pd.DataFrame({
+        'Column 1': ['col4', 'col4', 'col5'],
+        'Column 2': ['col5', 'col7', 'col7'],
+        'Metric': ['CorrelationSimilarity', 'CorrelationSimilarity', 'CorrelationSimilarity'],
+        'Score': [0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
+        'Real Correlation': [0.946664, 0.966247, 0.862622],
+        'Synthetic Correlation': [0.926925, 0.936853, 0.798384],
+    }))

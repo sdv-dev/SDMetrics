@@ -101,6 +101,8 @@ class QualityReport():
         if (table_name is not None) and (table_name not in self._tables):
             raise ValueError(f"Unknown table ('{table_name}'). Must be one of {self._tables}.")
 
+    def _validate_visualization(self, property_name, table_name):
+        self._validate_inputs(property_name, table_name)
         if property_name in ['Column Shapes', 'Column Pair Trends'] and table_name is None:
             raise ValueError('Table name must be provided when viewing details for '
                              f"property '{property_name}'.")
@@ -119,7 +121,7 @@ class QualityReport():
             plotly.graph_objects._figure.Figure
                 A visualization of the requested property's scores.
         """
-        self._validate_inputs(property_name, table_name)
+        self._validate_visualization(property_name, table_name)
 
         return self._properties_instances[property_name].get_visualization(table_name)
 
@@ -130,8 +132,7 @@ class QualityReport():
             property_name (str):
                 The name of the property to return score details for.
             table_name (str):
-                Optionally filter results by table. Must be provided for 'Column Shapes'
-                and 'Column Pair Trends'.
+                Optionally filter results by table.
 
         Returns:
             pandas.DataFrame
@@ -139,11 +140,18 @@ class QualityReport():
         """
         self._validate_inputs(property_name, table_name)
 
+        property_instance = self._properties_instances[property_name]
         if property_name != 'Cardinality':
-            return self._properties_instances[property_name]._properties[table_name]._details.copy(
-            )
+            if table_name:
+                return property_instance._properties[table_name]._details.copy()
 
-        details = self._properties_instances[property_name]._details.copy()
+            details = {}
+            for table_name, properties in property_instance._properties.items():
+                details[table_name] = properties._details
+
+            return details
+
+        details = property_instance._details
         if table_name:
             return {k: v for k, v in details.items() if k[0] == table_name or k[1] == table_name}
 
