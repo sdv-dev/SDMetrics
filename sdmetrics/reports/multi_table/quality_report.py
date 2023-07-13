@@ -4,6 +4,7 @@ import pickle
 import warnings
 
 import pandas as pd
+import numpy as np
 import pkg_resources
 
 from sdmetrics.reports.multi_table._properties import Cardinality, ColumnPairTrends, ColumnShapes
@@ -37,7 +38,7 @@ class QualityReport():
                 The metadata, which contains each column's data type as well as relationships.
             verbose (bool):
                 Whether or not to print report summary and progress.
-                NOTE: todo
+                NOTE: todo in GitHub Issue #362.
         """
         validate_multi_table_inputs(real_data, synthetic_data, metadata)
 
@@ -54,8 +55,8 @@ class QualityReport():
             for property_name, property_instance in self._properties_instances.items()
         }
 
-        scores = self._properties_scores.values()
-        self._overall_quality_score = sum(scores) / len(scores)
+        scores = list(self._properties_scores.values())
+        self._overall_quality_score = np.nanmean(scores)
         self._is_generated = True
 
     def _validate_generated(self):
@@ -79,7 +80,7 @@ class QualityReport():
 
         Returns:
             pandas.DataFrame
-                The property score breakdown.
+                The score for each property.
         """
         self._validate_generated()
 
@@ -135,8 +136,8 @@ class QualityReport():
                 Optionally filter results by table.
 
         Returns:
-            pandas.DataFrame
-                The score breakdown.
+            dict:
+                The details of the scores of a property.
         """
         self._validate_inputs(property_name, table_name)
 
@@ -146,14 +147,20 @@ class QualityReport():
                 return property_instance._properties[table_name]._details.copy()
 
             details = {}
-            for table_name, properties in property_instance._properties.items():
-                details[table_name] = properties._details
+            for table_name, property_ in property_instance._properties.items():
+                details[table_name] = property_._details
 
             return details
 
+        # For Cardinality, the details are a dictionary where the keys are tuples (table1, table2).
+        # If table_name is passed, select only the tuples which contain it.
         details = property_instance._details
         if table_name:
-            return {k: v for k, v in details.items() if k[0] == table_name or k[1] == table_name}
+            return {
+                table_names: detail
+                for table_names, detail in details.items()
+                if table_name in table_names
+            }
 
         return details
 
