@@ -479,6 +479,124 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, metadata):
         return make_mixed_column_pair_plot(real_data, synthetic_data)
 
 
+def get_cardinality(parent_table, child_table, parent_primary_key, child_foreign_key):
+    """Return the cardinality of the parent-child relationship.
+
+    Args:
+        parent_table (pandas.DataFrame):
+            The parent table.
+        child_table (pandas.DataFrame):
+            The child table.
+        parent_primary_key (string):
+            The name of the primary key column in the parent table.
+        child_foreign_key (string):
+            The name of the foreign key column in the child table.
+    """
+    merged = parent_table[[parent_primary_key]].merge(
+        child_table[[child_foreign_key]],
+        left_on=parent_primary_key,
+        right_on=child_foreign_key,
+        how='right'
+    )
+
+    cardinalities = (merged.groupby(parent_primary_key)
+                     .size()
+                     .reset_index(name='# children'))
+
+    cardinalities = (cardinalities.groupby('# children')
+                     .size()
+                     .reset_index(name='# parents'))
+
+    return cardinalities.sort_values('# children')
+
+
+def generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
+    """Generate a plot of the cardinality of the parent-child relationship.
+
+    Args:
+        data (pandas.DataFrame):
+            The cardinality data.
+        parent_primary_key (string):
+            The name of the primary key column in the parent table.
+        child_foreign_key (string):
+            The name of the foreign key column in the child table.
+    """
+    fig = px.histogram(data,
+                       x='# children',
+                       y='# parents',
+                       color='data',
+                       barmode='group',
+                       color_discrete_sequence=[DATACEBO_DARK, DATACEBO_LIGHT],
+                       pattern_shape='data',
+                       pattern_shape_sequence=['', '/'],
+                       nbins=max(data['# children']) - min(data['# children']) + 1,
+                       histnorm='probability density')
+
+    for name in ['Real', 'Synthetic']:
+        fig.update_traces(
+            hovertemplate=f'<b>{name}</b><br>Frequency: {{%y}}<extra></extra>',
+            selector={'name': name}
+        )
+
+    title = (
+        f"Relationship (child foreign key='{child_foreign_key}' and parent "
+        "primary key='{parent_primary_key}')"
+    )
+    fig.update_layout(
+        title=title,
+        xaxis_title='# of Children (per Parent)',
+        yaxis_title='Frequency',
+        plot_bgcolor=BACKGROUND_COLOR
+    )
+    return fig
+
+
+def get_cardinality_plot(real_data, synthetic_data, child_foreign_key, metadata):
+    """Return a plot of the cardinality of the parent-child relationship.
+
+    Args:
+        real_data (pandas.DataFrame):
+            The real data.
+        synthetic_data (pandas.DataFrame):
+            The synthetic data.
+        child_foreign_key (string):
+            The name of the foreign key column in the child table.
+        metadata (dict):
+            The metadata.
+    """
+    relation = None
+    for relation_dict in metadata['relationships']:
+        if relation_dict['child_foreign_key'] == child_foreign_key:
+            relation = relation_dict
+            break
+
+    if relation is None:
+        raise ValueError(
+            f"Foreign key '{child_foreign_key}' does not match any parent primary key"
+            'in the metadata.'
+        )
+
+    real_cardinality = get_cardinality(
+        real_data[relation['parent_table_name']], real_data[relation['child_table_name']],
+        relation['parent_primary_key'], child_foreign_key
+    )
+    synth_cardinality = get_cardinality(
+        synthetic_data[relation['parent_table_name']],
+        synthetic_data[relation['child_table_name']],
+        relation['parent_primary_key'], child_foreign_key
+    )
+
+    real_cardinality['data'] = 'Real'
+    synth_cardinality['data'] = 'Synthetic'
+
+    all_cardinality = pd.concat([real_cardinality, synth_cardinality], ignore_index=True)
+    fig = generate_cardinality_plot(
+        all_cardinality, relation['parent_primary_key'], child_foreign_key
+    )
+
+    return fig
+
+
 def discretize_table_data(real_data, synthetic_data, metadata):
     """Create a copy of the real and synthetic data with discretized data.
 
