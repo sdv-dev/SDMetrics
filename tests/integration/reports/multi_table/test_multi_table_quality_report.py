@@ -78,7 +78,7 @@ def load_test_data():
 
 def test_multi_table_quality_report():
     """Test the multi table QualityReport.
-    
+
     Run all the public methods for QualityReport, and check that all the scores for
     all the properties are correct.
     """
@@ -88,7 +88,7 @@ def test_multi_table_quality_report():
 
     # Run `generate`, `get_properties` and `get_score`,
     # as well as `get_visualization` and `get_details` for every property:
-    # ('Column Shapes', 'Column Pair Trends', 'Cardinality')
+    # 'Column Shapes', 'Column Pair Trends', 'Cardinality'
     report.generate(real_data, synthetic_data, metadata)
     properties = report.get_properties()
     score = report.get_score()

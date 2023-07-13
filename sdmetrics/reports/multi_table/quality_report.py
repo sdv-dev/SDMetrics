@@ -3,8 +3,8 @@
 import pickle
 import warnings
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pkg_resources
 
 from sdmetrics.reports.multi_table._properties import Cardinality, ColumnPairTrends, ColumnShapes

@@ -2,8 +2,8 @@ import pickle
 import re
 from unittest.mock import Mock, mock_open, patch
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pytest
 
 from sdmetrics.reports.multi_table import QualityReport
@@ -232,12 +232,13 @@ class TestQualityReport:
         instance._details = {('table1', 'table2'): 'details1', ('table1', 'table3'): 'details2'}
         report._properties_instances = {'Cardinality': instance}
         report._is_generated = True
+        report._tables = ['table1', 'table2', 'table3']
 
         # Run
         details = report.get_details('Cardinality', 'table3')
 
         # Assert
-        assert details == {'details2'}
+        assert details == {('table1', 'table3'): 'details2'}
 
     def test_get_details_no_table_name(self):
         """Test it works when table_name is None and property is not Cardinality."""
