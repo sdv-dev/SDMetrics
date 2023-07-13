@@ -3,6 +3,7 @@ import re
 from unittest.mock import Mock, mock_open, patch
 
 import pandas as pd
+import numpy as np
 import pytest
 
 from sdmetrics.reports.multi_table import QualityReport
@@ -45,18 +46,24 @@ class TestQualityReport:
                       mock_column_pair_trends_score):
         """Test the ``generate`` method."""
         # Setup
-        real_data = {'tab1': pd.DataFrame({'id': [1, 2]}), 'tab2': pd.DataFrame({'id': [1, 2]})}
-        synth_data = {'tab1': pd.DataFrame({'id': [1, 2]}), 'tab2': pd.DataFrame({'id': [1, 2]})}
+        real_data = {
+            'table1': pd.DataFrame({'id': [1, 2], 'col': [2, np.nan]}),
+            'table2': pd.DataFrame({'id': [1, 2], 'col': ['a', np.nan]})
+        }
+        synth_data = {
+            'table1': pd.DataFrame({'id': [1, 2], 'col': [3, np.nan]}),
+            'table2': pd.DataFrame({'id': [1, 2], 'col': ['a', np.nan]})
+        }
         metadata = {
             'tables': {
-                'tab1': {'columns': {'id': {'sdtype': 'id'}}},
-                'tab2': {'columns': {'id': {'sdtype': 'id'}}}
+                'table1': {'columns': {'id': {'sdtype': 'id'}, 'col': {'sdtype': 'numerical'}}},
+                'table2': {'columns': {'id': {'sdtype': 'id'}, 'col': {'sdtype': 'categorical'}}}
             },
             'relationships': [
                 {
-                    'parent_table_name': 'tab1',
+                    'parent_table_name': 'table1',
                     'parent_primary_key': 'id',
-                    'child_table_name': 'tab2',
+                    'child_table_name': 'table2',
                     'child_foreign_key': 'id'
                 }
             ]
@@ -106,12 +113,11 @@ class TestQualityReport:
         """Test the ``get_properties`` method."""
         # Setup
         report = QualityReport()
-        mock_properties_scores = {
+        report._properties_scores = {
             'Column Shapes': 0.1,
             'Column Pair Trends': 0.2,
             'Cardinality': 0.3,
         }
-        report._properties_scores = mock_properties_scores
         report._is_generated = True
 
         # Run
@@ -217,6 +223,21 @@ class TestQualityReport:
 
         # Assert
         assert details == {'details'}
+
+    def test_get_details_table_name(self):
+        """Test the ``get_details`` method with Cardinality and table_name."""
+        # Setup
+        report = QualityReport()
+        instance = Mock()
+        instance._details = {('table1', 'table2'): 'details1', ('table1', 'table3'): 'details2'}
+        report._properties_instances = {'Cardinality': instance}
+        report._is_generated = True
+
+        # Run
+        details = report.get_details('Cardinality', 'table3')
+
+        # Assert
+        assert details == {'details2'}
 
     def test_get_details_no_table_name(self):
         """Test it works when table_name is None and property is not Cardinality."""

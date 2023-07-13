@@ -77,12 +77,18 @@ def load_test_data():
 
 
 def test_multi_table_quality_report():
-    """Test the multi table quality report."""
+    """Test the multi table QualityReport.
+    
+    Run all the public methods for QualityReport, and check that all the scores for
+    all the properties are correct.
+    """
     # Setup
     real_data, synthetic_data, metadata = load_test_data()
     report = QualityReport()
 
-    # Run
+    # Run `generate`, `get_properties` and `get_score`,
+    # as well as `get_visualization` and `get_details` for every property:
+    # ('Column Shapes', 'Column Pair Trends', 'Cardinality')
     report.generate(real_data, synthetic_data, metadata)
     properties = report.get_properties()
     score = report.get_score()
@@ -91,10 +97,11 @@ def test_multi_table_quality_report():
         visualization.append(report.get_visualization(property_, 'table1'))
         details.append(report.get_details(property_, 'table1'))
 
+    # Run `get_details` for every property without passing a table_name
     for property_ in report._properties_instances:
         details.append(report.get_details(property_))
 
-    # Assert
+    # Assert score
     np.testing.assert_almost_equal(score, .72)
     pd.testing.assert_frame_equal(properties, pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
