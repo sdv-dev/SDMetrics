@@ -507,6 +507,14 @@ def get_cardinality(parent_table, child_table, parent_primary_key, child_foreign
                      .size()
                      .reset_index(name='# parents'))
 
+    parents_with_children = merged[parent_primary_key].unique()
+    all_parents = parent_table[parent_primary_key].unique()
+    num_parents_without_children = len(set(all_parents) - set(parents_with_children))
+
+    if num_parents_without_children > 0:
+        row = pd.DataFrame({'# children': [0], '# parents': [num_parents_without_children]})
+        cardinalities = pd.concat([row, cardinalities]).reset_index(drop=True)
+
     return cardinalities.sort_values('# children')
 
 
@@ -534,13 +542,13 @@ def generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
 
     for name in ['Real', 'Synthetic']:
         fig.update_traces(
-            hovertemplate=f'<b>{name}</b><br>Frequency: {{%y}}<extra></extra>',
+            hovertemplate=f'<b>{name}</b><br>Frequency: %{{y}}<extra></extra>',
             selector={'name': name}
         )
 
     title = (
         f"Relationship (child foreign key='{child_foreign_key}' and parent "
-        "primary key='{parent_primary_key}')"
+        f"primary key='{parent_primary_key}')"
     )
     fig.update_layout(
         title=title,
@@ -565,7 +573,7 @@ def get_cardinality_plot(real_data, synthetic_data, child_foreign_key, metadata)
             The metadata.
     """
     relation = None
-    for relation_dict in metadata['relationships']:
+    for relation_dict in metadata.get('relationships', []):
         if relation_dict['child_foreign_key'] == child_foreign_key:
             relation = relation_dict
             break
@@ -573,7 +581,7 @@ def get_cardinality_plot(real_data, synthetic_data, child_foreign_key, metadata)
     if relation is None:
         raise ValueError(
             f"Foreign key '{child_foreign_key}' does not match any parent primary key"
-            'in the metadata.'
+            'in the metadata. Please update the metadata.'
         )
 
     real_cardinality = get_cardinality(
