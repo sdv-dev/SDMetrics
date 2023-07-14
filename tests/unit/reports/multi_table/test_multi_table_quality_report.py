@@ -229,7 +229,10 @@ class TestQualityReport:
         # Setup
         report = QualityReport()
         instance = Mock()
-        instance._details = {('table1', 'table2'): 'details1', ('table1', 'table3'): 'details2'}
+        instance._details = {
+            ('table1', 'table2'): {'score': 0.75},
+            ('table1', 'table3'): {'score': 0.57}
+        }
         report._properties_instances = {'Cardinality': instance}
         report._is_generated = True
         report._tables = ['table1', 'table2', 'table3']
@@ -238,7 +241,7 @@ class TestQualityReport:
         details = report.get_details('Cardinality', 'table3')
 
         # Assert
-        assert details == {('table1', 'table3'): 'details2'}
+        assert details == {('table1', 'table3'): {'score': 0.57}}
 
     def test_get_details_no_table_name(self):
         """Test it works when table_name is None and property is not Cardinality."""
