@@ -1023,6 +1023,7 @@ def test_get_cardinality_plot(mock_generate_cardinality_plot, mock_get_cardinali
     real_data = {'table1': None, 'table2': None}
     synthetic_data = {'table1': None, 'table2': None}
     child_foreign_key = 'child_key'
+    parent_table_name = 'table1'
     metadata = {
         'relationships': [
             {
@@ -1041,7 +1042,9 @@ def test_get_cardinality_plot(mock_generate_cardinality_plot, mock_get_cardinali
     mock_generate_cardinality_plot.return_value = 'test_fig'
 
     # Run
-    fig = get_cardinality_plot(real_data, synthetic_data, child_foreign_key, metadata)
+    fig = get_cardinality_plot(
+        real_data, synthetic_data, child_foreign_key, parent_table_name, metadata
+    )
 
     # Assert
     assert fig == 'test_fig'
@@ -1071,6 +1074,7 @@ def test_get_cardinality_plot_no_relationships():
     real_data = {'table1': None, 'table2': None}
     synthetic_data = {'table1': None, 'table2': None}
     child_foreign_key = 'child_key'
+    parent_table_name = 'table1'
     metadata = {
         'relationships': [
             {
@@ -1084,11 +1088,13 @@ def test_get_cardinality_plot_no_relationships():
 
     # Run and Assert
     expected_message = re.escape(
-        "Foreign key 'child_key' does not match any parent primary key"
-        'in the metadata. Please update the metadata.'
+        "Relationship foreign key 'child_key' with parent table 'table1' not"
+        ' found in the metadata. Please update the metadata.'
     )
     with pytest.raises(ValueError, match=expected_message):
-        get_cardinality_plot(real_data, synthetic_data, child_foreign_key, metadata)
+        get_cardinality_plot(
+            real_data, synthetic_data, child_foreign_key, parent_table_name, metadata
+        )
 
 
 def test_discretize_table_data():

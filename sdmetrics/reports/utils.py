@@ -559,7 +559,8 @@ def generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
     return fig
 
 
-def get_cardinality_plot(real_data, synthetic_data, child_foreign_key, metadata):
+def get_cardinality_plot(
+        real_data, synthetic_data, child_foreign_key, parent_table_name, metadata):
     """Return a plot of the cardinality of the parent-child relationship.
 
     Args:
@@ -569,19 +570,23 @@ def get_cardinality_plot(real_data, synthetic_data, child_foreign_key, metadata)
             The synthetic data.
         child_foreign_key (string):
             The name of the foreign key column in the child table.
+        parent_table_name (string):
+            The name of the parent table.
         metadata (dict):
             The metadata.
     """
     relation = None
     for relation_dict in metadata.get('relationships', []):
-        if relation_dict['child_foreign_key'] == child_foreign_key:
+        child_match = relation_dict['child_foreign_key'] == child_foreign_key
+        parent_match = relation_dict['parent_table_name'] == parent_table_name
+        if child_match and parent_match:
             relation = relation_dict
-            break
 
     if relation is None:
         raise ValueError(
-            f"Foreign key '{child_foreign_key}' does not match any parent primary key"
-            'in the metadata. Please update the metadata.'
+            f"Relationship foreign key '{child_foreign_key}' with parent table"
+            f" '{parent_table_name}' not found in the metadata. "
+            'Please update the metadata.'
         )
 
     real_cardinality = get_cardinality(
