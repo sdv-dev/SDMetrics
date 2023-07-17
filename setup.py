@@ -25,7 +25,7 @@ install_requires = [
 ]
 
 pomegranate_requires = [
-    'pomegranate>=1.0.0,<2'
+    'pomegranate>=0.14.1,<0.14.7',
 ]
 
 torch_requires = [
