@@ -37,8 +37,7 @@ class QualityReport():
             out.write(
                 f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n')
 
-        if len(self._properties_instances) > 0:
-            out.write('Properties:\n')
+        out.write('Properties:\n')
 
         for property_name, score in self._properties_scores.items():
             if not pd.isna(score):

@@ -1,6 +1,6 @@
 import pickle
 import re
-from unittest.mock import Mock, mock_open, patch
+from unittest.mock import Mock, call, mock_open, patch
 
 import numpy as np
 import pandas as pd
@@ -29,6 +29,93 @@ class TestQualityReport:
         assert report._properties_scores == {}
         assert report._is_generated is False
         assert report._package_version is None
+
+    def test__print_result(self):
+        """Expect that the correct messages are written."""
+        # Setup
+        report = QualityReport()
+        report._overall_quality_score = 0.8
+        report._properties_scores = {
+            'Column Shapes': 0.6,
+            'Column Pair Trends': 0.8,
+            'Cardinality': 0.9
+        }
+        report._property_errors = {
+            'Column Shapes': False,
+            'Column Pair Trends': False,
+            'Cardinality': False,
+        }
+        mock_out = Mock()
+
+        # Run
+        report._print_results(mock_out)
+
+        # Assert
+        mock_out.write.assert_has_calls([
+            call('\nOverall Quality Score: 80.0%\n\n'),
+            call('Properties:\n'),
+            call('Column Shapes: 60.0%\n'),
+            call('Column Pair Trends: 80.0%\n'),
+            call('Cardinality: 90.0%\n'),
+        ])
+
+    def test__print_result_with_error(self):
+        """Expect that the correct messages are written when a property errors out."""
+        # Setup
+        report = QualityReport()
+        report._overall_quality_score = 0.7
+        report._properties_scores = {
+            'Column Shapes': 0.6,
+            'Column Pair Trends': np.nan,
+            'Cardinality': 0.8,
+        }
+        report._property_errors = {
+            'Column Shapes': False,
+            'Column Pair Trends': True,
+            'Cardinality': False,
+        }
+        mock_out = Mock()
+
+        # Run
+        report._print_results(mock_out)
+
+        # Assert
+        mock_out.write.assert_has_calls([
+            call('\nOverall Quality Score: 70.0%\n\n'),
+            call('Properties:\n'),
+            call('Column Shapes: 60.0%\n'),
+            call('Column Pair Trends: Error computing property.\n'),
+            call('Cardinality: 80.0%\n'),
+        ])
+
+    def test__print_result_with_all_errors(self):
+        """Expect that the correct messages are written when overall score is nan."""
+        # Setup
+        report = QualityReport()
+        report._overall_quality_score = np.nan
+        report._properties_scores = {
+            'Column Shapes': np.nan,
+            'Column Pair Trends': np.nan,
+            'Cardinality': np.nan
+        }
+        report._property_errors = {
+            'Column Shapes': True,
+            'Column Pair Trends': True,
+            'Cardinality': True,
+        }
+        mock_out = Mock()
+
+        # Run
+        report._print_results(mock_out)
+
+        # Assert
+        mock_out.write.assert_has_calls([
+            call('\nOverall Quality Score: Error computing report.\n\n'),
+            call('Properties:\n'),
+            call('Column Shapes: Error computing property.\n'),
+            call('Column Pair Trends: Error computing property.\n'),
+            call('Cardinality: Error computing property.\n'),
+        ])
 
     @patch(
         'sdmetrics.reports.multi_table._properties.column_pair_trends.ColumnPairTrends.get_score',
