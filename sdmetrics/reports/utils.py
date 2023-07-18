@@ -588,9 +588,9 @@ def get_cardinality_plot(
 
     if parent_primary_key is None:
         raise ValueError(
-            f"Relationship between child table '{child_table_name}' and parent table '{parent_table_name}'"
-            f" for the foreign key '{child_foreign_key}' not found in the metadata. "
-            'Please update the metadata.'
+            f"Relationship between child table '{child_table_name}' and parent table "
+            f"'{parent_table_name}' for the foreign key '{child_foreign_key}' "
+            'not found in the metadata. Please update the metadata.'
         )
 
     real_cardinality = get_cardinality(
