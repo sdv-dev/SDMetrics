@@ -19,6 +19,7 @@ install_requires = [
     "pandas>=1.5.0;python_version>='3.11'",
     'scikit-learn>=0.24,<2',
     "scipy>=1.5.4,<2;python_version<'3.10'",
+    "scipy>=1.9.2,<2;python_version>='3.10'",
     'copulas>=0.9.0,<0.10',
     'tqdm>=4.24,<5',
     'plotly>=5.10.0,<6',
