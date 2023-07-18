@@ -560,7 +560,8 @@ def generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
 
 
 def get_cardinality_plot(
-        real_data, synthetic_data, child_foreign_key, parent_table_name, metadata):
+        real_data, synthetic_data, child_table_name,
+        parent_table_name, child_foreign_key, metadata):
     """Return a plot of the cardinality of the parent-child relationship.
 
     Args:
@@ -568,35 +569,38 @@ def get_cardinality_plot(
             The real data.
         synthetic_data (pandas.DataFrame):
             The synthetic data.
-        child_foreign_key (string):
-            The name of the foreign key column in the child table.
+        child_table_name (string):
+            The name of the child table.
         parent_table_name (string):
             The name of the parent table.
+        child_foreign_key (string):
+            The name of the foreign key column in the child table.
         metadata (dict):
             The metadata.
     """
-    relation = None
+    parent_primary_key = None
     for relation_dict in metadata.get('relationships', []):
-        child_match = relation_dict['child_foreign_key'] == child_foreign_key
         parent_match = relation_dict['parent_table_name'] == parent_table_name
-        if child_match and parent_match:
-            relation = relation_dict
+        child_match = relation_dict['child_table_name'] == child_table_name
+        foreign_key_match = relation_dict['child_foreign_key'] == child_foreign_key
+        if child_match and parent_match and foreign_key_match:
+            parent_primary_key = relation_dict['parent_primary_key']
 
-    if relation is None:
+    if parent_primary_key is None:
         raise ValueError(
-            f"Relationship foreign key '{child_foreign_key}' with parent table"
-            f" '{parent_table_name}' not found in the metadata. "
+            f"Relationship between child table '{child_table_name}' and parent table '{parent_table_name}'"
+            f" for the foreign key '{child_foreign_key}' not found in the metadata. "
             'Please update the metadata.'
         )
 
     real_cardinality = get_cardinality(
-        real_data[relation['parent_table_name']], real_data[relation['child_table_name']],
-        relation['parent_primary_key'], child_foreign_key
+        real_data[parent_table_name], real_data[child_table_name],
+        parent_primary_key, child_foreign_key
     )
     synth_cardinality = get_cardinality(
-        synthetic_data[relation['parent_table_name']],
-        synthetic_data[relation['child_table_name']],
-        relation['parent_primary_key'], child_foreign_key
+        synthetic_data[parent_table_name],
+        synthetic_data[child_table_name],
+        parent_primary_key, child_foreign_key
     )
 
     real_cardinality['data'] = 'Real'
@@ -604,7 +608,7 @@ def get_cardinality_plot(
 
     all_cardinality = pd.concat([real_cardinality, synth_cardinality], ignore_index=True)
     fig = generate_cardinality_plot(
-        all_cardinality, relation['parent_primary_key'], child_foreign_key
+        all_cardinality, parent_primary_key, child_foreign_key
     )
 
     return fig

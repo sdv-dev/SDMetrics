@@ -1024,6 +1024,7 @@ def test_get_cardinality_plot(mock_generate_cardinality_plot, mock_get_cardinali
     synthetic_data = {'table1': None, 'table2': None}
     child_foreign_key = 'child_key'
     parent_table_name = 'table1'
+    child_table_name = 'table2'
     metadata = {
         'relationships': [
             {
@@ -1043,7 +1044,7 @@ def test_get_cardinality_plot(mock_generate_cardinality_plot, mock_get_cardinali
 
     # Run
     fig = get_cardinality_plot(
-        real_data, synthetic_data, child_foreign_key, parent_table_name, metadata
+        real_data, synthetic_data, child_table_name, parent_table_name, child_foreign_key, metadata
     )
 
     # Assert
@@ -1075,6 +1076,7 @@ def test_get_cardinality_plot_no_relationships():
     synthetic_data = {'table1': None, 'table2': None}
     child_foreign_key = 'child_key'
     parent_table_name = 'table1'
+    child_table_name = 'table2'
     metadata = {
         'relationships': [
             {
@@ -1088,12 +1090,14 @@ def test_get_cardinality_plot_no_relationships():
 
     # Run and Assert
     expected_message = re.escape(
-        "Relationship foreign key 'child_key' with parent table 'table1' not"
-        ' found in the metadata. Please update the metadata.'
+        "Relationship between child table 'table2' and parent table 'table1'"
+        " for the foreign key 'child_key' not found in the metadata. "
+        'Please update the metadata.'
     )
     with pytest.raises(ValueError, match=expected_message):
         get_cardinality_plot(
-            real_data, synthetic_data, child_foreign_key, parent_table_name, metadata
+            real_data, synthetic_data, child_table_name,
+            parent_table_name, child_foreign_key, metadata
         )
 
 
