@@ -107,10 +107,10 @@ setup(
     ],
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
-        'test': tests_require + pomegranate_requires + torch_requires,
+        'test': tests_require + torch_requires,
         'torch': torch_requires,
         'pomegranate': pomegranate_requires,
-        'dev': development_requires + tests_require + pomegranate_requires + torch_requires,
+        'dev': development_requires + tests_require + torch_requires,
     },
     install_package_data=True,
     install_requires=install_requires,
