@@ -163,6 +163,7 @@ class TestQualityReport:
         # Setup
         real_data, synth_data, metadata = self.get_data()
         report = QualityReport()
+        report._print_results = Mock()
 
         # Run
         report.generate(real_data, synth_data, metadata)
@@ -190,6 +191,8 @@ class TestQualityReport:
             call().set_description('(3/3) Evaluating Cardinality: '),
             call().close()
         ])
+
+        report._print_results.assert_called_once_with(mock_sys)
 
     @patch(
         'sdmetrics.reports.multi_table._properties.column_pair_trends.ColumnPairTrends.get_score')
