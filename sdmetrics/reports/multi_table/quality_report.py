@@ -1,11 +1,13 @@
 """Multi table quality report."""
 
 import pickle
+import sys
 import warnings
 
 import numpy as np
 import pandas as pd
 import pkg_resources
+import tqdm
 
 from sdmetrics.reports.multi_table._properties import Cardinality, ColumnPairTrends, ColumnShapes
 from sdmetrics.reports.utils import validate_multi_table_inputs
@@ -25,6 +27,25 @@ class QualityReport():
         self._properties_scores = {}
         self._is_generated = False
         self._package_version = None
+        self._property_errors = {}
+
+    def _print_results(self, out=sys.stdout):
+        """Print the quality report results."""
+        if pd.isna(self._overall_quality_score) & any(self._property_errors.values()):
+            out.write('\nOverall Quality Score: Error computing report.\n\n')
+        else:
+            out.write(
+                f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n')
+
+        out.write('Properties:\n')
+
+        for property_name, score in self._properties_scores.items():
+            if not pd.isna(score):
+                out.write(f'{property_name}: {round(score * 100, 2)}%\n')
+            elif property_name in self._property_errors:
+                out.write(f'{property_name}: Error computing property.\n')
+            else:
+                out.write(f'{property_name}: NaN\n')
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
@@ -37,8 +58,7 @@ class QualityReport():
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
             verbose (bool):
-                Whether or not to print report summary and progress.
-                NOTE: todo in GitHub Issue #362.
+                Whether or not to print the report summary and progress.
         """
         validate_multi_table_inputs(real_data, synthetic_data, metadata)
 
@@ -50,14 +70,44 @@ class QualityReport():
             'Cardinality': Cardinality()
         }
 
-        self._properties_scores = {
-            property_name: property_instance.get_score(real_data, synthetic_data, metadata)
-            for property_name, property_instance in self._properties_instances.items()
-        }
+        if verbose:
+            sys.stdout.write('Generating report ...\n')
+
+        num_columns = [len(table['columns']) for table in metadata['tables'].values()]
+        num_properties = len(self._properties_instances)
+        progress_bar = None
+        for index, property_tuple in enumerate(self._properties_instances.items()):
+            property_name, property_instance = property_tuple
+            if verbose:
+                if property_name == 'Column Shapes':
+                    num_iterations = sum(num_columns)
+                elif property_name == 'Column Pair Trends':
+                    # for each table, the number of combinations of pairs of columns is
+                    # n * (n - 1) / 2, where n is the number of columns in the table
+                    num_iterations = sum([(n_cols * (n_cols - 1)) // 2 for n_cols in num_columns])
+                elif property_name == 'Cardinality':
+                    num_iterations = len(metadata['relationships'])
+
+                progress_bar = tqdm.tqdm(total=num_iterations, file=sys.stdout)
+                progress_bar.set_description(
+                    f'({index + 1}/{num_properties}) Evaluating {property_name}: ')
+
+            try:
+                self._properties_scores[property_name] = property_instance.get_score(
+                    real_data, synthetic_data, metadata, progress_bar)
+            except BaseException:
+                self._properties_scores[property_name] = np.nan
+                self._property_errors[property_name] = True
+
+            if verbose:
+                progress_bar.close()
 
         scores = list(self._properties_scores.values())
         self._overall_quality_score = np.nanmean(scores)
         self._is_generated = True
+
+        if verbose:
+            self._print_results(sys.stdout)
 
     def _validate_generated(self):
         if not self._is_generated:
