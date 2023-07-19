@@ -15,8 +15,10 @@ install_requires = [
     "numpy>=1.20.0,<2;python_version<'3.10'",
     "numpy>=1.23.3,<2;python_version>='3.10'",
     "pandas>=1.1.3;python_version<'3.10'",
-    "pandas>=1.5.0;python_version>='3.10'",
-    'scikit-learn>=0.24,<2',
+    "pandas>=1.3.4;python_version>='3.10' and python_version<'3.11'",
+    "pandas>=1.5.0;python_version>='3.11'",
+    "scikit-learn>=0.24,<2;python_version<='3.10'",
+    "scikit-learn>=1.1.3,<2;python_version>='3.11'",
     "scipy>=1.5.4,<2;python_version<'3.10'",
     "scipy>=1.9.2,<2;python_version>='3.10'",
     'copulas>=0.9.0,<0.10',
@@ -30,7 +32,8 @@ pomegranate_requires = [
 
 torch_requires = [
     "torch>=1.8.0;python_version<'3.10'",
-    "torch>=1.11.0;python_version>='3.10'",
+    "torch>=1.11.0;python_version>='3.10' and python_version<'3.11'",
+    "torch>=2.0.0;python_version>='3.11'",
 ]
 
 setup_requires = [
@@ -102,13 +105,14 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
     description='Metrics for Synthetic Data Generation Projects',
     extras_require={
-        'test': tests_require + pomegranate_requires + torch_requires,
+        'test': tests_require + torch_requires,
         'torch': torch_requires,
         'pomegranate': pomegranate_requires,
-        'dev': development_requires + tests_require + pomegranate_requires + torch_requires,
+        'dev': development_requires + tests_require + torch_requires,
     },
     install_package_data=True,
     install_requires=install_requires,
@@ -119,7 +123,7 @@ setup(
     keywords='sdmetrics sdmetrics SDMetrics',
     name='sdmetrics',
     packages=find_packages(include=['sdmetrics', 'sdmetrics.*']),
-    python_requires='>=3.8,<3.11',
+    python_requires='>=3.8,<3.12',
     setup_requires=setup_requires,
     test_suite='tests',
     tests_require=tests_require,
