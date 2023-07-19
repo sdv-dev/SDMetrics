@@ -30,7 +30,7 @@ class TestQualityReport:
         assert report._is_generated is False
         assert report._package_version is None
 
-    def test__print_result(self):
+    def test__print_results(self):
         """Expect that the correct messages are written."""
         # Setup
         report = QualityReport()
@@ -59,7 +59,7 @@ class TestQualityReport:
             call('Cardinality: 90.0%\n'),
         ])
 
-    def test__print_result_with_error(self):
+    def test__print_results_with_error(self):
         """Expect that the correct messages are written when a property errors out."""
         # Setup
         report = QualityReport()
@@ -88,7 +88,7 @@ class TestQualityReport:
             call('Cardinality: 80.0%\n'),
         ])
 
-    def test__print_result_with_all_errors(self):
+    def test__print_results_with_all_errors(self):
         """Expect that the correct messages are written when overall score is nan."""
         # Setup
         report = QualityReport()
@@ -117,22 +117,7 @@ class TestQualityReport:
             call('Cardinality: Error computing property.\n'),
         ])
 
-    @patch(
-        'sdmetrics.reports.multi_table._properties.column_pair_trends.ColumnPairTrends.get_score',
-        return_value=.2
-    )
-    @patch(
-        'sdmetrics.reports.multi_table._properties.column_shapes.ColumnShapes.get_score',
-        return_value=.4
-    )
-    @patch(
-        'sdmetrics.reports.multi_table._properties.cardinality.Cardinality.get_score',
-        return_value=.9
-    )
-    def test_generate(self, mock_cardinality_score, mock_column_shapes_score,
-                      mock_column_pair_trends_score):
-        """Test the ``generate`` method."""
-        # Setup
+    def get_data(self):
         real_data = {
             'table1': pd.DataFrame({'id': [1, 2], 'col': [2, np.nan]}),
             'table2': pd.DataFrame({'id': [1, 2], 'col': ['a', np.nan]})
@@ -155,6 +140,28 @@ class TestQualityReport:
                 }
             ]
         }
+
+        return real_data, synth_data, metadata
+
+    @patch('sdmetrics.reports.multi_table.quality_report.sys.stdout')
+    @patch('sdmetrics.reports.multi_table.quality_report.tqdm.tqdm')
+    @patch(
+        'sdmetrics.reports.multi_table._properties.column_pair_trends.ColumnPairTrends.get_score',
+        return_value=.2
+    )
+    @patch(
+        'sdmetrics.reports.multi_table._properties.column_shapes.ColumnShapes.get_score',
+        return_value=.4
+    )
+    @patch(
+        'sdmetrics.reports.multi_table._properties.cardinality.Cardinality.get_score',
+        return_value=.9
+    )
+    def test_generate(self, mock_cardinality_score, mock_column_shapes_score,
+                      mock_column_pair_trends_score, mock_tqdm, mock_sys):
+        """Test the proper attributes are set and the progress bar runs correctly."""
+        # Setup
+        real_data, synth_data, metadata = self.get_data()
         report = QualityReport()
 
         # Run
@@ -171,6 +178,46 @@ class TestQualityReport:
 
         assert report._overall_quality_score == .5
         assert report._is_generated is True
+
+        mock_tqdm.assert_has_calls([
+            call(total=4, file=mock_sys),
+            call().set_description('(1/3) Evaluating Column Shapes: '),
+            call().close(),
+            call(total=2, file=mock_sys),
+            call().set_description('(2/3) Evaluating Column Pair Trends: '),
+            call().close(),
+            call(total=1, file=mock_sys),
+            call().set_description('(3/3) Evaluating Cardinality: '),
+            call().close()
+        ])
+
+    @patch(
+        'sdmetrics.reports.multi_table._properties.column_pair_trends.ColumnPairTrends.get_score')
+    @patch('sdmetrics.reports.multi_table._properties.column_shapes.ColumnShapes.get_score')
+    @patch('sdmetrics.reports.multi_table._properties.cardinality.Cardinality.get_score')
+    def test_generate_failed_scores(self, mock_cardinality_score, mock_column_shapes_score,
+                                    mock_column_pair_trends_score):
+        """Test the ``generate`` method when `get_score` for each property fails."""
+        # Setup
+        real_data, synth_data, metadata = self.get_data()
+        report = QualityReport()
+        mock_cardinality_score.side_effect = ValueError
+        mock_column_shapes_score.side_effect = ValueError
+        mock_column_pair_trends_score.side_effect = ValueError
+
+        # Run
+        report.generate(real_data, synth_data, metadata)
+
+        # Assert
+        assert pd.isna(report._properties_scores['Column Shapes'])
+        assert pd.isna(report._properties_scores['Column Pair Trends'])
+        assert pd.isna(report._properties_scores['Cardinality'])
+
+        assert report._property_errors['Column Shapes'] is True
+        assert report._property_errors['Column Pair Trends'] is True
+        assert report._property_errors['Cardinality'] is True
+
+        assert pd.isna(report._overall_quality_score)
 
     def test_get_score(self):
         """Test the ``get_score`` method."""
