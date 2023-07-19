@@ -492,28 +492,12 @@ def get_cardinality(parent_table, child_table, parent_primary_key, child_foreign
         child_foreign_key (string):
             The name of the foreign key column in the child table.
     """
-    merged = parent_table[[parent_primary_key]].merge(
-        child_table[[child_foreign_key]],
-        left_on=parent_primary_key,
-        right_on=child_foreign_key,
-        how='right'
-    )
+    child_counts = child_table[child_foreign_key].value_counts()
+    child_per_parent = child_counts.reindex(parent_table[parent_primary_key], fill_value=0)
+    child_per_parent = child_per_parent.reset_index()
+    child_per_parent.columns = [parent_primary_key, '# children']
 
-    cardinalities = (merged.groupby(parent_primary_key)
-                     .size()
-                     .reset_index(name='# children'))
-
-    cardinalities = (cardinalities.groupby('# children')
-                     .size()
-                     .reset_index(name='# parents'))
-
-    parents_with_children = merged[parent_primary_key].unique()
-    all_parents = parent_table[parent_primary_key].unique()
-    num_parents_without_children = len(set(all_parents) - set(parents_with_children))
-
-    if num_parents_without_children > 0:
-        row = pd.DataFrame({'# children': [0], '# parents': [num_parents_without_children]})
-        cardinalities = pd.concat([row, cardinalities]).reset_index(drop=True)
+    cardinalities = child_per_parent.groupby('# children').size().reset_index(name='# parents')
 
     return cardinalities.sort_values('# children')
 
@@ -559,15 +543,14 @@ def generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
     return fig
 
 
-def get_cardinality_plot(
-        real_data, synthetic_data, child_table_name,
-        parent_table_name, child_foreign_key, metadata):
+def get_cardinality_plot(real_data, synthetic_data, child_table_name, parent_table_name,
+                         child_foreign_key, metadata):
     """Return a plot of the cardinality of the parent-child relationship.
 
     Args:
-        real_data (pandas.DataFrame):
+        real_data (dict):
             The real data.
-        synthetic_data (pandas.DataFrame):
+        synthetic_data (dict):
             The synthetic data.
         child_table_name (string):
             The name of the child table.
