@@ -24,7 +24,7 @@ class Coverage(BaseSingleTableProperty):
     }
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
-        """Generate the _details dataframe for the column shapes property.
+        """Generate the _details dataframe for the column coverage property.
 
         Args:
             real_data (pandas.DataFrame):
