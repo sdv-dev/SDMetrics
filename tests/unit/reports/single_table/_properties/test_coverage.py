@@ -76,7 +76,6 @@ class TestCoverage:
         # Assert
         mock__compute_average.assert_called_once()
 
-        # Expected call
         expected_kwargs = {
             'data_frame': mock_df,
             'x': 'Column',
@@ -101,7 +100,6 @@ class TestCoverage:
         # Check call_args of mock_px.bar
         _, kwargs = mock_px.bar.call_args
 
-        # Check DataFrame separately
         assert kwargs.pop('data_frame').equals(expected_kwargs.pop('data_frame'))
         assert kwargs == expected_kwargs
 
