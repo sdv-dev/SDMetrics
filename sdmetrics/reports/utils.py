@@ -491,6 +491,9 @@ def get_cardinality(parent_table, child_table, parent_primary_key, child_foreign
             The name of the primary key column in the parent table.
         child_foreign_key (string):
             The name of the foreign key column in the child table.
+
+    Returns:
+        pandas.DataFrame
     """
     child_counts = child_table[child_foreign_key].value_counts()
     child_per_parent = child_counts.reindex(parent_table[parent_primary_key], fill_value=0)
@@ -512,6 +515,9 @@ def generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
             The name of the primary key column in the parent table.
         child_foreign_key (string):
             The name of the foreign key column in the child table.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
     """
     fig = px.histogram(data,
                        x='# children',
@@ -560,6 +566,9 @@ def get_cardinality_plot(real_data, synthetic_data, child_table_name, parent_tab
             The name of the foreign key column in the child table.
         metadata (dict):
             The metadata.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
     """
     parent_primary_key = None
     for relation_dict in metadata.get('relationships', []):
