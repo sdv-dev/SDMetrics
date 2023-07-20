@@ -23,7 +23,7 @@ class TestSynthesis:
         """Test the ``get_score`` method with an error."""
         # Setup
         real_data, _, metadata = load_demo('single_table')
-        real_data['start_date'].iloc[0] = 0
+        real_data['start_date'].iloc[0] = 'Err'
 
         # Run
         synthesis_property = Synthesis()
