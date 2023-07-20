@@ -1,5 +1,6 @@
 from datetime import date, datetime
 
+import numpy as np
 import pandas as pd
 
 from sdmetrics.reports.multi_table.quality_report import QualityReport
@@ -76,14 +77,83 @@ def load_test_data():
 
 
 def test_multi_table_quality_report():
-    """Test the multi table quality report."""
+    """Test the multi table QualityReport.
+
+    Run all the public methods for QualityReport, and check that all the scores for
+    all the properties are correct.
+    """
+    # Setup
     real_data, synthetic_data, metadata = load_test_data()
-
     report = QualityReport()
-    report.generate(real_data, synthetic_data, metadata)
 
+    # Run `generate`, `get_properties` and `get_score`,
+    # as well as `get_visualization` and `get_details` for every property:
+    # 'Column Shapes', 'Column Pair Trends', 'Cardinality'
+    report.generate(real_data, synthetic_data, metadata)
     properties = report.get_properties()
+    score = report.get_score()
+    visualization, details = [], []
+    for property_ in report._properties_instances:
+        visualization.append(report.get_visualization(property_, 'table1'))
+        details.append(report.get_details(property_, 'table1'))
+
+    # Run `get_details` for every property without passing a table_name
+    for property_ in report._properties_instances:
+        details.append(report.get_details(property_))
+
+    # Assert score
+    np.testing.assert_almost_equal(score, .72)
     pd.testing.assert_frame_equal(properties, pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
-        'Score': [0.8, 0.6704734340781349, 0.75],
+        'Score': [0.79, 0.62, 0.75],
+    }))
+
+    # Assert Column Shapes details
+    pd.testing.assert_frame_equal(details[0], pd.DataFrame({
+        'Column': ['col2', 'col3'],
+        'Metric': ['TVComplement', 'TVComplement'],
+        'Score': [.75, .75]
+    }))
+
+    # Assert Column Pair Trends details
+    pd.testing.assert_frame_equal(details[1], pd.DataFrame({
+        'Column 1': ['col2'],
+        'Column 2': ['col3'],
+        'Metric': ['ContingencySimilarity'],
+        'Score': [.25],
+        'Real Correlation': [np.nan],
+        'Synthetic Correlation': [np.nan],
+    }))
+
+    # Assert Cardinality details
+    assert details[2] == details[5] == {('table1', 'table2'): {'score': 0.75}}
+
+    # Assert Column Shapes details without table_name
+    pd.testing.assert_frame_equal(details[3]['table1'], pd.DataFrame({
+        'Column': ['col2', 'col3'],
+        'Metric': ['TVComplement', 'TVComplement'],
+        'Score': [.75, .75]
+    }))
+    pd.testing.assert_frame_equal(details[3]['table2'], pd.DataFrame({
+        'Column': ['col4', 'col5', 'col7'],
+        'Metric': ['KSComplement', 'KSComplement', 'KSComplement'],
+        'Score': [.75, .75, 1]
+    }))
+
+    # Assert Column Pair Trends details without table_name
+    pd.testing.assert_frame_equal(details[4]['table1'], pd.DataFrame({
+        'Column 1': ['col2'],
+        'Column 2': ['col3'],
+        'Metric': ['ContingencySimilarity'],
+        'Score': [.25],
+        'Real Correlation': [np.nan],
+        'Synthetic Correlation': [np.nan],
+    }))
+    pd.testing.assert_frame_equal(details[4]['table2'], pd.DataFrame({
+        'Column 1': ['col4', 'col4', 'col5'],
+        'Column 2': ['col5', 'col7', 'col7'],
+        'Metric': ['CorrelationSimilarity', 'CorrelationSimilarity', 'CorrelationSimilarity'],
+        'Score': [0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
+        'Real Correlation': [0.946664, 0.966247, 0.862622],
+        'Synthetic Correlation': [0.926925, 0.936853, 0.798384],
     }))

@@ -76,7 +76,7 @@ class QualityReport():
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
         out.write(
-                f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n'
+            f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n'
         )
         out.write('Properties:\n')
 
