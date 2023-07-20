@@ -24,12 +24,12 @@ class Coverage(BaseSingleTableProperty):
     }
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
-        """Generate the _details self._detailsframe for the column shapes property.
+        """Generate the _details dataframe for the column shapes property.
 
         Args:
-            real_data (pandas.self._detailsFrame):
+            real_data (pandas.DataFrame):
                 The real self._details
-            synthetic_data (pandas.self._detailsFrame):
+            synthetic_data (pandas.DataFrame):
                 The synthetic self._details
             metadata (dict):
                 The metadata of the table
@@ -37,7 +37,7 @@ class Coverage(BaseSingleTableProperty):
                 The progress bar to use. Defaults to tqdm.
 
         Returns:
-            pandas.self._detailsFrame
+            pandas.DataFrame
         """
         column_names, metric_names, scores = [], [], []
         error_messages = []
