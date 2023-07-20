@@ -86,11 +86,11 @@ class Coverage(BaseSingleTableProperty):
         average_score = self._compute_average()
 
         fig = px.bar(
-            self._details,
+            data_frame=self._details,
             x='Column',
             y='Score',
             title=f'Data Diagnostics: Column Coverage (Average Score={round(average_score, 2)})',
-            category_orders={'group': self._details['Column']},
+            category_orders={'group': list(self._details['Column'])},
             color='Metric',
             color_discrete_map={
                 'RangeCoverage': '#000036',
