@@ -17,7 +17,7 @@ class Synthesis(BaseSingleTableProperty):
     metric = NewRowSynthesis
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
-        """Generate the _details dataframe for the column shapes property.
+        """Generate the _details dataframe for the synthesis property.
 
         Args:
             real_data (pandas.DataFrame):
