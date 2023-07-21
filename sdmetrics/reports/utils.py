@@ -479,7 +479,7 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, metadata):
         return make_mixed_column_pair_plot(real_data, synthetic_data)
 
 
-def get_cardinality(parent_table, child_table, parent_primary_key, child_foreign_key):
+def _get_cardinality(parent_table, child_table, parent_primary_key, child_foreign_key):
     """Return the cardinality of the parent-child relationship.
 
     Args:
@@ -505,7 +505,7 @@ def get_cardinality(parent_table, child_table, parent_primary_key, child_foreign
     return cardinalities.sort_values('# children')
 
 
-def generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
+def _generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
     """Generate a plot of the cardinality of the parent-child relationship.
 
     Args:
@@ -519,16 +519,18 @@ def generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
     Returns:
         plotly.graph_objects._figure.Figure
     """
-    fig = px.histogram(data,
-                       x='# children',
-                       y='# parents',
-                       color='data',
-                       barmode='group',
-                       color_discrete_sequence=[DATACEBO_DARK, DATACEBO_LIGHT],
-                       pattern_shape='data',
-                       pattern_shape_sequence=['', '/'],
-                       nbins=max(data['# children']) - min(data['# children']) + 1,
-                       histnorm='probability density')
+    fig = px.histogram(
+        data,
+        x='# children',
+        y='# parents',
+        color='data',
+        barmode='group',
+        color_discrete_sequence=[DATACEBO_DARK, DATACEBO_LIGHT],
+        pattern_shape='data',
+        pattern_shape_sequence=['', '/'],
+        nbins=max(data['# children']) - min(data['# children']) + 1,
+        histnorm='probability density'
+    )
 
     for name in ['Real', 'Synthetic']:
         fig.update_traces(
@@ -571,25 +573,25 @@ def get_cardinality_plot(real_data, synthetic_data, child_table_name, parent_tab
         plotly.graph_objects._figure.Figure
     """
     parent_primary_key = None
-    for relation_dict in metadata.get('relationships', []):
-        parent_match = relation_dict['parent_table_name'] == parent_table_name
-        child_match = relation_dict['child_table_name'] == child_table_name
-        foreign_key_match = relation_dict['child_foreign_key'] == child_foreign_key
+    for relation in metadata.get('relationships', []):
+        parent_match = relation['parent_table_name'] == parent_table_name
+        child_match = relation['child_table_name'] == child_table_name
+        foreign_key_match = relation['child_foreign_key'] == child_foreign_key
         if child_match and parent_match and foreign_key_match:
-            parent_primary_key = relation_dict['parent_primary_key']
+            parent_primary_key = relation['parent_primary_key']
 
     if parent_primary_key is None:
         raise ValueError(
-            f"Relationship between child table '{child_table_name}' and parent table "
+            f"No relationship found between child table '{child_table_name}' and parent table "
             f"'{parent_table_name}' for the foreign key '{child_foreign_key}' "
-            'not found in the metadata. Please update the metadata.'
+            'in the metadata. Please update the metadata.'
         )
 
-    real_cardinality = get_cardinality(
+    real_cardinality = _get_cardinality(
         real_data[parent_table_name], real_data[child_table_name],
         parent_primary_key, child_foreign_key
     )
-    synth_cardinality = get_cardinality(
+    synth_cardinality = _get_cardinality(
         synthetic_data[parent_table_name],
         synthetic_data[child_table_name],
         parent_primary_key, child_foreign_key
@@ -599,7 +601,7 @@ def get_cardinality_plot(real_data, synthetic_data, child_table_name, parent_tab
     synth_cardinality['data'] = 'Synthetic'
 
     all_cardinality = pd.concat([real_cardinality, synth_cardinality], ignore_index=True)
-    fig = generate_cardinality_plot(
+    fig = _generate_cardinality_plot(
         all_cardinality, parent_primary_key, child_foreign_key
     )
 

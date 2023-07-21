@@ -7,11 +7,12 @@ import pandas as pd
 import pytest
 
 from sdmetrics.reports.utils import (
-    _validate_categorical_values, aggregate_metric_results, convert_to_datetime,
-    discretize_and_apply_metric, discretize_table_data, generate_cardinality_plot, get_cardinality,
-    get_cardinality_plot, get_column_pair_plot, get_column_plot, make_continuous_column_pair_plot,
-    make_continuous_column_plot, make_discrete_column_pair_plot, make_discrete_column_plot,
-    make_mixed_column_pair_plot, validate_multi_table_inputs, validate_single_table_inputs)
+    _generate_cardinality_plot, _get_cardinality, _validate_categorical_values,
+    aggregate_metric_results, convert_to_datetime, discretize_and_apply_metric,
+    discretize_table_data, get_cardinality_plot, get_column_pair_plot, get_column_plot,
+    make_continuous_column_pair_plot, make_continuous_column_plot, make_discrete_column_pair_plot,
+    make_discrete_column_plot, make_mixed_column_pair_plot, validate_multi_table_inputs,
+    validate_single_table_inputs)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -935,7 +936,7 @@ def test_get_column_pair_plot_missing_column_synthetic_data():
 
 
 def test_get_cardinality():
-    """Test the ``get_cardinality`` method."""
+    """Test the ``_get_cardinality`` method."""
     # Setup
     parent_table = pd.DataFrame({
         'id': [1, 2, 3, 4, 5],
@@ -949,7 +950,7 @@ def test_get_cardinality():
     child_foreign_key = 'parent_id'
 
     # Run
-    result = get_cardinality(parent_table, child_table, parent_primary_key, child_foreign_key)
+    result = _get_cardinality(parent_table, child_table, parent_primary_key, child_foreign_key)
 
     # Assert
     expected_result = pd.DataFrame({
@@ -962,7 +963,7 @@ def test_get_cardinality():
 
 @patch('sdmetrics.reports.utils.px')
 def test_generate_cardinality_plot(mock_px):
-    """Test the ``generate_cardinality_plot`` method."""
+    """Test the ``_generate_cardinality_plot`` method."""
     # Setup
     mock_data = pd.DataFrame({
         '# children': [1, 2, 3, 4],
@@ -977,7 +978,7 @@ def test_generate_cardinality_plot(mock_px):
     mock_px.histogram.return_value = mock_fig
 
     # Run
-    generate_cardinality_plot(mock_data, parent_primary_key, child_foreign_key)
+    _generate_cardinality_plot(mock_data, parent_primary_key, child_foreign_key)
 
     # Expected call
     expected_kwargs = {
@@ -1015,8 +1016,8 @@ def test_generate_cardinality_plot(mock_px):
         )
 
 
-@patch('sdmetrics.reports.utils.get_cardinality')
-@patch('sdmetrics.reports.utils.generate_cardinality_plot')
+@patch('sdmetrics.reports.utils._get_cardinality')
+@patch('sdmetrics.reports.utils._generate_cardinality_plot')
 def test_get_cardinality_plot(mock_generate_cardinality_plot, mock_get_cardinality):
     """Test the ``get_cardinality_plot`` method."""
     # Setup
@@ -1090,8 +1091,8 @@ def test_get_cardinality_plot_no_relationships():
 
     # Run and Assert
     expected_message = re.escape(
-        "Relationship between child table 'table2' and parent table 'table1'"
-        " for the foreign key 'child_key' not found in the metadata. "
+        "No relationship found between child table 'table2' and parent table 'table1'"
+        " for the foreign key 'child_key' in the metadata. "
         'Please update the metadata.'
     )
     with pytest.raises(ValueError, match=expected_message):
