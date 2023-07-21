@@ -10,7 +10,7 @@ class Synthesis(BaseSingleTableProperty):
     """Synthesis property class for single table.
 
     This property assesses the novelty of the syntetic data over the real data.
-    The NewRowSynthesis metric is computed over the real and synthetic table to
+    The ``NewRowSynthesis`` metric is computed over the real and synthetic table to
     score the proportion of new rows in the synthetic data.
     """
 
