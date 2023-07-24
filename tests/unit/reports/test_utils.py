@@ -7,8 +7,9 @@ import pandas as pd
 import pytest
 
 from sdmetrics.reports.utils import (
-    _validate_categorical_values, aggregate_metric_results, convert_to_datetime,
-    discretize_and_apply_metric, discretize_table_data, get_column_pair_plot, get_column_plot,
+    _generate_cardinality_plot, _get_cardinality, _validate_categorical_values,
+    aggregate_metric_results, convert_to_datetime, discretize_and_apply_metric,
+    discretize_table_data, get_cardinality_plot, get_column_pair_plot, get_column_plot,
     make_continuous_column_pair_plot, make_continuous_column_plot, make_discrete_column_pair_plot,
     make_discrete_column_plot, make_mixed_column_pair_plot, validate_multi_table_inputs,
     validate_single_table_inputs)
@@ -932,6 +933,173 @@ def test_get_column_pair_plot_missing_column_synthetic_data():
         match=re.escape('Column(s) `col2` not found in the synthetic table data.'),
     ):
         get_column_pair_plot(real_data, synthetic_data, columns, metadata)
+
+
+def test_get_cardinality():
+    """Test the ``_get_cardinality`` method."""
+    # Setup
+    parent_table = pd.DataFrame({
+        'id': [1, 2, 3, 4, 5],
+        'name': ['Alice', 'Bob', 'Charlie', 'Dave', 'Eve']
+    })
+    child_table = pd.DataFrame({
+        'id': [1, 2, 3, 4, 5, 6, 7, 8],
+        'parent_id': [1, 1, 2, 2, 2, 3, 3, 4]
+    })
+    parent_primary_key = 'id'
+    child_foreign_key = 'parent_id'
+
+    # Run
+    result = _get_cardinality(parent_table, child_table, parent_primary_key, child_foreign_key)
+
+    # Assert
+    expected_result = pd.DataFrame({
+        '# children': [0, 1, 2, 3],
+        '# parents': [1, 1, 2, 1]
+    })
+
+    pd.testing.assert_frame_equal(result, expected_result)
+
+
+@patch('sdmetrics.reports.utils.px')
+def test_generate_cardinality_plot(mock_px):
+    """Test the ``_generate_cardinality_plot`` method."""
+    # Setup
+    mock_data = pd.DataFrame({
+        '# children': [1, 2, 3, 4],
+        '# parents': [2, 3, 2, 1],
+        'data': ['Real', 'Real', 'Synthetic', 'Synthetic']
+    })
+
+    parent_primary_key = 'parent_key'
+    child_foreign_key = 'child_key'
+
+    mock_fig = Mock()
+    mock_px.histogram.return_value = mock_fig
+
+    # Run
+    _generate_cardinality_plot(mock_data, parent_primary_key, child_foreign_key)
+
+    # Expected call
+    expected_kwargs = {
+        'x': '# children',
+        'y': '# parents',
+        'color': 'data',
+        'barmode': 'group',
+        'color_discrete_sequence': ['#000036', '#01E0C9'],
+        'pattern_shape': 'data',
+        'pattern_shape_sequence': ['', '/'],
+        'nbins': 4,
+        'histnorm': 'probability density'
+    }
+
+    # Assert
+    mock_px.histogram.assert_called_once_with(mock_data, **expected_kwargs)
+
+    title = (
+        f"Relationship (child foreign key='{child_foreign_key}' and parent "
+        f"primary key='{parent_primary_key}')"
+    )
+
+    # Check update_layout and update_traces
+    mock_fig.update_layout.assert_called_once_with(
+        title=title,
+        xaxis_title='# of Children (per Parent)',
+        yaxis_title='Frequency',
+        plot_bgcolor='#F5F5F8'
+    )
+
+    for name in ['Real', 'Synthetic']:
+        mock_fig.update_traces.assert_any_call(
+            hovertemplate=f'<b>{name}</b><br>Frequency: %{{y}}<extra></extra>',
+            selector={'name': name}
+        )
+
+
+@patch('sdmetrics.reports.utils._get_cardinality')
+@patch('sdmetrics.reports.utils._generate_cardinality_plot')
+def test_get_cardinality_plot(mock_generate_cardinality_plot, mock_get_cardinality):
+    """Test the ``get_cardinality_plot`` method."""
+    # Setup
+    real_data = {'table1': None, 'table2': None}
+    synthetic_data = {'table1': None, 'table2': None}
+    child_foreign_key = 'child_key'
+    parent_table_name = 'table1'
+    child_table_name = 'table2'
+    metadata = {
+        'relationships': [
+            {
+                'child_foreign_key': child_foreign_key,
+                'parent_table_name': 'table1',
+                'child_table_name': 'table2',
+                'parent_primary_key': 'parent_key',
+            },
+        ]
+    }
+
+    real_cardinality = pd.DataFrame({'# children': [1, 2, 3, 4], '# parents': [2, 3, 2, 1]})
+    synthetic_cardinality = pd.DataFrame({'# children': [1, 2, 3, 4], '# parents': [2, 3, 2, 1]})
+    mock_get_cardinality.side_effect = [real_cardinality, synthetic_cardinality]
+
+    mock_generate_cardinality_plot.return_value = 'test_fig'
+
+    # Run
+    fig = get_cardinality_plot(
+        real_data, synthetic_data, child_table_name, parent_table_name, child_foreign_key, metadata
+    )
+
+    # Assert
+    assert fig == 'test_fig'
+
+    # Check the calls
+    calls = [
+        call(real_data['table1'], real_data['table2'], 'parent_key', 'child_key'),
+        call(synthetic_data['table1'], synthetic_data['table2'], 'parent_key', 'child_key')
+    ]
+    mock_get_cardinality.assert_has_calls(calls)
+
+    real_cardinality['data'] = 'Real'
+    synthetic_cardinality['data'] = 'Synthetic'
+    expected_all_cardinality = pd.concat([
+        real_cardinality, synthetic_cardinality
+    ], ignore_index=True)
+
+    all_cardinality = mock_generate_cardinality_plot.call_args[0][0]
+    pd.testing.assert_frame_equal(all_cardinality, expected_all_cardinality)
+    other_args = mock_generate_cardinality_plot.call_args[0][1:]
+    assert other_args == ('parent_key', 'child_key')
+
+
+def test_get_cardinality_plot_no_relationships():
+    """Test the ``get_cardinality_plot`` method when there are no relationships in the metadata."""
+    # Setup
+    real_data = {'table1': None, 'table2': None}
+    synthetic_data = {'table1': None, 'table2': None}
+    child_foreign_key = 'child_key'
+    parent_table_name = 'table1'
+    child_table_name = 'table2'
+    metadata = {
+        'relationships': [
+            {
+                'parent_table_name': 'table1',
+                'parent_primary_key': 'parent_column',
+                'child_table_name': 'table2',
+                'child_foreign_key': 'wrong_column'
+            }
+        ]
+    }
+
+    # Run and Assert
+    expected_message = re.escape(
+        "No relationship found between child table 'table2' and parent table 'table1'"
+        " for the foreign key 'child_key' in the metadata. "
+        'Please update the metadata.'
+    )
+    with pytest.raises(ValueError, match=expected_message):
+        get_cardinality_plot(
+            real_data, synthetic_data, child_table_name,
+            parent_table_name, child_foreign_key, metadata
+        )
 
 
 def test_discretize_table_data():
