@@ -90,7 +90,6 @@ class TestBoundary:
             },
         }
 
-        # Check call_args of mock_px.bar
         _, kwargs = mock_px.bar.call_args
 
         assert kwargs.pop('data_frame').equals(expected_kwargs.pop('data_frame'))

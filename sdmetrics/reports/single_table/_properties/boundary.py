@@ -22,11 +22,11 @@ class Boundary(BaseSingleTableProperty):
 
         Args:
             real_data (pandas.DataFrame):
-                The real data
+                The real data.
             synthetic_data (pandas.DataFrame):
-                The synthetic data
+                The synthetic data.
             metadata (dict):
-                The metadata of the table
+                The metadata of the table.
             progress_bar (tqdm.tqdm or None):
                 The progress bar to use. Defaults to tqdm.
 
@@ -74,7 +74,7 @@ class Boundary(BaseSingleTableProperty):
         """Create a plot to show the column boundary scores.
 
         Returns:
-            plotly.graph_objects._figure.Figure
+            plotly.graph_objects._figure.Figure.
         """
         average_score = self._compute_average()
 
