@@ -21,16 +21,16 @@ class Synthesis(BaseSingleTableProperty):
 
         Args:
             real_data (pandas.DataFrame):
-                The real data
+                The real data.
             synthetic_data (pandas.DataFrame):
-                The synthetic data
+                The synthetic data.
             metadata (dict):
-                The metadata of the table
+                The metadata of the table.
             progress_bar (tqdm.tqdm or None):
                 The progress bar to use. Defaults to tqdm.
 
         Returns:
-            pandas.DataFrame
+            pandas.DataFrame.
         """
         name = self.metric.__name__
         error_message = np.nan
@@ -65,7 +65,7 @@ class Synthesis(BaseSingleTableProperty):
             'Error': error_message,
         }, index=[0])
 
-        if result['Error'].isna().all():
+        if pd.isna(result['Error'].iloc[0]):
             result = result.drop('Error', axis=1)
 
         return result
@@ -74,14 +74,12 @@ class Synthesis(BaseSingleTableProperty):
         """Create a plot to show the synthesis property.
 
         Returns:
-            plotly.graph_objects._figure.Figure
+            plotly.graph_objects._figure.Figure.
         """
         labels = ['Exact Matches', 'Novel Rows']
-        values = list(self._details[['Num Matched Rows', 'Num New Rows']].to_numpy()[0])
+        values = list(self._details[['Num Matched Rows', 'Num New Rows']].iloc[0])
 
-        average_score = self._compute_average()
-        if not np.isnan(average_score):
-            average_score = round(average_score, 2)
+        average_score = round(self._compute_average(), 2)
 
         fig = px.pie(
             values=values,

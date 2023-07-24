@@ -10,40 +10,32 @@ class TestSynthesis:
     @patch('sdmetrics.reports.single_table._properties.synthesis.'
            'NewRowSynthesis.compute_breakdown')
     def test__generate_details(self, newrowsynthesis_mock):
-        """Test the ``_generate_details`` method."""
+        """Test the ``_generate_details`` method.
+        
+        If the synthetic data is larger than 10000 rows, then the synthetic sample size
+        should be 10000. Otherwise, the synthetic sample size should be the size of the
+        synthetic data.
+        """
         # Setup
-        real_data = pd.DataFrame({
-            'col1': [1, 2, 3, 4],
-            'col2': [False, True, True, False],
-            'col3': ['a', 'b', 'c', 'd'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03', '2020-01-04'])
-        })
-        synthetic_data = pd.DataFrame({
-            'col1': [1, 7, 3, 4],
-            'col2': [False, True, True, False],
-            'col3': ['a', 'b', 'c', 'd'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03', '2020-01-04'])
-        })
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'boolean'},
-                'col3': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'datetime'}
-            }
-        }
+        real_data = Mock()
+        synthetic_data = [1] * 4
+        synthetic_data_20000 = [1] * 20000
+        metadata = Mock()
 
         newrowsynthesis_mock.return_value = {
             'score': 0.25,
             'num_matched_rows': 3,
             'num_new_rows': 1,
         }
+
         # Run
         synthesis_property = Synthesis()
+        details = synthesis_property._generate_details(real_data, synthetic_data_20000, metadata)
         details = synthesis_property._generate_details(real_data, synthetic_data, metadata)
 
         # Assert
         expected_calls = [
+            call(real_data, synthetic_data_20000, synthetic_sample_size=10000),
             call(real_data, synthetic_data, synthetic_sample_size=4)
         ]
 
