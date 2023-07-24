@@ -11,7 +11,7 @@ class TestSynthesis:
            'NewRowSynthesis.compute_breakdown')
     def test__generate_details(self, newrowsynthesis_mock):
         """Test the ``_generate_details`` method.
-        
+
         If the synthetic data is larger than 10000 rows, then the synthetic sample size
         should be 10000. Otherwise, the synthetic sample size should be the size of the
         synthetic data.
