@@ -45,6 +45,43 @@ class TestBoundary:
 
         boundary_adherence_mock.assert_has_calls(expected_calls_boundary)
 
+    @patch('sdmetrics.reports.single_table._properties.boundary.BoundaryAdherence.compute')
+    def test__generate_details_error(self, boundary_adherence_mock):
+        """Test the ``_generate_details`` method."""
+        # Setup
+
+        boundary_adherence_mock.side_effect = ValueError('Mock Error')
+        real_data = pd.DataFrame({
+            'col1': [1, 2, np.nan],
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': [1, 2, 3]
+        })
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'}
+            }
+        }
+
+        # Run
+        boundary_property = Boundary()
+        details = boundary_property._generate_details(real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_calls_boundary = [
+            call(real_data['col1'], synthetic_data['col1']),
+        ]
+
+        boundary_adherence_mock.assert_has_calls(expected_calls_boundary)
+        expected_details = pd.DataFrame({
+            'Column': ['col1'],
+            'Metric': ['BoundaryAdherence'],
+            'Score': [np.nan],
+            'Error': ['Error: ValueError Mock Error']
+        })
+
+        pd.testing.assert_frame_equal(details, expected_details)
+
     @patch('sdmetrics.reports.single_table._properties.boundary.px')
     def test_get_visualization(self, mock_px):
         """Test the ``get_visualization`` method."""
