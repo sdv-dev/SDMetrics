@@ -1,5 +1,6 @@
 from unittest.mock import Mock, call, patch
 
+import numpy as np
 import pandas as pd
 
 from sdmetrics.reports.single_table._properties.synthesis import Synthesis
@@ -49,6 +50,38 @@ class TestSynthesis:
         }, index=[0])
 
         pd.testing.assert_frame_equal(details, expected__details)
+
+    @patch('sdmetrics.reports.single_table._properties.synthesis.'
+           'NewRowSynthesis.compute_breakdown')
+    def test__generate_details_error(self, newrowsynthesis_mock):
+        """Test the ``_generate_details`` method when the metric raises an error."""
+        # Setup
+
+        newrowsynthesis_mock.side_effect = ValueError('Mock Error')
+        real_data = Mock()
+        synthetic_data = [1] * 4
+        metadata = Mock()
+
+        # Run
+        synthesis_property = Synthesis()
+        details = synthesis_property._generate_details(real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_calls_synthesis = [
+            call(real_data, synthetic_data, synthetic_sample_size=4),
+        ]
+
+        newrowsynthesis_mock.assert_has_calls(expected_calls_synthesis)
+
+        expected_details = pd.DataFrame({
+            'Metric': 'NewRowSynthesis',
+            'Score': np.nan,
+            'Num Matched Rows': np.nan,
+            'Num New Rows': np.nan,
+            'Error': 'Error: ValueError Mock Error'
+        }, index=[0])
+
+        pd.testing.assert_frame_equal(details, expected_details)
 
     @patch('sdmetrics.reports.single_table._properties.synthesis.px')
     def test_get_visualization(self, mock_px):
