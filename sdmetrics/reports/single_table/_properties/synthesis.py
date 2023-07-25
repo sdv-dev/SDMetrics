@@ -36,7 +36,6 @@ class Synthesis(BaseSingleTableProperty):
         error_message = np.nan
 
         sample_size = len(synthetic_data) if len(synthetic_data) < 10000 else 10000
-
         try:
             score_breakdown = self.metric.compute_breakdown(
                 real_data, synthetic_data, synthetic_sample_size=sample_size
