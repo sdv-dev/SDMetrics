@@ -47,7 +47,7 @@ class TestBoundary:
 
     @patch('sdmetrics.reports.single_table._properties.boundary.BoundaryAdherence.compute')
     def test__generate_details_error(self, boundary_adherence_mock):
-        """Test the ``_generate_details`` method."""
+        """Test the ``_generate_details`` method when the metric raises an error."""
         # Setup
 
         boundary_adherence_mock.side_effect = ValueError('Mock Error')
