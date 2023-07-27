@@ -49,7 +49,7 @@ class BaseMultiTableProperty():
 
         self.is_computed = True
 
-        return round(average_score.mean(), 2)
+        return np.nanmean(average_score)
 
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.

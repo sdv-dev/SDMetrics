@@ -16,7 +16,7 @@ def test_column_shapes_property():
     result = column_shapes.get_score(real_data, synthetic_data, metadata)
 
     # Assert
-    assert result == 0.79
+    assert result == 0.796825396825397
 
 
 def test_column_shapes_property_with_progress_bar():
@@ -33,7 +33,7 @@ def test_column_shapes_property_with_progress_bar():
     result = column_shapes.get_score(real_data, synthetic_data, metadata, progress_bar)
 
     # Assert
-    assert result == 0.79
+    assert result == 0.796825396825397
     assert mock_update.call_count == num_columns
 
 
@@ -47,4 +47,4 @@ def test_column_pair_trends_property():
     result = column_pair_trends.get_score(real_data, synthetic_data, metadata)
 
     # Assert
-    assert result == 0.49
+    assert result == 0.49349249665827416

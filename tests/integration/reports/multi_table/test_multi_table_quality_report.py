@@ -102,10 +102,10 @@ def test_multi_table_quality_report():
         details.append(report.get_details(property_))
 
     # Assert score
-    np.testing.assert_almost_equal(score, .72)
+    assert score == 0.7190730021414969
     pd.testing.assert_frame_equal(properties, pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
-        'Score': [0.79, 0.62, 0.75],
+        'Score': [0.7916666666666667, 0.615552339757824, 0.75],
     }))
 
     # Assert Column Shapes details
