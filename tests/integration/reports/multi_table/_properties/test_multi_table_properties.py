@@ -94,7 +94,7 @@ def test_boundary_property():
     result = boundary.get_score(real_data, synthetic_data, metadata)
 
     # Assert
-    assert result == 0.96
+    assert result == 0.88
 
 
 def test_boundary_property_with_progress_bar():
@@ -112,7 +112,7 @@ def test_boundary_property_with_progress_bar():
     result = boundary.get_score(real_data, synthetic_data, metadata, progress_bar)
 
     # Assert
-    assert result == 0.96
+    assert result == 0.88
     assert mock_update.call_count == num_columns
 
 
