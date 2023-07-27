@@ -56,7 +56,6 @@ class TestSynthesis:
     def test__generate_details_error(self, newrowsynthesis_mock):
         """Test the ``_generate_details`` method when the metric raises an error."""
         # Setup
-
         newrowsynthesis_mock.side_effect = ValueError('Mock Error')
         real_data = Mock()
         synthetic_data = [1] * 4
