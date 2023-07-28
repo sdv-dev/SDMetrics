@@ -17,6 +17,11 @@ class BaseReport():
     This class creates a base report for single-table data.
     """
 
+    def __init__(self):
+        self._overall_quality_score = None
+        self.is_generated = False
+        self._properties = {}
+
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
         """Validate that the metadata matches the data.
 
@@ -130,7 +135,7 @@ class BaseReport():
 
         if not self.is_generated:
             raise ValueError(
-                'Quality report must be generated before getting details. Call `generate` first.'
+                'The report must be generated before getting details. Call `generate` first.'
             )
 
     def get_properties(self):
@@ -161,6 +166,8 @@ class BaseReport():
                 The visualization for the requested property.
         """
         self._validate_property_generated(property_name)
+
+        return self._properties[property_name].get_visualization()
 
     def get_details(self, property_name):
         """Return the details table for the given property name.

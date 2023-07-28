@@ -1,18 +1,7 @@
-import contextlib
-import io
-import pickle
-from unittest.mock import Mock, call, mock_open, patch
-
-import numpy as np
-import pandas as pd
 import pytest
-import re
 
-from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.reports.single_table import DiagnosticReport
-from sdmetrics.reports.single_table._properties import (
-    Coverage, Boundary, Synthesis
-)
+from sdmetrics.reports.single_table._properties import Boundary, Coverage, Synthesis
 
 
 class TestDiagnosticReport:
@@ -24,7 +13,7 @@ class TestDiagnosticReport:
 
         # Assert
         assert report._overall_quality_score is None
-        assert report.is_generated == False
+        assert report.is_generated is False
         assert isinstance(report._properties['Coverage'], Coverage)
         assert isinstance(report._properties['Boundary'], Boundary)
         assert isinstance(report._properties['Synthesis'], Synthesis)

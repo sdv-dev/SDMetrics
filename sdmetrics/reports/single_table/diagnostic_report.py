@@ -5,11 +5,10 @@ import sys
 
 import pandas as pd
 
+from sdmetrics.reports.single_table._properties import Boundary, Coverage, Synthesis
 from sdmetrics.reports.single_table.base_report import BaseReport
-from sdmetrics.reports.single_table._properties import Coverage, Synthesis, Boundary
-from sdmetrics.reports.utils import (
-    DIAGNOSTIC_REPORT_RESULT_DETAILS, aggregate_metric_results, print_results_for_level,
-    validate_single_table_inputs)
+from sdmetrics.reports.utils import DIAGNOSTIC_REPORT_RESULT_DETAILS, print_results_for_level
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -55,11 +54,11 @@ class DiagnosticReport(BaseReport):
         self._results['WARNING'] = []
         self._results['DANGER'] = []
 
-        for property in self._properties:
-            details = self._properties[property].get_details()
+        for property_name in self._properties:
+            details = self._properties[property_name].get_details()
             average_score_metric = details.groupby('metric').mean()['score']
 
-        for metric, score in self._metric_averages.items():
+        for metric, score in average_score_metric.items():
             if pd.isna(score):
                 continue
             if score >= 0.9:
