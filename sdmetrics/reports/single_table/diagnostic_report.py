@@ -2,6 +2,7 @@
 
 import logging
 import sys
+from copy import deepcopy
 
 import pandas as pd
 
@@ -26,6 +27,7 @@ class DiagnosticReport(BaseReport):
             'Boundary': Boundary(),
             'Synthesis': Synthesis()
         }
+        self.results = {}
 
     def _get_num_iterations(self, property_name, metadata):
         """Get the number of iterations for the property.
@@ -47,28 +49,36 @@ class DiagnosticReport(BaseReport):
 
     def _print_results(self, out=sys.stdout):
         """Print the diagnostic report results."""
-        results = {}
-        results['SUCCESS'] = []
-        results['WARNING'] = []
-        results['DANGER'] = []
+        self.results['SUCCESS'] = []
+        self.results['WARNING'] = []
+        self.results['DANGER'] = []
 
         for property_name in self._properties:
             details = self._properties[property_name]._details
-            average_score_metric = details.groupby('Metric').mean()['Score']
+            average_score_metric = details.groupby('Metric')['Score'].mean()
             for metric, score in average_score_metric.items():
                 if pd.isna(score):
                     continue
                 if score >= 0.9:
-                    results['SUCCESS'].append(
+                    self.results['SUCCESS'].append(
                         DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['SUCCESS'])
                 elif score >= 0.5:
-                    results['WARNING'].append(
+                    self.results['WARNING'].append(
                         DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['WARNING'])
                 else:
-                    results['DANGER'].append(
+                    self.results['DANGER'].append(
                         DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
 
         out.write('\nDiagnostic Results:\n')
-        print_results_for_level(out, results, 'SUCCESS')
-        print_results_for_level(out, results, 'WARNING')
-        print_results_for_level(out, results, 'DANGER')
+        print_results_for_level(out, self.results, 'SUCCESS')
+        print_results_for_level(out, self.results, 'WARNING')
+        print_results_for_level(out, self.results, 'DANGER')
+
+    def get_results(self):
+        """Return the diagnostic results.
+
+        Returns:
+            dict
+                The diagnostic results.
+        """
+        return deepcopy(self.results)

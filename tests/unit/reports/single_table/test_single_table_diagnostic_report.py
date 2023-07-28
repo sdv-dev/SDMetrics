@@ -15,7 +15,7 @@ class TestDiagnosticReport:
         report = DiagnosticReport()
 
         # Assert
-        assert report._overall_quality_score is None
+        assert report._overall_score is None
         assert report.is_generated is False
         assert isinstance(report._properties['Coverage'], Coverage)
         assert isinstance(report._properties['Boundary'], Boundary)
@@ -43,6 +43,17 @@ class TestDiagnosticReport:
         assert num_iterations_coverage == 3
         assert num_iterations_boundaries == 3
         assert num_iterations_synthesis == 1
+
+    def test_get_results(self):
+        # Setup
+        diagnostic_report = DiagnosticReport()
+        diagnostic_report.results = {'SUCCESS': ['Test']}
+
+        # Run
+        results = diagnostic_report.get_results()
+
+        # Assert
+        assert results == {'SUCCESS': ['Test']}
 
     @patch('sys.stdout.write')
     def test__print_results(self, mock_write):

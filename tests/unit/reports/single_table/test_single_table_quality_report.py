@@ -12,7 +12,7 @@ class TestQualityReport:
         report = QualityReport()
 
         # Assert
-        assert report._overall_quality_score is None
+        assert report._overall_score is None
         assert not report.is_generated
         assert isinstance(report._properties['Column Shapes'], ColumnShapes)
         assert isinstance(report._properties['Column Pair Trends'], ColumnPairTrends)
@@ -22,7 +22,7 @@ class TestQualityReport:
         """Test the ``_print_results`` method."""
         # Setup
         quality_report = QualityReport()
-        quality_report._overall_quality_score = 0.5
+        quality_report._overall_score = 0.5
         quality_report._properties = {
             'Column Shapes': Mock(_compute_average=Mock(return_value=0.6)),
             'Column Pair Trends': Mock(_compute_average=Mock(return_value=0.4))
@@ -45,7 +45,7 @@ class TestQualityReport:
         # Setup
         quality_report = QualityReport()
         mock_score = Mock()
-        quality_report._overall_quality_score = mock_score
+        quality_report._overall_score = mock_score
 
         # Run
         score = quality_report.get_score()

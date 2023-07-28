@@ -68,7 +68,7 @@ class BaseReport():
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
         _validate_categorical_values(real_data, synthetic_data, metadata)
 
-    def _print_results(self, out):
+    def _print_results(self, out=sys.stdout):
         raise NotImplementedError
 
     def _get_num_iterations(self, property_name, metadata):

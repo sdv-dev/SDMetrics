@@ -86,6 +86,7 @@ class TestBaseReport:
 
     @patch('sdmetrics.reports.single_table.base_report._validate_categorical_values')
     def test_validate(self, mock_validate_categorical_values):
+        """Test the ``validate`` method."""
         # Setup
         base_report = BaseReport()
         mock__validate_metadata_matches_data = Mock()
@@ -156,6 +157,24 @@ class TestBaseReport:
         base_report._properties['Property 2'].get_score.assert_called_with(
             real_data, synthetic_data, metadata, progress_bar=None
         )
+
+    def test__print_result(self):
+        """Test the ``_print_result`` method."""
+        # Setup
+        base_report = BaseReport()
+
+        # Run and Assert
+        with pytest.raises(NotImplementedError):
+            base_report._print_results()
+
+    def test__get_num_iterations(self):
+        """Test the ``_get_num_iterations`` method."""
+        # Setup
+        base_report = BaseReport()
+
+        # Run and Assert
+        with pytest.raises(NotImplementedError):
+            base_report._get_num_iterations('property_name', 'metadata')
 
     @patch('tqdm.tqdm')
     def test_generate_verbose(self, mock_tqdm):
