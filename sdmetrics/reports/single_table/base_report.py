@@ -18,7 +18,7 @@ class BaseReport():
     """
 
     def __init__(self):
-        self._overall_quality_score = None
+        self._overall_score = None
         self.is_generated = False
         self._properties = {}
 
@@ -109,7 +109,7 @@ class BaseReport():
             if verbose:
                 progress_bar.close()
 
-        self._overall_quality_score = np.nanmean(scores)
+        self._overall_score = np.nanmean(scores)
         self.is_generated = True
 
         if verbose:

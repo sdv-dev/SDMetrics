@@ -13,8 +13,7 @@ class QualityReport(BaseReport):
     """
 
     def __init__(self):
-        self._overall_quality_score = None
-        self.is_generated = False
+        super().__init__()
         self._properties = {
             'Column Shapes': ColumnShapes(),
             'Column Pair Trends': ColumnPairTrends()
@@ -43,7 +42,7 @@ class QualityReport(BaseReport):
     def _print_results(self, out=sys.stdout):
         """Print the quality report results."""
         out.write(
-            f'\nOverall Quality Score: {round(self._overall_quality_score * 100, 2)}%\n\n'
+            f'\nOverall Quality Score: {round(self._overall_score * 100, 2)}%\n\n'
         )
         out.write('Properties:\n')
 
@@ -60,4 +59,4 @@ class QualityReport(BaseReport):
             float
                 The overall quality score.
         """
-        return self._overall_quality_score
+        return self._overall_score

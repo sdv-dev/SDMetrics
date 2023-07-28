@@ -20,8 +20,7 @@ class DiagnosticReport(BaseReport):
     """
 
     def __init__(self):
-        self._overall_quality_score = None
-        self.is_generated = False
+        super().__init__()
         self._properties = {
             'Coverage': Coverage(),
             'Boundary': Boundary(),
@@ -41,9 +40,7 @@ class DiagnosticReport(BaseReport):
 
         num_columns = len(metadata['columns'])
 
-        if property_name == 'Coverage':
-            return num_columns
-        elif property_name == 'Boundary':
+        if property_name in ['Coverage', 'Boundary']:
             return num_columns
         elif property_name == 'Synthesis':
             return 1
