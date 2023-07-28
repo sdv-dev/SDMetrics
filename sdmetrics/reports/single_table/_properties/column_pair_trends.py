@@ -307,7 +307,12 @@ class ColumnPairTrends(BaseSingleTableProperty):
         return result
 
     def _get_correlation_matrix(self, column_name):
-        """Get the correlation matrix for the given column name."""
+        """Get the correlation matrix for the given column name.
+
+        Args:
+            column_name (str):
+                The column name to use.
+        """
         if column_name not in ['Score', 'Real Correlation', 'Synthetic Correlation']:
             raise ValueError(f"Invalid column name for _get_correlation_matrix : '{column_name}'")
 
@@ -339,7 +344,18 @@ class ColumnPairTrends(BaseSingleTableProperty):
         return heatmap_df.round(3)
 
     def _get_heatmap(self, correlation_matrix, coloraxis, hovertemplate, customdata=None):
-        """Get the heatmap for the given correlation matrix."""
+        """Get the heatmap for the given correlation matrix.
+
+        Args:
+            correlation_matrix (pandas.DataFrame):
+                The correlation matrix to use.
+            coloraxis (str):
+                The coloraxis to use.
+            hovertemplate (str):
+                The hovertemplate to use.
+            customdata (pandas.DataFrame or None):
+                The customdata to use. Defaults to None.
+        """
         fig = go.Heatmap(
             x=correlation_matrix.columns,
             y=correlation_matrix.columns,
@@ -352,8 +368,13 @@ class ColumnPairTrends(BaseSingleTableProperty):
         return fig
 
     def _update_layout(self, fig):
-        """Update the layout of the figure."""
-        average_score = self._compute_average()
+        """Update the layout of the figure.
+
+        Args:
+            fig (plotly.graph_objects._figure.Figure):
+                The figure to update.
+        """
+        average_score = round(self._compute_average(), 2)
         color_dict = {
             'colorbar_len': 0.5,
             'cmin': 0,
@@ -379,13 +400,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
         """Create a plot to show the column pairs data.
 
         This plot will have one graph in the top row and two in the bottom row.
-
-        Args:
-            score_breakdowns (dict):
-                The score breakdowns of the column pairs metric scores.
-            average_score (float):
-                The average score. If None, the average score will be computed from
-                ``score_breakdowns``.
 
         Returns:
             plotly.graph_objects._figure.Figure

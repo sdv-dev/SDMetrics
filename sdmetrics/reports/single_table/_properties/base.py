@@ -16,7 +16,7 @@ class BaseSingleTableProperty():
         if not isinstance(self._details, pd.DataFrame) or 'Score' not in self._details.columns:
             raise ValueError("The property details must be a DataFrame with a 'Score' column.")
 
-        return round(self._details['Score'].mean(), 2)
+        return self._details['Score'].mean()
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the property."""

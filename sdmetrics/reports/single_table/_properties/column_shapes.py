@@ -80,7 +80,7 @@ class ColumnShapes(BaseSingleTableProperty):
         Returns:
             plotly.graph_objects._figure.Figure
         """
-        average_score = self._compute_average()
+        average_score = round(self._compute_average(), 2)
 
         fig = px.bar(
             self._details,

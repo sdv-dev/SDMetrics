@@ -60,7 +60,7 @@ class TestQualityReport:
         # Assert
         pd.testing.assert_frame_equal(properties, pd.DataFrame({
             'Property': ['Column Shapes', 'Column Pair Trends'],
-            'Score': [0.750000, 0.5],
+            'Score': [0.750000, 0.5005754481922459],
         }))
 
     def test_report_end_to_end(self):
@@ -124,7 +124,7 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
-        assert report.get_score() == 0.78
+        assert report.get_score() == 0.7804181608907237
 
     def test_report_end_to_end_with_errors(self):
         """Test the quality report end to end with errors in the properties computation."""
@@ -194,7 +194,7 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
-        assert report.get_score() == 0.7849999999999999
+        assert report.get_score() == 0.7842929635366918
 
     def test_report_with_column_nan(self):
         """Test the report with column full of NaNs."""
@@ -292,10 +292,10 @@ class TestQualityReport:
             r'Generating\sreport\s\.\.\.',
             r'\(1/2\)\sEvaluating\sColumn\sShapes',
             r'\(2/2\)\sEvaluating\sColumn\sPair\sTrends',
-            r'Overall\sQuality\sScore:\s80\.5%',
+            r'Overall\sQuality\sScore:\s80\.51%',
             r'Properties:',
-            r'-\sColumn\sShapes:\s82\.0%',
-            r'-\sColumn\sPair\sTrends:\s79\.0%',
+            r'-\sColumn\sShapes:\s81\.56%',
+            r'-\sColumn\sPair\sTrends:\s79\.46%',
         ]
 
         real_data, synthetic_data, metadata = load_demo(modality='single_table')

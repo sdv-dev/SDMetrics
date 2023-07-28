@@ -81,7 +81,7 @@ class QualityReport():
         out.write('Properties:\n')
 
         for property_name in self._properties:
-            property_score = self._properties[property_name]._compute_average()
+            property_score = round(self._properties[property_name]._compute_average(), 4)
             out.write(
                 f'- {property_name}: {property_score * 100}%\n'
             )
