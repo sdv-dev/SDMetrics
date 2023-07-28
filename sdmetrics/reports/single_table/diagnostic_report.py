@@ -1,19 +1,12 @@
 """Single table diagnostic report."""
 
-import copy
-import itertools
 import logging
-import pickle
 import sys
-import warnings
 
-import numpy as np
 import pandas as pd
-import pkg_resources
-import tqdm
 
 from sdmetrics.reports.single_table.base_report import BaseReport
-from sdmetrics.reports.single_table._properties import Coverage, Synthesis, Boundaries
+from sdmetrics.reports.single_table._properties import Coverage, Synthesis, Boundary
 from sdmetrics.reports.utils import (
     DIAGNOSTIC_REPORT_RESULT_DETAILS, aggregate_metric_results, print_results_for_level,
     validate_single_table_inputs)
@@ -24,7 +17,7 @@ class DiagnosticReport(BaseReport):
     """Single table diagnostic report.
 
     This class creates a diagnostic report for single-table data. It calculates the diagnostic
-    score along three properties - synthesis, coverage, and boundaries.
+    score along three properties - Synthesis, Coverage, and Boundary.
     """
 
     def __init__(self):
@@ -32,15 +25,26 @@ class DiagnosticReport(BaseReport):
         self.is_generated = False
         self._properties = {
             'Coverage': Coverage(),
-            'Boundaries': Boundaries(),
+            'Boundary': Boundary(),
             'Synthesis': Synthesis()
         }
 
     def _get_num_iterations(self, property_name, metadata):
+        """Get the number of iterations for the property.
+
+        Args:
+            property_name (str):
+                The name of the property.
+            metadata (dict):
+                The metadata of the table.
+        """
+        self._check_property_name(property_name)
+
         num_columns = len(metadata['columns'])
+
         if property_name == 'Coverage':
             return num_columns
-        elif property_name == 'Boundaries':
+        elif property_name == 'Boundary':
             return num_columns
         elif property_name == 'Synthesis':
             return 1

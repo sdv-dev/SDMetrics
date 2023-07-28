@@ -8,12 +8,15 @@ import pandas as pd
 import pkg_resources
 import tqdm
 
-from sdmetrics.reports.single_table._properties import ColumnPairTrends, ColumnShapes
 from sdmetrics.reports.utils import _validate_categorical_values
 
 
 class BaseReport():
-    
+    """Base report class for single table reports.
+
+    This class creates a base report for single-table data.
+    """
+
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
         """Validate that the metadata matches the data.
 
@@ -82,7 +85,6 @@ class BaseReport():
         self.validate(real_data, synthetic_data, metadata)
 
         scores = []
-        num_columns = len(metadata['columns'])
         progress_bar = None
         if verbose:
             sys.stdout.write('Generating report ...\n')
@@ -108,13 +110,23 @@ class BaseReport():
         if verbose:
             self._print_results(sys.stdout)
 
-    def _validate_property_generated(self, property_name):
-        """Validate that the given property name and that the report has been generated."""
-        if property_name not in ['Column Shapes', 'Column Pair Trends']:
+    def _check_property_name(self, property_name):
+        """Check that the given property name is valid.
+
+        Args:
+            property_name (str):
+                The name of the property to check.
+        """
+        if property_name not in self._properties:
+            valid_property_names = "', '".join(self._properties.keys())
             raise ValueError(
                 f"Invalid property name '{property_name}'."
-                " Valid property names are 'Column Shapes' and 'Column Pair Trends'."
+                f" Valid property names are '{valid_property_names}'."
             )
+
+    def _validate_property_generated(self, property_name):
+        """Validate that the given property name and that the report has been generated."""
+        self._check_property_name(property_name)
 
         if not self.is_generated:
             raise ValueError(
