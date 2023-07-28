@@ -1,3 +1,6 @@
+from unittest.mock import call, patch
+
+import pandas as pd
 import pytest
 
 from sdmetrics.reports.single_table import DiagnosticReport
@@ -40,3 +43,48 @@ class TestDiagnosticReport:
         assert num_iterations_coverage == 3
         assert num_iterations_boundaries == 3
         assert num_iterations_synthesis == 1
+
+    @patch('sys.stdout.write')
+    def test__print_results(self, mock_write):
+        """Test the ``_print_results`` method."""
+        # Setup
+        diagnostic_report = DiagnosticReport()
+        diagnostic_report = DiagnosticReport()
+        diagnostic_report._properties['Coverage']._details = pd.DataFrame({
+            'Metric': ['CategoryCoverage', 'RangeCoverage', 'CategoryCoverage'],
+            'Score': [0.1, 0.2, 0.3]
+        })
+        diagnostic_report._properties['Boundary']._details = pd.DataFrame({
+            'Metric': ['BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence'],
+            'Score': [0.5, 0.6, 0.7]
+        })
+        diagnostic_report._properties['Synthesis']._details = pd.DataFrame({
+            'Metric': ['NewRowSynthesis'],
+            'Score': [1.0]
+        })
+
+        # Run
+        diagnostic_report._print_results()
+
+        # Assert
+        calls = [
+            call('\nDiagnostic Results:\n'),
+            call('\nSUCCESS:\n'),
+            call('✓ Over 90% of the synthetic rows are not copies of the real data\n'),
+            call('\nWARNING:\n'),
+            call(
+                '! More than 10% the synthetic data does not follow the min/max '
+                'boundaries set by the real data\n'
+            ),
+            call('\nDANGER:\n'),
+            call(
+                'x The synthetic data is missing more than 50% of the categories'
+                ' present in the real data\n'
+            ),
+            call(
+                'x The synthetic data is missing more than 50% of the numerical'
+                ' ranges present in the real data\n'
+            )
+        ]
+
+        mock_write.assert_has_calls(calls, any_order=True)

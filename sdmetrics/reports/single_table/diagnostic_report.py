@@ -50,28 +50,28 @@ class DiagnosticReport(BaseReport):
 
     def _print_results(self, out=sys.stdout):
         """Print the diagnostic report results."""
-        self._results['SUCCESS'] = []
-        self._results['WARNING'] = []
-        self._results['DANGER'] = []
+        results = {}
+        results['SUCCESS'] = []
+        results['WARNING'] = []
+        results['DANGER'] = []
 
         for property_name in self._properties:
-            details = self._properties[property_name].get_details()
-            average_score_metric = details.groupby('metric').mean()['score']
+            details = self._properties[property_name]._details
+            average_score_metric = details.groupby('Metric').mean()['Score']
+            for metric, score in average_score_metric.items():
+                if pd.isna(score):
+                    continue
+                if score >= 0.9:
+                    results['SUCCESS'].append(
+                        DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['SUCCESS'])
+                elif score >= 0.5:
+                    results['WARNING'].append(
+                        DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['WARNING'])
+                else:
+                    results['DANGER'].append(
+                        DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
 
-        for metric, score in average_score_metric.items():
-            if pd.isna(score):
-                continue
-            if score >= 0.9:
-                self._results['SUCCESS'].append(
-                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['SUCCESS'])
-            elif score >= 0.5:
-                self._results['WARNING'].append(
-                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['WARNING'])
-            else:
-                self._results['DANGER'].append(
-                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
-
-        out.write('\nDiagnosticResults:\n')
-        print_results_for_level(out, self._results, 'SUCCESS')
-        print_results_for_level(out, self._results, 'WARNING')
-        print_results_for_level(out, self._results, 'DANGER')
+        out.write('\nDiagnostic Results:\n')
+        print_results_for_level(out, results, 'SUCCESS')
+        print_results_for_level(out, results, 'WARNING')
+        print_results_for_level(out, results, 'DANGER')
