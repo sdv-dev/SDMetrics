@@ -1,4 +1,4 @@
-"""Single table quality report."""
+"""Single table base report."""
 import pickle
 import sys
 import warnings
@@ -197,15 +197,15 @@ class BaseReport():
 
     @classmethod
     def load(cls, filepath):
-        """Load a ``QualityReport`` instance from a given path.
+        """Load a ``Report`` instance from a given path.
 
         Args:
             filepath (str):
                 The path to the file where the report is stored.
 
         Returns:
-            QualityReort:
-                The loaded quality report instance.
+            SDMetrics Report:
+                The loaded report instance.
         """
         current_version = pkg_resources.get_distribution('sdmetrics').version
 
