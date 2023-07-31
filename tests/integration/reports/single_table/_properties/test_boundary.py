@@ -16,7 +16,7 @@ class TestBoundary:
         score = boundary_property.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        assert score == 0.92
+        assert score == 0.9172655676537751
 
         expected_details = pd.DataFrame({
             'Column': [
@@ -59,4 +59,4 @@ class TestBoundary:
         assert column_names_nan == ['start_date', 'employability_perc']
         assert error_messages[0] == expected_message_1
         assert error_messages[1] == expected_message_2
-        assert score == 0.93
+        assert score == 0.9292362353408865
