@@ -20,7 +20,7 @@ class TestDiagnosticReport:
         expected_frame = pd.DataFrame(
             {
                 'Property': ['Coverage', 'Boundary', 'Synthesis'],
-                'Score': [0.94, 0.92, 1.00]
+                'Score': [0.9419212095491987, 0.9172655676537751, 1.0]
             }
         )
         pd.testing.assert_frame_equal(properties_frame, expected_frame)
