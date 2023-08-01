@@ -129,14 +129,14 @@ class BaseReport():
                 f" Valid property names are '{valid_property_names}'."
             )
 
+    def _check_report_generated(self):
+        if not self.is_generated:
+            raise ValueError('The report has not been generated. Please call `generate` first.')
+
     def _validate_property_generated(self, property_name):
         """Validate that the given property name and that the report has been generated."""
         self._check_property_name(property_name)
-
-        if not self.is_generated:
-            raise ValueError(
-                'The report must be generated before getting details. Call `generate` first.'
-            )
+        self._check_report_generated()
 
     def get_properties(self):
         """Return the property score.
@@ -145,6 +145,7 @@ class BaseReport():
             pandas.DataFrame
                 The property score.
         """
+        self._check_report_generated()
         name, score = [], []
         for property_name in self._properties:
             name.append(property_name)

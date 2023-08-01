@@ -102,4 +102,5 @@ class DiagnosticReport(BaseReport):
             dict
                 The diagnostic results.
         """
+        self._check_report_generated()
         return deepcopy(self.results)

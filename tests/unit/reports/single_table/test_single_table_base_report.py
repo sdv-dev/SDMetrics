@@ -225,6 +225,22 @@ class TestBaseReport:
         mock_tqdm.assert_has_calls(calls, any_order=True)
         base_report._print_results.assert_called_once_with(sys.stdout)
 
+    def test__check_report_generated(self):
+        """Test the ``check_report_generated`` method."""
+        # Setup
+        base_report = BaseReport()
+        base_report.is_generated = False
+
+        # Run and Assert
+        expected_message = (
+            'The report has not been generated. Please call `generate` first.'
+        )
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._check_report_generated()
+
+        base_report.is_generated = True
+        base_report._check_report_generated()
+
     def test__validate_property_generated(self):
         """Test the ``_validate_property_generated`` method."""
         # Setup
@@ -235,7 +251,7 @@ class TestBaseReport:
 
         # Run and Assert
         expected_message_1 = (
-            'The report must be generated before getting details. Call `generate` first.'
+            'The report has not been generated. Please call `generate` first.'
         )
         with pytest.raises(ValueError, match=expected_message_1):
             base_report._validate_property_generated('Valid Property Name')
@@ -258,6 +274,7 @@ class TestBaseReport:
         base_report._properties['Property 1']._compute_average = mock_cs_compute_average
         base_report._properties['Property 2'] = Mock()
         base_report._properties['Property 2']._compute_average = mock_cpt_compute_averag
+        base_report.is_generated = True
 
         # Run
         properties = base_report.get_properties()

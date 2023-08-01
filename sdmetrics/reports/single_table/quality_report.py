@@ -59,4 +59,5 @@ class QualityReport(BaseReport):
             float
                 The overall quality score.
         """
+        self._check_report_generated()
         return self._overall_score

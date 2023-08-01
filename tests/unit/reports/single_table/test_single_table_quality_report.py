@@ -44,6 +44,7 @@ class TestQualityReport:
         """Test the ``get_score`` method."""
         # Setup
         quality_report = QualityReport()
+        quality_report.is_generated = True
         mock_score = Mock()
         quality_report._overall_score = mock_score
 

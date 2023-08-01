@@ -49,6 +49,7 @@ class TestDiagnosticReport:
         # Setup
         diagnostic_report = DiagnosticReport()
         diagnostic_report.results = {'SUCCESS': ['Test']}
+        diagnostic_report.is_generated = True
 
         # Run
         results = diagnostic_report.get_results()
