@@ -59,7 +59,7 @@ class TestBaseReport:
         """Test the ``_validate_metadata_matches_data`` method.
 
         This test checks that the method does not raise an error when there is no column mismatch
-        between the data and the metadata
+        between the data and the metadata.
         """
         # Setup
         base_report = BaseReport()
@@ -121,7 +121,11 @@ class TestBaseReport:
         )
 
     def test_generate(self):
-        """Test the ``generate`` method."""
+        """Test the ``generate`` method.
+
+        This test checks that the method calls the ``validate`` method and the ``get_score``
+        method for each property.
+        """
         # Setup
         base_report = BaseReport()
         mock_validate = Mock()

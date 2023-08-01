@@ -45,6 +45,7 @@ class TestDiagnosticReport:
         assert num_iterations_synthesis == 1
 
     def test_get_results(self):
+        """Test the ``get_results`` method."""
         # Setup
         diagnostic_report = DiagnosticReport()
         diagnostic_report.results = {'SUCCESS': ['Test']}

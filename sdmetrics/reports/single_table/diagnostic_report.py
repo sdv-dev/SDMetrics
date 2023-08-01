@@ -29,6 +29,29 @@ class DiagnosticReport(BaseReport):
         }
         self.results = {}
 
+    def _generate_results(self):
+        """Generate the diagnostic report results."""
+        if not self.results:
+            self.results['SUCCESS'] = []
+            self.results['WARNING'] = []
+            self.results['DANGER'] = []
+
+            for property_name in self._properties:
+                details = self._properties[property_name]._details
+                average_score_metric = details.groupby('Metric')['Score'].mean()
+                for metric, score in average_score_metric.items():
+                    if pd.isna(score):
+                        continue
+                    if score >= 0.9:
+                        self.results['SUCCESS'].append(
+                            DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['SUCCESS'])
+                    elif score >= 0.5:
+                        self.results['WARNING'].append(
+                            DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['WARNING'])
+                    else:
+                        self.results['DANGER'].append(
+                            DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
+
     def _get_num_iterations(self, property_name, metadata):
         """Get the number of iterations for the property.
 
@@ -49,30 +72,28 @@ class DiagnosticReport(BaseReport):
 
     def _print_results(self, out=sys.stdout):
         """Print the diagnostic report results."""
-        self.results['SUCCESS'] = []
-        self.results['WARNING'] = []
-        self.results['DANGER'] = []
-
-        for property_name in self._properties:
-            details = self._properties[property_name]._details
-            average_score_metric = details.groupby('Metric')['Score'].mean()
-            for metric, score in average_score_metric.items():
-                if pd.isna(score):
-                    continue
-                if score >= 0.9:
-                    self.results['SUCCESS'].append(
-                        DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['SUCCESS'])
-                elif score >= 0.5:
-                    self.results['WARNING'].append(
-                        DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['WARNING'])
-                else:
-                    self.results['DANGER'].append(
-                        DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
+        self._generate_results()
 
         out.write('\nDiagnostic Results:\n')
         print_results_for_level(out, self.results, 'SUCCESS')
         print_results_for_level(out, self.results, 'WARNING')
         print_results_for_level(out, self.results, 'DANGER')
+
+    def generate(self, real_data, synthetic_data, metadata, verbose=True):
+        """Generate report.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict):
+                The metadata, which contains each column's data type.
+            verbose (bool):
+                Whether or not to print report summary and progress.
+        """
+        super().generate(real_data, synthetic_data, metadata, verbose)
+        self._generate_results()
 
     def get_results(self):
         """Return the diagnostic results.

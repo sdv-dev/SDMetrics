@@ -51,6 +51,32 @@ class TestDiagnosticReport:
 
         assert result_dict == expected_results
 
+    def test_get_results_with_no_verbose(self):
+        """Test the ``get_results`` method works when verbose=False."""
+        # Setup
+        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        report = DiagnosticReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata, verbose=False)
+        result_dict = report.get_results()
+
+        # Assert
+        expected_results = {
+            'SUCCESS': [
+                'The synthetic data covers over 90% of the categories present in the real data',
+                'The synthetic data covers over 90% of the numerical ranges present in the '
+                'real data',
+                'The synthetic data follows over 90% of the min/max boundaries set by the '
+                'real data',
+                'Over 90% of the synthetic rows are not copies of the real data'
+            ],
+            'WARNING': [],
+            'DANGER': []
+        }
+
+        assert result_dict == expected_results
+
     def test_end_to_end(self):
         """Test the end-to-end functionality of the diagnostic report."""
         # Setup
