@@ -7,11 +7,12 @@ import pandas as pd
 import pytest
 
 from sdmetrics.reports.utils import (
-    _generate_cardinality_plot, _get_cardinality, aggregate_metric_results, convert_to_datetime,
-    discretize_and_apply_metric, discretize_table_data, get_cardinality_plot, get_column_pair_plot,
-    get_column_plot, make_continuous_column_pair_plot, make_continuous_column_plot,
-    make_discrete_column_pair_plot, make_discrete_column_plot, make_mixed_column_pair_plot,
-    validate_categorical_values, validate_multi_table_inputs, validate_single_table_inputs)
+    _generate_cardinality_plot, _get_cardinality, _validate_categorical_values,
+    aggregate_metric_results, convert_to_datetime, discretize_and_apply_metric,
+    discretize_table_data, get_cardinality_plot, get_column_pair_plot, get_column_plot,
+    make_continuous_column_pair_plot, make_continuous_column_plot, make_discrete_column_pair_plot,
+    make_discrete_column_plot, make_mixed_column_pair_plot, validate_multi_table_inputs,
+    validate_single_table_inputs)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -1370,7 +1371,7 @@ def test_validate_categorical_values():
     warnings.filterwarnings('error', category=UserWarning)
 
     # Run
-    validate_categorical_values(real_data, synthetic_data, metadata)
+    _validate_categorical_values(real_data, synthetic_data, metadata)
 
     warnings.resetwarnings()
 
@@ -1388,7 +1389,7 @@ def test_validate_categorical_values_single_table():
 
     # Run
     with pytest.raises(UserWarning, match=warning_msg):
-        validate_categorical_values(real_data, synthetic_data, metadata)
+        _validate_categorical_values(real_data, synthetic_data, metadata)
 
     warnings.resetwarnings()
 
@@ -1406,7 +1407,7 @@ def test_validate_categorical_values_multi_table():
 
     # Run
     with pytest.raises(UserWarning, match=warning_msg):
-        validate_categorical_values(real_data, synthetic_data, metadata, table='table1')
+        _validate_categorical_values(real_data, synthetic_data, metadata, table='table1')
 
     warnings.resetwarnings()
 
@@ -1424,7 +1425,7 @@ def test__validate_categorical_many_extra_values():
 
     # Run
     with pytest.raises(UserWarning, match=warning_msg):
-        validate_categorical_values(real_data, synthetic_data, metadata)
+        _validate_categorical_values(real_data, synthetic_data, metadata)
 
     warnings.resetwarnings()
 

@@ -755,7 +755,7 @@ def print_results_for_level(out, results, level):
             out.write(f'{level_marks[level]} {result}\n')
 
 
-def validate_categorical_values(real_data, synthetic_data, metadata, table=None):
+def _validate_categorical_values(real_data, synthetic_data, metadata, table=None):
     """Get categorical values found in synthetic data but not real data for all columns.
 
     Args:
@@ -805,7 +805,7 @@ def validate_multi_table_inputs(real_data, synthetic_data, metadata):
 
     for table in metadata['tables']:
         table_metadata = metadata['tables'][table]
-        validate_categorical_values(
+        _validate_categorical_values(
             real_data[table],
             synthetic_data[table],
             table_metadata,
@@ -841,4 +841,4 @@ def validate_single_table_inputs(real_data, synthetic_data, metadata):
     if not isinstance(metadata, dict):
         metadata = metadata.to_dict()
 
-    validate_categorical_values(real_data, synthetic_data, metadata)
+    _validate_categorical_values(real_data, synthetic_data, metadata)

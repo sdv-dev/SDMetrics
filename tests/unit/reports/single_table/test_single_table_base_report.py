@@ -84,7 +84,7 @@ class TestBaseReport:
         # Run and Assert
         base_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
-    @patch('sdmetrics.reports.single_table.base_report.validate_categorical_values')
+    @patch('sdmetrics.reports.single_table.base_report._validate_categorical_values')
     def test_validate(self, mock_validate_categorical_values):
         """Test the ``validate`` method."""
         # Setup

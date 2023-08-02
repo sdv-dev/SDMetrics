@@ -8,7 +8,7 @@ import pandas as pd
 import pkg_resources
 import tqdm
 
-from sdmetrics.reports.utils import validate_categorical_values
+from sdmetrics.reports.utils import _validate_categorical_values
 
 
 class BaseReport():
@@ -66,7 +66,7 @@ class BaseReport():
             metadata = metadata.to_dict()
 
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
-        validate_categorical_values(real_data, synthetic_data, metadata)
+        _validate_categorical_values(real_data, synthetic_data, metadata)
 
     def _print_results(self):
         raise NotImplementedError
