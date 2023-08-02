@@ -62,11 +62,11 @@ class DiagnosticReport(BaseReport):
                 The metadata of the table.
         """
         self._check_property_name(property_name)
-
         num_columns = len(metadata['columns'])
 
         if property_name in ['Coverage', 'Boundary']:
             return num_columns
+
         elif property_name == 'Synthesis':
             return 1
 
@@ -93,7 +93,8 @@ class DiagnosticReport(BaseReport):
                 Whether or not to print report summary and progress.
         """
         super().generate(real_data, synthetic_data, metadata, verbose)
-        self._generate_results()
+        if not verbose:
+            self._generate_results()
 
     def get_results(self):
         """Return the diagnostic results.

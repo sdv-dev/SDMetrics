@@ -77,6 +77,9 @@ class BaseReport():
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
 
+        This method generates the report by iterating through each property and calculating
+        the score for each property.
+
         Args:
             real_data (pandas.DataFrame):
                 The real data.
@@ -147,9 +150,10 @@ class BaseReport():
         """
         self._check_report_generated()
         name, score = [], []
-        for property_name in self._properties:
+        for property_name, property_instance in self._properties.items():
             name.append(property_name)
-            score.append(self._properties[property_name]._compute_average())
+            score.append(property_instance._compute_average())
+
         return pd.DataFrame({
             'Property': name,
             'Score': score,
@@ -167,7 +171,6 @@ class BaseReport():
                 The visualization for the requested property.
         """
         self._validate_property_generated(property_name)
-
         return self._properties[property_name].get_visualization()
 
     def get_details(self, property_name):
@@ -181,7 +184,6 @@ class BaseReport():
             pandas.DataFrame
         """
         self._validate_property_generated(property_name)
-
         return self._properties[property_name]._details.copy()
 
     def save(self, filepath):
