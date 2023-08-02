@@ -33,11 +33,11 @@ class Cardinality(BaseMultiTableProperty):
         for relation in metadata.get('relationships', []):
             relationships_metadata = {'relationships': [relation]}
             try:
-                self._details = CardinalityShapeSimilarity.compute_breakdown(
+                self._details.update(CardinalityShapeSimilarity.compute_breakdown(
                     real_data,
                     synthetic_data,
                     relationships_metadata
-                )
+                ))
             except Exception as error:
                 errors = self._details.get('Errors', {})
                 errors[relation] = str(error)
