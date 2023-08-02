@@ -135,7 +135,7 @@ def test_multi_table_quality_report():
         'Child Table': ['table1'],
         'Parent Table': ['table2'],
         'Metric': ['CardinalityShapeSimilariy'],
-        'Quality Score': [.75]
+        'Score': [.75]
     })
     pd.testing.assert_frame_equal(details[2], expected)
     pd.testing.assert_frame_equal(details[5], expected)
