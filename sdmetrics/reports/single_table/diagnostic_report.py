@@ -70,14 +70,14 @@ class DiagnosticReport(BaseReport):
         elif property_name == 'Synthesis':
             return 1
 
-    def _print_results(self, out=sys.stdout):
+    def _print_results(self):
         """Print the diagnostic report results."""
         self._generate_results()
 
-        out.write('\nDiagnostic Results:\n')
-        print_results_for_level(out, self.results, 'SUCCESS')
-        print_results_for_level(out, self.results, 'WARNING')
-        print_results_for_level(out, self.results, 'DANGER')
+        sys.stdout.write('\nDiagnostic Results:\n')
+        print_results_for_level(sys.stdout, self.results, 'SUCCESS')
+        print_results_for_level(sys.stdout, self.results, 'WARNING')
+        print_results_for_level(sys.stdout, self.results, 'DANGER')
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.

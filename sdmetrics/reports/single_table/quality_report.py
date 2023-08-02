@@ -39,16 +39,16 @@ class QualityReport(BaseReport):
             # combinations between 2 different columns is n * (n - 1) / 2
             return int(num_columns * (num_columns - 1) / 2)
 
-    def _print_results(self, out=sys.stdout):
+    def _print_results(self):
         """Print the quality report results."""
-        out.write(
+        sys.stdout.write(
             f'\nOverall Quality Score: {round(self._overall_score * 100, 2)}%\n\n'
         )
-        out.write('Properties:\n')
+        sys.stdout.write('Properties:\n')
 
         for property_name in self._properties:
             property_score = round(self._properties[property_name]._compute_average(), 4)
-            out.write(
+            sys.stdout.write(
                 f'- {property_name}: {property_score * 100}%\n'
             )
 

@@ -223,7 +223,7 @@ class TestBaseReport:
         # Assert
         calls = [call(total=4, file=sys.stdout), call(total=6, file=sys.stdout)]
         mock_tqdm.assert_has_calls(calls, any_order=True)
-        base_report._print_results.assert_called_once_with(sys.stdout)
+        base_report._print_results.assert_called_once()
 
     def test__check_report_generated(self):
         """Test the ``check_report_generated`` method."""

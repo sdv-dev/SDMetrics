@@ -68,7 +68,7 @@ class BaseReport():
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
         validate_categorical_values(real_data, synthetic_data, metadata)
 
-    def _print_results(self, out=sys.stdout):
+    def _print_results(self):
         raise NotImplementedError
 
     def _get_num_iterations(self, property_name, metadata):
@@ -116,7 +116,7 @@ class BaseReport():
         self.is_generated = True
 
         if verbose:
-            self._print_results(sys.stdout)
+            self._print_results()
 
     def _check_property_name(self, property_name):
         """Check that the given property name is valid.
