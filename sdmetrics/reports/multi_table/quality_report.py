@@ -209,7 +209,7 @@ class QualityReport():
                 'Child Table': [tables[0]],
                 'Parent Table': [tables[1]],
                 'Metric': ['CardinalityShapeSimilariy'],
-                'Quality Score': [scores['score']]
+                'Score': [scores['score']]
             })
             details_dataframe = pd.concat([details_dataframe, new_row], ignore_index=True)
 
