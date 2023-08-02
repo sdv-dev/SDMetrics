@@ -363,7 +363,7 @@ class TestQualityReport:
             'Child Table': ['table1'],
             'Parent Table': ['table2'],
             'Metric': ['CardinalityShapeSimilariy'],
-            'Quality Score': [1]
+            'Score': [1]
         })
         pd.testing.assert_frame_equal(details, expected)
 
@@ -388,7 +388,7 @@ class TestQualityReport:
             'Child Table': ['table1'],
             'Parent Table': ['table3'],
             'Metric': ['CardinalityShapeSimilariy'],
-            'Quality Score': [.57]
+            'Score': [.57]
         })
         pd.testing.assert_frame_equal(details, expected)
 
