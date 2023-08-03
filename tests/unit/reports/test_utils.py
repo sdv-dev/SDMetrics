@@ -1361,7 +1361,7 @@ def test_aggregate_metric_results():
     assert num_errors == 1
 
 
-def test__validate_categorical_values():
+def test_validate_categorical_values():
     """Test no extra categoricals does not crash."""
     # Setup
     sdtype = 'categorical'
@@ -1376,7 +1376,7 @@ def test__validate_categorical_values():
     warnings.resetwarnings()
 
 
-def test__validate_categorical_values_single_table():
+def test_validate_categorical_values_single_table():
     """Test validating categoricals for single table."""
     # Setup
     sdtype = 'categorical'
@@ -1394,7 +1394,7 @@ def test__validate_categorical_values_single_table():
     warnings.resetwarnings()
 
 
-def test__validate_categorical_values_multi_table():
+def test_validate_categorical_values_multi_table():
     """Test validating categoricals with table name."""
     # Setup
     sdtype = 'categorical'
