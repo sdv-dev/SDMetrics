@@ -3,3 +3,6 @@
 
 class IncomputableMetricError(Exception):
     """Raised when a metric cannot be computed."""
+
+class ConstantInputError(Exception):
+    """Thrown when the input data has all the same values."""
