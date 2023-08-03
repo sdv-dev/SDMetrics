@@ -1,15 +1,14 @@
 """Correlation Similarity Metric."""
 
-import warnings
 
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr
 
 from sdmetrics.column_pairs.base import ColumnPairsMetric
+from sdmetrics.errors import ConstantInputError
 from sdmetrics.goal import Goal
 from sdmetrics.utils import is_datetime
-from sdmetrics.errors import ConstantInputError
 
 
 class CorrelationSimilarity(ColumnPairsMetric):
@@ -30,13 +29,14 @@ class CorrelationSimilarity(ColumnPairsMetric):
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
+    _is_multi_table = False
 
     @staticmethod
     def _raise_constant_data_error(columns, prefix):
         if len(columns) > 1:
             cols = ', '.join(columns)
             raise ConstantInputError(
-                f"The {prefix} in columns '{cols}' contain a constant value. "
+                f"The {prefix} in columns '{cols}' contains a constant value. "
                 'Correlation is undefined for constant data.'
             )
 
@@ -45,15 +45,16 @@ class CorrelationSimilarity(ColumnPairsMetric):
                 f"The {prefix} in column '{columns[0]}' contains a constant value. "
                 'Correlation is undefined for constant data.'
             )
-    
+
     @classmethod
     def _validate_data_not_constant(cls, real_data, synthetic_data):
-        if (real_data.nunique() == 1).any() or (synthetic_data.nunique() == 1).any():
+        if (real_data.nunique() == 1).any():
             real_columns = list(real_data.loc[:, real_data.nunique() == 1].columns)
-            cls._validate_data_not_constant(real_columns, 'real data')
+            cls._raise_constant_data_error(real_columns, 'real data')
 
+        if (synthetic_data.nunique() == 1).any():
             synthetic_columns = list(synthetic_data.loc[:, synthetic_data.nunique() == 1].columns)
-            cls._validate_data_not_constant(synthetic_columns, 'synthetic data')
+            cls._raise_constant_data_error(synthetic_columns, 'synthetic data')
 
     @classmethod
     def compute_breakdown(cls, real_data, synthetic_data, coefficient='Pearson'):
@@ -108,7 +109,7 @@ class CorrelationSimilarity(ColumnPairsMetric):
         return {
             'score': 1 - abs(correlation_real - correlation_synthetic) / 2,
             'real': correlation_real,
-            'synthetic': correlation_synthetic,
+            'synthetic': correlation_synthetic
         }
 
     @classmethod

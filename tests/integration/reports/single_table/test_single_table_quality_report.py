@@ -314,3 +314,55 @@ class TestQualityReport:
         for pattern in key_phrases:
             match = re.search(pattern, my_stdout.getvalue())
             assert match is not None
+
+    def test_correlation_similarity_constant_real_data(self):
+        """Error out when CorrelationSimilarity is used with a constant pair of columns."""
+        # Setup
+        data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1, 1, 1, 1]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+        report = QualityReport()
+
+        # Run and Assert
+        report.generate(data, data, metadata)
+        error_msg = report.get_details(property_name='Column Pair Trends')['Error'][0]
+
+        # Assert
+        assert error_msg == (
+            "Error: ConstantInputError The real data in columns 'col1, col2' contains "
+            'a constant value. Correlation is undefined for constant data.'
+        )
+
+    def test_correlation_similarity_one_constant_real_data_column(self):
+        """Error out when CorrelationSimilarity is used with one constant column."""
+        # Setup
+        data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1.2, 1, 1, 1]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+        report = QualityReport()
+
+        # Run and Assert
+        report.generate(data, data, metadata)
+        error_msg = report.get_details(property_name='Column Pair Trends')['Error'][0]
+
+        # Assert
+        assert error_msg == (
+            "Error: ConstantInputError The real data in column 'col1' contains "
+            'a constant value. Correlation is undefined for constant data.'
+        )
+
+    def test_correlation_similarity_constant_synthetic_data(self):
+        """Error out when CorrelationSimilarity is used with constant synthetic data."""
+        # Setup
+        data = pd.DataFrame({'col1': [2, 1, 1, 1], 'col2': [3, 1, 1, 1]})
+        synthetic_data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1, 1, 1, 1]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+        report = QualityReport()
+
+        # Run and Assert
+        report.generate(data, synthetic_data, metadata)
+        error_msg = report.get_details(property_name='Column Pair Trends')['Error'][0]
+
+        # Assert
+        assert error_msg == (
+            "Error: ConstantInputError The synthetic data in columns 'col1, col2' contains "
+            'a constant value. Correlation is undefined for constant data.'
+        )
