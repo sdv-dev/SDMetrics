@@ -1,5 +1,5 @@
 """Multi table base property class."""
-import numpy as np
+import pandas as pd
 
 
 class BaseMultiTableProperty():
@@ -18,10 +18,28 @@ class BaseMultiTableProperty():
     def __init__(self):
         self._properties = {}
         self.is_computed = False
+        self.details_property = pd.DataFrame()
 
     def _get_num_iterations(self, metadata):
         """Get the number of iterations for the property."""
         raise NotImplementedError()
+
+    def _generate_details_property(self, metadata):
+        """Generate the ``details_property`` dataframe for the multi-table property.
+
+        This dataframe concatenates the ``_details`` dataframe of each single table property
+        and adds a ``Table`` column to indicate which table the score is for.
+
+        Args:
+            metadata (dict):
+                The metadata of the tables.
+        """
+        for table_name in metadata['tables']:
+            details = self._properties[table_name]._details.copy()
+            details['Table'] = table_name
+            self.details_property = pd.concat(
+                [self.details_property, details]
+            )
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.
@@ -43,17 +61,17 @@ class BaseMultiTableProperty():
         if self._single_table_property is None:
             raise NotImplementedError()
 
-        average_score = np.zeros(len(metadata['tables']))
-        for idx, table_name in enumerate(metadata['tables']):
+        for table_name, metadata_table in metadata['tables'].items():
             self._properties[table_name] = self._single_table_property()
-            average_score[idx] = self._properties[table_name].get_score(
-                real_data[table_name], synthetic_data[table_name], metadata['tables'][table_name],
+            self._properties[table_name].get_score(
+                real_data[table_name], synthetic_data[table_name], metadata_table,
                 progress_bar
             )
 
+        self._generate_details_property(metadata)
         self.is_computed = True
 
-        return np.nanmean(average_score)
+        return self.details_property['Score'].mean()
 
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.

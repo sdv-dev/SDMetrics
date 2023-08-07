@@ -2,12 +2,12 @@
 
 import copy
 import itertools
+import sys
 import warnings
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
-import sys
 import plotly.figure_factory as ff
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
@@ -844,6 +844,7 @@ def validate_single_table_inputs(real_data, synthetic_data, metadata):
 
     _validate_categorical_values(real_data, synthetic_data, metadata)
 
+
 def _print_results_quality_reports(report):
     """Print the quality report results."""
     sys.stdout.write(
@@ -856,6 +857,7 @@ def _print_results_quality_reports(report):
         sys.stdout.write(
             f'- {property_name}: {property_score * 100}%\n'
         )
+
 
 def _print_results_diagnostic_reports(report):
     """Print the diagnostic report results."""
