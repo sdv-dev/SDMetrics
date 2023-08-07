@@ -22,6 +22,10 @@ class BaseSingleTableProperty():
         """Generate the _details dataframe for the property."""
         raise NotImplementedError()
 
+    def _get_num_iterations(self, metadata):
+        """Get the number of iterations for the property."""
+        raise NotImplementedError()
+
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score for the property on the data.
 

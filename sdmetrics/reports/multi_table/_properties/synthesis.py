@@ -13,3 +13,6 @@ class Synthesis(BaseMultiTableProperty):
     """
 
     _single_table_property = SingleTableSynthesis
+
+    def _get_num_iterations(self, metadata):
+        return len(metadata['tables'])

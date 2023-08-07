@@ -71,9 +71,6 @@ class BaseReport():
     def _print_results(self):
         raise NotImplementedError
 
-    def _get_num_iterations(self, property_name, metadata):
-        raise NotImplementedError
-
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
 
@@ -97,9 +94,10 @@ class BaseReport():
         if verbose:
             sys.stdout.write('Generating report ...\n')
 
-        for ind, property_name in enumerate(self._properties):
+        ind = 0
+        for property_name, property_instance in self._properties.items():
             if verbose:
-                num_iterations = self._get_num_iterations(property_name, metadata)
+                num_iterations = property_instance._get_num_iterations(metadata)
                 progress_bar = tqdm.tqdm(total=num_iterations, file=sys.stdout)
                 progress_bar.set_description(
                     f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}: '
@@ -109,6 +107,7 @@ class BaseReport():
                 real_data, synthetic_data, metadata, progress_bar=progress_bar
             )
             scores.append(score)
+            ind += 1
             if verbose:
                 progress_bar.close()
 

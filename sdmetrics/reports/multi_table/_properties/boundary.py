@@ -13,3 +13,6 @@ class Boundary(BaseMultiTableProperty):
     """
 
     _single_table_property = SingleTableBoundary
+
+    def _get_num_iterations(self, metadata):
+        return sum(len(metadata['tables'][table]['columns']) for table in metadata['tables'])

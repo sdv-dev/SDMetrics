@@ -7,6 +7,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import sys
 import plotly.figure_factory as ff
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
@@ -842,3 +843,25 @@ def validate_single_table_inputs(real_data, synthetic_data, metadata):
         metadata = metadata.to_dict()
 
     _validate_categorical_values(real_data, synthetic_data, metadata)
+
+def _print_results_quality_reports(report):
+    """Print the quality report results."""
+    sys.stdout.write(
+        f'\nOverall Quality Score: {round(report._overall_score * 100, 2)}%\n\n'
+    )
+    sys.stdout.write('Properties:\n')
+
+    for property_name in report._properties:
+        property_score = round(report._properties[property_name]._compute_average(), 4)
+        sys.stdout.write(
+            f'- {property_name}: {property_score * 100}%\n'
+        )
+
+def _print_results_diagnostic_reports(report):
+    """Print the diagnostic report results."""
+    report._generate_results()
+
+    sys.stdout.write('\nDiagnostic Results:\n')
+    print_results_for_level(sys.stdout, report.results, 'SUCCESS')
+    print_results_for_level(sys.stdout, report.results, 'WARNING')
+    print_results_for_level(sys.stdout, report.results, 'DANGER')

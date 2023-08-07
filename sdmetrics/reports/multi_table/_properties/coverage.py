@@ -14,3 +14,6 @@ class Coverage(BaseMultiTableProperty):
     """
 
     _single_table_property = SingleTableCoverage
+
+    def _get_num_iterations(self, metadata):
+        return sum(len(metadata['tables'][table]['columns']) for table in metadata['tables'])

@@ -16,6 +16,9 @@ class Synthesis(BaseSingleTableProperty):
 
     metric = NewRowSynthesis
 
+    def _get_num_iterations(self, metadata):
+        return 1
+
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the synthesis property.
 

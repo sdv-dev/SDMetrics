@@ -19,6 +19,10 @@ class BaseMultiTableProperty():
         self._properties = {}
         self.is_computed = False
 
+    def _get_num_iterations(self, metadata):
+        """Get the number of iterations for the property."""
+        raise NotImplementedError()
+
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.
 
