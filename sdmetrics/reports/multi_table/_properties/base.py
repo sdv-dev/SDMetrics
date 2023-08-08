@@ -19,6 +19,23 @@ class BaseMultiTableProperty():
         self._properties = {}
         self.is_computed = False
 
+    def _augment_error_msg(self, table_name):
+        """Augment error messages in the details of a property.
+
+        Column pair trends only generates an error message for the single table case.
+        This method takes that error and augments it for the multi-table case.
+
+        Args:
+            table_name (str):
+                Table name.
+        """
+        if 'Error' in self._properties[table_name]._details.columns:
+            error_name = self._properties[table_name]._details['Error'][0][:25]
+            if error_name == 'Error: ConstantInputError':
+                new_error_msg = f"In table '{table_name}', t"
+                errors = self._properties[table_name]._details['Error'].str
+                self._properties[table_name]._details['Error'] = errors.replace('T', new_error_msg)
+
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.
 
@@ -46,6 +63,7 @@ class BaseMultiTableProperty():
                 real_data[table_name], synthetic_data[table_name], metadata['tables'][table_name],
                 progress_bar
             )
+            self._augment_error_msg(table_name)
 
         self.is_computed = True
 

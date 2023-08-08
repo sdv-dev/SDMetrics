@@ -1,13 +1,11 @@
 from datetime import datetime
 from unittest.mock import Mock, call, patch
 
-import numpy as np
 import pandas as pd
 import pytest
 
 from sdmetrics.column_pairs.statistical import CorrelationSimilarity
 from sdmetrics.errors import ConstantInputError
-from sdmetrics.warnings import ConstantInputWarning
 from tests.utils import SeriesMatcher
 
 
