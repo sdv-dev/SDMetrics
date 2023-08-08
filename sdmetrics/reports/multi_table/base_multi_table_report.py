@@ -65,7 +65,7 @@ class BaseMultiTableReport(BaseReport):
 
         self._check_table_names(table_name)
         table_name_rows = self._properties[property_name].details_property['Table'] == table_name
-        details = self._properties[table_name].details_property.loc[table_name_rows]
+        details = self._properties[property_name].details_property.loc[table_name_rows]
         details = details.drop(columns=['Table'])
 
         return details.copy()
@@ -85,8 +85,10 @@ class BaseMultiTableReport(BaseReport):
                 The visualization for the requested property.
         """
         if table_name is None:
-            raise NotImplementedError()
+            raise ValueError(
+                'Please provide a table name to get a visualization for the property.'
+            )
 
         self._validate_property_generated(property_name)
         self._check_table_names(table_name)
-        self._properties[property_name][table_name].get_visualization()
+        return self._properties[property_name][table_name].get_visualization()
