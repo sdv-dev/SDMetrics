@@ -41,6 +41,15 @@ class BaseMultiTableProperty():
                 [self.details_property, details]
             )
 
+    def _compute_average(self):
+        """Average the scores for each column."""
+        is_dataframe = isinstance(self.details_property, pd.DataFrame)
+        has_score_column = 'Score' in self.details_property.columns
+        if not is_dataframe or not has_score_column:
+            raise ValueError("The property details must be a DataFrame with a 'Score' column.")
+
+        return self._details['Score'].mean()
+
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.
 
@@ -71,7 +80,7 @@ class BaseMultiTableProperty():
         self._generate_details_property(metadata)
         self.is_computed = True
 
-        return self.details_property['Score'].mean()
+        return self._compute_average()
 
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.

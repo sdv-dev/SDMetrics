@@ -790,61 +790,6 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
                 warnings.warn(warning_format.format(values=values, column=column))
 
 
-def validate_multi_table_inputs(real_data, synthetic_data, metadata):
-    """Validate multi-table inputs for report generation.
-
-    Args:
-        real_data (dict[str, DataFrame]):
-            The real data.
-        synthetic_data (dict[str, DataFrame]):
-            The synthetic data.
-        metadata (dict):
-            The metadata, which contains each column's data type as well as relationships.
-    """
-    if not isinstance(metadata, dict):
-        metadata = metadata.to_dict()
-
-    for table in metadata['tables']:
-        table_metadata = metadata['tables'][table]
-        _validate_categorical_values(
-            real_data[table],
-            synthetic_data[table],
-            table_metadata,
-            table=table
-        )
-
-    for rel in metadata.get('relationships', []):
-        parent_dtype = real_data[rel['parent_table_name']][rel['parent_primary_key']].dtype
-        child_dtype = real_data[rel['child_table_name']][rel['child_foreign_key']].dtype
-        if (parent_dtype == 'object' and child_dtype != 'object') or (
-                parent_dtype != 'object' and child_dtype == 'object'):
-            parent = rel['parent_table_name']
-            parent_key = rel['parent_primary_key']
-            child = rel['child_table_name']
-            child_key = rel['child_foreign_key']
-            error_msg = (f"The '{parent}' table and '{child}' table cannot be merged. Please "
-                         f"make sure the primary key in '{parent}' ('{parent_key}') and the "
-                         f"foreign key in '{child}' ('{child_key}') have the same data type.")
-            raise ValueError(error_msg)
-
-
-def validate_single_table_inputs(real_data, synthetic_data, metadata):
-    """Validate single table inputs for report generation.
-
-    Args:
-        real_data (pandas.DataFrame):
-            The real data.
-        synthetic_data (pandas.DataFrame):
-            The synthetic data.
-        metadata (dict):
-            The metadata, which contains each column's data type as well as relationships.
-    """
-    if not isinstance(metadata, dict):
-        metadata = metadata.to_dict()
-
-    _validate_categorical_values(real_data, synthetic_data, metadata)
-
-
 def _print_results_quality_reports(report):
     """Print the quality report results."""
     sys.stdout.write(
