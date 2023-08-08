@@ -1,5 +1,4 @@
 import re
-import warnings
 from datetime import date, datetime
 from unittest.mock import Mock, call, patch
 
@@ -7,12 +6,10 @@ import pandas as pd
 import pytest
 
 from sdmetrics.reports.utils import (
-    _generate_cardinality_plot, _get_cardinality, _validate_categorical_values,
-    aggregate_metric_results, convert_to_datetime, discretize_and_apply_metric,
-    discretize_table_data, get_cardinality_plot, get_column_pair_plot, get_column_plot,
-    make_continuous_column_pair_plot, make_continuous_column_plot, make_discrete_column_pair_plot,
-    make_discrete_column_plot, make_mixed_column_pair_plot, validate_multi_table_inputs,
-    validate_single_table_inputs)
+    _generate_cardinality_plot, _get_cardinality, aggregate_metric_results, convert_to_datetime,
+    discretize_and_apply_metric, discretize_table_data, get_cardinality_plot, get_column_pair_plot,
+    get_column_plot, make_continuous_column_pair_plot, make_continuous_column_plot,
+    make_discrete_column_pair_plot, make_discrete_column_plot, make_mixed_column_pair_plot)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -1359,164 +1356,3 @@ def test_aggregate_metric_results():
     # Assert
     assert avg_score == 0.45
     assert num_errors == 1
-
-
-def test_validate_categorical_values():
-    """Test no extra categoricals does not crash."""
-    # Setup
-    sdtype = 'categorical'
-    real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
-    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 4]})
-    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
-    warnings.filterwarnings('error', category=UserWarning)
-
-    # Run
-    _validate_categorical_values(real_data, synthetic_data, metadata)
-
-    warnings.resetwarnings()
-
-
-def test_validate_categorical_values_single_table():
-    """Test validating categoricals for single table."""
-    # Setup
-    sdtype = 'categorical'
-    real_data = pd.DataFrame({'col1': [1, 2, 3, 3]})
-    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
-    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
-    warning_msg = re.escape('Unexpected values ("4", "5") in column "col1"')
-
-    warnings.filterwarnings('error', category=UserWarning)
-
-    # Run
-    with pytest.raises(UserWarning, match=warning_msg):
-        _validate_categorical_values(real_data, synthetic_data, metadata)
-
-    warnings.resetwarnings()
-
-
-def test_validate_categorical_values_multi_table():
-    """Test validating categoricals with table name."""
-    # Setup
-    sdtype = 'categorical'
-    real_data = pd.DataFrame({'col1': [1, 2, 3, 3]})
-    synthetic_data = pd.DataFrame({'col1': [1, 2, 4, 5]})
-    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
-    warning_msg = re.escape('Unexpected values ("4", "5") in column "col1" and table "table1"')
-
-    warnings.filterwarnings('error', category=UserWarning)
-
-    # Run
-    with pytest.raises(UserWarning, match=warning_msg):
-        _validate_categorical_values(real_data, synthetic_data, metadata, table='table1')
-
-    warnings.resetwarnings()
-
-
-def test__validate_categorical_many_extra_values():
-    """Test validating categoricals with table name."""
-    # Setup
-    sdtype = 'categorical'
-    real_data = pd.DataFrame({'col1': [1, 2, 3, 3, 4, 4]})
-    synthetic_data = pd.DataFrame({'col1': ['a', 'b', 'c', 'd', 'e', 'f']})
-    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
-    warning_msg = re.escape('Unexpected values ("a", "b", "c", "d", "e" + more) in column "col1"')
-
-    warnings.filterwarnings('error', category=UserWarning)
-
-    # Run
-    with pytest.raises(UserWarning, match=warning_msg):
-        _validate_categorical_values(real_data, synthetic_data, metadata)
-
-    warnings.resetwarnings()
-
-
-def test_validate_single_table():
-    """Test validating single table."""
-    # Setup
-    sdtype = 'categorical'
-    real_data = pd.DataFrame({'col1': [1, 2, 3, 4]})
-    synthetic_data = pd.DataFrame({'col1': [1, 1, 1, 3]})
-    extra_value_synthtetic_data = pd.DataFrame({'col1': [1, 1, 1, 5]})
-    metadata = {'columns': {'col1': {'sdtype': sdtype}}}
-
-    warning_msg = re.escape('Unexpected values ("5") in column "col1"')
-    warnings.filterwarnings('error', category=UserWarning)
-
-    # Run
-    validate_single_table_inputs(real_data, synthetic_data, metadata)
-
-    with pytest.raises(UserWarning, match=warning_msg):
-        validate_single_table_inputs(real_data, extra_value_synthtetic_data, metadata)
-
-    warnings.resetwarnings()
-
-
-def test_validate_multi_table():
-    """Test validating categoricals for single table."""
-    # Setup
-    sdtype = 'categorical'
-    real_data = {
-        'table1': pd.DataFrame({'col1': [1, 2, 3, 3]}),
-        'table2': pd.DataFrame({'col2': ['a', 'b', 'c', 'a']})
-    }
-    synthetic_data = {
-        'table1': pd.DataFrame({'col1': [1, 2, 3, 1]}),
-        'table2': pd.DataFrame({'col2': ['a', 'b', 'c', 'c']})
-    }
-    extra_value_synthetic_data = {
-        'table1': pd.DataFrame({'col1': [1, 2, 3, 1]}),
-        'table2': pd.DataFrame({'col2': ['a', 'b', 'c', 'd']})
-    }
-    metadata = {
-        'tables': {
-            'table1': {'columns': {'col1': {'sdtype': sdtype}}},
-            'table2': {'columns': {'col2': {'sdtype': sdtype}}}
-        }
-    }
-    warning_msg = re.escape('Unexpected values ("d") in column "col2" and table "table2"')
-
-    warnings.filterwarnings('error', category=UserWarning)
-
-    # Run
-    validate_multi_table_inputs(real_data, synthetic_data, metadata)
-    with pytest.raises(UserWarning, match=warning_msg):
-        validate_multi_table_inputs(real_data, extra_value_synthetic_data, metadata)
-
-    warnings.resetwarnings()
-
-
-def test_validate_multi_table_parent_child_dtype_mismatch():
-    """Test validating categoricals for single table."""
-    # Setup
-    sdtype = 'numerical'
-    real_data = {
-        'table1': pd.DataFrame({'primary_key': [1, 2, 3, 4]}),
-        'table2': pd.DataFrame({'foreign_key': ['1', '2', '2', '3']})
-    }
-    synthetic_data = {
-        'table1': pd.DataFrame({'primary_key': [1, 2, 3, 1]}),
-        'table2': pd.DataFrame({'foreign_key': ['2', '2', '1', '3']})
-    }
-    metadata = {
-        'tables': {
-            'table1': {'columns': {'primary_key': {'sdtype': sdtype}}},
-            'table2': {'columns': {'foreign_key': {'sdtype': sdtype}}}
-        },
-        'relationships': [
-            {
-                'parent_table_name': 'table1',
-                'child_table_name': 'table2',
-                'parent_primary_key': 'primary_key',
-                'child_foreign_key': 'foreign_key'
-            }
-        ]
-    }
-    error_msg = re.escape(
-        "The 'table1' table and 'table2' table cannot be merged. Please make sure the primary key "
-        "in 'table1' ('primary_key') and the foreign key in 'table2' ('foreign_key') have the same"
-        ' data type.'
-    )
-
-    # Run and Assert
-    with pytest.raises(ValueError, match=error_msg):
-        validate_multi_table_inputs(real_data, synthetic_data, metadata)

@@ -34,12 +34,15 @@ class BaseMultiTableProperty():
             metadata (dict):
                 The metadata of the tables.
         """
+        details_frames = []
         for table_name in metadata['tables']:
             details = self._properties[table_name]._details.copy()
             details['Table'] = table_name
-            self.details_property = pd.concat(
-                [self.details_property, details]
-            )
+            details_frames.append(details)
+
+        self.details_property = pd.concat(details_frames).reset_index(drop=True)
+        cols = ['Table'] + [col for col in self.details_property if col != 'Table']
+        self.details_property = self.details_property[cols]
 
     def _compute_average(self):
         """Average the scores for each column."""
@@ -48,7 +51,7 @@ class BaseMultiTableProperty():
         if not is_dataframe or not has_score_column:
             raise ValueError("The property details must be a DataFrame with a 'Score' column.")
 
-        return self._details['Score'].mean()
+        return self.details_property['Score'].mean()
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.

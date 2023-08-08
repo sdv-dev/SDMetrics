@@ -84,8 +84,7 @@ class TestBaseReport:
         # Run and Assert
         base_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
-    @patch('sdmetrics.reports.single_table.base_report._validate_categorical_values')
-    def test_validate(self, mock_validate_categorical_values):
+    def test_validate(self):
         """Test the ``validate`` method."""
         # Setup
         base_report = BaseReport()
@@ -114,9 +113,6 @@ class TestBaseReport:
 
         # Assert
         mock__validate_metadata_matches_data.assert_called_once_with(
-            real_data, synthetic_data, metadata
-        )
-        mock_validate_categorical_values.assert_called_once_with(
             real_data, synthetic_data, metadata
         )
 
@@ -171,15 +167,6 @@ class TestBaseReport:
         with pytest.raises(NotImplementedError):
             base_report._print_results()
 
-    def test__get_num_iterations(self):
-        """Test the ``_get_num_iterations`` method."""
-        # Setup
-        base_report = BaseReport()
-
-        # Run and Assert
-        with pytest.raises(NotImplementedError):
-            base_report._get_num_iterations('property_name', 'metadata')
-
     @patch('tqdm.tqdm')
     def test_generate_verbose(self, mock_tqdm):
         """Test the ``generate`` method with verbose=True."""
@@ -187,12 +174,13 @@ class TestBaseReport:
         base_report = BaseReport()
         mock_validate = Mock()
         base_report.validate = mock_validate
-        base_report._get_num_iterations = Mock(side_effect=[4, 6])
         base_report._print_results = Mock()
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 1'].get_score.return_value = 1.0
+        base_report._properties['Property 1']._get_num_iterations.return_value = 4
         base_report._properties['Property 2'] = Mock()
         base_report._properties['Property 2'].get_score.return_value = 1.0
+        base_report._properties['Property 2']._get_num_iterations.return_value = 6
         base_report._properties['Property 1']._compute_average.return_value = 1.0
         base_report._properties['Property 2']._compute_average.return_value = 1.0
 

@@ -1,103 +1,167 @@
 """Test BaseMultiTableProperty class."""
 
-from unittest.mock import Mock, call
+import re
+from unittest.mock import Mock, patch
 
+import pandas as pd
 import pytest
 
 from sdmetrics.reports.multi_table._properties import BaseMultiTableProperty
 
 
-def test__init__():
-    """Test the ``__init__`` method."""
-    # Setup
-    base_property = BaseMultiTableProperty()
+class TestBaseMultiTableProperty():
 
-    # Assert
-    assert base_property._properties == {}
-    assert base_property._single_table_property is None
-    assert base_property.is_computed is False
+    def test__init__(self):
+        """Test the ``__init__`` method."""
+        # Setup
+        base_property = BaseMultiTableProperty()
 
+        # Assert
+        assert base_property._properties == {}
+        assert base_property._single_table_property is None
+        assert base_property.is_computed is False
 
-def test_get_score_raises_error():
-    """Test that the method raises a ``NotImplementedError``."""
-    # Setup
-    base_property = BaseMultiTableProperty()
+    def test__get_num_iterations(self):
+        """Test that ``_get_num_iterations`` raises a ``NotImplementedError``."""
+        # Setup
+        base_property = BaseMultiTableProperty()
 
-    # Run and Assert
-    with pytest.raises(NotImplementedError):
-        base_property.get_score(None, None, None, None)
+        # Run and Assert
+        with pytest.raises(NotImplementedError):
+            base_property._get_num_iterations(None)
 
-
-def test_get_score_with_single_table_property():
-    """Test that the method returns the property's ``get_score``."""
-    # Setup
-    base_property = BaseMultiTableProperty()
-    mock_property = Mock()
-    mock_property.get_score.return_value = 1.0
-    base_property._single_table_property = Mock(return_value=mock_property)
-
-    metadata = {
-        'tables': {
-            'table1': {},
-            'table2': {},
-            'table3': {}
+    def test__generate_details_property(self):
+        """Test the ``_generate_details_property`` method."""
+        # Setup
+        metadata = {
+            'tables': {
+                'Table_1': {},
+                'Table_2': {},
+            }
         }
-    }
 
-    real_data = {
-        'table1': Mock(),
-        'table2': Mock(),
-        'table3': Mock()
-    }
+        property_table_1 = Mock()
+        property_table_1._details = pd.DataFrame({
+            'Column': ['col1', 'col2'],
+            'Score': [0.5, 0.6]
+        })
+        property_table_2 = Mock()
+        property_table_2._details = pd.DataFrame({
+            'Column': ['col3', 'col4'],
+            'Score': [0.7, 0.8]
+        })
+        base_property = BaseMultiTableProperty()
+        base_property._properties = {
+            'Table_1': property_table_1,
+            'Table_2': property_table_2,
+        }
+        base_property.details_property = pd.DataFrame()
 
-    synthetic_data = {
-        'table1': Mock(),
-        'table2': Mock(),
-        'table3': Mock()
-    }
+        # Run
+        base_property._generate_details_property(metadata)
 
-    prg_bar = Mock()
+        # Assert
+        expected_details = pd.DataFrame({
+            'Table': ['Table_1', 'Table_1', 'Table_2', 'Table_2'],
+            'Column': ['col1', 'col2', 'col3', 'col4'],
+            'Score': [0.5, 0.6, 0.7, 0.8]
+        })
 
-    # Run
-    result = base_property.get_score(real_data, synthetic_data, metadata, prg_bar)
+        pd.testing.assert_frame_equal(base_property.details_property, expected_details)
 
-    # Assert
-    expected_average_score = 1.0
-    expected_calls = [
-        call(real_data['table1'], synthetic_data['table1'], metadata['tables']['table1'], prg_bar),
-        call(real_data['table2'], synthetic_data['table2'], metadata['tables']['table2'], prg_bar),
-        call(real_data['table3'], synthetic_data['table3'], metadata['tables']['table3'], prg_bar)
-    ]
+    def test__compute_average_raises_error(self):
+        """Test that the method raises a ``ValueError`` when _details has not been computed."""
+        # Setup
+        base_property = BaseMultiTableProperty()
 
-    assert result == expected_average_score
-    assert base_property._single_table_property.call_count == 3
-    assert mock_property.get_score.call_args_list == expected_calls
+        # Run and Assert
+        expected_error_message = re.escape(
+            "The property details must be a DataFrame with a 'Score' column."
+        )
+        with pytest.raises(ValueError, match=expected_error_message):
+            base_property._compute_average()
 
+        base_property.details_property = pd.DataFrame({'Column': ['a', 'b', 'c']})
+        with pytest.raises(ValueError, match=expected_error_message):
+            base_property._compute_average()
 
-def test_get_visualization():
-    """Test that the method returns the property's ``get_visualization``."""
-    # Setup
-    base_property = BaseMultiTableProperty()
-    property_mock = Mock()
-    base_property._properties = {'table': property_mock}
-    base_property.is_computed = True
+    def test_get_score_raises_error(self):
+        """Test that the method raises a ``NotImplementedError``."""
+        # Setup
+        base_property = BaseMultiTableProperty()
 
-    # Run
-    result = base_property.get_visualization('table')
+        # Run and Assert
+        with pytest.raises(NotImplementedError):
+            base_property.get_score(None, None, None, None)
 
-    # Assert
-    assert result == property_mock.get_visualization.return_value
+    @patch('sdmetrics.reports.multi_table._properties.base.BaseMultiTableProperty'
+           '._single_table_property', create=True)
+    def test_get_score(self, mock_single_table_property):
+        """Test the ``get_score`` method."""
+        # Setup
+        real_data = {
+            'Table_1': pd.DataFrame(),
+            'Table_2': pd.DataFrame(),
+        }
+        synthetic_data = {
+            'Table_1': pd.DataFrame(),
+            'Table_2': pd.DataFrame(),
+        }
+        metadata = {
+            'tables': {
+                'Table_1': {},
+                'Table_2': {},
+            }
+        }
+        progress_bar = 'tqdm'
 
+        property_mock_1 = Mock()
+        property_mock_2 = Mock()
 
-def test_get_visualization_raises_error():
-    """Test that the method raises a ``ValueError`` when the table is not in the metadata."""
-    # Setup
-    base_property = BaseMultiTableProperty()
+        mock_single_table_property.side_effect = [property_mock_1, property_mock_2]
 
-    # Run and Assert
-    expected_message = (
-        'The property must be computed before getting a visualization.'
-        'Please call the ``get_score`` method first.'
-    )
-    with pytest.raises(ValueError, match=expected_message):
-        base_property.get_visualization('table')
+        base_multi_table_property = BaseMultiTableProperty()
+        base_multi_table_property._generate_details_property = Mock()
+        base_multi_table_property._compute_average = Mock(return_value=0.7)
+
+        # Run
+        result = base_multi_table_property.get_score(
+            real_data, synthetic_data, metadata, progress_bar
+        )
+
+        # Assert
+        property_mock_1.get_score.assert_called_once_with(
+            real_data['Table_1'], synthetic_data['Table_1'], metadata['tables']['Table_1'], 'tqdm')
+        property_mock_2.get_score.assert_called_once_with(
+            real_data['Table_2'], synthetic_data['Table_2'], metadata['tables']['Table_2'], 'tqdm')
+        base_multi_table_property._generate_details_property.assert_called_once_with(metadata)
+        base_multi_table_property._compute_average.assert_called_once()
+        assert result == 0.7
+        assert base_multi_table_property.is_computed is True
+
+    def test_get_visualization(self):
+        """Test that the method returns the property's ``get_visualization``."""
+        # Setup
+        base_property = BaseMultiTableProperty()
+        property_mock = Mock()
+        base_property._properties = {'table': property_mock}
+        base_property.is_computed = True
+
+        # Run
+        result = base_property.get_visualization('table')
+
+        # Assert
+        assert result == property_mock.get_visualization.return_value
+
+    def test_get_visualization_raises_error(self):
+        """Test that the method raises a ``ValueError`` when the table is not in the metadata."""
+        # Setup
+        base_property = BaseMultiTableProperty()
+
+        # Run and Assert
+        expected_message = (
+            'The property must be computed before getting a visualization.'
+            'Please call the ``get_score`` method first.'
+        )
+        with pytest.raises(ValueError, match=expected_message):
+            base_property.get_visualization('table')

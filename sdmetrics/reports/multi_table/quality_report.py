@@ -10,7 +10,6 @@ import pkg_resources
 import tqdm
 
 from sdmetrics.reports.multi_table._properties import Cardinality, ColumnPairTrends, ColumnShapes
-from sdmetrics.reports.utils import validate_multi_table_inputs
 
 
 class QualityReport():
@@ -60,8 +59,6 @@ class QualityReport():
             verbose (bool):
                 Whether or not to print the report summary and progress.
         """
-        validate_multi_table_inputs(real_data, synthetic_data, metadata)
-
         self._tables = list(real_data.keys())
 
         self._properties_instances = {

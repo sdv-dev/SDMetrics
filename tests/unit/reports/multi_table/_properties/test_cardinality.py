@@ -95,3 +95,36 @@ class TestCardinality:
             }
         }
         mock_get_table_relationships_plot.assert_called_with(expected_score_breakdwons)
+
+    def test__get_num_iteration(self):
+        """Test the ``_get_num_iterations`` method."""
+        # Setup
+        metadata = {
+            'relationships': [
+                {
+                    'parent_table_name': 'table1',
+                    'parent_primary_key': 'col1',
+                    'child_table_name': 'table2',
+                    'child_foreign_key': 'col6'
+                },
+                {
+                    'parent_table_name': 'table1',
+                    'parent_primary_key': 'col1',
+                    'child_table_name': 'table3',
+                    'child_foreign_key': 'col7'
+                },
+                {
+                    'parent_table_name': 'table2',
+                    'parent_primary_key': 'col6',
+                    'child_table_name': 'table4',
+                    'child_foreign_key': 'col8'
+                },
+            ]
+        }
+        cardinality = Cardinality()
+
+        # Run
+        num_iterations = cardinality._get_num_iterations(metadata)
+
+        # Assert
+        assert num_iterations == 3

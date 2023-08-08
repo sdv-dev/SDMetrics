@@ -18,8 +18,7 @@ from sdmetrics.multi_table import (
 from sdmetrics.reports.single_table.plot_utils import (
     get_column_boundaries_plot, get_column_coverage_plot, get_synthesis_plot)
 from sdmetrics.reports.utils import (
-    DIAGNOSTIC_REPORT_RESULT_DETAILS, aggregate_metric_results, print_results_for_level,
-    validate_multi_table_inputs)
+    DIAGNOSTIC_REPORT_RESULT_DETAILS, aggregate_metric_results, print_results_for_level)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -86,8 +85,6 @@ class DiagnosticReport():
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
-        validate_multi_table_inputs(real_data, synthetic_data, metadata)
-
         metrics = list(itertools.chain.from_iterable(self.METRICS.values()))
         for metric in tqdm.tqdm(metrics, desc='Creating report', disable=(not verbose)):
             metric_name = metric.__name__
