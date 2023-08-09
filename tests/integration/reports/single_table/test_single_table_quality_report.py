@@ -322,7 +322,7 @@ class TestQualityReport:
         metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
         report = QualityReport()
 
-        # Run and Assert
+        # Run
         report.generate(data, data, metadata)
         error_msg = report.get_details(property_name='Column Pair Trends')['Error'][0]
 
@@ -339,7 +339,7 @@ class TestQualityReport:
         metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
         report = QualityReport()
 
-        # Run and Assert
+        # Run
         report.generate(data, data, metadata)
         error_msg = report.get_details(property_name='Column Pair Trends')['Error'][0]
 
@@ -357,7 +357,7 @@ class TestQualityReport:
         metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
         report = QualityReport()
 
-        # Run and Assert
+        # Run
         report.generate(data, synthetic_data, metadata)
         error_msg = report.get_details(property_name='Column Pair Trends')['Error'][0]
 
