@@ -35,7 +35,6 @@ def test_get_score_with_single_table_property():
     mock_property = Mock()
     mock_property.get_score.return_value = 1.0
     base_property._single_table_property = Mock(return_value=mock_property)
-    base_property._augment_error_msg = Mock()
 
     metadata = {
         'tables': {
