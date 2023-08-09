@@ -3,8 +3,10 @@ from unittest.mock import Mock, call, patch
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from sdmetrics.column_pairs.statistical import CorrelationSimilarity
+from sdmetrics.errors import ConstantInputError
 from sdmetrics.warnings import ConstantInputWarning
 from tests.utils import SeriesMatcher
 
@@ -96,35 +98,19 @@ class TestCorrelationSimilarity:
         assert result == expected_score_breakdown
 
     def test_compute_breakdown_constant_input(self):
-        """Test the ``compute_breakdown`` method with constant input.
-
-        Expect that an invalid score is returned and that a warning is thrown.
-
-        Input:
-        - Mocked real data.
-        - Mocked synthetic data.
-
-        Output:
-        - A mapping of the metric results, containing the score and the real and synthetic results.
-        """
+        """Test an error is thrown when constant data is passed."""
         # Setup
         real_data = pd.DataFrame({'col1': [1.0, 1.0, 1.0], 'col2': [2.0, 2.0, 2.0]})
         synthetic_data = pd.DataFrame({'col1': [0.9, 1.8, 3.1], 'col2': [2, 3, 4]})
-        expected_score_breakdown = {
-            'score': np.nan,
-        }
-        expected_warn_msg = (
-            'One or both of the input arrays is constant. '
-            'The CorrelationSimilarity metric is either undefined or infinte.'
+
+        # Run and Assert
+        error_msg = (
+            "The real data in columns 'col1, col2' contains a constant value. "
+            'Correlation is undefined for constant data.'
         )
-
-        # Run
         metric = CorrelationSimilarity()
-        with np.testing.assert_warns(ConstantInputWarning, match=expected_warn_msg):
-            result = metric.compute_breakdown(real_data, synthetic_data, coefficient='Pearson')
-
-        # Assert
-        assert result == expected_score_breakdown
+        with pytest.raises(ConstantInputError, match=error_msg):
+            metric.compute_breakdown(real_data, synthetic_data, coefficient='Pearson')
 
     def test_compute(self):
         """Test the ``compute`` method.

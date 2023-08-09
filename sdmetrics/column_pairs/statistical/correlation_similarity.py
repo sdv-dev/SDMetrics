@@ -29,7 +29,6 @@ class CorrelationSimilarity(ColumnPairsMetric):
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
-    _is_multi_table = False
 
     @staticmethod
     def _raise_constant_data_error(columns, prefix):
