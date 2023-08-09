@@ -2,6 +2,7 @@
 
 from unittest.mock import Mock, call
 
+import pandas as pd
 import pytest
 
 from sdmetrics.reports.multi_table._properties import BaseMultiTableProperty
@@ -33,7 +34,11 @@ def test_get_score_with_single_table_property():
     # Setup
     base_property = BaseMultiTableProperty()
     mock_property = Mock()
-    mock_property.get_score.return_value = 1.0
+    mock_property._details = pd.DataFrame({
+        'Table': ['table1', 'table1', 'table1', 'table2', 'table3', 'table3'],
+        'Column': ['a', 'b', 'c', 'd', 'e', 'f'],
+        'Score': [1, 1, 1, 0.25, 0.5, 0]
+    })
     base_property._single_table_property = Mock(return_value=mock_property)
 
     metadata = {
@@ -62,7 +67,7 @@ def test_get_score_with_single_table_property():
     result = base_property.get_score(real_data, synthetic_data, metadata, prg_bar)
 
     # Assert
-    expected_average_score = 1.0
+    expected_average_score = 0.625
     expected_calls = [
         call(real_data['table1'], synthetic_data['table1'], metadata['tables']['table1'], prg_bar),
         call(real_data['table2'], synthetic_data['table2'], metadata['tables']['table2'], prg_bar),

@@ -1,5 +1,6 @@
 """Multi table base property class."""
 import numpy as np
+import pandas as pd
 
 
 class BaseMultiTableProperty():
@@ -39,17 +40,21 @@ class BaseMultiTableProperty():
         if self._single_table_property is None:
             raise NotImplementedError()
 
-        average_score = np.zeros(len(metadata['tables']))
-        for idx, table_name in enumerate(metadata['tables']):
-            self._properties[table_name] = self._single_table_property()
-            average_score[idx] = self._properties[table_name].get_score(
-                real_data[table_name], synthetic_data[table_name], metadata['tables'][table_name],
+        all_details = []
+        for table_name in metadata['tables']:
+            property_instance = self._single_table_property()
+            self._properties[table_name] = property_instance
+            self._properties[table_name].get_score(
+                real_data[table_name],
+                synthetic_data[table_name],
+                metadata['tables'][table_name],
                 progress_bar
             )
+            all_details.append(property_instance._details)
 
         self.is_computed = True
-
-        return np.nanmean(average_score)
+        all_details = pd.concat(all_details)
+        return np.nanmean(all_details['Score'])
 
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.
