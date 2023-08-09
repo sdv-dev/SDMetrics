@@ -11,6 +11,12 @@ class BaseMultiTableProperty():
     Attributes:
         properties (dict):
             A dict mapping the table names to their single table properties.
+        is_computed (bool):
+            Whether or not the property has been computed.
+        _only_multi_table (bool):
+            Whether or not the property only exist for multi-tables.
+        details_property (pandas.DataFrame):
+            The multi table details property dataframe.
     """
 
     _single_table_property = None
@@ -18,6 +24,7 @@ class BaseMultiTableProperty():
     def __init__(self):
         self._properties = {}
         self.is_computed = False
+        self._only_multi_table = False
         self.details_property = pd.DataFrame()
 
     def _get_num_iterations(self, metadata):
@@ -34,15 +41,16 @@ class BaseMultiTableProperty():
             metadata (dict):
                 The metadata of the tables.
         """
-        details_frames = []
-        for table_name in metadata['tables']:
-            details = self._properties[table_name]._details.copy()
-            details['Table'] = table_name
-            details_frames.append(details)
+        if not self._only_multi_table:
+            details_frames = []
+            for table_name in metadata['tables']:
+                details = self._properties[table_name]._details.copy()
+                details['Table'] = table_name
+                details_frames.append(details)
 
-        self.details_property = pd.concat(details_frames).reset_index(drop=True)
-        cols = ['Table'] + [col for col in self.details_property if col != 'Table']
-        self.details_property = self.details_property[cols]
+            self.details_property = pd.concat(details_frames).reset_index(drop=True)
+            cols = ['Table'] + [col for col in self.details_property if col != 'Table']
+            self.details_property = self.details_property[cols]
 
     def _compute_average(self):
         """Average the scores for each column."""

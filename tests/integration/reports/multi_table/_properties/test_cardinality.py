@@ -16,5 +16,5 @@ def test_cardinality_shame_similarity_property():
     figure = cardinality_property.get_visualization('users')
 
     # Assert
-    assert score == 0.7
+    assert score == 0.8
     assert isinstance(figure, Figure)

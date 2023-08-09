@@ -1,3 +1,6 @@
+import numpy as np
+import pandas as pd
+
 from sdmetrics.multi_table.statistical import CardinalityShapeSimilarity
 from sdmetrics.reports.multi_table._properties.base import BaseMultiTableProperty
 from sdmetrics.reports.multi_table.plot_utils import get_table_relationships_plot
@@ -11,7 +14,8 @@ class Cardinality(BaseMultiTableProperty):
     """
 
     def __init__(self):
-        self._details = {}
+        super().__init__()
+        self._only_multi_table = True
 
     def _get_num_iterations(self, metadata):
         return len(metadata['relationships'])
@@ -33,31 +37,74 @@ class Cardinality(BaseMultiTableProperty):
             float:
                 The average score for the property for all the individual metric scores computed.
         """
+        child_table, parent_table = [], []
+        metric_names, scores, error_messages = [], [], []
         for relation in metadata.get('relationships', []):
             relationships_metadata = {'relationships': [relation]}
             try:
-                self._details = CardinalityShapeSimilarity.compute_breakdown(
+                relation_score = CardinalityShapeSimilarity.compute(
                     real_data,
                     synthetic_data,
                     relationships_metadata
                 )
-            except Exception as error:
-                errors = self._details.get('Errors', {})
-                errors[relation] = str(error)
-                self._details['Errors'] = errors
+                error_message = None
+            except Exception as e:
+                relation_score = np.nan
+                error_message = f'Error: {type(e).__name__} {e}'
+            finally:
+                if progress_bar is not None:
+                    progress_bar.update()
 
-            if progress_bar is not None:
-                progress_bar.update()
+            child_table.append(relation['child_table_name'])
+            parent_table.append(relation['parent_table_name'])
+            metric_names.append('CardinalityShapeSimilarity')
+            scores.append(relation_score)
+            error_messages.append(error_message)
 
-        if progress_bar is not None:
-            progress_bar.close()
+        self.details_property = pd.DataFrame({
+            'Child Table': child_table,
+            'Parent Table': parent_table,
+            'Metric': metric_names,
+            'Score': scores,
+            'Error': error_messages,
+        })
 
-        score = 0
-        for result in self._details.values():
-            score += result.get('score', 0)
+        if self.details_property['Error'].isna().all():
+            self.details_property = self.details_property.drop('Error', axis=1)
 
-        average_score = score / len(self._details) if len(self._details) else score
-        return average_score
+        return self._compute_average()
+
+    def _get_details_for_table_name(self, table_name):
+        """Return the details for the given table name.
+
+        Args:
+            table_name (str):
+                Table name to get the details for.
+
+        Returns:
+            pandas.DataFrame:
+                The details for the given table name.
+        """
+        is_child = self.details_property['Child Table'] == table_name
+        is_parent = self.details_property['Parent Table'] == table_name
+        return self.details_property[is_child | is_parent].copy()
+
+    def get_details(self, table_name=None):
+        """Return the details for the property.
+
+        Args:
+            table_name (str):
+                Table name to get the details for.
+                Defaults to ``None``.
+
+        Returns:
+            pandas.DataFrame:
+                The details for the property.
+        """
+        if table_name is None:
+            return self.details_property.copy()
+
+        return self._get_details_for_table_name(table_name)
 
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.
@@ -70,12 +117,5 @@ class Cardinality(BaseMultiTableProperty):
             plotly.graph_objects._figure.Figure
                 The visualization for the property.
         """
-        score_breakdowns = {'CardinalityShapeSimilarity': self._details}
-        for metric, details in score_breakdowns.items():
-            score_breakdowns[metric] = {
-                tables: results for tables, results in details.items()
-                if table_name in tables
-            }
-
-        fig = get_table_relationships_plot(score_breakdowns)
+        fig = get_table_relationships_plot(self._get_details_for_table_name(table_name))
         return fig

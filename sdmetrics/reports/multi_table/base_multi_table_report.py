@@ -64,9 +64,13 @@ class BaseMultiTableReport(BaseReport):
             return self._properties[property_name].details_property.copy()
 
         self._check_table_names(table_name)
-        table_name_rows = self._properties[property_name].details_property['Table'] == table_name
-        details = self._properties[property_name].details_property.loc[table_name_rows]
-        details = details.drop(columns=['Table'])
+
+        if not self._properties[property_name]._only_multi_table:
+            table_rows = self._properties[property_name].details_property['Table'] == table_name
+            details = self._properties[property_name].details_property.loc[table_rows]
+            details = details.drop(columns=['Table'])
+        else:
+            details = self._properties[property_name].get_details(table_name)
 
         return details.copy()
 
@@ -91,4 +95,4 @@ class BaseMultiTableReport(BaseReport):
 
         self._validate_property_generated(property_name)
         self._check_table_names(table_name)
-        return self._properties[property_name][table_name].get_visualization()
+        return self._properties[property_name].get_visualization(table_name)
