@@ -182,9 +182,14 @@ class TestBaseReport:
         report._check_table_names = mock__check_table_names
         report._validate_property_generated = mock__validate_property_generated
 
+        expected_details = pd.DataFrame({
+            'Column': ['col1', 'col2'],
+            'Score': [0.3, 0.4],
+        })
+
         property_1 = Mock()
         property_1.details_property = details_property_df
-
+        property_1.get_details = Mock(return_value=expected_details)
         report._properties = {
             'Property_1': property_1,
             'Property_2': Mock(),
@@ -196,11 +201,7 @@ class TestBaseReport:
         # Assert
         mock__check_table_names.assert_called_once_with('Table_1')
         mock__validate_property_generated.assert_called_once_with('Property_1')
-
-        expected_details = pd.DataFrame({
-            'Column': ['col1', 'col2'],
-            'Score': [0.3, 0.4],
-        })
+        property_1.get_details.assert_called_once_with('Table_1')
 
         pd.testing.assert_frame_equal(result, expected_details)
 
@@ -216,12 +217,10 @@ class TestBaseReport:
         report._validate_property_generated = mock__validate_property_generated
         report._check_table_names = mock__check_table_names
 
-        property_1 = {
-            'Table_1': Mock(get_visualization=mock_get_visualization),
-        }
+        mock_property = Mock(get_visualization=mock_get_visualization)
 
         report._properties = {
-            'Property_1': property_1,
+            'Property_1': mock_property,
             'Property_2': Mock(),
         }
 
@@ -231,7 +230,7 @@ class TestBaseReport:
         # Assert
         mock__validate_property_generated.assert_called_once_with('Property_1')
         mock__check_table_names.assert_called_once_with('Table_1')
-        mock_get_visualization.assert_called_once_with()
+        mock_get_visualization.assert_called_once_with('Table_1')
 
         assert result == mock_visualization
 

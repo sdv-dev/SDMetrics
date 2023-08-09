@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
+import plotly.express as px
 
 from sdmetrics.multi_table.statistical import CardinalityShapeSimilarity
 from sdmetrics.reports.multi_table._properties.base import BaseMultiTableProperty
-from sdmetrics.reports.multi_table.plot_utils import get_table_relationships_plot
 
 
 class Cardinality(BaseMultiTableProperty):
@@ -106,6 +106,47 @@ class Cardinality(BaseMultiTableProperty):
 
         return self._get_details_for_table_name(table_name)
 
+    def _get_table_relationships_plot(self, table_name):
+        """Get the table relationships plot from the parent child relationship scores for a table.
+
+        Args:
+            table_name (str):
+                Table name to get details table for.
+
+        Returns:
+            plotly.graph_objects._figure.Figure
+        """
+        plot_data = self._get_details_for_table_name(table_name).copy()
+        column_name = 'Child → Parent Relationship'
+        plot_data[column_name] = plot_data['Child Table'] + ' → ' + plot_data['Parent Table']
+        plot_data = plot_data.drop(['Child Table', 'Parent Table'], axis=1)
+
+        average_score = round(plot_data['Score'].mean(), 2)
+
+        fig = px.bar(
+            plot_data,
+            x='Child → Parent Relationship',
+            y='Score',
+            title=f'Table Relationships (Average Score={average_score})',
+            color='Metric',
+            color_discrete_sequence=['#000036'],
+            hover_name='Child → Parent Relationship',
+            hover_data={
+                'Child → Parent Relationship': False,
+                'Metric': True,
+                'Score': True,
+            },
+        )
+
+        fig.update_yaxes(range=[0, 1])
+
+        fig.update_layout(
+            xaxis_categoryorder='total ascending',
+            plot_bgcolor='#F5F5F8',
+        )
+
+        return fig
+
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.
 
@@ -117,5 +158,4 @@ class Cardinality(BaseMultiTableProperty):
             plotly.graph_objects._figure.Figure
                 The visualization for the property.
         """
-        fig = get_table_relationships_plot(self._get_details_for_table_name(table_name))
-        return fig
+        return self._get_table_relationships_plot(table_name)

@@ -790,7 +790,7 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
                 warnings.warn(warning_format.format(values=values, column=column))
 
 
-def _print_results_quality_reports(report):
+def _print_results_quality_report(report):
     """Print the quality report results."""
     sys.stdout.write(
         f'\nOverall Quality Score: {round(report._overall_score * 100, 2)}%\n\n'
