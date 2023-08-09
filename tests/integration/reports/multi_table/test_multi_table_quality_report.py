@@ -109,51 +109,58 @@ def test_multi_table_quality_report():
     }))
 
     # Assert Column Shapes details
-    pd.testing.assert_frame_equal(details[0], pd.DataFrame({
+    expected = pd.DataFrame({
+        'Table': ['table1', 'table1'],
         'Column': ['col2', 'col3'],
         'Metric': ['TVComplement', 'TVComplement'],
         'Score': [.75, .75]
-    }))
+    })
+    pd.testing.assert_frame_equal(details[0], expected)
 
     # Assert Column Pair Trends details
-    pd.testing.assert_frame_equal(details[1], pd.DataFrame({
+    expected = pd.DataFrame({
+        'Table': ['table1'],
         'Column 1': ['col2'],
         'Column 2': ['col3'],
         'Metric': ['ContingencySimilarity'],
         'Score': [.25],
         'Real Correlation': [np.nan],
         'Synthetic Correlation': [np.nan],
-    }))
+    })
+    pd.testing.assert_frame_equal(details[1], expected)
 
-    # Assert Cardinality details
-    assert details[2] == details[5] == {('table1', 'table2'): {'score': 0.75}}
+    # Assert Cardinality details, with and without table name
+    # In this case they are the same because the only existing row contains the table_name
+    expected = pd.DataFrame({
+        'Child Table': ['table1'],
+        'Parent Table': ['table2'],
+        'Metric': ['CardinalityShapeSimilariy'],
+        'Score': [.75]
+    })
+    pd.testing.assert_frame_equal(details[2], expected)
+    pd.testing.assert_frame_equal(details[5], expected)
 
     # Assert Column Shapes details without table_name
-    pd.testing.assert_frame_equal(details[3]['table1'], pd.DataFrame({
-        'Column': ['col2', 'col3'],
-        'Metric': ['TVComplement', 'TVComplement'],
-        'Score': [.75, .75]
-    }))
-    pd.testing.assert_frame_equal(details[3]['table2'], pd.DataFrame({
-        'Column': ['col4', 'col5', 'col7'],
-        'Metric': ['KSComplement', 'KSComplement', 'KSComplement'],
-        'Score': [.75, .75, 1]
-    }))
+    expected = pd.DataFrame({
+        'Table': ['table1', 'table1', 'table2', 'table2', 'table2'],
+        'Column': ['col2', 'col3', 'col4', 'col5', 'col7'],
+        'Metric': ['TVComplement', 'TVComplement', 'KSComplement', 'KSComplement', 'KSComplement'],
+        'Score': [.75, .75, .75, .75, 1]
+    })
 
     # Assert Column Pair Trends details without table_name
-    pd.testing.assert_frame_equal(details[4]['table1'], pd.DataFrame({
-        'Column 1': ['col2'],
-        'Column 2': ['col3'],
-        'Metric': ['ContingencySimilarity'],
-        'Score': [.25],
-        'Real Correlation': [np.nan],
-        'Synthetic Correlation': [np.nan],
-    }))
-    pd.testing.assert_frame_equal(details[4]['table2'], pd.DataFrame({
-        'Column 1': ['col4', 'col4', 'col5'],
-        'Column 2': ['col5', 'col7', 'col7'],
-        'Metric': ['CorrelationSimilarity', 'CorrelationSimilarity', 'CorrelationSimilarity'],
-        'Score': [0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
-        'Real Correlation': [0.946664, 0.966247, 0.862622],
-        'Synthetic Correlation': [0.926925, 0.936853, 0.798384],
-    }))
+    expected = pd.DataFrame({
+        'Table': ['table1', 'table2', 'table2', 'table2'],
+        'Column 1': ['col2', 'col4', 'col4', 'col5'],
+        'Column 2': ['col3', 'col5', 'col7', 'col7'],
+        'Metric': [
+            'ContingencySimilarity',
+            'CorrelationSimilarity',
+            'CorrelationSimilarity',
+            'CorrelationSimilarity'
+        ],
+        'Score': [.25, 0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
+        'Real Correlation': [np.nan, 0.946664, 0.966247, 0.862622],
+        'Synthetic Correlation': [np.nan, 0.926925, 0.936853, 0.798384],
+    })
+    pd.testing.assert_frame_equal(details[4], expected)

@@ -176,6 +176,45 @@ class QualityReport():
 
         return self._properties_instances[property_name].get_visualization(table_name)
 
+    def _get_details_non_cardinality(self, property_instance, table_name):
+        if table_name:
+            details = {table_name: property_instance._properties[table_name]._details.copy()}
+        else:
+            details = {
+                table_name: property_._details
+                for table_name, property_ in property_instance._properties.items()
+            }
+
+        # Add a column with the table name for each details
+        for table_name in details:
+            table_column = pd.DataFrame({'Table': [table_name] * len(details[table_name])})
+            details[table_name] = pd.concat([table_column, details[table_name]], axis=1)
+
+        return pd.concat(list(details.values()), ignore_index=True)
+
+    def _get_details_cardinality(self, property_instance, table_name):
+        # For Cardinality, the details are a dictionary where the keys are tuples (table1, table2).
+        # If table_name is passed, select only the tuples which contain it.
+        details = property_instance._details
+        if table_name:
+            details = {
+                table_names: detail
+                for table_names, detail in details.items()
+                if table_name in table_names
+            }
+
+        details_dataframe = pd.DataFrame()
+        for tables, scores in details.items():
+            new_row = pd.DataFrame({
+                'Child Table': [tables[0]],
+                'Parent Table': [tables[1]],
+                'Metric': ['CardinalityShapeSimilariy'],
+                'Score': [scores['score']]
+            })
+            details_dataframe = pd.concat([details_dataframe, new_row], ignore_index=True)
+
+        return details_dataframe
+
     def get_details(self, property_name, table_name=None):
         """Return the details for each score for the given property name.
 
@@ -186,33 +225,16 @@ class QualityReport():
                 Optionally filter results by table.
 
         Returns:
-            dict:
+            pd.DataFrame:
                 The details of the scores of a property.
         """
         self._validate_inputs(property_name, table_name)
 
         property_instance = self._properties_instances[property_name]
         if property_name != 'Cardinality':
-            if table_name:
-                return property_instance._properties[table_name]._details.copy()
-
-            details = {}
-            for table_name, property_ in property_instance._properties.items():
-                details[table_name] = property_._details
-
-            return details
-
-        # For Cardinality, the details are a dictionary where the keys are tuples (table1, table2).
-        # If table_name is passed, select only the tuples which contain it.
-        details = property_instance._details
-        if table_name:
-            return {
-                table_names: detail
-                for table_names, detail in details.items()
-                if table_name in table_names
-            }
-
-        return details
+            return self._get_details_non_cardinality(property_instance, table_name)
+        else:
+            return self._get_details_cardinality(property_instance, table_name)
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.

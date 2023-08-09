@@ -47,14 +47,13 @@ def get_column_shapes_plot(score_breakdowns, average_score=None):
         plotly.graph_objects._figure.Figure
     """
     data = _get_column_shapes_data(score_breakdowns)
-    data = data.rename(columns={'Score': 'Quality Score'})
     if average_score is None:
-        average_score = data['Quality Score'].mean()
+        average_score = data['Score'].mean()
 
     fig = px.bar(
         data,
         x='Column Name',
-        y='Quality Score',
+        y='Score',
         title=f'Data Quality: Column Shapes (Average Score={round(average_score, 2)})',
         category_orders={'group': data['Column Name']},
         color='Metric',
@@ -68,7 +67,7 @@ def get_column_shapes_plot(score_breakdowns, average_score=None):
         hover_data={
             'Column Name': False,
             'Metric': True,
-            'Quality Score': True,
+            'Score': True,
         },
     )
 

@@ -351,7 +351,7 @@ class TestQualityReport:
         # Setup
         report = QualityReport()
         instance = Mock()
-        instance._details = {'details'}
+        instance._details = {('table1', 'table2'): {'score': 1}}
         report._properties_instances = {'Cardinality': instance}
         report._is_generated = True
 
@@ -359,7 +359,13 @@ class TestQualityReport:
         details = report.get_details('Cardinality')
 
         # Assert
-        assert details == {'details'}
+        expected = pd.DataFrame({
+            'Child Table': ['table1'],
+            'Parent Table': ['table2'],
+            'Metric': ['CardinalityShapeSimilariy'],
+            'Score': [1]
+        })
+        pd.testing.assert_frame_equal(details, expected)
 
     def test_get_details_table_name(self):
         """Test the ``get_details`` method with Cardinality and table_name."""
@@ -378,7 +384,13 @@ class TestQualityReport:
         details = report.get_details('Cardinality', 'table3')
 
         # Assert
-        assert details == {('table1', 'table3'): {'score': 0.57}}
+        expected = pd.DataFrame({
+            'Child Table': ['table1'],
+            'Parent Table': ['table3'],
+            'Metric': ['CardinalityShapeSimilariy'],
+            'Score': [.57]
+        })
+        pd.testing.assert_frame_equal(details, expected)
 
     def test_get_details_no_table_name(self):
         """Test it works when table_name is None and property is not Cardinality."""
@@ -387,7 +399,7 @@ class TestQualityReport:
         report._is_generated = True
         instance = Mock()
         details_mock = Mock()
-        details_mock._details = {'details'}
+        details_mock._details = pd.DataFrame({'cols': ['col1', 'col2']})
         instance._properties = {'table': details_mock}
         report._properties_instances = {'Column Shapes': instance}
         report._tables = ['tab1']
@@ -396,7 +408,11 @@ class TestQualityReport:
         details = report.get_details('Column Shapes')
 
         # Assert
-        assert details == {'table': {'details'}}
+        expected = pd.DataFrame({
+            'Table': ['table', 'table'],
+            'cols': ['col1', 'col2']
+        })
+        pd.testing.assert_frame_equal(details, expected)
 
     def test_get_details_not_generated(self):
         """Test the ``get_details`` method when the report hasn't been generated."""
