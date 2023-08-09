@@ -1,5 +1,5 @@
 """Single table base property class."""
-from sdmetrics.reports.single_table.base_report import BaseReport
+from sdmetrics.reports.base_report import BaseReport
 
 
 class BaseMultiTableReport(BaseReport):

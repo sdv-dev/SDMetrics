@@ -20,7 +20,7 @@ class TestDiagnosticReport:
         assert isinstance(report._properties['Boundary'], Boundary)
         assert isinstance(report._properties['Synthesis'], Synthesis)
 
-    @patch('sdmetrics.reports.multi_table.diagnostic_report._print_results_diagnostic_reports')
+    @patch('sdmetrics.reports.multi_table.diagnostic_report._print_results_diagnostic_report')
     def test__print_results(self, mock_print_results):
         """Test the ``_print_results`` method."""
         # Setup
@@ -33,7 +33,7 @@ class TestDiagnosticReport:
         mock_print_results.assert_called_once_with(report)
 
     @patch('sdmetrics.reports.multi_table.diagnostic_report._generate_results_diagnostic_report')
-    @patch('sdmetrics.reports.single_table.base_report.BaseReport.generate')
+    @patch('sdmetrics.reports.base_report.BaseReport.generate')
     def test_generate_without_verbose(self, mock_super_generate, mock_generate_results):
         """Test the ``generate`` method without verbose."""
         # Setup

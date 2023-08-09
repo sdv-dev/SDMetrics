@@ -31,7 +31,7 @@ class TestQualityReport:
         # Assert
         mock_print_result.assert_called_once_with(report)
 
-    @patch('sdmetrics.reports.single_table.base_report.BaseReport.generate')
+    @patch('sdmetrics.reports.base_report.BaseReport.generate')
     def test_generate_without_verbose(self, mock_super_generate):
         """Test the ``generate`` method without verbose."""
         # Setup

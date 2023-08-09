@@ -5,11 +5,14 @@ from unittest.mock import Mock, call, patch
 import pandas as pd
 import pytest
 
+from sdmetrics.reports.single_table import DiagnosticReport, QualityReport
 from sdmetrics.reports.utils import (
-    _generate_cardinality_plot, _get_cardinality, aggregate_metric_results, convert_to_datetime,
-    discretize_and_apply_metric, discretize_table_data, get_cardinality_plot, get_column_pair_plot,
-    get_column_plot, make_continuous_column_pair_plot, make_continuous_column_plot,
-    make_discrete_column_pair_plot, make_discrete_column_plot, make_mixed_column_pair_plot)
+    _generate_cardinality_plot, _generate_results_diagnostic_report, _get_cardinality,
+    _print_results_diagnostic_report, _print_results_quality_report, aggregate_metric_results,
+    convert_to_datetime, discretize_and_apply_metric, discretize_table_data, get_cardinality_plot,
+    get_column_pair_plot, get_column_plot, make_continuous_column_pair_plot,
+    make_continuous_column_plot, make_discrete_column_pair_plot, make_discrete_column_plot,
+    make_mixed_column_pair_plot)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -1356,3 +1359,112 @@ def test_aggregate_metric_results():
     # Assert
     assert avg_score == 0.45
     assert num_errors == 1
+
+
+def test__generate_results_diagnostic_report():
+    """Test the ``_generate_results_diagnostic_report`` method."""
+    # Setup
+    report = DiagnosticReport()
+    report._properties['Coverage']._details = pd.DataFrame({
+        'Metric': ['CategoryCoverage', 'RangeCoverage', 'CategoryCoverage'],
+        'Score': [0.1, 0.2, 0.3]
+    })
+    report._properties['Boundary']._details = pd.DataFrame({
+        'Metric': ['BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence'],
+        'Score': [0.5, 0.6, 0.7]
+    })
+    report._properties['Synthesis']._details = pd.DataFrame({
+        'Metric': ['NewRowSynthesis'],
+        'Score': [1.0]
+    })
+
+    # Run
+    _generate_results_diagnostic_report(report)
+
+    # Assert
+    expected_result = {
+        'SUCCESS': [
+            'Over 90% of the synthetic rows are not copies of the real data'
+        ],
+        'WARNING': [
+            'More than 10% the synthetic data does not follow the min/max boundaries'
+            ' set by the real data'
+        ],
+        'DANGER': [
+            'The synthetic data is missing more than 50% of the categories'
+            ' present in the real data',
+            'The synthetic data is missing more than 50% of the numerical ranges'
+            ' present in the real data'
+        ]
+    }
+
+    assert report.results == expected_result
+
+
+@patch('sys.stdout.write')
+def test__print_results_diagnostic_report(mock_write):
+    """Test the ``_print_results`` method."""
+    # Setup
+    report = DiagnosticReport()
+    report._properties['Coverage']._details = pd.DataFrame({
+        'Metric': ['CategoryCoverage', 'RangeCoverage', 'CategoryCoverage'],
+        'Score': [0.1, 0.2, 0.3]
+    })
+    report._properties['Boundary']._details = pd.DataFrame({
+        'Metric': ['BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence'],
+        'Score': [0.5, 0.6, 0.7]
+    })
+    report._properties['Synthesis']._details = pd.DataFrame({
+        'Metric': ['NewRowSynthesis'],
+        'Score': [1.0]
+    })
+
+    # Run
+    _print_results_diagnostic_report(report)
+
+    # Assert
+    calls = [
+        call('\nDiagnostic Results:\n'),
+        call('\nSUCCESS:\n'),
+        call('✓ Over 90% of the synthetic rows are not copies of the real data\n'),
+        call('\nWARNING:\n'),
+        call(
+            '! More than 10% the synthetic data does not follow the min/max '
+            'boundaries set by the real data\n'
+        ),
+        call('\nDANGER:\n'),
+        call(
+            'x The synthetic data is missing more than 50% of the categories'
+            ' present in the real data\n'
+        ),
+        call(
+            'x The synthetic data is missing more than 50% of the numerical'
+            ' ranges present in the real data\n'
+        )
+    ]
+
+    mock_write.assert_has_calls(calls, any_order=True)
+
+
+@patch('sys.stdout.write')
+def test__print_results_quality_report(mock_write):
+    """Test the ``_print_results_quality_report`` method."""
+    # Setup
+    quality_report = QualityReport()
+    quality_report._overall_score = 0.5
+    quality_report._properties = {
+        'Column Shapes': Mock(_compute_average=Mock(return_value=0.6)),
+        'Column Pair Trends': Mock(_compute_average=Mock(return_value=0.4))
+    }
+
+    # Run
+    _print_results_quality_report(quality_report)
+
+    # Assert
+    calls = [
+        call('\nOverall Quality Score: 50.0%\n\n'),
+        call('Properties:\n'),
+        call('- Column Shapes: 60.0%\n'),
+        call('- Column Pair Trends: 40.0%\n'),
+    ]
+    mock_write.assert_has_calls(calls, any_order=True)

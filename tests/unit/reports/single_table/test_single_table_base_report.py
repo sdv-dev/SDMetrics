@@ -6,7 +6,7 @@ from unittest.mock import Mock, call, mock_open, patch
 import pandas as pd
 import pytest
 
-from sdmetrics.reports.single_table.base_report import BaseReport
+from sdmetrics.reports.base_report import BaseReport
 
 
 class TestBaseReport:
@@ -313,8 +313,8 @@ class TestBaseReport:
         base_report._properties['Property 1']._details.copy.assert_called_once()
         base_report._properties['Property 2']._details.copy.assert_called_once()
 
-    @patch('sdmetrics.reports.single_table.base_report.pkg_resources.get_distribution')
-    @patch('sdmetrics.reports.single_table.base_report.pickle')
+    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.pickle')
     def test_save(self, pickle_mock, get_distribution_mock):
         """Test the ``save`` method.
 
@@ -331,7 +331,7 @@ class TestBaseReport:
         open_mock = mock_open(read_data=pickle.dumps('test'))
 
         # Run
-        with patch('sdmetrics.reports.single_table.base_report.open', open_mock):
+        with patch('sdmetrics.reports.base_report.open', open_mock):
             BaseReport.save(report, 'test-file.pkl')
 
         # Assert
@@ -340,8 +340,8 @@ class TestBaseReport:
         pickle_mock.dump.assert_called_once_with(report, open_mock())
         assert report._package_version == get_distribution_mock.return_value.version
 
-    @patch('sdmetrics.reports.single_table.base_report.pkg_resources.get_distribution')
-    @patch('sdmetrics.reports.single_table.base_report.pickle')
+    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.pickle')
     def test_load(self, pickle_mock, get_distribution_mock):
         """Test the ``load`` method.
 
@@ -363,16 +363,16 @@ class TestBaseReport:
         report._package_version = get_distribution_mock.return_value.version
 
         # Run
-        with patch('sdmetrics.reports.single_table.base_report.open', open_mock):
+        with patch('sdmetrics.reports.base_report.open', open_mock):
             loaded = BaseReport.load('test-file.pkl')
 
         # Assert
         open_mock.assert_called_once_with('test-file.pkl', 'rb')
         assert loaded == pickle_mock.load.return_value
 
-    @patch('sdmetrics.reports.single_table.base_report.warnings')
-    @patch('sdmetrics.reports.single_table.base_report.pkg_resources.get_distribution')
-    @patch('sdmetrics.reports.single_table.base_report.pickle')
+    @patch('sdmetrics.reports.base_report.warnings')
+    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.pickle')
     def test_load_mismatched_versions(self, pickle_mock, get_distribution_mock, warnings_mock):
         """Test the ``load`` method with mismatched sdmetrics versions.
 
@@ -395,7 +395,7 @@ class TestBaseReport:
         get_distribution_mock.return_value.version = 'new_version'
 
         # Run
-        with patch('sdmetrics.reports.single_table.base_report.open', open_mock):
+        with patch('sdmetrics.reports.base_report.open', open_mock):
             loaded = BaseReport.load('test-file.pkl')
 
         # Assert

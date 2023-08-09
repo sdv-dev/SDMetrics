@@ -812,7 +812,12 @@ def _generate_results_diagnostic_report(report):
         report.results['DANGER'] = []
 
     for property_name in report._properties:
-        details = report._properties[property_name].details_property
+        details = getattr(report._properties[property_name], '_details', None)
+        if details is None:
+            details = getattr(
+                report._properties[property_name], 'details_property', None
+            )
+
         average_score_metric = details.groupby('Metric')['Score'].mean()
         for metric, score in average_score_metric.items():
             if pd.isna(score):
@@ -828,7 +833,7 @@ def _generate_results_diagnostic_report(report):
                     DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
 
 
-def _print_results_diagnostic_reports(report):
+def _print_results_diagnostic_report(report):
     """Print the diagnostic report results."""
     _generate_results_diagnostic_report(report)
 

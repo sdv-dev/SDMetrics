@@ -71,7 +71,7 @@ class TestBaseReport:
         with pytest.raises(ValueError, match=expected_error_message):
             report._validate_metadata_matches_data(real_data_bad, synthetic_data, metadata)
 
-    @patch('sdmetrics.reports.single_table.base_report.BaseReport._validate_metadata_matches_data')
+    @patch('sdmetrics.reports.base_report.BaseReport._validate_metadata_matches_data')
     def test__validate_metadata_matches_data(self, mock__validate_metadata_matches_data):
         """Test the ``_validate_metadata_matches_data`` method."""
         # Setup

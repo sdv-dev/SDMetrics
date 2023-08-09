@@ -4,7 +4,7 @@ from copy import deepcopy
 from sdmetrics.reports.multi_table._properties import Boundary, Coverage, Synthesis
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
 from sdmetrics.reports.utils import (
-    _generate_results_diagnostic_report, _print_results_diagnostic_reports)
+    _generate_results_diagnostic_report, _print_results_diagnostic_report)
 
 
 class DiagnosticReport(BaseMultiTableReport):
@@ -25,7 +25,7 @@ class DiagnosticReport(BaseMultiTableReport):
 
     def _print_results(self):
         """Print the results of the report."""
-        _print_results_diagnostic_reports(self)
+        _print_results_diagnostic_report(self)
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
