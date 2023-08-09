@@ -152,7 +152,7 @@ class TestQualityReport:
             'Score': [0.7011066184294531, np.nan, 0.9720930232558139, 0.9255813953488372],
             'Error': [
                 None,
-                "Error: TypeError '<' not supported between instances of 'str' and 'float'",
+                "TypeError: '<' not supported between instances of 'str' and 'float'",
                 None,
                 None
             ]
@@ -177,11 +177,11 @@ class TestQualityReport:
             'Real Correlation': [np.nan] * 6,
             'Synthetic Correlation': [np.nan] * 6,
             'Error': [
-                "Error: ValueError could not convert string to float: 'a'",
+                "ValueError: could not convert string to float: 'a'",
                 None,
                 None,
-                "Error: TypeError '<=' not supported between instances of 'float' and 'str'",
-                "Error: TypeError '<=' not supported between instances of 'float' and 'str'",
+                "TypeError: '<=' not supported between instances of 'float' and 'str'",
+                "TypeError: '<=' not supported between instances of 'float' and 'str'",
                 None
             ]
         }
@@ -232,7 +232,7 @@ class TestQualityReport:
             ],
             'Error': [
                 None, None, None, None,
-                'Error: ValueError Data passed to ks_2samp must not be empty'
+                'ValueError: Data passed to ks_2samp must not be empty'
             ]
         }
 
@@ -267,8 +267,8 @@ class TestQualityReport:
                 np.nan, np.nan
             ],
             'Error': [
-                None, None, None, 'Error: ValueError x and y must have length at least 2.',
-                None, None, 'Error: ValueError x and y must have length at least 2.', None,
+                None, None, None, 'ValueError: x and y must have length at least 2.',
+                None, None, 'ValueError: x and y must have length at least 2.', None,
                 None, None
             ]
         }
@@ -314,3 +314,55 @@ class TestQualityReport:
         for pattern in key_phrases:
             match = re.search(pattern, my_stdout.getvalue())
             assert match is not None
+
+    def test_correlation_similarity_constant_real_data(self):
+        """Error out when CorrelationSimilarity is used with a constant pair of columns."""
+        # Setup
+        data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1, 1, 1, 1]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+        report = QualityReport()
+
+        # Run
+        report.generate(data, data, metadata)
+        error_msg = report.get_details(property_name='Column Pair Trends')['Error'][0]
+
+        # Assert
+        assert error_msg == (
+            "ConstantInputError: The real data in columns 'col1, col2' contains "
+            'a constant value. Correlation is undefined for constant data.'
+        )
+
+    def test_correlation_similarity_one_constant_real_data_column(self):
+        """Error out when CorrelationSimilarity is used with one constant column."""
+        # Setup
+        data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1.2, 1, 1, 1]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+        report = QualityReport()
+
+        # Run
+        report.generate(data, data, metadata)
+        error_msg = report.get_details(property_name='Column Pair Trends')['Error'][0]
+
+        # Assert
+        assert error_msg == (
+            "ConstantInputError: The real data in column 'col1' contains "
+            'a constant value. Correlation is undefined for constant data.'
+        )
+
+    def test_correlation_similarity_constant_synthetic_data(self):
+        """Error out when CorrelationSimilarity is used with constant synthetic data."""
+        # Setup
+        data = pd.DataFrame({'col1': [2, 1, 1, 1], 'col2': [3, 1, 1, 1]})
+        synthetic_data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1, 1, 1, 1]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+        report = QualityReport()
+
+        # Run
+        report.generate(data, synthetic_data, metadata)
+        error_msg = report.get_details(property_name='Column Pair Trends')['Error'][0]
+
+        # Assert
+        assert error_msg == (
+            "ConstantInputError: The synthetic data in columns 'col1, col2' contains "
+            'a constant value. Correlation is undefined for constant data.'
+        )

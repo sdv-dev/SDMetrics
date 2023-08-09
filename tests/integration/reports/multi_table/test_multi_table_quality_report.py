@@ -164,3 +164,56 @@ def test_multi_table_quality_report():
         'Synthetic Correlation': [np.nan, 0.926925, 0.936853, 0.798384],
     })
     pd.testing.assert_frame_equal(details[4], expected)
+
+
+def test_correlation_similarity_constant_real_data():
+    """Error out when CorrelationSimilarity is used with a constant pair of columns."""
+    # Setup
+    data = {
+        'table1': pd.DataFrame({'id': [0, 1, 2, 3], 'col': [1, 1, 1, 1], 'col2': [1, 1, 1, 1]}),
+        'table2': pd.DataFrame({'id': [0, 1, 2, 3], 'col': [1, 1, 1, 1], 'col2': [1, 1, 1, 1]}),
+    }
+    metadata = {
+        'tables': {
+            'table1': {
+                'columns': {
+                    'id': {'sdtype': 'id'},
+                    'col': {'sdtype': 'numerical'},
+                    'col2': {'sdtype': 'numerical'},
+                },
+            },
+            'table2': {
+                'columns': {
+                    'id': {'sdtype': 'id'},
+                    'col': {'sdtype': 'numerical'},
+                    'col2': {'sdtype': 'numerical'},
+                },
+            }
+        },
+        'relationships': [
+            {
+                'parent_table_name': 'table1',
+                'parent_primary_key': 'id',
+                'child_table_name': 'table2',
+                'child_foreign_key': 'id'
+            }
+        ]
+    }
+    report = QualityReport()
+
+    # Run and Assert
+    report.generate(data, data, metadata)
+    details = report.get_details(property_name='Column Pair Trends')
+
+    # Assert
+    error_msg1 = details['Error'][0]
+    assert error_msg1 == (
+        "ConstantInputError: The real data in columns 'col, col2' "
+        'contains a constant value. Correlation is undefined for constant data.'
+    )
+
+    error_msg1 = details['Error'][1]
+    assert error_msg1 == (
+        "ConstantInputError: The real data in columns 'col, col2' "
+        'contains a constant value. Correlation is undefined for constant data.'
+    )
