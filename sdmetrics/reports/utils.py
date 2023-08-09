@@ -804,9 +804,33 @@ def _print_results_quality_reports(report):
         )
 
 
+def _generate_results_diagnostic_report(report):
+    """Generate the diagnostic report results."""
+    if not report.results:
+        report.results['SUCCESS'] = []
+        report.results['WARNING'] = []
+        report.results['DANGER'] = []
+
+    for property_name in report._properties:
+        details = report._properties[property_name].details_property
+        average_score_metric = details.groupby('Metric')['Score'].mean()
+        for metric, score in average_score_metric.items():
+            if pd.isna(score):
+                continue
+            if score >= 0.9:
+                report.results['SUCCESS'].append(
+                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['SUCCESS'])
+            elif score >= 0.5:
+                report.results['WARNING'].append(
+                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['WARNING'])
+            else:
+                report.results['DANGER'].append(
+                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
+
+
 def _print_results_diagnostic_reports(report):
     """Print the diagnostic report results."""
-    report._generate_results()
+    _generate_results_diagnostic_report(report)
 
     sys.stdout.write('\nDiagnostic Results:\n')
     print_results_for_level(sys.stdout, report.results, 'SUCCESS')
