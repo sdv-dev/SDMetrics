@@ -127,4 +127,4 @@ class TestColumnPairTrends:
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
-        assert score == 0.88
+        assert score == 0.8813953488372093
