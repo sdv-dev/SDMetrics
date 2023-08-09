@@ -48,10 +48,10 @@ class TestColumnShapes:
         column_shape_property = ColumnShapes()
 
         expected_message_1 = (
-            "Error: TypeError '<' not supported between instances of 'Timestamp' and 'int'"
+            "TypeError: '<' not supported between instances of 'Timestamp' and 'int'"
         )
         expected_message_2 = (
-            "Error: TypeError '<' not supported between instances of 'str' and 'float'"
+            "TypeError: '<' not supported between instances of 'str' and 'float'"
         )
 
         score = column_shape_property.get_score(real_data, synthetic_data, metadata)

@@ -74,11 +74,11 @@ class TestColumnPairTrends:
         column_shape_property = ColumnPairTrends()
 
         exp_message_1 = (
-            "Error: ValueError could not convert string to float: 'a'"
+            "ValueError: could not convert string to float: 'a'"
         )
 
         exp_message_2 = (
-            "Error: TypeError '<=' not supported between instances of 'float' and 'str'"
+            "TypeError: '<=' not supported between instances of 'float' and 'str'"
         )
 
         exp_error_serie = pd.Series(
@@ -92,39 +92,39 @@ class TestColumnPairTrends:
         pd.testing.assert_series_equal(details['Error'], exp_error_serie, check_names=False)
         assert score == 0.7023255813953488
 
-        def test_only_categorical_columns(self):
-            """Test the ``get_score`` method when there are only categorical columns."""
-            # Setup
-            column_names = [
-                'student_id', 'degree_type', 'gender', 'high_spec', 'work_experience'
-            ]
-            real_data, synthetic_data, metadata = load_demo(modality='single_table')
+    def test_only_categorical_columns(self):
+        """Test the ``get_score`` method when there are only categorical columns."""
+        # Setup
+        column_names = [
+            'student_id', 'degree_type', 'gender', 'high_spec', 'work_experience'
+        ]
+        real_data, synthetic_data, metadata = load_demo(modality='single_table')
 
-            metadata['columns'] = {
-                key: val for key, val in metadata['columns'].items() if key in column_names
-            }
+        metadata['columns'] = {
+            key: val for key, val in metadata['columns'].items() if key in column_names
+        }
 
-            # Run
-            column_shape_property = ColumnPairTrends()
-            score = column_shape_property.get_score(real_data, synthetic_data, metadata)
+        # Run
+        column_shape_property = ColumnPairTrends()
+        score = column_shape_property.get_score(real_data, synthetic_data, metadata)
 
-            # Assert
-            expected_details_dict = {
-                'Column 1': [
-                    'high_spec', 'high_spec', 'high_spec', 'gender', 'gender', 'work_experience'
-                ],
-                'Column 2': [
-                    'gender', 'work_experience', 'degree_type', 'work_experience',
-                    'degree_type', 'degree_type'
-                ],
-                'Metric': ['ContingencySimilarity'] * 6,
-                'Score': [
-                    0.8883720930232558, 0.9023255813953488, 0.7767441860465116, 0.9348837209302325,
-                    0.8883720930232558, 0.8976744186046511
-                ],
-                'Real Correlation': [np.nan] * 6,
-                'Synthetic Correlation': [np.nan] * 6
-            }
-            expected_details = pd.DataFrame(expected_details_dict)
-            pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
-            assert score == 0.88
+        # Assert
+        expected_details_dict = {
+            'Column 1': [
+                'high_spec', 'high_spec', 'high_spec', 'gender', 'gender', 'work_experience'
+            ],
+            'Column 2': [
+                'gender', 'work_experience', 'degree_type', 'work_experience',
+                'degree_type', 'degree_type'
+            ],
+            'Metric': ['ContingencySimilarity'] * 6,
+            'Score': [
+                0.8883720930232558, 0.9023255813953488, 0.7767441860465116, 0.9348837209302325,
+                0.8883720930232558, 0.8976744186046511
+            ],
+            'Real Correlation': [np.nan] * 6,
+            'Synthetic Correlation': [np.nan] * 6
+        }
+        expected_details = pd.DataFrame(expected_details_dict)
+        pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
+        assert score == 0.88

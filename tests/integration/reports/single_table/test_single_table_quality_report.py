@@ -152,7 +152,7 @@ class TestQualityReport:
             'Score': [0.7011066184294531, np.nan, 0.9720930232558139, 0.9255813953488372],
             'Error': [
                 None,
-                "Error: TypeError '<' not supported between instances of 'str' and 'float'",
+                "TypeError: '<' not supported between instances of 'str' and 'float'",
                 None,
                 None
             ]
@@ -177,11 +177,11 @@ class TestQualityReport:
             'Real Correlation': [np.nan] * 6,
             'Synthetic Correlation': [np.nan] * 6,
             'Error': [
-                "Error: ValueError could not convert string to float: 'a'",
+                "ValueError: could not convert string to float: 'a'",
                 None,
                 None,
-                "Error: TypeError '<=' not supported between instances of 'float' and 'str'",
-                "Error: TypeError '<=' not supported between instances of 'float' and 'str'",
+                "TypeError: '<=' not supported between instances of 'float' and 'str'",
+                "TypeError: '<=' not supported between instances of 'float' and 'str'",
                 None
             ]
         }
@@ -232,7 +232,7 @@ class TestQualityReport:
             ],
             'Error': [
                 None, None, None, None,
-                'Error: ValueError Data passed to ks_2samp must not be empty'
+                'ValueError: Data passed to ks_2samp must not be empty'
             ]
         }
 
@@ -267,8 +267,8 @@ class TestQualityReport:
                 np.nan, np.nan
             ],
             'Error': [
-                None, None, None, 'Error: ValueError x and y must have length at least 2.',
-                None, None, 'Error: ValueError x and y must have length at least 2.', None,
+                None, None, None, 'ValueError: x and y must have length at least 2.',
+                None, None, 'ValueError: x and y must have length at least 2.', None,
                 None, None
             ]
         }
@@ -328,7 +328,7 @@ class TestQualityReport:
 
         # Assert
         assert error_msg == (
-            "Error: ConstantInputError The real data in columns 'col1, col2' contains "
+            "ConstantInputError: The real data in columns 'col1, col2' contains "
             'a constant value. Correlation is undefined for constant data.'
         )
 
@@ -345,7 +345,7 @@ class TestQualityReport:
 
         # Assert
         assert error_msg == (
-            "Error: ConstantInputError The real data in column 'col1' contains "
+            "ConstantInputError: The real data in column 'col1' contains "
             'a constant value. Correlation is undefined for constant data.'
         )
 
@@ -363,6 +363,6 @@ class TestQualityReport:
 
         # Assert
         assert error_msg == (
-            "Error: ConstantInputError The synthetic data in columns 'col1, col2' contains "
+            "ConstantInputError: The synthetic data in columns 'col1, col2' contains "
             'a constant value. Correlation is undefined for constant data.'
         )

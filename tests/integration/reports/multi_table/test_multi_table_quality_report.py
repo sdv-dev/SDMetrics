@@ -149,22 +149,21 @@ def test_multi_table_quality_report():
     })
 
     # Assert Column Pair Trends details without table_name
-    pd.testing.assert_frame_equal(details[4]['table1'], pd.DataFrame({
-        'Column 1': ['col2'],
-        'Column 2': ['col3'],
-        'Metric': ['ContingencySimilarity'],
-        'Score': [.25],
-        'Real Correlation': [np.nan],
-        'Synthetic Correlation': [np.nan],
-    }))
-    pd.testing.assert_frame_equal(details[4]['table2'], pd.DataFrame({
-        'Column 1': ['col4', 'col4', 'col5'],
-        'Column 2': ['col5', 'col7', 'col7'],
-        'Metric': ['CorrelationSimilarity', 'CorrelationSimilarity', 'CorrelationSimilarity'],
-        'Score': [0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
-        'Real Correlation': [0.946664, 0.966247, 0.862622],
-        'Synthetic Correlation': [0.926925, 0.936853, 0.798384],
-    }))
+    expected = pd.DataFrame({
+        'Table': ['table1', 'table2', 'table2', 'table2'],
+        'Column 1': ['col2', 'col4', 'col4', 'col5'],
+        'Column 2': ['col3', 'col5', 'col7', 'col7'],
+        'Metric': [
+            'ContingencySimilarity',
+            'CorrelationSimilarity',
+            'CorrelationSimilarity',
+            'CorrelationSimilarity'
+        ],
+        'Score': [.25, 0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
+        'Real Correlation': [np.nan, 0.946664, 0.966247, 0.862622],
+        'Synthetic Correlation': [np.nan, 0.926925, 0.936853, 0.798384],
+    })
+    pd.testing.assert_frame_equal(details[4], expected)
 
 
 def test_correlation_similarity_constant_real_data():
@@ -207,14 +206,14 @@ def test_correlation_similarity_constant_real_data():
     details = report.get_details(property_name='Column Pair Trends')
 
     # Assert
-    error_msg1 = details['table1']['Error'][0]
+    error_msg1 = details['Error'][0]
     assert error_msg1 == (
-        "Error: ConstantInputError In table 'table1', the real data in columns 'col, col2' "
+        "ConstantInputError: The real data in columns 'col, col2' "
         'contains a constant value. Correlation is undefined for constant data.'
     )
 
-    error_msg1 = details['table2']['Error'][0]
+    error_msg1 = details['Error'][1]
     assert error_msg1 == (
-        "Error: ConstantInputError In table 'table2', the real data in columns 'col, col2' "
+        "ConstantInputError: The real data in columns 'col, col2' "
         'contains a constant value. Correlation is undefined for constant data.'
     )
