@@ -1,5 +1,46 @@
 # History
 
+## v0.11.0 - 2023-08-10
+
+This release adds a function that allows users to plot the cardinality of foreign and primary keys in synthetic data. More specifically, it graphs the frequency that each number of children per parent row occurs in the parent table.
+
+Additionally, architectural changes are made to improve the efficiency and error handling of the `QualityReport`! The progress bar is also enhanced to be more informative when the report is generating.
+
+This release also adds support for Python 3.11 and drops support for Python 3.7.
+
+### New Features
+
+* Visualize cardinality of foreign key columns - Issue [#283](https://github.com/sdv-dev/SDMetrics/issues/283) by @R-Palazzo
+* Create single table BaseProperty class - Issue [#354](https://github.com/sdv-dev/SDMetrics/issues/354) by @amontanez24
+* Create single table column shapes property - Issue [#355](https://github.com/sdv-dev/SDMetrics/issues/355) by @R-Palazzo
+* Create single table column pair trends property - Issue [#356](https://github.com/sdv-dev/SDMetrics/issues/356) by @R-Palazzo
+* Create multi table BaseProperty class - Issue [#357](https://github.com/sdv-dev/SDMetrics/issues/357) by @pvk-developer
+* Create multi table column shapes and column pair trends properties - Issue [#358](https://github.com/sdv-dev/SDMetrics/issues/358) by @R-Palazzo
+* Create Parent Child Relationships property class - Issue [#359](https://github.com/sdv-dev/SDMetrics/issues/359) by @pvk-developer
+* In Multi Table Quality Report: Rename "Table Relationships" property to "Cardinality" - Issue [#360](https://github.com/sdv-dev/SDMetrics/issues/360) by @frances-h
+* More accurate progress bar for single table Quality Report - Issue [#361](https://github.com/sdv-dev/SDMetrics/issues/361) by @R-Palazzo
+* More accurate progress bar for multi table Quality Report - Issue [#362](https://github.com/sdv-dev/SDMetrics/issues/362) by @fealho
+* Raise error in CorrelationSimilarity if either column is constant - Issue [#407](https://github.com/sdv-dev/SDMetrics/issues/407) by @fealho
+
+### Bug Fixes
+
+* Issue in building the denormalized table inside the Parent-Child Detection metrics - Issue [#328](https://github.com/sdv-dev/SDMetrics/issues/328) by @fealho
+* Don't modify the rounding in the quality report - Issue [#401](https://github.com/sdv-dev/SDMetrics/issues/401) by @R-Palazzo
+* The Cardinality property is missing some relationships - Issue [#404](https://github.com/sdv-dev/SDMetrics/issues/404) by @pvk-developer
+* The Cardinality property is not returning a DataFrame - Issue [#405](https://github.com/sdv-dev/SDMetrics/issues/405) by @fealho
+* Overall property score should be the average across all breakdowns - Issue [#415](https://github.com/sdv-dev/SDMetrics/issues/415) by @amontanez24
+
+### Internal
+
+* Use property classes in single table QualityReport - Issue [#370](https://github.com/sdv-dev/SDMetrics/issues/370) by @R-Palazzo
+* Use property classes in multi table QualityReport - Issue [#371](https://github.com/sdv-dev/SDMetrics/issues/371) by @fealho
+* Add add-on detection for premium metrics - Issue [#388](https://github.com/sdv-dev/SDMetrics/issues/388) by @amontanez24
+
+### Maintenance
+
+* Add support for Python 3.11 - Issue [#353](https://github.com/sdv-dev/SDMetrics/issues/353) by @amontanez24
+* Drop support for Python 3.7 - Issue [#380](https://github.com/sdv-dev/SDMetrics/issues/380) by @amontanez24
+
 ## v0.10.1 - 2023-06-06
 
 This release fixes a bug that was causing the `DiagnosticReport` to crash on the `NewRowSynthesis` metric. It also adds support for PyTorch 2.0!
