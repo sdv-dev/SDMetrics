@@ -102,10 +102,10 @@ def test_multi_table_quality_report():
         details.append(report.get_details(property_))
 
     # Assert score
-    assert score == 0.7190730021414969
+    assert score == 0.782776169878912
     pd.testing.assert_frame_equal(properties, pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
-        'Score': [0.7916666666666667, 0.615552339757824, 0.75],
+        'Score': [0.8, 0.7983285096367361, 0.75],
     }))
 
     # Assert Column Shapes details
@@ -147,6 +147,7 @@ def test_multi_table_quality_report():
         'Metric': ['TVComplement', 'TVComplement', 'KSComplement', 'KSComplement', 'KSComplement'],
         'Score': [.75, .75, .75, .75, 1]
     })
+    pd.testing.assert_frame_equal(details[3], expected)
 
     # Assert Column Pair Trends details without table_name
     expected = pd.DataFrame({
