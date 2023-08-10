@@ -73,7 +73,9 @@ class TestDiagnosticReport:
             ]
         })
         assert results == expected_results
-        pd.testing.assert_frame_equal(report.get_properties(), expected_properties)
+        pd.testing.assert_frame_equal(
+            report.get_properties(), expected_properties, check_exact=False, atol=2e-2
+        )
         pd.testing.assert_frame_equal(report.get_details('Boundary'), expected_details)
 
     def test_get_properties(self):

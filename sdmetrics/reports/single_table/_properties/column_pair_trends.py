@@ -247,7 +247,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
             error = None
             valid_sdtypes = sdtype_col_1 in list_dtypes and sdtype_col_2 in list_dtypes
-            print(progress_bar)
             if not valid_sdtypes:
                 if progress_bar:
                     progress_bar.update()
