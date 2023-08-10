@@ -32,7 +32,7 @@ def _get_table_relationships_data(score_breakdowns):
     return pd.DataFrame({
         'Child → Parent Relationship': relationships,
         'Metric': metrics,
-        'Quality Score': scores,
+        'Score': scores,
     })
 
 
@@ -47,12 +47,12 @@ def get_table_relationships_plot(score_breakdowns):
         plotly.graph_objects._figure.Figure
     """
     plot_data = _get_table_relationships_data(score_breakdowns)
-    average_score = round(plot_data['Quality Score'].mean(), 2)
+    average_score = round(plot_data['Score'].mean(), 2)
 
     fig = px.bar(
         plot_data,
         x='Child → Parent Relationship',
-        y='Quality Score',
+        y='Score',
         title=f'Data Quality: Table Relationships (Average Score={average_score})',
         color='Metric',
         color_discrete_sequence=[BAR_COLOR],
@@ -60,7 +60,7 @@ def get_table_relationships_plot(score_breakdowns):
         hover_data={
             'Child → Parent Relationship': False,
             'Metric': True,
-            'Quality Score': True,
+            'Score': True,
         },
     )
 

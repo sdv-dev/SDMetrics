@@ -34,7 +34,7 @@ def test__get_table_relationships_data():
     pd.testing.assert_frame_equal(out, pd.DataFrame({
         'Child → Parent Relationship': ['table1 → table2', 'table1 → table3'],
         'Metric': ['METRIC', 'METRIC'],
-        'Quality Score': [0.2, 0.1],
+        'Score': [0.2, 0.1],
     }))
 
 
