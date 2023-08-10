@@ -31,7 +31,7 @@ class Boundary(BaseSingleTableProperty):
             metadata (dict):
                 The metadata of the table.
             progress_bar (tqdm.tqdm or None):
-                The progress bar to use. Defaults to tqdm.
+                The progress bar to use. Defaults to None.
 
         Returns:
             pandas.DataFrame
