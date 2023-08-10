@@ -1,5 +1,4 @@
 """Multi table base property class."""
-import numpy as np
 import pandas as pd
 
 
@@ -54,7 +53,7 @@ class BaseMultiTableProperty():
 
         self.is_computed = True
         all_details = pd.concat(all_details)
-        return np.nanmean(all_details['Score'])
+        return all_details['Score'].mean()
 
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.
