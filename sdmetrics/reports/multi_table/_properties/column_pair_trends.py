@@ -13,7 +13,4 @@ class ColumnPairTrends(BaseMultiTableProperty):
     """
 
     _single_table_property = SingleTableColumnPairTrends
-
-    def _get_num_iterations(self, metadata):
-        num_columns = [len(table['columns']) for table in metadata['tables'].values()]
-        return sum([(n_cols * (n_cols - 1)) // 2 for n_cols in num_columns])
+    _num_iteration_case = 'per column pair'

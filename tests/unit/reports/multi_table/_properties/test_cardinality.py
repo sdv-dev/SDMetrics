@@ -18,6 +18,7 @@ class TestCardinality:
 
         # Assert
         cardinality._only_multi_table is True
+        assert cardinality._num_iteration_case == 'per relationship'
 
     def test__get_num_iteration(self):
         """Test the ``_get_num_iterations`` method."""

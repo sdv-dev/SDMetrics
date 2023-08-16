@@ -8,24 +8,6 @@ from sdmetrics.reports.single_table._properties.boundary import Boundary
 
 class TestBoundary:
 
-    def test__get_num_iterations(self):
-        """Test the ``_get_num_iterations`` method."""
-        # Setup
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'boolean'},
-                'col3': {'sdtype': 'categorical'},
-            }
-        }
-        boundary_property = Boundary()
-
-        # Run
-        num_iterations = boundary_property._get_num_iterations(metadata)
-
-        # Assert
-        assert num_iterations == 3
-
     @patch('sdmetrics.reports.single_table._properties.boundary.BoundaryAdherence.compute')
     def test__generate_details(self, boundary_adherence_mock):
         """Test the ``_generate_details`` method."""

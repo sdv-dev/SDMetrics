@@ -14,6 +14,4 @@ class ColumnShapes(BaseMultiTableProperty):
     """
 
     _single_table_property = SingleTableColumnShapes
-
-    def _get_num_iterations(self, metadata):
-        return sum(len(metadata['tables'][table]['columns']) for table in metadata['tables'])
+    _num_iteration_case = 'per column'

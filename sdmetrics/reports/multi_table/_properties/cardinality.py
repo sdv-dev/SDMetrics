@@ -13,12 +13,11 @@ class Cardinality(BaseMultiTableProperty):
     in order to compute and plot the scores of cardinality shape similarity in the given tables.
     """
 
+    _num_iteration_case = 'per relationship'
+
     def __init__(self):
         super().__init__()
         self._only_multi_table = True
-
-    def _get_num_iterations(self, metadata):
-        return len(metadata['relationships'])
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of cardinality shape similarity in the given tables.

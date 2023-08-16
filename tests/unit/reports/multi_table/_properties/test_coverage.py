@@ -11,32 +11,4 @@ def test__init__():
     # Assert
     assert coverage._properties == {}
     assert coverage._single_table_property == SingleTableCoverage
-
-
-def test__get_num_iterations():
-    """Test the ``_get_num_iterations`` method."""
-    # Setup
-    metadata = {
-        'tables': {
-            'Table_1': {
-                'columns': {
-                    'col1': {},
-                    'col2': {},
-                },
-            },
-            'Table_2': {
-                'columns': {
-                    'col3': {},
-                    'col4': {},
-                    'col5': {},
-                },
-            },
-        }
-    }
-    coverage = Coverage()
-
-    # Run
-    num_iterations = coverage._get_num_iterations(metadata)
-
-    # Assert
-    assert num_iterations == 5
+    assert coverage._num_iteration_case == 'per column'

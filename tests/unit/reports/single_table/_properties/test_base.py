@@ -19,14 +19,27 @@ class TestBaseSingleTableProperty:
         with pytest.raises(NotImplementedError):
             base_property._generate_details(None, None, None, None)
 
-    def test__get_num_iterations_raises_error(self):
-        """Test that the method raises a ``NotImplementedError``."""
+    def test__get_num_iterations(self):
+        """Test the ``_get_num_iterations``."""
         # Setup
         base_property = BaseSingleTableProperty()
 
+        metadata = {
+            'columns': {
+                'col1': {}, 'col2': {}, 'col3': {},
+                'col4': {}, 'col5': {},
+            }
+        }
+
         # Run and Assert
-        with pytest.raises(NotImplementedError):
-            base_property._get_num_iterations(None)
+        base_property._num_iteration_case = 'per column'
+        assert base_property._get_num_iterations(metadata) == 5
+
+        base_property._num_iteration_case = 'per table'
+        assert base_property._get_num_iterations(metadata) == 1
+
+        base_property._num_iteration_case = 'per column pair'
+        assert base_property._get_num_iterations(metadata) == 10
 
     def test_get_visualization_raises_error(self):
         """Test that the method raises a ``NotImplementedError``."""

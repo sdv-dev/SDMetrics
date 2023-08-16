@@ -8,24 +8,6 @@ from sdmetrics.reports.single_table._properties.column_shapes import ColumnShape
 
 class TestColumnShapes:
 
-    def test__get_num_iterations(self):
-        """Test the ``_get_num_iterations`` method."""
-        # Setup
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'boolean'},
-                'col3': {'sdtype': 'categorical'},
-            }
-        }
-        column_shape_property = ColumnShapes()
-
-        # Run
-        num_iterations = column_shape_property._get_num_iterations(metadata)
-
-        # Assert
-        assert num_iterations == 3
-
     @patch('sdmetrics.reports.single_table._properties.column_shapes.KSComplement.compute')
     @patch('sdmetrics.reports.single_table._properties.column_shapes.TVComplement.compute')
     def test__generate_details(self, tv_complement_compute_mock, ks_complement_compute_mock):

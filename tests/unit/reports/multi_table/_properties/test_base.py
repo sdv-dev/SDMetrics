@@ -22,13 +22,68 @@ class TestBaseMultiTableProperty():
         assert base_property.is_computed is False
 
     def test__get_num_iterations(self):
-        """Test that ``_get_num_iterations`` raises a ``NotImplementedError``."""
+        """Test that ``_get_num_iterations``."""
         # Setup
         base_property = BaseMultiTableProperty()
 
+        metadata = {
+            'tables': {
+                'table1': {
+                    'columns': {
+                        'col1': {}, 'col2': {}, 'col3': {},
+                        'col4': {}, 'col5': {},
+                    }
+                },
+                'table2': {
+                    'columns': {
+                        'col6': {},
+                    }
+                },
+                'table3': {
+                    'columns': {
+                        'col7': {},
+                    }
+                },
+                'table4': {
+                    'columns': {
+                        'col8': {},
+                    }
+                },
+            },
+            'relationships': [
+                {
+                    'parent_table_name': 'table1',
+                    'parent_primary_key': 'col1',
+                    'child_table_name': 'table2',
+                    'child_foreign_key': 'col6'
+                },
+                {
+                    'parent_table_name': 'table1',
+                    'parent_primary_key': 'col1',
+                    'child_table_name': 'table3',
+                    'child_foreign_key': 'col7'
+                },
+                {
+                    'parent_table_name': 'table2',
+                    'parent_primary_key': 'col6',
+                    'child_table_name': 'table4',
+                    'child_foreign_key': 'col8'
+                },
+            ]
+        }
+
         # Run and Assert
-        with pytest.raises(NotImplementedError):
-            base_property._get_num_iterations(None)
+        base_property._num_iteration_case = 'per column'
+        assert base_property._get_num_iterations(metadata) == 8
+
+        base_property._num_iteration_case = 'per table'
+        assert base_property._get_num_iterations(metadata) == 4
+
+        base_property._num_iteration_case = 'per relationship'
+        assert base_property._get_num_iterations(metadata) == 3
+
+        base_property._num_iteration_case = 'per column pair'
+        assert base_property._get_num_iterations(metadata) == 10
 
     def test__generate_details_property(self):
         """Test the ``_generate_details`` method."""
@@ -70,7 +125,7 @@ class TestBaseMultiTableProperty():
         pd.testing.assert_frame_equal(base_property.details, expected_details)
 
     def test__compute_average_raises_error(self):
-        """Test that the method raises a ``ValueError`` when _details has not been computed."""
+        """Test that the method raises an error when _details has not been computed."""
         # Setup
         base_property = BaseMultiTableProperty()
 
@@ -78,11 +133,11 @@ class TestBaseMultiTableProperty():
         expected_error_message = re.escape(
             "The property details must be a DataFrame with a 'Score' column."
         )
-        with pytest.raises(ValueError, match=expected_error_message):
+        with pytest.raises(AssertionError, match=expected_error_message):
             base_property._compute_average()
 
         base_property.details = pd.DataFrame({'Column': ['a', 'b', 'c']})
-        with pytest.raises(ValueError, match=expected_error_message):
+        with pytest.raises(AssertionError, match=expected_error_message):
             base_property._compute_average()
 
     def test_get_score_raises_error(self):

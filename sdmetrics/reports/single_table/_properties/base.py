@@ -10,6 +10,7 @@ class BaseSingleTableProperty():
     """
 
     _details = None
+    _num_iteration_case = None
 
     def _compute_average(self):
         """Average the scores for each column."""
@@ -24,7 +25,12 @@ class BaseSingleTableProperty():
 
     def _get_num_iterations(self, metadata):
         """Get the number of iterations for the property."""
-        raise NotImplementedError()
+        if self._num_iteration_case == 'per column':
+            return len(metadata['columns'])
+        elif self._num_iteration_case == 'per table':
+            return 1
+        elif self._num_iteration_case == 'per column pair':
+            return int(len(metadata['columns']) * (len(metadata['columns']) - 1) / 2)
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score for the property on the data.

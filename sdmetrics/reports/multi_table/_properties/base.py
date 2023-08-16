@@ -20,6 +20,7 @@ class BaseMultiTableProperty():
     """
 
     _single_table_property = None
+    _num_iteration_case = None
 
     def __init__(self):
         self._properties = {}
@@ -29,7 +30,15 @@ class BaseMultiTableProperty():
 
     def _get_num_iterations(self, metadata):
         """Get the number of iterations for the property."""
-        raise NotImplementedError()
+        if self._num_iteration_case == 'per column':
+            return sum(len(metadata['tables'][table]['columns']) for table in metadata['tables'])
+        elif self._num_iteration_case == 'per table':
+            return len(metadata['tables'])
+        elif self._num_iteration_case == 'per relationship':
+            return len(metadata['relationships'])
+        elif self._num_iteration_case == 'per column pair':
+            num_columns = [len(table['columns']) for table in metadata['tables'].values()]
+            return sum([(n_cols * (n_cols - 1)) // 2 for n_cols in num_columns])
 
     def _generate_details(self, metadata):
         """Generate the ``details`` dataframe for the multi-table property.
@@ -56,8 +65,10 @@ class BaseMultiTableProperty():
         """Average the scores for each column."""
         is_dataframe = isinstance(self.details, pd.DataFrame)
         has_score_column = 'Score' in self.details.columns
-        if not is_dataframe or not has_score_column:
-            raise ValueError("The property details must be a DataFrame with a 'Score' column.")
+        assert_message = "The property details must be a DataFrame with a 'Score' column."
+
+        assert is_dataframe, assert_message
+        assert has_score_column, assert_message
 
         return self.details['Score'].mean()
 

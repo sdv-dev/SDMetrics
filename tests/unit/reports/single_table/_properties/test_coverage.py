@@ -8,24 +8,6 @@ from sdmetrics.reports.single_table._properties.coverage import Coverage
 
 class TestCoverage:
 
-    def test__get_num_iterations(self):
-        """Test the ``_get_num_iterations`` method."""
-        # Setup
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'boolean'},
-                'col3': {'sdtype': 'categorical'},
-            }
-        }
-        coverage_property = Coverage()
-
-        # Run
-        num_iterations = coverage_property._get_num_iterations(metadata)
-
-        # Assert
-        assert num_iterations == 3
-
     @patch('sdmetrics.reports.single_table._properties.coverage.RangeCoverage.compute')
     @patch('sdmetrics.reports.single_table._properties.coverage.CategoryCoverage.compute')
     def test__generate_details(self, category_coverage_mock, range_coverage_mock):

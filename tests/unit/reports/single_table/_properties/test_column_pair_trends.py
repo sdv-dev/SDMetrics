@@ -9,25 +9,6 @@ from sdmetrics.reports.single_table._properties.column_pair_trends import Column
 
 class TestColumnPairTrends:
 
-    def test__get_num_iterations(self):
-        """Test the ``_get_num_iterations`` method."""
-        # Setup
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'boolean'},
-                'col3': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'datetime'},
-            }
-        }
-        cpt_property = ColumnPairTrends()
-
-        # Run
-        num_iterations = cpt_property._get_num_iterations(metadata)
-
-        # Assert
-        assert num_iterations == 6
-
     def test__convert_datetime_columns_to_numeric(self):
         """Test the ``_convert_datetime_columns_to_numeric`` method."""
         # Setup

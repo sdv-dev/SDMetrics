@@ -16,15 +16,13 @@ class ColumnShapes(BaseSingleTableProperty):
     The other column types are ignored by this property.
     """
 
+    _num_iteration_case = 'per column'
     _sdtype_to_metric = {
         'numerical': KSComplement,
         'datetime': KSComplement,
         'categorical': TVComplement,
         'boolean': TVComplement
     }
-
-    def _get_num_iterations(self, metadata):
-        return len(metadata['columns'])
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the column shapes property.

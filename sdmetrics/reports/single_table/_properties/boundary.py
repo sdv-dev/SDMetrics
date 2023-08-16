@@ -16,9 +16,7 @@ class Boundary(BaseSingleTableProperty):
     """
 
     metric = BoundaryAdherence
-
-    def _get_num_iterations(self, metadata):
-        return len(metadata['columns'])
+    _num_iteration_case = 'per column'
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the boundary property.

@@ -18,6 +18,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
     the final score represents the average of these measures across all column pairs
     """
 
+    _num_iteration_case = 'per column pair'
     _sdtype_to_shape = {
         'numerical': 'continuous',
         'datetime': 'continuous',
@@ -28,9 +29,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
     def __init__(self):
         self._columns_datetime_conversion_failed = {}
         self._columns_discretization_failed = {}
-
-    def _get_num_iterations(self, metadata):
-        return len(metadata['columns']) * (len(metadata['columns']) - 1) / 2
 
     def _convert_datetime_columns_to_numeric(self, data, metadata):
         """Convert all the datetime columns to numeric columns.

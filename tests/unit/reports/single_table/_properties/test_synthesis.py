@@ -8,24 +8,6 @@ from sdmetrics.reports.single_table._properties.synthesis import Synthesis
 
 class TestSynthesis:
 
-    def test__get_num_iterations(self):
-        """Test the ``_get_num_iterations`` method."""
-        # Setup
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'boolean'},
-                'col3': {'sdtype': 'categorical'},
-            }
-        }
-        synthesis_property = Synthesis()
-
-        # Run
-        num_iterations = synthesis_property._get_num_iterations(metadata)
-
-        # Assert
-        assert num_iterations == 1
-
     @patch('sdmetrics.reports.single_table._properties.synthesis.'
            'NewRowSynthesis.compute_breakdown')
     def test__generate_details(self, newrowsynthesis_mock):
