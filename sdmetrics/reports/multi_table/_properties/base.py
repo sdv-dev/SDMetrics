@@ -14,7 +14,7 @@ class BaseMultiTableProperty():
         is_computed (bool):
             Whether or not the property has been computed.
         _only_multi_table (bool):
-            Whether or not the property only exist for multi-tables.
+            Whether or not the property only exists for multi-tables.
         details_property (pandas.DataFrame):
             The multi table details property dataframe.
     """
@@ -31,7 +31,7 @@ class BaseMultiTableProperty():
         """Get the number of iterations for the property."""
         raise NotImplementedError()
 
-    def _generate_details_property(self, metadata):
+    def _generate_details(self, metadata):
         """Generate the ``details_property`` dataframe for the multi-table property.
 
         This dataframe concatenates the ``_details`` dataframe of each single table property
@@ -88,7 +88,7 @@ class BaseMultiTableProperty():
                 progress_bar
             )
 
-        self._generate_details_property(metadata)
+        self._generate_details(metadata)
         self.is_computed = True
 
         return self._compute_average()

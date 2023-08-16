@@ -37,7 +37,7 @@ class Cardinality(BaseMultiTableProperty):
             float:
                 The average score for the property for all the individual metric scores computed.
         """
-        child_table, parent_table = [], []
+        child_tables, parent_tables = [], []
         metric_names, scores, error_messages = [], [], []
         for relation in metadata.get('relationships', []):
             relationships_metadata = {'relationships': [relation]}
@@ -55,15 +55,15 @@ class Cardinality(BaseMultiTableProperty):
                 if progress_bar is not None:
                     progress_bar.update()
 
-            child_table.append(relation['child_table_name'])
-            parent_table.append(relation['parent_table_name'])
+            child_tables.append(relation['child_table_name'])
+            parent_tables.append(relation['parent_table_name'])
             metric_names.append('CardinalityShapeSimilarity')
             scores.append(relation_score)
             error_messages.append(error_message)
 
         self.details_property = pd.DataFrame({
-            'Child Table': child_table,
-            'Parent Table': parent_table,
+            'Child Table': child_tables,
+            'Parent Table': parent_tables,
             'Metric': metric_names,
             'Score': scores,
             'Error': error_messages,

@@ -31,7 +31,7 @@ class TestBaseMultiTableProperty():
             base_property._get_num_iterations(None)
 
     def test__generate_details_property(self):
-        """Test the ``_generate_details_property`` method."""
+        """Test the ``_generate_details`` method."""
         # Setup
         metadata = {
             'tables': {
@@ -58,7 +58,7 @@ class TestBaseMultiTableProperty():
         base_property.details_property = pd.DataFrame()
 
         # Run
-        base_property._generate_details_property(metadata)
+        base_property._generate_details(metadata)
 
         # Assert
         expected_details = pd.DataFrame({
@@ -121,7 +121,7 @@ class TestBaseMultiTableProperty():
         mock_single_table_property.side_effect = [property_mock_1, property_mock_2]
 
         base_multi_table_property = BaseMultiTableProperty()
-        base_multi_table_property._generate_details_property = Mock()
+        base_multi_table_property._generate_details = Mock()
         base_multi_table_property._compute_average = Mock(return_value=0.7)
 
         # Run
@@ -134,7 +134,7 @@ class TestBaseMultiTableProperty():
             real_data['Table_1'], synthetic_data['Table_1'], metadata['tables']['Table_1'], 'tqdm')
         property_mock_2.get_score.assert_called_once_with(
             real_data['Table_2'], synthetic_data['Table_2'], metadata['tables']['Table_2'], 'tqdm')
-        base_multi_table_property._generate_details_property.assert_called_once_with(metadata)
+        base_multi_table_property._generate_details.assert_called_once_with(metadata)
         base_multi_table_property._compute_average.assert_called_once()
         assert result == 0.7
         assert base_multi_table_property.is_computed is True
