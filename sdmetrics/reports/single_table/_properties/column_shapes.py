@@ -55,7 +55,7 @@ class ColumnShapes(BaseSingleTableProperty):
 
             except Exception as e:
                 column_score = np.nan
-                error_message = f'Error: {type(e).__name__} {e}'
+                error_message = f'{type(e).__name__}: {e}'
             finally:
                 if progress_bar:
                     progress_bar.update()

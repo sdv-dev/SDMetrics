@@ -51,7 +51,7 @@ class Synthesis(BaseSingleTableProperty):
             score = np.nan
             num_matched_rows = np.nan
             num_new_rows = np.nan
-            error_message = f'Error: {type(e).__name__} {e}'
+            error_message = f'{type(e).__name__}: {e}'
 
         finally:
             if progress_bar:

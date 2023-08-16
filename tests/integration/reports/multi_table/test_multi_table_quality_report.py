@@ -222,10 +222,10 @@ def test_quality_report_with_errors():
             np.nan, np.nan, 0.8
         ],
         'Error': [
-            None, None, "Error: TypeError '<' not supported between instances of 'int' and 'str'",
+            None, None, "TypeError: '<' not supported between instances of 'int' and 'str'",
             np.nan, np.nan,
-            "Error: TypeError '<' not supported between instances of 'Timestamp' and 'str'",
-            "Error: TypeError '<' not supported between instances of 'float' and 'str'",
+            "TypeError: '<' not supported between instances of 'Timestamp' and 'str'",
+            "TypeError: '<' not supported between instances of 'float' and 'str'",
             None
         ]
     })

@@ -67,9 +67,9 @@ class TestDiagnosticReport:
             'Metric': ['BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence'],
             'Score': [np.nan, np.nan, np.nan],
             'Error': [
-                "Error: TypeError '<=' not supported between instances of 'str' and 'int'",
-                "Error: TypeError '<=' not supported between instances of 'str' and 'Timestamp'",
-                "Error: TypeError '<=' not supported between instances of 'str' and 'float'"
+                "TypeError: '<=' not supported between instances of 'str' and 'int'",
+                "TypeError: '<=' not supported between instances of 'str' and 'Timestamp'",
+                "TypeError: '<=' not supported between instances of 'str' and 'float'"
             ]
         })
         assert results == expected_results

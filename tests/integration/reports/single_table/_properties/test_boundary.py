@@ -47,10 +47,10 @@ class TestBoundary:
 
         # Assert
         expected_message_1 = (
-            "Error: TypeError '<=' not supported between instances of 'int' and 'Timestamp'"
+            "TypeError: '<=' not supported between instances of 'int' and 'Timestamp'"
         )
         expected_message_2 = (
-            "Error: TypeError '<=' not supported between instances of 'float' and 'str'"
+            "TypeError: '<=' not supported between instances of 'float' and 'str'"
         )
         details = boundary_property._details
         details_nan = details.loc[pd.isna(details['Score'])]

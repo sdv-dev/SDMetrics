@@ -74,11 +74,11 @@ class TestColumnPairTrends:
         column_shape_property = ColumnPairTrends()
 
         exp_message_1 = (
-            "Error: ValueError could not convert string to float: 'a'"
+            "ValueError: could not convert string to float: 'a'"
         )
 
         exp_message_2 = (
-            "Error: TypeError '<=' not supported between instances of 'float' and 'str'"
+            "TypeError: '<=' not supported between instances of 'float' and 'str'"
         )
 
         exp_error_serie = pd.Series(

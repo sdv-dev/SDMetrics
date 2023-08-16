@@ -95,7 +95,7 @@ class TestSynthesis:
             'Score': np.nan,
             'Num Matched Rows': np.nan,
             'Num New Rows': np.nan,
-            'Error': 'Error: ValueError Mock Error'
+            'Error': 'ValueError: Mock Error'
         }, index=[0])
 
         pd.testing.assert_frame_equal(details, expected_details)

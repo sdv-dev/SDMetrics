@@ -65,7 +65,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
                 continue
             except Exception as e:
-                message = f'Error: {type(e).__name__} {e}'
+                message = f'{type(e).__name__}: {e}'
                 self._columns_datetime_conversion_failed[column_name] = message
                 continue
 
@@ -95,7 +95,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             column_result = np.digitize(column_result, bins=bin_edges)
 
         except Exception as e:
-            message = f'Error: {type(e).__name__} {e}'
+            message = f'{type(e).__name__}: {e}'
             self._columns_discretization_failed[column_name] = message
 
         return column_result, bin_edges
@@ -281,7 +281,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 real_correlation = np.nan
                 synthetic_correlation = np.nan
                 if not str(e) == 'Preprocessing failed':
-                    error = f'Error: {type(e).__name__} {e}'
+                    error = f'{type(e).__name__}: {e}'
             finally:
                 if progress_bar:
                     progress_bar.update()

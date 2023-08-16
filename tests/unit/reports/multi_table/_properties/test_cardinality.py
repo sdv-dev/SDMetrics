@@ -105,7 +105,7 @@ class TestCardinality:
             'Parent Table': ['users_parent', 'sessions_parent'],
             'Metric': ['CardinalityShapeSimilarity', 'CardinalityShapeSimilarity'],
             'Score': [np.nan, np.nan],
-            'Error': ['Error: ValueError Users error', 'Error: ValueError Sessions error']
+            'Error': ['ValueError: Users error', 'ValueError: Sessions error']
         })
 
         assert pd.isna(score)

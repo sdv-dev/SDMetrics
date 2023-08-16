@@ -128,7 +128,7 @@ class TestColumnShapes:
 
         # Assert
         expected_message = (
-            "Error: TypeError '<' not supported between instances of 'str' and 'int'"
+            "TypeError: '<' not supported between instances of 'str' and 'int'"
         )
         result_nan = result.loc[pd.isna(result['Score'])]
         column_names_nan = result_nan['Column'].tolist()

@@ -95,7 +95,7 @@ class TestBoundary:
             'Column': ['col1'],
             'Metric': ['BoundaryAdherence'],
             'Score': [np.nan],
-            'Error': ['Error: ValueError Mock Error']
+            'Error': ['ValueError: Mock Error']
         })
 
         pd.testing.assert_frame_equal(details, expected_details)
