@@ -26,9 +26,10 @@ class BaseMultiTableReport(BaseReport):
                 child = rel['child_table_name']
                 child_key = rel['child_foreign_key']
                 error_msg = (
-                    f"The '{parent}' table and '{child}' table cannot be merged. Please "
-                    f"make sure the primary key in '{parent}' ('{parent_key}') and the "
-                    f"foreign key in '{child}' ('{child_key}') have the same data type."
+                    f"The '{parent}' table and '{child}' table cannot be merged "
+                    'for computing the cardinality. Please make sure the primary key'
+                    f" in '{parent}' ('{parent_key}') and the foreign key in '{child}'"
+                    f" ('{child_key}') have the same data type."
                 )
                 raise ValueError(error_msg)
 

@@ -64,9 +64,9 @@ class TestBaseReport:
         report._validate_relationships(real_data, synthetic_data, metadata)
 
         expected_error_message = re.escape(
-            "The 'Table_1' table and 'Table_2' table cannot be merged. Please "
-            "make sure the primary key in 'Table_1' ('col1') and the "
-            "foreign key in 'Table_2' ('col2') have the same data type."
+            "The 'Table_1' table and 'Table_2' table cannot be merged for computing"
+            " the cardinality. Please make sure the primary key in 'Table_1' ('col1')"
+            " and the foreign key in 'Table_2' ('col2') have the same data type."
         )
         with pytest.raises(ValueError, match=expected_error_message):
             report._validate_metadata_matches_data(real_data_bad, synthetic_data, metadata)
