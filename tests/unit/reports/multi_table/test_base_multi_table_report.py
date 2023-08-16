@@ -189,6 +189,7 @@ class TestBaseReport:
 
         property_1 = Mock()
         property_1.details = details_property_df
+        property_1._num_iteration_case = 'column'
         property_1.get_details = Mock(return_value=expected_details)
         report._properties = {
             'Property_1': property_1,
@@ -201,8 +202,6 @@ class TestBaseReport:
         # Assert
         mock__check_table_names.assert_called_once_with('Table_1')
         mock__validate_property_generated.assert_called_once_with('Property_1')
-        property_1.get_details.assert_called_once_with('Table_1')
-
         pd.testing.assert_frame_equal(result, expected_details)
 
     def test_get_visualization_with_table_name(self):

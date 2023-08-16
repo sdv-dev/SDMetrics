@@ -19,6 +19,7 @@ class TestBaseMultiTableProperty():
         # Assert
         assert base_property._properties == {}
         assert base_property._single_table_property is None
+        assert base_property._num_iteration_case is None
         assert base_property.is_computed is False
 
     def test__get_num_iterations(self):

@@ -13,8 +13,6 @@ class BaseMultiTableProperty():
             A dict mapping the table names to their single table properties.
         is_computed (bool):
             Whether or not the property has been computed.
-        _only_multi_table (bool):
-            Whether or not the property only exists for multi-tables.
         details (pandas.DataFrame):
             The multi table details property dataframe.
     """
@@ -25,7 +23,6 @@ class BaseMultiTableProperty():
     def __init__(self):
         self._properties = {}
         self.is_computed = False
-        self._only_multi_table = False
         self.details = pd.DataFrame()
 
     def _get_num_iterations(self, metadata):
@@ -50,7 +47,7 @@ class BaseMultiTableProperty():
             metadata (dict):
                 The metadata of the tables.
         """
-        if not self._only_multi_table:
+        if not self._num_iteration_case == 'relationship':
             details_frames = []
             for table_name in metadata['tables']:
                 details = self._properties[table_name]._details.copy()

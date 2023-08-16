@@ -11,15 +11,6 @@ from sdmetrics.reports.multi_table._properties.cardinality import Cardinality
 
 class TestCardinality:
 
-    def test__init__(self):
-        """Test the ``__init__`` method."""
-        # Setup
-        cardinality = Cardinality()
-
-        # Assert
-        cardinality._only_multi_table is True
-        assert cardinality._num_iteration_case == 'relationship'
-
     def test__get_num_iteration(self):
         """Test the ``_get_num_iterations`` method."""
         # Setup
