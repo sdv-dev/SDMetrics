@@ -25,11 +25,11 @@ class BaseSingleTableProperty():
 
     def _get_num_iterations(self, metadata):
         """Get the number of iterations for the property."""
-        if self._num_iteration_case == 'per column':
+        if self._num_iteration_case == 'column':
             return len(metadata['columns'])
-        elif self._num_iteration_case == 'per table':
+        elif self._num_iteration_case == 'table':
             return 1
-        elif self._num_iteration_case == 'per column pair':
+        elif self._num_iteration_case == 'column_pair':
             return int(len(metadata['columns']) * (len(metadata['columns']) - 1) / 2)
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):

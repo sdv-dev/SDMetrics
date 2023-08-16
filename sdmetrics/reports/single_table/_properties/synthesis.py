@@ -14,7 +14,7 @@ class Synthesis(BaseSingleTableProperty):
     score the proportion of new rows in the synthetic data.
     """
 
-    _num_iteration_case = 'per table'
+    _num_iteration_case = 'table'
     metric = NewRowSynthesis
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):

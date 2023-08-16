@@ -30,13 +30,13 @@ class BaseMultiTableProperty():
 
     def _get_num_iterations(self, metadata):
         """Get the number of iterations for the property."""
-        if self._num_iteration_case == 'per column':
+        if self._num_iteration_case == 'column':
             return sum(len(metadata['tables'][table]['columns']) for table in metadata['tables'])
-        elif self._num_iteration_case == 'per table':
+        elif self._num_iteration_case == 'table':
             return len(metadata['tables'])
-        elif self._num_iteration_case == 'per relationship':
+        elif self._num_iteration_case == 'relationship':
             return len(metadata['relationships'])
-        elif self._num_iteration_case == 'per column pair':
+        elif self._num_iteration_case == 'column_pair':
             num_columns = [len(table['columns']) for table in metadata['tables'].values()]
             return sum([(n_cols * (n_cols - 1)) // 2 for n_cols in num_columns])
 

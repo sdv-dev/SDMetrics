@@ -13,4 +13,4 @@ class Boundary(BaseMultiTableProperty):
     """
 
     _single_table_property = SingleTableBoundary
-    _num_iteration_case = 'per column'
+    _num_iteration_case = 'column'

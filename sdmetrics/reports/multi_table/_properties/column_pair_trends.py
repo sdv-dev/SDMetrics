@@ -13,4 +13,4 @@ class ColumnPairTrends(BaseMultiTableProperty):
     """
 
     _single_table_property = SingleTableColumnPairTrends
-    _num_iteration_case = 'per column pair'
+    _num_iteration_case = 'column_pair'

@@ -18,7 +18,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
     the final score represents the average of these measures across all column pairs
     """
 
-    _num_iteration_case = 'per column pair'
+    _num_iteration_case = 'column_pair'
     _sdtype_to_shape = {
         'numerical': 'continuous',
         'datetime': 'continuous',

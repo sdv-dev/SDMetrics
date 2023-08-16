@@ -13,7 +13,7 @@ class Cardinality(BaseMultiTableProperty):
     in order to compute and plot the scores of cardinality shape similarity in the given tables.
     """
 
-    _num_iteration_case = 'per relationship'
+    _num_iteration_case = 'relationship'
 
     def __init__(self):
         super().__init__()

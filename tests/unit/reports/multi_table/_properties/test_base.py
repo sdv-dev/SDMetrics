@@ -73,16 +73,16 @@ class TestBaseMultiTableProperty():
         }
 
         # Run and Assert
-        base_property._num_iteration_case = 'per column'
+        base_property._num_iteration_case = 'column'
         assert base_property._get_num_iterations(metadata) == 8
 
-        base_property._num_iteration_case = 'per table'
+        base_property._num_iteration_case = 'table'
         assert base_property._get_num_iterations(metadata) == 4
 
-        base_property._num_iteration_case = 'per relationship'
+        base_property._num_iteration_case = 'relationship'
         assert base_property._get_num_iterations(metadata) == 3
 
-        base_property._num_iteration_case = 'per column pair'
+        base_property._num_iteration_case = 'column_pair'
         assert base_property._get_num_iterations(metadata) == 10
 
     def test__generate_details_property(self):

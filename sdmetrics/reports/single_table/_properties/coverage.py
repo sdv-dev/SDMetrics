@@ -16,7 +16,7 @@ class Coverage(BaseSingleTableProperty):
     The other column types are ignored by this property.
     """
 
-    _num_iteration_case = 'per column'
+    _num_iteration_case = 'column'
     _sdtype_to_metric = {
         'numerical': RangeCoverage,
         'datetime': RangeCoverage,

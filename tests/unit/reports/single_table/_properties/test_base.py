@@ -32,13 +32,13 @@ class TestBaseSingleTableProperty:
         }
 
         # Run and Assert
-        base_property._num_iteration_case = 'per column'
+        base_property._num_iteration_case = 'column'
         assert base_property._get_num_iterations(metadata) == 5
 
-        base_property._num_iteration_case = 'per table'
+        base_property._num_iteration_case = 'table'
         assert base_property._get_num_iterations(metadata) == 1
 
-        base_property._num_iteration_case = 'per column pair'
+        base_property._num_iteration_case = 'column_pair'
         assert base_property._get_num_iterations(metadata) == 10
 
     def test_get_visualization_raises_error(self):

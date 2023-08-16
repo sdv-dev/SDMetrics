@@ -11,4 +11,4 @@ def test__init__():
     # Assert
     assert boundary._properties == {}
     assert boundary._single_table_property == SingleTableBoundary
-    assert boundary._num_iteration_case == 'per column'
+    assert boundary._num_iteration_case == 'column'

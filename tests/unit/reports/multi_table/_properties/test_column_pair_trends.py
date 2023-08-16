@@ -12,4 +12,4 @@ def test__init__():
     # Assert
     assert column_pair_trends._properties == {}
     assert column_pair_trends._single_table_property == SingleTableColumnPairTrends
-    assert column_pair_trends._num_iteration_case == 'per column pair'
+    assert column_pair_trends._num_iteration_case == 'column_pair'

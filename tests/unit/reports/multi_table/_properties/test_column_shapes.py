@@ -11,4 +11,4 @@ def test__init__():
     # Assert
     assert column_shapes._properties == {}
     assert column_shapes._single_table_property == SingleTableColumnShapes
-    assert column_shapes._num_iteration_case == 'per column'
+    assert column_shapes._num_iteration_case == 'column'
