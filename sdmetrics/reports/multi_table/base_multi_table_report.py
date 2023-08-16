@@ -61,13 +61,13 @@ class BaseMultiTableReport(BaseReport):
         """
         self._validate_property_generated(property_name)
         if not table_name:
-            return self._properties[property_name].details_property.copy()
+            return self._properties[property_name].details.copy()
 
         self._check_table_names(table_name)
 
         if not self._properties[property_name]._only_multi_table:
-            table_rows = self._properties[property_name].details_property['Table'] == table_name
-            details = self._properties[property_name].details_property.loc[table_rows]
+            table_rows = self._properties[property_name].details['Table'] == table_name
+            details = self._properties[property_name].details.loc[table_rows]
             details = details.drop(columns=['Table'])
         else:
             details = self._properties[property_name].get_details(table_name)

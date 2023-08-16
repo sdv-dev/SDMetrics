@@ -55,7 +55,7 @@ class TestBaseMultiTableProperty():
             'Table_1': property_table_1,
             'Table_2': property_table_2,
         }
-        base_property.details_property = pd.DataFrame()
+        base_property.details = pd.DataFrame()
 
         # Run
         base_property._generate_details(metadata)
@@ -67,7 +67,7 @@ class TestBaseMultiTableProperty():
             'Score': [0.5, 0.6, 0.7, 0.8]
         })
 
-        pd.testing.assert_frame_equal(base_property.details_property, expected_details)
+        pd.testing.assert_frame_equal(base_property.details, expected_details)
 
     def test__compute_average_raises_error(self):
         """Test that the method raises a ``ValueError`` when _details has not been computed."""
@@ -81,7 +81,7 @@ class TestBaseMultiTableProperty():
         with pytest.raises(ValueError, match=expected_error_message):
             base_property._compute_average()
 
-        base_property.details_property = pd.DataFrame({'Column': ['a', 'b', 'c']})
+        base_property.details = pd.DataFrame({'Column': ['a', 'b', 'c']})
         with pytest.raises(ValueError, match=expected_error_message):
             base_property._compute_average()
 

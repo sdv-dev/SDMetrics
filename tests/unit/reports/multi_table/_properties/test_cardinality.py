@@ -109,7 +109,7 @@ class TestCardinality:
         })
 
         assert pd.isna(score)
-        pd.testing.assert_frame_equal(cardinality.details_property, expected_details_property)
+        pd.testing.assert_frame_equal(cardinality.details, expected_details_property)
         progress_bar.update.assert_called()
         assert progress_bar.update.call_count == 2
 
@@ -121,7 +121,7 @@ class TestCardinality:
         """
         # Setup
         cardinality = Cardinality()
-        cardinality.details_property = pd.DataFrame({
+        cardinality.details = pd.DataFrame({
             'Child Table': ['users_child', 'sessions_child'],
             'Parent Table': ['users_parent', 'sessions_parent'],
             'Metric': ['CardinalityShapeSimilarity', 'SomeOtherMetric'],
@@ -159,7 +159,7 @@ class TestCardinality:
         # Setup
         mock__get_details_for_table_name = Mock(return_value='Details for table name')
         cardinality = Cardinality()
-        cardinality.details_property = pd.DataFrame({'a': ['b']})
+        cardinality.details = pd.DataFrame({'a': ['b']})
         cardinality._get_details_for_table_name = mock__get_details_for_table_name
 
         # Run
@@ -178,7 +178,7 @@ class TestCardinality:
         """
         # Setup
         instance = Cardinality()
-        instance.details_property = pd.DataFrame({
+        instance.details = pd.DataFrame({
             'Child Table': ['users_child', 'sessions_child'],
             'Parent Table': ['users_parent', 'sessions_parent'],
             'Metric': ['CardinalityShapeSimilarity', 'SomeOtherMetric'],

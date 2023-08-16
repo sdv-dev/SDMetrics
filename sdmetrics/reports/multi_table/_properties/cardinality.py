@@ -61,7 +61,7 @@ class Cardinality(BaseMultiTableProperty):
             scores.append(relation_score)
             error_messages.append(error_message)
 
-        self.details_property = pd.DataFrame({
+        self.details = pd.DataFrame({
             'Child Table': child_tables,
             'Parent Table': parent_tables,
             'Metric': metric_names,
@@ -69,8 +69,8 @@ class Cardinality(BaseMultiTableProperty):
             'Error': error_messages,
         })
 
-        if self.details_property['Error'].isna().all():
-            self.details_property = self.details_property.drop('Error', axis=1)
+        if self.details['Error'].isna().all():
+            self.details = self.details.drop('Error', axis=1)
 
         return self._compute_average()
 
@@ -85,9 +85,9 @@ class Cardinality(BaseMultiTableProperty):
             pandas.DataFrame:
                 The details for the given table name.
         """
-        is_child = self.details_property['Child Table'] == table_name
-        is_parent = self.details_property['Parent Table'] == table_name
-        return self.details_property[is_child | is_parent].copy()
+        is_child = self.details['Child Table'] == table_name
+        is_parent = self.details['Parent Table'] == table_name
+        return self.details[is_child | is_parent].copy()
 
     def get_details(self, table_name=None):
         """Return the details for the property.
@@ -102,7 +102,7 @@ class Cardinality(BaseMultiTableProperty):
                 The details for the property.
         """
         if table_name is None:
-            return self.details_property.copy()
+            return self.details.copy()
 
         return self._get_details_for_table_name(table_name)
 

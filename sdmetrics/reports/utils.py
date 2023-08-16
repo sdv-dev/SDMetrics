@@ -815,7 +815,7 @@ def _generate_results_diagnostic_report(report):
         details = getattr(report._properties[property_name], '_details', None)
         if details is None:
             details = getattr(
-                report._properties[property_name], 'details_property', None
+                report._properties[property_name], 'details', None
             )
 
         average_score_metric = details.groupby('Metric')['Score'].mean()

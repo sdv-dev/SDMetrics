@@ -15,7 +15,7 @@ class BaseMultiTableProperty():
             Whether or not the property has been computed.
         _only_multi_table (bool):
             Whether or not the property only exists for multi-tables.
-        details_property (pandas.DataFrame):
+        details (pandas.DataFrame):
             The multi table details property dataframe.
     """
 
@@ -25,14 +25,14 @@ class BaseMultiTableProperty():
         self._properties = {}
         self.is_computed = False
         self._only_multi_table = False
-        self.details_property = pd.DataFrame()
+        self.details = pd.DataFrame()
 
     def _get_num_iterations(self, metadata):
         """Get the number of iterations for the property."""
         raise NotImplementedError()
 
     def _generate_details(self, metadata):
-        """Generate the ``details_property`` dataframe for the multi-table property.
+        """Generate the ``details`` dataframe for the multi-table property.
 
         This dataframe concatenates the ``_details`` dataframe of each single table property
         and adds a ``Table`` column to indicate which table the score is for.
@@ -48,18 +48,18 @@ class BaseMultiTableProperty():
                 details['Table'] = table_name
                 details_frames.append(details)
 
-            self.details_property = pd.concat(details_frames).reset_index(drop=True)
-            cols = ['Table'] + [col for col in self.details_property if col != 'Table']
-            self.details_property = self.details_property[cols]
+            self.details = pd.concat(details_frames).reset_index(drop=True)
+            cols = ['Table'] + [col for col in self.details if col != 'Table']
+            self.details = self.details[cols]
 
     def _compute_average(self):
         """Average the scores for each column."""
-        is_dataframe = isinstance(self.details_property, pd.DataFrame)
-        has_score_column = 'Score' in self.details_property.columns
+        is_dataframe = isinstance(self.details, pd.DataFrame)
+        has_score_column = 'Score' in self.details.columns
         if not is_dataframe or not has_score_column:
             raise ValueError("The property details must be a DataFrame with a 'Score' column.")
 
-        return self.details_property['Score'].mean()
+        return self.details['Score'].mean()
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.

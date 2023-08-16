@@ -152,7 +152,7 @@ class TestBaseReport:
         report._validate_property_generated = mock__validate_property_generated
 
         property_1 = Mock()
-        property_1.details_property = details_property_df
+        property_1.details = details_property_df
 
         report._properties = {
             'Property_1': property_1,
@@ -188,7 +188,7 @@ class TestBaseReport:
         })
 
         property_1 = Mock()
-        property_1.details_property = details_property_df
+        property_1.details = details_property_df
         property_1.get_details = Mock(return_value=expected_details)
         report._properties = {
             'Property_1': property_1,
