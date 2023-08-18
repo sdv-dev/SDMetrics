@@ -4,8 +4,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
-BAR_COLOR = '#000036'
-BACKGROUND_COLOR = '#F5F5F8'
+from sdmetrics.reports.utils import PlotConfig
 
 
 def _get_table_relationships_data(score_breakdowns):
@@ -55,7 +54,7 @@ def get_table_relationships_plot(score_breakdowns):
         y='Score',
         title=f'Data Quality: Table Relationships (Average Score={average_score})',
         color='Metric',
-        color_discrete_sequence=[BAR_COLOR],
+        color_discrete_sequence=[PlotConfig.DATACEBO_DARK],
         hover_name='Child → Parent Relationship',
         hover_data={
             'Child → Parent Relationship': False,
@@ -68,7 +67,8 @@ def get_table_relationships_plot(score_breakdowns):
 
     fig.update_layout(
         xaxis_categoryorder='total ascending',
-        plot_bgcolor=BACKGROUND_COLOR,
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        font={'size': PlotConfig.FONT_SIZE}
     )
 
     return fig

@@ -1006,7 +1006,8 @@ def test_generate_cardinality_plot(mock_px):
         title=title,
         xaxis_title='# of Children (per Parent)',
         yaxis_title='Frequency',
-        plot_bgcolor='#F5F5F8'
+        plot_bgcolor='#F5F5F8',
+        font={'size': 18}
     )
 
     for name in ['Real', 'Synthetic']:

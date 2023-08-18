@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
+from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.single_column import KSComplement, TVComplement
 
 
@@ -90,8 +91,8 @@ class ColumnShapes(BaseSingleTableProperty):
             category_orders={'group': self._details['Column']},
             color='Metric',
             color_discrete_map={
-                'KSComplement': '#000036',
-                'TVComplement': '#03AFF1',
+                'KSComplement': PlotConfig.DATACEBO_DARK,
+                'TVComplement': PlotConfig.DATACEBO_BLUE,
             },
             pattern_shape='Metric',
             pattern_shape_sequence=['', '/'],
@@ -107,8 +108,9 @@ class ColumnShapes(BaseSingleTableProperty):
 
         fig.update_layout(
             xaxis_categoryorder='total ascending',
-            plot_bgcolor='#F5F5F8',
+            plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
             margin={'t': 150},
+            font={'size': PlotConfig.FONT_SIZE},
         )
 
         return fig
