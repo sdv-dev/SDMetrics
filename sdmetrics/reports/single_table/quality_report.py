@@ -81,9 +81,9 @@ class QualityReport():
         out.write('Properties:\n')
 
         for property_name in self._properties:
-            property_score = round(self._properties[property_name]._compute_average(), 4)
+            property_score = round(self._properties[property_name]._compute_average() * 100, 2)
             out.write(
-                f'- {property_name}: {property_score * 100}%\n'
+                f'- {property_name}: {property_score}%\n'
             )
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
