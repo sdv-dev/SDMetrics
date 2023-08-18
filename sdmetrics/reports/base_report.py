@@ -95,7 +95,6 @@ class BaseReport():
                 real_data, synthetic_data, metadata, progress_bar=progress_bar
             )
             scores.append(score)
-            ind += 1
             if verbose:
                 progress_bar.close()
 
