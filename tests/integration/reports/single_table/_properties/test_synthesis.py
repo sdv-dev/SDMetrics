@@ -39,7 +39,7 @@ class TestSynthesis:
             'Score': np.nan,
             'Num Matched Rows': np.nan,
             'Num New Rows': np.nan,
-            'Error': "Error: AttributeError 'list' object has no attribute 'columns'"
+            'Error': "AttributeError: 'list' object has no attribute 'columns'"
         }, index=[0])
 
         pd.testing.assert_frame_equal(synthesis_property._details, expected_details)

@@ -13,3 +13,4 @@ class Synthesis(BaseMultiTableProperty):
     """
 
     _single_table_property = SingleTableSynthesis
+    _num_iteration_case = 'table'

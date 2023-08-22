@@ -19,6 +19,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
     the final score represents the average of these measures across all column pairs
     """
 
+    _num_iteration_case = 'column_pair'
     _sdtype_to_shape = {
         'numerical': 'continuous',
         'datetime': 'continuous',
@@ -209,7 +210,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         return error
 
-    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar):
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the column pair trends property.
 
         Args:
@@ -220,7 +221,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             metadata (dict):
                 The metadata of the table
             progress_bar:
-                The progress bar to use. Defaults to tqdm.
+                The progress bar to use. Defaults to None.
         """
         processed_real_data, discrete_real = self._get_processed_data(real_data, metadata)
         processed_synthetic_data, discrete_synthetic = self._get_processed_data(
@@ -280,6 +281,9 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 synthetic_correlation = np.nan
                 if not str(e) == 'Preprocessing failed':
                     error = f'{type(e).__name__}: {e}'
+            finally:
+                if progress_bar:
+                    progress_bar.update()
 
             column_names_1.append(column_name_1)
             column_names_2.append(column_name_2)
@@ -288,9 +292,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
             real_correlations.append(real_correlation)
             synthetic_correlations.append(synthetic_correlation)
             error_messages.append(error)
-
-            if progress_bar:
-                progress_bar.update()
 
         result = pd.DataFrame({
             'Column 1': column_names_1,

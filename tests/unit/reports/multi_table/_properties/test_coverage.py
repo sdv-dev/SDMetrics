@@ -11,3 +11,4 @@ def test__init__():
     # Assert
     assert coverage._properties == {}
     assert coverage._single_table_property == SingleTableCoverage
+    assert coverage._num_iteration_case == 'column'
