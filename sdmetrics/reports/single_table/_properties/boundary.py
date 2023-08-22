@@ -16,6 +16,7 @@ class Boundary(BaseSingleTableProperty):
     """
 
     metric = BoundaryAdherence
+    _num_iteration_case = 'column'
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the boundary property.
@@ -28,7 +29,7 @@ class Boundary(BaseSingleTableProperty):
             metadata (dict):
                 The metadata of the table.
             progress_bar (tqdm.tqdm or None):
-                The progress bar to use. Defaults to tqdm.
+                The progress bar to use. Defaults to None.
 
         Returns:
             pandas.DataFrame
@@ -48,7 +49,7 @@ class Boundary(BaseSingleTableProperty):
 
             except Exception as e:
                 column_score = np.nan
-                error_message = f'Error: {type(e).__name__} {e}'
+                error_message = f'{type(e).__name__}: {e}'
             finally:
                 if progress_bar:
                     progress_bar.update()

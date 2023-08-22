@@ -14,6 +14,7 @@ class Synthesis(BaseSingleTableProperty):
     score the proportion of new rows in the synthetic data.
     """
 
+    _num_iteration_case = 'table'
     metric = NewRowSynthesis
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
@@ -27,7 +28,7 @@ class Synthesis(BaseSingleTableProperty):
             metadata (dict):
                 The metadata of the table.
             progress_bar (tqdm.tqdm or None):
-                The progress bar to use. Defaults to tqdm.
+                The progress bar to use. Defaults to None.
 
         Returns:
             pandas.DataFrame.
@@ -48,7 +49,7 @@ class Synthesis(BaseSingleTableProperty):
             score = np.nan
             num_matched_rows = np.nan
             num_new_rows = np.nan
-            error_message = f'Error: {type(e).__name__} {e}'
+            error_message = f'{type(e).__name__}: {e}'
 
         finally:
             if progress_bar:

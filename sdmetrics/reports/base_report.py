@@ -8,8 +8,6 @@ import pandas as pd
 import pkg_resources
 import tqdm
 
-from sdmetrics.reports.utils import _validate_categorical_values
-
 
 class BaseReport():
     """Base report class for single table reports.
@@ -26,14 +24,6 @@ class BaseReport():
         """Validate that the metadata matches the data.
 
         Raise an error if the column metadata does not match the column data.
-
-        Args:
-            real_data (pandas.DataFrame):
-                The real data.
-            synthetic_data (pandas.DataFrame):
-                The synthetic data.
-            metadata (dict):
-                The metadata of the table.
         """
         real_columns = set(real_data.columns)
         synthetic_columns = set(synthetic_data.columns)
@@ -66,12 +56,8 @@ class BaseReport():
             metadata = metadata.to_dict()
 
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
-        _validate_categorical_values(real_data, synthetic_data, metadata)
 
     def _print_results(self):
-        raise NotImplementedError
-
-    def _get_num_iterations(self, property_name, metadata):
         raise NotImplementedError
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
@@ -97,9 +83,9 @@ class BaseReport():
         if verbose:
             sys.stdout.write('Generating report ...\n')
 
-        for ind, property_name in enumerate(self._properties):
+        for ind, (property_name, property_instance) in enumerate(self._properties.items()):
             if verbose:
-                num_iterations = self._get_num_iterations(property_name, metadata)
+                num_iterations = int(property_instance._get_num_iterations(metadata))
                 progress_bar = tqdm.tqdm(total=num_iterations, file=sys.stdout)
                 progress_bar.set_description(
                     f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}: '

@@ -18,7 +18,7 @@ class TestColumnPairTrends:
         result = column_pair_trends.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        assert result == 0.49349249665827416
+        assert result == 0.4249665433225429
 
     def test_with_progress_bar(self):
         """Test that the progress bar is correctly updated."""
@@ -38,5 +38,5 @@ class TestColumnPairTrends:
         result = column_pair_trends.get_score(real_data, synthetic_data, metadata, progress_bar)
 
         # Assert
-        assert result == 0.49349249665827416
+        assert result == 0.4249665433225429
         assert mock_update.call_count == num_iter

@@ -11,3 +11,4 @@ def test__init__():
     # Assert
     assert synthesis._properties == {}
     assert synthesis._single_table_property == SingleTableSynthesis
+    assert synthesis._num_iteration_case == 'table'

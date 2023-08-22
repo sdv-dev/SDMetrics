@@ -14,3 +14,4 @@ class ColumnShapes(BaseMultiTableProperty):
     """
 
     _single_table_property = SingleTableColumnShapes
+    _num_iteration_case = 'column'

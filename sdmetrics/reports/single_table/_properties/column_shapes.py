@@ -17,6 +17,7 @@ class ColumnShapes(BaseSingleTableProperty):
     The other column types are ignored by this property.
     """
 
+    _num_iteration_case = 'column'
     _sdtype_to_metric = {
         'numerical': KSComplement,
         'datetime': KSComplement,
@@ -35,7 +36,7 @@ class ColumnShapes(BaseSingleTableProperty):
             metadata (dict):
                 The metadata of the table
             progress_bar (tqdm.tqdm or None):
-                The progress bar to use. Defaults to tqdm.
+                The progress bar to use. Defaults to None.
         """
         column_names, metric_names, scores = [], [], []
         error_messages = []

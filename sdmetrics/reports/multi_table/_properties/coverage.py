@@ -14,3 +14,4 @@ class Coverage(BaseMultiTableProperty):
     """
 
     _single_table_property = SingleTableCoverage
+    _num_iteration_case = 'column'

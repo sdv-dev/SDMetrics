@@ -2,6 +2,7 @@
 
 import copy
 import itertools
+import sys
 import warnings
 
 import numpy as np
@@ -811,56 +812,54 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
                 warnings.warn(warning_format.format(values=values, column=column))
 
 
-def validate_multi_table_inputs(real_data, synthetic_data, metadata):
-    """Validate multi-table inputs for report generation.
+def _print_results_quality_report(report):
+    """Print the quality report results."""
+    sys.stdout.write(
+        f'\nOverall Quality Score: {round(report._overall_score * 100, 2)}%\n\n'
+    )
+    sys.stdout.write('Properties:\n')
 
-    Args:
-        real_data (dict[str, DataFrame]):
-            The real data.
-        synthetic_data (dict[str, DataFrame]):
-            The synthetic data.
-        metadata (dict):
-            The metadata, which contains each column's data type as well as relationships.
-    """
-    if not isinstance(metadata, dict):
-        metadata = metadata.to_dict()
-
-    for table in metadata['tables']:
-        table_metadata = metadata['tables'][table]
-        _validate_categorical_values(
-            real_data[table],
-            synthetic_data[table],
-            table_metadata,
-            table=table
+    for property_name in report._properties:
+        property_score = round(report._properties[property_name]._compute_average(), 4)
+        sys.stdout.write(
+            f'- {property_name}: {property_score * 100}%\n'
         )
 
-    for rel in metadata.get('relationships', []):
-        parent_dtype = real_data[rel['parent_table_name']][rel['parent_primary_key']].dtype
-        child_dtype = real_data[rel['child_table_name']][rel['child_foreign_key']].dtype
-        if (parent_dtype == 'object' and child_dtype != 'object') or (
-                parent_dtype != 'object' and child_dtype == 'object'):
-            parent = rel['parent_table_name']
-            parent_key = rel['parent_primary_key']
-            child = rel['child_table_name']
-            child_key = rel['child_foreign_key']
-            error_msg = (f"The '{parent}' table and '{child}' table cannot be merged. Please "
-                         f"make sure the primary key in '{parent}' ('{parent_key}') and the "
-                         f"foreign key in '{child}' ('{child_key}') have the same data type.")
-            raise ValueError(error_msg)
+
+def _generate_results_diagnostic_report(report):
+    """Generate the diagnostic report results."""
+    if not report.results:
+        report.results['SUCCESS'] = []
+        report.results['WARNING'] = []
+        report.results['DANGER'] = []
+
+    for property_name in report._properties:
+        details = getattr(report._properties[property_name], '_details', None)
+        if details is None:
+            details = getattr(
+                report._properties[property_name], 'details', None
+            )
+
+        average_score_metric = details.groupby('Metric')['Score'].mean()
+        for metric, score in average_score_metric.items():
+            if pd.isna(score):
+                continue
+            if score >= 0.9:
+                report.results['SUCCESS'].append(
+                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['SUCCESS'])
+            elif score >= 0.5:
+                report.results['WARNING'].append(
+                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['WARNING'])
+            else:
+                report.results['DANGER'].append(
+                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
 
 
-def validate_single_table_inputs(real_data, synthetic_data, metadata):
-    """Validate single table inputs for report generation.
+def _print_results_diagnostic_report(report):
+    """Print the diagnostic report results."""
+    _generate_results_diagnostic_report(report)
 
-    Args:
-        real_data (pandas.DataFrame):
-            The real data.
-        synthetic_data (pandas.DataFrame):
-            The synthetic data.
-        metadata (dict):
-            The metadata, which contains each column's data type as well as relationships.
-    """
-    if not isinstance(metadata, dict):
-        metadata = metadata.to_dict()
-
-    _validate_categorical_values(real_data, synthetic_data, metadata)
+    sys.stdout.write('\nDiagnostic Results:\n')
+    print_results_for_level(sys.stdout, report.results, 'SUCCESS')
+    print_results_for_level(sys.stdout, report.results, 'WARNING')
+    print_results_for_level(sys.stdout, report.results, 'DANGER')

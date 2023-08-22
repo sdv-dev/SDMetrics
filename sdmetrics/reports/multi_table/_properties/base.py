@@ -11,13 +11,63 @@ class BaseMultiTableProperty():
     Attributes:
         properties (dict):
             A dict mapping the table names to their single table properties.
+        is_computed (bool):
+            Whether or not the property has been computed.
+        details (pandas.DataFrame):
+            The multi table details property dataframe.
     """
 
     _single_table_property = None
+    _num_iteration_case = None
 
     def __init__(self):
         self._properties = {}
         self.is_computed = False
+        self.details = pd.DataFrame()
+
+    def _get_num_iterations(self, metadata):
+        """Get the number of iterations for the property."""
+        if self._num_iteration_case == 'column':
+            return sum(len(metadata['tables'][table]['columns']) for table in metadata['tables'])
+        elif self._num_iteration_case == 'table':
+            return len(metadata['tables'])
+        elif self._num_iteration_case == 'relationship':
+            return len(metadata['relationships'])
+        elif self._num_iteration_case == 'column_pair':
+            num_columns = [len(table['columns']) for table in metadata['tables'].values()]
+            return sum([(n_cols * (n_cols - 1)) // 2 for n_cols in num_columns])
+
+    def _generate_details(self, metadata):
+        """Generate the ``details`` dataframe for the multi-table property.
+
+        This dataframe concatenates the ``_details`` dataframe of each single table property
+        and adds a ``Table`` column to indicate which table the score is for.
+
+        Args:
+            metadata (dict):
+                The metadata of the tables.
+        """
+        if not self._num_iteration_case == 'relationship':
+            details_frames = []
+            for table_name in metadata['tables']:
+                details = self._properties[table_name]._details.copy()
+                details['Table'] = table_name
+                details_frames.append(details)
+
+            self.details = pd.concat(details_frames).reset_index(drop=True)
+            cols = ['Table'] + [col for col in self.details if col != 'Table']
+            self.details = self.details[cols]
+
+    def _compute_average(self):
+        """Average the scores for each column."""
+        is_dataframe = isinstance(self.details, pd.DataFrame)
+        has_score_column = 'Score' in self.details.columns
+        assert_message = "The property details must be a DataFrame with a 'Score' column."
+
+        assert is_dataframe, assert_message
+        assert has_score_column, assert_message
+
+        return self.details['Score'].mean()
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.
@@ -39,21 +89,17 @@ class BaseMultiTableProperty():
         if self._single_table_property is None:
             raise NotImplementedError()
 
-        all_details = []
-        for table_name in metadata['tables']:
-            property_instance = self._single_table_property()
-            self._properties[table_name] = property_instance
+        for table_name, metadata_table in metadata['tables'].items():
+            self._properties[table_name] = self._single_table_property()
             self._properties[table_name].get_score(
-                real_data[table_name],
-                synthetic_data[table_name],
-                metadata['tables'][table_name],
+                real_data[table_name], synthetic_data[table_name], metadata_table,
                 progress_bar
             )
-            all_details.append(property_instance._details)
 
+        self._generate_details(metadata)
         self.is_computed = True
-        all_details = pd.concat(all_details)
-        return all_details['Score'].mean()
+
+        return self._compute_average()
 
     def get_visualization(self, table_name):
         """Return a visualization for each score in the property.
