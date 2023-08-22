@@ -7,6 +7,7 @@ from plotly.subplots import make_subplots
 
 from sdmetrics.column_pairs.statistical import ContingencySimilarity, CorrelationSimilarity
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
+from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.utils import is_datetime
 
 
@@ -381,8 +382,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
             'cmax': 1,
         }
 
-        colors_1 = ['#FF0000', '#F16141', '#36B37E']
-        colors_2 = ['#03AFF1', '#000036', '#01E0C9']
+        colors_1 = [PlotConfig.RED, PlotConfig.ORANGE, PlotConfig.GREEN]
+        colors_2 = [PlotConfig.DATACEBO_BLUE, PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]
 
         fig.update_layout(
             title_text=f'Data Quality: Column Pair Trends (Average Score={average_score})',
@@ -392,6 +393,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             xaxis3={'matches': 'x2'},
             height=900,
             width=900,
+            font={'size': PlotConfig.FONT_SIZE}
         )
 
         fig.update_yaxes(autorange='reversed')
@@ -421,6 +423,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
         )
 
         fig = make_subplots(rows=2, cols=2, subplot_titles=titles, specs=specs)
+
+        fig.update_xaxes(tickangle=45)
 
         fig.add_trace(
             self._get_heatmap(similarity_correlation, 'coloraxis', tmpl_1), 1, 1

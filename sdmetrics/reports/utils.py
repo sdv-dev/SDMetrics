@@ -14,9 +14,6 @@ from sdmetrics.utils import (
     get_alternate_keys, get_columns_from_metadata, get_missing_percentage,
     get_type_from_column_meta, is_datetime)
 
-DATACEBO_DARK = '#000036'
-DATACEBO_LIGHT = '#01E0C9'
-BACKGROUND_COLOR = '#F5F5F8'
 CONTINUOUS_SDTYPES = ['numerical', 'datetime']
 DISCRETE_SDTYPES = ['categorical', 'boolean']
 DIAGNOSTIC_REPORT_RESULT_DETAILS = {
@@ -63,6 +60,19 @@ DIAGNOSTIC_REPORT_RESULT_DETAILS = {
         ),
     }
 }
+
+
+class PlotConfig:
+    """Custom plot settings for visualizations."""
+
+    GREEN = '#36B37E'
+    RED = '#FF0000'
+    ORANGE = '#F16141'
+    DATACEBO_DARK = '#000036'
+    DATACEBO_GREEN = '#01E0C9'
+    DATACEBO_BLUE = '#03AFF1'
+    BACKGROUND_COLOR = '#F5F5F8'
+    FONT_SIZE = 18
 
 
 def convert_to_datetime(column_data, datetime_format=None):
@@ -139,7 +149,7 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
         x='values',
         color='Data',
         barmode='group',
-        color_discrete_sequence=[DATACEBO_DARK, DATACEBO_LIGHT],
+        color_discrete_sequence=[PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN],
         pattern_shape='Data',
         pattern_shape_sequence=['', '/'],
         histnorm='probability density'
@@ -175,8 +185,9 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
         title=f"Real vs. Synthetic Data for column '{column_name}'",
         xaxis_title='Category',
         yaxis_title='Frequency',
-        plot_bgcolor=BACKGROUND_COLOR,
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
         annotations=annotations,
+        font={'size': PlotConfig.FONT_SIZE},
     )
 
     return fig
@@ -212,7 +223,7 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
         ['Real', 'Synthetic'],
         show_hist=False,
         show_rug=False,
-        colors=[DATACEBO_DARK, DATACEBO_LIGHT]
+        colors=[PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]
     )
 
     fig.update_traces(
@@ -249,8 +260,9 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
         title=f'Real vs. Synthetic Data for column {column_name}',
         xaxis_title='Value',
         yaxis_title='Frequency',
-        plot_bgcolor=BACKGROUND_COLOR,
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
         annotations=annotations,
+        font={'size': PlotConfig.FONT_SIZE},
     )
 
     return fig
@@ -327,13 +339,17 @@ def make_continuous_column_pair_plot(real_data, synthetic_data):
         x=columns[0],
         y=columns[1],
         color='Data',
-        color_discrete_map={'Real': DATACEBO_DARK, 'Synthetic': DATACEBO_LIGHT},
+        color_discrete_map={
+            'Real': PlotConfig.DATACEBO_DARK,
+            'Synthetic': PlotConfig.DATACEBO_GREEN
+        },
         symbol='Data'
     )
 
     fig.update_layout(
         title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
-        plot_bgcolor=BACKGROUND_COLOR,
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        font={'size': PlotConfig.FONT_SIZE},
     )
 
     return fig
@@ -368,7 +384,8 @@ def make_discrete_column_pair_plot(real_data, synthetic_data):
 
     fig.update_layout(
         title_text=f"Real vs Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
-        coloraxis={'colorscale': [DATACEBO_DARK, DATACEBO_LIGHT]},
+        coloraxis={'colorscale': [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]},
+        font={'size': PlotConfig.FONT_SIZE},
     )
 
     fig.for_each_annotation(lambda a: a.update(text=a.text.split('=')[-1] + ' Data'))
@@ -400,12 +417,16 @@ def make_mixed_column_pair_plot(real_data, synthetic_data):
         x=columns[0],
         y=columns[1],
         color='Data',
-        color_discrete_map={'Real': DATACEBO_DARK, 'Synthetic': DATACEBO_LIGHT},
+        color_discrete_map={
+            'Real': PlotConfig.DATACEBO_DARK,
+            'Synthetic': PlotConfig.DATACEBO_GREEN
+        },
     )
 
     fig.update_layout(
         title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
-        plot_bgcolor=BACKGROUND_COLOR
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        font={'size': PlotConfig.FONT_SIZE},
     )
 
     return fig
@@ -525,7 +546,7 @@ def _generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
         y='# parents',
         color='data',
         barmode='group',
-        color_discrete_sequence=[DATACEBO_DARK, DATACEBO_LIGHT],
+        color_discrete_sequence=[PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN],
         pattern_shape='data',
         pattern_shape_sequence=['', '/'],
         nbins=max(data['# children']) - min(data['# children']) + 1,
@@ -546,7 +567,8 @@ def _generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
         title=title,
         xaxis_title='# of Children (per Parent)',
         yaxis_title='Frequency',
-        plot_bgcolor=BACKGROUND_COLOR
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        font={'size': PlotConfig.FONT_SIZE},
     )
     return fig
 

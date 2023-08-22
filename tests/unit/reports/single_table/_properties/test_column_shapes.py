@@ -180,5 +180,8 @@ class TestColumnShapes:
 
             mock_bar.update_yaxes.assert_called_once_with(range=[0, 1])
             mock_bar.update_layout.assert_called_once_with(
-                xaxis_categoryorder='total ascending', plot_bgcolor='#F5F5F8', margin={'t': 150}
+                xaxis_categoryorder='total ascending',
+                plot_bgcolor='#F5F5F8',
+                margin={'t': 150},
+                font={'size': 18}
             )
