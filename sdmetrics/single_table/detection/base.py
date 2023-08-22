@@ -34,7 +34,7 @@ class DetectionMetric(SingleTableMetric):
     """
 
     name = 'SingleTable Detection'
-    goal = Goal.MAXIMIZE
+    goal = Goal.MINIMIZE
     min_value = 0.0
     max_value = 1.0
 
