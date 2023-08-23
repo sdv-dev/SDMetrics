@@ -4,6 +4,7 @@ import plotly.express as px
 
 from sdmetrics.multi_table.statistical import CardinalityShapeSimilarity
 from sdmetrics.reports.multi_table._properties.base import BaseMultiTableProperty
+from sdmetrics.reports.utils import PlotConfig
 
 
 class Cardinality(BaseMultiTableProperty):
@@ -124,7 +125,7 @@ class Cardinality(BaseMultiTableProperty):
             y='Score',
             title=f'Table Relationships (Average Score={average_score})',
             color='Metric',
-            color_discrete_sequence=['#000036'],
+            color_discrete_sequence=[PlotConfig.DATACEBO_DARK],
             hover_name='Child → Parent Relationship',
             hover_data={
                 'Child → Parent Relationship': False,
@@ -137,7 +138,8 @@ class Cardinality(BaseMultiTableProperty):
 
         fig.update_layout(
             xaxis_categoryorder='total ascending',
-            plot_bgcolor='#F5F5F8',
+            plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+            font={'size': PlotConfig.FONT_SIZE}
         )
 
         return fig
