@@ -9,7 +9,7 @@ from sdmetrics.single_table import NewRowSynthesis
 class Synthesis(BaseSingleTableProperty):
     """Synthesis property class for single table.
 
-    This property assesses the novelty of the syntetic data over the real data.
+    This property assesses the novelty of the synthetic data over the real data.
     The ``NewRowSynthesis`` metric is computed over the real and synthetic table to
     score the proportion of new rows in the synthetic data.
     """
@@ -39,7 +39,10 @@ class Synthesis(BaseSingleTableProperty):
         sample_size = len(synthetic_data) if len(synthetic_data) < 10000 else 10000
         try:
             score_breakdown = self.metric.compute_breakdown(
-                real_data, synthetic_data, synthetic_sample_size=sample_size
+                real_data=real_data,
+                synthetic_data=synthetic_data,
+                metadata=metadata,
+                synthetic_sample_size=sample_size
             )
             score = score_breakdown['score']
             num_matched_rows = score_breakdown['num_matched_rows']
