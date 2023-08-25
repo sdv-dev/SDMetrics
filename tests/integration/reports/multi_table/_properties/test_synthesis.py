@@ -18,7 +18,7 @@ class TestSynthesis:
         result = synthesis.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        assert result == 0.9629629629629629
+        assert result == 0.6333333333333333
 
     def test_with_progress_bar(self):
         """Test that the progress bar is correctly updated."""
@@ -35,5 +35,5 @@ class TestSynthesis:
         result = synthesis.get_score(real_data, synthetic_data, metadata, progress_bar)
 
         # Assert
-        assert result == 0.9629629629629629
+        assert result == 0.6333333333333333
         assert mock_update.call_count == num_tables

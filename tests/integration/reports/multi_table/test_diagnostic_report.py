@@ -21,12 +21,12 @@ class TestDiagnosticReport:
             'SUCCESS': [
                 'The synthetic data covers over 90% of the categories present in the real data',
                 'The synthetic data covers over 90% of the numerical ranges present'
-                ' in the real data',
-                'Over 90% of the synthetic rows are not copies of the real data'
+                ' in the real data'
             ],
             'WARNING': [
                 'More than 10% the synthetic data does not follow the min/max boundaries'
-                ' set by the real data'
+                ' set by the real data',
+                'More than 10% of the synthetic rows are copies of the real data'
             ],
             'DANGER': []
         }
@@ -51,15 +51,14 @@ class TestDiagnosticReport:
         # Assert
         expected_results = {
             'SUCCESS': [
-                'The synthetic data covers over 90% of the categories present in the real data',
-                'Over 90% of the synthetic rows are not copies of the real data'
+                'The synthetic data covers over 90% of the categories present in the real data'
             ],
             'WARNING': [],
-            'DANGER': []
+            'DANGER': ['More than 50% of the synthetic rows are copies of the real data']
         }
         expected_properties = pd.DataFrame({
             'Property': ['Coverage', 'Boundary', 'Synthesis'],
-            'Score': [0.9666666666666668, np.nan, 0.9444444444444444]
+            'Score': [0.9666666666666668, np.nan, 0.0]
         })
         expected_details = pd.DataFrame({
             'Table': ['users', 'transactions', 'transactions'],
@@ -91,7 +90,7 @@ class TestDiagnosticReport:
         # Assert
         expected_dataframe = pd.DataFrame({
             'Property': ['Coverage', 'Boundary', 'Synthesis'],
-            'Score': [0.9573447196980541, 0.8666666666666667, 0.9629629629629629]
+            'Score': [0.9573447196980541, 0.8666666666666667, 0.6333333333333333]
         })
 
         pd.testing.assert_frame_equal(properties, expected_dataframe)

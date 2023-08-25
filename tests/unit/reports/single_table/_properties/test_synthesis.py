@@ -36,8 +36,18 @@ class TestSynthesis:
 
         # Assert
         expected_calls = [
-            call(real_data, synthetic_data_20000, synthetic_sample_size=10000),
-            call(real_data, synthetic_data, synthetic_sample_size=4)
+            call(
+                real_data=real_data,
+                synthetic_data=synthetic_data_20000,
+                metadata=metadata,
+                synthetic_sample_size=10000
+            ),
+            call(
+                real_data=real_data,
+                synthetic_data=synthetic_data,
+                metadata=metadata,
+                synthetic_sample_size=4
+            )
         ]
 
         newrowsynthesis_mock.assert_has_calls(expected_calls)
@@ -66,11 +76,12 @@ class TestSynthesis:
         details = synthesis_property._generate_details(real_data, synthetic_data, metadata)
 
         # Assert
-        expected_calls_synthesis = [
-            call(real_data, synthetic_data, synthetic_sample_size=4),
-        ]
-
-        newrowsynthesis_mock.assert_has_calls(expected_calls_synthesis)
+        newrowsynthesis_mock.assert_called_once_with(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            synthetic_sample_size=4
+        )
 
         expected_details = pd.DataFrame({
             'Metric': 'NewRowSynthesis',
