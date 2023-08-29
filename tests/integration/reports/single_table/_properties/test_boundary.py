@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from sdmetrics.demos import load_demo
@@ -39,6 +40,7 @@ class TestBoundary:
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
         real_data['start_date'].iloc[0] = 0
         real_data['employability_perc'].iloc[2] = 'a'
+        real_data['salary'] = np.nan
 
         boundary_property = Boundary()
 
@@ -49,14 +51,17 @@ class TestBoundary:
         expected_message_1 = (
             "TypeError: '<=' not supported between instances of 'int' and 'Timestamp'"
         )
-        expected_message_2 = (
+        expected_message_2 = 'InvalidDataError: All NaN values in real data.'
+        expected_message_3 = (
             "TypeError: '<=' not supported between instances of 'float' and 'str'"
         )
+
         details = boundary_property._details
         details_nan = details.loc[pd.isna(details['Score'])]
         column_names_nan = details_nan['Column'].tolist()
         error_messages = details_nan['Error'].tolist()
-        assert column_names_nan == ['start_date', 'employability_perc']
+        assert column_names_nan == ['start_date', 'salary', 'employability_perc']
         assert error_messages[0] == expected_message_1
         assert error_messages[1] == expected_message_2
-        assert score == 0.9292362353408865
+        assert error_messages[2] == expected_message_3
+        assert score == 0.9270636340403783
