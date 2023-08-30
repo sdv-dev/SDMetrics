@@ -60,10 +60,11 @@ class BaseReport():
 
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
-    def _handle_results(self):
+    def _handle_results(self, verbose):
         raise NotImplementedError
 
-    def convert_datetimes(self, real_data, synthetic_data, metadata):
+    @staticmethod
+    def convert_datetimes(real_data, synthetic_data, metadata):
         """Try to convert all datetime columns to datetime dtype.
 
         Args:
