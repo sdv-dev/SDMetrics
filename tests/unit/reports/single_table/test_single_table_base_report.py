@@ -125,6 +125,8 @@ class TestBaseReport:
         # Setup
         base_report = BaseReport()
         mock_validate = Mock()
+        mock_handle_results = Mock()
+        base_report._handle_results = mock_handle_results
         base_report.validate = mock_validate
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 1'].get_score.return_value = 1.0
@@ -151,6 +153,7 @@ class TestBaseReport:
 
         # Assert
         mock_validate.assert_called_once_with(real_data, synthetic_data, metadata)
+        mock_handle_results.assert_called_once_with(False)
         base_report._properties['Property 1'].get_score.assert_called_with(
             real_data, synthetic_data, metadata, progress_bar=None
         )
@@ -158,20 +161,21 @@ class TestBaseReport:
             real_data, synthetic_data, metadata, progress_bar=None
         )
 
-    def test__print_result(self):
-        """Test the ``_print_result`` method."""
+    def test__handle_results(self):
+        """Test the ``_handle_results`` method."""
         # Setup
         base_report = BaseReport()
 
         # Run and Assert
         with pytest.raises(NotImplementedError):
-            base_report._print_results()
+            base_report._handle_results(True)
 
     @patch('tqdm.tqdm')
     def test_generate_verbose(self, mock_tqdm):
         """Test the ``generate`` method with verbose=True."""
         # Setup
         base_report = BaseReport()
+        base_report._handle_results = Mock()
         mock_validate = Mock()
         base_report.validate = mock_validate
         base_report._print_results = Mock()
@@ -211,7 +215,7 @@ class TestBaseReport:
         # Assert
         calls = [call(total=4, file=sys.stdout), call(total=6, file=sys.stdout)]
         mock_tqdm.assert_has_calls(calls, any_order=True)
-        base_report._print_results.assert_called_once()
+        base_report._handle_results.assert_called_once_with(True)
 
     def test__check_report_generated(self):
         """Test the ``check_report_generated`` method."""

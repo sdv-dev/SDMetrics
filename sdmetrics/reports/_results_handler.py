@@ -4,6 +4,7 @@ import sys
 
 import pandas as pd
 
+
 class BaseResultsHandler():
     """Base class for handling results for reports."""
 

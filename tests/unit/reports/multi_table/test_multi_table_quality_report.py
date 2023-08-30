@@ -1,5 +1,6 @@
 from unittest.mock import Mock, patch
 
+from sdmetrics.reports._results_handler import QualityReportResultsHandler
 from sdmetrics.reports.multi_table import QualityReport
 from sdmetrics.reports.multi_table._properties import Cardinality, ColumnPairTrends, ColumnShapes
 
@@ -18,18 +19,25 @@ class TestQualityReport:
         assert isinstance(report._properties['Column Shapes'], ColumnShapes)
         assert isinstance(report._properties['Column Pair Trends'], ColumnPairTrends)
         assert isinstance(report._properties['Cardinality'], Cardinality)
+        assert isinstance(report._results_handler, QualityReportResultsHandler)
 
-    @patch('sdmetrics.reports.multi_table.quality_report._print_results_quality_report')
-    def test__print_results(self, mock_print_result):
-        """Test the ``_print_results`` method."""
+    def test__handle_results(self):
+        """Test that the proper values are passed to the handler."""
         # Setup
         report = QualityReport()
+        report._overall_score = 0.5
+        report._properties = {
+            'Column Shapes': Mock(_compute_average=Mock(return_value=0.6)),
+            'Column Pair Trends': Mock(_compute_average=Mock(return_value=0.4))
+        }
+        report._results_handler = Mock()
 
         # Run
-        report._print_results()
+        report._handle_results(True)
 
         # Assert
-        mock_print_result.assert_called_once_with(report)
+        report._results_handler.print_results.assert_called_once_with(
+            report._properties, report._overall_score, True)
 
     @patch('sdmetrics.reports.base_report.BaseReport.generate')
     def test_generate_without_verbose(self, mock_super_generate):

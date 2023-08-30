@@ -1,5 +1,6 @@
 from unittest.mock import Mock, patch
 
+from sdmetrics.reports._results_handler import DiagnosticReportResultsHandler
 from sdmetrics.reports.single_table import DiagnosticReport
 from sdmetrics.reports.single_table._properties import Boundary, Coverage, Synthesis
 
@@ -17,22 +18,23 @@ class TestDiagnosticReport:
         assert isinstance(report._properties['Coverage'], Coverage)
         assert isinstance(report._properties['Boundary'], Boundary)
         assert isinstance(report._properties['Synthesis'], Synthesis)
+        assert isinstance(report._results_handler, DiagnosticReportResultsHandler)
 
-    @patch('sdmetrics.reports.single_table.diagnostic_report._print_results_diagnostic_report')
-    def test__print_results(self, mock_print_results):
-        """Test the ``_print_results`` method."""
+    def test__handle_results(self):
+        """Test that the proper values are passed to the handler."""
         # Setup
         report = DiagnosticReport()
+        report._properties = Mock()
+        report._results_handler = Mock()
 
         # Run
-        report._print_results()
+        report._handle_results(True)
 
         # Assert
-        mock_print_results.assert_called_once_with(report)
+        report._results_handler.print_results.assert_called_once_with(report._properties, True)
 
-    @patch('sdmetrics.reports.single_table.diagnostic_report._generate_results_diagnostic_report')
     @patch('sdmetrics.reports.base_report.BaseReport.generate')
-    def test_generate_without_verbose(self, mock_super_generate, mock_generate_results):
+    def test_generate_without_verbose(self, mock_super_generate):
         """Test the ``generate`` method without verbose."""
         # Setup
         real_data = Mock()
@@ -44,8 +46,8 @@ class TestDiagnosticReport:
         report.generate(real_data, synthetic_data, metadata, verbose=False)
 
         # Assert
-        mock_super_generate.assert_called_once_with(real_data, synthetic_data, metadata, False)
-        mock_generate_results.assert_called_once_with(report)
+        mock_super_generate.assert_called_once_with(
+            real_data, synthetic_data, metadata, verbose=False)
 
     def test_get_results(self):
         """Test the ``get_results`` method."""
@@ -53,7 +55,9 @@ class TestDiagnosticReport:
         report = DiagnosticReport()
         mock_check_report_generated = Mock()
         report._check_report_generated = mock_check_report_generated
-        report.results = {'SUCCESS': ['Test']}
+        mock_results_handler = Mock()
+        report._results_handler = mock_results_handler
+        mock_results_handler.results = {'SUCCESS': ['Test']}
         report.is_generated = True
 
         # Run
