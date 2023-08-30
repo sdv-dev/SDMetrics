@@ -82,6 +82,99 @@ class TestBoundary:
 
         pd.testing.assert_frame_equal(details, expected_details)
 
+    @patch('sdmetrics.reports.single_table._properties.boundary.BoundaryAdherence.compute')
+    def test__generate_details_all_nans(self, boundary_adherence_mock):
+        """Test the ``_generate_details`` method when the columns contain only ``NaN`` values."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': [np.nan, np.nan, np.nan],
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': [np.nan, np.nan, np.nan]
+        })
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'}
+            }
+        }
+
+        # Run
+        boundary_property = Boundary()
+        details = boundary_property._generate_details(real_data, synthetic_data, metadata)
+
+        # Assert
+        boundary_adherence_mock.assert_not_called()
+        expected_details = pd.DataFrame({
+            'Column': ['col1'],
+            'Metric': ['BoundaryAdherence'],
+            'Score': [np.nan],
+            'Error': ['InvalidDataError: All NaN values in both real and synthetic data.']
+        })
+
+        pd.testing.assert_frame_equal(details, expected_details)
+
+    @patch('sdmetrics.reports.single_table._properties.boundary.BoundaryAdherence.compute')
+    def test__generate_details_all_nans_real_column(self, boundary_adherence_mock):
+        """Test the ``_generate_details`` method when the real column contains only ``NaNs``."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': [np.nan, np.nan, np.nan],
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': [1, 2, 3]
+        })
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'}
+            }
+        }
+
+        # Run
+        boundary_property = Boundary()
+        details = boundary_property._generate_details(real_data, synthetic_data, metadata)
+
+        # Assert
+        boundary_adherence_mock.assert_not_called()
+        expected_details = pd.DataFrame({
+            'Column': ['col1'],
+            'Metric': ['BoundaryAdherence'],
+            'Score': [np.nan],
+            'Error': ['InvalidDataError: All NaN values in real data.']
+        })
+
+        pd.testing.assert_frame_equal(details, expected_details)
+
+    @patch('sdmetrics.reports.single_table._properties.boundary.BoundaryAdherence.compute')
+    def test__generate_details_all_nans_synthetic_column(self, boundary_adherence_mock):
+        """Test the ``_generate_details`` method when synthetic column contains only ``NaNs``."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': [1, 2, 3],
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': [np.nan, np.nan, np.nan]
+        })
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'numerical'}
+            }
+        }
+
+        # Run
+        boundary_property = Boundary()
+        details = boundary_property._generate_details(real_data, synthetic_data, metadata)
+
+        # Assert
+        boundary_adherence_mock.assert_not_called()
+        expected_details = pd.DataFrame({
+            'Column': ['col1'],
+            'Metric': ['BoundaryAdherence'],
+            'Score': [np.nan],
+            'Error': ['InvalidDataError: All NaN values in synthetic data.']
+        })
+
+        pd.testing.assert_frame_equal(details, expected_details)
+
     @patch('sdmetrics.reports.single_table._properties.boundary.px')
     def test_get_visualization(self, mock_px):
         """Test the ``get_visualization`` method."""

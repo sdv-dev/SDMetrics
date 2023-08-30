@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
+from sdmetrics.errors import InvalidDataError
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.single_column import BoundaryAdherence
 
@@ -40,10 +41,21 @@ class Boundary(BaseSingleTableProperty):
             sdtype = metadata['columns'][column_name]['sdtype']
             try:
                 if sdtype in ('numerical', 'datetime'):
-                    column_score = self.metric.compute(
-                        real_data[column_name], synthetic_data[column_name]
-                    )
-                    error_message = None
+                    real_column = real_data[column_name]
+                    synthetic_column = synthetic_data[column_name]
+                    real_column_is_na = all(real_column.isna())
+                    synthetic_column_is_na = all(synthetic_column.isna())
+
+                    if real_column_is_na and synthetic_column_is_na:
+                        raise InvalidDataError('All NaN values in both real and synthetic data.')
+                    elif real_column_is_na:
+                        raise InvalidDataError('All NaN values in real data.')
+                    elif synthetic_column_is_na:
+                        raise InvalidDataError('All NaN values in synthetic data.')
+                    else:
+                        column_score = self.metric.compute(real_column, synthetic_column)
+                        error_message = None
+
                 else:
                     continue
 
