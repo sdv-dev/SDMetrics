@@ -141,3 +141,28 @@ class TestDiagnosticReport:
             report.get_details('Boundary'),
             expected_details_boundary
         )
+
+    def test_generate_multiple_times(self):
+        """The results should be the same both times."""
+        # Setup
+        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        report = DiagnosticReport()
+
+        # Run and assert
+        report = DiagnosticReport()
+        report.generate(real_data, synthetic_data, metadata, verbose=False)
+        expected_results = {
+            'DANGER': [],
+            'SUCCESS': [
+                'The synthetic data covers over 90% of the categories present in the real data',
+                'The synthetic data covers over 90% of the numerical ranges present in the real '
+                'data',
+                'The synthetic data follows over 90% of the min/max boundaries set by the real '
+                'data',
+                'Over 90% of the synthetic rows are not copies of the real data'
+            ],
+           'WARNING': []
+        }
+        assert report.get_results() == expected_results
+        report.generate(real_data, synthetic_data, metadata)
+        assert report.get_results() == expected_results

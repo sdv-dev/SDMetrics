@@ -148,6 +148,7 @@ class DiagnosticReportResultsHandler(BaseResultsHandler):
                 else:
                     self.results['DANGER'].append(
                         self.DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
+
         if verbose:
             sys.stdout.write('\nDiagnostic Results:\n')
             self._print_results_for_level('SUCCESS')
