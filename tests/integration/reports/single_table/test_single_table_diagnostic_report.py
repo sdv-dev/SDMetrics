@@ -161,7 +161,7 @@ class TestDiagnosticReport:
                 'data',
                 'Over 90% of the synthetic rows are not copies of the real data'
             ],
-           'WARNING': []
+            'WARNING': []
         }
         assert report.get_results() == expected_results
         report.generate(real_data, synthetic_data, metadata)
