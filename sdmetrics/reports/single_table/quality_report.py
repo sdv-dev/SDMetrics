@@ -1,7 +1,7 @@
 """Single table quality report."""
+from sdmetrics.reports._results_handler import QualityReportResultsHandler
 from sdmetrics.reports.base_report import BaseReport
 from sdmetrics.reports.single_table._properties import ColumnPairTrends, ColumnShapes
-from sdmetrics.reports.utils import _print_results_quality_report
 
 
 class QualityReport(BaseReport):
@@ -17,10 +17,10 @@ class QualityReport(BaseReport):
             'Column Shapes': ColumnShapes(),
             'Column Pair Trends': ColumnPairTrends()
         }
+        self._results_handler = QualityReportResultsHandler()
 
-    def _print_results(self):
-        """Print the results of the report."""
-        _print_results_quality_report(self)
+    def _handle_results(self, verbose):
+        self._results_handler.print_results(self._properties, self._overall_score, verbose)
 
     def get_score(self):
         """Return the overall quality score.
