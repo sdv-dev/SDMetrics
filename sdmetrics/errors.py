@@ -7,3 +7,7 @@ class IncomputableMetricError(Exception):
 
 class ConstantInputError(Exception):
     """Thrown when the input data has all the same values."""
+
+
+class InvalidDataError(Exception):
+    """Error to raise when data is not valid."""
