@@ -42,4 +42,4 @@ class TestSynthesis:
             'Error': "AttributeError: 'list' object has no attribute 'columns'"
         }, index=[0])
 
-        pd.testing.assert_frame_equal(synthesis_property._details, expected_details)
+        pd.testing.assert_frame_equal(synthesis_property.details, expected_details)

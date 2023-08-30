@@ -53,7 +53,7 @@ class TestColumnPairTrends:
             ]
         }
         expected_details = pd.DataFrame(expected_details_dict)
-        pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
+        pd.testing.assert_frame_equal(column_shape_property.details, expected_details)
         assert score == 0.754164318336875
 
     def test_get_score_warnings(self, recwarn):
@@ -88,7 +88,7 @@ class TestColumnPairTrends:
         score = column_shape_property.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        details = column_shape_property._details
+        details = column_shape_property.details
         pd.testing.assert_series_equal(details['Error'], exp_error_serie, check_names=False)
         assert score == 0.7023255813953488
 
@@ -126,5 +126,5 @@ class TestColumnPairTrends:
             'Synthetic Correlation': [np.nan] * 6
         }
         expected_details = pd.DataFrame(expected_details_dict)
-        pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
+        pd.testing.assert_frame_equal(column_shape_property.details, expected_details)
         assert score == 0.8813953488372093

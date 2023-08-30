@@ -314,8 +314,8 @@ class TestBaseReport:
         mock_validate_property_generated.assert_has_calls([
             call('Property 1'), call('Property 2')
         ])
-        base_report._properties['Property 1']._details.copy.assert_called_once()
-        base_report._properties['Property 2']._details.copy.assert_called_once()
+        base_report._properties['Property 1'].details.copy.assert_called_once()
+        base_report._properties['Property 2'].details.copy.assert_called_once()
 
     @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
     @patch('sdmetrics.reports.base_report.pickle')

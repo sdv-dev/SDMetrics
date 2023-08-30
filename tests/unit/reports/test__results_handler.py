@@ -28,15 +28,15 @@ class TestDiagnosticReportResultsHandler():
             'Boundary': Mock(),
             'Synthesis': Mock()
         }
-        properties['Coverage']._details = pd.DataFrame({
+        properties['Coverage'].details = pd.DataFrame({
             'Metric': ['CategoryCoverage', 'RangeCoverage', 'CategoryCoverage'],
             'Score': [0.1, 0.2, 0.3]
         })
-        properties['Boundary']._details = pd.DataFrame({
+        properties['Boundary'].details = pd.DataFrame({
             'Metric': ['BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence'],
             'Score': [0.5, 0.6, 0.7]
         })
-        properties['Synthesis']._details = pd.DataFrame({
+        properties['Synthesis'].details = pd.DataFrame({
             'Metric': ['NewRowSynthesis'],
             'Score': [1.0]
         })
@@ -77,15 +77,15 @@ class TestDiagnosticReportResultsHandler():
             'Boundary': Mock(),
             'Synthesis': Mock()
         }
-        properties['Coverage']._details = pd.DataFrame({
+        properties['Coverage'].details = pd.DataFrame({
             'Metric': ['CategoryCoverage', 'RangeCoverage', 'CategoryCoverage'],
             'Score': [0.1, 0.2, 0.3]
         })
-        properties['Boundary']._details = pd.DataFrame({
+        properties['Boundary'].details = pd.DataFrame({
             'Metric': ['BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence'],
             'Score': [0.5, 0.6, 0.7]
         })
-        properties['Synthesis']._details = pd.DataFrame({
+        properties['Synthesis'].details = pd.DataFrame({
             'Metric': ['NewRowSynthesis'],
             'Score': [1.0]
         })

@@ -337,7 +337,7 @@ class TestColumnPairTrends:
         """Test the ``_get_correlation_matrix`` method to generate the ``Score`` heatmap."""
         # Setup
         cpt_property = ColumnPairTrends()
-        cpt_property._details = pd.DataFrame({
+        cpt_property.details = pd.DataFrame({
             'Column 1': ['col1', 'col1', 'col2'],
             'Column 2': ['col2', 'col3', 'col3'],
             'metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
@@ -360,7 +360,7 @@ class TestColumnPairTrends:
         """Test the ``_get_correlation_matrix`` method to generate the ``Correlation`` heatmap."""
         # Setup
         cpt_property = ColumnPairTrends()
-        cpt_property._details = pd.DataFrame({
+        cpt_property.details = pd.DataFrame({
             'Column 1': ['col1', 'col1', 'col2'],
             'Column 2': ['col2', 'col3', 'col3'],
             'metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],

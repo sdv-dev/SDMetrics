@@ -92,11 +92,11 @@ class Boundary(BaseSingleTableProperty):
         average_score = self._compute_average()
 
         fig = px.bar(
-            data_frame=self._details,
+            data_frame=self.details,
             x='Column',
             y='Score',
             title=f'Data Diagnostics: Column Boundary (Average Score={round(average_score, 2)})',
-            category_orders={'group': list(self._details['Column'])},
+            category_orders={'group': list(self.details['Column'])},
             color='Metric',
             color_discrete_map={
                 'BoundaryAdherence': '#000036',

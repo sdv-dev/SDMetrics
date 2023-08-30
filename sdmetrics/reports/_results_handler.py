@@ -129,12 +129,7 @@ class DiagnosticReportResultsHandler(BaseResultsHandler):
         self.results['WARNING'] = []
         self.results['DANGER'] = []
         for property_name in properties:
-            details = getattr(properties[property_name], '_details', None)
-            if details is None:
-                details = getattr(
-                    properties[property_name], 'details', None
-                )
-
+            details = properties[property_name].details
             average_score_metric = details.groupby('Metric')['Score'].mean()
             for metric, score in average_score_metric.items():
                 if pd.isna(score):
