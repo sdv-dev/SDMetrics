@@ -69,7 +69,6 @@ class BaseMultiTableReport(BaseReport):
         if self._properties[property_name]._num_iteration_case != 'relationship':
             table_rows = self._properties[property_name].details['Table'] == table_name
             details = self._properties[property_name].details.loc[table_rows]
-            details = details.drop(columns=['Table'])
         else:
             details = self._properties[property_name].get_details(table_name)
 

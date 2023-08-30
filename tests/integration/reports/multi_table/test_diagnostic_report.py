@@ -139,6 +139,7 @@ class TestDiagnosticReport:
 
         # Assert
         expected_dataframe = pd.DataFrame({
+            'Table': ['users', 'users', 'users'],
             'Column': ['country', 'gender', 'age'],
             'Metric': ['CategoryCoverage', 'CategoryCoverage', 'RangeCoverage'],
             'Score': [0.8333333333333334, 1.0, 1.0]
