@@ -47,6 +47,20 @@ class BaseMultiTableReport(BaseReport):
         if table_name not in self.table_names:
             raise ValueError(f"Unknown table ('{table_name}'). Must be one of {self.table_names}.")
 
+    def convert_datetimes(self, real_data, synthetic_data, metadata):
+        """Try to convert all datetime columns to datetime dtype.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict):
+                The metadata, which contains each column's data type as well as relationships.
+        """
+        for table, table_metadata in metadata['tables'].items():
+            super().convert_datetimes(real_data[table], synthetic_data[table], table_metadata)
+
     def get_details(self, property_name, table_name=None):
         """Return the details table for the given property name.
 
