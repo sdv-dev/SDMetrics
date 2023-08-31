@@ -112,6 +112,7 @@ def test_multi_table_quality_report():
 
     # Assert Column Shapes details
     expected_df_0 = pd.DataFrame({
+        'Table': ['table1', 'table1'],
         'Column': ['col2', 'col3'],
         'Metric': ['TVComplement', 'TVComplement'],
         'Score': [.75, .75]
@@ -120,6 +121,7 @@ def test_multi_table_quality_report():
 
     # Assert Column Pair Trends details
     expected_df_1 = pd.DataFrame({
+        'Table': ['table1'],
         'Column 1': ['col2'],
         'Column 2': ['col3'],
         'Metric': ['ContingencySimilarity'],
