@@ -87,7 +87,7 @@ class Coverage(BaseSingleTableProperty):
         average_score = self._compute_average()
 
         fig = px.bar(
-            data_frame=self._details,
+            data_frame=self._details.dropna(subset=['Score']),
             x='Column',
             y='Score',
             title=f'Data Diagnostics: Column Coverage (Average Score={round(average_score, 2)})',

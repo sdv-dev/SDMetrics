@@ -58,9 +58,9 @@ class TestCoverage:
         coverage_property = Coverage()
 
         mock_df = pd.DataFrame({
-            'Column': ['Column1', 'Column2'],
-            'Score': [0.7, 0.3],
-            'Metric': ['RangeCoverage', 'CategoryCoverage']
+            'Column': ['Column1', 'Column2', 'Column3'],
+            'Score': [0.7, 0.3, np.nan],
+            'Metric': ['RangeCoverage', 'CategoryCoverage', 'CategoryCoverage']
         })
         coverage_property._details = mock_df
 
@@ -75,9 +75,14 @@ class TestCoverage:
 
         # Assert
         mock__compute_average.assert_called_once()
+        expected_df = pd.DataFrame({
+            'Column': ['Column1', 'Column2'],
+            'Score': [0.7, 0.3],
+            'Metric': ['RangeCoverage', 'CategoryCoverage']
+        })
 
         expected_kwargs = {
-            'data_frame': mock_df,
+            'data_frame': expected_df,
             'x': 'Column',
             'y': 'Score',
             'title': f'Data Diagnostics: Column Coverage (Average Score={0.5})',
