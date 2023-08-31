@@ -145,7 +145,7 @@ class TestBaseReport:
             'Table': ['Table_1', 'Table_1', 'Table_2'],
             'Column': ['col1', 'col2', 'col3'],
             'Score': [0.3, 0.4, 0.5],
-            'Error': [np.nan, np.nan, np.nan]
+            'Error': ['Error', np.nan, np.nan]
         })
 
         mock__validate_property_generated = Mock()
@@ -169,10 +169,10 @@ class TestBaseReport:
             'Table': ['Table_1', 'Table_1', 'Table_2'],
             'Column': ['col1', 'col2', 'col3'],
             'Score': [0.3, 0.4, 0.5],
-            'Error': [None, None, None]
+            'Error': ['Error', None, None]
         })
         mock__validate_property_generated.assert_called_once_with('Property_1')
-        pd.testing.assert_frame_equal(result, details_property_df)
+        pd.testing.assert_frame_equal(result, expected_result)
 
     def test_get_details_with_table_name(self):
         """Test the ``get_details`` method when a table name is given."""

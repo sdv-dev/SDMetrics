@@ -225,7 +225,8 @@ class TestDiagnosticReport:
                 6: None,
                 7: None,
                 8: None,
-                9: None}
+                9: None
+            }
         })
         pd.testing.assert_frame_equal(
             report.get_details('Boundary'),
