@@ -318,7 +318,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
         if column_name not in ['Score', 'Real Correlation', 'Synthetic Correlation']:
             raise ValueError(f"Invalid column name for _get_correlation_matrix : '{column_name}'")
 
-        table = self._details.dropna(subset=[column_name])
+        table = self.details.dropna(subset=[column_name])
         names = list(pd.concat([table['Column 1'], table['Column 2']]).unique())
         heatmap_df = pd.DataFrame(index=names, columns=names)
 

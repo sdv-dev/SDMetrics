@@ -1,7 +1,7 @@
 """Multi table quality report."""
+from sdmetrics.reports._results_handler import QualityReportResultsHandler
 from sdmetrics.reports.multi_table._properties import Cardinality, ColumnPairTrends, ColumnShapes
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
-from sdmetrics.reports.utils import _print_results_quality_report
 
 
 class QualityReport(BaseMultiTableReport):
@@ -18,10 +18,10 @@ class QualityReport(BaseMultiTableReport):
             'Column Pair Trends': ColumnPairTrends(),
             'Cardinality': Cardinality()
         }
+        self._results_handler = QualityReportResultsHandler()
 
-    def _print_results(self):
-        """Print the results of the report."""
-        _print_results_quality_report(self)
+    def _handle_results(self, verbose):
+        self._results_handler.print_results(self._properties, self._overall_score, verbose)
 
     def get_score(self):
         """Return the overall quality score.

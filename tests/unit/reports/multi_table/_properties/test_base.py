@@ -97,12 +97,12 @@ class TestBaseMultiTableProperty():
         }
 
         property_table_1 = Mock()
-        property_table_1._details = pd.DataFrame({
+        property_table_1.details = pd.DataFrame({
             'Column': ['col1', 'col2'],
             'Score': [0.5, 0.6]
         })
         property_table_2 = Mock()
-        property_table_2._details = pd.DataFrame({
+        property_table_2.details = pd.DataFrame({
             'Column': ['col3', 'col4'],
             'Score': [0.7, 0.8]
         })

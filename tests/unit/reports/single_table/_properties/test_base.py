@@ -62,7 +62,7 @@ class TestBaseSingleTableProperty:
         with pytest.raises(ValueError, match=expected_error_message):
             base_property._compute_average()
 
-        base_property._details = pd.DataFrame({'Column': ['a', 'b', 'c']})
+        base_property.details = pd.DataFrame({'Column': ['a', 'b', 'c']})
         with pytest.raises(ValueError, match=expected_error_message):
             base_property._compute_average()
 

@@ -33,7 +33,7 @@ class TestColumnShapes:
             ]
         }
         expected_details = pd.DataFrame(expected_details_dict)
-        pd.testing.assert_frame_equal(column_shape_property._details, expected_details)
+        pd.testing.assert_frame_equal(column_shape_property.details, expected_details)
         assert score == 0.8155594899871002
 
     def test_get_score_errors(self):
@@ -58,7 +58,7 @@ class TestColumnShapes:
 
         # Assert
 
-        details = column_shape_property._details
+        details = column_shape_property.details
         details_nan = details.loc[pd.isna(details['Score'])]
         column_names_nan = details_nan['Column'].tolist()
         error_messages = details_nan['Error'].tolist()

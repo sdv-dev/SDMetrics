@@ -36,7 +36,7 @@ class TestCoverage:
             ]
         })
 
-        pd.testing.assert_frame_equal(coverage_property._details, expected_details)
+        pd.testing.assert_frame_equal(coverage_property.details, expected_details)
 
     def test_get_score_error(self):
         """Test the ``get_score`` method with errors."""
@@ -57,7 +57,7 @@ class TestCoverage:
         expected_message_2 = (
             "TypeError: '<=' not supported between instances of 'float' and 'str'"
         )
-        details = coverage_property._details
+        details = coverage_property.details
         details_nan = details.loc[pd.isna(details['Score'])]
         column_names_nan = details_nan['Column'].tolist()
         error_messages = details_nan['Error'].tolist()

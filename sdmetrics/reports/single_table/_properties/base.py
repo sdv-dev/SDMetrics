@@ -9,15 +9,17 @@ class BaseSingleTableProperty():
     and applies different base-level metrics based on the data type.
     """
 
-    _details = None
     _num_iteration_case = None
+
+    def __init__(self):
+        self.details = pd.DataFrame()
 
     def _compute_average(self):
         """Average the scores for each column."""
-        if not isinstance(self._details, pd.DataFrame) or 'Score' not in self._details.columns:
+        if not isinstance(self.details, pd.DataFrame) or 'Score' not in self.details.columns:
             raise ValueError("The property details must be a DataFrame with a 'Score' column.")
 
-        return self._details['Score'].mean()
+        return self.details['Score'].mean()
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the property."""
@@ -49,7 +51,7 @@ class BaseSingleTableProperty():
             float:
                 The average score for the property.
         """
-        self._details = self._generate_details(real_data, synthetic_data, metadata, progress_bar)
+        self.details = self._generate_details(real_data, synthetic_data, metadata, progress_bar)
         return self._compute_average()
 
     def get_visualization(self):

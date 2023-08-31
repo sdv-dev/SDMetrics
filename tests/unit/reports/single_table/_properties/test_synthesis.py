@@ -98,7 +98,7 @@ class TestSynthesis:
         """Test the ``get_visualization`` method."""
         # Setup
         synthesis_property = Synthesis()
-        synthesis_property._details = pd.DataFrame({
+        synthesis_property.details = pd.DataFrame({
             'Metric': 'NewRowSynthesis',
             'Score': 0.25,
             'Num Matched Rows': 3,

@@ -78,7 +78,7 @@ class Synthesis(BaseSingleTableProperty):
             plotly.graph_objects._figure.Figure.
         """
         labels = ['Exact Matches', 'Novel Rows']
-        values = list(self._details[['Num Matched Rows', 'Num New Rows']].iloc[0])
+        values = list(self.details[['Num Matched Rows', 'Num New Rows']].iloc[0])
 
         average_score = round(self._compute_average(), 2)
 
