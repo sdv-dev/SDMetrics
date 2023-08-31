@@ -183,6 +183,7 @@ class TestBaseReport:
         report._validate_property_generated = mock__validate_property_generated
 
         expected_details = pd.DataFrame({
+            'Table': ['Table_1', 'Table_1'],
             'Column': ['col1', 'col2'],
             'Score': [0.3, 0.4],
         })
