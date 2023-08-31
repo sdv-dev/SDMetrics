@@ -50,7 +50,7 @@ class BaseMultiTableProperty():
         if not self._num_iteration_case == 'relationship':
             details_frames = []
             for table_name in metadata['tables']:
-                details = self._properties[table_name]._details.copy()
+                details = self._properties[table_name].details.copy()
                 details['Table'] = table_name
                 details_frames.append(details)
 

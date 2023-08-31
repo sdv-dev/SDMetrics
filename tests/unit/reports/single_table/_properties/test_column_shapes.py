@@ -130,7 +130,7 @@ class TestColumnShapes:
                 'Score': [0.7, 0.3],
                 'Metric': ['KSComplement', 'TVComplement']
             })
-            column_shape_property._details = mock_df
+            column_shape_property.details = mock_df
 
             mock__compute_average = Mock(return_value=0.5)
             column_shape_property._compute_average = mock__compute_average
