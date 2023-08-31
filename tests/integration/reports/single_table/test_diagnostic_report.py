@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from sdmetrics.demos import load_demo
@@ -166,3 +167,67 @@ class TestDiagnosticReport:
         assert report.get_results() == expected_results
         report.generate(real_data, synthetic_data, metadata)
         assert report.get_results() == expected_results
+    def test_get_details_with_errors(self):
+        """Test the ``get_details`` function of the diagnostic report when there are errors."""
+        # Setup
+        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        report = DiagnosticReport()
+        real_data['second_perc'] = np.nan
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_details = pd.DataFrame({
+            'Column': {
+                0: 'start_date',
+                1: 'end_date',
+                2: 'salary',
+                3: 'duration',
+                4: 'high_perc',
+                5: 'second_perc',
+                6: 'degree_perc',
+                7: 'experience_years',
+                8: 'employability_perc',
+                9: 'mba_perc'
+            },
+            'Metric': {
+                0: 'BoundaryAdherence',
+                1: 'BoundaryAdherence',
+                2: 'BoundaryAdherence',
+                3: 'BoundaryAdherence',
+                4: 'BoundaryAdherence',
+                5: 'BoundaryAdherence',
+                6: 'BoundaryAdherence',
+                7: 'BoundaryAdherence',
+                8: 'BoundaryAdherence',
+                9: 'BoundaryAdherence'
+            },
+            'Score': {
+                0: 0.8503937007874016,
+                1: 0.8615384615384616,
+                2: 0.9444444444444444,
+                3: 1.0,
+                4: 0.8651162790697674,
+                5: np.nan,
+                6: 0.9441860465116279,
+                7: 1.0,
+                8: 0.8883720930232558,
+                9: 0.8930232558139535
+            },
+            'Error': {
+                0: None,
+                1: None,
+                2: None,
+                3: None,
+                4: None,
+                5: 'InvalidDataError: All NaN values in real data.',
+                6: None,
+                7: None,
+                8: None,
+                9: None}
+        })
+        pd.testing.assert_frame_equal(
+            report.get_details('Boundary'),
+            expected_details
+        )

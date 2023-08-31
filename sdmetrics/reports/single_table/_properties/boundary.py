@@ -39,6 +39,7 @@ class Boundary(BaseSingleTableProperty):
         error_messages = []
         for column_name in metadata['columns']:
             sdtype = metadata['columns'][column_name]['sdtype']
+            error_message = None
             try:
                 if sdtype in ('numerical', 'datetime'):
                     real_column = real_data[column_name]
@@ -54,7 +55,6 @@ class Boundary(BaseSingleTableProperty):
                         raise InvalidDataError('All NaN values in synthetic data.')
                     else:
                         column_score = self.metric.compute(real_column, synthetic_column)
-                        error_message = None
 
                 else:
                     continue
