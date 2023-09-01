@@ -186,7 +186,7 @@ class TestBoundary:
             'Score': [0.7, 0.3],
             'Metric': ['Rangeboundary', 'Categoryboundary']
         })
-        boundary_property._details = mock_df
+        boundary_property.details = mock_df
 
         mock__compute_average = Mock(return_value=0.5)
         boundary_property._compute_average = mock__compute_average

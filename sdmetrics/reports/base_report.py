@@ -19,6 +19,7 @@ class BaseReport():
         self._overall_score = None
         self.is_generated = False
         self._properties = {}
+        self._results_handler = None
 
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
         """Validate that the metadata matches the data.
@@ -57,7 +58,7 @@ class BaseReport():
 
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
-    def _print_results(self):
+    def _handle_results(self, verbose):
         raise NotImplementedError
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
@@ -101,8 +102,7 @@ class BaseReport():
         self._overall_score = np.nanmean(scores)
         self.is_generated = True
 
-        if verbose:
-            self._print_results()
+        self._handle_results(verbose)
 
     def _check_property_name(self, property_name):
         """Check that the given property name is valid.
@@ -170,7 +170,7 @@ class BaseReport():
             pandas.DataFrame
         """
         self._validate_property_generated(property_name)
-        return self._properties[property_name]._details.copy()
+        return self._properties[property_name].details.copy()
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.

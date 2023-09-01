@@ -2,7 +2,6 @@
 
 import copy
 import itertools
-import sys
 import warnings
 
 import numpy as np
@@ -17,50 +16,6 @@ from sdmetrics.utils import (
 
 CONTINUOUS_SDTYPES = ['numerical', 'datetime']
 DISCRETE_SDTYPES = ['categorical', 'boolean']
-DIAGNOSTIC_REPORT_RESULT_DETAILS = {
-    'BoundaryAdherence': {
-        'SUCCESS': (
-            'The synthetic data follows over 90% of the min/max boundaries set by the real data'
-        ),
-        'WARNING': (
-            'More than 10% the synthetic data does not follow the min/max boundaries set by '
-            'the real data'
-        ),
-        'DANGER': (
-            'More than 50% the synthetic data does not follow the min/max boundaries set by '
-            'the real data'
-        ),
-    },
-    'CategoryCoverage': {
-        'SUCCESS': 'The synthetic data covers over 90% of the categories present in the real data',
-        'WARNING': (
-            'The synthetic data is missing more than 10% of the categories present in the '
-            'real data'
-        ),
-        'DANGER': (
-            'The synthetic data is missing more than 50% of the categories present in the '
-            'real data'
-        ),
-    },
-    'NewRowSynthesis': {
-        'SUCCESS': 'Over 90% of the synthetic rows are not copies of the real data',
-        'WARNING': 'More than 10% of the synthetic rows are copies of the real data',
-        'DANGER': 'More than 50% of the synthetic rows are copies of the real data',
-    },
-    'RangeCoverage': {
-        'SUCCESS': (
-            'The synthetic data covers over 90% of the numerical ranges present in the real data'
-        ),
-        'WARNING': (
-            'The synthetic data is missing more than 10% of the numerical ranges present in '
-            'the real data'
-        ),
-        'DANGER': (
-            'The synthetic data is missing more than 50% of the numerical ranges present in '
-            'the real data'
-        ),
-    }
-}
 
 
 class PlotConfig:
@@ -759,25 +714,6 @@ def aggregate_metric_results(metric_results):
     return np.mean(metric_scores), num_errors
 
 
-def print_results_for_level(out, results, level):
-    """Print the result for a given level.
-
-    Args:
-        out:
-            Where to write to.
-        results (dict):
-            The results.
-        level (string):
-            The level to print results for.
-    """
-    level_marks = {'SUCCESS': '✓', 'WARNING': '!', 'DANGER': 'x'}
-
-    if len(results[level]) > 0:
-        out.write(f'\n{level}:\n')
-        for result in results[level]:
-            out.write(f'{level_marks[level]} {result}\n')
-
-
 def _validate_categorical_values(real_data, synthetic_data, metadata, table=None):
     """Get categorical values found in synthetic data but not real data for all columns.
 
@@ -810,56 +746,3 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
                 values = f'"{value_list}" + more' if len(
                     extra_categories) > 5 else f'"{value_list}"'
                 warnings.warn(warning_format.format(values=values, column=column))
-
-
-def _print_results_quality_report(report):
-    """Print the quality report results."""
-    sys.stdout.write(
-        f'\nOverall Quality Score: {round(report._overall_score * 100, 2)}%\n\n'
-    )
-    sys.stdout.write('Properties:\n')
-
-    for property_name in report._properties:
-        property_score = round(report._properties[property_name]._compute_average(), 4)
-        sys.stdout.write(
-            f'- {property_name}: {property_score * 100}%\n'
-        )
-
-
-def _generate_results_diagnostic_report(report):
-    """Generate the diagnostic report results."""
-    if not report.results:
-        report.results['SUCCESS'] = []
-        report.results['WARNING'] = []
-        report.results['DANGER'] = []
-
-    for property_name in report._properties:
-        details = getattr(report._properties[property_name], '_details', None)
-        if details is None:
-            details = getattr(
-                report._properties[property_name], 'details', None
-            )
-
-        average_score_metric = details.groupby('Metric')['Score'].mean()
-        for metric, score in average_score_metric.items():
-            if pd.isna(score):
-                continue
-            if score >= 0.9:
-                report.results['SUCCESS'].append(
-                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['SUCCESS'])
-            elif score >= 0.5:
-                report.results['WARNING'].append(
-                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['WARNING'])
-            else:
-                report.results['DANGER'].append(
-                    DIAGNOSTIC_REPORT_RESULT_DETAILS[metric]['DANGER'])
-
-
-def _print_results_diagnostic_report(report):
-    """Print the diagnostic report results."""
-    _generate_results_diagnostic_report(report)
-
-    sys.stdout.write('\nDiagnostic Results:\n')
-    print_results_for_level(sys.stdout, report.results, 'SUCCESS')
-    print_results_for_level(sys.stdout, report.results, 'WARNING')
-    print_results_for_level(sys.stdout, report.results, 'DANGER')

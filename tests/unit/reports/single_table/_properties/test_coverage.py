@@ -62,7 +62,7 @@ class TestCoverage:
             'Score': [0.7, 0.3, np.nan],
             'Metric': ['RangeCoverage', 'CategoryCoverage', 'CategoryCoverage']
         })
-        coverage_property._details = mock_df
+        coverage_property.details = mock_df
 
         mock__compute_average = Mock(return_value=0.5)
         coverage_property._compute_average = mock__compute_average

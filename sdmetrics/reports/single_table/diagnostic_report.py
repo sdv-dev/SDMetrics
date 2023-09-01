@@ -2,10 +2,9 @@
 import logging
 from copy import deepcopy
 
+from sdmetrics.reports._results_handler import DiagnosticReportResultsHandler
 from sdmetrics.reports.base_report import BaseReport
 from sdmetrics.reports.single_table._properties import Boundary, Coverage, Synthesis
-from sdmetrics.reports.utils import (
-    _generate_results_diagnostic_report, _print_results_diagnostic_report)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,28 +23,10 @@ class DiagnosticReport(BaseReport):
             'Boundary': Boundary(),
             'Synthesis': Synthesis()
         }
-        self.results = {}
+        self._results_handler = DiagnosticReportResultsHandler()
 
-    def _print_results(self):
-        """Print the results of the report."""
-        _print_results_diagnostic_report(self)
-
-    def generate(self, real_data, synthetic_data, metadata, verbose=True):
-        """Generate report.
-
-        Args:
-            real_data (pandas.DataFrame):
-                The real data.
-            synthetic_data (pandas.DataFrame):
-                The synthetic data.
-            metadata (dict):
-                The metadata, which contains each column's data type.
-            verbose (bool):
-                Whether or not to print report summary and progress.
-        """
-        super().generate(real_data, synthetic_data, metadata, verbose)
-        if not verbose:
-            _generate_results_diagnostic_report(self)
+    def _handle_results(self, verbose):
+        self._results_handler.print_results(self._properties, verbose)
 
     def get_results(self):
         """Return the diagnostic results.
@@ -55,4 +36,4 @@ class DiagnosticReport(BaseReport):
                 The diagnostic results.
         """
         self._check_report_generated()
-        return deepcopy(self.results)
+        return deepcopy(self._results_handler.results)
