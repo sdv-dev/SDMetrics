@@ -167,6 +167,7 @@ class TestDiagnosticReport:
         assert report.get_results() == expected_results
         report.generate(real_data, synthetic_data, metadata)
         assert report.get_results() == expected_results
+
     def test_get_details_with_errors(self):
         """Test the ``get_details`` function of the diagnostic report when there are errors."""
         # Setup
