@@ -259,7 +259,10 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
             try:
                 error = self._preprocessing_failed(
-                    column_name_1, column_name_2, sdtype_col_1, sdtype_col_2
+                    column_name_1,
+                    column_name_2,
+                    sdtype_col_1,
+                    sdtype_col_2
                 )
                 if error:
                     raise Exception('Preprocessing failed')

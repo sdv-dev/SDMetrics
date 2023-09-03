@@ -1,4 +1,5 @@
 """Multi table base property class."""
+import numpy as np
 import pandas as pd
 
 
@@ -55,6 +56,10 @@ class BaseMultiTableProperty():
                 details_frames.append(details)
 
             self.details = pd.concat(details_frames).reset_index(drop=True)
+
+            if 'Error' in self.details.columns:
+                self.details['Error'] = self.details['Error'].replace({np.nan: None})
+
             cols = ['Table'] + [col for col in self.details if col != 'Table']
             self.details = self.details[cols]
 

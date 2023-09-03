@@ -34,7 +34,7 @@ class Synthesis(BaseSingleTableProperty):
             pandas.DataFrame.
         """
         name = self.metric.__name__
-        error_message = np.nan
+        error_message = None
 
         sample_size = len(synthetic_data) if len(synthetic_data) < 10000 else 10000
         try:
