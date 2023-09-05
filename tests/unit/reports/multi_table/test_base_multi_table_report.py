@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from unittest.mock import Mock, call, patch
 
 import numpy as np
@@ -137,6 +138,55 @@ class TestBaseReport:
 
         with pytest.raises(ValueError, match=expected_error_message):
             report._check_table_names('Table_3')
+
+    def test_convert_datetimes(self):
+        """Test that ``convert_multi_table_datetimes`` tries to convert datetime columns."""
+        # Setup
+        base_report = BaseMultiTableReport()
+        real_data = {
+            'table1': pd.DataFrame({
+                'col1': ['2020-01-02', '2021-01-02'],
+                'col2': ['a', 'b']
+            }),
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({
+                'col1': ['2022-01-03', '2023-04-05'],
+                'col2': ['b', 'a']
+            }),
+        }
+        metadata = {
+            'tables': {
+                'table1': {
+                    'columns': {
+                        'col1': {'sdtype': 'datetime'},
+                        'col2': {'sdtype': 'datetime'}
+                    },
+                },
+            },
+        }
+
+        # Run
+        base_report.convert_datetimes(real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_real_data = {
+            'table1': pd.DataFrame({
+                'col1': [datetime(2020, 1, 2), datetime(2021, 1, 2)],
+                'col2': ['a', 'b']
+            }),
+        }
+        expected_synthetic_data = {
+            'table1': pd.DataFrame({
+                'col1': [datetime(2022, 1, 3), datetime(2023, 4, 5)],
+                'col2': ['b', 'a']
+            }),
+        }
+        for real, expected in zip(real_data.values(), expected_real_data.values()):
+            pd.testing.assert_frame_equal(real, expected)
+
+        for synthetic, expected in zip(synthetic_data.values(), expected_synthetic_data.values()):
+            pd.testing.assert_frame_equal(synthetic, expected)
 
     def test_get_details(self):
         """Test the ``get_details`` method."""

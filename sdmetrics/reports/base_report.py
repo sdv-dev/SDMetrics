@@ -8,6 +8,8 @@ import pandas as pd
 import pkg_resources
 import tqdm
 
+from sdmetrics.reports.utils import convert_datetime_columns
+
 
 class BaseReport():
     """Base report class for single table reports.
@@ -60,6 +62,28 @@ class BaseReport():
 
     def _handle_results(self, verbose):
         raise NotImplementedError
+
+    @staticmethod
+    def convert_datetimes(real_data, synthetic_data, metadata):
+        """Try to convert all datetime columns to datetime dtype.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict):
+                The metadata, which contains each column's data type as well as relationships.
+        """
+        for column, col_meta in metadata['columns'].items():
+            if col_meta['sdtype'] == 'datetime':
+                real_col = real_data[column]
+                synth_col = synthetic_data[column]
+                try:
+                    converted_cols = convert_datetime_columns(real_col, synth_col, col_meta)
+                    real_data[column], synthetic_data[column] = converted_cols
+                except Exception:
+                    continue
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
