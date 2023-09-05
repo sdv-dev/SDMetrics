@@ -1,6 +1,7 @@
 import pickle
 import re
 import sys
+from datetime import datetime
 from unittest.mock import Mock, call, mock_open, patch
 
 import pandas as pd
@@ -115,6 +116,41 @@ class TestBaseReport:
         mock__validate_metadata_matches_data.assert_called_once_with(
             real_data, synthetic_data, metadata
         )
+
+    def test_convert_datetimes(self):
+        """Test that ``_convert_datetimes`` tries to convert datetime columns."""
+        # Setup
+        base_report = BaseReport()
+        real_data = pd.DataFrame({
+            'col1': ['2020-01-02', '2021-01-02'],
+            'col2': ['a', 'b']
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': ['2022-01-03', '2023-04-05'],
+            'col2': ['b', 'a']
+        })
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'datetime'},
+                'col2': {'sdtype': 'datetime'}
+            },
+        }
+
+        # Run
+        base_report.convert_datetimes(real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_real_data = pd.DataFrame({
+            'col1': [datetime(2020, 1, 2), datetime(2021, 1, 2)],
+            'col2': ['a', 'b']
+        })
+        expected_synthetic_data = pd.DataFrame({
+            'col1': [datetime(2022, 1, 3), datetime(2023, 4, 5)],
+            'col2': ['b', 'a']
+        })
+
+        pd.testing.assert_frame_equal(real_data, expected_real_data)
+        pd.testing.assert_frame_equal(synthetic_data, expected_synthetic_data)
 
     def test_generate(self):
         """Test the ``generate`` method.
