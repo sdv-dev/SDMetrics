@@ -2,6 +2,7 @@
 
 import pandas as pd
 
+from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
 from sdmetrics.utils import get_frequencies
@@ -45,8 +46,9 @@ class TVComplement(SingleColumnMetric):
         real_data = pd.Series(real_data).dropna()
         synthetic_data = pd.Series(synthetic_data).dropna()
 
-        if len(synthetic_data) == 0:
-            return 0
+        if len(synthetic_data) == 0 or len(real_data) == 0:
+            raise IncomputableMetricError(
+                'The TVComplement metric must have 1 or more non-null values.')
 
         f_obs, f_exp = get_frequencies(real_data, synthetic_data)
         total_variation = 0
