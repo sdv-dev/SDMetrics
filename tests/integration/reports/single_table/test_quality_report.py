@@ -126,6 +126,73 @@ class TestQualityReport:
         )
         assert report.get_score() == 0.7804181608907237
 
+    def test_quality_report_with_object_datetimes(self):
+        """Test the quality report with object datetimes.
+
+        The report must compute each property and the overall quality score.
+        """
+        # Setup
+        column_names = [
+            'student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience'
+        ]
+        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        for column, column_meta in metadata['columns'].items():
+            if column_meta['sdtype'] == 'datetime':
+                dt_format = column_meta['datetime_format']
+                real_data[column] = real_data[column].dt.strftime(dt_format)
+
+        metadata['columns'] = {
+            key: val for key, val in metadata['columns'].items() if key in column_names
+        }
+        report = QualityReport()
+
+        # Run
+        report.generate(real_data[column_names], synthetic_data[column_names], metadata)
+
+        # Assert
+        expected_details_column_shapes_dict = {
+            'Column': ['start_date', 'second_perc', 'work_experience', 'degree_type'],
+            'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
+            'Score': [
+                0.7011066184294531, 0.627906976744186, 0.9720930232558139, 0.9255813953488372
+            ],
+        }
+
+        expected_details_cpt__dict = {
+            'Column 1': [
+                'start_date', 'start_date', 'start_date', 'second_perc',
+                'second_perc', 'work_experience'
+            ],
+            'Column 2': [
+                'second_perc', 'work_experience', 'degree_type', 'work_experience',
+                'degree_type', 'degree_type'
+            ],
+            'Metric': [
+                'CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity',
+                'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'
+            ],
+            'Score': [
+                0.9854510263003199, 0.586046511627907, 0.6232558139534884, 0.7348837209302326,
+                0.6976744186046512, 0.8976744186046511
+            ],
+            'Real Correlation': [
+                0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan
+            ],
+            'Synthetic Correlation': [
+                0.07645134784253645, np.nan, np.nan, np.nan, np.nan, np.nan
+            ]
+        }
+        expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
+        expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)
+
+        pd.testing.assert_frame_equal(
+            report.get_details('Column Shapes'), expected_details_column_shapes
+        )
+        pd.testing.assert_frame_equal(
+            report.get_details('Column Pair Trends'), expected_details_cpt
+        )
+        assert report.get_score() == 0.7804181608907237
+
     def test_report_end_to_end_with_errors(self):
         """Test the quality report end to end with errors in the properties computation."""
         # Setup

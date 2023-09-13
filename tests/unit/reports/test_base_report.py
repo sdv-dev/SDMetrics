@@ -179,8 +179,8 @@ class TestBaseReport:
         })
         metadata = {
             'columns': {
-                'column1': {'sdtypes': 'numerical'},
-                'column2': {'sdtypes': 'categorical'}
+                'column1': {'sdtype': 'numerical'},
+                'column2': {'sdtype': 'categorical'}
             }
         }
 
@@ -238,10 +238,10 @@ class TestBaseReport:
         })
         metadata = {
             'columns': {
-                'column1': {'sdtypes': 'numerical'},
-                'column2': {'sdtypes': 'categorical'},
-                'column3': {'sdtypes': 'numerical'},
-                'column4': {'sdtypes': 'numerical'},
+                'column1': {'sdtype': 'numerical'},
+                'column2': {'sdtype': 'categorical'},
+                'column3': {'sdtype': 'numerical'},
+                'column4': {'sdtype': 'numerical'},
             }
         }
 
