@@ -32,6 +32,43 @@ class TestDiagnosticReport:
         }
         assert results == expected_results
 
+    def test_end_to_end_with_object_datetimes(self):
+        """Test the ``DiagnosticReport`` report with object datetimes."""
+        real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+        for table, table_meta in metadata['tables'].items():
+            for column, column_meta in table_meta['columns'].items():
+                if column_meta['sdtype'] == 'datetime':
+                    dt_format = column_meta['datetime_format']
+                    real_data[table][column] = real_data[table][column].dt.strftime(dt_format)
+
+        report = DiagnosticReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata, verbose=False)
+        results = report.get_results()
+        properties = report.get_properties()
+
+        # Assert
+        expected_dataframe = pd.DataFrame({
+            'Property': ['Coverage', 'Boundary', 'Synthesis'],
+            'Score': [0.9573447196980541, 0.8666666666666667, 0.6333333333333333]
+        })
+        expected_results = {
+            'SUCCESS': [
+                'The synthetic data covers over 90% of the categories present in the real data',
+                'The synthetic data covers over 90% of the numerical ranges present'
+                ' in the real data'
+            ],
+            'WARNING': [
+                'More than 10% the synthetic data does not follow the min/max boundaries'
+                ' set by the real data',
+                'More than 10% of the synthetic rows are copies of the real data'
+            ],
+            'DANGER': []
+        }
+        assert results == expected_results
+        pd.testing.assert_frame_equal(properties, expected_dataframe)
+
     def test_end_to_end_with_metrics_failing(self):
         """Test the ``DiagnosticReport`` report when some metrics crash.
 

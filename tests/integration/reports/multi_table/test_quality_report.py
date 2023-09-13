@@ -186,6 +186,32 @@ def test_quality_report_end_to_end():
     pd.testing.assert_frame_equal(properties, expected_properties)
 
 
+def test_quality_report_with_object_datetimes():
+    """Test the multi table QualityReport with object datetimes."""
+    # Setup
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    for table, table_meta in metadata['tables'].items():
+        for column, column_meta in table_meta['columns'].items():
+            if column_meta['sdtype'] == 'datetime':
+                dt_format = column_meta['datetime_format']
+                real_data[table][column] = real_data[table][column].dt.strftime(dt_format)
+
+    report = QualityReport()
+
+    # Run
+    report.generate(real_data, synthetic_data, metadata)
+    score = report.get_score()
+    properties = report.get_properties()
+
+    # Assert
+    expected_properties = pd.DataFrame({
+        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
+        'Score': [0.7922619047619048, 0.4249665433225429, 0.8],
+    })
+    assert score == 0.672409482694816
+    pd.testing.assert_frame_equal(properties, expected_properties)
+
+
 def test_quality_report_with_errors():
     """Test the multi table QualityReport with errors when computing metrics."""
     # Setup
