@@ -102,6 +102,7 @@ class BaseReport():
                 Whether or not to print report summary and progress.
         """
         self.validate(real_data, synthetic_data, metadata)
+        self.convert_datetimes(real_data, synthetic_data, metadata)
 
         scores = []
         progress_bar = None

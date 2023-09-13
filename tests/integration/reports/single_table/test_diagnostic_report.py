@@ -143,6 +143,76 @@ class TestDiagnosticReport:
             expected_details_boundary
         )
 
+    def test_generate_with_object_datetimes(self):
+        """Test the diagnostic report with object datetimes."""
+        # Setup
+        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        for column, column_meta in metadata['columns'].items():
+            if column_meta['sdtype'] == 'datetime':
+                dt_format = column_meta['datetime_format']
+                real_data[column] = real_data[column].dt.strftime(dt_format)
+
+        report = DiagnosticReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_details_synthetis = pd.DataFrame(
+            {
+                'Metric': 'NewRowSynthesis',
+                'Score': 1.0,
+                'Num Matched Rows': 0,
+                'Num New Rows': 215
+            }, index=[0]
+        )
+
+        expected_details_coverage = pd.DataFrame({
+            'Column': [
+                'start_date', 'end_date', 'salary', 'duration', 'high_perc', 'high_spec',
+                'mba_spec', 'second_perc', 'gender', 'degree_perc', 'placed', 'experience_years',
+                'employability_perc', 'mba_perc', 'work_experience', 'degree_type'
+            ],
+            'Metric': [
+                'RangeCoverage', 'RangeCoverage', 'RangeCoverage', 'RangeCoverage',
+                'RangeCoverage', 'CategoryCoverage', 'CategoryCoverage', 'RangeCoverage',
+                'CategoryCoverage', 'RangeCoverage', 'CategoryCoverage', 'RangeCoverage',
+                'RangeCoverage', 'RangeCoverage', 'CategoryCoverage', 'CategoryCoverage'
+            ],
+            'Score': [
+                1.0, 1.0, 0.42333783783783785, 1.0, 0.9807348482826732, 1.0, 1.0, 1.0, 1.0, 1.0,
+                1.0, 0.6666666666666667, 1.0, 1.0, 1.0, 1.0
+            ]
+        })
+
+        expected_details_boundary = pd.DataFrame({
+            'Column': [
+                'start_date', 'end_date', 'salary', 'duration', 'high_perc', 'second_perc',
+                'degree_perc', 'experience_years', 'employability_perc', 'mba_perc'
+            ],
+            'Metric': ['BoundaryAdherence'] * 10,
+            'Score': [
+                0.8503937007874016, 0.8615384615384616, 0.9444444444444444, 1.0,
+                0.8651162790697674, 0.9255813953488372, 0.9441860465116279, 1.0,
+                0.8883720930232558, 0.8930232558139535
+            ]
+        })
+
+        pd.testing.assert_frame_equal(
+            report.get_details('Synthesis'),
+            expected_details_synthetis
+        )
+
+        pd.testing.assert_frame_equal(
+            report.get_details('Coverage'),
+            expected_details_coverage
+        )
+
+        pd.testing.assert_frame_equal(
+            report.get_details('Boundary'),
+            expected_details_boundary
+        )
+
     def test_generate_multiple_times(self):
         """The results should be the same both times."""
         # Setup
