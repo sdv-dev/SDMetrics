@@ -1,5 +1,32 @@
 # History
 
+## v0.11.1 - 2023-14-09
+
+This release makes multiple changes to better handle errors that get raised from the `DiagnosticReport`. The report should be able to run to completion now and have any errors that it encounters reported in a column on the details that can be observed from running `get_details`. It also resolves many warnings that were interrupting the printing of the report's results and progress.
+
+### New Features
+
+* Create single table coverage property - Issue [#389](https://github.com/sdv-dev/SDMetrics/issues/389) by @R-Palazzo
+* Create single table synthesis property - Issue [#390](https://github.com/sdv-dev/SDMetrics/issues/390) by @R-Palazzo
+* Create single table Boundaries property - Issue [#391](https://github.com/sdv-dev/SDMetrics/issues/391) by @R-Palazzo
+* Add multi table Coverage, Synthesis and Boundaries property - Issue [#393](https://github.com/sdv-dev/SDMetrics/issues/393) by @R-Palazzo
+
+### Bugs Fixed
+
+* Ensure that the `Synthesis` property score doesn't change - Issue [#425](https://github.com/sdv-dev/SDMetrics/issues/425) by @amontanez24
+* The Error column contains a mix of `NaN` and `None` values - Issue [#427](https://github.com/sdv-dev/SDMetrics/issues/427) by @pvk-developer
+* Always show the `Table` column in `get_details` - Issue [#429](https://github.com/sdv-dev/SDMetrics/issues/429) by @frances-h
+* Diagnostic explanations should not repeat if I generate multiple times - Issue [#430](https://github.com/sdv-dev/SDMetrics/issues/430) by @amontanez24
+* RangeCoverage errors on datetime columns in DiagnosticReport - Issue [#431](https://github.com/sdv-dev/SDMetrics/issues/431) by @frances-h
+* The coverage visualization shows empty bar graph for nan values - Issue [#432](https://github.com/sdv-dev/SDMetrics/issues/432) by @frances-h
+* Diagnostic report should skip over all NaN columns - Issue [#433](https://github.com/sdv-dev/SDMetrics/issues/433) by @pvk-developer
+* Quality report is printing out a long warning message (hundreds of lines) - Issue [#448](https://github.com/sdv-dev/SDMetrics/issues/448) by @amontanez24
+
+### Internal
+
+* Use property classes in single table DiagnosticReport - Issue [#392](https://github.com/sdv-dev/SDMetrics/issues/392) by @R-Palazzo
+* Use property classes in multi table DiagnosticReport - Issue [#394](https://github.com/sdv-dev/SDMetrics/issues/394) by @R-Palazzo
+
 ## v0.11.0 - 2023-08-10
 
 This release adds a function that allows users to plot the cardinality of foreign and primary keys in synthetic data. More specifically, it graphs the frequency that each number of children per parent row occurs in the parent table.
