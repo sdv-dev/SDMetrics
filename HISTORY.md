@@ -1,6 +1,6 @@
 # History
 
-## v0.11.1 - 2023-14-09
+## v0.11.1 - 2023-09-14
 
 This release makes multiple changes to better handle errors that get raised from the `DiagnosticReport`. The report should be able to run to completion now and have any errors that it encounters reported in a column on the details that can be observed from running `get_details`. It also resolves many warnings that were interrupting the printing of the report's results and progress.
 
