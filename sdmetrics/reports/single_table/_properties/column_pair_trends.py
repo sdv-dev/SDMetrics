@@ -56,11 +56,10 @@ class ColumnPairTrends(BaseSingleTableProperty):
                         data[column_name] = pd.to_datetime(
                             data[column_name], format=datetime_format
                         )
-
-                    data.loc[~pd.isna(data[column_name]), column_name] = pd.to_numeric(
-                        data[column_name]
-                    )
-                    data[column_name] = data[column_name].fillna(np.nan)
+                    nan_mask = pd.isna(data[column_name])
+                    data[column_name] = pd.to_numeric(data[column_name])
+                    if nan_mask.any():
+                        data.loc[nan_mask, column_name] = np.nan
 
                 continue
             except Exception as e:
