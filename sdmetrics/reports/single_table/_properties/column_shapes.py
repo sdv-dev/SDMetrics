@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
+from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.single_column import KSComplement, TVComplement
 
 
@@ -16,6 +17,7 @@ class ColumnShapes(BaseSingleTableProperty):
     The other column types are ignored by this property.
     """
 
+    _num_iteration_case = 'column'
     _sdtype_to_metric = {
         'numerical': KSComplement,
         'datetime': KSComplement,
@@ -34,7 +36,7 @@ class ColumnShapes(BaseSingleTableProperty):
             metadata (dict):
                 The metadata of the table
             progress_bar (tqdm.tqdm or None):
-                The progress bar to use. Defaults to tqdm.
+                The progress bar to use. Defaults to None.
         """
         column_names, metric_names, scores = [], [], []
         error_messages = []
@@ -83,15 +85,15 @@ class ColumnShapes(BaseSingleTableProperty):
         average_score = round(self._compute_average(), 2)
 
         fig = px.bar(
-            self._details,
+            self.details,
             x='Column',
             y='Score',
             title=f'Data Quality: Column Shapes (Average Score={average_score})',
-            category_orders={'group': self._details['Column']},
+            category_orders={'group': self.details['Column']},
             color='Metric',
             color_discrete_map={
-                'KSComplement': '#000036',
-                'TVComplement': '#03AFF1',
+                'KSComplement': PlotConfig.DATACEBO_DARK,
+                'TVComplement': PlotConfig.DATACEBO_BLUE,
             },
             pattern_shape='Metric',
             pattern_shape_sequence=['', '/'],
@@ -107,8 +109,9 @@ class ColumnShapes(BaseSingleTableProperty):
 
         fig.update_layout(
             xaxis_categoryorder='total ascending',
-            plot_bgcolor='#F5F5F8',
+            plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
             margin={'t': 150},
+            font={'size': PlotConfig.FONT_SIZE},
         )
 
         return fig

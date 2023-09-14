@@ -14,55 +14,21 @@ from sdmetrics.utils import (
     get_alternate_keys, get_columns_from_metadata, get_missing_percentage,
     get_type_from_column_meta, is_datetime)
 
-DATACEBO_DARK = '#000036'
-DATACEBO_LIGHT = '#01E0C9'
-BACKGROUND_COLOR = '#F5F5F8'
 CONTINUOUS_SDTYPES = ['numerical', 'datetime']
 DISCRETE_SDTYPES = ['categorical', 'boolean']
-DIAGNOSTIC_REPORT_RESULT_DETAILS = {
-    'BoundaryAdherence': {
-        'SUCCESS': (
-            'The synthetic data follows over 90% of the min/max boundaries set by the real data'
-        ),
-        'WARNING': (
-            'More than 10% the synthetic data does not follow the min/max boundaries set by '
-            'the real data'
-        ),
-        'DANGER': (
-            'More than 50% the synthetic data does not follow the min/max boundaries set by '
-            'the real data'
-        ),
-    },
-    'CategoryCoverage': {
-        'SUCCESS': 'The synthetic data covers over 90% of the categories present in the real data',
-        'WARNING': (
-            'The synthetic data is missing more than 10% of the categories present in the '
-            'real data'
-        ),
-        'DANGER': (
-            'The synthetic data is missing more than 50% of the categories present in the '
-            'real data'
-        ),
-    },
-    'NewRowSynthesis': {
-        'SUCCESS': 'Over 90% of the synthetic rows are not copies of the real data',
-        'WARNING': 'More than 10% of the synthetic rows are copies of the real data',
-        'DANGER': 'More than 50% of the synthetic rows are copies of the real data',
-    },
-    'RangeCoverage': {
-        'SUCCESS': (
-            'The synthetic data covers over 90% of the numerical ranges present in the real data'
-        ),
-        'WARNING': (
-            'The synthetic data is missing more than 10% of the numerical ranges present in '
-            'the real data'
-        ),
-        'DANGER': (
-            'The synthetic data is missing more than 50% of the numerical ranges present in '
-            'the real data'
-        ),
-    }
-}
+
+
+class PlotConfig:
+    """Custom plot settings for visualizations."""
+
+    GREEN = '#36B37E'
+    RED = '#FF0000'
+    ORANGE = '#F16141'
+    DATACEBO_DARK = '#000036'
+    DATACEBO_GREEN = '#01E0C9'
+    DATACEBO_BLUE = '#03AFF1'
+    BACKGROUND_COLOR = '#F5F5F8'
+    FONT_SIZE = 18
 
 
 def convert_to_datetime(column_data, datetime_format=None):
@@ -139,7 +105,7 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
         x='values',
         color='Data',
         barmode='group',
-        color_discrete_sequence=[DATACEBO_DARK, DATACEBO_LIGHT],
+        color_discrete_sequence=[PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN],
         pattern_shape='Data',
         pattern_shape_sequence=['', '/'],
         histnorm='probability density'
@@ -175,8 +141,9 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
         title=f"Real vs. Synthetic Data for column '{column_name}'",
         xaxis_title='Category',
         yaxis_title='Frequency',
-        plot_bgcolor=BACKGROUND_COLOR,
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
         annotations=annotations,
+        font={'size': PlotConfig.FONT_SIZE},
     )
 
     return fig
@@ -212,7 +179,7 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
         ['Real', 'Synthetic'],
         show_hist=False,
         show_rug=False,
-        colors=[DATACEBO_DARK, DATACEBO_LIGHT]
+        colors=[PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]
     )
 
     fig.update_traces(
@@ -249,8 +216,9 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
         title=f'Real vs. Synthetic Data for column {column_name}',
         xaxis_title='Value',
         yaxis_title='Frequency',
-        plot_bgcolor=BACKGROUND_COLOR,
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
         annotations=annotations,
+        font={'size': PlotConfig.FONT_SIZE},
     )
 
     return fig
@@ -327,13 +295,17 @@ def make_continuous_column_pair_plot(real_data, synthetic_data):
         x=columns[0],
         y=columns[1],
         color='Data',
-        color_discrete_map={'Real': DATACEBO_DARK, 'Synthetic': DATACEBO_LIGHT},
+        color_discrete_map={
+            'Real': PlotConfig.DATACEBO_DARK,
+            'Synthetic': PlotConfig.DATACEBO_GREEN
+        },
         symbol='Data'
     )
 
     fig.update_layout(
         title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
-        plot_bgcolor=BACKGROUND_COLOR,
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        font={'size': PlotConfig.FONT_SIZE},
     )
 
     return fig
@@ -368,7 +340,8 @@ def make_discrete_column_pair_plot(real_data, synthetic_data):
 
     fig.update_layout(
         title_text=f"Real vs Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
-        coloraxis={'colorscale': [DATACEBO_DARK, DATACEBO_LIGHT]},
+        coloraxis={'colorscale': [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]},
+        font={'size': PlotConfig.FONT_SIZE},
     )
 
     fig.for_each_annotation(lambda a: a.update(text=a.text.split('=')[-1] + ' Data'))
@@ -400,12 +373,16 @@ def make_mixed_column_pair_plot(real_data, synthetic_data):
         x=columns[0],
         y=columns[1],
         color='Data',
-        color_discrete_map={'Real': DATACEBO_DARK, 'Synthetic': DATACEBO_LIGHT},
+        color_discrete_map={
+            'Real': PlotConfig.DATACEBO_DARK,
+            'Synthetic': PlotConfig.DATACEBO_GREEN
+        },
     )
 
     fig.update_layout(
         title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
-        plot_bgcolor=BACKGROUND_COLOR
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        font={'size': PlotConfig.FONT_SIZE},
     )
 
     return fig
@@ -525,7 +502,7 @@ def _generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
         y='# parents',
         color='data',
         barmode='group',
-        color_discrete_sequence=[DATACEBO_DARK, DATACEBO_LIGHT],
+        color_discrete_sequence=[PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN],
         pattern_shape='data',
         pattern_shape_sequence=['', '/'],
         nbins=max(data['# children']) - min(data['# children']) + 1,
@@ -546,7 +523,8 @@ def _generate_cardinality_plot(data, parent_primary_key, child_foreign_key):
         title=title,
         xaxis_title='# of Children (per Parent)',
         yaxis_title='Frequency',
-        plot_bgcolor=BACKGROUND_COLOR
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        font={'size': PlotConfig.FONT_SIZE},
     )
     return fig
 
@@ -736,25 +714,6 @@ def aggregate_metric_results(metric_results):
     return np.mean(metric_scores), num_errors
 
 
-def print_results_for_level(out, results, level):
-    """Print the result for a given level.
-
-    Args:
-        out:
-            Where to write to.
-        results (dict):
-            The results.
-        level (string):
-            The level to print results for.
-    """
-    level_marks = {'SUCCESS': '✓', 'WARNING': '!', 'DANGER': 'x'}
-
-    if len(results[level]) > 0:
-        out.write(f'\n{level}:\n')
-        for result in results[level]:
-            out.write(f'{level_marks[level]} {result}\n')
-
-
 def _validate_categorical_values(real_data, synthetic_data, metadata, table=None):
     """Get categorical values found in synthetic data but not real data for all columns.
 
@@ -787,56 +746,3 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
                 values = f'"{value_list}" + more' if len(
                     extra_categories) > 5 else f'"{value_list}"'
                 warnings.warn(warning_format.format(values=values, column=column))
-
-
-def validate_multi_table_inputs(real_data, synthetic_data, metadata):
-    """Validate multi-table inputs for report generation.
-
-    Args:
-        real_data (dict[str, DataFrame]):
-            The real data.
-        synthetic_data (dict[str, DataFrame]):
-            The synthetic data.
-        metadata (dict):
-            The metadata, which contains each column's data type as well as relationships.
-    """
-    if not isinstance(metadata, dict):
-        metadata = metadata.to_dict()
-
-    for table in metadata['tables']:
-        table_metadata = metadata['tables'][table]
-        _validate_categorical_values(real_data[table],
-                                     synthetic_data[table],
-                                     table_metadata,
-                                     table=table)
-
-    for rel in metadata.get('relationships', []):
-        parent_dtype = real_data[rel['parent_table_name']][rel['parent_primary_key']].dtype
-        child_dtype = real_data[rel['child_table_name']][rel['child_foreign_key']].dtype
-        if (parent_dtype == 'object' and child_dtype != 'object') or (
-                parent_dtype != 'object' and child_dtype == 'object'):
-            parent = rel['parent_table_name']
-            parent_key = rel['parent_primary_key']
-            child = rel['child_table_name']
-            child_key = rel['child_foreign_key']
-            error_msg = (f"The '{parent}' table and '{child}' table cannot be merged. Please "
-                         f"make sure the primary key in '{parent}' ('{parent_key}') and the "
-                         f"foreign key in '{child}' ('{child_key}') have the same data type.")
-            raise ValueError(error_msg)
-
-
-def validate_single_table_inputs(real_data, synthetic_data, metadata):
-    """Validate single table inputs for report generation.
-
-    Args:
-        real_data (pandas.DataFrame):
-            The real data.
-        synthetic_data (pandas.DataFrame):
-            The synthetic data.
-        metadata (dict):
-            The metadata, which contains each column's data type as well as relationships.
-    """
-    if not isinstance(metadata, dict):
-        metadata = metadata.to_dict()
-
-    _validate_categorical_values(real_data, synthetic_data, metadata)

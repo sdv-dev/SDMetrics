@@ -7,6 +7,7 @@ from plotly.subplots import make_subplots
 
 from sdmetrics.column_pairs.statistical import ContingencySimilarity, CorrelationSimilarity
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
+from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.utils import is_datetime
 
 
@@ -18,6 +19,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
     the final score represents the average of these measures across all column pairs
     """
 
+    _num_iteration_case = 'column_pair'
     _sdtype_to_shape = {
         'numerical': 'continuous',
         'datetime': 'continuous',
@@ -54,11 +56,10 @@ class ColumnPairTrends(BaseSingleTableProperty):
                         data[column_name] = pd.to_datetime(
                             data[column_name], format=datetime_format
                         )
-
-                    data.loc[~pd.isna(data[column_name]), column_name] = pd.to_numeric(
-                        data[column_name]
-                    )
-                    data[column_name] = data[column_name].fillna(np.nan)
+                    nan_mask = pd.isna(data[column_name])
+                    data[column_name] = pd.to_numeric(data[column_name])
+                    if nan_mask.any():
+                        data.loc[nan_mask, column_name] = np.nan
 
                 continue
             except Exception as e:
@@ -208,7 +209,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         return error
 
-    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar):
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the column pair trends property.
 
         Args:
@@ -219,7 +220,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             metadata (dict):
                 The metadata of the table
             progress_bar:
-                The progress bar to use. Defaults to tqdm.
+                The progress bar to use. Defaults to None.
         """
         processed_real_data, discrete_real = self._get_processed_data(real_data, metadata)
         processed_synthetic_data, discrete_synthetic = self._get_processed_data(
@@ -257,7 +258,10 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
             try:
                 error = self._preprocessing_failed(
-                    column_name_1, column_name_2, sdtype_col_1, sdtype_col_2
+                    column_name_1,
+                    column_name_2,
+                    sdtype_col_1,
+                    sdtype_col_2
                 )
                 if error:
                     raise Exception('Preprocessing failed')
@@ -279,6 +283,9 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 synthetic_correlation = np.nan
                 if not str(e) == 'Preprocessing failed':
                     error = f'{type(e).__name__}: {e}'
+            finally:
+                if progress_bar:
+                    progress_bar.update()
 
             column_names_1.append(column_name_1)
             column_names_2.append(column_name_2)
@@ -287,9 +294,6 @@ class ColumnPairTrends(BaseSingleTableProperty):
             real_correlations.append(real_correlation)
             synthetic_correlations.append(synthetic_correlation)
             error_messages.append(error)
-
-            if progress_bar:
-                progress_bar.update()
 
         result = pd.DataFrame({
             'Column 1': column_names_1,
@@ -316,7 +320,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
         if column_name not in ['Score', 'Real Correlation', 'Synthetic Correlation']:
             raise ValueError(f"Invalid column name for _get_correlation_matrix : '{column_name}'")
 
-        table = self._details.dropna(subset=[column_name])
+        table = self.details.dropna(subset=[column_name])
         names = list(pd.concat([table['Column 1'], table['Column 2']]).unique())
         heatmap_df = pd.DataFrame(index=names, columns=names)
 
@@ -381,8 +385,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
             'cmax': 1,
         }
 
-        colors_1 = ['#FF0000', '#F16141', '#36B37E']
-        colors_2 = ['#03AFF1', '#000036', '#01E0C9']
+        colors_1 = [PlotConfig.RED, PlotConfig.ORANGE, PlotConfig.GREEN]
+        colors_2 = [PlotConfig.DATACEBO_BLUE, PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]
 
         fig.update_layout(
             title_text=f'Data Quality: Column Pair Trends (Average Score={average_score})',
@@ -392,6 +396,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             xaxis3={'matches': 'x2'},
             height=900,
             width=900,
+            font={'size': PlotConfig.FONT_SIZE}
         )
 
         fig.update_yaxes(autorange='reversed')
@@ -421,6 +426,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
         )
 
         fig = make_subplots(rows=2, cols=2, subplot_titles=titles, specs=specs)
+
+        fig.update_xaxes(tickangle=45)
 
         fig.add_trace(
             self._get_heatmap(similarity_correlation, 'coloraxis', tmpl_1), 1, 1

@@ -19,6 +19,28 @@ class TestBaseSingleTableProperty:
         with pytest.raises(NotImplementedError):
             base_property._generate_details(None, None, None, None)
 
+    def test__get_num_iterations(self):
+        """Test the ``_get_num_iterations``."""
+        # Setup
+        base_property = BaseSingleTableProperty()
+
+        metadata = {
+            'columns': {
+                'col1': {}, 'col2': {}, 'col3': {},
+                'col4': {}, 'col5': {},
+            }
+        }
+
+        # Run and Assert
+        base_property._num_iteration_case = 'column'
+        assert base_property._get_num_iterations(metadata) == 5
+
+        base_property._num_iteration_case = 'table'
+        assert base_property._get_num_iterations(metadata) == 1
+
+        base_property._num_iteration_case = 'column_pair'
+        assert base_property._get_num_iterations(metadata) == 10
+
     def test_get_visualization_raises_error(self):
         """Test that the method raises a ``NotImplementedError``."""
         # Setup
@@ -40,7 +62,7 @@ class TestBaseSingleTableProperty:
         with pytest.raises(ValueError, match=expected_error_message):
             base_property._compute_average()
 
-        base_property._details = pd.DataFrame({'Column': ['a', 'b', 'c']})
+        base_property.details = pd.DataFrame({'Column': ['a', 'b', 'c']})
         with pytest.raises(ValueError, match=expected_error_message):
             base_property._compute_average()
 

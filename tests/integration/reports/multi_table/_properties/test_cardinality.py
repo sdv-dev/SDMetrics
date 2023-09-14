@@ -5,7 +5,7 @@ from sdmetrics.demos import load_multi_table_demo
 from sdmetrics.reports.multi_table._properties import Cardinality
 
 
-def test_cardinality_shame_similarity_property():
+def test_cardinality_property():
     """Test the ``Cardinality`` with the multi table demo."""
     # Setup
     cardinality_property = Cardinality()
@@ -18,7 +18,3 @@ def test_cardinality_shame_similarity_property():
     # Assert
     assert score == 0.8
     assert isinstance(figure, Figure)
-    assert cardinality_property._details == {
-        ('users', 'sessions'): {'score': 0.9},
-        ('sessions', 'transactions'): {'score': 0.7}
-    }

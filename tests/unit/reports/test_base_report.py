@@ -1,51 +1,16 @@
 import pickle
 import re
 import sys
+from datetime import datetime
 from unittest.mock import Mock, call, mock_open, patch
 
 import pandas as pd
 import pytest
 
-from sdmetrics.reports.single_table import QualityReport
-from sdmetrics.reports.single_table._properties import ColumnPairTrends, ColumnShapes
+from sdmetrics.reports.base_report import BaseReport
 
 
-class TestQualityReport:
-
-    def test___init__(self):
-        """Test the ``__init__`` method."""
-        # Run
-        report = QualityReport()
-
-        # Assert
-        assert report._overall_quality_score is None
-        assert not report.is_generated
-        assert isinstance(report._properties['Column Shapes'], ColumnShapes)
-        assert isinstance(report._properties['Column Pair Trends'], ColumnPairTrends)
-
-    @patch('sys.stdout.write')
-    def test__print_results(self, mock_write):
-        """Test the ``_print_results`` method."""
-        # Setup
-        quality_report = QualityReport()
-        quality_report._overall_quality_score = 0.5
-        quality_report._properties = {
-            'Column Shapes': Mock(_compute_average=Mock(return_value=0.6)),
-            'Column Pair Trends': Mock(_compute_average=Mock(return_value=0.4))
-        }
-
-        # Run
-        quality_report._print_results()
-
-        # Assert
-        calls = [
-            call('\nOverall Quality Score: 50.0%\n\n'),
-            call('Properties:\n'),
-            call('- Column Shapes: 60.0%\n'),
-            call('- Column Pair Trends: 40.0%\n'),
-        ]
-        mock_write.assert_has_calls(calls, any_order=True)
-
+class TestBaseReport:
     def test__validate_metadata_matches_data(self):
         """Test the ``_validate_metadata_matches_data`` method.
 
@@ -54,7 +19,7 @@ class TestQualityReport:
         At the first call, there is a mismatch, not in the second call.
         """
         # Setup
-        quality_report = QualityReport()
+        base_report = BaseReport()
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
             'column2': ['a', 'b', 'c'],
@@ -78,7 +43,7 @@ class TestQualityReport:
             ' in the real/synthetic data or in the metadata: column2, column3, column4, column5'
         )
         with pytest.raises(ValueError, match=expected_err_message):
-            quality_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
+            base_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
         real_data['column4'] = [1, 2, 3]
         real_data['column5'] = ['a', 'b', 'c']
@@ -89,16 +54,16 @@ class TestQualityReport:
         metadata['columns']['column3'] = {'sdtype': 'numerical'}
         metadata['columns']['column4'] = {'sdtype': 'numerical'}
 
-        quality_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
+        base_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
     def test__validate_metadata_matches_data_no_mismatch(self):
         """Test the ``_validate_metadata_matches_data`` method.
 
         This test checks that the method does not raise an error when there is no column mismatch
-        between the data and the metadata
+        between the data and the metadata.
         """
         # Setup
-        quality_report = QualityReport()
+        base_report = BaseReport()
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
             'column2': ['a', 'b', 'c'],
@@ -118,14 +83,14 @@ class TestQualityReport:
         }
 
         # Run and Assert
-        quality_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
+        base_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
-    @patch('sdmetrics.reports.single_table.quality_report._validate_categorical_values')
-    def test_validate(self, mock_validate_categorical_values):
+    def test_validate(self):
+        """Test the ``validate`` method."""
         # Setup
-        quality_report = QualityReport()
+        base_report = BaseReport()
         mock__validate_metadata_matches_data = Mock()
-        quality_report._validate_metadata_matches_data = mock__validate_metadata_matches_data
+        base_report._validate_metadata_matches_data = mock__validate_metadata_matches_data
 
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
@@ -145,26 +110,64 @@ class TestQualityReport:
         }
 
         # Run
-        quality_report.validate(real_data, synthetic_data, metadata)
+        base_report.validate(real_data, synthetic_data, metadata)
 
         # Assert
         mock__validate_metadata_matches_data.assert_called_once_with(
             real_data, synthetic_data, metadata
         )
-        mock_validate_categorical_values.assert_called_once_with(
-            real_data, synthetic_data, metadata
-        )
+
+    def test_convert_datetimes(self):
+        """Test that ``_convert_datetimes`` tries to convert datetime columns."""
+        # Setup
+        base_report = BaseReport()
+        real_data = pd.DataFrame({
+            'col1': ['2020-01-02', '2021-01-02'],
+            'col2': ['a', 'b']
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': ['2022-01-03', '2023-04-05'],
+            'col2': ['b', 'a']
+        })
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'datetime'},
+                'col2': {'sdtype': 'datetime'}
+            },
+        }
+
+        # Run
+        base_report.convert_datetimes(real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_real_data = pd.DataFrame({
+            'col1': [datetime(2020, 1, 2), datetime(2021, 1, 2)],
+            'col2': ['a', 'b']
+        })
+        expected_synthetic_data = pd.DataFrame({
+            'col1': [datetime(2022, 1, 3), datetime(2023, 4, 5)],
+            'col2': ['b', 'a']
+        })
+
+        pd.testing.assert_frame_equal(real_data, expected_real_data)
+        pd.testing.assert_frame_equal(synthetic_data, expected_synthetic_data)
 
     def test_generate(self):
-        """Test the ``generate`` method."""
+        """Test the ``generate`` method.
+
+        This test checks that the method calls the ``validate`` method and the ``get_score``
+        method for each property.
+        """
         # Setup
-        quality_report = QualityReport()
+        base_report = BaseReport()
         mock_validate = Mock()
-        quality_report.validate = mock_validate
-        quality_report._properties['Column Shapes'] = Mock()
-        quality_report._properties['Column Shapes'].get_score.return_value = 1.0
-        quality_report._properties['Column Pair Trends'] = Mock()
-        quality_report._properties['Column Pair Trends'].get_score.return_value = 1.0
+        mock_handle_results = Mock()
+        base_report._handle_results = mock_handle_results
+        base_report.validate = mock_validate
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 1'].get_score.return_value = 1.0
+        base_report._properties['Property 2'] = Mock()
+        base_report._properties['Property 2'].get_score.return_value = 1.0
 
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
@@ -176,36 +179,50 @@ class TestQualityReport:
         })
         metadata = {
             'columns': {
-                'column1': {'sdtypes': 'numerical'},
-                'column2': {'sdtypes': 'categorical'}
+                'column1': {'sdtype': 'numerical'},
+                'column2': {'sdtype': 'categorical'}
             }
         }
 
         # Run
-        quality_report.generate(real_data, synthetic_data, metadata, verbose=False)
+        base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
         # Assert
         mock_validate.assert_called_once_with(real_data, synthetic_data, metadata)
-        quality_report._properties['Column Shapes'].get_score.assert_called_with(
+        mock_handle_results.assert_called_once_with(False)
+        base_report._properties['Property 1'].get_score.assert_called_with(
             real_data, synthetic_data, metadata, progress_bar=None
         )
-        quality_report._properties['Column Pair Trends'].get_score.assert_called_with(
+        base_report._properties['Property 2'].get_score.assert_called_with(
             real_data, synthetic_data, metadata, progress_bar=None
         )
+
+    def test__handle_results(self):
+        """Test the ``_handle_results`` method."""
+        # Setup
+        base_report = BaseReport()
+
+        # Run and Assert
+        with pytest.raises(NotImplementedError):
+            base_report._handle_results(True)
 
     @patch('tqdm.tqdm')
     def test_generate_verbose(self, mock_tqdm):
         """Test the ``generate`` method with verbose=True."""
         # Setup
-        quality_report = QualityReport()
+        base_report = BaseReport()
+        base_report._handle_results = Mock()
         mock_validate = Mock()
-        quality_report.validate = mock_validate
-        quality_report._properties['Column Shapes'] = Mock()
-        quality_report._properties['Column Shapes'].get_score.return_value = 1.0
-        quality_report._properties['Column Pair Trends'] = Mock()
-        quality_report._properties['Column Pair Trends'].get_score.return_value = 1.0
-        quality_report._properties['Column Shapes']._compute_average.return_value = 1.0
-        quality_report._properties['Column Pair Trends']._compute_average.return_value = 1.0
+        base_report.validate = mock_validate
+        base_report._print_results = Mock()
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 1'].get_score.return_value = 1.0
+        base_report._properties['Property 1']._get_num_iterations.return_value = 4
+        base_report._properties['Property 2'] = Mock()
+        base_report._properties['Property 2'].get_score.return_value = 1.0
+        base_report._properties['Property 2']._get_num_iterations.return_value = 6
+        base_report._properties['Property 1']._compute_average.return_value = 1.0
+        base_report._properties['Property 2']._compute_average.return_value = 1.0
 
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
@@ -221,74 +238,80 @@ class TestQualityReport:
         })
         metadata = {
             'columns': {
-                'column1': {'sdtypes': 'numerical'},
-                'column2': {'sdtypes': 'categorical'},
-                'column3': {'sdtypes': 'numerical'},
-                'column4': {'sdtypes': 'numerical'},
+                'column1': {'sdtype': 'numerical'},
+                'column2': {'sdtype': 'categorical'},
+                'column3': {'sdtype': 'numerical'},
+                'column4': {'sdtype': 'numerical'},
             }
         }
 
         # Run
-        quality_report.generate(real_data, synthetic_data, metadata, verbose=True)
+        base_report.generate(real_data, synthetic_data, metadata, verbose=True)
 
         # Assert
         calls = [call(total=4, file=sys.stdout), call(total=6, file=sys.stdout)]
         mock_tqdm.assert_has_calls(calls, any_order=True)
+        base_report._handle_results.assert_called_once_with(True)
+
+    def test__check_report_generated(self):
+        """Test the ``check_report_generated`` method."""
+        # Setup
+        base_report = BaseReport()
+        base_report.is_generated = False
+
+        # Run and Assert
+        expected_message = (
+            'The report has not been generated. Please call `generate` first.'
+        )
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._check_report_generated()
+
+        base_report.is_generated = True
+        base_report._check_report_generated()
 
     def test__validate_property_generated(self):
         """Test the ``_validate_property_generated`` method."""
         # Setup
-        quality_report = QualityReport()
+        base_report = BaseReport()
+        base_report._properties['Valid Property Name'] = Mock()
         wrong_property_name = 'Wrong Property Name'
-        quality_report.is_generated = False
+        base_report.is_generated = False
 
         # Run and Assert
         expected_message_1 = (
-            'Quality report must be generated before ''getting details. Call `generate` first.'
+            'The report has not been generated. Please call `generate` first.'
         )
         with pytest.raises(ValueError, match=expected_message_1):
-            quality_report._validate_property_generated('Column Shapes')
+            base_report._validate_property_generated('Valid Property Name')
 
-        quality_report.is_generated = True
+        base_report.is_generated = True
         expected_message_2 = (
             "Invalid property name 'Wrong Property Name'. Valid property names"
-            " are 'Column Shapes' and 'Column Pair Trends'."
+            " are 'Valid Property Name'."
         )
         with pytest.raises(ValueError, match=expected_message_2):
-            quality_report._validate_property_generated(wrong_property_name)
-
-    def test_get_score(self):
-        """Test the ``get_score`` method."""
-        # Setup
-        report = QualityReport()
-        mock_score = Mock()
-        report._overall_quality_score = mock_score
-
-        # Run
-        score = report.get_score()
-
-        # Assert
-        assert score == mock_score
+            base_report._validate_property_generated(wrong_property_name)
 
     def test_get_properties(self):
         """Test the ``get_details`` method."""
         # Setup
-        quality_report = QualityReport()
+        base_report = BaseReport()
         mock_cs_compute_average = Mock(return_value=1.0)
         mock_cpt_compute_averag = Mock(return_value=1.0)
-        quality_report._properties['Column Shapes'] = Mock()
-        quality_report._properties['Column Shapes']._compute_average = mock_cs_compute_average
-        quality_report._properties['Column Pair Trends'] = Mock()
-        quality_report._properties['Column Pair Trends']._compute_average = mock_cpt_compute_averag
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 1']._compute_average = mock_cs_compute_average
+        base_report._properties['Property 2'] = Mock()
+        base_report._properties['Property 2']._compute_average = mock_cpt_compute_averag
+        base_report.is_generated = True
 
         # Run
-        properties = quality_report.get_properties()
+        properties = base_report.get_properties()
 
         # Assert
         pd.testing.assert_frame_equal(
             properties,
             pd.DataFrame({
-                'Property': ['Column Shapes', 'Column Pair Trends'],
+                'Property': ['Property 1', 'Property 2'],
                 'Score': [1.0, 1.0],
             }),
         )
@@ -296,42 +319,42 @@ class TestQualityReport:
     def test_get_visualization(self):
         """Test the ``get_visualization`` method."""
         # Setup
-        quality_report = QualityReport()
-        quality_report._properties['Column Shapes'] = Mock()
-        quality_report._properties['Column Pair Trends'] = Mock()
-        quality_report.is_generated = True
+        base_report = BaseReport()
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 2'] = Mock()
+        base_report.is_generated = True
 
         # Run
-        quality_report.get_visualization('Column Shapes')
-        quality_report.get_visualization('Column Pair Trends')
+        base_report.get_visualization('Property 1')
+        base_report.get_visualization('Property 2')
 
         # Assert
-        quality_report._properties['Column Shapes'].get_visualization.assert_called_once()
-        quality_report._properties['Column Pair Trends'].get_visualization.assert_called_once()
+        base_report._properties['Property 1'].get_visualization.assert_called_once()
+        base_report._properties['Property 2'].get_visualization.assert_called_once()
 
     def test_get_details(self):
         """Test the ``get_details`` method."""
         # Setup
-        quality_report = QualityReport()
+        base_report = BaseReport()
         mock_validate_property_generated = Mock()
-        quality_report._validate_property_generated = mock_validate_property_generated
-        quality_report._properties['Column Shapes'] = Mock()
-        quality_report._properties['Column Pair Trends'] = Mock()
-        quality_report.is_generated = True
+        base_report._validate_property_generated = mock_validate_property_generated
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 2'] = Mock()
+        base_report.is_generated = True
 
         # Run
-        quality_report.get_details('Column Shapes')
-        quality_report.get_details('Column Pair Trends')
+        base_report.get_details('Property 1')
+        base_report.get_details('Property 2')
 
         # Assert
         mock_validate_property_generated.assert_has_calls([
-            call('Column Shapes'), call('Column Pair Trends')
+            call('Property 1'), call('Property 2')
         ])
-        quality_report._properties['Column Shapes']._details.copy.assert_called_once()
-        quality_report._properties['Column Pair Trends']._details.copy.assert_called_once()
+        base_report._properties['Property 1'].details.copy.assert_called_once()
+        base_report._properties['Property 2'].details.copy.assert_called_once()
 
-    @patch('sdmetrics.reports.single_table.quality_report.pkg_resources.get_distribution')
-    @patch('sdmetrics.reports.single_table.quality_report.pickle')
+    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.pickle')
     def test_save(self, pickle_mock, get_distribution_mock):
         """Test the ``save`` method.
 
@@ -348,8 +371,8 @@ class TestQualityReport:
         open_mock = mock_open(read_data=pickle.dumps('test'))
 
         # Run
-        with patch('sdmetrics.reports.single_table.quality_report.open', open_mock):
-            QualityReport.save(report, 'test-file.pkl')
+        with patch('sdmetrics.reports.base_report.open', open_mock):
+            BaseReport.save(report, 'test-file.pkl')
 
         # Assert
         get_distribution_mock.assert_called_once_with('sdmetrics')
@@ -357,8 +380,8 @@ class TestQualityReport:
         pickle_mock.dump.assert_called_once_with(report, open_mock())
         assert report._package_version == get_distribution_mock.return_value.version
 
-    @patch('sdmetrics.reports.single_table.quality_report.pkg_resources.get_distribution')
-    @patch('sdmetrics.reports.single_table.quality_report.pickle')
+    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.pickle')
     def test_load(self, pickle_mock, get_distribution_mock):
         """Test the ``load`` method.
 
@@ -380,16 +403,16 @@ class TestQualityReport:
         report._package_version = get_distribution_mock.return_value.version
 
         # Run
-        with patch('sdmetrics.reports.single_table.quality_report.open', open_mock):
-            loaded = QualityReport.load('test-file.pkl')
+        with patch('sdmetrics.reports.base_report.open', open_mock):
+            loaded = BaseReport.load('test-file.pkl')
 
         # Assert
         open_mock.assert_called_once_with('test-file.pkl', 'rb')
         assert loaded == pickle_mock.load.return_value
 
-    @patch('sdmetrics.reports.single_table.quality_report.warnings')
-    @patch('sdmetrics.reports.single_table.quality_report.pkg_resources.get_distribution')
-    @patch('sdmetrics.reports.single_table.quality_report.pickle')
+    @patch('sdmetrics.reports.base_report.warnings')
+    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.pickle')
     def test_load_mismatched_versions(self, pickle_mock, get_distribution_mock, warnings_mock):
         """Test the ``load`` method with mismatched sdmetrics versions.
 
@@ -412,8 +435,8 @@ class TestQualityReport:
         get_distribution_mock.return_value.version = 'new_version'
 
         # Run
-        with patch('sdmetrics.reports.single_table.quality_report.open', open_mock):
-            loaded = QualityReport.load('test-file.pkl')
+        with patch('sdmetrics.reports.base_report.open', open_mock):
+            loaded = BaseReport.load('test-file.pkl')
 
         # Assert
         open_mock.assert_called_once_with('test-file.pkl', 'rb')
