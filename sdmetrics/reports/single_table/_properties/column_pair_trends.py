@@ -58,7 +58,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
                         )
                     nan_mask = pd.isna(data[column_name])
                     data[column_name] = pd.to_numeric(data[column_name])
-                    data.loc[nan_mask, column_name] = np.nan
+                    if nan_mask.any():
+                        data.loc[nan_mask, column_name] = np.nan
 
                 continue
             except Exception as e:
