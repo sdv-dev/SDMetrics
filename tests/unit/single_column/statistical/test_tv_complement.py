@@ -82,6 +82,18 @@ class TestTVComplement:
         err_msg = 'The TVComplement metric must have 1 or more non-null values.'
         with pytest.raises(IncomputableMetricError, match=err_msg):
             metric.compute(real_data, synthetic_data)
+    
+    def test_compute_no_data2(self):
+        """Test it when no data is passed."""
+        # Setup
+        real_data = pd.Series()
+        synthetic_data = pd.Series()
+        metric = TVComplement()
+
+        # Run and Assert
+        err_msg = 'The TVComplement metric must have 1 or more non-null values.'
+        with pytest.raises(IncomputableMetricError, match=err_msg):
+            metric.compute(real_data, synthetic_data)
 
     @patch('sdmetrics.single_column.statistical.tv_complement.SingleColumnMetric.normalize')
     def test_normalize(self, normalize_mock):
