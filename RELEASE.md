@@ -7,7 +7,7 @@ This document describes the steps required to perform a full release of **SDMetr
 Before starting to prepare an **SDMetrics** release make sure of the following points:
 
 1. All the changes that need to be included in the current release have been added to
-   the [sdv-dev/SDMetrics repository](https://github.com/sdv-dev/SDMetrics) `master`
+   the [sdv-dev/SDMetrics repository](https://github.com/sdv-dev/SDMetrics) `main`
    branch.
 2. All the issues related to code changes which were closed after the latest release
    have been assigned to the current milestone, given a `bug` or `enhancement` tag
@@ -18,7 +18,7 @@ Before starting to prepare an **SDMetrics** release make sure of the following p
    an issue and assign a developer, a tag and a milestone to it directly.
 4. The Milestone that corresponds to the release does not have any issue that is still open.
    If there is any, either close it (if possible), or deassign it from the Milestone.
-5. The latest build for the `master` branch performed by the CI systems (Github Actions
+5. The latest build for the `main` branch performed by the CI systems (Github Actions
    and Travis) was successful. If the builds are more than a couple of days old, re-trigger
    them and wait for them to finish successfully.
 
@@ -146,7 +146,7 @@ Thanks to @<CONTRIBUTOR-USER-NAMES...> for contributing to this release.
 
 In case of doubt, loo at the previous release notes and try to follow a similar style.
 
-Once this is done, commit the change directly to `master` with the message `Add release notes for
+Once this is done, commit the change directly to `main` with the message `Add release notes for
 vX.Y.Z`.
 
 ## Make the final release
