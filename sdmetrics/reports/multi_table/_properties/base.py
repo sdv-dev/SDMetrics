@@ -147,8 +147,10 @@ class BaseMultiTableProperty():
             return self.details.copy()
 
         if self._num_iteration_case in ['relationship', 'inter_table_columns']:
-            table_rows = ((self.details['Parent Table'] == table_name) |
-                          (self.details['Child Table'] == table_name))
+            table_rows = (
+                (self.details['Parent Table'] == table_name) |
+                (self.details['Child Table'] == table_name)
+            )
         else:
             table_rows = self.details['Table'] == table_name
 
