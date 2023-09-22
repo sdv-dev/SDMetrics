@@ -209,7 +209,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         return error
 
-    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None,
+                          column_pairs=None):
         """Generate the _details dataframe for the column pair trends property.
 
         Args:
@@ -221,6 +222,9 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 The metadata of the table
             progress_bar:
                 The progress bar to use. Defaults to None.
+            column_pairs (list[tuple[str, str]]):
+                Pairs of columns to calculate results for. If None, uses every combination of
+                pairs of columns in the metadata. Defaults to None.
         """
         processed_real_data, discrete_real = self._get_processed_data(real_data, metadata)
         processed_synthetic_data, discrete_synthetic = self._get_processed_data(
@@ -236,7 +240,12 @@ class ColumnPairTrends(BaseSingleTableProperty):
         error_messages = []
 
         list_dtypes = self._sdtype_to_shape.keys()
-        for column_names in itertools.combinations(list(metadata['columns']), r=2):
+
+        column_pairs = itertools.combinations(
+            list(
+                metadata['columns']),
+            r=2) if column_pairs is None else column_pairs
+        for column_names in column_pairs:
             column_name_1 = column_names[0]
             column_name_2 = column_names[1]
 

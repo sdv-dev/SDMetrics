@@ -37,6 +37,13 @@ class BaseMultiTableProperty():
         elif self._num_iteration_case == 'column_pair':
             num_columns = [len(table['columns']) for table in metadata['tables'].values()]
             return sum([(n_cols * (n_cols - 1)) // 2 for n_cols in num_columns])
+        elif self._num_iteration_case == 'inter_table_columns':
+            iterations = 0
+            for relationship in metadata['relationships']:
+                parent_columns = metadata['tables'][relationship['parent_table_name']]['columns']
+                child_columns = metadata['tables'][relationship['child_table_name']]['columns']
+                iterations += (len(parent_columns) * len(child_columns))
+            return iterations
 
     def _generate_details(self, metadata):
         """Generate the ``details`` dataframe for the multi-table property.
@@ -124,3 +131,25 @@ class BaseMultiTableProperty():
             )
 
         return self._properties[table_name].get_visualization()
+
+    def get_details(self, table_name=None):
+        """Return the details table for the property for the given table.
+
+        Args:
+            table_name (str):
+                The name of the table to return details for.
+                Defaults to None.
+
+        Returns:
+            pandas.DataFrame
+        """
+        if table_name is None:
+            return self.details.copy()
+
+        if self._num_iteration_case in ['relationship', 'inter_table_columns']:
+            table_rows = ((self.details['Parent Table'] == table_name) |
+                          (self.details['Child Table'] == table_name))
+        else:
+            table_rows = self.details['Table'] == table_name
+
+        return self.details.loc[table_rows]
