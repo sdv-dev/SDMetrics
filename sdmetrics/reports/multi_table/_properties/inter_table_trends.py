@@ -100,8 +100,12 @@ class InterTableTrends(BaseMultiTableProperty):
 
             all_details = pd.concat([all_details, details]).reset_index(drop=True)
 
+        if all_details['Error'].isna().all():
+            all_details = all_details.drop('Error', axis=1)
+        else:
+            all_details['Error'] = all_details['Error'].replace({np.nan: None})
+
         self.details = all_details
-        self.details['Error'] = self.details['Error'].replace({np.nan: None})
         self.is_computed = True
 
         return self._compute_average()

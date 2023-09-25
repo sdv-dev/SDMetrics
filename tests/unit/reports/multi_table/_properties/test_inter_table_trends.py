@@ -151,8 +151,7 @@ def test_get_score(column_pair_trends_mock):
         ],
         'Score': [1.0, 1.0, 0.5, 0.5],
         'Real Correlation': [None, None, None, 0.8],
-        'Synthetic Correlation': [None, None, None, 0.6],
-        'Error': [None, None, None, None]
+        'Synthetic Correlation': [None, None, None, 0.6]
     })
     instanced_mock._generate_details.assert_called_once_with(
         DataFrameMatcher(expected_denormalized_real),
