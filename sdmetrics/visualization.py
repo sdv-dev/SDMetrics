@@ -277,7 +277,7 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
             The name of the column.
         plot_type (str or None):
             The plot to be used. Can choose between ``distplot``, ``bar`` or ``None``. If ``None`
-            select between ``distplot`` or ``bar`` depending on the data that the column contains:
+            select between ``distplot`` or ``bar`` depending on the data that the column contains,
             ``distplot`` for datetime and numerical values and ``bar`` for categorical.
             Defaults to ``None``.
 
