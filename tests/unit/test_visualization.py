@@ -254,7 +254,7 @@ def test_get_column_plot_bad_plot_type():
 @patch('sdmetrics.visualization._generate_column_plot')
 def test_get_column_plot_plot_type_none_data_int(mock__generate_column_plot):
     """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``int``."""
-    # Setup
+    # Setup
     real_data = pd.DataFrame({'values': [1, 2, 2, 3, 5]})
     synthetic_data = pd.DataFrame({'values': [2, 2, 3, 4, 5]})
 
@@ -273,7 +273,7 @@ def test_get_column_plot_plot_type_none_data_int(mock__generate_column_plot):
 @patch('sdmetrics.visualization._generate_column_plot')
 def test_get_column_plot_plot_type_none_data_float(mock__generate_column_plot):
     """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``float``."""
-    # Setup
+    # Setup
     real_data = pd.DataFrame({'values': [1., 2., 2., 3., 5.]})
     synthetic_data = pd.DataFrame({'values': [2., 2., 3., 4., 5.]})
 
@@ -292,7 +292,7 @@ def test_get_column_plot_plot_type_none_data_float(mock__generate_column_plot):
 @patch('sdmetrics.visualization._generate_column_plot')
 def test_get_column_plot_plot_type_none_data_datetime(mock__generate_column_plot):
     """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``datetime``."""
-    # Setup
+    # Setup
     real_data = pd.DataFrame({'values': pd.to_datetime(['2021-01-20', '2022-01-21'])})
     synthetic_data = pd.DataFrame({'values': pd.to_datetime(['2021-01-20', '2022-01-21'])})
 
@@ -311,7 +311,7 @@ def test_get_column_plot_plot_type_none_data_datetime(mock__generate_column_plot
 @patch('sdmetrics.visualization._generate_column_plot')
 def test_get_column_plot_plot_type_none_data_category(mock__generate_column_plot):
     """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``category``."""
-    # Setup
+    # Setup
     real_data = pd.DataFrame({'values': ['John', 'Doe']})
     synthetic_data = pd.DataFrame({'values': ['Johanna', 'Doe']})
 
@@ -330,7 +330,7 @@ def test_get_column_plot_plot_type_none_data_category(mock__generate_column_plot
 @patch('sdmetrics.visualization._generate_column_plot')
 def test_get_column_plot_plot_type_bar(mock__generate_column_plot):
     """Test ``get_column_plot`` when ``plot_type`` is ``bar``."""
-    # Setup
+    # Setup
     real_data = pd.DataFrame({'values': [1., 2., 2., 3., 5.]})
     synthetic_data = pd.DataFrame({'values': [2., 2., 3., 4., 5.]})
 
@@ -349,7 +349,7 @@ def test_get_column_plot_plot_type_bar(mock__generate_column_plot):
 @patch('sdmetrics.visualization._generate_column_plot')
 def test_get_column_plot_plot_type_distplot(mock__generate_column_plot):
     """Test ``get_column_plot`` when ``plot_type`` is ``distplot``."""
-    # Setup
+    # Setup
     real_data = pd.DataFrame({'values': ['John', 'Doe']})
     synthetic_data = pd.DataFrame({'values': ['Johanna', 'Doe']})
 
