@@ -37,7 +37,7 @@ class BaseMultiTableProperty():
         elif self._num_iteration_case == 'column_pair':
             num_columns = [len(table['columns']) for table in metadata['tables'].values()]
             return sum([(n_cols * (n_cols - 1)) // 2 for n_cols in num_columns])
-        elif self._num_iteration_case == 'inter_table_columns':
+        elif self._num_iteration_case == 'inter_table_column_pair':
             iterations = 0
             for relationship in metadata['relationships']:
                 parent_columns = metadata['tables'][relationship['parent_table_name']]['columns']
@@ -146,7 +146,7 @@ class BaseMultiTableProperty():
         if table_name is None:
             return self.details.copy()
 
-        if self._num_iteration_case in ['relationship', 'inter_table_columns']:
+        if self._num_iteration_case in ['relationship', 'inter_table_column_pair']:
             table_rows = (
                 (self.details['Parent Table'] == table_name) |
                 (self.details['Child Table'] == table_name)

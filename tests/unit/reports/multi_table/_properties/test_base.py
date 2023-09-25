@@ -86,6 +86,9 @@ class TestBaseMultiTableProperty():
         base_property._num_iteration_case = 'column_pair'
         assert base_property._get_num_iterations(metadata) == 10
 
+        base_property._num_iteration_case = 'inter_table_column_pair'
+        assert base_property._get_num_iterations(metadata) == 11
+
     def test__generate_details_property(self):
         """Test the ``_generate_details`` method."""
         # Setup
@@ -221,3 +224,70 @@ class TestBaseMultiTableProperty():
         )
         with pytest.raises(ValueError, match=expected_message):
             base_property.get_visualization('table')
+
+    def test_get_details(self):
+        """Test the ``get_details`` method."""
+        # Setup
+        details = pd.DataFrame({
+            'Table': ['table1', 'table2', 'table3'],
+            'Column 1': ['col1', 'col2', 'col3'],
+            'Column 2': ['colA', 'colB', 'colC'],
+            'Score': [0, 0.5, 1.0],
+            'Error': [None, None, None]
+        })
+
+        base_property = BaseMultiTableProperty()
+        base_property.details = details
+
+        # Run
+        full_details = base_property.get_details()
+        table_details = base_property.get_details('table2')
+
+        # Assert
+        expected_table_details = pd.DataFrame({
+            'Table': ['table2'],
+            'Column 1': ['col2'],
+            'Column 2': ['colB'],
+            'Score': [0.5],
+            'Error': [None]
+        }, index=[1])
+        pd.testing.assert_frame_equal(details, full_details)
+        pd.testing.assert_frame_equal(table_details, expected_table_details)
+
+    def test_get_details_with_parent_child(self):
+        """Test ``get_details`` with properties with parent/child relationships."""
+        # Setup
+        details = pd.DataFrame({
+            'Parent Table': ['table1', 'table3', 'table3'],
+            'Child Table': ['table2', 'table2', 'table4'],
+            'Column 1': ['col1', 'col2', 'col3'],
+            'Column 2': ['colA', 'colB', 'colC'],
+            'Score': [0, 0.5, 1.0],
+            'Error': [None, None, None]
+        })
+
+        base_property = BaseMultiTableProperty()
+        base_property.details = details
+
+        # Run
+        full_details = []
+        table_details = []
+        for prop in ['relationship', 'inter_table_column_pair']:
+            base_property._num_iteration_case = prop
+            full_details.append(base_property.get_details())
+            table_details.append(base_property.get_details('table2'))
+
+        # Assert
+        expected_table_details = pd.DataFrame({
+            'Parent Table': ['table1', 'table3'],
+            'Child Table': ['table2', 'table2'],
+            'Column 1': ['col1', 'col2'],
+            'Column 2': ['colA', 'colB'],
+            'Score': [0.0, 0.5],
+            'Error': [None, None]
+        })
+        for detail_df in full_details:
+            pd.testing.assert_frame_equal(detail_df, details)
+
+        for detail_df in table_details:
+            pd.testing.assert_frame_equal(detail_df, expected_table_details)

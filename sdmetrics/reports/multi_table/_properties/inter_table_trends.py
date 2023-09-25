@@ -20,7 +20,7 @@ class InterTableTrends(BaseMultiTableProperty):
     all column pairs
     """
 
-    _num_iteration_case = 'inter_table_columns'
+    _num_iteration_case = 'inter_table_column_pair'
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.
@@ -82,6 +82,8 @@ class InterTableTrends(BaseMultiTableProperty):
                 f'{parent}.{col}': col_meta for col, col_meta in parent_meta['columns'].items()
             }
             merged_metadata['columns'] = {**child_cols, **parent_cols}
+            if 'primary_key' in merged_metadata:
+                merged_metadata['primary_key'] = f'{child}.{merged_metadata["primary_key"]}'
 
             parent_child_pairs = itertools.product(parent_cols.keys(), child_cols.keys())
 
