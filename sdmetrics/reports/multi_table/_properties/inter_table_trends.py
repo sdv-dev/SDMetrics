@@ -95,8 +95,8 @@ class InterTableTrends(BaseMultiTableProperty):
             details['Parent Table'] = parent
             details['Child Table'] = child
             details['Foreign Key'] = foreign_key
-            details['Column 1'] = details['Column 1'].str.removeprefix(f'{parent}.')
-            details['Column 2'] = details['Column 2'].str.removeprefix(f'{child}.')
+            details['Column 1'] = details['Column 1'].str.replace(f'{parent}.', '', n=1)
+            details['Column 2'] = details['Column 2'].str.replace(f'{child}.', '', n=1)
 
             all_details = pd.concat([all_details, details]).reset_index(drop=True)
 
