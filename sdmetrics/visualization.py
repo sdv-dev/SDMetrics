@@ -452,12 +452,12 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
 
     if not set(column_names).issubset(real_data.columns):
         raise ValueError(
-            f'Missing column(s) {set(column_names) - set(real_data.colums)} in real data.'
+            f'Missing column(s) {set(column_names) - set(real_data.columns)} in real data.'
         )
 
     if not set(column_names).issubset(synthetic_data.columns):
         raise ValueError(
-            f'Missing column(s) {set(column_names) - set(synthetic_data.colums)} '
+            f'Missing column(s) {set(column_names) - set(synthetic_data.columns)} '
             'in synthetic data.'
         )
 
