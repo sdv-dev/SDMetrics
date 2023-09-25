@@ -27,7 +27,7 @@ class TestInterTableTrends:
         column_pair_trends = InterTableTrends()
         num_iter = sum(
             len(metadata['tables'][relationship['parent_table_name']]['columns'])
-            * len(metadata['tables'][relationship['child_table_name']]['columns'])  # noqa: W503
+            * len(metadata['tables'][relationship['child_table_name']]['columns'])
             for relationship in metadata['relationships']
         )
 
