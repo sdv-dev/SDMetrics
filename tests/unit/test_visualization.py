@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from sdmetrics.visualization import (
-    _generate_cardinality_plot, _get_cardinality, get_cardinality_plot)
+    _generate_cardinality_plot, _get_cardinality, get_cardinality_plot, get_column_plot)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -221,3 +221,145 @@ def test_get_cardinality_plot_bad_plot_type():
             real_data, synthetic_data, child_table_name, parent_table_name, child_foreign_key,
             parent_primary_key, plot_type='bad_type'
         )
+
+
+def test_get_column_plot_column_not_found():
+    """Test the ``get_column_plot`` method when column is not present."""
+    # Setup
+    real_data = pd.DataFrame({'values': [1, 2, 2, 3, 5]})
+    synthetic_data = pd.DataFrame({'values': [2, 2, 3, 4, 5]})
+
+    # Run and assert
+    match = re.escape("Column 'start_date' not found in real table data.")
+    with pytest.raises(ValueError, match=match):
+        get_column_plot(real_data, synthetic_data, 'start_date')
+
+    match = re.escape("Column 'start_date' not found in synthetic table data.")
+    with pytest.raises(ValueError, match=match):
+        get_column_plot(pd.DataFrame({'start_date': []}), synthetic_data, 'start_date')
+
+
+def test_get_column_plot_bad_plot_type():
+    """Test the ``get_column_plot`` method."""
+    # Setup
+    real_data = pd.DataFrame({'values': [1, 2, 2, 3, 5]})
+    synthetic_data = pd.DataFrame({'values': [2, 2, 3, 4, 5]})
+
+    # Run and assert
+    match = re.escape("Invalid plot_type 'bad_type'. Please use one of ['bar', 'distplot', None].")
+    with pytest.raises(ValueError, match=match):
+        get_column_plot(real_data, synthetic_data, 'valeus', plot_type='bad_type')
+
+
+@patch('sdmetrics.visualization._generate_column_plot')
+def test_get_column_plot_plot_type_none_data_int(mock__generate_column_plot):
+    """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``int``."""
+    # Setup
+    real_data = pd.DataFrame({'values': [1, 2, 2, 3, 5]})
+    synthetic_data = pd.DataFrame({'values': [2, 2, 3, 4, 5]})
+
+    # Run
+    figure = get_column_plot(real_data, synthetic_data, 'values')
+
+    # Assert
+    mock__generate_column_plot.assert_called_once_with(
+        real_data['values'],
+        synthetic_data['values'],
+        'distplot'
+    )
+    assert figure == mock__generate_column_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_column_plot')
+def test_get_column_plot_plot_type_none_data_float(mock__generate_column_plot):
+    """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``float``."""
+    # Setup
+    real_data = pd.DataFrame({'values': [1., 2., 2., 3., 5.]})
+    synthetic_data = pd.DataFrame({'values': [2., 2., 3., 4., 5.]})
+
+    # Run
+    figure = get_column_plot(real_data, synthetic_data, 'values')
+
+    # Assert
+    mock__generate_column_plot.assert_called_once_with(
+        real_data['values'],
+        synthetic_data['values'],
+        'distplot'
+    )
+    assert figure == mock__generate_column_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_column_plot')
+def test_get_column_plot_plot_type_none_data_datetime(mock__generate_column_plot):
+    """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``datetime``."""
+    # Setup
+    real_data = pd.DataFrame({'values': pd.to_datetime(['2021-01-20', '2022-01-21'])})
+    synthetic_data = pd.DataFrame({'values': pd.to_datetime(['2021-01-20', '2022-01-21'])})
+
+    # Run
+    figure = get_column_plot(real_data, synthetic_data, 'values')
+
+    # Assert
+    mock__generate_column_plot.assert_called_once_with(
+        real_data['values'],
+        synthetic_data['values'],
+        'distplot'
+    )
+    assert figure == mock__generate_column_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_column_plot')
+def test_get_column_plot_plot_type_none_data_category(mock__generate_column_plot):
+    """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``category``."""
+    # Setup
+    real_data = pd.DataFrame({'values': ['John', 'Doe']})
+    synthetic_data = pd.DataFrame({'values': ['Johanna', 'Doe']})
+
+    # Run
+    figure = get_column_plot(real_data, synthetic_data, 'values')
+
+    # Assert
+    mock__generate_column_plot.assert_called_once_with(
+        real_data['values'],
+        synthetic_data['values'],
+        'bar'
+    )
+    assert figure == mock__generate_column_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_column_plot')
+def test_get_column_plot_plot_type_bar(mock__generate_column_plot):
+    """Test ``get_column_plot`` when ``plot_type`` is ``bar``."""
+    # Setup
+    real_data = pd.DataFrame({'values': [1., 2., 2., 3., 5.]})
+    synthetic_data = pd.DataFrame({'values': [2., 2., 3., 4., 5.]})
+
+    # Run
+    figure = get_column_plot(real_data, synthetic_data, 'values', plot_type='bar')
+
+    # Assert
+    mock__generate_column_plot.assert_called_once_with(
+        real_data['values'],
+        synthetic_data['values'],
+        'bar'
+    )
+    assert figure == mock__generate_column_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_column_plot')
+def test_get_column_plot_plot_type_distplot(mock__generate_column_plot):
+    """Test ``get_column_plot`` when ``plot_type`` is ``distplot``."""
+    # Setup
+    real_data = pd.DataFrame({'values': ['John', 'Doe']})
+    synthetic_data = pd.DataFrame({'values': ['Johanna', 'Doe']})
+
+    # Run
+    figure = get_column_plot(real_data, synthetic_data, 'values', plot_type='distplot')
+
+    # Assert
+    mock__generate_column_plot.assert_called_once_with(
+        real_data['values'],
+        synthetic_data['values'],
+        'distplot'
+    )
+    assert figure == mock__generate_column_plot.return_value
