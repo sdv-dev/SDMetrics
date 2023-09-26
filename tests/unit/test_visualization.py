@@ -524,6 +524,7 @@ def test_get_column_pair_plot_invalid_plot_type():
     # Setup
     columns = ['start_date', 'end_date']
     real_data = synthetic_data = pd.DataFrame({'start_date': [], 'end_date': []})
+
     # Run and Assert
     match = re.escape(
         "Invalid plot_type 'distplot'. Please use one of ['box', 'heatmap', 'scatter', None]."
