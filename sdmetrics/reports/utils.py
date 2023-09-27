@@ -224,53 +224,6 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
     return fig
 
 
-def get_column_plot(real_data, synthetic_data, column_name, metadata):
-    """Return a plot of the real and synthetic data for a given column.
-
-    Args:
-        real_data (pandas.DataFrame):
-            The real table data.
-        synthetic_data (pandas.DataFrame):
-            The synthetic table data.
-        column_name (str):
-            The name of the column.
-        metadata (dict):
-            The table metadata.
-
-    Returns:
-        plotly.graph_objects._figure.Figure
-    """
-    columns = get_columns_from_metadata(metadata)
-    if column_name not in columns:
-        raise ValueError(f"Column '{column_name}' not found in metadata.")
-    elif 'sdtype' not in columns[column_name]:
-        raise ValueError(f"Metadata for column '{column_name}' missing 'type' information.")
-    if column_name not in real_data.columns:
-        raise ValueError(f"Column '{column_name}' not found in real table data.")
-    if column_name not in synthetic_data.columns:
-        raise ValueError(f"Column '{column_name}' not found in synthetic table data.")
-
-    column_meta = columns[column_name]
-    sdtype = get_type_from_column_meta(columns[column_name])
-    if sdtype == 'datetime':
-        real_column, synthetic_column = convert_datetime_columns(
-            real_data[column_name],
-            synthetic_data[column_name],
-            column_meta
-        )
-    else:
-        real_column = real_data[column_name]
-        synthetic_column = synthetic_data[column_name]
-    if sdtype in CONTINUOUS_SDTYPES:
-        fig = make_continuous_column_plot(real_column, synthetic_column, sdtype)
-    elif sdtype in DISCRETE_SDTYPES:
-        fig = make_discrete_column_plot(real_column, synthetic_column, sdtype)
-    else:
-        raise ValueError(f"sdtype of type '{sdtype}' not recognized.")
-
-    return fig
-
-
 def make_continuous_column_pair_plot(real_data, synthetic_data):
     """Make a column pair plot for continuous data.
 
