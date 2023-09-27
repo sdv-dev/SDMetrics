@@ -277,7 +277,7 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
             The name of the column.
         plot_type (str or None):
             The plot to be used. Can choose between ``distplot``, ``bar`` or ``None``. If ``None`
-            select between ``distplot`` or ``bar`` depending on the data that the column contains,
+            select between ``distplot`` or ``bar`` depending on the data that the column contains:
             ``distplot`` for datetime and numerical values and ``bar`` for categorical.
             Defaults to ``None``.
 
@@ -294,10 +294,10 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     if column_name not in synthetic_data.columns:
         raise ValueError(f"Column '{column_name}' not found in synthetic table data.")
 
-    column_is_datetime = is_datetime(real_data[column_name])
     real_column = real_data[column_name]
-    dtype = real_column.dropna().infer_objects().dtype.kind
     if plot_type is None:
+        column_is_datetime = is_datetime(real_data[column_name])
+        dtype = real_column.dropna().infer_objects().dtype.kind
         if column_is_datetime or dtype in ('i', 'f'):
             plot_type = 'distplot'
         else:
