@@ -12,10 +12,10 @@ class TestInterTableTrends:
         """Test ``ColumnPairTrends`` multi-table property end to end."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-        column_pair_trends = InterTableTrends()
+        inter_table_trends = InterTableTrends()
 
         # Run
-        result = column_pair_trends.get_score(real_data, synthetic_data, metadata)
+        result = inter_table_trends.get_score(real_data, synthetic_data, metadata)
 
         # Assert
         assert result == 0.48240740740740734
@@ -24,7 +24,7 @@ class TestInterTableTrends:
         """Test that the progress bar is correctly updated."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-        column_pair_trends = InterTableTrends()
+        inter_table_trends = InterTableTrends()
         num_iter = sum(
             len(metadata['tables'][relationship['parent_table_name']]['columns'])
             * len(metadata['tables'][relationship['child_table_name']]['columns'])
@@ -36,7 +36,7 @@ class TestInterTableTrends:
         progress_bar.update = mock_update
 
         # Run
-        result = column_pair_trends.get_score(real_data, synthetic_data, metadata, progress_bar)
+        result = inter_table_trends.get_score(real_data, synthetic_data, metadata, progress_bar)
 
         # Assert
         assert result == 0.48240740740740734

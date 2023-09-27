@@ -1,7 +1,6 @@
 """Column pair trends property for multi-table."""
 import itertools
 
-import numpy as np
 import pandas as pd
 import plotly.express as px
 
@@ -22,70 +21,109 @@ class InterTableTrends(BaseMultiTableProperty):
 
     _num_iteration_case = 'inter_table_column_pair'
 
-    def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
-        """Get the average score of all the individual metric scores computed.
+    def _denormalize_tables(self, real_data, synthetic_data, relationship):
+        """Merge a parent and child table into one denormalized table.
 
         Args:
-            real_data (pandas.DataFrame):
+            real_data (dict[str, pandas.DataFrame]):
                 The real data.
-            synthetic_data (pandas.DataFrame):
+            synthetic_data (dict[str, pandas.DataFrame]):
+                The synthetic data.
+            relationship (dict):
+                The relationship to denormalize.
+
+        Returns:
+            tuple(pd.DataFrame, pd.DataFrame)
+                The denormalized real table and the denormalized synthetic table.
+        """
+        parent = relationship['parent_table_name']
+        child = relationship['child_table_name']
+        foreign_key = relationship['child_foreign_key']
+        primary_key = relationship['parent_primary_key']
+
+        real_parent = real_data[parent].add_prefix(f'{parent}.')
+        real_child = real_data[child].add_prefix(f'{child}.')
+        synthetic_parent = synthetic_data[parent].add_prefix(f'{parent}.')
+        synthetic_child = synthetic_data[child].add_prefix(f'{child}.')
+
+        child_index = f'{child}.{foreign_key}'
+        parent_index = f'{parent}.{primary_key}'
+
+        denormalized_real = real_child.merge(
+            real_parent, left_on=child_index, right_on=parent_index
+        )
+        denormalized_synthetic = synthetic_child.merge(
+            synthetic_parent, left_on=child_index, right_on=parent_index
+        )
+
+        return denormalized_real, denormalized_synthetic
+
+    def _merge_metadata(self, metadata, parent_table, child_table):
+        """Merge the metadata of a parent and child table.
+
+        Merge the metadata for two tables together. Column names will be prefixed
+        with ``'{table_name}.'``. The merged table will inherit the child table's
+        primary key.
+
+        Args:
+            metadata (dict):
+                The metadata for the multi-table data.
+            relationship (dict):
+                The relationship to use to denormalize the metadata.
+
+        Returns:
+            (dict, list, list)
+                The metadata dictionary for the merged table. Also returns the list of columns
+                that came from the parent table, and the list of columns that came from the
+                child table.
+        """
+        child_meta = metadata['tables'][child_table]
+        parent_meta = metadata['tables'][parent_table]
+        merged_metadata = metadata['tables'][child_table].copy()
+        child_cols = {
+            f'{child_table}.{col}': col_meta for col, col_meta in child_meta['columns'].items()
+        }
+        parent_cols = {
+            f'{parent_table}.{col}': col_meta for col, col_meta in parent_meta['columns'].items()
+        }
+        merged_metadata['columns'] = {**child_cols, **parent_cols}
+        if 'primary_key' in merged_metadata:
+            merged_metadata['primary_key'] = f'{child_table}.{merged_metadata["primary_key"]}'
+
+        return merged_metadata, list(parent_cols.keys()), list(child_cols.keys())
+
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
+        """Generate the details dataframe for the metric.
+
+        Args:
+            real_data (dict[str, pandas.DataFrame]):
+                The real data.
+            synthetic_data (dict[str, pandas.DataFrame]):
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
             progress_bar (tqdm.tqdm or None):
                 The progress bar object. Defaults to None.
-
-        Returns:
-            float:
-                The average score for the property for all the individual metric scores computed.
         """
-        all_details = pd.DataFrame(columns=[
-            'Parent Table',
-            'Child Table',
-            'Foreign Key',
-            'Column 1',
-            'Column 2',
-            'Metric',
-            'Score',
-            'Real Correlation',
-            'Synthetic Correlation',
-            'Error'
-        ])
+        all_details = []
         for relationship in metadata['relationships']:
             parent = relationship['parent_table_name']
             child = relationship['child_table_name']
             foreign_key = relationship['child_foreign_key']
-            primary_key = relationship['parent_primary_key']
 
-            real_parent = real_data[parent].add_prefix(f'{parent}.')
-            real_child = real_data[child].add_prefix(f'{child}.')
-            synthetic_parent = synthetic_data[parent].add_prefix(f'{parent}.')
-            synthetic_child = synthetic_data[child].add_prefix(f'{child}.')
-
-            child_index = f'{child}.{foreign_key}'
-            parent_index = f'{parent}.{primary_key}'
-
-            denormalized_real = real_child.merge(
-                real_parent, left_on=child_index, right_on=parent_index
-            )
-            denormalized_synthetic = synthetic_child.merge(
-                synthetic_parent, left_on=child_index, right_on=parent_index
+            denormalized_real, denormalized_synthetic = self._denormalize_tables(
+                real_data,
+                synthetic_data,
+                relationship
             )
 
-            child_meta = metadata['tables'][child]
-            parent_meta = metadata['tables'][parent]
-            merged_metadata = metadata['tables'][child].copy()
-            child_cols = {
-                f'{child}.{col}': col_meta for col, col_meta in child_meta['columns'].items()
-            }
-            parent_cols = {
-                f'{parent}.{col}': col_meta for col, col_meta in parent_meta['columns'].items()
-            }
-            merged_metadata['columns'] = {**child_cols, **parent_cols}
-            if 'primary_key' in merged_metadata:
-                merged_metadata['primary_key'] = f'{child}.{merged_metadata["primary_key"]}'
+            merged_metadata, parent_cols, child_cols = self._merge_metadata(
+                metadata,
+                parent,
+                child
+            )
 
-            parent_child_pairs = itertools.product(parent_cols.keys(), child_cols.keys())
+            parent_child_pairs = itertools.product(parent_cols, child_cols)
 
             self._properties[(parent, child, foreign_key)] = SingleTableColumnPairTrends()
             details = self._properties[(parent, child, foreign_key)]._generate_details(
@@ -98,17 +136,17 @@ class InterTableTrends(BaseMultiTableProperty):
             details['Column 1'] = details['Column 1'].str.replace(f'{parent}.', '', n=1)
             details['Column 2'] = details['Column 2'].str.replace(f'{child}.', '', n=1)
 
-            all_details = pd.concat([all_details, details]).reset_index(drop=True)
+            all_details.append(details)
 
-        if all_details['Error'].isna().all():
-            all_details = all_details.drop('Error', axis=1)
-        else:
-            all_details['Error'] = all_details['Error'].replace({np.nan: None})
+        self.details = pd.concat(all_details, axis=0).reset_index(drop=True)
+        detail_columns = [
+            'Parent Table', 'Child Table', 'Foreign Key', 'Column 1', 'Column 2',
+            'Metric', 'Score', 'Real Correlation', 'Synthetic Correlation'
+        ]
+        if 'Error' in self.details.columns:
+            detail_columns.append('Error')
 
-        self.details = all_details
-        self.is_computed = True
-
-        return self._compute_average()
+        self.details = self.details[detail_columns]
 
     def get_visualization(self, table_name=None):
         """Create a plot to show the inter table trends data.

@@ -45,31 +45,6 @@ class BaseMultiTableProperty():
                 iterations += (len(parent_columns) * len(child_columns))
             return iterations
 
-    def _generate_details(self, metadata):
-        """Generate the ``details`` dataframe for the multi-table property.
-
-        This dataframe concatenates the ``_details`` dataframe of each single table property
-        and adds a ``Table`` column to indicate which table the score is for.
-
-        Args:
-            metadata (dict):
-                The metadata of the tables.
-        """
-        if not self._num_iteration_case == 'relationship':
-            details_frames = []
-            for table_name in metadata['tables']:
-                details = self._properties[table_name].details.copy()
-                details['Table'] = table_name
-                details_frames.append(details)
-
-            self.details = pd.concat(details_frames).reset_index(drop=True)
-
-            if 'Error' in self.details.columns:
-                self.details['Error'] = self.details['Error'].replace({np.nan: None})
-
-            cols = ['Table'] + [col for col in self.details if col != 'Table']
-            self.details = self.details[cols]
-
     def _compute_average(self):
         """Average the scores for each column."""
         is_dataframe = isinstance(self.details, pd.DataFrame)
@@ -80,6 +55,40 @@ class BaseMultiTableProperty():
         assert has_score_column, assert_message
 
         return self.details['Score'].mean()
+
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
+        """Generate the ``details`` dataframe for the multi-table property.
+
+        Args:
+            real_data (dict[str, pandas.DataFrame]):
+                The real data.
+            synthetic_data (dict[str, pandas.DataFrame]):
+                The synthetic data.
+            metadata (dict):
+                The metadata, which contains each column's data type as well as relationships.
+            progress_bar (tqdm.tqdm or None):
+                The progress bar object. Defaults to None.
+        """
+        if self._single_table_property is None:
+            raise NotImplementedError()
+
+        for table_name, metadata_table in metadata['tables'].items():
+            self._properties[table_name] = self._single_table_property()
+            self._properties[table_name].get_score(
+                real_data[table_name], synthetic_data[table_name], metadata_table,
+                progress_bar
+            )
+
+        details_frames = []
+        for table_name in metadata['tables']:
+            details = self._properties[table_name].details.copy()
+            details['Table'] = table_name
+            details_frames.append(details)
+
+        self.details = pd.concat(details_frames).reset_index(drop=True)
+
+        cols = ['Table'] + [col for col in self.details if col != 'Table']
+        self.details = self.details[cols]
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.
@@ -98,18 +107,14 @@ class BaseMultiTableProperty():
             float:
                 The average score for the property for all the individual metric scores computed.
         """
-        if self._single_table_property is None:
-            raise NotImplementedError()
+        self._generate_details(real_data, synthetic_data, metadata, progress_bar)
 
-        for table_name, metadata_table in metadata['tables'].items():
-            self._properties[table_name] = self._single_table_property()
-            self._properties[table_name].get_score(
-                real_data[table_name], synthetic_data[table_name], metadata_table,
-                progress_bar
-            )
-
-        self._generate_details(metadata)
         self.is_computed = True
+
+        if 'Error' in self.details.columns and self.details['Error'].isna().all():
+            self.details = self.details.drop('Error', axis=1)
+        elif 'Error' in self.details.columns:
+            self.details['Error'] = self.details['Error'].replace({np.nan: None})
 
         return self._compute_average()
 

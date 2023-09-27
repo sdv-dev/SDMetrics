@@ -21,7 +21,7 @@ def test__init__():
 
 
 @patch('sdmetrics.reports.multi_table._properties.inter_table_trends.SingleTableColumnPairTrends')
-def test_get_score(column_pair_trends_mock):
+def test__generate_details(column_pair_trends_mock):
     """Test the ``get_score`` method."""
     # Setup
     instance = InterTableTrends()
@@ -96,7 +96,7 @@ def test_get_score(column_pair_trends_mock):
     })
 
     # Run
-    instance.get_score(
+    instance._generate_details(
         real_data={'users': real_user_df, 'sessions': real_session_df},
         synthetic_data={'users': synthetic_user_df, 'sessions': synthetic_session_df},
         metadata=metadata
@@ -151,7 +151,8 @@ def test_get_score(column_pair_trends_mock):
         ],
         'Score': [1.0, 1.0, 0.5, 0.5],
         'Real Correlation': [None, None, None, 0.8],
-        'Synthetic Correlation': [None, None, None, 0.6]
+        'Synthetic Correlation': [None, None, None, 0.6],
+        'Error': [None, None, None, None]
     })
     instanced_mock._generate_details.assert_called_once_with(
         DataFrameMatcher(expected_denormalized_real),
