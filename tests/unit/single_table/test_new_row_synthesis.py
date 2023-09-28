@@ -29,7 +29,7 @@ class TestNewRowSynthesis:
             'col4': [1.32, 1.56, 1.21, np.nan, 1.90],
             'col5': [51, 51, 54, 55, 53],
             'col6': ['2020-01-02', '2022-11-24', '2022-06-01', '2021-04-12', '2020-12-11'],
-            'col7': pd.Series(['a', 'b', 'c', 'd', 'b'], dtype='category'),
+            'col7': pd.Series(['a', 'b', 'c', 'b', 'e'], dtype='category'),
         })
         metadata = {
             'primary_key': 'pk',
