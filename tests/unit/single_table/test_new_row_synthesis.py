@@ -19,6 +19,7 @@ class TestNewRowSynthesis:
             'col4': [1.32, np.nan, 1.43, np.nan, 2.0],
             'col5': [51, 52, 53, 54, 55],
             'col6': ['2020-01-02', '2021-01-04', '2021-05-03', '2022-10-11', '2022-11-13'],
+            'col7': pd.Series(['a', 'b', 'c', 'd', 'b'], dtype='category'),
         })
         synthetic_data = pd.DataFrame({
             'pk': [5, 6, 7, 8, 9],
@@ -28,6 +29,7 @@ class TestNewRowSynthesis:
             'col4': [1.32, 1.56, 1.21, np.nan, 1.90],
             'col5': [51, 51, 54, 55, 53],
             'col6': ['2020-01-02', '2022-11-24', '2022-06-01', '2021-04-12', '2020-12-11'],
+            'col7': pd.Series(['a', 'b', 'c', 'd', 'b'], dtype='category'),
         })
         metadata = {
             'primary_key': 'pk',
@@ -39,6 +41,7 @@ class TestNewRowSynthesis:
                 'col4': {'sdtype': 'numerical'},
                 'col5': {'sdtype': 'categorical'},
                 'col6': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                'col7': {'sdtype': 'categorical'},
             },
         }
         metric = NewRowSynthesis()
