@@ -16,7 +16,7 @@ class Cardinality(BaseMultiTableProperty):
 
     _num_iteration_case = 'relationship'
 
-    def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
+    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of cardinality shape similarity in the given tables.
 
         Args:
@@ -64,11 +64,6 @@ class Cardinality(BaseMultiTableProperty):
             'Score': scores,
             'Error': error_messages,
         })
-
-        if self.details['Error'].isna().all():
-            self.details = self.details.drop('Error', axis=1)
-
-        return self._compute_average()
 
     def _get_details_for_table_name(self, table_name):
         """Return the details for the given table name.

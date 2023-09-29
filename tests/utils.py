@@ -26,3 +26,16 @@ class SeriesMatcher:
         """Assert equality using pandas testing module."""
         pd.testing.assert_series_equal(self.data, other)
         return True
+
+
+class IteratorMatcher:
+    """Match a given iterator in a mock function call."""
+
+    def __init__(self, iterator):
+        """Initialize the iterator."""
+        self.iterator = iterator
+
+    def __eq__(self, other):
+        """Assert equality by expanding the iterator."""
+        assert all([x == y for x, y in zip(self.iterator, other)])
+        return True
