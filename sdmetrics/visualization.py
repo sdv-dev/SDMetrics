@@ -224,9 +224,7 @@ def _generate_column_plot(real_column,
     if plot_type == 'bar':
         fig = _generate_column_bar_plot(real_data, synthetic_data, plot_kwargs)
     elif plot_type == 'distplot':
-        if x_label is None:
-            x_label = 'Value'
-
+        x_label = x_label or 'Value'
         fig = _generate_column_distplot(real_data, synthetic_data, plot_kwargs)
         trace_args = {'fill': 'tozeroy'}
 
