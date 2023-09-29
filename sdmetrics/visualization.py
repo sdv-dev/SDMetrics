@@ -43,25 +43,19 @@ def _generate_column_bar_plot(real_data, synthetic_data, plot_kwargs={}):
     return fig
 
 
-def _generate_heatmap_plot(real_data, synthetic_data):
+def _generate_heatmap_plot(all_data, columns):
     """Generate heatmap plot for discrete data.
 
     Args:
-        real_data (pandas.DataFrame):
-            The real data for the desired column pair.
-        synthetic_column (pandas.Dataframe):
-            The synthetic data for the desired column pair.
+        all_data (pandas.DataFrame):
+            The real and synthetic data for the desired column pair containing a
+            ``Data`` column that indicates whether is real or synthetic.
+        columns (list):
+            A list of the columns being plotted.
 
     Returns:
         plotly.graph_objects._figure.Figure
     """
-    columns = real_data.columns
-    real_data = real_data.copy()
-    real_data['Data'] = 'Real'
-    synthetic_data = synthetic_data.copy()
-    synthetic_data['Data'] = 'Synthetic'
-    all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
-
     fig = px.density_heatmap(
         all_data,
         x=columns[0],
@@ -81,25 +75,19 @@ def _generate_heatmap_plot(real_data, synthetic_data):
     return fig
 
 
-def _generate_box_plot(real_data, synthetic_data):
+def _generate_box_plot(all_data, columns):
     """Generate a box plot for mixed discrete and continuous column data.
 
     Args:
-        real_data (pandas.DataFrame):
-            The real data for the desired column pair.
-        synthetic_column (pandas.Dataframe):
-            The synthetic data for the desired column pair.
+        all_data (pandas.DataFrame):
+            The real and synthetic data for the desired column pair containing a
+            ``Data`` column that indicates whether is real or synthetic.
+        columns (list):
+            A list of the columns being plotted.
 
     Returns:
         plotly.graph_objects._figure.Figure
     """
-    columns = real_data.columns
-    real_data = real_data.copy()
-    real_data['Data'] = 'Real'
-    synthetic_data = synthetic_data.copy()
-    synthetic_data['Data'] = 'Synthetic'
-    all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
-
     fig = px.box(
         all_data,
         x=columns[0],
@@ -120,25 +108,19 @@ def _generate_box_plot(real_data, synthetic_data):
     return fig
 
 
-def _generate_scatter_plot(real_data, synthetic_data):
+def _generate_scatter_plot(all_data, columns):
     """Generate a scatter plot for column pair plot.
 
     Args:
-        real_data (pandas.DataFrame):
-            The real data for the desired column pair.
-        synthetic_column (pandas.Dataframe):
-            The synthetic data for the desired column pair.
+        all_data (pandas.DataFrame):
+            The real and synthetic data for the desired column pair containing a
+            ``Data`` column that indicates whether is real or synthetic.
+        columns (list):
+            A list of the columns being plotted.
 
     Returns:
         plotly.graph_objects._figure.Figure
     """
-    columns = real_data.columns
-    real_data = real_data.copy()
-    real_data['Data'] = 'Real'
-    synthetic_data = synthetic_data.copy()
-    synthetic_data['Data'] = 'Synthetic'
-    all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
-
     fig = px.scatter(
         all_data,
         x=columns[0],
@@ -484,9 +466,17 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
         else:
             plot_type = plot_type.pop()
 
-    if plot_type == 'scatter':
-        return _generate_scatter_plot(real_data, synthetic_data)
-    elif plot_type == 'heatmap':
-        return _generate_heatmap_plot(real_data, synthetic_data)
+    # Merge the real and synthetic data and add a flag ``Data`` to indicate each one.
+    columns = list(real_data.columns)
+    real_data = real_data.copy()
+    real_data['Data'] = 'Real'
+    synthetic_data = synthetic_data.copy()
+    synthetic_data['Data'] = 'Synthetic'
+    all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
 
-    return _generate_box_plot(real_data, synthetic_data)
+    if plot_type == 'scatter':
+        return _generate_scatter_plot(all_data, columns)
+    elif plot_type == 'heatmap':
+        return _generate_heatmap_plot(all_data, columns)
+
+    return _generate_box_plot(all_data, columns)

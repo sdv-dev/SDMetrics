@@ -370,14 +370,24 @@ def test_get_column_plot_plot_type_distplot(mock__generate_column_plot):
 def test__generate_scatter_plot(px_mock):
     """Test the ``_generate_scatter_plot`` method."""
     # Setup
-    real_column = pd.DataFrame({'col1': [1, 2, 3, 4], 'col2': [1.1, 1.2, 1.3, 1.4]})
-    synthetic_column = pd.DataFrame({'col1': [1, 2, 4, 5], 'col2': [1.1, 1.2, 1.3, 1.4]})
+    real_column = pd.DataFrame({
+        'col1': [1, 2, 3, 4],
+        'col2': [1.1, 1.2, 1.3, 1.4],
+        'Data': ['Real'] * 4
+    })
+    synthetic_column = pd.DataFrame({
+        'col1': [1, 2, 4, 5],
+        'col2': [1.1, 1.2, 1.3, 1.4],
+        'Data': ['Synthetic'] * 4
+    })
 
+    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
+    columns = ['col1', 'col2']
     mock_figure = Mock()
     px_mock.scatter.return_value = mock_figure
 
     # Run
-    fig = _generate_scatter_plot(real_column, synthetic_column)
+    fig = _generate_scatter_plot(all_data, columns)
 
     # Assert
     px_mock.scatter.assert_called_once_with(
@@ -409,14 +419,24 @@ def test__generate_scatter_plot(px_mock):
 def test__generate_heatmap_plot(px_mock):
     """Test the ``_generate_heatmap_plot`` method."""
     # Setup
-    real_column = pd.DataFrame({'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
-    synthetic_column = pd.DataFrame({'col1': [1, 2, 4, 5], 'col2': ['a', 'b', 'c', 'd']})
+    real_column = pd.DataFrame({
+        'col1': [1, 2, 3, 4],
+        'col2': ['a', 'b', 'c', 'd'],
+        'Data': ['Real'] * 4
+    })
+    synthetic_column = pd.DataFrame({
+        'col1': [1, 2, 4, 5],
+        'col2': ['a', 'b', 'c', 'd'],
+        'Data': ['Synthetic'] * 4
+    })
+    columns = ['col1', 'col2']
+    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
 
     mock_figure = Mock()
     px_mock.density_heatmap.return_value = mock_figure
 
     # Run
-    fig = _generate_heatmap_plot(real_column, synthetic_column)
+    fig = _generate_heatmap_plot(all_data, columns)
 
     # Assert
     px_mock.density_heatmap.assert_called_once_with(
@@ -448,14 +468,24 @@ def test__generate_heatmap_plot(px_mock):
 def test__generate_box_plot(px_mock):
     """Test the ``_generate_box_plot`` method."""
     # Setup
-    real_column = pd.DataFrame({'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
-    synthetic_column = pd.DataFrame({'col1': [1, 2, 4, 5], 'col2': ['a', 'b', 'c', 'd']})
+    real_column = pd.DataFrame({
+        'col1': [1, 2, 3, 4],
+        'col2': ['a', 'b', 'c', 'd'],
+        'Data': ['Real'] * 4
+    })
+    synthetic_column = pd.DataFrame({
+        'col1': [1, 2, 4, 5],
+        'col2': ['a', 'b', 'c', 'd'],
+        'Data': ['Synthetic'] * 4
+    })
+    columns = ['col1', 'col2']
+    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
 
     mock_figure = Mock()
     px_mock.box.return_value = mock_figure
 
     # Run
-    fig = _generate_box_plot(real_column, synthetic_column)
+    fig = _generate_box_plot(all_data, columns)
 
     # Assert
     px_mock.box.assert_called_once_with(
@@ -545,9 +575,13 @@ def test_get_column_pair_plot_plot_type_none_continuous_data(mock__generate_scat
     fig = get_column_pair_plot(real_data, synthetic_data, columns)
 
     # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
     mock__generate_scatter_plot.assert_called_once_with(
-        DataFrameMatcher(real_data[columns]),
-        DataFrameMatcher(synthetic_data[columns]),
+        DataFrameMatcher(expected_call_data),
+        ['amount', 'price']
     )
     assert fig == mock__generate_scatter_plot.return_value
 
@@ -559,20 +593,24 @@ def test_get_column_pair_plot_plot_type_none_continuous_data_and_date(mock__gene
     columns = ['amount', 'date']
     real_data = pd.DataFrame({
         'amount': [1, 2, 3],
-        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01'])
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
     })
     synthetic_data = pd.DataFrame({
         'amount': [1., 2., 3.],
-        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01'])
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
     })
 
     # Run
     fig = get_column_pair_plot(real_data, synthetic_data, columns)
 
     # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
     mock__generate_scatter_plot.assert_called_once_with(
-        DataFrameMatcher(real_data[columns]),
-        DataFrameMatcher(synthetic_data[columns]),
+        DataFrameMatcher(expected_call_data),
+        ['amount', 'date'],
     )
     assert fig == mock__generate_scatter_plot.return_value
 
@@ -595,9 +633,13 @@ def test_get_column_pair_plot_plot_type_none_discrete_data(mock__generate_heatma
     fig = get_column_pair_plot(real_data, synthetic_data, columns)
 
     # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
     mock__generate_heatmap_plot.assert_called_once_with(
-        DataFrameMatcher(real_data[columns]),
-        DataFrameMatcher(synthetic_data[columns]),
+        DataFrameMatcher(expected_call_data),
+        ['name', 'surname'],
     )
     assert fig == mock__generate_heatmap_plot.return_value
 
@@ -620,9 +662,13 @@ def test_get_column_pair_plot_plot_type_none_discrete_and_continuous(mock__gener
     fig = get_column_pair_plot(real_data, synthetic_data, columns)
 
     # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
     mock__generate_box_plot.assert_called_once_with(
-        DataFrameMatcher(real_data[columns]),
-        DataFrameMatcher(synthetic_data[columns]),
+        DataFrameMatcher(expected_call_data),
+        ['name', 'counts']
     )
     assert fig == mock__generate_box_plot.return_value
 
@@ -645,8 +691,12 @@ def test_get_column_pair_plot_plot_type_is_box(mock__generate_heatmap_plot):
     fig = get_column_pair_plot(real_data, synthetic_data, columns, plot_type='heatmap')
 
     # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
     mock__generate_heatmap_plot.assert_called_once_with(
-        DataFrameMatcher(real_data[columns]),
-        DataFrameMatcher(synthetic_data[columns]),
+        DataFrameMatcher(expected_call_data),
+        ['amount', 'date']
     )
     assert fig == mock__generate_heatmap_plot.return_value
