@@ -43,6 +43,105 @@ def _generate_column_bar_plot(real_data, synthetic_data, plot_kwargs={}):
     return fig
 
 
+def _generate_heatmap_plot(all_data, columns):
+    """Generate heatmap plot for discrete data.
+
+    Args:
+        all_data (pandas.DataFrame):
+            The real and synthetic data for the desired column pair containing a
+            ``Data`` column that indicates whether is real or synthetic.
+        columns (list):
+            A list of the columns being plotted.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    fig = px.density_heatmap(
+        all_data,
+        x=columns[0],
+        y=columns[1],
+        facet_col='Data',
+        histnorm='probability'
+    )
+
+    fig.update_layout(
+        title_text=f"Real vs Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
+        coloraxis={'colorscale': [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]},
+        font={'size': PlotConfig.FONT_SIZE},
+    )
+
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split('=')[-1] + ' Data'))
+
+    return fig
+
+
+def _generate_box_plot(all_data, columns):
+    """Generate a box plot for mixed discrete and continuous column data.
+
+    Args:
+        all_data (pandas.DataFrame):
+            The real and synthetic data for the desired column pair containing a
+            ``Data`` column that indicates whether is real or synthetic.
+        columns (list):
+            A list of the columns being plotted.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    fig = px.box(
+        all_data,
+        x=columns[0],
+        y=columns[1],
+        color='Data',
+        color_discrete_map={
+            'Real': PlotConfig.DATACEBO_DARK,
+            'Synthetic': PlotConfig.DATACEBO_GREEN
+        },
+    )
+
+    fig.update_layout(
+        title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        font={'size': PlotConfig.FONT_SIZE},
+    )
+
+    return fig
+
+
+def _generate_scatter_plot(all_data, columns):
+    """Generate a scatter plot for column pair plot.
+
+    Args:
+        all_data (pandas.DataFrame):
+            The real and synthetic data for the desired column pair containing a
+            ``Data`` column that indicates whether is real or synthetic.
+        columns (list):
+            A list of the columns being plotted.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    fig = px.scatter(
+        all_data,
+        x=columns[0],
+        y=columns[1],
+        color='Data',
+        color_discrete_map={
+            'Real': PlotConfig.DATACEBO_DARK,
+            'Synthetic': PlotConfig.DATACEBO_GREEN
+        },
+        symbol='Data'
+    )
+
+    fig.update_layout(
+        title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        font={'size': PlotConfig.FONT_SIZE},
+    )
+
+    return fig
+
+
 def _generate_column_distplot(real_data, synthetic_data, plot_kwargs={}):
     """Plot the real and synthetic data as a distplot.
 
@@ -125,9 +224,7 @@ def _generate_column_plot(real_column,
     if plot_type == 'bar':
         fig = _generate_column_bar_plot(real_data, synthetic_data, plot_kwargs)
     elif plot_type == 'distplot':
-        if x_label is None:
-            x_label = 'Value'
-
+        x_label = x_label or 'Value'
         fig = _generate_column_distplot(real_data, synthetic_data, plot_kwargs)
         trace_args = {'fill': 'tozeroy'}
 
@@ -277,7 +374,7 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
             The name of the column.
         plot_type (str or None):
             The plot to be used. Can choose between ``distplot``, ``bar`` or ``None``. If ``None`
-            select between ``distplot`` or ``bar`` depending on the data that the column contains:
+            select between ``distplot`` or ``bar`` depending on the data that the column contains,
             ``distplot`` for datetime and numerical values and ``bar`` for categorical.
             Defaults to ``None``.
 
@@ -309,3 +406,75 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     fig = _generate_column_plot(real_column, synthetic_column, plot_type)
 
     return fig
+
+
+def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None):
+    """Return a plot of the real and synthetic data for a given column pair.
+
+    Args:
+        real_data (pandas.DataFrame):
+            The real table data.
+        synthetic_column (pandas.Dataframe):
+            The synthetic table data.
+        column_names (list[string]):
+            The names of the two columns to plot.
+        plot_type (str or None):
+            The plot to be used. Can choose between ``box``, ``heatmap``, ``scatter`` or ``None``.
+            If ``None` select between ``box``, ``heatmap`` or ``scatter`` depending on the data
+            that the column contains, ``scatter`` used for datetime and numerical values,
+            ``heatmap`` for categorical and ``box`` for a mix of both. Defaults to ``None``.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    if len(column_names) != 2:
+        raise ValueError('Must provide exactly two column names.')
+
+    if not set(column_names).issubset(real_data.columns):
+        raise ValueError(
+            f'Missing column(s) {set(column_names) - set(real_data.columns)} in real data.'
+        )
+
+    if not set(column_names).issubset(synthetic_data.columns):
+        raise ValueError(
+            f'Missing column(s) {set(column_names) - set(synthetic_data.columns)} '
+            'in synthetic data.'
+        )
+
+    if plot_type not in ['box', 'heatmap', 'scatter', None]:
+        raise ValueError(
+            f"Invalid plot_type '{plot_type}'. Please use one of "
+            "['box', 'heatmap', 'scatter', None]."
+        )
+
+    real_data = real_data[column_names]
+    synthetic_data = synthetic_data[column_names]
+    if plot_type is None:
+        plot_type = []
+        for column_name in column_names:
+            column = real_data[column_name]
+            dtype = column.dropna().infer_objects().dtype.kind
+            if dtype in ('i', 'f') or is_datetime(column):
+                plot_type.append('scatter')
+            else:
+                plot_type.append('heatmap')
+
+        if len(set(plot_type)) > 1:
+            plot_type = 'box'
+        else:
+            plot_type = plot_type.pop()
+
+    # Merge the real and synthetic data and add a flag ``Data`` to indicate each one.
+    columns = list(real_data.columns)
+    real_data = real_data.copy()
+    real_data['Data'] = 'Real'
+    synthetic_data = synthetic_data.copy()
+    synthetic_data['Data'] = 'Synthetic'
+    all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
+    if plot_type == 'scatter':
+        return _generate_scatter_plot(all_data, columns)
+    elif plot_type == 'heatmap':
+        return _generate_heatmap_plot(all_data, columns)
+
+    return _generate_box_plot(all_data, columns)

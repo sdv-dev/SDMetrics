@@ -5,7 +5,8 @@ import pandas as pd
 import pytest
 
 from sdmetrics.visualization import (
-    _generate_cardinality_plot, _get_cardinality, get_cardinality_plot, get_column_plot)
+    _generate_box_plot, _generate_cardinality_plot, _generate_heatmap_plot, _generate_scatter_plot,
+    _get_cardinality, get_cardinality_plot, get_column_pair_plot, get_column_plot)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -363,3 +364,339 @@ def test_get_column_plot_plot_type_distplot(mock__generate_column_plot):
         'distplot'
     )
     assert figure == mock__generate_column_plot.return_value
+
+
+@patch('sdmetrics.visualization.px')
+def test__generate_scatter_plot(px_mock):
+    """Test the ``_generate_scatter_plot`` method."""
+    # Setup
+    real_column = pd.DataFrame({
+        'col1': [1, 2, 3, 4],
+        'col2': [1.1, 1.2, 1.3, 1.4],
+        'Data': ['Real'] * 4
+    })
+    synthetic_column = pd.DataFrame({
+        'col1': [1, 2, 4, 5],
+        'col2': [1.1, 1.2, 1.3, 1.4],
+        'Data': ['Synthetic'] * 4
+    })
+
+    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
+    columns = ['col1', 'col2']
+    mock_figure = Mock()
+    px_mock.scatter.return_value = mock_figure
+
+    # Run
+    fig = _generate_scatter_plot(all_data, columns)
+
+    # Assert
+    px_mock.scatter.assert_called_once_with(
+        DataFrameMatcher(pd.DataFrame({
+            'col1': [1, 2, 3, 4, 1, 2, 4, 5],
+            'col2': [1.1, 1.2, 1.3, 1.4, 1.1, 1.2, 1.3, 1.4],
+            'Data': [
+                'Real',
+                'Real',
+                'Real',
+                'Real',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+            ],
+        })),
+        x='col1',
+        y='col2',
+        color='Data',
+        color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'},
+        symbol='Data',
+    )
+    assert mock_figure.update_layout.called_once()
+    assert fig == mock_figure
+
+
+@patch('sdmetrics.visualization.px')
+def test__generate_heatmap_plot(px_mock):
+    """Test the ``_generate_heatmap_plot`` method."""
+    # Setup
+    real_column = pd.DataFrame({
+        'col1': [1, 2, 3, 4],
+        'col2': ['a', 'b', 'c', 'd'],
+        'Data': ['Real'] * 4
+    })
+    synthetic_column = pd.DataFrame({
+        'col1': [1, 2, 4, 5],
+        'col2': ['a', 'b', 'c', 'd'],
+        'Data': ['Synthetic'] * 4
+    })
+    columns = ['col1', 'col2']
+    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
+
+    mock_figure = Mock()
+    px_mock.density_heatmap.return_value = mock_figure
+
+    # Run
+    fig = _generate_heatmap_plot(all_data, columns)
+
+    # Assert
+    px_mock.density_heatmap.assert_called_once_with(
+        DataFrameMatcher(pd.DataFrame({
+            'col1': [1, 2, 3, 4, 1, 2, 4, 5],
+            'col2': ['a', 'b', 'c', 'd', 'a', 'b', 'c', 'd'],
+            'Data': [
+                'Real',
+                'Real',
+                'Real',
+                'Real',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+            ],
+        })),
+        x='col1',
+        y='col2',
+        facet_col='Data',
+        histnorm='probability',
+    )
+    assert mock_figure.update_layout.called_once()
+    assert mock_figure.for_each_annotation.called_once()
+    assert fig == mock_figure
+
+
+@patch('sdmetrics.visualization.px')
+def test__generate_box_plot(px_mock):
+    """Test the ``_generate_box_plot`` method."""
+    # Setup
+    real_column = pd.DataFrame({
+        'col1': [1, 2, 3, 4],
+        'col2': ['a', 'b', 'c', 'd'],
+        'Data': ['Real'] * 4
+    })
+    synthetic_column = pd.DataFrame({
+        'col1': [1, 2, 4, 5],
+        'col2': ['a', 'b', 'c', 'd'],
+        'Data': ['Synthetic'] * 4
+    })
+    columns = ['col1', 'col2']
+    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
+
+    mock_figure = Mock()
+    px_mock.box.return_value = mock_figure
+
+    # Run
+    fig = _generate_box_plot(all_data, columns)
+
+    # Assert
+    px_mock.box.assert_called_once_with(
+        DataFrameMatcher(pd.DataFrame({
+            'col1': [1, 2, 3, 4, 1, 2, 4, 5],
+            'col2': ['a', 'b', 'c', 'd', 'a', 'b', 'c', 'd'],
+            'Data': [
+                'Real',
+                'Real',
+                'Real',
+                'Real',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+            ],
+        })),
+        x='col1',
+        y='col2',
+        color='Data',
+        color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'},
+    )
+    assert mock_figure.update_layout.called_once()
+    assert fig == mock_figure
+
+
+def test_get_column_pair_plot_invalid_column_names():
+    """Test ``get_column_pair_plot`` method with invalid ``column_names``."""
+    # Setup
+    columns = ['values']
+    real_data = synthetic_data = pd.DataFrame({'values': []})
+
+    # Run and Assert
+    match = 'Must provide exactly two column names.'
+    with pytest.raises(ValueError, match=match):
+        get_column_pair_plot(real_data, synthetic_data, columns)
+
+
+def test_get_column_pair_plot_columns_not_in_real_data():
+    """Test ``get_column_pair_plot`` method with ``column_names`` not in the real data."""
+    # Setup
+    columns = ['start_date', 'end_date']
+    real_data = synthetic_data = pd.DataFrame({'start_date': []})
+
+    # Run and Assert
+    match = re.escape("Missing column(s) {'end_date'} in real data.")
+    with pytest.raises(ValueError, match=match):
+        get_column_pair_plot(real_data, synthetic_data, columns)
+
+
+def test_get_column_pair_plot_columns_not_in_syntehtic_data():
+    """Test ``get_column_pair_plot`` method with ``column_names`` not in the synthetic data."""
+    # Setup
+    columns = ['start_date', 'end_date']
+    real_data = pd.DataFrame({'start_date': [], 'end_date': []})
+    synthetic_data = pd.DataFrame({'start_date': []})
+
+    # Run and Assert
+    match = re.escape("Missing column(s) {'end_date'} in synthetic data.")
+    with pytest.raises(ValueError, match=match):
+        get_column_pair_plot(real_data, synthetic_data, columns)
+
+
+def test_get_column_pair_plot_invalid_plot_type():
+    """Test when invalid plot type is passed as argument to ``get_column_pair_plot``."""
+    # Setup
+    columns = ['start_date', 'end_date']
+    real_data = synthetic_data = pd.DataFrame({'start_date': [], 'end_date': []})
+
+    # Run and Assert
+    match = re.escape(
+        "Invalid plot_type 'distplot'. Please use one of ['box', 'heatmap', 'scatter', None]."
+    )
+    with pytest.raises(ValueError, match=match):
+        get_column_pair_plot(real_data, synthetic_data, columns, plot_type='distplot')
+
+
+@patch('sdmetrics.visualization._generate_scatter_plot')
+def test_get_column_pair_plot_plot_type_none_continuous_data(mock__generate_scatter_plot):
+    """Test ``get_column_pair_plot`` with continuous data and ``plot_type`` ``None``."""
+    # Setup
+    columns = ['amount', 'price']
+    real_data = pd.DataFrame({'amount': [1, 2, 3], 'price': [4, 5, 6]})
+    synthetic_data = pd.DataFrame({'amount': [1., 2., 3.], 'price': [4., 5., 6.]})
+
+    # Run
+    fig = get_column_pair_plot(real_data, synthetic_data, columns)
+
+    # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
+    mock__generate_scatter_plot.assert_called_once_with(
+        DataFrameMatcher(expected_call_data),
+        ['amount', 'price']
+    )
+    assert fig == mock__generate_scatter_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_scatter_plot')
+def test_get_column_pair_plot_plot_type_none_continuous_data_and_date(mock__generate_scatter_plot):
+    """Test ``get_column_pair_plot`` with continuous data and ``plot_type`` ``None``."""
+    # Setup
+    columns = ['amount', 'date']
+    real_data = pd.DataFrame({
+        'amount': [1, 2, 3],
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
+    })
+    synthetic_data = pd.DataFrame({
+        'amount': [1., 2., 3.],
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
+    })
+
+    # Run
+    fig = get_column_pair_plot(real_data, synthetic_data, columns)
+
+    # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
+    mock__generate_scatter_plot.assert_called_once_with(
+        DataFrameMatcher(expected_call_data),
+        ['amount', 'date'],
+    )
+    assert fig == mock__generate_scatter_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_heatmap_plot')
+def test_get_column_pair_plot_plot_type_none_discrete_data(mock__generate_heatmap_plot):
+    """Test ``get_column_pair_plot`` with discrete data and ``plot_type`` ``None``."""
+    # Setup
+    columns = ['name', 'surname']
+    real_data = pd.DataFrame({
+        'name': ['John', 'Emily'],
+        'surname': ['Morales', 'Terry']
+    })
+    synthetic_data = pd.DataFrame({
+        'name': ['John', 'Johanna'],
+        'surname': ['Dominic', 'Rogers']
+    })
+
+    # Run
+    fig = get_column_pair_plot(real_data, synthetic_data, columns)
+
+    # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
+    mock__generate_heatmap_plot.assert_called_once_with(
+        DataFrameMatcher(expected_call_data),
+        ['name', 'surname'],
+    )
+    assert fig == mock__generate_heatmap_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_box_plot')
+def test_get_column_pair_plot_plot_type_none_discrete_and_continuous(mock__generate_box_plot):
+    """Test ``get_column_pair_plot`` with discrete and continuous data."""
+    # Setup
+    columns = ['name', 'counts']
+    real_data = pd.DataFrame({
+        'name': ['John', 'Emily'],
+        'counts': [1, 2]
+    })
+    synthetic_data = pd.DataFrame({
+        'name': ['John', 'Johanna'],
+        'counts': [3, 1]
+    })
+
+    # Run
+    fig = get_column_pair_plot(real_data, synthetic_data, columns)
+
+    # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
+    mock__generate_box_plot.assert_called_once_with(
+        DataFrameMatcher(expected_call_data),
+        ['name', 'counts']
+    )
+    assert fig == mock__generate_box_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_heatmap_plot')
+def test_get_column_pair_plot_plot_type_is_box(mock__generate_heatmap_plot):
+    """Test ``get_column_pair_plot`` when forcing it ot be a heatmap plot on continuous data."""
+    # Setup
+    columns = ['amount', 'date']
+    real_data = pd.DataFrame({
+        'amount': [1, 2, 3],
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01'])
+    })
+    synthetic_data = pd.DataFrame({
+        'amount': [1., 2., 3.],
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01'])
+    })
+
+    # Run
+    fig = get_column_pair_plot(real_data, synthetic_data, columns, plot_type='heatmap')
+
+    # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
+    mock__generate_heatmap_plot.assert_called_once_with(
+        DataFrameMatcher(expected_call_data),
+        ['amount', 'date']
+    )
+    assert fig == mock__generate_heatmap_plot.return_value
