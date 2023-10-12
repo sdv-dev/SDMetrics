@@ -253,6 +253,54 @@ class TestBaseReport:
         mock_tqdm.assert_has_calls(calls, any_order=True)
         base_report._handle_results.assert_called_once_with(True)
 
+    def test__convert_metadata_with_to_dict_method(self):
+        """Test ``_convert_metadata`` when the metadata object has a ``to_dict`` method."""
+        # Setup
+        metadata_example = {
+            'column1': {'sdtype': 'numerical'},
+            'column2': {'sdtype': 'categorical'},
+        }
+
+        class Metadata:
+            def __init__(self):
+                self.columns = metadata_example
+
+            def to_dict(self):
+                return self.columns
+
+        metadata = Metadata()
+
+        # Run
+        converted_metadata = BaseReport._convert_metadata(metadata)
+
+        # Assert
+        assert converted_metadata == metadata_example
+
+    def test__convert_metadata_without_to_dict_method(self):
+        """Test ``_convert_metadata`` when the metadata object has no ``to_dict`` method."""
+        # Setup
+        metadata_example = {
+            'column1': {'sdtype': 'numerical'},
+            'column2': {'sdtype': 'categorical'},
+        }
+
+        class Metadata:
+            def __init__(self):
+                self.columns = metadata_example
+
+        metadata = Metadata()
+
+        # Run and Assert
+        expected_message = re.escape(
+            'The provided metadata is not a dictionary and does not have a to_dict method.'
+            'Please convert the metadata to a dictionary.'
+        )
+        with pytest.raises(TypeError, match=expected_message):
+            BaseReport._convert_metadata(metadata)
+
+        result = BaseReport._convert_metadata(metadata_example)
+        assert result == metadata_example
+
     def test__check_report_generated(self):
         """Test the ``check_report_generated`` method."""
         # Setup
