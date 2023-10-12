@@ -61,20 +61,6 @@ class BaseReport():
         raise NotImplementedError
 
     @staticmethod
-    def _convert_metadata(metadata):
-        """If the metadta is not a dict, try to convert it."""
-        if not isinstance(metadata, dict):
-            try:
-                metadata = metadata.to_dict()
-            except Exception:
-                raise TypeError(
-                    'The provided metadata is not a dictionary and does not have a to_dict method.'
-                    'Please convert the metadata to a dictionary.'
-                )
-
-        return metadata
-
-    @staticmethod
     def convert_datetimes(real_data, synthetic_data, metadata):
         """Try to convert all datetime columns to datetime dtype.
 
@@ -112,7 +98,9 @@ class BaseReport():
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
-        metadata = self._convert_metadata(metadata)
+        if not isinstance(metadata, dict):
+            raise TypeError('The provided metadata is not a dictionary.')
+
         self.validate(real_data, synthetic_data, metadata)
         self.convert_datetimes(real_data, synthetic_data, metadata)
 
