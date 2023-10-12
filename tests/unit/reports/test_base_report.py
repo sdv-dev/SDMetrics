@@ -173,7 +173,7 @@ class TestBaseReport:
         with pytest.raises(TypeError, match=expected_message):
             base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
-    def test_generate(self, mock__convert_metadata):
+    def test_generate(self):
         """Test the ``generate`` method.
 
         This test checks that the method calls the ``validate`` method and the ``get_score``
