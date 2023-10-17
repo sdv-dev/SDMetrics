@@ -1,6 +1,7 @@
 import contextlib
 import io
 import re
+import time
 from datetime import date, datetime
 
 import numpy as np
@@ -80,7 +81,9 @@ class TestQualityReport:
         report = QualityReport()
 
         # Run
+        generate_start_time = time.time()
         report.generate(real_data[column_names], synthetic_data[column_names], metadata)
+        generate_end_time = time.time()
 
         # Assert
         expected_details_column_shapes_dict = {
@@ -125,6 +128,19 @@ class TestQualityReport:
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
         assert report.get_score() == 0.7804181608907237
+
+        report_info = report.get_info()
+        assert report_info == report.report_info
+
+        expected_info_keys = {
+            'report_type', 'generated_date', 'sdmetrics_version', 'num_rows_real_data',
+            'num_rows_synthetic_data', 'generation_time'
+        }
+        assert report_info.keys() == expected_info_keys
+        assert report_info['report_type'] == 'QualityReport'
+        assert report_info['num_rows_real_data'] == 215
+        assert report_info['num_rows_synthetic_data'] == 215
+        assert report_info['generation_time'] <= generate_end_time - generate_start_time
 
     def test_quality_report_with_object_datetimes(self):
         """Test the quality report with object datetimes.

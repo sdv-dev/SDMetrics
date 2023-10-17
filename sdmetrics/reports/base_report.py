@@ -1,7 +1,11 @@
 """Single table base report."""
 import pickle
 import sys
+import time
 import warnings
+from copy import deepcopy
+from datetime import datetime
+from importlib.metadata import version
 
 import numpy as np
 import pandas as pd
@@ -22,6 +26,11 @@ class BaseReport():
         self.is_generated = False
         self._properties = {}
         self._results_handler = None
+        self.report_info = {
+            'report_type': self.__class__.__name__,
+            'generated_date': None,
+            'sdmetrics_version': version('sdmetrics')
+        }
 
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
         """Validate that the metadata matches the data.
@@ -104,11 +113,25 @@ class BaseReport():
         self.validate(real_data, synthetic_data, metadata)
         self.convert_datetimes(real_data, synthetic_data, metadata)
 
+        self.report_info['generated_date'] = datetime.today().strftime('%Y-%m-%d')
+        if 'tables' in metadata:
+            self.report_info['num_tables'] = len(metadata['tables'])
+            self.report_info['num_rows_real_data'] = {
+                name: len(table) for name, table in real_data.items()
+            }
+            self.report_info['num_rows_synthetic_data'] = {
+                name: len(table) for name, table in synthetic_data.items()
+            }
+        else:
+            self.report_info['num_rows_real_data'] = len(real_data)
+            self.report_info['num_rows_synthetic_data'] = len(synthetic_data)
+
         scores = []
         progress_bar = None
         if verbose:
             sys.stdout.write('Generating report ...\n')
 
+        start_time = time.time()
         for ind, (property_name, property_instance) in enumerate(self._properties.items()):
             if verbose:
                 num_iterations = int(property_instance._get_num_iterations(metadata))
@@ -126,6 +149,8 @@ class BaseReport():
 
         self._overall_score = np.nanmean(scores)
         self.is_generated = True
+        end_time = time.time()
+        self.report_info['generation_time'] = end_time - start_time
 
         self._handle_results(verbose)
 
@@ -142,6 +167,10 @@ class BaseReport():
                 f"Invalid property name '{property_name}'."
                 f" Valid property names are '{valid_property_names}'."
             )
+
+    def get_info(self):
+        """Get the information about the report."""
+        return deepcopy(self.report_info)
 
     def _check_report_generated(self):
         if not self.is_generated:

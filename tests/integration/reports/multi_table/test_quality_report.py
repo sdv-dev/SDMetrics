@@ -1,3 +1,4 @@
+import time
 from datetime import date, datetime
 
 import numpy as np
@@ -90,7 +91,9 @@ def test_multi_table_quality_report():
     # Run `generate`, `get_properties` and `get_score`,
     # as well as `get_visualization` and `get_details` for every property:
     # 'Column Shapes', 'Column Pair Trends', 'Cardinality'
+    generate_start_time = time.time()
     report.generate(real_data, synthetic_data, metadata)
+    generate_end_time = time.time()
     properties = report.get_properties()
     property_names = list(properties['Property'])
     score = report.get_score()
@@ -183,6 +186,21 @@ def test_multi_table_quality_report():
     })
     pd.testing.assert_frame_equal(details[5], expected_df_4)
 
+    # Assert report info saved
+    report_info = report.get_info()
+    assert report_info == report.report_info
+
+    expected_info_keys = {
+        'report_type', 'generated_date', 'sdmetrics_version', 'num_tables', 'num_rows_real_data',
+        'num_rows_synthetic_data', 'generation_time'
+    }
+    assert report_info.keys() == expected_info_keys
+    assert report_info['report_type'] == 'QualityReport'
+    assert report_info['num_tables'] == 2
+    assert report_info['num_rows_real_data'] == {'table1': 4, 'table2': 4}
+    assert report_info['num_rows_synthetic_data'] == {'table1': 4, 'table2': 4}
+    assert report_info['generation_time'] <= generate_end_time - generate_start_time
+
 
 def test_quality_report_end_to_end():
     """Test the multi table QualityReport end to end."""
@@ -194,6 +212,7 @@ def test_quality_report_end_to_end():
     report.generate(real_data, synthetic_data, metadata)
     score = report.get_score()
     properties = report.get_properties()
+    info = report.get_info()
 
     # Assert
     expected_properties = pd.DataFrame({
@@ -202,6 +221,15 @@ def test_quality_report_end_to_end():
     })
     assert score == 0.6249089638729638
     pd.testing.assert_frame_equal(properties, expected_properties)
+    expected_info_keys = {
+        'report_type', 'generated_date', 'sdmetrics_version', 'num_tables', 'num_rows_real_data',
+        'num_rows_synthetic_data', 'generation_time'
+    }
+    assert info.keys() == expected_info_keys
+    assert info['report_type'] == 'QualityReport'
+    assert info['num_tables'] == 3
+    assert info['num_rows_real_data'] == {'sessions': 10, 'users': 10, 'transactions': 10}
+    assert info['num_rows_synthetic_data'] == {'sessions': 9, 'users': 10, 'transactions': 10}
 
 
 def test_quality_report_with_object_datetimes():
