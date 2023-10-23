@@ -31,7 +31,7 @@ class TestKeyUniqueness:
         synthetic_data = pd.Series([1, 2, np.nan, 3, np.nan, 5, 2, np.nan, 6, None])
         metric = KeyUniqueness()
 
-        # Run
+        # Run and Assert
         expected_message = 'The real data contains NA or duplicate values.'
         with pytest.raises(InvalidDataError, match=expected_message):
             metric.compute_breakdown(real_data, synthetic_data)
@@ -49,6 +49,7 @@ class TestKeyUniqueness:
         result = metric.compute(real_data, synthetic_data)
 
         # Assert
+        compute_breakdown_mock.assert_called_once_with(real_data, synthetic_data)
         assert result == 0.6
 
     @patch('sdmetrics.single_column.statistical.key_uniqueness.SingleColumnMetric.normalize')

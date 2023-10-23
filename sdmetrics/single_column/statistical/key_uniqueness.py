@@ -8,7 +8,7 @@ from sdmetrics.single_column.base import SingleColumnMetric
 class KeyUniqueness(SingleColumnMetric):
     """Key uniqueness metric.
 
-    Compute the fraction of rows in the synthetic data that are unique.
+    The proportion of data points in the synthetic data that are unique.
 
     Attributes:
         name (str):
@@ -51,7 +51,7 @@ class KeyUniqueness(SingleColumnMetric):
 
     @classmethod
     def compute(cls, real_data, synthetic_data):
-        """Compute the key uniqueness of two columns.
+        """Compute the key uniqueness metric.
 
         Args:
             real_data (pandas.Series):
@@ -61,7 +61,7 @@ class KeyUniqueness(SingleColumnMetric):
 
         Returns:
             float:
-                The key uniqueness of the two columns.
+                The proportion of data points in the synthetic data that are unique.
         """
         return cls.compute_breakdown(real_data, synthetic_data)['score']
 
