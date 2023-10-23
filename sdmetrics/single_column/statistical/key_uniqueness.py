@@ -1,8 +1,10 @@
 """Key Uniqueness Metric."""
+import logging
 
-from sdmetrics.errors import InvalidDataError
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
+
+LOGGER = logging.getLogger(__name__)
 
 
 class KeyUniqueness(SingleColumnMetric):
@@ -41,11 +43,12 @@ class KeyUniqueness(SingleColumnMetric):
                 The score breakdown of the key uniqueness metric.
         """
         has_duplicates = real_data.duplicated().any()
-        if has_duplicates:
-            raise InvalidDataError('The real data contains NA or duplicate values.')
+        has_nans = real_data.isna().any()
+        if has_duplicates or has_nans:
+            LOGGER.info('The real data contains NA or duplicate values.')
 
-        duplicates_synthetic = synthetic_data.duplicated()
-        score = 1 - duplicates_synthetic.sum() / len(synthetic_data)
+        nans_or_duplicates_synthetic = synthetic_data.duplicated() | synthetic_data.isna()
+        score = 1 - nans_or_duplicates_synthetic.sum() / len(synthetic_data)
 
         return {'score': score}
 
