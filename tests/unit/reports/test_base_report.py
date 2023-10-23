@@ -152,6 +152,27 @@ class TestBaseReport:
         pd.testing.assert_frame_equal(real_data, expected_real_data)
         pd.testing.assert_frame_equal(synthetic_data, expected_synthetic_data)
 
+    def test_generate_metadata_not_dict(self):
+        """Test the ``generate`` method with metadata not being a dict."""
+        # Setup
+        base_report = BaseReport()
+        real_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c']
+        })
+        synthetic_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c']
+        })
+        metadata = 'metadata'
+
+        # Run and Assert
+        expected_message = (
+            'The provided metadata is not a dictionary.'
+        )
+        with pytest.raises(TypeError, match=expected_message):
+            base_report.generate(real_data, synthetic_data, metadata, verbose=False)
+
     @patch('sdmetrics.reports.base_report.datetime')
     @patch('sdmetrics.reports.base_report.time')
     @patch('sdmetrics.reports.base_report.version')

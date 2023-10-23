@@ -64,9 +64,6 @@ class BaseReport():
             metadata (dict):
                 The metadata of the table.
         """
-        if not isinstance(metadata, dict):
-            metadata = metadata.to_dict()
-
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
     def _handle_results(self, verbose):
@@ -110,6 +107,9 @@ class BaseReport():
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
+        if not isinstance(metadata, dict):
+            raise TypeError('The provided metadata is not a dictionary.')
+
         self.validate(real_data, synthetic_data, metadata)
         self.convert_datetimes(real_data, synthetic_data, metadata)
 
