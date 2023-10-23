@@ -9,7 +9,7 @@ from sdmetrics.single_column.base import SingleColumnMetric
 class CategoryAdherence(SingleColumnMetric):
     """Category adherence metric.
 
-    Compute the fraction of synthetic values that match at least 1 value in the real data.
+    The proportion of synthetic data points that match an existing category from the real data.
 
     Attributes:
         name (str):
@@ -39,7 +39,7 @@ class CategoryAdherence(SingleColumnMetric):
 
         Returns:
             dict:
-                The score breakdown of the key uniqueness metric.
+                The score breakdown of the category adherence metric.
         """
         real_data = real_data.fillna(np.nan)
         synthetic_data = synthetic_data.fillna(np.nan)
@@ -59,7 +59,7 @@ class CategoryAdherence(SingleColumnMetric):
 
         Returns:
             float:
-                The key uniqueness of the two columns.
+                The category adherence metric score.
         """
         return cls.compute_breakdown(real_data, synthetic_data)['score']
 
