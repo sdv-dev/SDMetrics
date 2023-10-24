@@ -195,17 +195,3 @@ class TestTableFormat:
         # Assert
         compute_breakdown_mock.assert_called_once_with(real_data, synthetic_data, None)
         assert result == 0.6
-
-    @patch('sdmetrics.single_table.table_format.SingleTableMetric.normalize')
-    def test_normalize(self, normalize_mock):
-        """Test the ``normalize`` method."""
-        # Setup
-        metric = TableFormat()
-        raw_score = 0.9
-
-        # Run
-        result = metric.normalize(raw_score)
-
-        # Assert
-        normalize_mock.assert_called_once_with(raw_score)
-        assert result == normalize_mock.return_value
