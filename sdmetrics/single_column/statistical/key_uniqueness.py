@@ -67,17 +67,3 @@ class KeyUniqueness(SingleColumnMetric):
                 The proportion of data points in the synthetic data that are unique.
         """
         return cls.compute_breakdown(real_data, synthetic_data)['score']
-
-    @classmethod
-    def normalize(cls, raw_score):
-        """Return the `raw_score` as is, since it is already normalized.
-
-        Args:
-            raw_score (float):
-                The value of the metric from `compute`.
-
-        Returns:
-            float:
-                The normalized value of the metric
-        """
-        return super().normalize(raw_score)
