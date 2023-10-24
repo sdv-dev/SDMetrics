@@ -43,8 +43,11 @@ class BoundaryAdherence(SingleColumnMetric):
             float:
                 The boundary adherence of the two columns.
         """
-        real_data = pd.Series(real_data).dropna()
-        synthetic_data = pd.Series(synthetic_data).dropna()
+        real_data = pd.Series(real_data)
+        synthetic_data = pd.Series(synthetic_data)
+        if any(pd.isna(real_data)):
+            real_data = real_data.dropna()
+            synthetic_data = synthetic_data.dropna()
 
         if is_datetime(real_data):
             real_data = pd.to_numeric(real_data)
