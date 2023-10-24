@@ -173,13 +173,21 @@ class TestBaseReport:
         with pytest.raises(TypeError, match=expected_message):
             base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
-    def test_generate(self):
+    @patch('sdmetrics.reports.base_report.datetime')
+    @patch('sdmetrics.reports.base_report.time')
+    @patch('sdmetrics.reports.base_report.version')
+    def test_generate(self, version_mock, time_mock, datetime_mock):
         """Test the ``generate`` method.
 
         This test checks that the method calls the ``validate`` method and the ``get_score``
-        method for each property.
+        method for each property. Also tests that the ``details`` property is correctly
+        populated.
         """
         # Setup
+        datetime_mock.today.return_value = pd.to_datetime('2020-01-05')
+        time_mock.time.side_effect = [5, 10]
+        version_mock.return_value = 'version'
+
         base_report = BaseReport()
         mock_validate = Mock()
         mock_handle_results = Mock()
@@ -217,6 +225,102 @@ class TestBaseReport:
         base_report._properties['Property 2'].get_score.assert_called_with(
             real_data, synthetic_data, metadata, progress_bar=None
         )
+        expected_info = {
+            'report_type': 'BaseReport',
+            'generated_date': '2020-01-05',
+            'sdmetrics_version': 'version',
+            'num_rows_real_data': 3,
+            'num_rows_synthetic_data': 3,
+            'generation_time': 5
+        }
+        assert base_report.report_info == expected_info
+
+    @patch('sdmetrics.reports.base_report.datetime')
+    @patch('sdmetrics.reports.base_report.time')
+    @patch('sdmetrics.reports.base_report.version')
+    def test_generate_multi_table_details(self, version_mock, time_mock, datetime_mock):
+        """Test the ``generate`` method with multi-table data.
+
+        This test checks that the ``details`` property is correctly populated with
+        multi-table data.
+        """
+        # Setup
+        datetime_mock.today.return_value = pd.to_datetime('2020-01-05')
+        time_mock.time.side_effect = [5, 10]
+        version_mock.return_value = 'version'
+
+        base_report = BaseReport()
+        base_report._handle_results = Mock()
+        base_report.validate = Mock()
+        base_report.convert_datetimes = Mock()
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 1'].get_score.return_value = 1.0
+        base_report._properties['Property 2'] = Mock()
+        base_report._properties['Property 2'].get_score.return_value = 1.0
+
+        real_data = {
+            'table1': pd.DataFrame({
+                'column1': [1, 2, 3],
+                'column2': ['a', 'b', 'c']
+            }),
+            'table2': pd.DataFrame({
+                'column3': ['x', 'y', 'z'],
+                'column4': [10, 9, 8]
+            })
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({
+                'column1': [1, 2, 3],
+                'column2': ['a', 'b', 'c']
+            }),
+            'table2': pd.DataFrame({
+                'column3': ['x', 'y', 'z'],
+                'column4': [10, 9, 8]
+            })
+        }
+        metadata = {
+            'tables': {
+                'table1': {
+                    'columns': {
+                        'column1': {'sdtype': 'numerical'},
+                        'column2': {'sdtype': 'categorical'}
+                    }
+                },
+                'table2': {
+                    'columns': {
+                        'column3': {'sdtype': 'categorical'},
+                        'column4': {'sdtype': 'numerical'}
+                    }
+                }
+            }
+        }
+
+        # Run
+        base_report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+        # Assert
+        base_report._properties['Property 1'].get_score.assert_called_with(
+            real_data, synthetic_data, metadata, progress_bar=None
+        )
+        base_report._properties['Property 2'].get_score.assert_called_with(
+            real_data, synthetic_data, metadata, progress_bar=None
+        )
+        expected_info = {
+            'report_type': 'BaseReport',
+            'generated_date': '2020-01-05',
+            'sdmetrics_version': 'version',
+            'num_tables': 2,
+            'num_rows_real_data': {
+                'table1': 3,
+                'table2': 3
+            },
+            'num_rows_synthetic_data': {
+                'table1': 3,
+                'table2': 3
+            },
+            'generation_time': 5
+        }
+        assert base_report.report_info == expected_info
 
     def test__handle_results(self):
         """Test the ``_handle_results`` method."""
@@ -336,6 +440,55 @@ class TestBaseReport:
                 'Score': [1.0, 1.0],
             }),
         )
+
+    @patch('sdmetrics.reports.base_report.datetime')
+    @patch('sdmetrics.reports.base_report.time')
+    @patch('sdmetrics.reports.base_report.version')
+    def test_get_info(self, version_mock, time_mock, datetime_mock):
+        """Test the ``get_info`` method."""
+        # Setup
+        datetime_mock.today.return_value = pd.to_datetime('2020-01-05')
+        time_mock.time.side_effect = [5, 10]
+        version_mock.return_value = 'version'
+
+        base_report = BaseReport()
+        mock_validate = Mock()
+        mock_handle_results = Mock()
+        base_report._handle_results = mock_handle_results
+        base_report.validate = mock_validate
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 1'].get_score.return_value = 1.0
+        base_report._properties['Property 2'] = Mock()
+        base_report._properties['Property 2'].get_score.return_value = 1.0
+
+        real_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c']
+        })
+        synthetic_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c']
+        })
+        metadata = {
+            'columns': {
+                'column1': {'sdtype': 'numerical'},
+                'column2': {'sdtype': 'categorical'}
+            }
+        }
+
+        # Run
+        base_report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+        # Assert
+        expected_info = {
+            'report_type': 'BaseReport',
+            'generated_date': '2020-01-05',
+            'sdmetrics_version': 'version',
+            'num_rows_real_data': 3,
+            'num_rows_synthetic_data': 3,
+            'generation_time': 5
+        }
+        assert base_report.get_info() == expected_info
 
     def test_get_visualization(self):
         """Test the ``get_visualization`` method."""
