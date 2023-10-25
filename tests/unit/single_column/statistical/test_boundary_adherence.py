@@ -40,7 +40,7 @@ class TestBoundaryAdherence:
         out of bounds if the real data does not also containt nan values.
         """
         # Setup
-        real_data = pd.Series([1.0, 2.4, 2.6, 0.8])  # 0.8 -> 2.6
+        real_data = pd.Series([1.0, 2.4, 2.6, 0.8])
         real_data_nans = pd.Series([1.0, 2.4, 2.6, 0.8, np.nan])
         synthetic_data = pd.Series([0.9, 1.8, 2.1, 5.0, np.nan])
 
@@ -67,7 +67,7 @@ class TestBoundaryAdherence:
             datetime(2021, 9, 12),
             datetime(2022, 10, 1),
 
-        ], dtype='datetime64[ns]')  # 0.8 -> 2.6
+        ], dtype='datetime64[ns]')
         real_data_nans = pd.Series([
             datetime(2020, 10, 1),
             datetime(2021, 1, 2),
