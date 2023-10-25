@@ -204,7 +204,7 @@ def test_get_visualization(plotly_mock):
         DataFrameMatcher(expected_plot_df),
         x='Columns',
         y='Score',
-        title='Data Quality: Column Shapes (Average Score=1.0)',
+        title='Data Quality: Intertable Trends (Average Score=1.0)',
         category_orders={'group': SeriesMatcher(expected_plot_df['Columns'])},
         color='Metric',
         color_discrete_map={
@@ -270,7 +270,7 @@ def test_get_visualization_multiple_relationships(plotly_mock):
         DataFrameMatcher(expected_plot_df),
         x='Columns',
         y='Score',
-        title='Data Quality: Column Shapes (Average Score=0.75)',
+        title='Data Quality: Intertable Trends (Average Score=0.75)',
         category_orders={'group': SeriesMatcher(expected_plot_df['Columns'])},
         color='Metric',
         color_discrete_map={

@@ -193,7 +193,7 @@ class InterTableTrends(BaseMultiTableProperty):
             to_plot,
             x='Columns',
             y='Score',
-            title=f'Data Quality: Column Shapes (Average Score={average_score})',
+            title=f'Data Quality: Intertable Trends (Average Score={average_score})',
             category_orders={'group': to_plot['Columns']},
             color='Metric',
             color_discrete_map={
