@@ -58,16 +58,7 @@ class TableFormat(SingleTableMetric):
         proportion_valid_sdtypes = 1 - len(invalid_sdtypes) / len(synthetic_data.columns)
 
         score = proportion_correct_columns * proportion_valid_names * proportion_valid_sdtypes
-        return {
-            key: value
-            for key, value in {
-                'score': score,
-                'missing columns in synthetic data': list(missing_columns_in_synthetic),
-                'invalid column names': invalid_names,
-                'invalid column data types': invalid_sdtypes
-            }.items()
-            if value
-        }
+        return {'score': score}
 
     @classmethod
     def compute(cls, real_data, synthetic_data, ignore_dtype_columns=None):

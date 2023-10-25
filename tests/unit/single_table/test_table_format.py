@@ -40,9 +40,7 @@ class TestTableFormat:
         result = metric.compute_breakdown(real_data, synthetic_data)
 
         # Assert
-        expected_result = {
-            'score': 1.0,
-        }
+        expected_result = {'score': 1.0}
         assert result == expected_result
 
     def test_compute_breakdown_with_missing_columns(self, real_data):
@@ -63,10 +61,7 @@ class TestTableFormat:
         result = metric.compute_breakdown(real_data, synthetic_data)
 
         # Assert
-        expected_result = {
-            'score': 0.8,
-            'missing columns in synthetic data': ['col_5']
-        }
+        expected_result = {'score': 0.8}
         assert result == expected_result
 
     def test_compute_breakdown_with_invalid_names(self, real_data):
@@ -89,10 +84,7 @@ class TestTableFormat:
         result = metric.compute_breakdown(real_data, synthetic_data)
 
         # Assert
-        expected_result = {
-            'score': 0.8333333333333334,
-            'invalid column names': ['col_6']
-        }
+        expected_result = {'score': 0.8333333333333334}
         assert result == expected_result
 
     def test_compute_breakdown_with_invalid_dtypes(self, real_data):
@@ -114,10 +106,7 @@ class TestTableFormat:
         result = metric.compute_breakdown(real_data, synthetic_data)
 
         # Assert
-        expected_result = {
-            'score': 0.6,
-            'invalid column data types': ['col_1', 'col_4']
-        }
+        expected_result = {'score': 0.6}
         assert result == expected_result
 
     def test_compute_breakdown_ignore_dtype_columns(self, real_data):
@@ -141,10 +130,7 @@ class TestTableFormat:
         )
 
         # Assert
-        expected_result = {
-            'score': 0.8,
-            'invalid column data types': ['col_1']
-        }
+        expected_result = {'score': 0.8}
         assert result == expected_result
 
     def test_compute_breakdown_multiple_error(self, real_data):
@@ -165,12 +151,7 @@ class TestTableFormat:
         result = metric.compute_breakdown(real_data, synthetic_data)
 
         # Assert
-        expected_result = {
-            'score': 0.5120000000000001,
-            'missing columns in synthetic data': ['col_2'],
-            'invalid column names': ['col_6'],
-            'invalid column data types': ['col_4']
-        }
+        expected_result = {'score': 0.5120000000000001}
         assert result == expected_result
 
     @patch('sdmetrics.single_table.table_format.TableFormat.compute_breakdown')
