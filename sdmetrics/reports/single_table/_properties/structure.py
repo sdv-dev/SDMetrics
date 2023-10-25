@@ -78,19 +78,10 @@ class Structure(BaseSingleTableProperty):
 
         fig = px.bar(
             data_frame=self.details.dropna(subset=['Score']),
-            x='Table',
             y='Score',
             title=f'Data Diagnostics: Structure (Average Score={round(average_score, 2)})',
-            category_orders={'group': list(self.details['Column'])},
             color='Metric',
             pattern_shape='Metric',
-            pattern_shape_sequence=['', '/'],
-            hover_name='Column',
-            hover_data={
-                'Column': False,
-                'Metric': True,
-                'Score': True,
-            },
         )
 
         fig.update_yaxes(range=[0, 1], title_text='Diagnostic Score')
@@ -99,6 +90,7 @@ class Structure(BaseSingleTableProperty):
             xaxis_categoryorder='total ascending',
             plot_bgcolor='#F5F5F8',
             margin={'t': 150},
+            xaxis_title='Table',
         )
 
         return fig
