@@ -5,6 +5,7 @@ from sdmetrics.column_pairs.statistical.contingency_similarity import Contingenc
 from sdmetrics.column_pairs.statistical.correlation_similarity import CorrelationSimilarity
 from sdmetrics.column_pairs.statistical.kl_divergence import (
     ContinuousKLDivergence, DiscreteKLDivergence)
+from sdmetrics.column_pairs.statistical.referential_integrity import ReferentialIntegrity
 
 __all__ = [
     'ColumnPairsMetric',
@@ -12,4 +13,5 @@ __all__ = [
     'ContinuousKLDivergence',
     'CorrelationSimilarity',
     'DiscreteKLDivergence',
+    'ReferentialIntegrity',
 ]
