@@ -1,6 +1,7 @@
 """Univariate goodness-of-fit tests."""
 
 from sdmetrics.single_column.statistical.boundary_adherence import BoundaryAdherence
+from sdmetrics.single_column.statistical.category_adherence import CategoryAdherence
 from sdmetrics.single_column.statistical.category_coverage import CategoryCoverage
 from sdmetrics.single_column.statistical.cstest import CSTest
 from sdmetrics.single_column.statistical.kscomplement import KSComplement
@@ -12,6 +13,7 @@ from sdmetrics.single_column.statistical.tv_complement import TVComplement
 __all__ = [
     'BoundaryAdherence',
     'CategoryCoverage',
+    'CategoryAdherence',
     'CSTest',
     'KSComplement',
     'MissingValueSimilarity',
