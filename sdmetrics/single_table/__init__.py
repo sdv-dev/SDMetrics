@@ -32,6 +32,7 @@ from sdmetrics.single_table.privacy.ensemble import CategoricalEnsemble
 from sdmetrics.single_table.privacy.numerical_sklearn import (
     NumericalLR, NumericalMLP, NumericalSVR)
 from sdmetrics.single_table.privacy.radius_nearest_neighbor import NumericalRadiusNearestNeighbor
+from sdmetrics.single_table.table_format import TableFormat
 
 __all__ = [
     'bayesian_network',
@@ -90,4 +91,5 @@ __all__ = [
     'TVComplement',
     'RangeCoverage',
     'NewRowSynthesis',
+    'TableFormat',
 ]
