@@ -85,11 +85,11 @@ class ColumnShapes(BaseSingleTableProperty):
         average_score = round(self._compute_average(), 2)
 
         fig = px.bar(
-            self.details,
+            data_frame=self.details,
             x='Column',
             y='Score',
             title=f'Data Quality: Column Shapes (Average Score={average_score})',
-            category_orders={'group': self.details['Column']},
+            category_orders={'group': list(self.details['Column'])},
             color='Metric',
             color_discrete_map={
                 'KSComplement': PlotConfig.DATACEBO_DARK,
