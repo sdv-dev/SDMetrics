@@ -3,6 +3,7 @@
 from sdmetrics.single_column import base
 from sdmetrics.single_column.base import SingleColumnMetric
 from sdmetrics.single_column.statistical.boundary_adherence import BoundaryAdherence
+from sdmetrics.single_column.statistical.category_adherence import CategoryAdherence
 from sdmetrics.single_column.statistical.category_coverage import CategoryCoverage
 from sdmetrics.single_column.statistical.cstest import CSTest
 from sdmetrics.single_column.statistical.kscomplement import KSComplement
@@ -16,6 +17,7 @@ __all__ = [
     'SingleColumnMetric',
     'BoundaryAdherence',
     'CategoryCoverage',
+    'CategoryAdherence',
     'CSTest',
     'KSComplement',
     'MissingValueSimilarity',
