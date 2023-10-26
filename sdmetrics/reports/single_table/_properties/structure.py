@@ -79,7 +79,7 @@ class Structure(BaseSingleTableProperty):
         fig = px.bar(
             data_frame=self.details.dropna(subset=['Score']),
             y='Score',
-            title=f'Data Diagnostics: Structure (Average Score={round(average_score, 2)})',
+            title=f'Data Diagnostic: Structure (Average Score={round(average_score, 2)})',
             color='Metric',
             pattern_shape='Metric',
         )
