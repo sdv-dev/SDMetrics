@@ -130,12 +130,13 @@ class InterTableTrends(BaseMultiTableProperty):
                 denormalized_real, denormalized_synthetic, merged_metadata,
                 progress_bar=progress_bar, column_pairs=parent_child_pairs
             )
+
             details['Parent Table'] = parent
             details['Child Table'] = child
             details['Foreign Key'] = foreign_key
-            details['Column 1'] = details['Column 1'].str.replace(f'{parent}.', '', n=1)
-            details['Column 2'] = details['Column 2'].str.replace(f'{child}.', '', n=1)
-
+            if not details.empty:
+                details['Column 1'] = details['Column 1'].str.replace(f'{parent}.', '', n=1)
+                details['Column 2'] = details['Column 2'].str.replace(f'{child}.', '', n=1)
             all_details.append(details)
 
         self.details = pd.concat(all_details, axis=0).reset_index(drop=True)
