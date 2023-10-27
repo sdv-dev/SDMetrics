@@ -1,4 +1,4 @@
-"""ColumnPair metrics based on Kullback–Leibler Divergence."""
+"""ColumnPair metric for Cardinality Boundary Adherence."""
 
 import pandas as pd
 
@@ -41,7 +41,7 @@ class CardinalityBoundaryAdherence(ColumnPairsMetric):
                 foreign keys as the second element.
 
         Returns:
-            Union[float, tuple[float]]:
+            dict
                 Metric output.
         """
         real_cardinality = pd.DataFrame(index=real_data[0].copy())
@@ -74,7 +74,7 @@ class CardinalityBoundaryAdherence(ColumnPairsMetric):
                 foreign keys as the second element.
 
         Returns:
-            Union[float, tuple[float]]:
+            float:
                 Metric output.
         """
         return cls.compute_breakdown(real_data, synthetic_data)['score']
