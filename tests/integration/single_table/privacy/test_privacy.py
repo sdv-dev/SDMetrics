@@ -136,12 +136,12 @@ def numerical_bad_synthetic_data():
 @pytest.mark.parametrize('metric', numerical_metrics.values())  # noqa: PD011
 def test_num(metric):
     good = metric.compute(
-        numerical_real_data(), numerical_good_synthetic_data(),
+        numerical_good_synthetic_data(), numerical_real_data(),
         key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2']
     )
 
     bad = metric.compute(
-        numerical_real_data(), numerical_bad_synthetic_data(),
+        numerical_bad_synthetic_data(), numerical_real_data(),
         key_fields=['key1', 'key2'], sensitive_fields=['sensitive1', 'sensitive2']
     )
 
