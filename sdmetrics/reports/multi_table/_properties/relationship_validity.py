@@ -2,14 +2,12 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
-from sdmetrics.multi_table.statistical import CardinalityShapeSimilarity
-from sdmetrics.column_pairs.statistical import ReferentialIntegrity
-from sdmetrics.column_pairs.statistical import CardinalityBoundaryAdherence
+from sdmetrics.column_pairs.statistical import CardinalityBoundaryAdherence, ReferentialIntegrity
 from sdmetrics.reports.multi_table._properties.base import BaseMultiTableProperty
 from sdmetrics.reports.utils import PlotConfig
 
 
-class Relationship_Validity(BaseMultiTableProperty):
+class RelationshipValidity(BaseMultiTableProperty):
     """``Relationship Validity`` class.
 
     This property measures the validity of the relationship
@@ -18,13 +16,6 @@ class Relationship_Validity(BaseMultiTableProperty):
     """
 
     _num_iteration_case = 'relationship'
-
-    def _extract_tuple(data, relation):
-        parent_data = data[relation['parent_table_name']]
-        child_data = data[relation['child_table_name']]
-        return (
-            parent_data[relation['parent_primary_key']], child_data[relation['child_foreign_key']]
-        )
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of relationship validity in the given tables.
@@ -77,44 +68,15 @@ class Relationship_Validity(BaseMultiTableProperty):
         self.details = pd.DataFrame({
             'Parent Table': parent_tables,
             'Child Table': child_tables,
-            'Primary key': primary_key,
-            'Foreign key': foreign_key,
+            'Primary Key': primary_key,
+            'Foreign Key': foreign_key,
             'Metric': metric_names,
             'Score': scores,
             'Error': error_messages,
         })
 
-    def _get_details_for_table_name_with_relationships(self, table_name):
-        """Return the details for the given table name.
-
-        Args:
-            table_name (str):
-                Table name to get the details for.
-
-        Returns:
-            pandas.DataFrame:
-                The details for the given table name.
-        """
-        is_child = self.details['Child Table'] == table_name
-        is_parent = self.details['Parent Table'] == table_name
-        return self.details[is_child | is_parent].copy()
-
-    def get_details(self, table_name=None):
-        """Return the details for the property.
-
-        Args:
-            table_name (str):
-                Table name to get the details for.
-                Defaults to ``None``.
-
-        Returns:
-            pandas.DataFrame:
-                The details for the property.
-        """
-        if table_name is None:
-            return self.details.copy()
-
-        return self._get_details_for_table_name_with_relationships(table_name)
+        if self.details['Error'].isna().all():
+            self.details = self.details.drop('Error', axis=1)
 
     def _get_table_relationships_plot(self, table_name):
         """Get the table relationships plot from the parent child relationship scores for a table.
@@ -126,7 +88,7 @@ class Relationship_Validity(BaseMultiTableProperty):
         Returns:
             plotly.graph_objects._figure.Figure
         """
-        plot_data = self._get_details_for_table_name_with_relationships(table_name).copy()
+        plot_data = self.get_details(table_name).copy()
         column_name = 'Child → Parent Relationship'
         plot_data[column_name] = plot_data['Child Table'] + ' → ' + plot_data['Parent Table']
         plot_data = plot_data.drop(['Child Table', 'Parent Table'], axis=1)
@@ -139,13 +101,14 @@ class Relationship_Validity(BaseMultiTableProperty):
             y='Score',
             title=f'Table Relationships (Average Score={average_score})',
             color='Metric',
-            color_discrete_sequence=[PlotConfig.DATACEBO_DARK],
+            color_discrete_sequence=[PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_BLUE],
             hover_name='Child → Parent Relationship',
             hover_data={
                 'Child → Parent Relationship': False,
                 'Metric': True,
                 'Score': True,
             },
+            barmode='group'
         )
 
         fig.update_yaxes(range=[0, 1])

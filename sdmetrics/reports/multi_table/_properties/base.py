@@ -54,6 +54,14 @@ class BaseMultiTableProperty():
                 iterations += (len(parent_columns) * len(child_columns))
             return iterations
 
+    @staticmethod
+    def _extract_tuple(data, relation):
+        parent_data = data[relation['parent_table_name']]
+        child_data = data[relation['child_table_name']]
+        return (
+            parent_data[relation['parent_primary_key']], child_data[relation['child_foreign_key']]
+        )
+
     def _compute_average(self):
         """Average the scores for each column."""
         is_dataframe = isinstance(self.details, pd.DataFrame)
@@ -146,22 +154,6 @@ class BaseMultiTableProperty():
             )
 
         return self._properties[table_name].get_visualization()
-
-    def _get_details_for_table_name_with_relationships(self, table_name):
-        """Return the details for the given table name.
-
-        Args:
-            table_name (str):
-                Table name to get the details for.
-
-        Returns:
-            pandas.DataFrame:
-                The details for the given table name.
-        """
-        if all(column in self.details.columns for column in ['Child Table', 'Parent Table']):
-            is_child = self.details['Child Table'] == table_name
-            is_parent = self.details['Parent Table'] == table_name
-            return self.details[is_child | is_parent].copy()
 
     def get_details(self, table_name=None):
         """Return the details table for the property for the given table.

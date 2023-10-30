@@ -10,6 +10,7 @@ from sdmetrics.reports.multi_table._properties.data_validity import DataValidity
 from sdmetrics.reports.multi_table._properties.inter_table_trends import InterTableTrends
 from sdmetrics.reports.multi_table._properties.structure import Structure
 from sdmetrics.reports.multi_table._properties.synthesis import Synthesis
+from sdmetrics.reports.multi_table._properties.relationship_validity import RelationshipValidity
 
 __all__ = [
     'BaseMultiTableProperty',
@@ -22,4 +23,5 @@ __all__ = [
     'Synthesis',
     'Structure',
     'DataValidity'
+    'RelationshipValidity',
 ]
