@@ -173,7 +173,7 @@ class TestRelationshipValidity:
 
         assert score == 0.5
         progress_bar.update.assert_called()
-        assert progress_bar.update.call_count == 2
+        assert progress_bar.update.call_count == 1
         mock_compute_average.assert_called_once_with()
         pd.testing.assert_frame_equal(relationship_validity.details, expected_details_property)
 
@@ -218,7 +218,7 @@ class TestRelationshipValidity:
         assert pd.isna(score)
         pd.testing.assert_frame_equal(relationship_validity.details, expected_details_property)
         progress_bar.update.assert_called()
-        assert progress_bar.update.call_count == 2
+        assert progress_bar.update.call_count == 1
 
     def test_get_details_with_table_name(self):
         """Test the ``get_details`` method.
