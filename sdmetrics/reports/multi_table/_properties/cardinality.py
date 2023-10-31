@@ -67,22 +67,8 @@ class Cardinality(BaseMultiTableProperty):
             'Error': error_messages,
         })
 
-    def get_details(self, table_name=None):
-        """Return the details for the property.
-
-        Args:
-            table_name (str):
-                Table name to get the details for.
-                Defaults to ``None``.
-
-        Returns:
-            pandas.DataFrame:
-                The details for the property.
-        """
-        if table_name is None:
-            return self.details.copy()
-
-        return self._get_details_for_table_name_with_relationships(table_name)
+        if self.details['Error'].isna().all():
+            self.details = self.details.drop('Error', axis=1)
 
     def _get_table_relationships_plot(self, table_name):
         """Get the table relationships plot from the parent child relationship scores for a table.
@@ -94,7 +80,7 @@ class Cardinality(BaseMultiTableProperty):
         Returns:
             plotly.graph_objects._figure.Figure
         """
-        plot_data = self._get_details_for_table_name_with_relationships(table_name).copy()
+        plot_data = self.get_details(table_name).copy()
         column_name = 'Child → Parent Relationship'
         plot_data[column_name] = plot_data['Child Table'] + ' → ' + plot_data['Parent Table']
         plot_data = plot_data.drop(['Child Table', 'Parent Table'], axis=1)
