@@ -59,12 +59,11 @@ class BaseMultiTableProperty():
         """Average the scores for each column."""
         is_dataframe = isinstance(self.details, pd.DataFrame)
         has_score_column = 'Score' in self.details.columns
-        assert_message = "The property details must be a DataFrame with a 'Score' column."
+        assert_message = "The property details must be in a DataFrame with a 'Score' column."
 
+        assert is_dataframe, assert_message
         if not has_score_column:
             return np.nan
-        assert is_dataframe, assert_message
-        assert has_score_column, assert_message
 
         return self.details['Score'].mean()
 
