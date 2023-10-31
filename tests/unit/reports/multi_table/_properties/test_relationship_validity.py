@@ -281,7 +281,7 @@ class TestRelationshipValidity:
 
         expected_x = ['users_child → users_parent']
         expected_y = [1.0]
-        expected_title = 'Table Relationships (Average Score=1.0)'
+        expected_title = 'Data Diagnostic: Relationship Validity (Average Score=1.0)'
 
         assert fig.data[0].x.tolist() == expected_x
         assert fig.data[0].y.tolist() == expected_y
