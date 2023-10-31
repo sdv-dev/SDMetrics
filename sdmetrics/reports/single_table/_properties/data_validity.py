@@ -41,10 +41,12 @@ class DataValidity(BaseSingleTableProperty):
         """
         column_names, metric_names, scores = [], [], []
         error_messages = []
+        primary_key = metadata.get('primary_key')
+        alternate_keys = metadata.get('alternate_keys', [])
         for column_name in metadata['columns']:
             sdtype = metadata['columns'][column_name]['sdtype']
-            primary_key_match = column_name == metadata.get('primary_key')
-            alternate_key_match = column_name in metadata.get('alternate_keys', [])
+            primary_key_match = column_name == primary_key
+            alternate_key_match = column_name in alternate_keys
             is_unique = primary_key_match or alternate_key_match
 
             try:
@@ -103,7 +105,7 @@ class DataValidity(BaseSingleTableProperty):
 
             },
             pattern_shape='Metric',
-            pattern_shape_sequence=['', '/'],
+            pattern_shape_sequence=['', '/', '.'],
             hover_name='Column',
             hover_data={
                 'Column': False,

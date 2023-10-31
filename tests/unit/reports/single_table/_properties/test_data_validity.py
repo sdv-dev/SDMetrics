@@ -130,7 +130,7 @@ class TestDataValidity:
                 'KeyUniqueness': '#01E0C9',
             },
             'pattern_shape': 'Metric',
-            'pattern_shape_sequence': ['', '/'],
+            'pattern_shape_sequence': ['', '/', '.'],
             'hover_name': 'Column',
             'hover_data': {
                 'Column': False,
