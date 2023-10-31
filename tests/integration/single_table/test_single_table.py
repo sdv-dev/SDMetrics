@@ -147,3 +147,26 @@ def test_newrowsynthesis_with_special_characters_in_column_names():
 
     # Assert
     assert metric == 0.66666666666666667
+
+
+def test_new_row_synthesis_datetime_as_string():
+    """Test it works when the datetime column is a string."""
+    # Setup
+    data = pd.DataFrame(data={
+        'id': [0, 1, 2, 3, 4],
+        'datetime_column': ['2010-02-23', '2010-01-01', '2010-03-30', '2010-03-23', '2010-03-04'],
+        'numerical_column': [1, 2, 3, 4, 5],
+        'categorical_column': [1, 2, 2, 1, 2]
+    })
+
+    # Run
+    metric = NewRowSynthesis.compute(
+        real_data=data,
+        synthetic_data=data,
+        numerical_match_tolerance=0.01,
+        synthetic_sample_size=10_000
+
+    )
+
+    # Assert
+    assert metric == 0.0
