@@ -8,7 +8,7 @@ from sdmetrics.reports.utils import PlotConfig
 
 
 class RelationshipValidity(BaseMultiTableProperty):
-    """``Relationship Validity`` class.
+    """``Relationship Validity`` property.
 
     This property measures the validity of the relationship
     from the primary key and the foreign key perspective.
@@ -18,7 +18,7 @@ class RelationshipValidity(BaseMultiTableProperty):
     _num_iteration_case = 'relationship'
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
-        """Get the average score of relationship validity in the given tables.
+        """Generate the _details dataframe for the relationship validity property.
 
         Args:
             real_data (dict[str, pandas.DataFrame]):
