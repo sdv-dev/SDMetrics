@@ -75,9 +75,6 @@ class RelationshipValidity(BaseMultiTableProperty):
             'Error': error_messages,
         })
 
-        if self.details['Error'].isna().all():
-            self.details = self.details.drop('Error', axis=1)
-
     def _get_table_relationships_plot(self, table_name):
         """Get the table relationships plot from the parent child relationship scores for a table.
 
