@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+import sys
 
 from tqdm import tqdm
 
@@ -20,20 +20,22 @@ class TestRelationshipValidity:
         # Assert
         assert result == 1.0
 
-    def test_with_progress_bar(self):
+    def test_with_progress_bar(self, capsys):
         """Test that the progress bar is correctly updated."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
         relationship_validity = RelationshipValidity()
         num_relationship = 2
 
-        progress_bar = tqdm(total=num_relationship)
-        mock_update = Mock()
-        progress_bar.update = mock_update
+        progress_bar = tqdm(total=num_relationship, file=sys.stdout)
 
         # Run
         result = relationship_validity.get_score(real_data, synthetic_data, metadata, progress_bar)
+        progress_bar.close()
+        captured = capsys.readouterr()
+        output = captured.out
 
         # Assert
         assert result == 1.0
-        assert mock_update.call_count == num_relationship
+        assert '100%' in output
+        assert f'{num_relationship}/{num_relationship}' in output
