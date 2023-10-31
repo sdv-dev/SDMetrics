@@ -101,7 +101,9 @@ class RelationshipValidity(BaseMultiTableProperty):
             y='Score',
             title=f'Data Diagnostic: Relationship Validity (Average Score={average_score})',
             color='Metric',
-            color_discrete_sequence=[PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_BLUE],
+            color_discrete_sequence=[PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN],
+            pattern_shape='Metric',
+            pattern_shape_sequence=['', '/'],
             hover_name='Child → Parent Relationship',
             hover_data={
                 'Child → Parent Relationship': False,
