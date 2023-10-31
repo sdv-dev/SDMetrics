@@ -106,48 +106,49 @@ class InterTableTrends(BaseMultiTableProperty):
                 The progress bar object. Defaults to None.
         """
         all_details = []
-        for relationship in metadata['relationships']:
-            parent = relationship['parent_table_name']
-            child = relationship['child_table_name']
-            foreign_key = relationship['child_foreign_key']
+        if 'relationships' in metadata:
+            for relationship in metadata['relationships']:
+                parent = relationship['parent_table_name']
+                child = relationship['child_table_name']
+                foreign_key = relationship['child_foreign_key']
 
-            denormalized_real, denormalized_synthetic = self._denormalize_tables(
-                real_data,
-                synthetic_data,
-                relationship
-            )
+                denormalized_real, denormalized_synthetic = self._denormalize_tables(
+                    real_data,
+                    synthetic_data,
+                    relationship
+                )
 
-            merged_metadata, parent_cols, child_cols = self._merge_metadata(
-                metadata,
-                parent,
-                child
-            )
+                merged_metadata, parent_cols, child_cols = self._merge_metadata(
+                    metadata,
+                    parent,
+                    child
+                )
 
-            parent_child_pairs = itertools.product(parent_cols, child_cols)
+                parent_child_pairs = itertools.product(parent_cols, child_cols)
 
-            self._properties[(parent, child, foreign_key)] = SingleTableColumnPairTrends()
-            details = self._properties[(parent, child, foreign_key)]._generate_details(
-                denormalized_real, denormalized_synthetic, merged_metadata,
-                progress_bar=progress_bar, column_pairs=parent_child_pairs
-            )
+                self._properties[(parent, child, foreign_key)] = SingleTableColumnPairTrends()
+                details = self._properties[(parent, child, foreign_key)]._generate_details(
+                    denormalized_real, denormalized_synthetic, merged_metadata,
+                    progress_bar=progress_bar, column_pairs=parent_child_pairs
+                )
 
-            details['Parent Table'] = parent
-            details['Child Table'] = child
-            details['Foreign Key'] = foreign_key
-            if not details.empty:
-                details['Column 1'] = details['Column 1'].str.replace(f'{parent}.', '', n=1)
-                details['Column 2'] = details['Column 2'].str.replace(f'{child}.', '', n=1)
-            all_details.append(details)
+                details['Parent Table'] = parent
+                details['Child Table'] = child
+                details['Foreign Key'] = foreign_key
+                if not details.empty:
+                    details['Column 1'] = details['Column 1'].str.replace(f'{parent}.', '', n=1)
+                    details['Column 2'] = details['Column 2'].str.replace(f'{child}.', '', n=1)
+                all_details.append(details)
 
-        self.details = pd.concat(all_details, axis=0).reset_index(drop=True)
-        detail_columns = [
-            'Parent Table', 'Child Table', 'Foreign Key', 'Column 1', 'Column 2',
-            'Metric', 'Score', 'Real Correlation', 'Synthetic Correlation'
-        ]
-        if 'Error' in self.details.columns:
-            detail_columns.append('Error')
+            self.details = pd.concat(all_details, axis=0).reset_index(drop=True)
+            detail_columns = [
+                'Parent Table', 'Child Table', 'Foreign Key', 'Column 1', 'Column 2',
+                'Metric', 'Score', 'Real Correlation', 'Synthetic Correlation'
+            ]
+            if 'Error' in self.details.columns:
+                detail_columns.append('Error')
 
-        self.details = self.details[detail_columns]
+            self.details = self.details[detail_columns]
 
     def get_visualization(self, table_name=None):
         """Create a plot to show the inter table trends data.

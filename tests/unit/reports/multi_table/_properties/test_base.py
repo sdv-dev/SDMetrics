@@ -1,6 +1,5 @@
 """Test BaseMultiTableProperty class."""
 
-import re
 from unittest.mock import Mock
 
 import numpy as np
@@ -176,21 +175,15 @@ class TestBaseMultiTableProperty():
         with pytest.raises(NotImplementedError):
             base_property._generate_details(None, None, None, None)
 
-    def test__compute_average_raises_error(self):
+    def test__compute_average_sends_nan(self):
         """Test that the method raises an error when _details has not been computed."""
         # Setup
         base_property = BaseMultiTableProperty()
 
         # Run and Assert
-        expected_error_message = re.escape(
-            "The property details must be a DataFrame with a 'Score' column."
-        )
-        with pytest.raises(AssertionError, match=expected_error_message):
-            base_property._compute_average()
-
+        assert np.isnan(base_property._compute_average())
         base_property.details = pd.DataFrame({'Column': ['a', 'b', 'c']})
-        with pytest.raises(AssertionError, match=expected_error_message):
-            base_property._compute_average()
+        assert np.isnan(base_property._compute_average())
 
     def test_get_score(self):
         """Test the ``get_score`` method."""
