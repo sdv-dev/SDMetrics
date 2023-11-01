@@ -47,8 +47,8 @@ class MLEfficacyMetric(SingleTableMetric):
             predictions = np.full(len(test_data), unique_labels[0])
         else:
             ht = HyperTransformer()
-            test_data = ht.fit_transform(test_data)
-            train_data = ht.transform(train_data)
+            train_data = ht.fit_transform(train_data)
+            test_data = ht.transform(test_data)
 
             test_data[np.isin(test_data, [np.inf, -np.inf])] = None
             train_data[np.isin(train_data, [np.inf, -np.inf])] = None

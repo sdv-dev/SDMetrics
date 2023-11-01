@@ -106,7 +106,7 @@ class InterTableTrends(BaseMultiTableProperty):
                 The progress bar object. Defaults to None.
         """
         all_details = []
-        for relationship in metadata['relationships']:
+        for relationship in metadata.get('relationships', []):
             parent = relationship['parent_table_name']
             child = relationship['child_table_name']
             foreign_key = relationship['child_foreign_key']
@@ -135,19 +135,24 @@ class InterTableTrends(BaseMultiTableProperty):
             details['Child Table'] = child
             details['Foreign Key'] = foreign_key
             if not details.empty:
-                details['Column 1'] = details['Column 1'].str.replace(f'{parent}.', '', n=1)
-                details['Column 2'] = details['Column 2'].str.replace(f'{child}.', '', n=1)
+                details['Column 1'] = details['Column 1'].str.replace(
+                    f'{parent}.', '', n=1, regex=False
+                )
+                details['Column 2'] = details['Column 2'].str.replace(
+                    f'{child}.', '', n=1, regex=False
+                )
             all_details.append(details)
 
-        self.details = pd.concat(all_details, axis=0).reset_index(drop=True)
-        detail_columns = [
-            'Parent Table', 'Child Table', 'Foreign Key', 'Column 1', 'Column 2',
-            'Metric', 'Score', 'Real Correlation', 'Synthetic Correlation'
-        ]
-        if 'Error' in self.details.columns:
-            detail_columns.append('Error')
+        if len(all_details) > 0:
+            self.details = pd.concat(all_details, axis=0).reset_index(drop=True)
+            detail_columns = [
+                'Parent Table', 'Child Table', 'Foreign Key', 'Column 1', 'Column 2',
+                'Metric', 'Score', 'Real Correlation', 'Synthetic Correlation'
+            ]
+            if 'Error' in self.details.columns:
+                detail_columns.append('Error')
 
-        self.details = self.details[detail_columns]
+            self.details = self.details[detail_columns]
 
     def get_visualization(self, table_name=None):
         """Create a plot to show the inter table trends data.

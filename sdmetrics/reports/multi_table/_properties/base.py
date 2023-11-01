@@ -1,4 +1,6 @@
 """Multi table base property class."""
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -33,15 +35,22 @@ class BaseMultiTableProperty():
         elif self._num_iteration_case == 'table':
             return len(metadata['tables'])
         elif self._num_iteration_case == 'relationship':
-            return len(metadata['relationships'])
+            try:
+                return len(metadata['relationships'])
+            except KeyError as e:
+                message = f'{type(e).__name__}: {e}. No relationships found in the data.'
+                warnings.warn(message)
+                return 0
         elif self._num_iteration_case == 'column_pair':
             num_columns = [len(table['columns']) for table in metadata['tables'].values()]
             return sum([(n_cols * (n_cols - 1)) // 2 for n_cols in num_columns])
         elif self._num_iteration_case == 'inter_table_column_pair':
             iterations = 0
-            for relationship in metadata['relationships']:
-                parent_columns = metadata['tables'][relationship['parent_table_name']]['columns']
-                child_columns = metadata['tables'][relationship['child_table_name']]['columns']
+            for relationship in metadata.get('relationships', []):
+                parent_columns = \
+                    metadata['tables'][relationship['parent_table_name']]['columns']
+                child_columns = \
+                    metadata['tables'][relationship['child_table_name']]['columns']
                 iterations += (len(parent_columns) * len(child_columns))
             return iterations
 
@@ -49,10 +58,11 @@ class BaseMultiTableProperty():
         """Average the scores for each column."""
         is_dataframe = isinstance(self.details, pd.DataFrame)
         has_score_column = 'Score' in self.details.columns
-        assert_message = "The property details must be a DataFrame with a 'Score' column."
+        assert_message = "The property details must be in a DataFrame with a 'Score' column."
 
         assert is_dataframe, assert_message
-        assert has_score_column, assert_message
+        if not has_score_column:
+            return np.nan
 
         return self.details['Score'].mean()
 
