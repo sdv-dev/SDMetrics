@@ -1,5 +1,32 @@
 # History
 
+## v0.12.0 - 2023-10-31
+
+This release adds a new property, InterTable Trends. Several plots were moved from the reports module into the new visualizations module.  The `metadata` parameter was removed for these plots, and the `plot_types` parameter was added. `plot_types` lets the user control which plot type is used. Several crashes have been resolved.
+
+### New Features
+
+* Provide meta information about the reports - Pull [#472](https://github.com/sdv-dev/SDMetrics/pull/472) by @frances-h
+* Validate that the metadata is always a dict - Issue [#428](https://github.com/sdv-dev/SDMetrics/issues/428) by @R-Palazzo
+* Expose reports module in top-level init - Pull [#459](https://github.com/sdv-dev/SDMetrics/pull/459) by @frances-h
+* Add new get_column_pair_plot - Issue [#444](https://github.com/sdv-dev/SDMetrics/issues/444) by @pvk-developer
+* Add InterTable Trends property - Issue [#451](https://github.com/sdv-dev/SDMetrics/issues/451) by @frances-h
+* Add new get_column_plot - Issue [#443](https://github.com/sdv-dev/SDMetrics/issues/443) by @pvk-developer
+* Add new get_cardinality_plot - Issue [#445](https://github.com/sdv-dev/SDMetrics/issues/445) by @frances-h
+* Create visualizations module - Issue [#442](https://github.com/sdv-dev/SDMetrics/issues/442) by @frances-h, @pvk-developer
+
+### Bugs Fixed
+
+* Fix `NewRowSynthesis` on datetime columns without formats - Issue [#473](https://github.com/sdv-dev/SDMetrics/issues/473) by @fealho
+* Intertable trends property crashes if a table has no statistical columns - Issue [#476](https://github.com/sdv-dev/SDMetrics/issues/476) by @lajohn4747
+* Fix BoundaryAdherence NaN handling - Issue [#470](https://github.com/sdv-dev/SDMetrics/issues/470) by @frances-h
+* The Intertable Trends visualization is mislabeled as 'Column Shapes' - Issue [#477](https://github.com/sdv-dev/SDMetrics/issues/477) by @lajohn4747
+* ValueError when using get_cardinality_plot on some schemas - Issue [#447](https://github.com/sdv-dev/SDMetrics/issues/447) by @frances-h
+
+### Internal
+
+* Switch default branch from master to main - Issue [#420](https://github.com/sdv-dev/SDMetrics/issues/420) by @amontanez24
+
 ## v0.11.1 - 2023-09-14
 
 This release makes multiple changes to better handle errors that get raised from the `DiagnosticReport`. The report should be able to run to completion now and have any errors that it encounters reported in a column on the details that can be observed from running `get_details`. It also resolves many warnings that were interrupting the printing of the report's results and progress.
