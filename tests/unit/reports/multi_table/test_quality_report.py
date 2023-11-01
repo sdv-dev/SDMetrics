@@ -2,7 +2,8 @@ from unittest.mock import Mock, patch
 
 from sdmetrics.reports._results_handler import QualityReportResultsHandler
 from sdmetrics.reports.multi_table import QualityReport
-from sdmetrics.reports.multi_table._properties import Cardinality, ColumnPairTrends, ColumnShapes
+from sdmetrics.reports.multi_table._properties import (
+    Cardinality, ColumnPairTrends, ColumnShapes, InterTableTrends)
 
 
 class TestQualityReport:
@@ -19,6 +20,7 @@ class TestQualityReport:
         assert isinstance(report._properties['Column Shapes'], ColumnShapes)
         assert isinstance(report._properties['Column Pair Trends'], ColumnPairTrends)
         assert isinstance(report._properties['Cardinality'], Cardinality)
+        assert isinstance(report._properties['Intertable Trends'], InterTableTrends)
         assert isinstance(report._results_handler, QualityReportResultsHandler)
 
     def test__handle_results(self):

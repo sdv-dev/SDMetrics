@@ -4,7 +4,7 @@
 
 __author__ = 'MIT Data To AI Lab'
 __email__ = 'dailabmit@gmail.com'
-__version__ = '0.11.1'
+__version__ = '0.12.0.dev1'
 
 import sys
 import warnings as python_warnings
@@ -15,7 +15,7 @@ import pandas as pd
 from pkg_resources import iter_entry_points
 
 from sdmetrics import (
-    column_pairs, demos, goal, multi_table, single_column, single_table, timeseries)
+    column_pairs, demos, goal, multi_table, reports, single_column, single_table, timeseries)
 from sdmetrics.demos import load_demo
 
 __all__ = [
@@ -27,6 +27,7 @@ __all__ = [
     'single_column',
     'single_table',
     'timeseries',
+    'reports',
 ]
 
 

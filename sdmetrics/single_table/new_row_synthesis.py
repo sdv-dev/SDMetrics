@@ -73,6 +73,10 @@ class NewRowSynthesis(SingleTableMetric):
 
         for field, field_meta in get_columns_from_metadata(metadata).items():
             if get_type_from_column_meta(field_meta) == 'datetime':
+                if len(real_data[field]) > 0 and isinstance(real_data[field][0], str):
+                    real_data[field] = pd.to_datetime(real_data[field])
+                    synthetic_data[field] = pd.to_datetime(synthetic_data[field])
+
                 real_data[field] = pd.to_numeric(real_data[field])
                 synthetic_data[field] = pd.to_numeric(synthetic_data[field])
 

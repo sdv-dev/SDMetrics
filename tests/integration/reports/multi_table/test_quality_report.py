@@ -1,3 +1,4 @@
+import time
 from datetime import date, datetime
 
 import numpy as np
@@ -90,7 +91,9 @@ def test_multi_table_quality_report():
     # Run `generate`, `get_properties` and `get_score`,
     # as well as `get_visualization` and `get_details` for every property:
     # 'Column Shapes', 'Column Pair Trends', 'Cardinality'
+    generate_start_time = time.time()
     report.generate(real_data, synthetic_data, metadata)
+    generate_end_time = time.time()
     properties = report.get_properties()
     property_names = list(properties['Property'])
     score = report.get_score()
@@ -104,10 +107,10 @@ def test_multi_table_quality_report():
         details.append(report.get_details(property_))
 
     # Assert score
-    assert score == 0.782776169878912
+    assert score == 0.649582127409184
     pd.testing.assert_frame_equal(properties, pd.DataFrame({
-        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
-        'Score': [0.8, 0.7983285096367361, 0.75],
+        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
+        'Score': [0.8, 0.7983285096367361, 0.75, 0.25],
     }))
 
     # Assert Column Shapes details
@@ -139,7 +142,25 @@ def test_multi_table_quality_report():
         'Score': [0.75],
     })
     pd.testing.assert_frame_equal(details[2], expected_df_2)
-    pd.testing.assert_frame_equal(details[5], expected_df_2)
+    pd.testing.assert_frame_equal(details[6], expected_df_2)
+
+    # Assert Intertable Trends details
+    expected_df_3 = pd.DataFrame({
+        'Parent Table': ['table1', 'table1', 'table1', 'table1', 'table1', 'table1'],
+        'Child Table': ['table2', 'table2', 'table2', 'table2', 'table2', 'table2'],
+        'Foreign Key': ['col6', 'col6', 'col6', 'col6', 'col6', 'col6'],
+        'Column 1': ['col2', 'col2', 'col2', 'col3', 'col3', 'col3'],
+        'Column 2': ['col4', 'col5', 'col7', 'col4', 'col5', 'col7'],
+        'Metric': [
+            'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity',
+            'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'
+        ],
+        'Score': [0.5, 0.5, 0.5, 0.0, 0.0, 0.0],
+        'Real Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+        'Synthetic Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+    })
+    pd.testing.assert_frame_equal(details[3], expected_df_3)
+    pd.testing.assert_frame_equal(details[7], expected_df_3)
 
     # Assert Column Shapes details without table_name
     expected_df_3 = pd.DataFrame({
@@ -148,7 +169,7 @@ def test_multi_table_quality_report():
         'Metric': ['TVComplement', 'TVComplement', 'KSComplement', 'KSComplement', 'KSComplement'],
         'Score': [0.75, 0.75, 0.75, 0.75, 1.0]
     })
-    pd.testing.assert_frame_equal(details[3], expected_df_3)
+    pd.testing.assert_frame_equal(details[4], expected_df_3)
 
     # Assert Column Pair Trends details without table_name
     expected_df_4 = pd.DataFrame({
@@ -163,7 +184,22 @@ def test_multi_table_quality_report():
         'Real Correlation': [np.nan, 0.946664, 0.966247, 0.862622],
         'Synthetic Correlation': [np.nan, 0.926925, 0.936853, 0.798384],
     })
-    pd.testing.assert_frame_equal(details[4], expected_df_4)
+    pd.testing.assert_frame_equal(details[5], expected_df_4)
+
+    # Assert report info saved
+    report_info = report.get_info()
+    assert report_info == report.report_info
+
+    expected_info_keys = {
+        'report_type', 'generated_date', 'sdmetrics_version', 'num_tables', 'num_rows_real_data',
+        'num_rows_synthetic_data', 'generation_time'
+    }
+    assert report_info.keys() == expected_info_keys
+    assert report_info['report_type'] == 'QualityReport'
+    assert report_info['num_tables'] == 2
+    assert report_info['num_rows_real_data'] == {'table1': 4, 'table2': 4}
+    assert report_info['num_rows_synthetic_data'] == {'table1': 4, 'table2': 4}
+    assert report_info['generation_time'] <= generate_end_time - generate_start_time
 
 
 def test_quality_report_end_to_end():
@@ -176,14 +212,24 @@ def test_quality_report_end_to_end():
     report.generate(real_data, synthetic_data, metadata)
     score = report.get_score()
     properties = report.get_properties()
+    info = report.get_info()
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
-        'Score': [0.7922619047619048, 0.4249665433225429, 0.8],
+        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
+        'Score': [0.7922619047619048, 0.4249665433225429, 0.8, 0.48240740740740734],
     })
-    assert score == 0.672409482694816
+    assert score == 0.6249089638729638
     pd.testing.assert_frame_equal(properties, expected_properties)
+    expected_info_keys = {
+        'report_type', 'generated_date', 'sdmetrics_version', 'num_tables', 'num_rows_real_data',
+        'num_rows_synthetic_data', 'generation_time'
+    }
+    assert info.keys() == expected_info_keys
+    assert info['report_type'] == 'QualityReport'
+    assert info['num_tables'] == 3
+    assert info['num_rows_real_data'] == {'sessions': 10, 'users': 10, 'transactions': 10}
+    assert info['num_rows_synthetic_data'] == {'sessions': 9, 'users': 10, 'transactions': 10}
 
 
 def test_quality_report_with_object_datetimes():
@@ -205,10 +251,10 @@ def test_quality_report_with_object_datetimes():
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
-        'Score': [0.7922619047619048, 0.4249665433225429, 0.8],
+        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
+        'Score': [0.7922619047619048, 0.4249665433225429, 0.8, 0.48240740740740734],
     })
-    assert score == 0.672409482694816
+    assert score == 0.6249089638729638
     pd.testing.assert_frame_equal(properties, expected_properties)
 
 
@@ -230,8 +276,8 @@ def test_quality_report_with_errors():
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality'],
-        'Score': [0.8276190476190475, 0.5666666666666667, 0.8]
+        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
+        'Score': [0.8276190476190475, 0.5666666666666667, 0.8, 0.6092592592592593]
     })
     expected_details = pd.DataFrame({
         'Table': [
@@ -257,6 +303,6 @@ def test_quality_report_with_errors():
             None
         ]
     })
-    assert score == 0.7314285714285713
+    assert score == 0.7008862433862433
     pd.testing.assert_frame_equal(properties, expected_properties)
     pd.testing.assert_frame_equal(details_column_shapes, expected_details)
