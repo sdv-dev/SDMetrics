@@ -306,3 +306,24 @@ def test_quality_report_with_errors():
     assert score == 0.7008862433862433
     pd.testing.assert_frame_equal(properties, expected_properties)
     pd.testing.assert_frame_equal(details_column_shapes, expected_details)
+
+
+def test_quality_report_with_no_relationships():
+    # Setup
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+
+    del metadata['relationships']
+    report = QualityReport()
+
+    # Run
+    report.generate(real_data, synthetic_data, metadata, verbose=True)
+    score = report.get_score()
+
+    # Assert
+    expected_properties = pd.DataFrame({
+        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
+        'Score': [0.792262, 0.424967, np.nan, np.nan]
+    })
+    properties = report.get_properties()
+    pd.testing.assert_frame_equal(properties, expected_properties)
+    assert score == 0.6086142240422239
