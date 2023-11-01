@@ -46,13 +46,12 @@ class BaseMultiTableProperty():
             return sum([(n_cols * (n_cols - 1)) // 2 for n_cols in num_columns])
         elif self._num_iteration_case == 'inter_table_column_pair':
             iterations = 0
-            if 'relationships' in metadata:
-                for relationship in metadata['relationships']:
-                    parent_columns = \
-                        metadata['tables'][relationship['parent_table_name']]['columns']
-                    child_columns = \
-                        metadata['tables'][relationship['child_table_name']]['columns']
-                    iterations += (len(parent_columns) * len(child_columns))
+            for relationship in metadata.get('relationships', []):
+                parent_columns = \
+                    metadata['tables'][relationship['parent_table_name']]['columns']
+                child_columns = \
+                    metadata['tables'][relationship['child_table_name']]['columns']
+                iterations += (len(parent_columns) * len(child_columns))
             return iterations
 
     def _compute_average(self):
