@@ -22,6 +22,6 @@ __all__ = [
     'InterTableTrends',
     'Synthesis',
     'Structure',
-    'DataValidity'
+    'DataValidity',
     'RelationshipValidity',
 ]
