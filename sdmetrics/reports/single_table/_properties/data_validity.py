@@ -4,29 +4,30 @@ import plotly.express as px
 
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
-from sdmetrics.single_column import KSComplement, TVComplement
+from sdmetrics.single_column import BoundaryAdherence, CategoryAdherence, KeyUniqueness
 
 
-class ColumnShapes(BaseSingleTableProperty):
-    """Column Shapes property class for single table.
+class DataValidity(BaseSingleTableProperty):
+    """Data Validity property class for single table.
 
-    This property assesses the shape similarity between the real and synthetic data.
-    A metric score is computed column-wise and the final score is the average over all columns.
-    The KSComplement metric is used for numerical and datetime columns while the TVComplement
-    is used for categorical and boolean columns.
-    The other column types are ignored by this property.
+    This property computes, at base, whether each column contains valid data.
+    The metric is based on the type data in each column.
+    The BoundaryAdherence metric is used for numerical and datetime columns, the CategoryAdherence
+    is used for categorical and boolean columns and the KeyUniqueness for primary
+    and alternate keys. The other column types are ignored by this property.
     """
 
     _num_iteration_case = 'column'
     _sdtype_to_metric = {
-        'numerical': KSComplement,
-        'datetime': KSComplement,
-        'categorical': TVComplement,
-        'boolean': TVComplement
+        'numerical': BoundaryAdherence,
+        'datetime': BoundaryAdherence,
+        'categorical': CategoryAdherence,
+        'boolean': CategoryAdherence,
+        'id': KeyUniqueness,
     }
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
-        """Generate the _details dataframe for the column shapes property.
+        """Generate the _details dataframe for the data validity property.
 
         Args:
             real_data (pandas.DataFrame):
@@ -40,17 +41,23 @@ class ColumnShapes(BaseSingleTableProperty):
         """
         column_names, metric_names, scores = [], [], []
         error_messages = []
+        primary_key = metadata.get('primary_key')
+        alternate_keys = metadata.get('alternate_keys', [])
         for column_name in metadata['columns']:
             sdtype = metadata['columns'][column_name]['sdtype']
+            primary_key_match = column_name == primary_key
+            alternate_key_match = column_name in alternate_keys
+            is_unique = primary_key_match or alternate_key_match
+
             try:
-                if sdtype in self._sdtype_to_metric:
-                    metric = self._sdtype_to_metric[sdtype]
-                    column_score = metric.compute(
-                        real_data[column_name], synthetic_data[column_name]
-                    )
-                    error_message = None
-                else:
+                if sdtype not in self._sdtype_to_metric and not is_unique:
                     continue
+
+                metric = self._sdtype_to_metric.get(sdtype, KeyUniqueness)
+                column_score = metric.compute(
+                    real_data[column_name], synthetic_data[column_name]
+                )
+                error_message = None
 
             except Exception as e:
                 column_score = np.nan
@@ -77,7 +84,7 @@ class ColumnShapes(BaseSingleTableProperty):
         return result
 
     def get_visualization(self):
-        """Create a plot to show the column shape scores.
+        """Create a plot to show the data validity scores.
 
         Returns:
             plotly.graph_objects._figure.Figure
@@ -88,15 +95,17 @@ class ColumnShapes(BaseSingleTableProperty):
             data_frame=self.details,
             x='Column',
             y='Score',
-            title=f'Data Quality: Column Shapes (Average Score={average_score})',
+            title=f'Data Diagnostic: Data Validity (Average Score={average_score})',
             category_orders={'group': list(self.details['Column'])},
             color='Metric',
             color_discrete_map={
-                'KSComplement': PlotConfig.DATACEBO_DARK,
-                'TVComplement': PlotConfig.DATACEBO_BLUE,
+                'BoundaryAdherence': PlotConfig.DATACEBO_DARK,
+                'CategoryAdherence': PlotConfig.DATACEBO_BLUE,
+                'KeyUniqueness': PlotConfig.DATACEBO_GREEN
+
             },
             pattern_shape='Metric',
-            pattern_shape_sequence=['', '/'],
+            pattern_shape_sequence=['', '/', '.'],
             hover_name='Column',
             hover_data={
                 'Column': False,
