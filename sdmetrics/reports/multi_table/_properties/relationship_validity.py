@@ -43,7 +43,7 @@ class RelationshipValidity(BaseMultiTableProperty):
         for relation in metadata.get('relationships', []):
             real_columns = self._extract_tuple(real_data, relation)
             synthetic_columns = self._extract_tuple(synthetic_data, relation)
-            for idx, metric in enumerate(metrics):
+            for metric in metrics:
                 try:
                     relation_score = metric.compute(
                         real_columns,
@@ -53,9 +53,6 @@ class RelationshipValidity(BaseMultiTableProperty):
                 except Exception as e:
                     relation_score = np.nan
                     error_message = f'{type(e).__name__}: {e}'
-                finally:
-                    if progress_bar is not None and idx % 2 == 0:
-                        progress_bar.update()
 
                 child_tables.append(relation['child_table_name'])
                 parent_tables.append(relation['parent_table_name'])
@@ -64,6 +61,9 @@ class RelationshipValidity(BaseMultiTableProperty):
                 metric_names.append(metric.__name__)
                 scores.append(relation_score)
                 error_messages.append(error_message)
+
+            if progress_bar:
+                progress_bar.update()
 
         self.details = pd.DataFrame({
             'Parent Table': parent_tables,
