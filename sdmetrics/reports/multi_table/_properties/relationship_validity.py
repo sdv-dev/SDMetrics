@@ -87,7 +87,10 @@ class RelationshipValidity(BaseMultiTableProperty):
         """
         plot_data = self.get_details(table_name).copy()
         column_name = 'Child → Parent Relationship'
-        plot_data[column_name] = plot_data['Child Table'] + ' → ' + plot_data['Parent Table']
+        plot_data[column_name] = (
+            plot_data['Child Table'] + ' (' + plot_data['Foreign Key'] + ') → ' +
+            plot_data['Parent Table']
+        )
         plot_data = plot_data.drop(['Child Table', 'Parent Table'], axis=1)
 
         average_score = round(plot_data['Score'].mean(), 2)

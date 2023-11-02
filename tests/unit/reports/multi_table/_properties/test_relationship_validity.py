@@ -231,7 +231,9 @@ class TestRelationshipValidity:
         relationship_validity.details = pd.DataFrame({
             'Child Table': ['users_child', 'sessions_child'],
             'Parent Table': ['users_parent', 'sessions_parent'],
-            'Metric': ['RelationshipValidityShapeSimilarity', 'SomeOtherMetric'],
+            'Primary Key': ['user_id', 'user_id'],
+            'Foreign Key': ['user_id', 'user_id'],
+            'Metric': ['ReferentialIntegrity', 'CardinalityBoundaryAdherence'],
             'Score': [1.0, 0.5],
             'Error': [None, 'Some error']
         })
@@ -244,7 +246,9 @@ class TestRelationshipValidity:
         assert details_users_child.equals(pd.DataFrame({
             'Child Table': ['users_child'],
             'Parent Table': ['users_parent'],
-            'Metric': ['RelationshipValidityShapeSimilarity'],
+            'Primary Key': ['user_id'],
+            'Foreign Key': ['user_id'],
+            'Metric': ['ReferentialIntegrity'],
             'Score': [1.0],
             'Error': [None]
         }, index=[0]))
@@ -253,7 +257,9 @@ class TestRelationshipValidity:
         assert details_sessions_parent.equals(pd.DataFrame({
             'Child Table': ['sessions_child'],
             'Parent Table': ['sessions_parent'],
-            'Metric': ['SomeOtherMetric'],
+            'Primary Key': ['user_id'],
+            'Foreign Key': ['user_id'],
+            'Metric': ['CardinalityBoundaryAdherence'],
             'Score': [0.5],
             'Error': ['Some error']
         }, index=[1]))
@@ -268,7 +274,9 @@ class TestRelationshipValidity:
         instance.details = pd.DataFrame({
             'Child Table': ['users_child', 'sessions_child'],
             'Parent Table': ['users_parent', 'sessions_parent'],
-            'Metric': ['RelationshipValidityShapeSimilarity', 'SomeOtherMetric'],
+            'Primary Key': ['user_id', 'user_id'],
+            'Foreign Key': ['user_id', 'user_id'],
+            'Metric': ['ReferentialIntegrity', 'CardinalityBoundaryAdherence'],
             'Score': [1.0, 0.5],
             'Error': [None, 'Some error']
         })
@@ -279,7 +287,7 @@ class TestRelationshipValidity:
         # Assert
         assert isinstance(fig, Figure)
 
-        expected_x = ['users_child → users_parent']
+        expected_x = ['users_child (user_id) → users_parent']
         expected_y = [1.0]
         expected_title = 'Data Diagnostic: Relationship Validity (Average Score=1.0)'
 
