@@ -1,7 +1,6 @@
 """Single table diagnostic report."""
 import logging
 
-from sdmetrics.reports._results_handler import QualityReportResultsHandler
 from sdmetrics.reports.base_report import BaseReport
 from sdmetrics.reports.single_table._properties import DataValidity, Structure
 
@@ -21,10 +20,6 @@ class DiagnosticReport(BaseReport):
             'Data Validity': DataValidity(),
             'Data Structure': Structure(),
         }
-        self._results_handler = QualityReportResultsHandler()
-
-    def _handle_results(self, verbose):
-        self._results_handler.print_results(self._properties, self._overall_score, verbose)
 
     def get_score(self):
         """Return the diagnostic results.

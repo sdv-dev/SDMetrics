@@ -25,7 +25,6 @@ class BaseReport():
         self._overall_score = None
         self.is_generated = False
         self._properties = {}
-        self._results_handler = None
         self.report_info = {
             'report_type': self.__class__.__name__,
             'generated_date': None,
@@ -91,6 +90,25 @@ class BaseReport():
                 except Exception:
                     continue
 
+    def _print_results(self, verbose):
+        """Print the results of a QualityReport.
+
+        Args:
+            verbose (bool):
+                Whether or not to print results to std.out.
+        """
+        if verbose:
+            sys.stdout.write(
+                f'\nOverall Score: {round(self._overall_score * 100, 2)}%\n\n'
+            )
+            sys.stdout.write('Properties:\n')
+
+            for property_name, property_instance in self._properties.items():
+                property_score = round(property_instance._compute_average() * 100, 2)
+                sys.stdout.write(
+                    f'- {property_name}: {property_score}%\n'
+                )
+
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
 
@@ -152,7 +170,7 @@ class BaseReport():
         end_time = time.time()
         self.report_info['generation_time'] = end_time - start_time
 
-        self._handle_results(verbose)
+        self._print_results(verbose)
 
     def _check_property_name(self, property_name):
         """Check that the given property name is valid.

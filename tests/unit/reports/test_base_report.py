@@ -173,6 +173,50 @@ class TestBaseReport:
         with pytest.raises(TypeError, match=expected_message):
             base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
+    @patch('sys.stdout.write')
+    def test_print_results_verbose_true(self, mock_write):
+        """Test the results are printed if verbose is True."""
+        # Setup
+        report = BaseReport()
+        report._overall_score = 0.5
+        mock_column_shapes = Mock()
+        mock_column_shapes._compute_average.return_value = 0.6
+        mock_column_pair_trends = Mock()
+        mock_column_pair_trends._compute_average.return_value = 0.4
+        report._properties = {
+            'Column Shapes': mock_column_shapes,
+            'Column Pair Trends': mock_column_pair_trends
+        }
+
+        # Run
+        report._print_results(True)
+
+        # Assert
+        calls = [
+            call('\nOverall Score: 50.0%\n\n'),
+            call('Properties:\n'),
+            call('- Column Shapes: 60.0%\n'),
+            call('- Column Pair Trends: 40.0%\n'),
+        ]
+        mock_write.assert_has_calls(calls, any_order=True)
+
+    @patch('sys.stdout.write')
+    def test_print_results_verbose_false(self, mock_write):
+        """Test the results are not printed if verbose is False."""
+        # Setup
+        report = BaseReport()
+        report._overall_score = 0.5
+        report._properties = {
+            'Column Shapes': Mock(_compute_average=Mock(return_value=0.6)),
+            'Column Pair Trends': Mock(_compute_average=Mock(return_value=0.4))
+        }
+
+        # Run
+        report._print_results(False)
+
+        # Assert
+        mock_write.assert_not_called()
+
     @patch('sdmetrics.reports.base_report.datetime')
     @patch('sdmetrics.reports.base_report.time')
     @patch('sdmetrics.reports.base_report.version')
@@ -190,8 +234,8 @@ class TestBaseReport:
 
         base_report = BaseReport()
         mock_validate = Mock()
-        mock_handle_results = Mock()
-        base_report._handle_results = mock_handle_results
+        mock__print_results = Mock()
+        base_report._print_results = mock__print_results
         base_report.validate = mock_validate
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 1'].get_score.return_value = 1.0
@@ -218,7 +262,7 @@ class TestBaseReport:
 
         # Assert
         mock_validate.assert_called_once_with(real_data, synthetic_data, metadata)
-        mock_handle_results.assert_called_once_with(False)
+        mock__print_results.assert_called_once_with(False)
         base_report._properties['Property 1'].get_score.assert_called_with(
             real_data, synthetic_data, metadata, progress_bar=None
         )
@@ -250,7 +294,7 @@ class TestBaseReport:
         version_mock.return_value = 'version'
 
         base_report = BaseReport()
-        base_report._handle_results = Mock()
+        base_report._print_results = Mock()
         base_report.validate = Mock()
         base_report.convert_datetimes = Mock()
         base_report._properties['Property 1'] = Mock()
@@ -322,21 +366,12 @@ class TestBaseReport:
         }
         assert base_report.report_info == expected_info
 
-    def test__handle_results(self):
-        """Test the ``_handle_results`` method."""
-        # Setup
-        base_report = BaseReport()
-
-        # Run and Assert
-        with pytest.raises(NotImplementedError):
-            base_report._handle_results(True)
-
     @patch('tqdm.tqdm')
     def test_generate_verbose(self, mock_tqdm):
         """Test the ``generate`` method with verbose=True."""
         # Setup
         base_report = BaseReport()
-        base_report._handle_results = Mock()
+        base_report._print_results = Mock()
         mock_validate = Mock()
         base_report.validate = mock_validate
         base_report._print_results = Mock()
@@ -376,7 +411,7 @@ class TestBaseReport:
         # Assert
         calls = [call(total=4, file=sys.stdout), call(total=6, file=sys.stdout)]
         mock_tqdm.assert_has_calls(calls, any_order=True)
-        base_report._handle_results.assert_called_once_with(True)
+        base_report._print_results.assert_called_once_with(True)
 
     def test__check_report_generated(self):
         """Test the ``check_report_generated`` method."""
@@ -453,8 +488,8 @@ class TestBaseReport:
 
         base_report = BaseReport()
         mock_validate = Mock()
-        mock_handle_results = Mock()
-        base_report._handle_results = mock_handle_results
+        mock__print_results = Mock()
+        base_report._print_results = mock__print_results
         base_report.validate = mock_validate
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 1'].get_score.return_value = 1.0
