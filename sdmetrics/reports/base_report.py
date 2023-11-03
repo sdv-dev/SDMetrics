@@ -91,7 +91,7 @@ class BaseReport():
                     continue
 
     def _print_results(self, verbose):
-        """Print the results of a QualityReport.
+        """Print the results.
 
         Args:
             verbose (bool):
@@ -187,11 +187,11 @@ class BaseReport():
             )
 
     def get_score(self):
-        """Return the overall quality score.
+        """Return the overall score.
 
         Returns:
             float
-                The overall quality score.
+                The overall score.
         """
         self._check_report_generated()
         return self._overall_score
