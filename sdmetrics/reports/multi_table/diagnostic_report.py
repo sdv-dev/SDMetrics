@@ -7,7 +7,7 @@ class DiagnosticReport(BaseMultiTableReport):
     """Multi table diagnostic report.
 
     This class creates a diagnostic report for multi-table data. It calculates the diagnostic
-    score along three properties - RelationshipValidity, DataStructure, and DataValidity.
+    score along three properties - Relationship Validity, Data Structure, and Data Validity.
     """
 
     def __init__(self):
