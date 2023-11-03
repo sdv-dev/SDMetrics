@@ -17,13 +17,3 @@ class DiagnosticReport(BaseMultiTableReport):
             'Data Structure': Structure(),
             'Relationship Validity': RelationshipValidity()
         }
-
-    def get_score(self):
-        """Return the diagnostic results.
-
-        Returns:
-            dict
-                The diagnostic results.
-        """
-        self._check_report_generated()
-        return self._overall_score

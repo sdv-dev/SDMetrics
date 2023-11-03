@@ -452,6 +452,21 @@ class TestBaseReport:
         with pytest.raises(ValueError, match=expected_message_2):
             base_report._validate_property_generated(wrong_property_name)
 
+    def test_get_score(self):
+        """Test the ``get_score`` method."""
+        # Setup
+        report = BaseReport()
+        report._check_report_generated = Mock()
+        report._overall_score = 0.7
+        report.is_generated = True
+
+        # Run
+        results = report.get_score()
+
+        # Assert
+        report._check_report_generated.assert_called_once_with()
+        assert results == 0.7
+
     def test_get_properties(self):
         """Test the ``get_details`` method."""
         # Setup

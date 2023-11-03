@@ -20,13 +20,3 @@ class DiagnosticReport(BaseReport):
             'Data Validity': DataValidity(),
             'Data Structure': Structure(),
         }
-
-    def get_score(self):
-        """Return the diagnostic results.
-
-        Returns:
-            dict
-                The diagnostic results.
-        """
-        self._check_report_generated()
-        return self._overall_score

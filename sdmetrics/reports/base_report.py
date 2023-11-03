@@ -186,6 +186,16 @@ class BaseReport():
                 f" Valid property names are '{valid_property_names}'."
             )
 
+    def get_score(self):
+        """Return the overall quality score.
+
+        Returns:
+            float
+                The overall quality score.
+        """
+        self._check_report_generated()
+        return self._overall_score
+
     def get_info(self):
         """Get the information about the report."""
         return deepcopy(self.report_info)

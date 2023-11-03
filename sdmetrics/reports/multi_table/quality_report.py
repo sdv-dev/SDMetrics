@@ -19,13 +19,3 @@ class QualityReport(BaseMultiTableReport):
             'Cardinality': Cardinality(),
             'Intertable Trends': InterTableTrends()
         }
-
-    def get_score(self):
-        """Return the overall quality score.
-
-        Returns:
-            float
-                The overall quality score.
-        """
-        self._check_report_generated()
-        return self._overall_score
