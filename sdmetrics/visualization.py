@@ -1,5 +1,7 @@
 """Visualization methods for SDMetrics."""
 
+from functools import wraps
+
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
@@ -10,21 +12,32 @@ from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.utils import get_missing_percentage, is_datetime
 
 
-def _set_plotly_config():
-    """Set the ``plotly`` config according to the environment."""
-    renderers = list(pio.renderers)
-    if getattr('get_ipython', __builtin__):
-        ipython_interpreter = get_ipython()
-        if 'colab' in ipython_interpreter and 'colab' in renderers:
-            pio.renderers.default = 'colab'
-        elif 'ZMQInteractiveShell' in ipython_interpreter and 'notebook' in renderers:
-            pio.renderers.default = 'notebook'
+def set_plotly_config(function):
+    """Set the ``plotly.io.renders`` config according to the environment.
 
-    elif 'iframe' in renderers:
-        pio.renderers.default = 'iframe'
+    Configure the rendering settings based on the environment in which the plot is generated
+    to ensure the image rendering with a stable engine. When working in Google Colab,
+    the default ``colab`` rendering option provided by ``plotly`` will be used.
+    For other environments, like ``Jupyter Notebooks``, select the `iframe` rendering engine.
+    """
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        renderers = list(pio.renderers)
+        builtin = globals().get('__builtin__', {})
+        get_ipython = getattr(builtin, 'get_ipython') if hasattr(builtin, 'get_ipython') else False
+        if get_ipython:
+            ipython_interpreter = get_ipython()
+            if 'colab' in ipython_interpreter and 'colab' in renderers:
+                pio.renderers.default = 'colab'
+            elif 'ZMQInteractiveShell' in ipython_interpreter and 'iframe' in renderers:
+                pio.renderers.default = 'iframe'
 
+        elif 'iframe' in renderers:
+            pio.renderers.default = 'iframe'
 
-_set_plotly_config()
+        return function(*args, **kwargs)
+
+    return wrapper
 
 
 def _generate_column_bar_plot(real_data, synthetic_data, plot_kwargs={}):
@@ -331,6 +344,7 @@ def _get_cardinality(parent_table, child_table, parent_primary_key, child_foreig
     return cardinalities.sort_values('# children')['# children']
 
 
+@set_plotly_config
 def get_cardinality_plot(real_data, synthetic_data, child_table_name, parent_table_name,
                          child_foreign_key, parent_primary_key, plot_type='bar'):
     """Return a plot of the cardinality of the parent-child relationship.
@@ -380,6 +394,7 @@ def get_cardinality_plot(real_data, synthetic_data, child_table_name, parent_tab
     return fig
 
 
+@set_plotly_config
 def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     """Return a plot of the real and synthetic data for a given column.
 
@@ -426,6 +441,7 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     return fig
 
 
+@set_plotly_config
 def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None):
     """Return a plot of the real and synthetic data for a given column pair.
 

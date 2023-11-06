@@ -700,3 +700,31 @@ def test_get_column_pair_plot_plot_type_is_box(mock__generate_heatmap_plot):
         ['amount', 'date']
     )
     assert fig == mock__generate_heatmap_plot.return_value
+
+
+@patch('sdmetrics.visualization.pio')
+def test_get_column_pair_plot_sets_plotly_renderers(mock_pio):
+    """Ensure that the ``plotly.io`` render is set to ``iframe``."""
+    # Setup
+    def mock_iter():
+        yield from ['iframe', 'notebook', 'colab']
+
+    mock_pio.renderers = Mock()
+    mock_pio.renderers.__iter__ = Mock(side_effect=mock_iter)
+    mock_pio.renderers.default = 'default'
+
+    columns = ['amount', 'date']
+    real_data = pd.DataFrame({
+        'amount': [1, 2, 3],
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01'])
+    })
+    synthetic_data = pd.DataFrame({
+        'amount': [1., 2., 3.],
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01'])
+    })
+
+    # Run
+    get_column_pair_plot(real_data, synthetic_data, columns, plot_type='heatmap')
+
+    # Assert
+    assert mock_pio.renderers.default == 'iframe'
