@@ -1,6 +1,3 @@
-import contextlib
-import io
-import re
 import time
 from datetime import date, datetime
 
@@ -365,7 +362,7 @@ class TestQualityReport:
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
 
-    def test_report_with_verbose(self):
+    def test_report_with_verbose(self, capsys):
         """Test the report with verbose.
 
         Check that the report prints the correct information.
@@ -390,13 +387,13 @@ class TestQualityReport:
         report = QualityReport()
 
         # Run
-        with contextlib.redirect_stdout(io.StringIO()) as my_stdout:
-            report.generate(real_data, synthetic_data, metadata)
+        report.generate(real_data, synthetic_data, metadata)
+        captured = capsys.readouterr()
+        output = captured.out
 
         # Assert
         for pattern in key_phrases:
-            match = re.search(pattern, my_stdout.getvalue())
-            assert match is not None
+            pattern in output
 
     def test_correlation_similarity_constant_real_data(self):
         """Error out when CorrelationSimilarity is used with a constant pair of columns."""
