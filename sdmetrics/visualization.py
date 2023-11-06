@@ -26,7 +26,7 @@ def set_plotly_config(function):
         builtin = globals().get('__builtin__', {})
         get_ipython = getattr(builtin, 'get_ipython') if hasattr(builtin, 'get_ipython') else False
         if get_ipython:
-            ipython_interpreter = get_ipython()
+            ipython_interpreter = str(get_ipython())
             if 'colab' in ipython_interpreter and 'colab' in renderers:
                 pio.renderers.default = 'colab'
             elif 'ZMQInteractiveShell' in ipython_interpreter and 'iframe' in renderers:
