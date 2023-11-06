@@ -58,8 +58,16 @@ class TestCardinality:
         cardinality._compute_average = mock_compute_average
         progress_bar = Mock()
         relationships = [
-            {'child_table_name': 'users_child', 'parent_table_name': 'users_parent'},
-            {'child_table_name': 'sessions_child', 'parent_table_name': 'sessions_parent'}
+            {
+                'child_table_name': 'users_child',
+                'parent_table_name': 'users_parent',
+                'child_foreign_key': 'users_child_id',
+            },
+            {
+                'child_table_name': 'sessions_child',
+                'parent_table_name': 'sessions_parent',
+                'child_foreign_key': 'sessions_child_id',
+            }
         ]
         metadata = {'relationships': relationships}
 
@@ -83,8 +91,16 @@ class TestCardinality:
         cardinality = Cardinality()
         progress_bar = Mock()
         relationships = [
-            {'child_table_name': 'users_child', 'parent_table_name': 'users_parent'},
-            {'child_table_name': 'sessions_child', 'parent_table_name': 'sessions_parent'}
+            {
+                'child_table_name': 'users_child',
+                'parent_table_name': 'users_parent',
+                'child_foreign_key': 'users_child_id',
+            },
+            {
+                'child_table_name': 'sessions_child',
+                'parent_table_name': 'sessions_parent',
+                'child_foreign_key': 'sessions_child_id',
+            }
         ]
         metadata = {'relationships': relationships}
 
@@ -95,6 +111,7 @@ class TestCardinality:
         expected_details_property = pd.DataFrame({
             'Child Table': ['users_child', 'sessions_child'],
             'Parent Table': ['users_parent', 'sessions_parent'],
+            'Foreign Key': ['users_child_id', 'sessions_child_id'],
             'Metric': ['CardinalityShapeSimilarity', 'CardinalityShapeSimilarity'],
             'Score': [np.nan, np.nan],
             'Error': ['ValueError: Users error', 'ValueError: Sessions error']
@@ -105,8 +122,8 @@ class TestCardinality:
         progress_bar.update.assert_called()
         assert progress_bar.update.call_count == 2
 
-    def test_get_details_for_table_name(self):
-        """Test the ``_get_details_for_table_name`` method.
+    def test_get_details_with_table_name(self):
+        """Test the ``get_details`` method.
 
         Test that the method returns the correct details for the given table name,
         either from the child or parent table.
@@ -116,19 +133,21 @@ class TestCardinality:
         cardinality.details = pd.DataFrame({
             'Child Table': ['users_child', 'sessions_child'],
             'Parent Table': ['users_parent', 'sessions_parent'],
+            'Foreign Key': ['users_child_id', 'sessions_child_id'],
             'Metric': ['CardinalityShapeSimilarity', 'SomeOtherMetric'],
             'Score': [1.0, 0.5],
             'Error': [None, 'Some error']
         })
 
         # Run
-        details_users_child = cardinality._get_details_for_table_name('users_child')
-        details_sessions_parent = cardinality._get_details_for_table_name('sessions_parent')
+        details_users_child = cardinality.get_details('users_child')
+        details_sessions_parent = cardinality.get_details('sessions_parent')
 
         # Assert for child table
         assert details_users_child.equals(pd.DataFrame({
             'Child Table': ['users_child'],
             'Parent Table': ['users_parent'],
+            'Foreign Key': ['users_child_id'],
             'Metric': ['CardinalityShapeSimilarity'],
             'Score': [1.0],
             'Error': [None]
@@ -138,30 +157,11 @@ class TestCardinality:
         assert details_sessions_parent.equals(pd.DataFrame({
             'Child Table': ['sessions_child'],
             'Parent Table': ['sessions_parent'],
+            'Foreign Key': ['sessions_child_id'],
             'Metric': ['SomeOtherMetric'],
             'Score': [0.5],
             'Error': ['Some error']
         }, index=[1]))
-
-    def test_get_details(self):
-        """Test the ``get_details`` method.
-
-        Test that the method returns the correct details for the given property and table name.
-        """
-        # Setup
-        mock__get_details_for_table_name = Mock(return_value='Details for table name')
-        cardinality = Cardinality()
-        cardinality.details = pd.DataFrame({'a': ['b']})
-        cardinality._get_details_for_table_name = mock__get_details_for_table_name
-
-        # Run
-        details = cardinality.get_details('table_name')
-        entire_details = cardinality.get_details()
-
-        # Assert
-        assert details == 'Details for table name'
-        pd.testing.assert_frame_equal(entire_details, pd.DataFrame({'a': ['b']}))
-        mock__get_details_for_table_name.assert_called_once_with('table_name')
 
     def test_get_table_relationships_plot(self):
         """Test the ``_get_table_relationships_plot`` method.
@@ -173,6 +173,7 @@ class TestCardinality:
         instance.details = pd.DataFrame({
             'Child Table': ['users_child', 'sessions_child'],
             'Parent Table': ['users_parent', 'sessions_parent'],
+            'Foreign Key': ['users_child_id', 'sessions_child_id'],
             'Metric': ['CardinalityShapeSimilarity', 'SomeOtherMetric'],
             'Score': [1.0, 0.5],
             'Error': [None, 'Some error']
@@ -184,7 +185,7 @@ class TestCardinality:
         # Assert
         assert isinstance(fig, Figure)
 
-        expected_x = ['users_child → users_parent']
+        expected_x = ['users_child (users_child_id) → users_parent']
         expected_y = [1.0]
         expected_title = 'Table Relationships (Average Score=1.0)'
 
@@ -195,7 +196,7 @@ class TestCardinality:
     def test_get_visualization(self):
         """Test the ``get_visualization`` method."""
         # Setup
-        mock__get_table_relationships_plot = Mock(return_value='Table relationships plot')
+        mock__get_table_relationships_plot = Mock(side_effect=[Figure()])
         cardinality = Cardinality()
         cardinality._get_table_relationships_plot = mock__get_table_relationships_plot
 
@@ -203,4 +204,5 @@ class TestCardinality:
         fig = cardinality.get_visualization('table_name')
 
         # Assert
-        assert fig == 'Table relationships plot'
+        assert isinstance(fig, Figure)
+        mock__get_table_relationships_plot.assert_called_once_with('table_name')
