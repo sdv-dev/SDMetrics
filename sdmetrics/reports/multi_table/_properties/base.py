@@ -54,6 +54,14 @@ class BaseMultiTableProperty():
                 iterations += (len(parent_columns) * len(child_columns))
             return iterations
 
+    @staticmethod
+    def _extract_tuple(data, relation):
+        parent_data = data[relation['parent_table_name']]
+        child_data = data[relation['child_table_name']]
+        return (
+            parent_data[relation['parent_primary_key']], child_data[relation['child_foreign_key']]
+        )
+
     def _compute_average(self):
         """Average the scores for each column."""
         is_dataframe = isinstance(self.details, pd.DataFrame)
