@@ -2,22 +2,23 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
-from sdmetrics.multi_table.statistical import CardinalityShapeSimilarity
+from sdmetrics.column_pairs.statistical import CardinalityBoundaryAdherence, ReferentialIntegrity
 from sdmetrics.reports.multi_table._properties.base import BaseMultiTableProperty
 from sdmetrics.reports.utils import PlotConfig
 
 
-class Cardinality(BaseMultiTableProperty):
-    """``Cardinality`` class.
+class RelationshipValidity(BaseMultiTableProperty):
+    """``Relationship Validity`` property.
 
-    Property that uses ``sdmetrics.multi_table.statistical.CardinalityShapeSimilarity`` metric
-    in order to compute and plot the scores of cardinality shape similarity in the given tables.
+    This property measures the validity of the relationship
+    from the primary key and the foreign key perspective.
+
     """
 
     _num_iteration_case = 'relationship'
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
-        """Get the average score of cardinality shape similarity in the given tables.
+        """Generate the _details dataframe for the relationship validity property.
 
         Args:
             real_data (dict[str, pandas.DataFrame]):
@@ -35,35 +36,40 @@ class Cardinality(BaseMultiTableProperty):
             float:
                 The average score for the property for all the individual metric scores computed.
         """
-        child_tables, parent_tables, child_foreign_key = [], [], []
+        child_tables, parent_tables = [], []
+        primary_key, foreign_key = [], []
         metric_names, scores, error_messages = [], [], []
+        metrics = [ReferentialIntegrity, CardinalityBoundaryAdherence]
         for relation in metadata.get('relationships', []):
-            relationships_metadata = {'relationships': [relation]}
-            try:
-                relation_score = CardinalityShapeSimilarity.compute(
-                    real_data,
-                    synthetic_data,
-                    relationships_metadata
-                )
-                error_message = None
-            except Exception as e:
-                relation_score = np.nan
-                error_message = f'{type(e).__name__}: {e}'
-            finally:
-                if progress_bar is not None:
-                    progress_bar.update()
+            real_columns = self._extract_tuple(real_data, relation)
+            synthetic_columns = self._extract_tuple(synthetic_data, relation)
+            for metric in metrics:
+                try:
+                    relation_score = metric.compute(
+                        real_columns,
+                        synthetic_columns,
+                    )
+                    error_message = None
+                except Exception as e:
+                    relation_score = np.nan
+                    error_message = f'{type(e).__name__}: {e}'
 
-            child_tables.append(relation['child_table_name'])
-            parent_tables.append(relation['parent_table_name'])
-            child_foreign_key.append(relation['child_foreign_key'])
-            metric_names.append('CardinalityShapeSimilarity')
-            scores.append(relation_score)
-            error_messages.append(error_message)
+                child_tables.append(relation['child_table_name'])
+                parent_tables.append(relation['parent_table_name'])
+                primary_key.append(relation['parent_primary_key'])
+                foreign_key.append(relation['child_foreign_key'])
+                metric_names.append(metric.__name__)
+                scores.append(relation_score)
+                error_messages.append(error_message)
+
+            if progress_bar:
+                progress_bar.update()
 
         self.details = pd.DataFrame({
-            'Child Table': child_tables,
             'Parent Table': parent_tables,
-            'Foreign Key': child_foreign_key,
+            'Child Table': child_tables,
+            'Primary Key': primary_key,
+            'Foreign Key': foreign_key,
             'Metric': metric_names,
             'Score': scores,
             'Error': error_messages,
@@ -93,15 +99,18 @@ class Cardinality(BaseMultiTableProperty):
             plot_data,
             x='Child → Parent Relationship',
             y='Score',
-            title=f'Table Relationships (Average Score={average_score})',
+            title=f'Data Diagnostic: Relationship Validity (Average Score={average_score})',
             color='Metric',
-            color_discrete_sequence=[PlotConfig.DATACEBO_DARK],
+            color_discrete_sequence=[PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN],
+            pattern_shape='Metric',
+            pattern_shape_sequence=['', '/'],
             hover_name='Child → Parent Relationship',
             hover_data={
                 'Child → Parent Relationship': False,
                 'Metric': True,
                 'Score': True,
             },
+            barmode='group'
         )
 
         fig.update_yaxes(range=[0, 1])
