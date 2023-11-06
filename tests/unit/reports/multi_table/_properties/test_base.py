@@ -90,6 +90,36 @@ class TestBaseMultiTableProperty():
         base_property._num_iteration_case = 'inter_table_column_pair'
         assert base_property._get_num_iterations(metadata) == 11
 
+    def test__extract_tuple(self):
+        """Test the ``_extract_tuple`` method."""
+        # Setup
+        base_property = BaseMultiTableProperty()
+        real_user_df = pd.DataFrame({
+            'user_id': ['user1', 'user2'],
+            'columnA': ['A', 'B'],
+            'columnB': [np.nan, 1.0]
+        })
+        real_session_df = pd.DataFrame({
+            'session_id': ['session1', 'session2', 'session3'],
+            'user_id': ['user1', 'user1', 'user2'],
+            'columnC': ['X', 'Y', 'Z'],
+            'columnD': [4.0, 6.0, 7.0]
+        })
+
+        real_data = {'users': real_user_df, 'sessions': real_session_df}
+        relation = {
+            'parent_table_name': 'users',
+            'child_table_name': 'sessions',
+            'parent_primary_key': 'user_id',
+            'child_foreign_key': 'user_id'
+        }
+
+        # Run
+        real_columns = base_property._extract_tuple(real_data, relation)
+
+        # Assert
+        assert real_columns == (real_data['users']['user_id'], real_data['sessions']['user_id'])
+
     def test__generate_details_property(self):
         """Test the ``_generate_details`` method."""
         # Setup
