@@ -27,13 +27,9 @@ def set_plotly_config(function):
         get_ipython = getattr(builtin, 'get_ipython') if hasattr(builtin, 'get_ipython') else False
         if get_ipython:
             ipython_interpreter = str(get_ipython())
-            if 'colab' in ipython_interpreter and 'colab' in renderers:
-                pio.renderers.default = 'colab'
-            elif 'ZMQInteractiveShell' in ipython_interpreter and 'iframe' in renderers:
+            if 'ZMQInteractiveShell' in ipython_interpreter and 'iframe' in renderers:
+                # This means we are in jupyter notebook
                 pio.renderers.default = 'iframe'
-
-        elif 'iframe' in renderers:
-            pio.renderers.default = 'iframe'
 
         return function(*args, **kwargs)
 
