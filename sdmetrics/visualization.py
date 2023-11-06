@@ -16,9 +16,9 @@ def set_plotly_config(function):
     """Set the ``plotly.io.renders`` config according to the environment.
 
     Configure the rendering settings based on the environment in which the plot is generated
-    to ensure the image rendering with a stable engine. When working in Google Colab,
-    the default ``colab`` rendering option provided by ``plotly`` will be used.
-    For other environments, like ``Jupyter Notebooks``, select the `iframe` rendering engine.
+    to ensure the image rendering with a stable engine. For other environments, like
+    ``Jupyter Notebooks``, select the ``iframe`` rendering engine otherwise leave the default
+    one.
     """
     @wraps(function)
     def wrapper(*args, **kwargs):
