@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
 
 from sdmetrics.column_pairs.statistical import ReferentialIntegrity
@@ -70,3 +71,36 @@ class TestReferentialIntegrity:
         # Assert
         compute_breakdown_mock.assert_called_once_with(real_data, synthetic_data)
         assert result == 0.6
+
+    def test_compute_with_nan_foreign_keys_real_data(self):
+        """Test the ``compute`` method with NaN foreign keys inside the real data."""
+        # Setup
+        parent_keys = pd.Series(['a', 'b', 'c'])
+        foreign_keys = pd.Series(['a', 'a', 'b', 'c', np.nan])
+        metric = ReferentialIntegrity()
+
+        # Run
+        result = metric.compute(
+            real_data=(parent_keys, foreign_keys),
+            synthetic_data=(parent_keys, foreign_keys)
+        )
+
+        # Assert
+        assert result == 1.0
+
+    def test_compute_with_nan_foreign_keys_only_synthetic_data(self):
+        """Test the ``compute`` method with NaN foreign keys inside the synthetic data."""
+        # Setup
+        parent_keys = pd.Series(['a', 'b', 'c'])
+        foreign_keys = pd.Series(['a', 'a', 'b', 'c', 'a'])
+        synth_foreign_keys = pd.Series(['a', 'a', 'b', 'c', np.nan])
+        metric = ReferentialIntegrity()
+
+        # Run
+        result = metric.compute(
+            real_data=(parent_keys, foreign_keys),
+            synthetic_data=(parent_keys, synth_foreign_keys)
+        )
+
+        # Assert
+        assert result == 0.8
