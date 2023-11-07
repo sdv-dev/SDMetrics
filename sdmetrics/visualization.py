@@ -23,13 +23,17 @@ def set_plotly_config(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
         renderers = list(pio.renderers)
-        builtin = globals().get('__builtin__', {})
-        get_ipython = getattr(builtin, 'get_ipython') if hasattr(builtin, 'get_ipython') else False
-        if get_ipython:
+        try:
+            # Lazy import IPython
+            from IPython import get_ipython
+
             ipython_interpreter = str(get_ipython())
             if 'ZMQInteractiveShell' in ipython_interpreter and 'iframe' in renderers:
-                # This means we are in jupyter notebook
+                # This means we are using jupyter notebook
                 pio.renderers.default = 'iframe'
+
+        except Exception:
+            pass
 
         return function(*args, **kwargs)
 
