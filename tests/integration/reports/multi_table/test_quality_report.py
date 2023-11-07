@@ -138,6 +138,7 @@ def test_multi_table_quality_report():
     expected_df_2 = pd.DataFrame({
         'Child Table': ['table2'],
         'Parent Table': ['table1'],
+        'Foreign Key': ['col6'],
         'Metric': ['CardinalityShapeSimilarity'],
         'Score': [0.75],
     })

@@ -1,5 +1,15 @@
 # History
 
+## v0.12.1 - 2023-11-01
+
+This release fixes a bug with the new Intertable Trends property and older pandas versions and a bug with how the ML Efficacy metric handled train and test data. Reports handle missing relationships more gracefully.
+
+### Bugs Fixed
+
+* Multiple FutureWarning lines printed out when running the Quality Report (Intertable Trends property) - Issue [#490](https://github.com/sdv-dev/SDMetrics/issues/490) by @frances-h
+* Transformer should not be fit on test data - Issue [#291](https://github.com/sdv-dev/SDMetrics/issues/291) by @fealho
+* Reports should not crash if there are no relationships - Issue [#481](https://github.com/sdv-dev/SDMetrics/issues/481) by @lajohn4747
+
 ## v0.12.0 - 2023-10-31
 
 This release adds a new property, InterTable Trends. Several plots were moved from the reports module into the new visualizations module.  The `metadata` parameter was removed for these plots, and the `plot_types` parameter was added. `plot_types` lets the user control which plot type is used. Several crashes have been resolved.
