@@ -478,3 +478,108 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
         return _generate_heatmap_plot(all_data, columns)
 
     return _generate_box_plot(all_data, columns)
+
+
+def _generate_line_plot(all_data, x_axis, y_axis, marker, annotations=None):
+    """Generate a line plot of the real and synthetic data separated by a marker column.
+
+    Args:
+        all_data (pandas.DataFrame):
+            The combined data (real and synthetic) used for the graph.
+        x_axis (str):
+            The column name to be used as the x-axis of the graph
+        y_axis (str):
+            The column name to be used as the y-axis of the graph
+        marker (str):
+            The column used to define separate line sequences
+        annotations (None or dict):
+            Dict object that describes additional information to be presented in the graph
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    # Check if the column is the appropriate type
+    if not (is_datetime(all_data[x_axis]) or
+            pd.api.types.is_numeric_dtype(all_data[x_axis])):
+        raise ValueError(
+            f"Sequence Index '{x_axis}' must contain numerical or datetime values only")
+
+    fig = px.line(all_data, x=x_axis, y=y_axis, color=marker, markers=True)
+    if annotations:
+        fig.add_annotation(annotations)
+    return fig
+
+
+def get_column_line_plot(real_data, synthetic_data, column_name, metadata):
+    """Return a line plot of the real and synthetic data.
+
+    Args:
+        real_data (pandas.DataFrame):
+            The real table data.
+        synthetic_column (pandas.Dataframe):
+            The synthetic table data.
+        column_name (str):
+            The column name to be used as the y-axis of the graph
+        metadata (dict):
+            TimeSeries metadata dict. If not passed, the graph will
+            use raw indices to build the graph and only separate the sequences
+            into real and synthetic plots
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    real_column = real_data[column_name]
+    synthetic_column = synthetic_data[column_name]
+
+    # Check if the column is the appropriate type
+    if not (is_datetime(real_column) or is_datetime(synthetic_column)
+            or pd.api.types.is_numeric_dtype(real_column) or
+            pd.api.types.is_numeric_dtype(synthetic_column)):
+        raise ValueError(f"Column '{column_name}' must contain numerical or datetime values only")
+
+    missing_data_real = get_missing_percentage(real_column)
+    missing_data_synthetic = get_missing_percentage(synthetic_column)
+    show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
+
+    annotations = None if not show_missing_values else {
+        'xref': 'paper',
+        'yref': 'paper',
+        'x': 1.0,
+        'y': 1.05,
+        'showarrow': False,
+        'text': (
+                f'*Missing Values: Real Data ({missing_data_real}%), '
+                f'Synthetic Data ({missing_data_synthetic}%)'
+        ),
+    }
+
+    # Merge the real and synthetic data and add a flag ``Data`` to indicate each one.
+    r_data = real_data.copy()
+    s_data = synthetic_data.copy()
+    marker_name = 'Data'
+
+    # If there are multiple sequences in the data, split them out appropriately
+    if 'sequence_key' in metadata:
+        key_column = metadata['sequence_key']
+        r_data[marker_name] = 'Real-' + r_data[key_column]
+        s_data[marker_name] = 'Synthetic-' + s_data[key_column]
+    else:
+        r_data[marker_name] = 'Real'
+        s_data[marker_name] = 'Synthetic'
+
+    # Check for sequence index to determine the x-axis values
+    x_axis = 'sequence_index'
+    if 'sequence_index' in metadata:
+        x_axis = metadata['sequence_index']
+    else:
+        r_data['sequence_index'] = r_data.index
+        s_data['sequence_index'] = s_data.index
+
+    # Generate plot
+    all_data = pd.concat([r_data, s_data], axis=0, ignore_index=True)
+    fig = _generate_line_plot(all_data=all_data,
+                              x_axis=x_axis,
+                              y_axis=column_name,
+                              marker=marker_name,
+                              annotations=annotations)
+    return fig

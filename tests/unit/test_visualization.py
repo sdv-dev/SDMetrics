@@ -5,8 +5,9 @@ import pandas as pd
 import pytest
 
 from sdmetrics.visualization import (
-    _generate_box_plot, _generate_cardinality_plot, _generate_heatmap_plot, _generate_scatter_plot,
-    _get_cardinality, get_cardinality_plot, get_column_pair_plot, get_column_plot)
+    _generate_box_plot, _generate_cardinality_plot, _generate_heatmap_plot, _generate_line_plot,
+    _generate_scatter_plot, _get_cardinality, get_cardinality_plot, get_column_line_plot,
+    get_column_pair_plot, get_column_plot)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -465,6 +466,69 @@ def test__generate_heatmap_plot(px_mock):
 
 
 @patch('sdmetrics.visualization.px')
+def test__generate_line_plot(px_mock):
+    """Test the ``_generate_line_plot`` method."""
+    # Setup
+    real_column = pd.DataFrame({
+        'colX': [1, 2, 3, 4],
+        'colY': [10, 4, 20, 21],
+        'Data': ['Real'] * 4
+    })
+    synthetic_column = pd.DataFrame({
+        'colX': [1, 2, 4, 5],
+        'colY': [6, 11, 9, 18],
+        'Data': ['Synthetic'] * 4
+    })
+
+    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
+
+    mock_figure = Mock()
+    px_mock.line.return_value = mock_figure
+
+    # Run
+    fig = _generate_line_plot(all_data, x_axis='colX', y_axis='colY', marker='Data')
+
+    # Assert
+    px_mock.line.assert_called_once_with(
+        DataFrameMatcher(pd.DataFrame({
+            'colX': [1, 2, 3, 4, 1, 2, 4, 5],
+            'colY': [10, 4, 20, 21, 6, 11, 9, 18],
+            'Data': [
+                'Real',
+                'Real',
+                'Real',
+                'Real',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+            ],
+        })),
+        x='colX',
+        y='colY',
+        color='Data',
+        markers=True
+    )
+    assert mock_figure.update_layout.called_once()
+    assert mock_figure.for_each_annotation.called_once()
+    assert fig == mock_figure
+
+    # Setup failing case
+    bad_column = pd.DataFrame({
+        'colX': [1, 'bad_value', 4, 5],
+        'colY': [6, 7, 9, 18],
+        'Data': ['Synthetic'] * 4
+    })
+
+    bad_all_data = pd.concat([real_column, bad_column], axis=0, ignore_index=True)
+
+    # Run and Assert
+    match = "Sequence Index 'colX' must contain numerical or datetime values only"
+    with pytest.raises(ValueError, match=match):
+        _generate_line_plot(bad_all_data, x_axis='colX', y_axis='colY', marker='Data')
+
+
+@patch('sdmetrics.visualization.px')
 def test__generate_box_plot(px_mock):
     """Test the ``_generate_box_plot`` method."""
     # Setup
@@ -700,3 +764,61 @@ def test_get_column_pair_plot_plot_type_is_box(mock__generate_heatmap_plot):
         ['amount', 'date']
     )
     assert fig == mock__generate_heatmap_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_line_plot')
+def test_get_column_line_plot(mock__generate_line_plot):
+    """Test ``get_column_line_plot`` when forcing it ot be a heatmap plot on continuous data."""
+    # Setup
+    real_data = pd.DataFrame({
+        'amount': [1, 2, 3, 2, 4, 6],
+        'date': pd.to_datetime(
+            [
+                '2021-01-01', '2022-01-01', '2023-01-01',
+                '2021-01-01', '2022-01-01', '2023-01-01'
+            ]
+        ),
+        'object': ['a', 'a', 'a', 'b', 'b', 'b'],
+    })
+    synthetic_data = pd.DataFrame({
+        'amount': [4., 1., 1., 4., 3., 3., ],
+        'date': pd.to_datetime(
+            [
+                '2021-01-01', '2022-01-01', '2023-01-01',
+                '2021-01-01', '2022-01-01', '2023-01-01'
+            ]
+        ),
+        'object': ['b', 'b', 'b', 'a', 'a', 'a'],
+    })
+
+    metadata = {
+        'columns': {
+            'amount': {
+                'sdtype': 'numerical',
+                'computer_representation': 'Float'
+            },
+            'date': {
+                'sdtype': 'datetime'
+            },
+        },
+        'sequence_index': 'date',
+        'sequence_key': 'object',
+        'METADATA_SPEC_VERSION': 'SINGLE_TABLE_V1'
+    }
+
+    # Run
+    fig = get_column_line_plot(real_data, synthetic_data, column_name='amount', metadata=metadata)
+
+    # Assert
+    real_data['Data'] = 'Real-' + real_data['object']
+    synthetic_data['Data'] = 'Synthetic-' + synthetic_data['object']
+    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+
+    mock__generate_line_plot.assert_called_once_with(
+        all_data=DataFrameMatcher(expected_call_data),
+        x_axis='date',
+        y_axis='amount',
+        marker='Data',
+        annotations=None
+    )
+    assert fig == mock__generate_line_plot.return_value
