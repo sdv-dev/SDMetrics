@@ -1,6 +1,8 @@
 """Referential Integrity Metric."""
 import logging
 
+import pandas as pd
+
 from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
 
@@ -43,6 +45,10 @@ class ReferentialIntegrity(ColumnPairsMetric):
             dict:
                 The score breakdown of the key uniqueness metric.
         """
+        if pd.isna(real_data[1]).any():
+            synthetic_data = list(synthetic_data)
+            synthetic_data[1] = synthetic_data[1].dropna()
+
         missing_parents = not real_data[1].isin(real_data[0]).all()
         if missing_parents:
             LOGGER.info(
