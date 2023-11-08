@@ -512,7 +512,7 @@ def test__generate_line_plot(px_mock):
     assert mock_figure.for_each_annotation.called_once()
     assert fig == mock_figure
 
-    # Setup failing case
+    # Setup failing case sequence index
     bad_data = pd.DataFrame({
         'colX': [1, 'bad_value', 4, 5],
         'colY': [6, 7, 9, 18],
@@ -523,6 +523,18 @@ def test__generate_line_plot(px_mock):
     match = "Sequence Index 'colX' must contain numerical or datetime values only"
     with pytest.raises(ValueError, match=match):
         _generate_line_plot(real_data, bad_data, x_axis='colX', y_axis='colY', marker='Data')
+
+    # Setup failing case for column
+    bad_column = pd.DataFrame({
+        'colX': [1, 2, 4, 5],
+        'colY': [6, 'bad_value', 9, 18],
+        'Data': ['Synthetic'] * 4
+    })
+
+    # Run and Assert
+    match = "Column Name 'colY' must contain numerical or datetime values only"
+    with pytest.raises(ValueError, match=match):
+        _generate_line_plot(real_data, bad_column, x_axis='colX', y_axis='colY', marker='Data')
 
 
 @patch('sdmetrics.visualization.px')

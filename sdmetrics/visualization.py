@@ -507,6 +507,11 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
             pd.api.types.is_numeric_dtype(all_data[x_axis])):
         raise ValueError(
             f"Sequence Index '{x_axis}' must contain numerical or datetime values only")
+    if not (is_datetime(all_data[y_axis]) or
+            pd.api.types.is_numeric_dtype(all_data[y_axis])):
+        raise ValueError(
+            f"Column Name '{y_axis}' must contain numerical or datetime values only")
+
     fig = px.line(all_data, x=x_axis, y=y_axis, color=marker,
                   color_discrete_map={
                       'Real': PlotConfig.DATACEBO_DARK,
@@ -514,10 +519,9 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                   })
     if annotations:
         fig.add_annotation(annotations)
+
     if x_axis == 'sequence_index':
-        fig.update_xaxes(
-            title_text='Sequence Position'
-        )
+        fig.update_xaxes(title_text='Sequence Position')
 
     fig.update_layout(
         title_text=f"Real vs Synthetic Data for column: '{y_axis}'",
@@ -599,12 +603,6 @@ def get_column_line_plot(real_data, synthetic_data, column_name, metadata):
     real_column = real_data[column_name]
     synthetic_column = synthetic_data[column_name]
 
-    # Check if the column is the appropriate type
-    if not (is_datetime(real_column) or is_datetime(synthetic_column)
-            or pd.api.types.is_numeric_dtype(real_column) or
-            pd.api.types.is_numeric_dtype(synthetic_column)):
-        raise ValueError(f"Column '{column_name}' must contain numerical or datetime values only")
-
     missing_data_real = get_missing_percentage(real_column)
     missing_data_synthetic = get_missing_percentage(synthetic_column)
     show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
@@ -655,10 +653,12 @@ def get_column_line_plot(real_data, synthetic_data, column_name, metadata):
     s_data[marker_name] = 'Synthetic'
 
     # Generate plot
-    fig = _generate_line_plot(real_data=r_data,
-                              synthetic_data=s_data,
-                              x_axis=x_axis,
-                              y_axis=y_axis,
-                              marker=marker_name,
-                              annotations=annotations)
+    fig = _generate_line_plot(
+        real_data=r_data,
+        synthetic_data=s_data,
+        x_axis=x_axis,
+        y_axis=y_axis,
+        marker=marker_name,
+        annotations=annotations
+    )
     return fig
