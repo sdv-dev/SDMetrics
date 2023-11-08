@@ -507,7 +507,7 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
             pd.api.types.is_numeric_dtype(all_data[x_axis])):
         raise ValueError(
             f"Sequence Index '{x_axis}' must contain numerical or datetime values only")
-    fig = px.line(all_data, x=x_axis, y=y_axis, color=marker, markers=True, color_discrete_map={
+    fig = px.line(all_data, x=x_axis, y=y_axis, color=marker, color_discrete_map={
         'Real': PlotConfig.DATACEBO_DARK, 'Synthetic': PlotConfig.DATACEBO_GREEN
     })
     if annotations:
@@ -515,6 +515,7 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
 
     fig.update_layout(
         title_text=f"Real vs Synthetic Data for column: '{y_axis}'",
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
         font={'size': PlotConfig.FONT_SIZE},
     )
 
