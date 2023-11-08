@@ -469,24 +469,23 @@ def test__generate_heatmap_plot(px_mock):
 def test__generate_line_plot(px_mock):
     """Test the ``_generate_line_plot`` method."""
     # Setup
-    real_column = pd.DataFrame({
+    real_data = pd.DataFrame({
         'colX': [1, 2, 3, 4],
         'colY': [10, 4, 20, 21],
         'Data': ['Real'] * 4
     })
-    synthetic_column = pd.DataFrame({
+    synthetic_data = pd.DataFrame({
         'colX': [1, 2, 4, 5],
         'colY': [6, 11, 9, 18],
         'Data': ['Synthetic'] * 4
     })
 
-    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
-
     mock_figure = Mock()
     px_mock.line.return_value = mock_figure
 
     # Run
-    fig = _generate_line_plot(all_data, x_axis='colX', y_axis='colY', marker='Data')
+    fig = _generate_line_plot(real_data, synthetic_data, x_axis='colX',
+                              y_axis='colY', marker='Data')
 
     # Assert
     px_mock.line.assert_called_once_with(
@@ -507,25 +506,24 @@ def test__generate_line_plot(px_mock):
         x='colX',
         y='colY',
         color='Data',
-        markers=True
+        markers=True,
+        color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'}
     )
     assert mock_figure.update_layout.called_once()
     assert mock_figure.for_each_annotation.called_once()
     assert fig == mock_figure
 
     # Setup failing case
-    bad_column = pd.DataFrame({
+    bad_data = pd.DataFrame({
         'colX': [1, 'bad_value', 4, 5],
         'colY': [6, 7, 9, 18],
         'Data': ['Synthetic'] * 4
     })
 
-    bad_all_data = pd.concat([real_column, bad_column], axis=0, ignore_index=True)
-
     # Run and Assert
     match = "Sequence Index 'colX' must contain numerical or datetime values only"
     with pytest.raises(ValueError, match=match):
-        _generate_line_plot(bad_all_data, x_axis='colX', y_axis='colY', marker='Data')
+        _generate_line_plot(real_data, bad_data, x_axis='colX', y_axis='colY', marker='Data')
 
 
 @patch('sdmetrics.visualization.px')
@@ -810,12 +808,32 @@ def test_get_column_line_plot(mock__generate_line_plot):
     fig = get_column_line_plot(real_data, synthetic_data, column_name='amount', metadata=metadata)
 
     # Assert
-    real_data['Data'] = 'Real-' + real_data['object']
-    synthetic_data['Data'] = 'Synthetic-' + synthetic_data['object']
-    expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
-
+    # Setup
+    real_data_submitted = pd.DataFrame({
+        'date': pd.to_datetime(
+            [
+                '2021-01-01', '2022-01-01', '2023-01-01'
+            ]
+        ),
+        'amount': [1.5, 3, 4.5],
+        'min': [1, 2, 3],
+        'max': [2, 4, 6],
+        'Data': ['Real', 'Real', 'Real'],
+    })
+    synthetic_data_submitted = pd.DataFrame({
+        'date': pd.to_datetime(
+            [
+                '2021-01-01', '2022-01-01', '2023-01-01'
+            ]
+        ),
+        'amount': [4.0, 2.0, 2.0],
+        'min': [4., 1., 1.],
+        'max': [4., 3., 3.],
+        'Data': ['Synthetic', 'Synthetic', 'Synthetic']
+    })
     mock__generate_line_plot.assert_called_once_with(
-        all_data=DataFrameMatcher(expected_call_data),
+        real_data=DataFrameMatcher(real_data_submitted),
+        synthetic_data=DataFrameMatcher(synthetic_data_submitted),
         x_axis='date',
         y_axis='amount',
         marker='Data',
