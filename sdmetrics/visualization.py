@@ -507,11 +507,17 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
             pd.api.types.is_numeric_dtype(all_data[x_axis])):
         raise ValueError(
             f"Sequence Index '{x_axis}' must contain numerical or datetime values only")
-    fig = px.line(all_data, x=x_axis, y=y_axis, color=marker, color_discrete_map={
-        'Real': PlotConfig.DATACEBO_DARK, 'Synthetic': PlotConfig.DATACEBO_GREEN
-    })
+    fig = px.line(all_data, x=x_axis, y=y_axis, color=marker,
+                  color_discrete_map={
+                      'Real': PlotConfig.DATACEBO_DARK,
+                      'Synthetic': PlotConfig.DATACEBO_GREEN
+                  })
     if annotations:
         fig.add_annotation(annotations)
+    if x_axis == 'sequence_index':
+        fig.update_xaxes(
+            title_text='Sequence Position'
+        )
 
     fig.update_layout(
         title_text=f"Real vs Synthetic Data for column: '{y_axis}'",
@@ -526,6 +532,7 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                 name='Real-Min',
                 x=real_data[x_axis],
                 y=real_data['min'],
+                hoverinfo='skip',
                 marker={'color': 'rgba(0, 0, 54, 0.25)'},
                 showlegend=False,
                 mode='lines'
@@ -536,6 +543,7 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                 name='Real-Max',
                 x=real_data[x_axis],
                 y=real_data['max'],
+                hoverinfo='skip',
                 marker={'color': 'rgba(0, 0, 54, 0.25)'},
                 showlegend=False,
                 mode='lines',
@@ -548,6 +556,7 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                 name='Synthetic-Min',
                 x=synthetic_data[x_axis],
                 y=synthetic_data['min'],
+                hoverinfo='skip',
                 marker={'color': 'rgba(1, 224, 201, 0.25)'},
                 showlegend=False,
                 mode='lines'
@@ -558,6 +567,7 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                 name='Synthetic-Max',
                 x=synthetic_data[x_axis],
                 y=synthetic_data['max'],
+                hoverinfo='skip',
                 marker={'color': 'rgba(1, 224, 201, 0.25)'},
                 showlegend=False,
                 mode='lines',
