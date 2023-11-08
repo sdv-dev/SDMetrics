@@ -819,7 +819,6 @@ def test_get_column_line_plot(mock__generate_line_plot):
     fig = get_column_line_plot(real_data, synthetic_data, column_name='amount', metadata=metadata)
 
     # Assert
-    # Setup
     real_data_submitted = pd.DataFrame({
         'date': pd.to_datetime(
             [
@@ -897,7 +896,6 @@ def test_get_column_line_plot_no_sequence_key(mock__generate_line_plot):
     synthetic_data_submitted['Data'] = 'Synthetic'
 
     # Assert
-    # Setup
     mock__generate_line_plot.assert_called_once_with(
         real_data=DataFrameMatcher(real_data_submitted),
         synthetic_data=DataFrameMatcher(synthetic_data_submitted),
@@ -947,7 +945,6 @@ def test_get_column_line_plot_no_sequence_index(mock__generate_line_plot):
     synthetic_data_submitted['Data'] = 'Synthetic'
 
     # Assert
-    # Setup
     mock__generate_line_plot.assert_called_once_with(
         real_data=DataFrameMatcher(real_data_submitted),
         synthetic_data=DataFrameMatcher(synthetic_data_submitted),

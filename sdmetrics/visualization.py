@@ -537,7 +537,7 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                 x=real_data[x_axis],
                 y=real_data['min'],
                 hoverinfo='skip',
-                marker={'color': 'rgba(0, 0, 54, 0.25)'},
+                marker={'color': PlotConfig.DATACEBO_DARK_TRANSPARENT},
                 showlegend=False,
                 mode='lines'
             )
@@ -548,11 +548,11 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                 x=real_data[x_axis],
                 y=real_data['max'],
                 hoverinfo='skip',
-                marker={'color': 'rgba(0, 0, 54, 0.25)'},
+                marker={'color': PlotConfig.DATACEBO_DARK_TRANSPARENT},
                 showlegend=False,
                 mode='lines',
                 fill='tonexty',
-                fillcolor='rgba(0, 0, 54, 0.25)',
+                fillcolor=PlotConfig.DATACEBO_DARK_TRANSPARENT,
             )
         )
         fig.add_trace(
@@ -561,7 +561,7 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                 x=synthetic_data[x_axis],
                 y=synthetic_data['min'],
                 hoverinfo='skip',
-                marker={'color': 'rgba(1, 224, 201, 0.25)'},
+                marker={'color': PlotConfig.DATACEBO_GREEN_TRANSPARENT},
                 showlegend=False,
                 mode='lines'
             )
@@ -572,11 +572,11 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                 x=synthetic_data[x_axis],
                 y=synthetic_data['max'],
                 hoverinfo='skip',
-                marker={'color': 'rgba(1, 224, 201, 0.25)'},
+                marker={'color': PlotConfig.DATACEBO_GREEN_TRANSPARENT},
                 showlegend=False,
                 mode='lines',
                 fill='tonexty',
-                fillcolor='rgba(1, 224, 201, 0.25)',
+                fillcolor=PlotConfig.DATACEBO_GREEN_TRANSPARENT,
             )
         )
     return fig
