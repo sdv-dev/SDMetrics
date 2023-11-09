@@ -5,8 +5,9 @@ import pandas as pd
 import pytest
 
 from sdmetrics.visualization import (
-    _generate_box_plot, _generate_cardinality_plot, _generate_heatmap_plot, _generate_scatter_plot,
-    _get_cardinality, get_cardinality_plot, get_column_pair_plot, get_column_plot)
+    _generate_box_plot, _generate_cardinality_plot, _generate_heatmap_plot, _generate_line_plot,
+    _generate_scatter_plot, _get_cardinality, get_cardinality_plot, get_column_line_plot,
+    get_column_pair_plot, get_column_plot)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -465,6 +466,78 @@ def test__generate_heatmap_plot(px_mock):
 
 
 @patch('sdmetrics.visualization.px')
+def test__generate_line_plot(px_mock):
+    """Test the ``_generate_line_plot`` method."""
+    # Setup
+    real_data = pd.DataFrame({
+        'colX': [1, 2, 3, 4],
+        'colY': [10, 4, 20, 21],
+        'Data': ['Real'] * 4
+    })
+    synthetic_data = pd.DataFrame({
+        'colX': [1, 2, 4, 5],
+        'colY': [6, 11, 9, 18],
+        'Data': ['Synthetic'] * 4
+    })
+
+    mock_figure = Mock()
+    px_mock.line.return_value = mock_figure
+
+    # Run
+    fig = _generate_line_plot(real_data, synthetic_data, x_axis='colX',
+                              y_axis='colY', marker='Data')
+
+    # Assert
+    px_mock.line.assert_called_once_with(
+        DataFrameMatcher(pd.DataFrame({
+            'colX': [1, 2, 3, 4, 1, 2, 4, 5],
+            'colY': [10, 4, 20, 21, 6, 11, 9, 18],
+            'Data': [
+                'Real',
+                'Real',
+                'Real',
+                'Real',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+                'Synthetic',
+            ],
+        })),
+        x='colX',
+        y='colY',
+        color='Data',
+        color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'}
+    )
+    assert mock_figure.update_layout.called_once()
+    assert mock_figure.for_each_annotation.called_once()
+    assert fig == mock_figure
+
+    # Setup failing case sequence index
+    bad_data = pd.DataFrame({
+        'colX': [1, 'bad_value', 4, 5],
+        'colY': [6, 7, 9, 18],
+        'Data': ['Synthetic'] * 4
+    })
+
+    # Run and Assert
+    match = "Sequence Index 'colX' must contain numerical or datetime values only"
+    with pytest.raises(ValueError, match=match):
+        _generate_line_plot(real_data, bad_data, x_axis='colX', y_axis='colY', marker='Data')
+
+    # Setup failing case for column
+    bad_column = pd.DataFrame({
+        'colX': [1, 2, 4, 5],
+        'colY': [6, 'bad_value', 9, 18],
+        'Data': ['Synthetic'] * 4
+    })
+
+    # Run and Assert
+    match = "Column Name 'colY' must contain numerical or datetime values only"
+    with pytest.raises(ValueError, match=match):
+        _generate_line_plot(real_data, bad_column, x_axis='colX', y_axis='colY', marker='Data')
+
+
+@patch('sdmetrics.visualization.px')
 def test__generate_box_plot(px_mock):
     """Test the ``_generate_box_plot`` method."""
     # Setup
@@ -700,3 +773,184 @@ def test_get_column_pair_plot_plot_type_is_box(mock__generate_heatmap_plot):
         ['amount', 'date']
     )
     assert fig == mock__generate_heatmap_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_line_plot')
+def test_get_column_line_plot(mock__generate_line_plot):
+    """Test ``get_column_line_plot`` with sequence key and index."""
+    # Setup
+    real_data = pd.DataFrame({
+        'amount': [1, 2, 3, 2, 4, 6],
+        'date': pd.to_datetime(
+            [
+                '2021-01-01', '2022-01-01', '2023-01-01',
+                '2021-01-01', '2022-01-01', '2023-01-01'
+            ]
+        ),
+        'object': ['a', 'a', 'a', 'b', 'b', 'b'],
+    })
+    synthetic_data = pd.DataFrame({
+        'amount': [4., 1., 1., 4., 3., 3.],
+        'date': pd.to_datetime(
+            [
+                '2021-01-01', '2022-01-01', '2023-01-01',
+                '2021-01-01', '2022-01-01', '2023-01-01'
+            ]
+        ),
+        'object': ['b', 'b', 'b', 'a', 'a', 'a'],
+    })
+
+    metadata = {
+        'columns': {
+            'amount': {
+                'sdtype': 'numerical',
+                'computer_representation': 'Float'
+            },
+            'date': {
+                'sdtype': 'datetime'
+            },
+        },
+        'sequence_index': 'date',
+        'sequence_key': 'object',
+        'METADATA_SPEC_VERSION': 'SINGLE_TABLE_V1'
+    }
+
+    # Run
+    fig = get_column_line_plot(real_data, synthetic_data, column_name='amount', metadata=metadata)
+
+    # Assert
+    real_data_submitted = pd.DataFrame({
+        'date': pd.to_datetime(
+            [
+                '2021-01-01', '2022-01-01', '2023-01-01'
+            ]
+        ),
+        'amount': [1.5, 3, 4.5],
+        'min': [1, 2, 3],
+        'max': [2, 4, 6],
+        'Data': ['Real', 'Real', 'Real'],
+    })
+    synthetic_data_submitted = pd.DataFrame({
+        'date': pd.to_datetime(
+            [
+                '2021-01-01', '2022-01-01', '2023-01-01'
+            ]
+        ),
+        'amount': [4.0, 2.0, 2.0],
+        'min': [4., 1., 1.],
+        'max': [4., 3., 3.],
+        'Data': ['Synthetic', 'Synthetic', 'Synthetic']
+    })
+    mock__generate_line_plot.assert_called_once_with(
+        real_data=DataFrameMatcher(real_data_submitted),
+        synthetic_data=DataFrameMatcher(synthetic_data_submitted),
+        x_axis='date',
+        y_axis='amount',
+        marker='Data',
+        annotations=None
+    )
+    assert fig == mock__generate_line_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_line_plot')
+def test_get_column_line_plot_no_sequence_key(mock__generate_line_plot):
+    """Test ``get_column_line_plot`` with only a sequence index."""
+    # Setup
+    real_data = pd.DataFrame({
+        'date': pd.to_datetime(
+            [
+                '2021-01-01', '2022-01-01', '2023-01-01'
+            ]
+        ),
+        'amount': [1, 2, 3],
+    })
+    synthetic_data = pd.DataFrame({
+        'date': pd.to_datetime(
+            [
+                '2021-01-01', '2022-01-01', '2023-01-01'
+            ]
+        ),
+        'amount': [4., 1., 1.],
+    })
+
+    metadata = {
+        'columns': {
+            'amount': {
+                'sdtype': 'numerical',
+                'computer_representation': 'Float'
+            },
+            'date': {
+                'sdtype': 'datetime'
+            },
+        },
+        'sequence_index': 'date',
+        'METADATA_SPEC_VERSION': 'SINGLE_TABLE_V1'
+    }
+
+    # Run
+    fig = get_column_line_plot(real_data, synthetic_data, column_name='amount', metadata=metadata)
+
+    real_data_submitted = real_data.copy()
+    synthetic_data_submitted = synthetic_data.copy()
+    real_data_submitted['Data'] = 'Real'
+    synthetic_data_submitted['Data'] = 'Synthetic'
+
+    # Assert
+    mock__generate_line_plot.assert_called_once_with(
+        real_data=DataFrameMatcher(real_data_submitted),
+        synthetic_data=DataFrameMatcher(synthetic_data_submitted),
+        x_axis='date',
+        y_axis='amount',
+        marker='Data',
+        annotations=None
+    )
+    assert fig == mock__generate_line_plot.return_value
+
+
+@patch('sdmetrics.visualization._generate_line_plot')
+def test_get_column_line_plot_no_sequence_index(mock__generate_line_plot):
+    """Test ``get_column_line_plot`` with only a sequence key."""
+    # Setup
+    real_data = pd.DataFrame({
+        'amount': [1, 2, 3, 2, 4, 6],
+        'object': ['a', 'a', 'a', 'b', 'b', 'b'],
+    })
+    synthetic_data = pd.DataFrame({
+        'amount': [4., 1., 1., 4., 3., 3., ],
+        'object': ['b', 'b', 'b', 'a', 'a', 'a'],
+    })
+
+    metadata = {
+        'columns': {
+            'amount': {
+                'sdtype': 'numerical',
+                'computer_representation': 'Float'
+            },
+            'date': {
+                'sdtype': 'datetime'
+            },
+        },
+        'sequence_key': 'object',
+        'METADATA_SPEC_VERSION': 'SINGLE_TABLE_V1'
+    }
+
+    # Run
+    fig = get_column_line_plot(real_data, synthetic_data, column_name='amount', metadata=metadata)
+
+    real_data_submitted = real_data.copy()
+    synthetic_data_submitted = synthetic_data.copy()
+    real_data_submitted['sequence_index'] = real_data_submitted.index
+    synthetic_data_submitted['sequence_index'] = synthetic_data_submitted.index
+    real_data_submitted['Data'] = 'Real'
+    synthetic_data_submitted['Data'] = 'Synthetic'
+
+    # Assert
+    mock__generate_line_plot.assert_called_once_with(
+        real_data=DataFrameMatcher(real_data_submitted),
+        synthetic_data=DataFrameMatcher(synthetic_data_submitted),
+        x_axis='sequence_index',
+        y_axis='amount',
+        marker='Data',
+        annotations=None
+    )
+    assert fig == mock__generate_line_plot.return_value
