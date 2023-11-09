@@ -1,5 +1,6 @@
 """Single table base property class."""
 from sdmetrics.reports.base_report import BaseReport
+from sdmetrics.visualization import set_plotly_config
 
 
 class BaseMultiTableReport(BaseReport):
@@ -84,6 +85,7 @@ class BaseMultiTableReport(BaseReport):
         details = self._properties[property_name].get_details(table_name)
         return details.copy()
 
+    @set_plotly_config
     def get_visualization(self, property_name, table_name=None):
         """Return a visualization for the given property and table_name.
 
