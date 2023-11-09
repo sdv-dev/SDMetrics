@@ -1,12 +1,43 @@
 """Visualization methods for SDMetrics."""
 
+from functools import wraps
+
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
+import plotly.io as pio
 from pandas.api.types import is_datetime64_dtype
 
 from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.utils import get_missing_percentage, is_datetime
+
+
+def set_plotly_config(function):
+    """Set the ``plotly.io.renders`` config according to the environment.
+
+    Configure the rendering settings based on the environment in which the plot is generated
+    to ensure the image rendering with a stable engine. For other environments, like
+    ``Jupyter Notebooks``, select the ``iframe`` rendering engine otherwise leave the default
+    one.
+    """
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        renderers = list(pio.renderers)
+        try:
+            # Lazy import IPython
+            from IPython import get_ipython
+
+            ipython_interpreter = str(get_ipython())
+            if 'ZMQInteractiveShell' in ipython_interpreter and 'iframe' in renderers:
+                # This means we are using jupyter notebook
+                pio.renderers.default = 'iframe'
+
+        except Exception:
+            pass
+
+        return function(*args, **kwargs)
+
+    return wrapper
 
 
 def _generate_column_bar_plot(real_data, synthetic_data, plot_kwargs={}):
@@ -313,6 +344,7 @@ def _get_cardinality(parent_table, child_table, parent_primary_key, child_foreig
     return cardinalities.sort_values('# children')['# children']
 
 
+@set_plotly_config
 def get_cardinality_plot(real_data, synthetic_data, child_table_name, parent_table_name,
                          child_foreign_key, parent_primary_key, plot_type='bar'):
     """Return a plot of the cardinality of the parent-child relationship.
@@ -362,6 +394,7 @@ def get_cardinality_plot(real_data, synthetic_data, child_table_name, parent_tab
     return fig
 
 
+@set_plotly_config
 def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     """Return a plot of the real and synthetic data for a given column.
 
@@ -408,6 +441,7 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     return fig
 
 
+@set_plotly_config
 def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None):
     """Return a plot of the real and synthetic data for a given column pair.
 

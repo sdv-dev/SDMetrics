@@ -13,6 +13,7 @@ import pkg_resources
 import tqdm
 
 from sdmetrics.reports.utils import convert_datetime_columns
+from sdmetrics.visualization import set_plotly_config
 
 
 class BaseReport():
@@ -199,6 +200,7 @@ class BaseReport():
             'Score': score,
         })
 
+    @set_plotly_config
     def get_visualization(self, property_name):
         """Return a visualization for each score for the given property name.
 
