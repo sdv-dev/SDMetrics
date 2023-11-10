@@ -21,7 +21,7 @@ class Structure(BaseMultiTableProperty):
         """Return a visualization for each score in the property.
 
         Args:
-            table_name (str):
+            table_name:
                 If a table name is provided, an error is raised.
 
         Returns:
