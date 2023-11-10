@@ -1,8 +1,10 @@
 """Structure property for multi-table."""
+import plotly.express as px
+
 from sdmetrics.errors import VisualizationUnavailableError
-from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.reports.multi_table._properties import BaseMultiTableProperty
 from sdmetrics.reports.single_table._properties import Structure as SingleTableStructure
+from sdmetrics.reports.utils import PlotConfig
 
 
 class Structure(BaseMultiTableProperty):
@@ -28,9 +30,11 @@ class Structure(BaseMultiTableProperty):
         """
         if table_name:
             raise VisualizationUnavailableError(
-                'The Structure property does not have a supported visualization for individual tables.'
+                'The Structure property does not have a supported visualization for'
+                ' individual tables.'
             )
 
+        average_score = self._compute_average()
         fig = px.bar(
             data_frame=self.details,
             x='Table',

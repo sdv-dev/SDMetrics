@@ -98,6 +98,9 @@ class BaseMultiTableReport(BaseReport):
             plotly.graph_objects._figure.Figure
                 The visualization for the requested property.
         """
+        if property_name == 'Data Structure':
+            return self._properties[property_name].get_visualization(table_name)
+
         if table_name is None:
             raise ValueError(
                 'Please provide a table name to get a visualization for the property.'
