@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-import plotly.express as px
 
+from sdmetrics.errors import VisualizationUnavailableError
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.single_table import TableFormat
 
@@ -69,28 +69,11 @@ class Structure(BaseSingleTableProperty):
         return result
 
     def get_visualization(self):
-        """Create a plot to show the structure property score.
+        """Return the visualization for the property.
 
-        Returns:
-            plotly.graph_objects._figure.Figure
+        Raise an error in this case because the single table Structure property
+        does not have a supported visualization.
         """
-        average_score = self._compute_average()
-
-        fig = px.bar(
-            data_frame=self.details.dropna(subset=['Score']),
-            y='Score',
-            title=f'Data Diagnostic: Structure (Average Score={round(average_score, 2)})',
-            color='Metric',
-            pattern_shape='Metric',
+        raise VisualizationUnavailableError(
+            'The single table Structure property does not have a supported visualization.'
         )
-
-        fig.update_yaxes(range=[0, 1], title_text='Diagnostic Score')
-
-        fig.update_layout(
-            xaxis_categoryorder='total ascending',
-            plot_bgcolor='#F5F5F8',
-            margin={'t': 150},
-            xaxis_title='Table',
-        )
-
-        return fig
