@@ -17,7 +17,7 @@ class TestDiagnosticReport:
         results = report.get_score()
 
         # Assert
-        assert results == 0.9814814814814815
+        assert results == 0.9878787878787879
 
     def test_end_to_end_with_object_datetimes(self):
         """Test the ``DiagnosticReport`` report with object datetimes."""
@@ -38,9 +38,9 @@ class TestDiagnosticReport:
         # Assert
         expected_dataframe = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-            'Score': [0.9444444444444445, 1.0, 1.0]
+            'Score': [0.9636363636363637, 1.0, 1.0]
         })
-        assert results == 0.9814814814814815
+        assert results == 0.9878787878787879
         pd.testing.assert_frame_equal(properties, expected_dataframe)
 
     def test_end_to_end_with_metrics_failing(self):
@@ -62,37 +62,36 @@ class TestDiagnosticReport:
         # Assert
         expected_properties = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-            'Score': [0.9677777777777777, 0.7833333333333333, 1.0]
+            'Score': [1.0, 0.7833333333333333, 1.0]
         })
         expected_details = pd.DataFrame({
             'Table': [
                 'users', 'users', 'users', 'users', 'sessions', 'sessions', 'sessions',
-                'sessions', 'transactions', 'transactions', 'transactions', 'transactions',
-                'transactions'
+                'transactions', 'transactions', 'transactions', 'transactions',
             ],
             'Column': [
-                'user_id', 'country', 'gender', 'age', 'session_id', 'user_id', 'device',
-                'os', 'transaction_id', 'session_id', 'timestamp', 'amount', 'approved'
+                'user_id', 'country', 'gender', 'age', 'session_id', 'device',
+                'os', 'transaction_id', 'timestamp', 'amount', 'approved'
             ],
             'Metric': [
                 'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence', 'BoundaryAdherence',
-                'KeyUniqueness', 'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence',
-                'KeyUniqueness', 'KeyUniqueness', 'BoundaryAdherence', 'BoundaryAdherence',
+                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence',
+                'KeyUniqueness', 'BoundaryAdherence', 'BoundaryAdherence',
                 'CategoryAdherence'
             ],
             'Score': [
-                1.0, 1.0, 1.0, np.nan, 1.0, 0.7777777777777778, 1.0, 1.0, 1.0, 0.9,
+                1.0, 1.0, 1.0, np.nan, 1.0, 1.0, 1.0, 1.0,
                 np.nan, np.nan, 1.0
             ],
             'Error': [
                 None, None, None,
                 "TypeError: '<=' not supported between instances of 'str' and 'int'",
-                None, None, None, None, None, None,
+                None, None, None, None,
                 "TypeError: '<=' not supported between instances of 'str' and 'Timestamp'",
                 "TypeError: '<=' not supported between instances of 'str' and 'float'", None
             ]
         })
-        assert results == 0.9170370370370371
+        assert results == 0.9277777777777777
         pd.testing.assert_frame_equal(
             report.get_properties(), expected_properties, check_exact=False, atol=2e-2
         )
@@ -111,7 +110,7 @@ class TestDiagnosticReport:
         # Assert
         expected_dataframe = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-            'Score': [0.9444444444444445, 1.0, 1.0]
+            'Score': [0.9636363636363637, 1.0, 1.0]
         })
 
         pd.testing.assert_frame_equal(properties, expected_dataframe)
@@ -130,21 +129,20 @@ class TestDiagnosticReport:
         expected_dataframe = pd.DataFrame({
             'Table': [
                 'users', 'users', 'users', 'users', 'sessions', 'sessions', 'sessions',
-                'sessions', 'transactions', 'transactions', 'transactions', 'transactions',
-                'transactions'
+                'transactions', 'transactions', 'transactions', 'transactions',
             ],
             'Column': [
-                'user_id', 'country', 'gender', 'age', 'session_id', 'user_id', 'device',
-                'os', 'transaction_id', 'session_id', 'timestamp', 'amount', 'approved'
+                'user_id', 'country', 'gender', 'age', 'session_id', 'device',
+                'os', 'transaction_id', 'timestamp', 'amount', 'approved'
             ],
             'Metric': [
                 'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence', 'BoundaryAdherence',
-                'KeyUniqueness', 'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence',
-                'KeyUniqueness', 'KeyUniqueness', 'BoundaryAdherence', 'BoundaryAdherence',
+                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence',
+                'KeyUniqueness', 'BoundaryAdherence', 'BoundaryAdherence',
                 'CategoryAdherence'
             ],
             'Score': [
-                1.0, 1.0, 1.0, 0.9, 1.0, 0.7777777777777778, 1.0, 1.0, 1.0, 0.9, 0.9,
+                1.0, 1.0, 1.0, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9,
                 0.8, 1.0
             ]
         })
