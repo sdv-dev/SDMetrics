@@ -23,7 +23,6 @@ class DataValidity(BaseSingleTableProperty):
         'datetime': BoundaryAdherence,
         'categorical': CategoryAdherence,
         'boolean': CategoryAdherence,
-        'id': KeyUniqueness,
     }
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
