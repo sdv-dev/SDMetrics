@@ -2,7 +2,9 @@ from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
+import pytest
 
+from sdmetrics.errors import VisualizationUnavailableError
 from sdmetrics.reports.single_table._properties.structure import Structure
 
 
@@ -84,3 +86,16 @@ class TestStructure:
             'Score': 0.75,
         }, index=[0])
         pd.testing.assert_frame_equal(result, expected_details)
+
+    def test_get_visualization(self):
+        """Test the ``get_visualization`` method."""
+        # Setup
+        structure_property = Structure()
+
+        # Run and Assert
+        expected_message = (
+            'The single table Structure property does not have a'
+            ' supported visualization.'
+        )
+        with pytest.raises(VisualizationUnavailableError, match=expected_message):
+            structure_property.get_visualization()
