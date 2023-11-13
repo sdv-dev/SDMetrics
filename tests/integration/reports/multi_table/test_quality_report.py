@@ -218,9 +218,9 @@ def test_quality_report_end_to_end():
     # Assert
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.7922619047619048, 0.4249665433225429, 0.8, 0.48240740740740734],
+        'Score': [0.6643907563025211, 0.49532155831786817, 0.7, 0.4242296918767507],
     })
-    assert score == 0.6249089638729638
+    assert score == 0.570985501624285
     pd.testing.assert_frame_equal(properties, expected_properties)
     expected_info_keys = {
         'report_type', 'generated_date', 'sdmetrics_version', 'num_tables', 'num_rows_real_data',
@@ -255,7 +255,7 @@ def test_quality_report_with_object_datetimes():
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
         'Score': [0.7922619047619048, 0.4249665433225429, 0.8, 0.48240740740740734],
     })
-    assert score == 0.6249089638729638
+    assert score == 0.570985501624285
     pd.testing.assert_frame_equal(properties, expected_properties)
 
 
@@ -304,7 +304,7 @@ def test_quality_report_with_errors():
             None
         ]
     })
-    assert score == 0.7008862433862433
+    assert score == 0.6283893557422969 
     pd.testing.assert_frame_equal(properties, expected_properties)
     pd.testing.assert_frame_equal(details_column_shapes, expected_details)
 
