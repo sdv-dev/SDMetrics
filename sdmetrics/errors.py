@@ -1,6 +1,10 @@
 """Custom errors for SDMetrics."""
 
 
+class VisualizationUnavailableError(Exception):
+    """Raised when a visualization is not available."""
+
+
 class IncomputableMetricError(Exception):
     """Raised when a metric cannot be computed."""
 
