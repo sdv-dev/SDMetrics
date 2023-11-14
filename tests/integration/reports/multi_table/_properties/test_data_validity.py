@@ -18,7 +18,7 @@ class TestDataValidity:
         result = column_shapes.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        assert result == 0.9636363636363637
+        assert result == 1.0
 
     def test_with_progress_bar(self):
         """Test that the progress bar is correctly updated."""
@@ -35,5 +35,5 @@ class TestDataValidity:
         result = column_shapes.get_score(real_data, synthetic_data, metadata, progress_bar)
 
         # Assert
-        assert result == 0.9636363636363637
+        assert result == 1.0
         assert mock_update.call_count == num_columns

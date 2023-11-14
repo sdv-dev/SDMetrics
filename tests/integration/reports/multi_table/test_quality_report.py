@@ -218,9 +218,9 @@ def test_quality_report_end_to_end():
     # Assert
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.6643907563025211, 0.49532155831786817, 0.7, 0.4242296918767507],
+        'Score': [0.7978174603174604, 0.45654629583521095, 0.95, 0.4416666666666667],
     })
-    assert score == 0.570985501624285
+    assert score == 0.6615076057048345
     pd.testing.assert_frame_equal(properties, expected_properties)
     expected_info_keys = {
         'report_type', 'generated_date', 'sdmetrics_version', 'num_tables', 'num_rows_real_data',
@@ -230,7 +230,7 @@ def test_quality_report_end_to_end():
     assert info['report_type'] == 'QualityReport'
     assert info['num_tables'] == 3
     assert info['num_rows_real_data'] == {'sessions': 10, 'users': 10, 'transactions': 10}
-    assert info['num_rows_synthetic_data'] == {'sessions': 9, 'users': 10, 'transactions': 10}
+    assert info['num_rows_synthetic_data'] == {'sessions': 10, 'users': 10, 'transactions': 10}
 
 
 def test_quality_report_with_object_datetimes():
@@ -253,9 +253,9 @@ def test_quality_report_with_object_datetimes():
     # Assert
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.7922619047619048, 0.4249665433225429, 0.8, 0.48240740740740734],
+        'Score': [0.7978174603174604, 0.45654629583521095, 0.95, 0.4416666666666667],
     })
-    assert score == 0.570985501624285
+    assert score == 0.6615076057048345
     pd.testing.assert_frame_equal(properties, expected_properties)
 
 
@@ -278,7 +278,7 @@ def test_quality_report_with_errors():
     # Assert
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.8276190476190475, 0.5666666666666667, 0.8, 0.6092592592592593]
+        'Score': [0.8165079365079364, 0.55, 0.95, 0.5833333333333334]
     })
     expected_details = pd.DataFrame({
         'Table': [
@@ -293,8 +293,8 @@ def test_quality_report_with_errors():
             'KSComplement', 'KSComplement', 'TVComplement'
         ],
         'Score': [
-            0.7, 0.9714285714285714, np.nan, 0.9333333333333333, 0.7333333333333334,
-            np.nan, np.nan, 0.8
+            0.8, 0.6825396825396826, np.nan, 0.7999999999999999, 0.9, np.nan,
+            np.nan, 0.8999999999999999
         ],
         'Error': [
             None, None, "TypeError: '<' not supported between instances of 'int' and 'str'",
@@ -304,7 +304,7 @@ def test_quality_report_with_errors():
             None
         ]
     })
-    assert score == 0.6283893557422969 
+    assert score == 0.7249603174603175
     pd.testing.assert_frame_equal(properties, expected_properties)
     pd.testing.assert_frame_equal(details_column_shapes, expected_details)
 
@@ -323,8 +323,8 @@ def test_quality_report_with_no_relationships():
     # Assert
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.792262, 0.424967, np.nan, np.nan]
+        'Score': [0.7978174603174604, 0.45654629583521095, np.nan, np.nan]
     })
     properties = report.get_properties()
     pd.testing.assert_frame_equal(properties, expected_properties)
-    assert score == 0.6086142240422239
+    assert score == 0.6271818780763356

@@ -18,7 +18,7 @@ class TestInterTableTrends:
         result = inter_table_trends.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        assert result == 0.48240740740740734
+        assert result == 0.4416666666666667
 
     def test_with_progress_bar(self):
         """Test that the progress bar is correctly updated."""
@@ -39,5 +39,5 @@ class TestInterTableTrends:
         result = inter_table_trends.get_score(real_data, synthetic_data, metadata, progress_bar)
 
         # Assert
-        assert result == 0.48240740740740734
+        assert result == 0.4416666666666667
         assert mock_update.call_count == num_iter
