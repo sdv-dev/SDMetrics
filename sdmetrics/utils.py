@@ -158,7 +158,7 @@ class HyperTransformer():
             elif kind == 'O':
                 # Categorical column.
                 col_data = pd.DataFrame({'field': data[field]})
-                enc = OneHotEncoder()
+                enc = OneHotEncoder(handle_unknown='ignore')
                 enc.fit(col_data)
                 self.column_transforms[field] = {'one_hot_encoder': enc}
             elif kind == 'M':
