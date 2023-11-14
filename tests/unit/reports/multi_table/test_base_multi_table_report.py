@@ -304,3 +304,18 @@ class TestBaseReport:
 
         with pytest.raises(ValueError, match=expected_error_message):
             report.get_visualization('Property_1')
+
+    def test_get_visualization_for_structure_property(self):
+        """Test the ``get_visualization`` method for the structure property."""
+        # Setup
+        report = BaseMultiTableReport()
+        report._properties = {
+            'Data Structure': Mock()
+        }
+        report._properties['Data Structure'].get_visualization = Mock()
+
+        # Run
+        report.get_visualization('Data Structure', 'Table_1')
+
+        # Assert
+        report._properties['Data Structure'].get_visualization.assert_called_once_with('Table_1')
