@@ -36,7 +36,7 @@ class BNLikelihoodBase(SingleTableMetric):
             real_data_encoded[field] = encoders[field].fit_transform(real_data_encoded[field])
 
         for field in fields:
-            synthetic_data_encoded[field] = encoders[field].transform(synthetic_data_encoded[field])
+            synthetic_data_encoded[field] = encoders[field].fit_transform(synthetic_data_encoded[field])
 
         LOGGER.debug('Fitting the BayesianNetwork to the real data')
         if structure:
