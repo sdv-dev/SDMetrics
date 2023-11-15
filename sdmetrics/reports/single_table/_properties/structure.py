@@ -31,21 +31,9 @@ class Structure(BaseSingleTableProperty):
         Returns:
             pandas.DataFrame
         """
-        column_to_ignore_dtype = []
-        non_pii_sdtype = [
-            'numerical', 'datetime', 'categorical', 'boolean'
-        ]
-        for column_name in metadata['columns']:
-            sdtype = metadata['columns'][column_name]['sdtype']
-            if sdtype in non_pii_sdtype:
-                continue
-
-            column_to_ignore_dtype.append(column_name)
-
         try:
             score = TableStructure.compute(
-                real_data, synthetic_data,
-                ignore_dtype_columns=column_to_ignore_dtype
+                real_data, synthetic_data
             )
             error_message = None
 

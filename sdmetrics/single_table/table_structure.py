@@ -26,7 +26,7 @@ class TableStructure(SingleTableMetric):
     max_value = 1
 
     @classmethod
-    def compute_breakdown(cls, real_data, synthetic_data, ignore_dtype_columns=None):
+    def compute_breakdown(cls, real_data, synthetic_data):
         """Compute the score breakdown of the table format metric.
 
         Args:
@@ -34,20 +34,13 @@ class TableStructure(SingleTableMetric):
             The real data.
         synthetic_data (pandas.DataFrame):
             The synthetic data.
-        ignore_dtype_columns (list[str]):
-            List of column names to ignore when comparing data types.
-            Defaults to ``None``.
         """
-        ignore_dtype_columns = ignore_dtype_columns or []
         missing_columns_in_synthetic = set(real_data.columns) - set(synthetic_data.columns)
         invalid_names = []
         invalid_sdtypes = []
         for column in synthetic_data.columns:
             if column not in real_data.columns:
                 invalid_names.append(column)
-                continue
-
-            if column in ignore_dtype_columns:
                 continue
 
             if synthetic_data[column].dtype != real_data[column].dtype:
@@ -61,7 +54,7 @@ class TableStructure(SingleTableMetric):
         return {'score': score}
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, ignore_dtype_columns=None):
+    def compute(cls, real_data, synthetic_data):
         """Compute the table format metric score.
 
         Args:
@@ -69,12 +62,9 @@ class TableStructure(SingleTableMetric):
                 The real data.
             synthetic_data (pandas.DataFrame):
                 The synthetic data.
-            ignore_dtype_columns (list[str]):
-                List of column names to ignore when comparing data types.
-                Defaults to ``None``.
 
         Returns:
             float:
                 The metric score.
         """
-        return cls.compute_breakdown(real_data, synthetic_data, ignore_dtype_columns)['score']
+        return cls.compute_breakdown(real_data, synthetic_data)['score']

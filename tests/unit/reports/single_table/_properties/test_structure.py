@@ -38,7 +38,7 @@ class TestStructure:
 
         # Assert
         table_format_mock.assert_called_once_with(
-            real_data, synthetic_data, ignore_dtype_columns=[]
+            real_data, synthetic_data,
         )
 
         expected_details = pd.DataFrame({
@@ -78,7 +78,7 @@ class TestStructure:
 
         # Assert
         table_format_mock.assert_called_once_with(
-            real_data, synthetic_data, ignore_dtype_columns=['id']
+            real_data, synthetic_data
         )
 
         expected_details = pd.DataFrame({
