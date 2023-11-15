@@ -85,8 +85,8 @@ class TestBaseReport:
         # Run and Assert
         base_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
-    def test_validate(self):
-        """Test the ``validate`` method."""
+    def test__validate(self):
+        """Test the ``_validate`` method."""
         # Setup
         base_report = BaseReport()
         mock__validate_metadata_matches_data = Mock()
@@ -110,7 +110,7 @@ class TestBaseReport:
         }
 
         # Run
-        base_report.validate(real_data, synthetic_data, metadata)
+        base_report._validate(real_data, synthetic_data, metadata)
 
         # Assert
         mock__validate_metadata_matches_data.assert_called_once_with(
@@ -236,7 +236,7 @@ class TestBaseReport:
         mock_validate = Mock()
         mock__print_results = Mock()
         base_report._print_results = mock__print_results
-        base_report.validate = mock_validate
+        base_report._validate = mock_validate
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 1'].get_score.return_value = 1.0
         base_report._properties['Property 2'] = Mock()
@@ -295,7 +295,7 @@ class TestBaseReport:
 
         base_report = BaseReport()
         base_report._print_results = Mock()
-        base_report.validate = Mock()
+        base_report._validate = Mock()
         base_report.convert_datetimes = Mock()
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 1'].get_score.return_value = 1.0
