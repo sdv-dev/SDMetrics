@@ -154,7 +154,7 @@ class TestTableStructure:
         expected_result = {'score': 0.5120000000000001}
         assert result == expected_result
 
-    @patch('sdmetrics.single_table.table_format.TableStructure.compute_breakdown')
+    @patch('sdmetrics.single_table.table_structure.TableStructure.compute_breakdown')
     def test_compute(self, compute_breakdown_mock, real_data):
         """Test the ``compute`` method."""
         # Setup

@@ -32,7 +32,7 @@ from sdmetrics.single_table.privacy.ensemble import CategoricalEnsemble
 from sdmetrics.single_table.privacy.numerical_sklearn import (
     NumericalLR, NumericalMLP, NumericalSVR)
 from sdmetrics.single_table.privacy.radius_nearest_neighbor import NumericalRadiusNearestNeighbor
-from sdmetrics.single_table.table_format import TableStructure
+from sdmetrics.single_table.table_structure import TableStructure
 
 __all__ = [
     'bayesian_network',
