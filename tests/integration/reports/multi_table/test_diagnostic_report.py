@@ -62,7 +62,7 @@ class TestDiagnosticReport:
         # Assert
         expected_properties = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-            'Score': [1.0, 0.7833333333333333, 1.0]
+            'Score': [1.0, 1.0, 1.0]
         })
         expected_details = pd.DataFrame({
             'Table': [
@@ -91,7 +91,7 @@ class TestDiagnosticReport:
                 "TypeError: '<=' not supported between instances of 'str' and 'float'", None
             ]
         })
-        assert results == 0.9277777777777777
+        assert results == 1.0
         pd.testing.assert_frame_equal(
             report.get_properties(), expected_properties, check_exact=False, atol=2e-2
         )

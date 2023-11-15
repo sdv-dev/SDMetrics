@@ -35,22 +35,12 @@ class TableStructure(SingleTableMetric):
         synthetic_data (pandas.DataFrame):
             The synthetic data.
         """
-        missing_columns_in_synthetic = set(real_data.columns) - set(synthetic_data.columns)
-        invalid_names = []
-        invalid_sdtypes = []
-        for column in synthetic_data.columns:
-            if column not in real_data.columns:
-                invalid_names.append(column)
-                continue
+        synthetic_columns = set(synthetic_data.columns)
+        real_columns = set(real_data.columns)
+        intersection_columns = real_columns & synthetic_columns
+        union_columns = real_columns | synthetic_columns
+        score = len(intersection_columns)/len(union_columns)
 
-            if synthetic_data[column].dtype != real_data[column].dtype:
-                invalid_sdtypes.append(column)
-
-        proportion_correct_columns = 1 - len(missing_columns_in_synthetic) / len(real_data.columns)
-        proportion_valid_names = 1 - len(invalid_names) / len(synthetic_data.columns)
-        proportion_valid_sdtypes = 1 - len(invalid_sdtypes) / len(synthetic_data.columns)
-
-        score = proportion_correct_columns * proportion_valid_names * proportion_valid_sdtypes
         return {'score': score}
 
     @classmethod
