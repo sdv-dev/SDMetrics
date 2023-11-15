@@ -85,7 +85,7 @@ class TestDiagnosticReport:
         })
 
         expected_details_data_structure = pd.DataFrame({
-            'Metric': ['TableFormat'],
+            'Metric': ['TableStructure'],
             'Score': [1.0]
         })
 
@@ -136,7 +136,7 @@ class TestDiagnosticReport:
         })
 
         expected_details_data_structure = pd.DataFrame({
-            'Metric': ['TableFormat'],
+            'Metric': ['TableStructure'],
             'Score': [1.0]
         })
 

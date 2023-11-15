@@ -29,7 +29,7 @@ def test_get_visualization(mock_px):
     mock_df = pd.DataFrame({
         'Table': ['Table1', 'Table2'],
         'Score': [0.7, 0.3],
-        'Metric': ['TableFormat', 'TableFormat']
+        'Metric': ['TableStructure', 'TableStructure']
     })
     structure_property.details = mock_df
 
@@ -57,7 +57,7 @@ def test_get_visualization(mock_px):
         'category_orders': {'group': mock_df['Table'].tolist()},
         'color': 'Metric',
         'color_discrete_map': {
-            'TableFormat': '#000036',
+            'TableStructure': '#000036',
         },
         'pattern_shape': 'Metric',
         'pattern_shape_sequence': [''],

@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from sdmetrics.single_table import TableFormat
+from sdmetrics.single_table import TableStructure
 
 
 @pytest.fixture()
@@ -19,7 +19,7 @@ def real_data():
     })
 
 
-class TestTableFormat:
+class TestTableStructure:
 
     def test_compute_breakdown(self, real_data):
         """Test the ``compute_breakdown`` method."""
@@ -34,7 +34,7 @@ class TestTableFormat:
             'col_5': [4.0, 2.0, 3.0, 4.0, 5.0]
         })
 
-        metric = TableFormat()
+        metric = TableStructure()
 
         # Run
         result = metric.compute_breakdown(real_data, synthetic_data)
@@ -55,7 +55,7 @@ class TestTableFormat:
             ]),
         })
 
-        metric = TableFormat()
+        metric = TableStructure()
 
         # Run
         result = metric.compute_breakdown(real_data, synthetic_data)
@@ -78,7 +78,7 @@ class TestTableFormat:
             'col_6': [4.0, 2.0, 3.0, 4.0, 5.0],
         })
 
-        metric = TableFormat()
+        metric = TableStructure()
 
         # Run
         result = metric.compute_breakdown(real_data, synthetic_data)
@@ -100,7 +100,7 @@ class TestTableFormat:
             'col_5': [4.0, 2.0, 3.0, 4.0, 5.0],
         })
 
-        metric = TableFormat()
+        metric = TableStructure()
 
         # Run
         result = metric.compute_breakdown(real_data, synthetic_data)
@@ -122,7 +122,7 @@ class TestTableFormat:
             'col_5': [4.0, 2.0, 3.0, 4.0, 5.0],
         })
 
-        metric = TableFormat()
+        metric = TableStructure()
 
         # Run
         result = metric.compute_breakdown(
@@ -145,7 +145,7 @@ class TestTableFormat:
             'col_6': [4.0, 2.0, 3.0, 4.0, 5.0],
         })
 
-        metric = TableFormat()
+        metric = TableStructure()
 
         # Run
         result = metric.compute_breakdown(real_data, synthetic_data)
@@ -154,7 +154,7 @@ class TestTableFormat:
         expected_result = {'score': 0.5120000000000001}
         assert result == expected_result
 
-    @patch('sdmetrics.single_table.table_format.TableFormat.compute_breakdown')
+    @patch('sdmetrics.single_table.table_format.TableStructure.compute_breakdown')
     def test_compute(self, compute_breakdown_mock, real_data):
         """Test the ``compute`` method."""
         # Setup
@@ -167,7 +167,7 @@ class TestTableFormat:
             ]),
             'col_5': [4.0, 2.0, 3.0, 4.0, 5.0]
         })
-        metric = TableFormat()
+        metric = TableStructure()
         compute_breakdown_mock.return_value = {'score': 0.6}
 
         # Run

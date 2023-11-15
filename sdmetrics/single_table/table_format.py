@@ -3,8 +3,8 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 
 
-class TableFormat(SingleTableMetric):
-    """TableFormat Single Table metric.
+class TableStructure(SingleTableMetric):
+    """TableStructure Single Table metric.
 
     This metric computes whether the names and data types of each column are
     the same in the real and synthetic data.
@@ -20,7 +20,7 @@ class TableFormat(SingleTableMetric):
             Maximum value or values that this metric can take.
     """
 
-    name = 'TableFormat'
+    name = 'TableStructure'
     goal = Goal.MAXIMIZE
     min_value = 0
     max_value = 1
