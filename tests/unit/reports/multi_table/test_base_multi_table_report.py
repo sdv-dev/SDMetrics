@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
 
 
@@ -21,6 +22,25 @@ class TestBaseReport:
         assert report.is_generated is False
         assert report._properties == {}
         assert report.table_names == []
+
+    def test__validate_data_format(self):
+        """Test the ``_validate_data_format`` method.
+
+        This test checks that the method raises an error when the real and synthetic data are not
+        dictionnaries of pd.DataFrame.
+        """
+        # Setup
+        base_report = BaseMultiTableReport()
+        real_data, synthetic_data, _ = load_demo('single_table')
+
+        # Run and Assert
+        expected_message = (
+            'Multi table report BaseMultiTableReport expects real and synthetic data to be '
+            'dictionnaries of pandas.DataFrame. If your real and synthetic data are '
+            'pd.DataFrame, please use the single-table BaseMultiTableReport instead.'
+        )
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._validate_data_format(real_data, synthetic_data)
 
     def test__validate_relationships(self):
         """Test the ``_validate_relationships`` method."""
