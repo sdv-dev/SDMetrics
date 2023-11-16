@@ -3,7 +3,7 @@ import pandas as pd
 
 from sdmetrics.errors import VisualizationUnavailableError
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
-from sdmetrics.single_table import TableFormat
+from sdmetrics.single_table import TableStructure
 
 
 class Structure(BaseSingleTableProperty):
@@ -31,21 +31,9 @@ class Structure(BaseSingleTableProperty):
         Returns:
             pandas.DataFrame
         """
-        column_to_ignore_dtype = []
-        non_pii_sdtype = [
-            'numerical', 'datetime', 'categorical', 'boolean'
-        ]
-        for column_name in metadata['columns']:
-            sdtype = metadata['columns'][column_name]['sdtype']
-            if sdtype in non_pii_sdtype:
-                continue
-
-            column_to_ignore_dtype.append(column_name)
-
         try:
-            score = TableFormat.compute(
-                real_data, synthetic_data,
-                ignore_dtype_columns=column_to_ignore_dtype
+            score = TableStructure.compute(
+                real_data, synthetic_data
             )
             error_message = None
 
@@ -58,7 +46,7 @@ class Structure(BaseSingleTableProperty):
                 progress_bar.update()
 
         result = pd.DataFrame({
-            'Metric': 'TableFormat',
+            'Metric': 'TableStructure',
             'Score': score,
             'Error': error_message,
         }, index=[0])

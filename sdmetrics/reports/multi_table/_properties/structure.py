@@ -43,7 +43,7 @@ class Structure(BaseMultiTableProperty):
             category_orders={'group': list(self.details['Table'])},
             color='Metric',
             color_discrete_map={
-                'TableFormat': PlotConfig.DATACEBO_DARK,
+                'TableStructure': PlotConfig.DATACEBO_DARK,
             },
             pattern_shape='Metric',
             pattern_shape_sequence=[''],
