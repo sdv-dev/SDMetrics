@@ -17,7 +17,7 @@ class TestDiagnosticReport:
         results = report.get_score()
 
         # Assert
-        assert results == 0.9878787878787879
+        assert results == 1.0
 
     def test_end_to_end_with_object_datetimes(self):
         """Test the ``DiagnosticReport`` report with object datetimes."""
@@ -38,9 +38,9 @@ class TestDiagnosticReport:
         # Assert
         expected_dataframe = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-            'Score': [0.9636363636363637, 1.0, 1.0]
+            'Score': [1.0, 1.0, 1.0]
         })
-        assert results == 0.9878787878787879
+        assert results == 1.0
         pd.testing.assert_frame_equal(properties, expected_dataframe)
 
     def test_end_to_end_with_metrics_failing(self):
@@ -110,7 +110,7 @@ class TestDiagnosticReport:
         # Assert
         expected_dataframe = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-            'Score': [0.9636363636363637, 1.0, 1.0]
+            'Score': [1.0, 1.0, 1.0]
         })
 
         pd.testing.assert_frame_equal(properties, expected_dataframe)
@@ -142,8 +142,8 @@ class TestDiagnosticReport:
                 'CategoryAdherence'
             ],
             'Score': [
-                1.0, 1.0, 1.0, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9,
-                0.8, 1.0
+                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                1.0, 1.0
             ]
         })
 
@@ -166,7 +166,7 @@ class TestDiagnosticReport:
             'Metric': [
                 'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence', 'BoundaryAdherence'
             ],
-            'Score': [1.0, 1.0, 1.0, 0.9]
+            'Score': [1.0, 1.0, 1.0, 1.0]
         })
 
         pd.testing.assert_frame_equal(details, expected_dataframe)

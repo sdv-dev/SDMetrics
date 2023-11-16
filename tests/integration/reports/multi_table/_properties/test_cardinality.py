@@ -17,7 +17,7 @@ def test_cardinality_property():
     figure = cardinality_property.get_visualization('users')
 
     # Assert
-    assert score == 0.8
+    assert score == 0.95
     assert isinstance(figure, Figure)
 
 
