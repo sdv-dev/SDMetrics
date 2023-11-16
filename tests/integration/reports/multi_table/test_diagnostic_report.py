@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table import DiagnosticReport
@@ -170,3 +171,14 @@ class TestDiagnosticReport:
         })
 
         pd.testing.assert_frame_equal(details, expected_dataframe)
+
+    def test_metadata_without_relationship(self):
+        """Test that no warning is raised when the metadata does not contain relationships."""
+        # Setup
+        real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+        del metadata['relationships']
+        report = DiagnosticReport()
+
+        # Run and Assert
+        with pytest.warns(None):
+            report.generate(real_data, synthetic_data, metadata)
