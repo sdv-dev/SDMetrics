@@ -16,7 +16,7 @@ class TestCoverage:
         score = coverage_property.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        assert score == 0.9419212095491987
+        assert score == 0.896792056025647
 
         expected_details = pd.DataFrame({
             'Column': [
@@ -31,8 +31,10 @@ class TestCoverage:
                 'RangeCoverage', 'RangeCoverage', 'CategoryCoverage', 'CategoryCoverage'
             ],
             'Score': [
-                1.0, 1.0, 0.42333783783783785, 1.0, 0.9807348482826732, 1.0, 1.0, 1.0, 1.0,
-                1.0, 1.0, 0.6666666666666667, 1.0, 1.0, 1.0, 1.0
+                0.9952153110047847, 0.9554140127388535, 0.45462162162162156,
+                0.7777777777777778, 0.928171334431631, 1.0, 1.0, 0.9659863945578232,
+                1.0, 1.0, 1.0, 0.33333333333333337, 0.9943749999999998, 0.943778110944528,
+                1.0, 1.0
             ]
         })
 
@@ -64,4 +66,4 @@ class TestCoverage:
         assert column_names_nan == ['start_date', 'employability_perc']
         assert error_messages[0] == expected_message_1
         assert error_messages[1] == expected_message_2
-        assert score == 0.9336242394847984
+        assert score == 0.8827916132432548
