@@ -23,7 +23,7 @@ class TestStructure:
 
         expected_details = pd.DataFrame({
             'Table': ['users', 'sessions', 'transactions'],
-            'Metric': ['TableFormat', 'TableFormat', 'TableFormat'],
+            'Metric': ['TableStructure', 'TableStructure', 'TableStructure'],
             'Score': [1.0, 1.0, 1.0],
         })
         pd.testing.assert_frame_equal(structure.details, expected_details)

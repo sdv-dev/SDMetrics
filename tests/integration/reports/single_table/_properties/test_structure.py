@@ -20,7 +20,7 @@ class TestStructure:
         assert score == 1.0
 
         expected_details = pd.DataFrame({
-            'Metric': 'TableFormat',
+            'Metric': 'TableStructure',
             'Score': 1.0,
         }, index=[0])
 
@@ -41,7 +41,7 @@ class TestStructure:
         assert pd.isna(score)
 
         expected_details = pd.DataFrame({
-            'Metric': 'TableFormat',
+            'Metric': 'TableStructure',
             'Score': np.nan,
             'Error': "AttributeError: 'list' object has no attribute 'columns'"
         }, index=[0])
