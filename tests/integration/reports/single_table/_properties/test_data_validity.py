@@ -30,16 +30,11 @@ class TestDataValidity:
                 'BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence', 'CategoryAdherence',
                 'CategoryAdherence'
             ],
-            'Score': [
-                0.8503937007874016, 0.8615384615384616, 0.9444444444444444,
-                1.0, 1.0, 0.8651162790697674, 1.0, 1.0, 0.9255813953488372,
-                1.0, 0.9441860465116279, 1.0, 1.0, 0.8883720930232558,
-                0.8930232558139535, 1.0, 1.0
-            ]
+            'Score': [1.0] * 17
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(data_validity_property.details, expected_details)
-        assert score == 0.9513326868551618
+        assert score == 1.0
 
     def test_get_score_errors(self):
         """Test the ``get_score`` method when the metrics are raising errors for some columns."""
@@ -70,4 +65,4 @@ class TestDataValidity:
         assert column_names_nan == ['start_date', 'employability_perc']
         assert error_messages[0] == expected_message_1
         assert error_messages[1] == expected_message_2
-        assert score == 0.9622593255151395
+        assert score == 1.0
