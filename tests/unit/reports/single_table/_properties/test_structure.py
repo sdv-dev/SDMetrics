@@ -11,7 +11,7 @@ from sdmetrics.reports.single_table._properties.structure import Structure
 class TestStructure:
 
     @patch('sdmetrics.reports.single_table._properties.structure.'
-           'TableFormat.compute')
+           'TableStructure.compute')
     def test__generate_details(self, table_format_mock):
         """Test the ``_generate_details`` method."""
         # Setup
@@ -38,17 +38,17 @@ class TestStructure:
 
         # Assert
         table_format_mock.assert_called_once_with(
-            real_data, synthetic_data, ignore_dtype_columns=[]
+            real_data, synthetic_data,
         )
 
         expected_details = pd.DataFrame({
-            'Metric': 'TableFormat',
+            'Metric': 'TableStructure',
             'Score': 0.75,
         }, index=[0])
         pd.testing.assert_frame_equal(result, expected_details)
 
     @patch('sdmetrics.reports.single_table._properties.structure.'
-           'TableFormat.compute')
+           'TableStructure.compute')
     def test__generate_details_with_id_column(self, table_format_mock):
         """Test the ``_generate_details`` method."""
         # Setup
@@ -78,11 +78,11 @@ class TestStructure:
 
         # Assert
         table_format_mock.assert_called_once_with(
-            real_data, synthetic_data, ignore_dtype_columns=['id']
+            real_data, synthetic_data
         )
 
         expected_details = pd.DataFrame({
-            'Metric': 'TableFormat',
+            'Metric': 'TableStructure',
             'Score': 0.75,
         }, index=[0])
         pd.testing.assert_frame_equal(result, expected_details)
