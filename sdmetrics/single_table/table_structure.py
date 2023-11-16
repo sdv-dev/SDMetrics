@@ -30,10 +30,10 @@ class TableStructure(SingleTableMetric):
         """Compute the score breakdown of the table format metric.
 
         Args:
-        real_data (pandas.DataFrame):
-            The real data.
-        synthetic_data (pandas.DataFrame):
-            The synthetic data.
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
         """
         synthetic_columns = set(synthetic_data.columns)
         real_columns = set(real_data.columns)
