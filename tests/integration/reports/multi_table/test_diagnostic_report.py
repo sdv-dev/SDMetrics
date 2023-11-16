@@ -172,13 +172,12 @@ class TestDiagnosticReport:
 
         pd.testing.assert_frame_equal(details, expected_dataframe)
 
+    @pytest.mark.filterwarnings('error::UserWarning')
     def test_metadata_without_relationship(self):
-        """Test that no warning is raised when the metadata does not contain relationships."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
         del metadata['relationships']
         report = DiagnosticReport()
 
         # Run and Assert
-        with pytest.warns(None):
-            report.generate(real_data, synthetic_data, metadata)
+        report.generate(real_data, synthetic_data, metadata)
