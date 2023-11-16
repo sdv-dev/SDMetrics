@@ -36,7 +36,7 @@ class TestBaseReport:
         # Run and Assert
         expected_message = (
             'Multi table report BaseMultiTableReport expects real and synthetic data to be '
-            'dictionnaries of pandas.DataFrame. If your real and synthetic data are '
+            'dictionaries of pandas.DataFrame. If your real and synthetic data are '
             'pd.DataFrame, please use the single-table BaseMultiTableReport instead.'
         )
         with pytest.raises(ValueError, match=expected_message):

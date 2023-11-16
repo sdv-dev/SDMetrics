@@ -33,7 +33,7 @@ class BaseMultiTableReport(BaseReport):
 
         error_message = (
             f'Multi table report {self.__class__.__name__} expects real and synthetic data to be'
-            ' dictionnaries of pandas.DataFrame. If your real and synthetic data are pd.DataFrame,'
+            ' dictionaries of pandas.DataFrame. If your real and synthetic data are pd.DataFrame,'
             f' please use the single-table {self.__class__.__name__} instead.'
         )
 
