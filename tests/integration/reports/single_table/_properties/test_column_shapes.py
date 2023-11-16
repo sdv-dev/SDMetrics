@@ -28,13 +28,15 @@ class TestColumnShapes:
                 'TVComplement'
             ],
             'Score': [
-                0.701107, 0.768919, 0.869155, 0.826051, 0.553488, 0.902326, 0.995349, 0.627907,
-                0.939535, 0.627907, 0.916279, 0.800000, 0.781395, 0.841860, 0.972093, 0.925581
+                0.6621621621621622, 0.849290780141844, 0.8531399046104928, 0.43918918918918914,
+                0.8976744186046511, 0.9860465116279069, 0.986046511627907, 0.8976744186046511,
+                1.0, 0.9162790697674419, 0.9906976744186047, 0.3441860465116279,
+                0.9348837209302325, 0.9255813953488372, 0.9953488372093023, 0.9395348837209302
             ]
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(column_shape_property.details, expected_details)
-        assert score == 0.8155594899871002
+        assert score == 0.8511084702797364
 
     def test_get_score_errors(self):
         """Test the ``get_score`` method when the metrics are raising errors for some columns."""
@@ -65,4 +67,4 @@ class TestColumnShapes:
         assert column_names_nan == ['start_date', 'employability_perc']
         assert error_messages[0] == expected_message_1
         assert error_messages[1] == expected_message_2
-        assert score == 0.8261749908947813
+        assert score == 0.858620688670242

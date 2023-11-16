@@ -21,7 +21,7 @@ class TestDiagnosticReport:
         expected_frame = pd.DataFrame(
             {
                 'Property': ['Data Validity', 'Data Structure'],
-                'Score': [0.951333, 1.0]
+                'Score': [1.0, 1.0]
             }
         )
         pd.testing.assert_frame_equal(properties_frame, expected_frame)
@@ -38,7 +38,7 @@ class TestDiagnosticReport:
 
         # Assert
 
-        assert result == 0.975666343427581
+        assert result == 1.0
 
     def test_get_score_with_no_verbose(self):
         """Test the ``get_score`` method works when verbose=False."""
@@ -51,7 +51,7 @@ class TestDiagnosticReport:
         result_dict = report.get_score()
 
         # Assert
-        assert result_dict == 0.975666343427581
+        assert result_dict == 1.0
 
     def test_end_to_end(self):
         """Test the end-to-end functionality of the diagnostic report."""
@@ -78,9 +78,8 @@ class TestDiagnosticReport:
                 'CategoryAdherence'
             ],
             'Score': [
-                0.8503937007874016, 0.8615384615384616, 0.9444444444444444, 1.0, 1.0,
-                0.8651162790697674, 1.0, 1.0, 0.9255813953488372, 1.0, 0.9441860465116279, 1.0,
-                1.0, 0.8883720930232558, 0.8930232558139535, 1.0, 1.0
+                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                1.0
             ]
         })
 
@@ -129,9 +128,8 @@ class TestDiagnosticReport:
                 'CategoryAdherence'
             ],
             'Score': [
-                0.8503937007874016, 0.8615384615384616, 0.9444444444444444, 1.0, 1.0,
-                0.8651162790697674, 1.0, 1.0, 0.9255813953488372, 1.0, 0.9441860465116279,
-                1.0, 1.0, 0.8883720930232558, 0.8930232558139535, 1.0, 1.0
+                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                1.0
             ]
         })
 
@@ -160,9 +158,9 @@ class TestDiagnosticReport:
         report = DiagnosticReport()
         report.generate(real_data, synthetic_data, metadata, verbose=False)
 
-        assert report.get_score() == 0.975666343427581
+        assert report.get_score() == 1.0
         report.generate(real_data, synthetic_data, metadata)
-        assert report.get_score() == 0.975666343427581
+        assert report.get_score() == 1.0
 
     def test_get_details_with_errors(self):
         """Test the ``get_details`` function of the diagnostic report when there are errors."""
@@ -190,9 +188,8 @@ class TestDiagnosticReport:
                 'CategoryAdherence'
             ],
             'Score': [
-                0.8503937007874016, 0.8615384615384616, 0.9444444444444444, 1.0, 1.0,
-                0.8651162790697674, 1.0, 1.0, np.nan, 1.0, 0.9441860465116279, 1.0, 1.0,
-                0.8883720930232558, 0.8930232558139535, 1.0, 1.0
+                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, np.nan, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                1.0
             ],
             'Error': [
                 None, None, None, None, None, None, None, None,
