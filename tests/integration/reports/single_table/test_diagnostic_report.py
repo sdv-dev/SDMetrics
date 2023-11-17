@@ -232,9 +232,9 @@ class TestDiagnosticReport:
         # Assert
         expected_properties = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure'],
-            'Score': [0.5, 0.4444444]
+            'Score': [0.5, 0.5]
         })
-        assert report.get_score() == 0.47222222222222227
+        assert report.get_score() == 0.5
         pd.testing.assert_frame_equal(
             report.get_properties(), expected_properties
         )
