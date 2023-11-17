@@ -1,6 +1,4 @@
 """Multi table base property class."""
-import warnings
-
 import numpy as np
 import pandas as pd
 
@@ -37,9 +35,7 @@ class BaseMultiTableProperty():
         elif self._num_iteration_case == 'relationship':
             try:
                 return len(metadata['relationships'])
-            except KeyError as e:
-                message = f'{type(e).__name__}: {e}. No relationships found in the data.'
-                warnings.warn(message)
+            except KeyError:
                 return 0
         elif self._num_iteration_case == 'column_pair':
             num_columns = [len(table['columns']) for table in metadata['tables'].values()]

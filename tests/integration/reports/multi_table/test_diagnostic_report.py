@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table import DiagnosticReport
@@ -170,3 +171,13 @@ class TestDiagnosticReport:
         })
 
         pd.testing.assert_frame_equal(details, expected_dataframe)
+
+    @pytest.mark.filterwarnings('error::UserWarning')
+    def test_metadata_without_relationship(self):
+        # Setup
+        real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+        del metadata['relationships']
+        report = DiagnosticReport()
+
+        # Run and Assert
+        report.generate(real_data, synthetic_data, metadata)
