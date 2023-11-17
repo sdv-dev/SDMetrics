@@ -76,6 +76,23 @@ class DetectionMetric(SingleTableMetric):
             transformed_real_data = real_data
             transformed_synthetic_data = synthetic_data
 
+        if metadata is not None and 'columns' in metadata:
+            drop_columns = []
+            for column in metadata['columns']:
+                if 'primary_key' in metadata and column == metadata['primary_key']:
+                    continue
+                for field in metadata['columns'][column]:
+                    if field == 'sdtype':
+                        sdtype = metadata['columns'][column][field]
+                        if sdtype == 'id' or sdtype == 'text':
+                            drop_columns.append(column)
+                    if field == 'pii':
+                        if metadata['columns'][column][field]:
+                            drop_columns.append(column)
+            if len(drop_columns) > 0:
+                transformed_real_data = transformed_real_data.drop(drop_columns, axis=1)
+                transformed_synthetic_data = transformed_synthetic_data.drop(drop_columns, axis=1)
+
         ht = HyperTransformer()
         transformed_real_data = ht.fit_transform(transformed_real_data).to_numpy()
         transformed_synthetic_data = ht.transform(transformed_synthetic_data).to_numpy()
