@@ -7,10 +7,30 @@ from unittest.mock import Mock, call, mock_open, patch
 import pandas as pd
 import pytest
 
+from sdmetrics.demos import load_demo
 from sdmetrics.reports.base_report import BaseReport
 
 
 class TestBaseReport:
+    def test__validate_data_format(self):
+        """Test the ``_validate_data_format`` method.
+
+        This test checks that the method raises an error when the real and synthetic data are not
+        pandas.DataFrame.
+        """
+        # Setup
+        base_report = BaseReport()
+        real_data, synthetic_data, _ = load_demo('multi_table')
+
+        # Run and Assert
+        expected_message = (
+            'Single table report BaseReport expects real and synthetic data to be '
+            'pandas.DataFrame. If your real and synthetic data are dictionaries of '
+            'tables, please use the multi-table BaseReport instead.'
+        )
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._validate_data_format(real_data, synthetic_data)
+
     def test__validate_metadata_matches_data(self):
         """Test the ``_validate_metadata_matches_data`` method.
 
