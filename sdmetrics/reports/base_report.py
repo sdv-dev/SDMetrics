@@ -53,7 +53,7 @@ class BaseReport():
             )
             raise ValueError(error_message)
 
-    def validate(self, real_data, synthetic_data, metadata):
+    def _validate(self, real_data, synthetic_data, metadata):
         """Validate the inputs.
 
         Args:
@@ -129,7 +129,7 @@ class BaseReport():
         if not isinstance(metadata, dict):
             raise TypeError('The provided metadata is not a dictionary.')
 
-        self.validate(real_data, synthetic_data, metadata)
+        self._validate(real_data, synthetic_data, metadata)
         self.convert_datetimes(real_data, synthetic_data, metadata)
 
         self.report_info['generated_date'] = datetime.today().strftime('%Y-%m-%d')
