@@ -1,4 +1,6 @@
 """Single table base property class."""
+import pandas as pd
+
 from sdmetrics.reports.base_report import BaseReport
 from sdmetrics.visualization import set_plotly_config
 
@@ -14,6 +16,28 @@ class BaseMultiTableReport(BaseReport):
     def __init__(self):
         super().__init__()
         self.table_names = []
+
+    def _validate_data_format(self, real_data, synthetic_data):
+        """Validate that the real and synthetic are dictionnaries of tables."""
+        is_real_dict = isinstance(real_data, dict)
+        is_synthetic_dict = isinstance(synthetic_data, dict)
+        if is_real_dict and is_synthetic_dict:
+            all_real_dataframes = all(
+                isinstance(table, pd.DataFrame) for table in real_data.values()
+            )
+            all_synthetic_dataframes = all(
+                isinstance(table, pd.DataFrame) for table in synthetic_data.values()
+            )
+            if all_real_dataframes and all_synthetic_dataframes:
+                return
+
+        error_message = (
+            f'Multi table report {self.__class__.__name__} expects real and synthetic data to be'
+            ' dictionaries of pandas.DataFrame. If your real and synthetic data are pd.DataFrame,'
+            f' please use the single-table {self.__class__.__name__} instead.'
+        )
+
+        raise ValueError(error_message)
 
     def _validate_relationships(self, real_data, synthetic_data, metadata):
         """Validate that the relationships are valid."""

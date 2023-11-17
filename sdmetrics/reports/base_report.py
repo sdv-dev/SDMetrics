@@ -53,6 +53,21 @@ class BaseReport():
             )
             raise ValueError(error_message)
 
+    def _validate_data_format(self, real_data, synthetic_data):
+        """Validate that the real and synthetic data are pd.DataFrame for single table reports."""
+        is_real_dataframe = isinstance(real_data, pd.DataFrame)
+        is_synthetic_dataframe = isinstance(synthetic_data, pd.DataFrame)
+        if is_real_dataframe and is_synthetic_dataframe:
+            return
+
+        error_message = (
+            f'Single table report {self.__class__.__name__} expects real and synthetic data to be'
+            ' pandas.DataFrame. If your real and synthetic data are dictionaries of tables, '
+            f'please use the multi-table {self.__class__.__name__} instead.'
+
+        )
+        raise ValueError(error_message)
+
     def _validate(self, real_data, synthetic_data, metadata):
         """Validate the inputs.
 
@@ -64,6 +79,7 @@ class BaseReport():
             metadata (dict):
                 The metadata of the table.
         """
+        self._validate_data_format(real_data, synthetic_data)
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
     def _handle_results(self, verbose):
