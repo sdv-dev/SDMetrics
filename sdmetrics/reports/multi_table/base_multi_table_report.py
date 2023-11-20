@@ -60,13 +60,26 @@ class BaseMultiTableReport(BaseReport):
 
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
         """Validate that the metadata matches the data."""
-        self.table_names = list(metadata['tables'].keys())
         for table in self.table_names:
             super()._validate_metadata_matches_data(
                 real_data[table], synthetic_data[table], metadata['tables'][table]
             )
 
         self._validate_relationships(real_data, synthetic_data, metadata)
+
+    def _validate(self, real_data, synthetic_data, metadata):
+        """Validate the inputs.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict):
+                The metadata of the table.
+        """
+        self.table_names = list(metadata['tables'].keys())
+        super()._validate(real_data, synthetic_data, metadata)
 
     def _check_table_names(self, table_name):
         if table_name not in self.table_names:

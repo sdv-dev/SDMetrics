@@ -131,6 +131,7 @@ class TestBaseReport:
 
         report = BaseMultiTableReport()
         report._validate_relationships = mock__validate_relationships
+        report.table_names = ['Table_1', 'Table_2']
 
         # Run
         report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
