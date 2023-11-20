@@ -68,28 +68,29 @@ class DetectionMetric(SingleTableMetric):
         real_data, synthetic_data, metadata = cls._validate_inputs(
             real_data, synthetic_data, metadata)
 
-        if metadata is not None and 'primary_key' in metadata:
-            transformed_real_data = real_data.drop(metadata['primary_key'], axis=1)
-            transformed_synthetic_data = synthetic_data.drop(metadata['primary_key'], axis=1)
+        transformed_real_data = real_data
+        transformed_synthetic_data = synthetic_data
 
-        else:
-            transformed_real_data = real_data
-            transformed_synthetic_data = synthetic_data
-
-        if metadata is not None and 'columns' in metadata:
+        if metadata is not None:
             drop_columns = []
-            for column in metadata['columns']:
-                if 'primary_key' in metadata and column == metadata['primary_key']:
-                    continue
-                for field in metadata['columns'][column]:
-                    if field == 'sdtype':
-                        sdtype = metadata['columns'][column][field]
-                        if sdtype == 'id' or sdtype == 'text':
-                            drop_columns.append(column)
-                    if field == 'pii':
-                        if metadata['columns'][column][field]:
-                            drop_columns.append(column)
-            if len(drop_columns) > 0:
+            if 'columns' in metadata:
+                for column in metadata['columns']:
+                    if ('primary_key' in metadata and
+                            (column == metadata['primary_key'] or
+                             column in metadata['primary_key'])):
+                        drop_columns.append(column)
+
+                    for field in metadata['columns'][column]:
+                        if field == 'sdtype':
+                            sdtype = metadata['columns'][column][field]
+                            if sdtype == 'id' or sdtype == 'text':
+                                drop_columns.append(column)
+
+                        if field == 'pii':
+                            if metadata['columns'][column][field]:
+                                drop_columns.append(column)
+
+            if drop_columns:
                 transformed_real_data = transformed_real_data.drop(drop_columns, axis=1)
                 transformed_synthetic_data = transformed_synthetic_data.drop(drop_columns, axis=1)
 
