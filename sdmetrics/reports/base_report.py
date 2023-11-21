@@ -80,9 +80,6 @@ class BaseReport():
                 The metadata of the table.
         """
         self._validate_data_format(real_data, synthetic_data)
-        if self.__class__.__name__ == 'DiagnosticReport':
-            return
-
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
     @staticmethod

@@ -16,3 +16,6 @@ class DiagnosticReport(BaseReport):
             'Data Validity': DataValidity(),
             'Data Structure': Structure(),
         }
+
+    def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
+        return
