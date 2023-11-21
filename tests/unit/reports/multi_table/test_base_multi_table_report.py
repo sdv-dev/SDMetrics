@@ -184,6 +184,7 @@ class TestBaseReport:
         report.generate(real_data, synthetic_data, metadata)
 
         # Assert
+        assert report.table_names == ['Table_1', 'Table_2']
         mock_generate.assert_called_once_with(real_data, synthetic_data, metadata, True)
 
     def test__check_table_names(self):
