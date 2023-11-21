@@ -105,7 +105,7 @@ class TestDetectionMetric:
                 'col3': {'sdtype': 'numerical'},
                 'ID_3': {'sdtype': 'id'},
                 'blob': {'sdtype': 'text'},
-                'col4': {'sdtype': 'numeric', 'pii': False}
+                'col4': {'sdtype': 'numerical', 'pii': False}
             },
             'primary_key': {'ID_1', 'ID_2'}
         }

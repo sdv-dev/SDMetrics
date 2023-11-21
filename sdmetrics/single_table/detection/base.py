@@ -83,7 +83,7 @@ class DetectionMetric(SingleTableMetric):
                     for field in metadata['columns'][column]:
                         if field == 'sdtype':
                             sdtype = metadata['columns'][column][field]
-                            if sdtype == 'id' or sdtype == 'text':
+                            if sdtype not in ['numerical', 'datetime', 'categorical']:
                                 drop_columns.append(column)
 
                         if field == 'pii':
