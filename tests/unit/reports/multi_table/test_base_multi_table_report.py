@@ -144,6 +144,48 @@ class TestBaseReport:
         mock__validate_metadata_matches_data.assert_has_calls(expected_calls)
         report._validate_relationships.assert_called_once_with(real_data, synthetic_data, metadata)
 
+    @patch('sdmetrics.reports.base_report.BaseReport.generate')
+    def test_generate(self, mock_generate):
+        """Test the ``generate`` method."""
+        # Setup
+        real_data = {
+            'Table_1': pd.DataFrame({'col1': [1, 2, 3]}),
+            'Table_2': pd.DataFrame({'col2': [4, 5, 6]}),
+        }
+        synthetic_data = {
+            'Table_1': pd.DataFrame({'col1': [1, 2, 3]}),
+            'Table_2': pd.DataFrame({'col2': [4, 5, 6]}),
+        }
+        real_data = {
+            'Table_1': pd.DataFrame({'col1': [1, 2, 3]}),
+            'Table_2': pd.DataFrame({'col2': [4, 5, 6]}),
+        }
+        synthetic_data = {
+            'Table_1': pd.DataFrame({'col1': [1, 2, 3]}),
+            'Table_2': pd.DataFrame({'col2': [4, 5, 6]}),
+        }
+        metadata = {
+            'tables': {
+                'Table_1': {
+                    'columns': {
+                        'col1': {},
+                    },
+                },
+                'Table_2': {
+                    'columns': {
+                        'col2': {}
+                    },
+                },
+            },
+        }
+        report = BaseMultiTableReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        mock_generate.assert_called_once_with(real_data, synthetic_data, metadata, True)
+
     def test__check_table_names(self):
         """Test the ``_check_table_names`` method."""
         # Setup
