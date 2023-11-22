@@ -201,3 +201,40 @@ class TestDiagnosticReport:
             report.get_details('Data Validity'),
             expected_details
         )
+
+    def test_report_runs_with_mismatch_data_metadata(self):
+        """Test that the report runs with mismatched data and metadata."""
+        # Setup
+        data = pd.DataFrame({
+            'id': [0, 1, 2],
+            'val1': ['a', 'a', 'b'],
+            'val2': [0.1, 2.4, 5.7]
+        })
+        synthetic_data = pd.DataFrame({
+            'id': [1, 2, 3],
+            'extra_col': ['x', 'y', 'z'],
+            'val1': ['c', 'd', 'd']
+        })
+
+        metadata = {
+            'columns': {
+                'id': {'sdtype': 'id'},
+                'val1': {'sdtype': 'categorical'},
+                'val2': {'sdtype': 'numerical'}
+            },
+            'primary_key': 'id'
+        }
+        report = DiagnosticReport()
+
+        # Run
+        report.generate(data, synthetic_data, metadata)
+
+        # Assert
+        expected_properties = pd.DataFrame({
+            'Property': ['Data Validity', 'Data Structure'],
+            'Score': [0.5, 0.5]
+        })
+        assert report.get_score() == 0.5
+        pd.testing.assert_frame_equal(
+            report.get_properties(), expected_properties
+        )
