@@ -137,6 +137,36 @@ class TestBaseReport:
             real_data, synthetic_data, metadata
         )
 
+    def test__validate_with_value_error(self):
+        """Test the ``_validate`` method with a ValueError."""
+        # Setup
+        base_report = BaseReport()
+        mock__validate_metadata_matches_data = Mock(
+            side_effect=ValueError('error message')
+        )
+        base_report._validate_metadata_matches_data = mock__validate_metadata_matches_data
+
+        real_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c'],
+            'column3': [4, 5, 6]
+        })
+        synthetic_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c'],
+            'column4': [4, 5, 6]
+        })
+        metadata = {
+            'columns': {
+                'column1': {'sdtype': 'numerical'},
+                'column2': {'sdtype': 'categorical'},
+            }
+        }
+
+        # Run and Assert
+        with pytest.raises(ValueError, match='error message'):
+            base_report._validate(real_data, synthetic_data, metadata)
+
     def test_convert_datetimes(self):
         """Test that ``_convert_datetimes`` tries to convert datetime columns."""
         # Setup
