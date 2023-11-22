@@ -17,3 +17,6 @@ class DiagnosticReport(BaseMultiTableReport):
             'Data Structure': Structure(),
             'Relationship Validity': RelationshipValidity()
         }
+
+    def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
+        self._validate_relationships(real_data, synthetic_data, metadata)
