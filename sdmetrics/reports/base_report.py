@@ -61,12 +61,23 @@ class BaseReport():
             return
 
         error_message = (
-            f'Single table report {self.__class__.__name__} expects real and synthetic data to be'
+            f'Single table {self.__class__.__name__} expects real and synthetic data to be'
             ' pandas.DataFrame. If your real and synthetic data are dictionaries of tables, '
             f'please use the multi-table {self.__class__.__name__} instead.'
 
         )
         raise ValueError(error_message)
+
+    def _validate_metadata_format(self, metadata):
+        """Validate the metadata."""
+        if not isinstance(metadata, dict):
+            raise TypeError('The provided metadata is not a dictionary.')
+
+        if 'columns' not in metadata:
+            raise ValueError(
+                'Single table reports expect metadata to contain a "columns" key with a mapping'
+                ' from column names to column informations.'
+            )
 
     def _validate(self, real_data, synthetic_data, metadata):
         """Validate the inputs.
@@ -80,6 +91,7 @@ class BaseReport():
                 The metadata of the table.
         """
         self._validate_data_format(real_data, synthetic_data)
+        self._validate_metadata_format(metadata)
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
     @staticmethod
