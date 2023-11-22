@@ -9,7 +9,7 @@ from sklearn.model_selection import StratifiedKFold
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.utils import HyperTransformer
+from sdmetrics.utils import HyperTransformer, get_alternate_keys
 
 LOGGER = logging.getLogger(__name__)
 
@@ -73,6 +73,7 @@ class DetectionMetric(SingleTableMetric):
 
         if metadata is not None:
             drop_columns = []
+            drop_columns.extend(get_alternate_keys(metadata))
             if 'columns' in metadata:
                 for column in metadata['columns']:
                     if ('primary_key' in metadata and

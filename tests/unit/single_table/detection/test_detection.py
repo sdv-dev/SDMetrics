@@ -84,7 +84,8 @@ class TestDetectionMetric:
             'col3': [5, 6, 7, 8, 9],
             'ID_3': ['a', 'b', 'c', 'd', 'e'],
             'blob': ['Hello world!', 'Hello world!', 'This is SDV', 'This is SDV', 'Hello world!'],
-            'col4': [1, 3, 9, 2, 1]
+            'col4': [1, 3, 9, 2, 1],
+            'col5': [10, 20, 30, 40, 50]
         })
         synthetic_data = pd.DataFrame({
             'ID_1': [1, 3, 4, 2, 2],
@@ -94,7 +95,8 @@ class TestDetectionMetric:
             'col3': [55, 66, 77, 88, 99],
             'ID_3': ['a', 'b', 'e', 'd', 'c'],
             'blob': ['Hello world!', 'Hello world!', 'This is SDV', 'This is SDV', 'Hello world!'],
-            'col4': [4, 1, 3, 1, 9]
+            'col4': [4, 1, 3, 1, 9],
+            'col5': [10, 20, 30, 40, 50]
         })
         metadata = {
             'columns': {
@@ -105,9 +107,11 @@ class TestDetectionMetric:
                 'col3': {'sdtype': 'numerical'},
                 'ID_3': {'sdtype': 'id'},
                 'blob': {'sdtype': 'text'},
-                'col4': {'sdtype': 'numerical', 'pii': False}
+                'col4': {'sdtype': 'numerical', 'pii': False},
+                'col5': {'sdtype': 'numerical'}
             },
-            'primary_key': {'ID_1', 'ID_2'}
+            'primary_key': {'ID_1', 'ID_2'},
+            'alternate_keys': ['col5']
         }
 
         expected_real_dataframe = pd.DataFrame({
