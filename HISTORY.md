@@ -1,5 +1,43 @@
 # History
 
+## v0.13.0 - 2023-12-04
+
+This release makes significant improvements to the Diagnostic Reports! The report now runs a diagnostic to calculate scores for three basic but important properties of your data: data validity, data structure and in the multi table case, relationship validity. Data validity checks that the columns of your data are valid (eg. correct range or values). Data structure makes sure the synthetic data has the correct columns. Relationship validity checks to make sure key references are correct and the cardinality is within ranges seen in the real data. These changes are meant to make the `DiagnosticReport` a quick way for you to see if there are any major problems with your synthetic data.
+
+Additionally, some general improvements were made and bugs were resolved. The `LogisticDetection` and `SVCDetection` metrics were fixed to only use boolean, categorical, datetime and numeric columns in their calculations. A bug that prevented visualizations from displaying on Jupyter notebooks was patched. The cardinality property in the multi table `QualityReport` can now handle multiple foreign keys to the same parent. Finally, a new visualization was added for sequential/timeseries data called `get_column_line_plot`.
+
+### New Features
+
+* Detection metrics should only use statistically modeled columns (filter out the rest) - Issue [#286](https://github.com/sdv-dev/SDMetrics/issues/286) by @lajohn4747
+* Add visualization for timeseries / sequential data  - Issue [#376](https://github.com/sdv-dev/SDMetrics/issues/376) by @lajohn4747
+* Multi table quality report should handle multi-foreign keys (to same parent) - Issue [#406](https://github.com/sdv-dev/SDMetrics/issues/406) by @R-Palazzo
+* Add `KeyUniqueness` metric - Issue [#460](https://github.com/sdv-dev/SDMetrics/issues/460) by @R-Palazzo
+* Add `ReferentialIntegrity` metric - Issue [#461](https://github.com/sdv-dev/SDMetrics/issues/461) by @R-Palazzo
+* Add `CategoryAdherence` metric - Issue [#462](https://github.com/sdv-dev/SDMetrics/issues/462) by @R-Palazzo
+* Add `TableFormat` metric - Issue [#463](https://github.com/sdv-dev/SDMetrics/issues/463) by @R-Palazzo
+* Add `CardinalityBoundaryAdherence` metric - Issue [#464](https://github.com/sdv-dev/SDMetrics/issues/464) by @frances-h
+* Add `DataValidity` property - Issue [#467](https://github.com/sdv-dev/SDMetrics/issues/467) by @R-Palazzo
+* Add `Structure` property - Issue [#468](https://github.com/sdv-dev/SDMetrics/issues/468) by @R-Palazzo
+* Add `Relationship Validity` property - Issue [#469](https://github.com/sdv-dev/SDMetrics/issues/469) by @R-Palazzo
+* Update `DiagnosticReport` to calculate base correctness of synthetic data - Issue [#471](https://github.com/sdv-dev/SDMetrics/issues/471) by @R-Palazzo
+* Update the synthetic data that's available for the multi-table demo - Issue [#501](https://github.com/sdv-dev/SDMetrics/issues/501) by @R-Palazzo
+* Update the synthetic data that's available for the single-table demo - Issue [#502](https://github.com/sdv-dev/SDMetrics/issues/502) by @R-Palazzo
+* Update `TableFormat` metric to `TableStructure` + fix its computation - Issue [#518](https://github.com/sdv-dev/SDMetrics/issues/518) by @R-Palazzo
+
+### Bugs Fixed
+
+* Sometimes graphs don't show when using Jupyter notebook - Issue [#322](https://github.com/sdv-dev/SDMetrics/issues/322) by @pvk-developer
+* Fix ReferentialIntegrity NaN handling - Issue [#494](https://github.com/sdv-dev/SDMetrics/issues/494) by @R-Palazzo
+* KeyUniqueness metric should only be applied to primary and alternate keys - Issue [#503](https://github.com/sdv-dev/SDMetrics/issues/503) by @R-Palazzo
+* Single table Structure property should not have visualization - Issue [#504](https://github.com/sdv-dev/SDMetrics/issues/504) by @R-Palazzo
+* Multi table Structure property visualization has incorrect styling - Issue [#505](https://github.com/sdv-dev/SDMetrics/issues/505) by @R-Palazzo
+* `UserWarning: KeyError: 'relationships'` in DiagnosticReport if metadata missing relationships - Issue [#506](https://github.com/sdv-dev/SDMetrics/issues/506) by @R-Palazzo
+* Report `validate` method should be private - Issue [#507](https://github.com/sdv-dev/SDMetrics/issues/507) by @R-Palazzo
+* `ValueError` in DiagnosticReport if synthetic data does not match metadata - Issue [#508](https://github.com/sdv-dev/SDMetrics/issues/508) by @R-Palazzo
+* Check if QualityReport needs the synthetic data to match the metadata - Issue [#509](https://github.com/sdv-dev/SDMetrics/issues/509) by @R-Palazzo
+* Running single table report on multi table data (or vice versa) results in confusing error - Issue [#510](https://github.com/sdv-dev/SDMetrics/issues/510) by @R-Palazzo
+* Add metadata validation - Issue [#526](https://github.com/sdv-dev/SDMetrics/issues/526) by @R-Palazzo
+
 ## v0.12.1 - 2023-11-01
 
 This release fixes a bug with the new Intertable Trends property and older pandas versions and a bug with how the ML Efficacy metric handled train and test data. Reports handle missing relationships more gracefully.
