@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table import DiagnosticReport
@@ -14,23 +15,10 @@ class TestDiagnosticReport:
 
         # Run
         report.generate(real_data, synthetic_data, metadata, verbose=False)
-        results = report.get_results()
+        results = report.get_score()
 
         # Assert
-        expected_results = {
-            'SUCCESS': [
-                'The synthetic data covers over 90% of the categories present in the real data',
-                'The synthetic data covers over 90% of the numerical ranges present'
-                ' in the real data'
-            ],
-            'WARNING': [
-                'More than 10% the synthetic data does not follow the min/max boundaries'
-                ' set by the real data',
-                'More than 10% of the synthetic rows are copies of the real data'
-            ],
-            'DANGER': []
-        }
-        assert results == expected_results
+        assert results == 1.0
 
     def test_end_to_end_with_object_datetimes(self):
         """Test the ``DiagnosticReport`` report with object datetimes."""
@@ -45,28 +33,15 @@ class TestDiagnosticReport:
 
         # Run
         report.generate(real_data, synthetic_data, metadata, verbose=False)
-        results = report.get_results()
+        results = report.get_score()
         properties = report.get_properties()
 
         # Assert
         expected_dataframe = pd.DataFrame({
-            'Property': ['Coverage', 'Boundary', 'Synthesis'],
-            'Score': [0.9573447196980541, 0.8666666666666667, 0.6333333333333333]
+            'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
+            'Score': [1.0, 1.0, 1.0]
         })
-        expected_results = {
-            'SUCCESS': [
-                'The synthetic data covers over 90% of the categories present in the real data',
-                'The synthetic data covers over 90% of the numerical ranges present'
-                ' in the real data'
-            ],
-            'WARNING': [
-                'More than 10% the synthetic data does not follow the min/max boundaries'
-                ' set by the real data',
-                'More than 10% of the synthetic rows are copies of the real data'
-            ],
-            'DANGER': []
-        }
-        assert results == expected_results
+        assert results == 1.0
         pd.testing.assert_frame_equal(properties, expected_dataframe)
 
     def test_end_to_end_with_metrics_failing(self):
@@ -83,36 +58,45 @@ class TestDiagnosticReport:
 
         # Run
         report.generate(real_data, synthetic_data, metadata, verbose=False)
-        results = report.get_results()
+        results = report.get_score()
 
         # Assert
-        expected_results = {
-            'SUCCESS': [
-                'The synthetic data covers over 90% of the categories present in the real data'
-            ],
-            'WARNING': [],
-            'DANGER': ['More than 50% of the synthetic rows are copies of the real data']
-        }
         expected_properties = pd.DataFrame({
-            'Property': ['Coverage', 'Boundary', 'Synthesis'],
-            'Score': [0.9666666666666668, np.nan, 0.0]
+            'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
+            'Score': [1.0, 1.0, 1.0]
         })
         expected_details = pd.DataFrame({
-            'Table': ['users', 'transactions', 'transactions'],
-            'Column': ['age', 'timestamp', 'amount'],
-            'Metric': ['BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence'],
-            'Score': [np.nan, np.nan, np.nan],
+            'Table': [
+                'users', 'users', 'users', 'users', 'sessions', 'sessions', 'sessions',
+                'transactions', 'transactions', 'transactions', 'transactions',
+            ],
+            'Column': [
+                'user_id', 'country', 'gender', 'age', 'session_id', 'device',
+                'os', 'transaction_id', 'timestamp', 'amount', 'approved'
+            ],
+            'Metric': [
+                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence', 'BoundaryAdherence',
+                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence',
+                'KeyUniqueness', 'BoundaryAdherence', 'BoundaryAdherence',
+                'CategoryAdherence'
+            ],
+            'Score': [
+                1.0, 1.0, 1.0, np.nan, 1.0, 1.0, 1.0, 1.0,
+                np.nan, np.nan, 1.0
+            ],
             'Error': [
+                None, None, None,
                 "TypeError: '<=' not supported between instances of 'str' and 'int'",
+                None, None, None, None,
                 "TypeError: '<=' not supported between instances of 'str' and 'Timestamp'",
-                "TypeError: '<=' not supported between instances of 'str' and 'float'"
+                "TypeError: '<=' not supported between instances of 'str' and 'float'", None
             ]
         })
-        assert results == expected_results
+        assert results == 1.0
         pd.testing.assert_frame_equal(
             report.get_properties(), expected_properties, check_exact=False, atol=2e-2
         )
-        pd.testing.assert_frame_equal(report.get_details('Boundary'), expected_details)
+        pd.testing.assert_frame_equal(report.get_details('Data Validity'), expected_details)
 
     def test_get_properties(self):
         """Test the ``get_properties`` method."""
@@ -126,60 +110,74 @@ class TestDiagnosticReport:
 
         # Assert
         expected_dataframe = pd.DataFrame({
-            'Property': ['Coverage', 'Boundary', 'Synthesis'],
-            'Score': [0.9573447196980541, 0.8666666666666667, 0.6333333333333333]
+            'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
+            'Score': [1.0, 1.0, 1.0]
         })
 
         pd.testing.assert_frame_equal(properties, expected_dataframe)
 
     def test_get_details(self):
-        """Test the ``get_properties`` method."""
+        """Test the ``get_details`` method."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
         report = DiagnosticReport()
 
         # Run
         report.generate(real_data, synthetic_data, metadata, verbose=False)
-        details = report.get_details('Coverage')
+        details = report.get_details('Data Validity')
 
         # Assert
         expected_dataframe = pd.DataFrame({
             'Table': [
-                'users', 'users', 'users', 'sessions', 'sessions', 'transactions',
-                'transactions', 'transactions'
+                'users', 'users', 'users', 'users', 'sessions', 'sessions', 'sessions',
+                'transactions', 'transactions', 'transactions', 'transactions',
             ],
             'Column': [
-                'country', 'gender', 'age', 'device', 'os', 'timestamp',
-                'amount', 'approved'
+                'user_id', 'country', 'gender', 'age', 'session_id', 'device',
+                'os', 'transaction_id', 'timestamp', 'amount', 'approved'
             ],
             'Metric': [
-                'CategoryCoverage', 'CategoryCoverage', 'RangeCoverage', 'CategoryCoverage',
-                'CategoryCoverage', 'RangeCoverage', 'RangeCoverage', 'CategoryCoverage'
+                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence', 'BoundaryAdherence',
+                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence',
+                'KeyUniqueness', 'BoundaryAdherence', 'BoundaryAdherence',
+                'CategoryAdherence'
             ],
             'Score': [
-                0.8333333333333334, 1.0, 1.0, 1.0, 1.0, 0.9955955390408375,
-                0.829828885210262, 1.0
+                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                1.0, 1.0
             ]
         })
 
         pd.testing.assert_frame_equal(details, expected_dataframe)
 
     def test_get_details_with_table_name(self):
-        """Test the ``get_properties`` method with a table_name parameter."""
+        """Test the ``get_details`` method with a table_name parameter."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
         report = DiagnosticReport()
 
         # Run
         report.generate(real_data, synthetic_data, metadata, verbose=False)
-        details = report.get_details('Coverage', 'users')
+        details = report.get_details('Data Validity', 'users')
 
         # Assert
         expected_dataframe = pd.DataFrame({
-            'Table': ['users', 'users', 'users'],
-            'Column': ['country', 'gender', 'age'],
-            'Metric': ['CategoryCoverage', 'CategoryCoverage', 'RangeCoverage'],
-            'Score': [0.8333333333333334, 1.0, 1.0]
+            'Table': ['users', 'users', 'users', 'users'],
+            'Column': ['user_id', 'country', 'gender', 'age'],
+            'Metric': [
+                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence', 'BoundaryAdherence'
+            ],
+            'Score': [1.0, 1.0, 1.0, 1.0]
         })
 
         pd.testing.assert_frame_equal(details, expected_dataframe)
+
+    @pytest.mark.filterwarnings('error::UserWarning')
+    def test_metadata_without_relationship(self):
+        # Setup
+        real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+        del metadata['relationships']
+        report = DiagnosticReport()
+
+        # Run and Assert
+        report.generate(real_data, synthetic_data, metadata)

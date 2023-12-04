@@ -1,7 +1,11 @@
 """Single table base report."""
 import pickle
 import sys
+import time
 import warnings
+from copy import deepcopy
+from datetime import datetime
+from importlib.metadata import version
 
 import numpy as np
 import pandas as pd
@@ -9,6 +13,7 @@ import pkg_resources
 import tqdm
 
 from sdmetrics.reports.utils import convert_datetime_columns
+from sdmetrics.visualization import set_plotly_config
 
 
 class BaseReport():
@@ -21,7 +26,11 @@ class BaseReport():
         self._overall_score = None
         self.is_generated = False
         self._properties = {}
-        self._results_handler = None
+        self.report_info = {
+            'report_type': self.__class__.__name__,
+            'generated_date': None,
+            'sdmetrics_version': version('sdmetrics')
+        }
 
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
         """Validate that the metadata matches the data.
@@ -44,7 +53,33 @@ class BaseReport():
             )
             raise ValueError(error_message)
 
-    def validate(self, real_data, synthetic_data, metadata):
+    def _validate_data_format(self, real_data, synthetic_data):
+        """Validate that the real and synthetic data are pd.DataFrame for single table reports."""
+        is_real_dataframe = isinstance(real_data, pd.DataFrame)
+        is_synthetic_dataframe = isinstance(synthetic_data, pd.DataFrame)
+        if is_real_dataframe and is_synthetic_dataframe:
+            return
+
+        error_message = (
+            f'Single table {self.__class__.__name__} expects real and synthetic data to be'
+            ' pandas.DataFrame. If your real and synthetic data are dictionaries of tables, '
+            f'please use the multi-table {self.__class__.__name__} instead.'
+
+        )
+        raise ValueError(error_message)
+
+    def _validate_metadata_format(self, metadata):
+        """Validate the metadata."""
+        if not isinstance(metadata, dict):
+            raise TypeError('The provided metadata is not a dictionary.')
+
+        if 'columns' not in metadata:
+            raise ValueError(
+                'Single table reports expect metadata to contain a "columns" key with a mapping'
+                ' from column names to column informations.'
+            )
+
+    def _validate(self, real_data, synthetic_data, metadata):
         """Validate the inputs.
 
         Args:
@@ -55,13 +90,9 @@ class BaseReport():
             metadata (dict):
                 The metadata of the table.
         """
-        if not isinstance(metadata, dict):
-            metadata = metadata.to_dict()
-
+        self._validate_data_format(real_data, synthetic_data)
+        self._validate_metadata_format(metadata)
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
-
-    def _handle_results(self, verbose):
-        raise NotImplementedError
 
     @staticmethod
     def convert_datetimes(real_data, synthetic_data, metadata):
@@ -85,6 +116,25 @@ class BaseReport():
                 except Exception:
                     continue
 
+    def _print_results(self, verbose):
+        """Print the results.
+
+        Args:
+            verbose (bool):
+                Whether or not to print results to std.out.
+        """
+        if verbose:
+            sys.stdout.write(
+                f'\nOverall Score: {round(self._overall_score * 100, 2)}%\n\n'
+            )
+            sys.stdout.write('Properties:\n')
+
+            for property_name, property_instance in self._properties.items():
+                property_score = round(property_instance._compute_average() * 100, 2)
+                sys.stdout.write(
+                    f'- {property_name}: {property_score}%\n'
+                )
+
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
 
@@ -101,14 +151,31 @@ class BaseReport():
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
-        self.validate(real_data, synthetic_data, metadata)
+        if not isinstance(metadata, dict):
+            raise TypeError('The provided metadata is not a dictionary.')
+
+        self._validate(real_data, synthetic_data, metadata)
         self.convert_datetimes(real_data, synthetic_data, metadata)
+
+        self.report_info['generated_date'] = datetime.today().strftime('%Y-%m-%d')
+        if 'tables' in metadata:
+            self.report_info['num_tables'] = len(metadata['tables'])
+            self.report_info['num_rows_real_data'] = {
+                name: len(table) for name, table in real_data.items()
+            }
+            self.report_info['num_rows_synthetic_data'] = {
+                name: len(table) for name, table in synthetic_data.items()
+            }
+        else:
+            self.report_info['num_rows_real_data'] = len(real_data)
+            self.report_info['num_rows_synthetic_data'] = len(synthetic_data)
 
         scores = []
         progress_bar = None
         if verbose:
             sys.stdout.write('Generating report ...\n')
 
+        start_time = time.time()
         for ind, (property_name, property_instance) in enumerate(self._properties.items()):
             if verbose:
                 num_iterations = int(property_instance._get_num_iterations(metadata))
@@ -126,8 +193,10 @@ class BaseReport():
 
         self._overall_score = np.nanmean(scores)
         self.is_generated = True
+        end_time = time.time()
+        self.report_info['generation_time'] = end_time - start_time
 
-        self._handle_results(verbose)
+        self._print_results(verbose)
 
     def _check_property_name(self, property_name):
         """Check that the given property name is valid.
@@ -142,6 +211,20 @@ class BaseReport():
                 f"Invalid property name '{property_name}'."
                 f" Valid property names are '{valid_property_names}'."
             )
+
+    def get_score(self):
+        """Return the overall score.
+
+        Returns:
+            float
+                The overall score.
+        """
+        self._check_report_generated()
+        return self._overall_score
+
+    def get_info(self):
+        """Get the information about the report."""
+        return deepcopy(self.report_info)
 
     def _check_report_generated(self):
         if not self.is_generated:
@@ -170,6 +253,7 @@ class BaseReport():
             'Score': score,
         })
 
+    @set_plotly_config
     def get_visualization(self, property_name):
         """Return a visualization for each score for the given property name.
 

@@ -9,7 +9,7 @@ from sklearn.model_selection import StratifiedKFold
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.utils import HyperTransformer
+from sdmetrics.utils import HyperTransformer, get_alternate_keys
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,6 +43,32 @@ class DetectionMetric(SingleTableMetric):
         """Fit a classifier and then use it to predict."""
         raise NotImplementedError()
 
+    @staticmethod
+    def _drop_non_compute_columns(real_data, synthetic_data, metadata):
+        """Drop all columns that cannot be statistically modeled."""
+        transformed_real_data = real_data
+        transformed_synthetic_data = synthetic_data
+
+        if metadata is not None:
+            drop_columns = []
+            drop_columns.extend(get_alternate_keys(metadata))
+            for column in metadata.get('columns', []):
+                if ('primary_key' in metadata and
+                        (column == metadata['primary_key'] or
+                         column in metadata['primary_key'])):
+                    drop_columns.append(column)
+
+                column_info = metadata['columns'].get(column, {})
+                sdtype = column_info.get('sdtype')
+                pii = column_info.get('pii')
+                if sdtype not in ['numerical', 'datetime', 'categorical'] or pii:
+                    drop_columns.append(column)
+
+            if drop_columns:
+                transformed_real_data = real_data.drop(drop_columns, axis=1)
+                transformed_synthetic_data = synthetic_data.drop(drop_columns, axis=1)
+        return transformed_real_data, transformed_synthetic_data
+
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None):
         """Compute this metric.
@@ -68,13 +94,8 @@ class DetectionMetric(SingleTableMetric):
         real_data, synthetic_data, metadata = cls._validate_inputs(
             real_data, synthetic_data, metadata)
 
-        if metadata is not None and 'primary_key' in metadata:
-            transformed_real_data = real_data.drop(metadata['primary_key'], axis=1)
-            transformed_synthetic_data = synthetic_data.drop(metadata['primary_key'], axis=1)
-
-        else:
-            transformed_real_data = real_data
-            transformed_synthetic_data = synthetic_data
+        transformed_real_data, transformed_synthetic_data = cls._drop_non_compute_columns(
+            real_data, synthetic_data, metadata)
 
         ht = HyperTransformer()
         transformed_real_data = ht.fit_transform(transformed_real_data).to_numpy()

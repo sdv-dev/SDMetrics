@@ -7,8 +7,8 @@
 [![Development Status](https://img.shields.io/badge/Development%20Status-2%20--%20Pre--Alpha-yellow)](https://pypi.org/search/?c=Development+Status+%3A%3A+2+-+Pre-Alpha)
 [![PyPI Shield](https://img.shields.io/pypi/v/sdmetrics.svg)](https://pypi.python.org/pypi/sdmetrics)
 [![Downloads](https://pepy.tech/badge/sdmetrics)](https://pepy.tech/project/sdmetrics)
-[![Tests](https://github.com/sdv-dev/SDMetrics/workflows/Run%20Tests/badge.svg)](https://github.com/sdv-dev/SDMetrics/actions?query=workflow%3A%22Run+Tests%22+branch%3Amaster)
-[![Coverage Status](https://codecov.io/gh/sdv-dev/SDMetrics/branch/master/graph/badge.svg)](https://codecov.io/gh/sdv-dev/SDMetrics)
+[![Tests](https://github.com/sdv-dev/SDMetrics/workflows/Run%20Tests/badge.svg)](https://github.com/sdv-dev/SDMetrics/actions?query=workflow%3A%22Run+Tests%22+branch%3Amain)
+[![Coverage Status](https://codecov.io/gh/sdv-dev/SDMetrics/branch/main/graph/badge.svg)](https://codecov.io/gh/sdv-dev/SDMetrics)
 [![Slack](https://img.shields.io/badge/Community-Slack-blue?style=plastic&logo=slack)](https://bit.ly/sdv-slack-invite)
 [![Tutorial](https://img.shields.io/badge/Demo-Get%20started-orange?style=plastic&logo=googlecolab)](https://bit.ly/sdmetrics-demo)
 
@@ -16,7 +16,7 @@
 <br/>
 <p align="center">
 <a href="https://github.com/sdv-dev/SDV">
-<img align="center" width=40% src="https://github.com/sdv-dev/SDV/blob/master/docs/images/SDMetrics-DataCebo.png"></img>
+<img align="center" width=40% src="https://github.com/sdv-dev/SDV/blob/stable/docs/images/SDMetrics-DataCebo.png"></img>
 </a>
 </p>
 </div>
@@ -121,7 +121,7 @@ To learn more about the reports and metrics, visit the [SDMetrics Documentation]
 
 
 <div align="center">
-<a href="https://datacebo.com"><img align="center" width=40% src="https://github.com/sdv-dev/SDV/blob/master/docs/images/DataCebo.png"></img></a>
+<a href="https://datacebo.com"><img align="center" width=40% src="https://github.com/sdv-dev/SDV/blob/stable/docs/images/DataCebo.png"></img></a>
 </div>
 <br/>
 <br/>

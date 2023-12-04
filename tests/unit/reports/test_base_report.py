@@ -7,10 +7,64 @@ from unittest.mock import Mock, call, mock_open, patch
 import pandas as pd
 import pytest
 
+from sdmetrics.demos import load_demo
 from sdmetrics.reports.base_report import BaseReport
 
 
 class TestBaseReport:
+    def test__validate_data_format(self):
+        """Test the ``_validate_data_format`` method.
+
+        This test checks that the method raises an error when the real and synthetic data are not
+        pandas.DataFrame.
+        """
+        # Setup
+        base_report = BaseReport()
+        real_data, synthetic_data, _ = load_demo('multi_table')
+
+        # Run and Assert
+        expected_message = (
+            'Single table BaseReport expects real and synthetic data to be '
+            'pandas.DataFrame. If your real and synthetic data are dictionaries of '
+            'tables, please use the multi-table BaseReport instead.'
+        )
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._validate_data_format(real_data, synthetic_data)
+
+    def test__validate_metadata_format(self):
+        """Test the ``_validate_metadata_format`` method.
+
+        This test checks that the method raises an error when the metadata is not a dictionary.
+        """
+        # Setup
+        base_report = BaseReport()
+        metadata = 'metadata'
+
+        # Run and Assert
+        expected_message = (
+            'The provided metadata is not a dictionary.'
+        )
+        with pytest.raises(TypeError, match=expected_message):
+            base_report._validate_metadata_format(metadata)
+
+    def test__validate_metadata_format_no_columns(self):
+        """Test the ``_validate_metadata_format`` method.
+
+        This test checks that the method raises an error when the metadata does not contain a
+        'columns' key.
+        """
+        # Setup
+        base_report = BaseReport()
+        metadata = {}
+
+        # Run and Assert
+        expected_message = (
+            'Single table reports expect metadata to contain a "columns" key with a mapping'
+            ' from column names to column informations.'
+        )
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._validate_metadata_format(metadata)
+
     def test__validate_metadata_matches_data(self):
         """Test the ``_validate_metadata_matches_data`` method.
 
@@ -85,8 +139,8 @@ class TestBaseReport:
         # Run and Assert
         base_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
-    def test_validate(self):
-        """Test the ``validate`` method."""
+    def test__validate(self):
+        """Test the ``_validate`` method."""
         # Setup
         base_report = BaseReport()
         mock__validate_metadata_matches_data = Mock()
@@ -110,12 +164,42 @@ class TestBaseReport:
         }
 
         # Run
-        base_report.validate(real_data, synthetic_data, metadata)
+        base_report._validate(real_data, synthetic_data, metadata)
 
         # Assert
         mock__validate_metadata_matches_data.assert_called_once_with(
             real_data, synthetic_data, metadata
         )
+
+    def test__validate_with_value_error(self):
+        """Test the ``_validate`` method with a ValueError."""
+        # Setup
+        base_report = BaseReport()
+        mock__validate_metadata_matches_data = Mock(
+            side_effect=ValueError('error message')
+        )
+        base_report._validate_metadata_matches_data = mock__validate_metadata_matches_data
+
+        real_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c'],
+            'column3': [4, 5, 6]
+        })
+        synthetic_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c'],
+            'column4': [4, 5, 6]
+        })
+        metadata = {
+            'columns': {
+                'column1': {'sdtype': 'numerical'},
+                'column2': {'sdtype': 'categorical'},
+            }
+        }
+
+        # Run and Assert
+        with pytest.raises(ValueError, match='error message'):
+            base_report._validate(real_data, synthetic_data, metadata)
 
     def test_convert_datetimes(self):
         """Test that ``_convert_datetimes`` tries to convert datetime columns."""
@@ -152,18 +236,91 @@ class TestBaseReport:
         pd.testing.assert_frame_equal(real_data, expected_real_data)
         pd.testing.assert_frame_equal(synthetic_data, expected_synthetic_data)
 
-    def test_generate(self):
+    def test_generate_metadata_not_dict(self):
+        """Test the ``generate`` method with metadata not being a dict."""
+        # Setup
+        base_report = BaseReport()
+        real_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c']
+        })
+        synthetic_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c']
+        })
+        metadata = 'metadata'
+
+        # Run and Assert
+        expected_message = (
+            'The provided metadata is not a dictionary.'
+        )
+        with pytest.raises(TypeError, match=expected_message):
+            base_report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+    @patch('sys.stdout.write')
+    def test_print_results_verbose_true(self, mock_write):
+        """Test the results are printed if verbose is True."""
+        # Setup
+        report = BaseReport()
+        report._overall_score = 0.5
+        mock_column_shapes = Mock()
+        mock_column_shapes._compute_average.return_value = 0.6
+        mock_column_pair_trends = Mock()
+        mock_column_pair_trends._compute_average.return_value = 0.4
+        report._properties = {
+            'Column Shapes': mock_column_shapes,
+            'Column Pair Trends': mock_column_pair_trends
+        }
+
+        # Run
+        report._print_results(True)
+
+        # Assert
+        calls = [
+            call('\nOverall Score: 50.0%\n\n'),
+            call('Properties:\n'),
+            call('- Column Shapes: 60.0%\n'),
+            call('- Column Pair Trends: 40.0%\n'),
+        ]
+        mock_write.assert_has_calls(calls, any_order=True)
+
+    @patch('sys.stdout.write')
+    def test_print_results_verbose_false(self, mock_write):
+        """Test the results are not printed if verbose is False."""
+        # Setup
+        report = BaseReport()
+        report._overall_score = 0.5
+        report._properties = {
+            'Column Shapes': Mock(_compute_average=Mock(return_value=0.6)),
+            'Column Pair Trends': Mock(_compute_average=Mock(return_value=0.4))
+        }
+
+        # Run
+        report._print_results(False)
+
+        # Assert
+        mock_write.assert_not_called()
+
+    @patch('sdmetrics.reports.base_report.datetime')
+    @patch('sdmetrics.reports.base_report.time')
+    @patch('sdmetrics.reports.base_report.version')
+    def test_generate(self, version_mock, time_mock, datetime_mock):
         """Test the ``generate`` method.
 
         This test checks that the method calls the ``validate`` method and the ``get_score``
-        method for each property.
+        method for each property. Also tests that the ``details`` property is correctly
+        populated.
         """
         # Setup
+        datetime_mock.today.return_value = pd.to_datetime('2020-01-05')
+        time_mock.time.side_effect = [5, 10]
+        version_mock.return_value = 'version'
+
         base_report = BaseReport()
         mock_validate = Mock()
-        mock_handle_results = Mock()
-        base_report._handle_results = mock_handle_results
-        base_report.validate = mock_validate
+        mock__print_results = Mock()
+        base_report._print_results = mock__print_results
+        base_report._validate = mock_validate
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 1'].get_score.return_value = 1.0
         base_report._properties['Property 2'] = Mock()
@@ -189,29 +346,116 @@ class TestBaseReport:
 
         # Assert
         mock_validate.assert_called_once_with(real_data, synthetic_data, metadata)
-        mock_handle_results.assert_called_once_with(False)
+        mock__print_results.assert_called_once_with(False)
         base_report._properties['Property 1'].get_score.assert_called_with(
             real_data, synthetic_data, metadata, progress_bar=None
         )
         base_report._properties['Property 2'].get_score.assert_called_with(
             real_data, synthetic_data, metadata, progress_bar=None
         )
+        expected_info = {
+            'report_type': 'BaseReport',
+            'generated_date': '2020-01-05',
+            'sdmetrics_version': 'version',
+            'num_rows_real_data': 3,
+            'num_rows_synthetic_data': 3,
+            'generation_time': 5
+        }
+        assert base_report.report_info == expected_info
 
-    def test__handle_results(self):
-        """Test the ``_handle_results`` method."""
+    @patch('sdmetrics.reports.base_report.datetime')
+    @patch('sdmetrics.reports.base_report.time')
+    @patch('sdmetrics.reports.base_report.version')
+    def test_generate_multi_table_details(self, version_mock, time_mock, datetime_mock):
+        """Test the ``generate`` method with multi-table data.
+
+        This test checks that the ``details`` property is correctly populated with
+        multi-table data.
+        """
         # Setup
-        base_report = BaseReport()
+        datetime_mock.today.return_value = pd.to_datetime('2020-01-05')
+        time_mock.time.side_effect = [5, 10]
+        version_mock.return_value = 'version'
 
-        # Run and Assert
-        with pytest.raises(NotImplementedError):
-            base_report._handle_results(True)
+        base_report = BaseReport()
+        base_report._print_results = Mock()
+        base_report._validate = Mock()
+        base_report.convert_datetimes = Mock()
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 1'].get_score.return_value = 1.0
+        base_report._properties['Property 2'] = Mock()
+        base_report._properties['Property 2'].get_score.return_value = 1.0
+
+        real_data = {
+            'table1': pd.DataFrame({
+                'column1': [1, 2, 3],
+                'column2': ['a', 'b', 'c']
+            }),
+            'table2': pd.DataFrame({
+                'column3': ['x', 'y', 'z'],
+                'column4': [10, 9, 8]
+            })
+        }
+        synthetic_data = {
+            'table1': pd.DataFrame({
+                'column1': [1, 2, 3],
+                'column2': ['a', 'b', 'c']
+            }),
+            'table2': pd.DataFrame({
+                'column3': ['x', 'y', 'z'],
+                'column4': [10, 9, 8]
+            })
+        }
+        metadata = {
+            'tables': {
+                'table1': {
+                    'columns': {
+                        'column1': {'sdtype': 'numerical'},
+                        'column2': {'sdtype': 'categorical'}
+                    }
+                },
+                'table2': {
+                    'columns': {
+                        'column3': {'sdtype': 'categorical'},
+                        'column4': {'sdtype': 'numerical'}
+                    }
+                }
+            }
+        }
+
+        # Run
+        base_report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+        # Assert
+        base_report._properties['Property 1'].get_score.assert_called_with(
+            real_data, synthetic_data, metadata, progress_bar=None
+        )
+        base_report._properties['Property 2'].get_score.assert_called_with(
+            real_data, synthetic_data, metadata, progress_bar=None
+        )
+        expected_info = {
+            'report_type': 'BaseReport',
+            'generated_date': '2020-01-05',
+            'sdmetrics_version': 'version',
+            'num_tables': 2,
+            'num_rows_real_data': {
+                'table1': 3,
+                'table2': 3
+            },
+            'num_rows_synthetic_data': {
+                'table1': 3,
+                'table2': 3
+            },
+            'generation_time': 5
+        }
+        assert base_report.report_info == expected_info
 
     @patch('tqdm.tqdm')
     def test_generate_verbose(self, mock_tqdm):
         """Test the ``generate`` method with verbose=True."""
         # Setup
         base_report = BaseReport()
-        base_report._handle_results = Mock()
+        base_report._print_results = Mock()
         mock_validate = Mock()
         base_report.validate = mock_validate
         base_report._print_results = Mock()
@@ -251,7 +495,7 @@ class TestBaseReport:
         # Assert
         calls = [call(total=4, file=sys.stdout), call(total=6, file=sys.stdout)]
         mock_tqdm.assert_has_calls(calls, any_order=True)
-        base_report._handle_results.assert_called_once_with(True)
+        base_report._print_results.assert_called_once_with(True)
 
     def test__check_report_generated(self):
         """Test the ``check_report_generated`` method."""
@@ -292,6 +536,21 @@ class TestBaseReport:
         with pytest.raises(ValueError, match=expected_message_2):
             base_report._validate_property_generated(wrong_property_name)
 
+    def test_get_score(self):
+        """Test the ``get_score`` method."""
+        # Setup
+        report = BaseReport()
+        report._check_report_generated = Mock()
+        report._overall_score = 0.7
+        report.is_generated = True
+
+        # Run
+        results = report.get_score()
+
+        # Assert
+        report._check_report_generated.assert_called_once_with()
+        assert results == 0.7
+
     def test_get_properties(self):
         """Test the ``get_details`` method."""
         # Setup
@@ -315,6 +574,55 @@ class TestBaseReport:
                 'Score': [1.0, 1.0],
             }),
         )
+
+    @patch('sdmetrics.reports.base_report.datetime')
+    @patch('sdmetrics.reports.base_report.time')
+    @patch('sdmetrics.reports.base_report.version')
+    def test_get_info(self, version_mock, time_mock, datetime_mock):
+        """Test the ``get_info`` method."""
+        # Setup
+        datetime_mock.today.return_value = pd.to_datetime('2020-01-05')
+        time_mock.time.side_effect = [5, 10]
+        version_mock.return_value = 'version'
+
+        base_report = BaseReport()
+        mock_validate = Mock()
+        mock__print_results = Mock()
+        base_report._print_results = mock__print_results
+        base_report.validate = mock_validate
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 1'].get_score.return_value = 1.0
+        base_report._properties['Property 2'] = Mock()
+        base_report._properties['Property 2'].get_score.return_value = 1.0
+
+        real_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c']
+        })
+        synthetic_data = pd.DataFrame({
+            'column1': [1, 2, 3],
+            'column2': ['a', 'b', 'c']
+        })
+        metadata = {
+            'columns': {
+                'column1': {'sdtype': 'numerical'},
+                'column2': {'sdtype': 'categorical'}
+            }
+        }
+
+        # Run
+        base_report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+        # Assert
+        expected_info = {
+            'report_type': 'BaseReport',
+            'generated_date': '2020-01-05',
+            'sdmetrics_version': 'version',
+            'num_rows_real_data': 3,
+            'num_rows_synthetic_data': 3,
+            'generation_time': 5
+        }
+        assert base_report.get_info() == expected_info
 
     def test_get_visualization(self):
         """Test the ``get_visualization`` method."""

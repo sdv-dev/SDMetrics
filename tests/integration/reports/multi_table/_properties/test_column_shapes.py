@@ -18,7 +18,7 @@ class TestColumnShapes:
         result = column_shapes.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        assert result == 0.7922619047619048
+        assert result == 0.7978174603174604
 
     def test_with_progress_bar(self):
         """Test that the progress bar is correctly updated."""
@@ -35,5 +35,5 @@ class TestColumnShapes:
         result = column_shapes.get_score(real_data, synthetic_data, metadata, progress_bar)
 
         # Assert
-        assert result == 0.7922619047619048
+        assert result == 0.7978174603174604
         assert mock_update.call_count == num_columns

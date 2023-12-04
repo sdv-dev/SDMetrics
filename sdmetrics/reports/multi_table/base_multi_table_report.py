@@ -1,5 +1,8 @@
 """Single table base property class."""
+import pandas as pd
+
 from sdmetrics.reports.base_report import BaseReport
+from sdmetrics.visualization import set_plotly_config
 
 
 class BaseMultiTableReport(BaseReport):
@@ -13,6 +16,44 @@ class BaseMultiTableReport(BaseReport):
     def __init__(self):
         super().__init__()
         self.table_names = []
+
+    def _validate_data_format(self, real_data, synthetic_data):
+        """Validate that the real and synthetic are dictionnaries of tables."""
+        is_real_dict = isinstance(real_data, dict)
+        is_synthetic_dict = isinstance(synthetic_data, dict)
+        if is_real_dict and is_synthetic_dict:
+            all_real_dataframes = all(
+                isinstance(table, pd.DataFrame) for table in real_data.values()
+            )
+            all_synthetic_dataframes = all(
+                isinstance(table, pd.DataFrame) for table in synthetic_data.values()
+            )
+            if all_real_dataframes and all_synthetic_dataframes:
+                return
+
+        error_message = (
+            f'Multi table {self.__class__.__name__} expects real and synthetic data to be'
+            ' dictionaries of pandas.DataFrame. If your real and synthetic data are pd.DataFrame,'
+            f' please use the single-table {self.__class__.__name__} instead.'
+        )
+
+        raise ValueError(error_message)
+
+    def _validate_metadata_format(self, metadata):
+        """Validate the metadata."""
+        if not isinstance(metadata, dict):
+            raise TypeError('The provided metadata is not a dictionary.')
+
+        if 'tables' not in metadata:
+            raise ValueError(
+                'Multi table reports expect metadata to contain a "tables" key with a mapping'
+                ' from table names to metadata for each table.'
+            )
+        for table_name, table_metadata in metadata['tables'].items():
+            if 'columns' not in table_metadata:
+                raise ValueError(
+                    f'The metadata for table "{table_name}" is missing a "columns" key.'
+                )
 
     def _validate_relationships(self, real_data, synthetic_data, metadata):
         """Validate that the relationships are valid."""
@@ -35,13 +76,31 @@ class BaseMultiTableReport(BaseReport):
 
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
         """Validate that the metadata matches the data."""
-        self.table_names = list(metadata['tables'].keys())
         for table in self.table_names:
             super()._validate_metadata_matches_data(
                 real_data[table], synthetic_data[table], metadata['tables'][table]
             )
 
         self._validate_relationships(real_data, synthetic_data, metadata)
+
+    def generate(self, real_data, synthetic_data, metadata, verbose=True):
+        """Generate report.
+
+        This method generates the report by iterating through each property and calculating
+        the score for each property.
+
+        Args:
+            real_data (pandas.DataFrame):
+                The real data.
+            synthetic_data (pandas.DataFrame):
+                The synthetic data.
+            metadata (dict):
+                The metadata, which contains each column's data type as well as relationships.
+            verbose (bool):
+                Whether or not to print report summary and progress.
+        """
+        self.table_names = list(metadata.get('tables', {}).keys())
+        return super().generate(real_data, synthetic_data, metadata, verbose)
 
     def _check_table_names(self, table_name):
         if table_name not in self.table_names:
@@ -81,14 +140,10 @@ class BaseMultiTableReport(BaseReport):
 
         self._check_table_names(table_name)
 
-        if self._properties[property_name]._num_iteration_case != 'relationship':
-            table_rows = self._properties[property_name].details['Table'] == table_name
-            details = self._properties[property_name].details.loc[table_rows]
-        else:
-            details = self._properties[property_name].get_details(table_name)
-
+        details = self._properties[property_name].get_details(table_name)
         return details.copy()
 
+    @set_plotly_config
     def get_visualization(self, property_name, table_name=None):
         """Return a visualization for the given property and table_name.
 
@@ -103,6 +158,9 @@ class BaseMultiTableReport(BaseReport):
             plotly.graph_objects._figure.Figure
                 The visualization for the requested property.
         """
+        if property_name == 'Data Structure':
+            return self._properties[property_name].get_visualization(table_name)
+
         if table_name is None:
             raise ValueError(
                 'Please provide a table name to get a visualization for the property.'

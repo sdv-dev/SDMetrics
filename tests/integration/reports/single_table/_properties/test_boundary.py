@@ -17,19 +17,14 @@ class TestBoundary:
         score = boundary_property.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        assert score == 0.9172655676537751
-
+        assert score == 1.0
         expected_details = pd.DataFrame({
             'Column': [
                 'start_date', 'end_date', 'salary', 'duration', 'high_perc', 'second_perc',
                 'degree_perc', 'experience_years', 'employability_perc', 'mba_perc'
             ],
             'Metric': ['BoundaryAdherence'] * 10,
-            'Score': [
-                0.8503937007874016, 0.8615384615384616, 0.9444444444444444, 1.0,
-                0.8651162790697674, 0.9255813953488372, 0.9441860465116279, 1.0,
-                0.8883720930232558, 0.8930232558139535
-            ]
+            'Score': [1.0] * 10
         })
 
         pd.testing.assert_frame_equal(boundary_property.details, expected_details)
@@ -64,4 +59,4 @@ class TestBoundary:
         assert error_messages[0] == expected_message_1
         assert error_messages[1] == expected_message_2
         assert error_messages[2] == expected_message_3
-        assert score == 0.9270636340403783
+        assert score == 1.0

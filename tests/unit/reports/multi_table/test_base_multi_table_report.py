@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
 
 
@@ -21,6 +22,76 @@ class TestBaseReport:
         assert report.is_generated is False
         assert report._properties == {}
         assert report.table_names == []
+
+    def test__validate_data_format(self):
+        """Test the ``_validate_data_format`` method.
+
+        This test checks that the method raises an error when the real and synthetic data are not
+        dictionnaries of pd.DataFrame.
+        """
+        # Setup
+        base_report = BaseMultiTableReport()
+        real_data, synthetic_data, _ = load_demo('single_table')
+
+        # Run and Assert
+        expected_message = (
+            'Multi table BaseMultiTableReport expects real and synthetic data to be '
+            'dictionaries of pandas.DataFrame. If your real and synthetic data are '
+            'pd.DataFrame, please use the single-table BaseMultiTableReport instead.'
+        )
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._validate_data_format(real_data, synthetic_data)
+
+    def test__validate_metadata_format(self):
+        """Test the ``_validate_metadata_format`` method.
+
+        This test checks that the method raises an error when the metadata is not a dictionnary.
+        """
+        # Setup
+        base_report = BaseMultiTableReport()
+        metadata = []
+
+        # Run and Assert
+        expected_message = 'The provided metadata is not a dictionary.'
+        with pytest.raises(TypeError, match=expected_message):
+            base_report._validate_metadata_format(metadata)
+
+    def test__validate_metadata_format_with_no_tables(self):
+        """Test the ``_validate_metadata_format`` method.
+
+        This test checks that the method raises an error when the metadata does not contain a
+        'tables' key.
+        """
+        # Setup
+        base_report = BaseMultiTableReport()
+        metadata = {}
+
+        # Run and Assert
+        expected_message = (
+            'Multi table reports expect metadata to contain a "tables" key with a mapping from '
+            'table names to metadata for each table.'
+        )
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._validate_metadata_format(metadata)
+
+    def test__validate_metadata_format_with_no_columns(self):
+        """Test the ``_validate_metadata_format`` method.
+
+        This test checks that the method raises an error when the metadata does not contain a
+        'columns' key.
+        """
+        # Setup
+        base_report = BaseMultiTableReport()
+        metadata = {
+            'tables': {
+                'Table_1': {}
+            }
+        }
+
+        # Run and Assert
+        expected_message = 'The metadata for table "Table_1" is missing a "columns" key.'
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._validate_metadata_format(metadata)
 
     def test__validate_relationships(self):
         """Test the ``_validate_relationships`` method."""
@@ -111,6 +182,7 @@ class TestBaseReport:
 
         report = BaseMultiTableReport()
         report._validate_relationships = mock__validate_relationships
+        report.table_names = ['Table_1', 'Table_2']
 
         # Run
         report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
@@ -122,6 +194,49 @@ class TestBaseReport:
         ]
         mock__validate_metadata_matches_data.assert_has_calls(expected_calls)
         report._validate_relationships.assert_called_once_with(real_data, synthetic_data, metadata)
+
+    @patch('sdmetrics.reports.base_report.BaseReport.generate')
+    def test_generate(self, mock_generate):
+        """Test the ``generate`` method."""
+        # Setup
+        real_data = {
+            'Table_1': pd.DataFrame({'col1': [1, 2, 3]}),
+            'Table_2': pd.DataFrame({'col2': [4, 5, 6]}),
+        }
+        synthetic_data = {
+            'Table_1': pd.DataFrame({'col1': [1, 2, 3]}),
+            'Table_2': pd.DataFrame({'col2': [4, 5, 6]}),
+        }
+        real_data = {
+            'Table_1': pd.DataFrame({'col1': [1, 2, 3]}),
+            'Table_2': pd.DataFrame({'col2': [4, 5, 6]}),
+        }
+        synthetic_data = {
+            'Table_1': pd.DataFrame({'col1': [1, 2, 3]}),
+            'Table_2': pd.DataFrame({'col2': [4, 5, 6]}),
+        }
+        metadata = {
+            'tables': {
+                'Table_1': {
+                    'columns': {
+                        'col1': {},
+                    },
+                },
+                'Table_2': {
+                    'columns': {
+                        'col2': {}
+                    },
+                },
+            },
+        }
+        report = BaseMultiTableReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        assert report.table_names == ['Table_1', 'Table_2']
+        mock_generate.assert_called_once_with(real_data, synthetic_data, metadata, True)
 
     def test__check_table_names(self):
         """Test the ``_check_table_names`` method."""
@@ -304,3 +419,18 @@ class TestBaseReport:
 
         with pytest.raises(ValueError, match=expected_error_message):
             report.get_visualization('Property_1')
+
+    def test_get_visualization_for_structure_property(self):
+        """Test the ``get_visualization`` method for the structure property."""
+        # Setup
+        report = BaseMultiTableReport()
+        report._properties = {
+            'Data Structure': Mock()
+        }
+        report._properties['Data Structure'].get_visualization = Mock()
+
+        # Run
+        report.get_visualization('Data Structure', 'Table_1')
+
+        # Assert
+        report._properties['Data Structure'].get_visualization.assert_called_once_with('Table_1')

@@ -1,6 +1,4 @@
-import contextlib
-import io
-import re
+import time
 from datetime import date, datetime
 
 import numpy as np
@@ -80,14 +78,16 @@ class TestQualityReport:
         report = QualityReport()
 
         # Run
+        generate_start_time = time.time()
         report.generate(real_data[column_names], synthetic_data[column_names], metadata)
+        generate_end_time = time.time()
 
         # Assert
         expected_details_column_shapes_dict = {
             'Column': ['start_date', 'second_perc', 'work_experience', 'degree_type'],
             'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
             'Score': [
-                0.7011066184294531, 0.627906976744186, 0.9720930232558139, 0.9255813953488372
+                0.6621621621621622, 0.8976744186046511, 0.9953488372093023, 0.9395348837209302
             ],
         }
 
@@ -105,14 +105,14 @@ class TestQualityReport:
                 'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'
             ],
             'Score': [
-                0.9854510263003199, 0.586046511627907, 0.6232558139534884, 0.7348837209302326,
-                0.6976744186046512, 0.8976744186046511
+                0.9187918131436303, 0.6744186046511629, 0.7162790697674419, 0.813953488372093,
+                0.772093023255814, 0.9348837209302325
             ],
             'Real Correlation': [
                 0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan
             ],
             'Synthetic Correlation': [
-                0.07645134784253645, np.nan, np.nan, np.nan, np.nan, np.nan
+                -0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan
             ]
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
@@ -124,7 +124,20 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
-        assert report.get_score() == 0.7804181608907237
+        assert report.get_score() == 0.8393750143888287
+
+        report_info = report.get_info()
+        assert report_info == report.report_info
+
+        expected_info_keys = {
+            'report_type', 'generated_date', 'sdmetrics_version', 'num_rows_real_data',
+            'num_rows_synthetic_data', 'generation_time'
+        }
+        assert report_info.keys() == expected_info_keys
+        assert report_info['report_type'] == 'QualityReport'
+        assert report_info['num_rows_real_data'] == 215
+        assert report_info['num_rows_synthetic_data'] == 215
+        assert report_info['generation_time'] <= generate_end_time - generate_start_time
 
     def test_quality_report_with_object_datetimes(self):
         """Test the quality report with object datetimes.
@@ -154,7 +167,7 @@ class TestQualityReport:
             'Column': ['start_date', 'second_perc', 'work_experience', 'degree_type'],
             'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
             'Score': [
-                0.7011066184294531, 0.627906976744186, 0.9720930232558139, 0.9255813953488372
+                0.6621621621621622, 0.8976744186046511, 0.9953488372093023, 0.9395348837209302
             ],
         }
 
@@ -172,14 +185,14 @@ class TestQualityReport:
                 'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'
             ],
             'Score': [
-                0.9854510263003199, 0.586046511627907, 0.6232558139534884, 0.7348837209302326,
-                0.6976744186046512, 0.8976744186046511
+                0.9187918131436303, 0.6744186046511629, 0.7162790697674419, 0.813953488372093,
+                0.772093023255814, 0.9348837209302325
             ],
             'Real Correlation': [
                 0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan
             ],
             'Synthetic Correlation': [
-                0.07645134784253645, np.nan, np.nan, np.nan, np.nan, np.nan
+                -0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan
             ]
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
@@ -191,7 +204,7 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
-        assert report.get_score() == 0.7804181608907237
+        assert report.get_score() == 0.8393750143888287
 
     def test_report_end_to_end_with_errors(self):
         """Test the quality report end to end with errors in the properties computation."""
@@ -216,7 +229,7 @@ class TestQualityReport:
         expected_details_column_shapes_dict = {
             'Column': ['start_date', 'second_perc', 'work_experience', 'degree_type'],
             'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
-            'Score': [0.7011066184294531, np.nan, 0.9720930232558139, 0.9255813953488372],
+            'Score': [0.6621621621621622, np.nan, 0.9953488372093023, 0.9395348837209302],
             'Error': [
                 None,
                 "TypeError: '<' not supported between instances of 'str' and 'float'",
@@ -239,7 +252,7 @@ class TestQualityReport:
                 'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'
             ],
             'Score': [
-                np.nan, 0.586046511627907, 0.6232558139534884, np.nan, np.nan, 0.8976744186046511
+                np.nan, 0.6744186046511629, 0.7162790697674419, np.nan, np.nan, 0.9348837209302325
             ],
             'Real Correlation': [np.nan] * 6,
             'Synthetic Correlation': [np.nan] * 6,
@@ -261,7 +274,7 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
-        assert report.get_score() == 0.7842929635366918
+        assert report.get_score() == 0.8204378797402054
 
     def test_report_with_column_nan(self):
         """Test the report with column full of NaNs."""
@@ -294,7 +307,7 @@ class TestQualityReport:
                 'KSComplement', 'KSComplement', 'TVComplement', 'TVComplement', 'KSComplement'
             ],
             'Score': [
-                0.7011066184294531, 0.627906976744186, 0.9720930232558139, 0.9255813953488372,
+                0.6621621621621622, 0.8976744186046511, 0.9953488372093023, 0.9395348837209302,
                 np.nan
             ],
             'Error': [
@@ -321,16 +334,16 @@ class TestQualityReport:
                 'ContingencySimilarity'
             ],
             'Score': [
-                0.9854510263003199, 0.586046511627907, 0.6232558139534884, np.nan,
-                0.7348837209302326, 0.6976744186046512, np.nan, 0.8976744186046511,
-                0.9720930232558139, 0.9255813953488372
+                0.9187918131436303, 0.6744186046511629, 0.7162790697674419, np.nan,
+                0.813953488372093, 0.772093023255814, np.nan, 0.9348837209302325,
+                0.9953488372093023, 0.9395348837209302
             ],
             'Real Correlation': [
                 0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
                 np.nan, np.nan
             ],
             'Synthetic Correlation': [
-                0.07645134784253645, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
+                -0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
                 np.nan, np.nan
             ],
             'Error': [
@@ -349,7 +362,7 @@ class TestQualityReport:
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
 
-    def test_report_with_verbose(self):
+    def test_report_with_verbose(self, capsys):
         """Test the report with verbose.
 
         Check that the report prints the correct information.
@@ -374,13 +387,13 @@ class TestQualityReport:
         report = QualityReport()
 
         # Run
-        with contextlib.redirect_stdout(io.StringIO()) as my_stdout:
-            report.generate(real_data, synthetic_data, metadata)
+        report.generate(real_data, synthetic_data, metadata)
+        captured = capsys.readouterr()
+        output = captured.out
 
         # Assert
         for pattern in key_phrases:
-            match = re.search(pattern, my_stdout.getvalue())
-            assert match is not None
+            pattern in output
 
     def test_correlation_similarity_constant_real_data(self):
         """Error out when CorrelationSimilarity is used with a constant pair of columns."""
