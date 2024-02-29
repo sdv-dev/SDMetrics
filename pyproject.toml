@@ -42,9 +42,7 @@ dependencies = [
 requires = ['setuptools', 'wheel']
 build-backend = "setuptools.build_meta"
 
-# Development dependencies
 [project.optional-dependencies]
-
 torch = [
     "torch>=1.8.0;python_version<'3.10'",
     "torch>=1.11.0;python_version>='3.10' and python_version<'3.11'",
@@ -60,6 +58,7 @@ test = [
     'pytest-rerunfailures>=10',
     'jupyter>=1.0.0,<2',
     'rundoc>=0.4.3,<0.5',
+    'tomli>=2.0.0,<3',
     'invoke',
 ]
 
