@@ -72,7 +72,7 @@ def _get_minimum_versions(dependencies, python_version):
 
 @task
 def install_minimum(c):
-    with open('pyproject.toml', 'r', encoding='utf-8') as pyproject_file:
+    with open('pyproject.toml', 'rb') as pyproject_file:
         pyproject_data = tomli.load(pyproject_file)
 
     dependencies = pyproject_data.get('project', {}).get('dependencies', [])
