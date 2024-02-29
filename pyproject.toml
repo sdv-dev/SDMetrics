@@ -40,7 +40,7 @@ dependencies = [
 "Chat" = "https://bit.ly/sdv-slack-invite"
 
 [build-system]
-requires = ['setuptools', 'wheel', 'cython ~= 0.29.0']
+requires = ['setuptools', 'wheel', 'cython == 0.29.24']
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
