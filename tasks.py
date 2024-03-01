@@ -2,15 +2,15 @@ import glob
 import inspect
 import operator
 import os
-import tomli
-import sys
-from packaging.requirements import Requirement
-from packaging.version import Version
 import shutil
 import stat
+import sys
 from pathlib import Path
 
+import tomli
 from invoke import task
+from packaging.requirements import Requirement
+from packaging.version import Version
 
 COMPARISONS = {
     '>=': operator.ge,
