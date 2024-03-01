@@ -42,6 +42,7 @@ dependencies = [
 [build-system]
 requires = ['setuptools', 'wheel', 'Cython==0.29.23']
 build-backend = "setuptools.build_meta"
+isolated_build = true
 
 [project.optional-dependencies]
 torch = [
