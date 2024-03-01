@@ -1,3 +1,7 @@
+[build-system]
+requires = ['setuptools', 'wheel']
+build-backend = "setuptools.build_meta"
+
 [project]
 name = 'sdmetrics'
 description = 'Metrics for Synthetic Data Generation Projects'
@@ -39,19 +43,13 @@ dependencies = [
 "Twitter" = "https://twitter.com/sdv_dev"
 "Chat" = "https://bit.ly/sdv-slack-invite"
 
-[build-system]
-requires = ['setuptools', 'wheel']
-build-backend = "setuptools.build_meta"
-
 [project.optional-dependencies]
 torch = [
     "torch>=1.8.0;python_version<'3.10'",
     "torch>=1.11.0;python_version>='3.10' and python_version<'3.11'",
     "torch>=2.0.0;python_version>='3.11'",
 ]
-
 pomegranate = ['pomegranate>=0.14.1,<0.14.7']
-
 test = [
     'sdmetrics[torch]',
     'pytest>=6.2.5,<7',
@@ -61,8 +59,8 @@ test = [
     'rundoc>=0.4.3,<0.5',
     'tomli>=2.0.0,<3',
     'invoke',
+    'pytest-runner>=2.11.1',
 ]
-
 dev = [
     'sdmetrics[test, torch]',
 
@@ -111,3 +109,15 @@ dev = [
 
 [tool.setuptools]
 packages.find.include = ['sdmetrics*']
+
+[tool.isort]
+include_trailing_comment = true
+line_length = 99
+lines_between_types = 0
+multi_line_output = 4
+not_skip = ['__init__.py']
+use_parentheses = true
+
+[tool.pydocstyle]
+convention = 'google'
+add-ignore = ['D107', 'D407', 'D417']
