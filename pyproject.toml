@@ -183,7 +183,7 @@ values = [
 ]
 
 [[tool.bumpversion.files]]
-filename = "sdgym/__init__.py"
+filename = "sdmetrics/__init__.py"
 search = "__version__ = '{current_version}'"
 replace = "__version__ = '{new_version}'"
 
