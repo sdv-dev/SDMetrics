@@ -40,6 +40,9 @@ dependencies = [
 "Twitter" = "https://twitter.com/sdv_dev"
 "Chat" = "https://bit.ly/sdv-slack-invite"
 
+[project.entry-points]
+sdmetrics = { main = 'sdmetrics.cli.__main__:main' }
+
 [project.optional-dependencies]
 torch = [
     "torch>=1.8.0;python_version<'3.10'",
