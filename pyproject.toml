@@ -1,13 +1,7 @@
-[build-system]
-requires = ['setuptools', 'wheel']
-build-backend = "setuptools.build_meta"
-
 [project]
 name = 'sdmetrics'
 description = 'Metrics for Synthetic Data Generation Projects'
-version = '0.13.1.dev0'
 authors = [{ name = "MIT Data To AI Lab", email = "dailabmit@gmail.com" }]
-license = { text = 'MIT license' }
 classifiers = [
     'Development Status :: 2 - Pre-Alpha',
     'Intended Audience :: Developers',
@@ -19,9 +13,11 @@ classifiers = [
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
 ]
-readme = 'README.md'
-requires-python = ">=3.8,<3.12"
 keywords = ['sdmetrics', 'sdmetrics', 'SDMetrics']
+dynamic = ['version']
+license = { text = 'MIT license' }
+requires-python = ">=3.8,<3.12"
+readme = 'README.md'
 dependencies = [
     "numpy>=1.20.0,<2;python_version<'3.10'",
     "numpy>=1.23.3,<2;python_version>='3.10'",
@@ -66,7 +62,7 @@ dev = [
     'sdmetrics[test, torch]',
 
     # general
-    'bumpversion>=0.5.3,<0.6',
+    'bump-my-version>=0.18.3,<1',
     'pip>=9.0.1',
     'watchdog>=0.8.3,<0.11',
 
@@ -109,7 +105,39 @@ dev = [
 ]
 
 [tool.setuptools]
-packages.find.include = ['sdmetrics*']
+include-package-data = true
+license-files = ['LICENSE']
+
+[tool.setuptools.packages.find]
+include = ['sdmetrics', 'sdmetrics.*']
+namespaces = false
+
+[tool.setuptools.package-data]
+'*' = [
+    'AUTHORS.rst',
+    'CONTRIBUTING.rst',
+    'HISTORY.md',
+    'README.md',
+    '*.md',
+    '*.rst',
+    'conf.py',
+    'Makefile',
+    'make.bat',
+    '*.jpg',
+    '*.png',
+    '*.gif'
+]
+'sdmetrics' = ['demos/*/*.json', 'demos/*/*.csv']
+'tests' = ['*']
+
+[tool.setuptools.exclude-package-data]
+'*' = [
+    '* __pycache__',
+    '*.py[co]',
+]
+
+[tool.setuptools.dynamic]
+version = {attr = 'sdmetrics.__version__'}
 
 [tool.isort]
 include_trailing_comment = true
@@ -122,3 +150,45 @@ use_parentheses = true
 [tool.pydocstyle]
 convention = 'google'
 add-ignore = ['D107', 'D407', 'D417']
+
+[tool.bumpversion]
+current_version = '0.13.1.dev0'
+parse = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(\.(?P<release>[a-z]+)(?P<candidate>\d+))?'
+serialize = [
+    '{major}.{minor}.{patch}.{release}{candidate}',
+	'{major}.{minor}.{patch}'
+]
+search = '{current_version}'
+replace = '{new_version}'
+regex = false
+ignore_missing_version = false
+tag = true
+sign_tags = false
+tag_name = 'v{new_version}'
+tag_message = 'Bump version: {current_version} → {new_version}'
+allow_dirty = false
+commit = true
+message = 'Bump version: {current_version} → {new_version}'
+commit_args = ''
+
+[tool.bumpversion.parts.release]
+first_value = 'dev'
+optional_value = 'release'
+values = [
+    'dev',
+    'release'
+]
+
+[[tool.bumpversion.files]]
+filename = "sdgym/__init__.py"
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"
+
+[[tool.bumpversion.files]]
+filename = "meta.yaml"
+search = "version = {current_version}"
+replace = "version = {new_version}"
+
+[build-system]
+requires = ['setuptools', 'wheel']
+build-backend = "setuptools.build_meta"
