@@ -125,15 +125,8 @@ class BaseReport():
         """
         if verbose:
             sys.stdout.write(
-                f'\nOverall Score: {round(self._overall_score * 100, 2)}%\n\n'
+                f'Overall Score (Average): {round(self._overall_score * 100, 2)}%\n\n'
             )
-            sys.stdout.write('Properties:\n')
-
-            for property_name, property_instance in self._properties.items():
-                property_score = round(property_instance._compute_average() * 100, 2)
-                sys.stdout.write(
-                    f'- {property_name}: {property_score}%\n'
-                )
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
@@ -173,7 +166,7 @@ class BaseReport():
         scores = []
         progress_bar = None
         if verbose:
-            sys.stdout.write('Generating report ...\n')
+            sys.stdout.write('Generating report ...\n\n')
 
         start_time = time.time()
         for ind, (property_name, property_instance) in enumerate(self._properties.items()):
@@ -190,6 +183,8 @@ class BaseReport():
             scores.append(score)
             if verbose:
                 progress_bar.close()
+                sys.stdout.write(f'{property_name} Score: {round(score * 100, 2)}%\n\n')
+                sys.stdout.flush()
 
         self._overall_score = np.nanmean(scores)
         self.is_generated = True
