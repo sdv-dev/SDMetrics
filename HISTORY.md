@@ -1,5 +1,13 @@
 # History
 
+## v0.13.1 - 2024-03-14
+
+### Maintenance
+
+* Transition from using setup.py to pyroject.toml to specify project metadata - Issue [#534](https://github.com/sdv-dev/SDMetrics/issues/534) by @lajohn4747
+* Remove bumpversion and use bump-my-version - Issue [#535](https://github.com/sdv-dev/SDMetrics/issues/535) by @R-Palazzo
+* Add support for Copulas 0.10 - Issue [#541](https://github.com/sdv-dev/SDMetrics/issues/541) by @amontanez24
+
 ## v0.13.0 - 2023-12-04
 
 This release makes significant improvements to the Diagnostic Reports! The report now runs a diagnostic to calculate scores for three basic but important properties of your data: data validity, data structure and in the multi table case, relationship validity. Data validity checks that the columns of your data are valid (eg. correct range or values). Data structure makes sure the synthetic data has the correct columns. Relationship validity checks to make sure key references are correct and the cardinality is within ranges seen in the real data. These changes are meant to make the `DiagnosticReport` a quick way for you to see if there are any major problems with your synthetic data.

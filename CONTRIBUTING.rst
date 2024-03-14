@@ -218,16 +218,7 @@ This will perform the following actions:
 
 2. Bump the current version to the next release candidate, ``X.Y.Z.dev(N+1)``
 
-After this is done, the new pre-release can be installed by including the ``dev`` section in the
-dependency specification, either in ``setup.py``::
-
-    install_requires = [
-        ...
-        'sdmetrics>=X.Y.Z.dev',
-        ...
-    ]
-
-or in command line::
+After this is done, the new pre-release can be installed in command line::
 
     pip install 'sdmetrics>=X.Y.Z.dev'
 
