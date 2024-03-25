@@ -172,7 +172,11 @@ class BaseReport():
         for ind, (property_name, property_instance) in enumerate(self._properties.items()):
             if verbose:
                 num_iterations = int(property_instance._get_num_iterations(metadata))
-                progress_bar = tqdm.tqdm(total=num_iterations, file=sys.stdout, bar_format='{desc}|{bar}{r_bar}|')
+                progress_bar = tqdm.tqdm(
+                    total=num_iterations,
+                    file=sys.stdout,
+                    bar_format='{desc}|{bar}{r_bar}|'
+                )
                 progress_bar.set_description(
                     f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}'
                 )
