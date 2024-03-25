@@ -498,7 +498,10 @@ class TestBaseReport:
         ]
         mock_write.assert_has_calls(write_calls, any_order=True)
 
-        calls = [call(total=4, file=sys.stdout), call(total=6, file=sys.stdout)]
+        calls = [
+            call(total=4, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout),
+            call(total=6, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout)
+        ]
         mock_tqdm.assert_has_calls(calls, any_order=True)
         base_report._print_results.assert_called_once_with(True)
 
