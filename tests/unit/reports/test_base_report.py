@@ -277,11 +277,9 @@ class TestBaseReport:
 
         # Assert
         calls = [
-            call('\nOverall Score: 50.0%\n\n'),
-            call('Properties:\n'),
-            call('- Column Shapes: 60.0%\n'),
-            call('- Column Pair Trends: 40.0%\n'),
+            call('Overall Score (Average): 50.0%\n\n')
         ]
+        assert mock_write.call_count == 1
         mock_write.assert_has_calls(calls, any_order=True)
 
     @patch('sys.stdout.write')
@@ -450,8 +448,9 @@ class TestBaseReport:
         }
         assert base_report.report_info == expected_info
 
+    @patch('sys.stdout.write')
     @patch('tqdm.tqdm')
-    def test_generate_verbose(self, mock_tqdm):
+    def test_generate_verbose(self, mock_tqdm, mock_write):
         """Test the ``generate`` method with verbose=True."""
         # Setup
         base_report = BaseReport()
@@ -493,7 +492,16 @@ class TestBaseReport:
         base_report.generate(real_data, synthetic_data, metadata, verbose=True)
 
         # Assert
-        calls = [call(total=4, file=sys.stdout), call(total=6, file=sys.stdout)]
+        write_calls = [
+            call('Property 1 Score: 100.0%\n\n'),
+            call('Property 2 Score: 100.0%\n\n'),
+        ]
+        mock_write.assert_has_calls(write_calls, any_order=True)
+
+        calls = [
+            call(total=4, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout),
+            call(total=6, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout)
+        ]
         mock_tqdm.assert_has_calls(calls, any_order=True)
         base_report._print_results.assert_called_once_with(True)
 
