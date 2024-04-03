@@ -1,0 +1,7 @@
+numpy==1.26.4
+scikit-learn==1.4.1.post1
+scipy==1.13.0
+copulas==0.10.1
+tqdm==4.66.2
+plotly==5.20.0
+pandas==2.2.1
