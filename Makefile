@@ -204,6 +204,11 @@ ifeq ($(CHANGELOG_LINES),0)
 	$(error Please insert the release notes in HISTORY.md before releasing)
 endif
 
+.PHONY: check-deps
+checkdeps: # Dependency targets
+	$(eval allow_list='numpy|pandas|scikit-learn|scipy|tqdm|plotly|copulas')
+	pip freeze | grep -v "SDMetrics.git" | grep -E $(allow_list) > $(OUTPUT_FILEPATH)
+
 .PHONY: check-release
 check-release: check-clean check-main check-history ## Check if the release can be made
 	@echo "A new release can be made"
