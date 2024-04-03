@@ -206,8 +206,8 @@ endif
 
 .PHONY: check-deps
 checkdeps: # Dependency targets
-	$(eval allow_list='numpy|pandas|scikit-learn|scipy|tqdm|plotly|copulas')
-	pip freeze | grep -v "SDMetrics.git" | grep -E $(allow_list) > $(OUTPUT_FILEPATH)
+	$(eval allow_list='numpy=|pandas=|scikit-learn=|scipy=|tqdm=|plotly=|copulas=')
+	pip freeze | grep -v "SDMetrics.git" | grep -E $(allow_list) | sort > $(OUTPUT_FILEPATH)
 
 .PHONY: check-release
 check-release: check-clean check-main check-history ## Check if the release can be made
