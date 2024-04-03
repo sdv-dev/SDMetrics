@@ -205,7 +205,7 @@ ifeq ($(CHANGELOG_LINES),0)
 endif
 
 .PHONY: check-deps
-checkdeps: # Dependency targets
+check-deps: # Dependency targets
 	$(eval allow_list='numpy=|pandas=|scikit-learn=|scipy=|tqdm=|plotly=|copulas=')
 	pip freeze | grep -v "SDMetrics.git" | grep -E $(allow_list) | sort > $(OUTPUT_FILEPATH)
 
