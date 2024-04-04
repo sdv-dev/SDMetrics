@@ -39,7 +39,7 @@ class TableStructure(SingleTableMetric):
         real_columns = set(real_data.columns)
         intersection_columns = real_columns & synthetic_columns
         union_columns = real_columns | synthetic_columns
-        score = len(intersection_columns)/len(union_columns)
+        score = len(intersection_columns) / len(union_columns)
 
         return {'score': score}
 
