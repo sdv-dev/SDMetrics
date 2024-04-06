@@ -669,7 +669,7 @@ class TestBaseReport:
         base_report._properties['Property 1'].details.copy.assert_called_once()
         base_report._properties['Property 2'].details.copy.assert_called_once()
 
-    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.importlib.metadata.version')
     @patch('sdmetrics.reports.base_report.pickle')
     def test_save(self, pickle_mock, get_distribution_mock):
         """Test the ``save`` method.
@@ -694,9 +694,9 @@ class TestBaseReport:
         get_distribution_mock.assert_called_once_with('sdmetrics')
         open_mock.assert_called_once_with('test-file.pkl', 'wb')
         pickle_mock.dump.assert_called_once_with(report, open_mock())
-        assert report._package_version == get_distribution_mock.return_value.version
+        assert report._package_version == get_distribution_mock.return_value
 
-    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.importlib.metadata.version')
     @patch('sdmetrics.reports.base_report.pickle')
     def test_load(self, pickle_mock, get_distribution_mock):
         """Test the ``load`` method.
@@ -727,7 +727,7 @@ class TestBaseReport:
         assert loaded == pickle_mock.load.return_value
 
     @patch('sdmetrics.reports.base_report.warnings')
-    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.importlib.metadata.version')
     @patch('sdmetrics.reports.base_report.pickle')
     def test_load_mismatched_versions(self, pickle_mock, get_distribution_mock, warnings_mock):
         """Test the ``load`` method with mismatched sdmetrics versions.
@@ -748,7 +748,7 @@ class TestBaseReport:
         report = Mock()
         pickle_mock.load.return_value = report
         report._package_version = 'previous_version'
-        get_distribution_mock.return_value.version = 'new_version'
+        get_distribution_mock.return_value = 'new_version'
 
         # Run
         with patch('sdmetrics.reports.base_report.open', open_mock):

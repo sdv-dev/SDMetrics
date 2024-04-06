@@ -412,7 +412,7 @@ def test__generate_scatter_plot(px_mock):
         color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'},
         symbol='Data',
     )
-    assert mock_figure.update_layout.called_once()
+    mock_figure.update_layout.assert_called_once()
     assert fig == mock_figure
 
 
@@ -460,8 +460,8 @@ def test__generate_heatmap_plot(px_mock):
         facet_col='Data',
         histnorm='probability',
     )
-    assert mock_figure.update_layout.called_once()
-    assert mock_figure.for_each_annotation.called_once()
+    mock_figure.update_layout.assert_called_once()
+    mock_figure.for_each_annotation.assert_called_once()
     assert fig == mock_figure
 
 
@@ -508,8 +508,8 @@ def test__generate_line_plot(px_mock):
         color='Data',
         color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'}
     )
-    assert mock_figure.update_layout.called_once()
-    assert mock_figure.for_each_annotation.called_once()
+    mock_figure.update_layout.assert_called_once()
+    mock_figure.for_each_annotation.assert_not_called()
     assert fig == mock_figure
 
     # Setup failing case sequence index
@@ -581,7 +581,7 @@ def test__generate_box_plot(px_mock):
         color='Data',
         color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'},
     )
-    assert mock_figure.update_layout.called_once()
+    mock_figure.update_layout.assert_called_once()
     assert fig == mock_figure
 
 

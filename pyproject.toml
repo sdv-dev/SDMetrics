@@ -12,25 +12,29 @@ classifiers = [
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
 ]
 keywords = ['sdmetrics', 'sdmetrics', 'SDMetrics']
 dynamic = ['version']
 license = { text = 'MIT license' }
-requires-python = ">=3.8,<3.12"
+requires-python = ">=3.8,<3.13"
 readme = 'README.md'
 dependencies = [
     "numpy>=1.20.0;python_version<'3.10'",
-    "numpy>=1.23.3;python_version>='3.10'",
+    "numpy>=1.23.3;python_version>='3.10' and python_version<'3.12'",
+    "numpy>=1.26.0;python_version>='3.12'",
     "pandas>=1.1.3;python_version<'3.10'",
     "pandas>=1.3.4;python_version>='3.10' and python_version<'3.11'",
     "pandas>=1.5.0;python_version>='3.11'",
     "scikit-learn>=0.24;python_version<'3.10'",
-    "scikit-learn>=1.1.3;python_version>='3.10'",
+    "scikit-learn>=1.1.3;python_version>='3.10' and python_version<'3.12'",
+    "scikit-learn>=1.3.0;python_version>='3.12'",
     "scipy>=1.5.4;python_version<'3.10'",
-    "scipy>=1.9.2;python_version>='3.10'",
-    'copulas>=0.10.0',
-    'tqdm>=4.15',
-    'plotly>=5.10.0',
+    "scipy>=1.9.2;python_version>='3.10' and python_version<'3.12'",
+    "scipy>=1.12.0;python_version>='3.12'",
+    'copulas @ git+https://github.com/sdv-dev/Copulas@main',
+    'tqdm>=4.29',
+    'plotly>=5.19.0',
 ]
 
 [project.urls]
@@ -46,15 +50,15 @@ sdmetrics = { main = 'sdmetrics.cli.__main__:main' }
 [project.optional-dependencies]
 torch = [
     "torch>=1.8.0;python_version<'3.10'",
-    "torch>=1.11.0;python_version>='3.10' and python_version<'3.11'",
-    "torch>=2.0.0;python_version>='3.11'",
+    "torch>=2.0.0;python_version>='3.10' and python_version<'3.12'",
+    "torch>=2.2.0;python_version>='3.12'",
 ]
 pomegranate = ['pomegranate>=0.14.1,<0.14.7']
 test = [
     'sdmetrics[torch]',
     'pytest>=6.2.5,<7',
     'pytest-cov>=2.6.0,<3',
-    'pytest-rerunfailures>=10',
+    'pytest-rerunfailures>=10.3,<15',
     'jupyter>=1.0.0,<2',
     'rundoc>=0.4.3,<0.5',
     'tomli>=2.0.0,<3',
@@ -68,7 +72,7 @@ dev = [
     'build>=1.0.0,<2',
     'bump-my-version>=0.18.3,<1',
     'pip>=9.0.1',
-    'watchdog>=0.8.3,<0.11',
+    'watchdog>=1.0.1,<5',
 
     # style check
     'flake8>=3.7.7,<4',
@@ -132,7 +136,6 @@ namespaces = false
     '*.gif'
 ]
 'sdmetrics' = ['demos/*/*.json', 'demos/*/*.csv']
-'tests' = ['*']
 
 [tool.setuptools.exclude-package-data]
 '*' = [

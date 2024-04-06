@@ -1,4 +1,5 @@
 """Single table base report."""
+import importlib.metadata
 import pickle
 import sys
 import time
@@ -9,7 +10,6 @@ from importlib.metadata import version
 
 import numpy as np
 import pandas as pd
-import pkg_resources
 import tqdm
 
 from sdmetrics.reports.utils import convert_datetime_columns
@@ -287,7 +287,7 @@ class BaseReport():
             filepath (str):
                 The path to the file where the report instance will be serialized.
         """
-        self._package_version = pkg_resources.get_distribution('sdmetrics').version
+        self._package_version = importlib.metadata.version('sdmetrics')
 
         with open(filepath, 'wb') as output:
             pickle.dump(self, output)
@@ -304,7 +304,7 @@ class BaseReport():
             SDMetrics Report:
                 The loaded report instance.
         """
-        current_version = pkg_resources.get_distribution('sdmetrics').version
+        current_version = importlib.metadata.version('sdmetrics')
 
         with open(filepath, 'rb') as f:
             report = pickle.load(f)
