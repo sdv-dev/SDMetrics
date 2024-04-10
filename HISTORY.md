@@ -1,5 +1,20 @@
 # History
 
+## v0.14.0 - 2024-04-10
+
+This release adds support for Python 3.12! It also improves the way the reports print in verbose mode.
+
+### Maintenance
+
+* Support Python 3.12 - Issue [#529](https://github.com/sdv-dev/SDMetrics/issues/529) by @fealho
+* Add dependency checker - Issue [#547](https://github.com/sdv-dev/SDMetrics/issues/547) by @lajohn4747
+* Add bandit workflow - Issue [#552](https://github.com/sdv-dev/SDMetrics/issues/552) by @R-Palazzo
+* Fix minimum version workflow when pointing to github branch - Issue [#555](https://github.com/sdv-dev/SDMetrics/issues/555) by @R-Palazzo
+
+### New Features
+
+* Improve readability of the report scores when verbosity is on - Issue [#538](https://github.com/sdv-dev/SDMetrics/issues/538) by @lajohn4747
+
 ## v0.13.1 - 2024-03-14
 
 ### Maintenance
