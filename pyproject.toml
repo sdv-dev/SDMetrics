@@ -32,7 +32,7 @@ dependencies = [
     "scipy>=1.5.4;python_version<'3.10'",
     "scipy>=1.9.2;python_version>='3.10' and python_version<'3.12'",
     "scipy>=1.12.0;python_version>='3.12'",
-    'copulas @ git+https://github.com/sdv-dev/Copulas@main',
+    'copulas>=0.11.0.dev0',
     'tqdm>=4.29',
     'plotly>=5.19.0',
 ]
@@ -160,7 +160,7 @@ convention = 'google'
 add-ignore = ['D107', 'D407', 'D417']
 
 [tool.bumpversion]
-current_version = "0.13.2.dev0"
+current_version = "0.14.0.dev0"
 parse = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(\.(?P<release>[a-z]+)(?P<candidate>\d+))?'
 serialize = [
     '{major}.{minor}.{patch}.{release}{candidate}',
