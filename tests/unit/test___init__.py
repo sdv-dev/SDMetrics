@@ -8,7 +8,7 @@ import sdmetrics
 from sdmetrics import _find_addons
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_sdmetrics():
     sdmetrics_module = sys.modules['sdmetrics']
     sdmetrics_mock = Mock()
