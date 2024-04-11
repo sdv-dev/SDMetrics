@@ -277,11 +277,9 @@ class TestBaseReport:
 
         # Assert
         calls = [
-            call('\nOverall Score: 50.0%\n\n'),
-            call('Properties:\n'),
-            call('- Column Shapes: 60.0%\n'),
-            call('- Column Pair Trends: 40.0%\n'),
+            call('Overall Score (Average): 50.0%\n\n')
         ]
+        assert mock_write.call_count == 1
         mock_write.assert_has_calls(calls, any_order=True)
 
     @patch('sys.stdout.write')
@@ -450,8 +448,9 @@ class TestBaseReport:
         }
         assert base_report.report_info == expected_info
 
+    @patch('sys.stdout.write')
     @patch('tqdm.tqdm')
-    def test_generate_verbose(self, mock_tqdm):
+    def test_generate_verbose(self, mock_tqdm, mock_write):
         """Test the ``generate`` method with verbose=True."""
         # Setup
         base_report = BaseReport()
@@ -493,7 +492,16 @@ class TestBaseReport:
         base_report.generate(real_data, synthetic_data, metadata, verbose=True)
 
         # Assert
-        calls = [call(total=4, file=sys.stdout), call(total=6, file=sys.stdout)]
+        write_calls = [
+            call('Property 1 Score: 100.0%\n\n'),
+            call('Property 2 Score: 100.0%\n\n'),
+        ]
+        mock_write.assert_has_calls(write_calls, any_order=True)
+
+        calls = [
+            call(total=4, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout),
+            call(total=6, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout)
+        ]
         mock_tqdm.assert_has_calls(calls, any_order=True)
         base_report._print_results.assert_called_once_with(True)
 
@@ -661,7 +669,7 @@ class TestBaseReport:
         base_report._properties['Property 1'].details.copy.assert_called_once()
         base_report._properties['Property 2'].details.copy.assert_called_once()
 
-    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.importlib.metadata.version')
     @patch('sdmetrics.reports.base_report.pickle')
     def test_save(self, pickle_mock, get_distribution_mock):
         """Test the ``save`` method.
@@ -686,9 +694,9 @@ class TestBaseReport:
         get_distribution_mock.assert_called_once_with('sdmetrics')
         open_mock.assert_called_once_with('test-file.pkl', 'wb')
         pickle_mock.dump.assert_called_once_with(report, open_mock())
-        assert report._package_version == get_distribution_mock.return_value.version
+        assert report._package_version == get_distribution_mock.return_value
 
-    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.importlib.metadata.version')
     @patch('sdmetrics.reports.base_report.pickle')
     def test_load(self, pickle_mock, get_distribution_mock):
         """Test the ``load`` method.
@@ -719,7 +727,7 @@ class TestBaseReport:
         assert loaded == pickle_mock.load.return_value
 
     @patch('sdmetrics.reports.base_report.warnings')
-    @patch('sdmetrics.reports.base_report.pkg_resources.get_distribution')
+    @patch('sdmetrics.reports.base_report.importlib.metadata.version')
     @patch('sdmetrics.reports.base_report.pickle')
     def test_load_mismatched_versions(self, pickle_mock, get_distribution_mock, warnings_mock):
         """Test the ``load`` method with mismatched sdmetrics versions.
@@ -740,7 +748,7 @@ class TestBaseReport:
         report = Mock()
         pickle_mock.load.return_value = report
         report._package_version = 'previous_version'
-        get_distribution_mock.return_value.version = 'new_version'
+        get_distribution_mock.return_value = 'new_version'
 
         # Run
         with patch('sdmetrics.reports.base_report.open', open_mock):

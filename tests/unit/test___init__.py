@@ -8,7 +8,7 @@ import sdmetrics
 from sdmetrics import _find_addons
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_sdmetrics():
     sdmetrics_module = sys.modules['sdmetrics']
     sdmetrics_mock = Mock()
@@ -18,7 +18,7 @@ def mock_sdmetrics():
     sys.modules['sdmetrics'] = sdmetrics_module
 
 
-@patch.object(sdmetrics, 'iter_entry_points')
+@patch.object(sdmetrics, 'entry_points')
 def test__find_addons_module(entry_points_mock, mock_sdmetrics):
     """Test loading an add-on."""
     # Setup
@@ -37,7 +37,7 @@ def test__find_addons_module(entry_points_mock, mock_sdmetrics):
     assert sys.modules['sdmetrics.submodule.entry_name'] == add_on_mock
 
 
-@patch.object(sdmetrics, 'iter_entry_points')
+@patch.object(sdmetrics, 'entry_points')
 def test__find_addons_object(entry_points_mock, mock_sdmetrics):
     """Test loading an add-on."""
     # Setup
@@ -55,7 +55,7 @@ def test__find_addons_object(entry_points_mock, mock_sdmetrics):
 
 
 @patch('warnings.warn')
-@patch('sdmetrics.iter_entry_points')
+@patch('sdmetrics.entry_points')
 def test__find_addons_bad_addon(entry_points_mock, warning_mock):
     """Test failing to load an add-on generates a warning."""
     # Setup
@@ -78,7 +78,7 @@ def test__find_addons_bad_addon(entry_points_mock, warning_mock):
 
 
 @patch('warnings.warn')
-@patch('sdmetrics.iter_entry_points')
+@patch('sdmetrics.entry_points')
 def test__find_addons_wrong_base(entry_points_mock, warning_mock):
     """Test incorrect add-on name generates a warning."""
     # Setup
@@ -99,7 +99,7 @@ def test__find_addons_wrong_base(entry_points_mock, warning_mock):
 
 
 @patch('warnings.warn')
-@patch('sdmetrics.iter_entry_points')
+@patch('sdmetrics.entry_points')
 def test__find_addons_missing_submodule(entry_points_mock, warning_mock):
     """Test incorrect add-on name generates a warning."""
     # Setup
@@ -120,7 +120,7 @@ def test__find_addons_missing_submodule(entry_points_mock, warning_mock):
 
 
 @patch('warnings.warn')
-@patch('sdmetrics.iter_entry_points')
+@patch('sdmetrics.entry_points')
 def test__find_addons_module_and_object(entry_points_mock, warning_mock):
     """Test incorrect add-on name generates a warning."""
     # Setup
@@ -141,7 +141,7 @@ def test__find_addons_module_and_object(entry_points_mock, warning_mock):
 
 
 @patch('warnings.warn')
-@patch.object(sdmetrics, 'iter_entry_points')
+@patch.object(sdmetrics, 'entry_points')
 def test__find_addons_missing_object(entry_points_mock, warning_mock, mock_sdmetrics):
     """Test incorrect add-on name generates a warning."""
     # Setup

@@ -44,10 +44,10 @@ class TestCorrelationSimilarity:
         result = metric.compute_breakdown(real_data, synthetic_data, coefficient='Pearson')
 
         # Assert
-        assert pearson_mock.has_calls(
+        pearson_mock.assert_has_calls([
             call(SeriesMatcher(real_data['col1']), SeriesMatcher(real_data['col2'])),
             call(SeriesMatcher(synthetic_data['col1']), SeriesMatcher(synthetic_data['col2'])),
-        )
+        ])
         assert result == expected_score_breakdown
 
     @patch('sdmetrics.column_pairs.statistical.correlation_similarity.pearsonr')
@@ -89,10 +89,16 @@ class TestCorrelationSimilarity:
         result = metric.compute_breakdown(real_data, synthetic_data, coefficient='Pearson')
 
         # Assert
-        assert pearson_mock.has_calls(
-            call(SeriesMatcher(real_data['col1']), SeriesMatcher(real_data['col2'])),
-            call(SeriesMatcher(synthetic_data['col1']), SeriesMatcher(synthetic_data['col2'])),
-        )
+        pearson_mock.assert_has_calls([
+            call(
+                SeriesMatcher(
+                    real_data['col1'].astype('int64')), SeriesMatcher(
+                    real_data['col2'].astype('int64'))),
+            call(
+                SeriesMatcher(
+                    synthetic_data['col1'].astype('int64')), SeriesMatcher(
+                    synthetic_data['col2'].astype('int64'))),
+        ])
         assert result == expected_score_breakdown
 
     def test_compute_breakdown_constant_input(self):

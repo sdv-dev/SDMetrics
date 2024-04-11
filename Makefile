@@ -87,7 +87,7 @@ lint: ## check style with flake8 and isort
 fix-lint: ## fix lint issues using autoflake, autopep8, and isort
 	find sdmetrics tests -name '*.py' | xargs autoflake --in-place --remove-all-unused-imports --remove-unused-variables
 	autopep8 --in-place --recursive --aggressive sdmetrics tests
-	isort --apply --atomic --recursive sdmetrics tests
+	isort --apply --atomic sdmetrics tests
 
 
 # TEST TARGETS
@@ -203,6 +203,11 @@ check-history: ## Check if HISTORY.md has been modified
 ifeq ($(CHANGELOG_LINES),0)
 	$(error Please insert the release notes in HISTORY.md before releasing)
 endif
+
+.PHONY: check-deps
+check-deps: # Dependency targets
+	$(eval allow_list='numpy=|pandas=|scikit-learn=|scipy=|tqdm=|plotly=|copulas=')
+	pip freeze | grep -v "SDMetrics.git" | grep -E $(allow_list) | sort > $(OUTPUT_FILEPATH)
 
 .PHONY: check-release
 check-release: check-clean check-main check-history ## Check if the release can be made

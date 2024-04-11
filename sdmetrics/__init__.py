@@ -4,15 +4,15 @@
 
 __author__ = 'MIT Data To AI Lab'
 __email__ = 'dailabmit@gmail.com'
-__version__ = '0.13.1'
+__version__ = '0.14.0.dev1'
 
 import sys
 import warnings as python_warnings
+from importlib.metadata import entry_points
 from operator import attrgetter
 from types import ModuleType
 
 import pandas as pd
-from pkg_resources import iter_entry_points
 
 from sdmetrics import (
     column_pairs, demos, goal, multi_table, reports, single_column, single_table, timeseries)
@@ -134,7 +134,13 @@ def _find_addons():
     from top_module.addon_module import x
     """
     group = 'sdmetrics_modules'
-    for entry_point in iter_entry_points(group=group):
+    try:
+        eps = entry_points(group=group)
+    except TypeError:
+        # Load-time selection requires Python >= 3.10 or importlib_metadata >= 3.6
+        eps = entry_points().get(group, [])
+
+    for entry_point in eps:
         try:
             addon = entry_point.load()
         except Exception:  # pylint: disable=broad-exception-caught

@@ -10,7 +10,7 @@ from plotly.graph_objects import Figure
 from sdmetrics.reports.multi_table._properties.relationship_validity import RelationshipValidity
 
 
-@pytest.fixture()
+@pytest.fixture
 def real_data_fixture():
     real_user_df = pd.DataFrame({
         'user_id': ['user1', 'user2'],
@@ -26,7 +26,7 @@ def real_data_fixture():
     return {'users': real_user_df, 'sessions': real_session_df}
 
 
-@pytest.fixture()
+@pytest.fixture
 def synthetic_data_fixture():
     synthetic_user_df = pd.DataFrame({
         'user_id': ['user1', 'user2'],
@@ -42,7 +42,7 @@ def synthetic_data_fixture():
     return {'users': synthetic_user_df, 'sessions': synthetic_session_df}
 
 
-@pytest.fixture()
+@pytest.fixture
 def metadata_fixture():
     return {
         'tables': {

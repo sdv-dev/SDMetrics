@@ -1,4 +1,5 @@
 """Single table base report."""
+import importlib.metadata
 import pickle
 import sys
 import time
@@ -9,7 +10,6 @@ from importlib.metadata import version
 
 import numpy as np
 import pandas as pd
-import pkg_resources
 import tqdm
 
 from sdmetrics.reports.utils import convert_datetime_columns
@@ -125,15 +125,8 @@ class BaseReport():
         """
         if verbose:
             sys.stdout.write(
-                f'\nOverall Score: {round(self._overall_score * 100, 2)}%\n\n'
+                f'Overall Score (Average): {round(self._overall_score * 100, 2)}%\n\n'
             )
-            sys.stdout.write('Properties:\n')
-
-            for property_name, property_instance in self._properties.items():
-                property_score = round(property_instance._compute_average() * 100, 2)
-                sys.stdout.write(
-                    f'- {property_name}: {property_score}%\n'
-                )
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
@@ -173,15 +166,19 @@ class BaseReport():
         scores = []
         progress_bar = None
         if verbose:
-            sys.stdout.write('Generating report ...\n')
+            sys.stdout.write('Generating report ...\n\n')
 
         start_time = time.time()
         for ind, (property_name, property_instance) in enumerate(self._properties.items()):
             if verbose:
                 num_iterations = int(property_instance._get_num_iterations(metadata))
-                progress_bar = tqdm.tqdm(total=num_iterations, file=sys.stdout)
+                progress_bar = tqdm.tqdm(
+                    total=num_iterations,
+                    file=sys.stdout,
+                    bar_format='{desc}|{bar}{r_bar}|'
+                )
                 progress_bar.set_description(
-                    f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}: '
+                    f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}'
                 )
 
             score = self._properties[property_name].get_score(
@@ -190,6 +187,8 @@ class BaseReport():
             scores.append(score)
             if verbose:
                 progress_bar.close()
+                sys.stdout.write(f'{property_name} Score: {round(score * 100, 2)}%\n\n')
+                sys.stdout.flush()
 
         self._overall_score = np.nanmean(scores)
         self.is_generated = True
@@ -288,7 +287,7 @@ class BaseReport():
             filepath (str):
                 The path to the file where the report instance will be serialized.
         """
-        self._package_version = pkg_resources.get_distribution('sdmetrics').version
+        self._package_version = importlib.metadata.version('sdmetrics')
 
         with open(filepath, 'wb') as output:
             pickle.dump(self, output)
@@ -305,7 +304,7 @@ class BaseReport():
             SDMetrics Report:
                 The loaded report instance.
         """
-        current_version = pkg_resources.get_distribution('sdmetrics').version
+        current_version = importlib.metadata.version('sdmetrics')
 
         with open(filepath, 'rb') as f:
             report = pickle.load(f)

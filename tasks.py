@@ -44,7 +44,7 @@ def _get_minimum_versions(dependencies, python_version):
     for dependency in dependencies:
         if '@' in dependency:
             name, url = dependency.split(' @ ')
-            min_versions[name] = f'{name} @ {url}'
+            min_versions[name] = f'{url}#egg={name}'
             continue
 
         req = Requirement(dependency)
@@ -123,7 +123,7 @@ def lint(c):
     c.run('pydocstyle sdmetrics')
     c.run('flake8 tests --ignore=D')
     c.run('pydocstyle tests')
-    c.run('isort -c --recursive sdmetrics tests')
+    c.run('isort -c sdmetrics tests')
 
 
 def remove_readonly(func, path, _):

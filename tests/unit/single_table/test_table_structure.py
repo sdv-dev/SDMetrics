@@ -6,7 +6,7 @@ import pytest
 from sdmetrics.single_table import TableStructure
 
 
-@pytest.fixture()
+@pytest.fixture
 def real_data():
     return pd.DataFrame({
         'col_1': [1, 2, 3, 4, 5],
