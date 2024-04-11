@@ -8,7 +8,7 @@ from sdmetrics.multi_table.multi_single_table import (
 METRICS = [CSTest, KSComplement, LogisticDetection, SVCDetection]
 
 
-@pytest.fixture()
+@pytest.fixture
 def ones():
     data = pd.DataFrame({
         'a': [1] * 100,
@@ -17,7 +17,7 @@ def ones():
     return {'a': data, 'b': data.copy()}
 
 
-@pytest.fixture()
+@pytest.fixture
 def zeros():
     data = pd.DataFrame({
         'a': [0] * 100,
@@ -26,7 +26,7 @@ def zeros():
     return {'a': data, 'b': data.copy()}
 
 
-@pytest.fixture()
+@pytest.fixture
 def real_data():
     data = pd.DataFrame({
         'a': np.random.normal(size=600),
@@ -37,7 +37,7 @@ def real_data():
     return {'a': data, 'b': data.copy()}
 
 
-@pytest.fixture()
+@pytest.fixture
 def good_data():
     data = pd.DataFrame({
         'a': np.random.normal(loc=0.01, size=600),
@@ -48,7 +48,7 @@ def good_data():
     return {'a': data, 'b': data.copy()}
 
 
-@pytest.fixture()
+@pytest.fixture
 def bad_data():
     data = pd.DataFrame({
         'a': np.random.normal(loc=5, scale=3, size=600),

@@ -37,5 +37,5 @@ class IteratorMatcher:
 
     def __eq__(self, other):
         """Assert equality by expanding the iterator."""
-        assert all([x == y for x, y in zip(self.iterator, other)])
+        assert all(x == y for x, y in zip(self.iterator, other))
         return True

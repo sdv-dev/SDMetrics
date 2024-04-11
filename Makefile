@@ -87,7 +87,7 @@ lint: ## check style with flake8 and isort
 fix-lint: ## fix lint issues using autoflake, autopep8, and isort
 	find sdmetrics tests -name '*.py' | xargs autoflake --in-place --remove-all-unused-imports --remove-unused-variables
 	autopep8 --in-place --recursive --aggressive sdmetrics tests
-	isort --apply --atomic --recursive sdmetrics tests
+	isort --apply --atomic sdmetrics tests
 
 
 # TEST TARGETS

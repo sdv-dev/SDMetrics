@@ -29,7 +29,7 @@ METRICS = [
 ]
 
 
-@pytest.fixture()
+@pytest.fixture
 def ones():
     return pd.DataFrame({
         'a': [1] * 300,
@@ -39,7 +39,7 @@ def ones():
     })
 
 
-@pytest.fixture()
+@pytest.fixture
 def zeros():
     return pd.DataFrame({
         'a': [0] * 300,
@@ -49,7 +49,7 @@ def zeros():
     })
 
 
-@pytest.fixture()
+@pytest.fixture
 def real_data():
     return pd.DataFrame({
         'a': np.random.normal(size=1800),
@@ -59,7 +59,7 @@ def real_data():
     })
 
 
-@pytest.fixture()
+@pytest.fixture
 def good_data():
     return pd.DataFrame({
         'a': np.random.normal(loc=0.01, size=1800),
@@ -69,7 +69,7 @@ def good_data():
     })
 
 
-@pytest.fixture()
+@pytest.fixture
 def bad_data():
     return pd.DataFrame({
         'a': np.random.normal(loc=5, scale=3, size=1800),
