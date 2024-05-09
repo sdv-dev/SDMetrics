@@ -46,7 +46,7 @@ def test_compute_all():
     assert scores.normalized_score.between(0.0, 1.0).all()
 
 
-def test_compute_LSTMDetection_multiple_categorical_columns():
+def test_compute_lstmdetection_multiple_categorical_columns():
     """"""
     # Setup
     real_data, synthetic_data, metadata = load_timeseries_demo()
