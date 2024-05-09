@@ -205,8 +205,8 @@ class TestHyperTransformer:
             'numerical': [1.0, 2.0, 3.0],
             'datetime': [1.577837e+18, 1.612138e+18, 1.646093e+18],
             'boolean': [1.0, 0.0, 0.0],
-            'value0': [1, 0, 0],
-            'value1': [0, 1, 0],
+            'categorical_value0': [1, 0, 0],
+            'categorical_value1': [0, 1, 0],
         })
         pd.testing.assert_frame_equal(transformed, expected, check_dtype=False)
 
