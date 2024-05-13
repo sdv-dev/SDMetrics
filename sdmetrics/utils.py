@@ -199,7 +199,7 @@ class HyperTransformer():
                 col_data = pd.DataFrame({'field': data[field]})
                 out = transform_info['one_hot_encoder'].transform(col_data).toarray()
                 transformed = pd.DataFrame(
-                    out, columns=[f'value{i}' for i in range(np.shape(out)[1])])
+                    out, columns=[f'{field}_value{i}' for i in range(np.shape(out)[1])])
                 data = data.drop(columns=[field])
                 data = pd.concat([data, transformed.set_index(data.index)], axis=1)
             elif kind == 'M':

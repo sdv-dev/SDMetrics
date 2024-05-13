@@ -1,5 +1,18 @@
 # History
 
+## v0.14.1 - 2024-05-13
+
+This release patches a bug on the `LSTMDetection` metric.
+
+### Bugs Fixed
+
+* `LSTMDetection` metric crashes when there are multiple context columns - Issue [#298](https://github.com/sdv-dev/SDMetrics/issues/298) by @frances-h
+
+### Maintenance
+
+* Cleanup automated PR workflows - Issue [#566](https://github.com/sdv-dev/SDMetrics/issues/566) by @R-Palazzo
+* Only run unit and integration tests on oldest and latest python versions for macos - Issue [#569](https://github.com/sdv-dev/SDMetrics/issues/569) by @R-Palazzo
+
 ## v0.14.0 - 2024-04-11
 
 This release adds support for Python 3.12! It also improves the way the reports print in verbose mode.

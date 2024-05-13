@@ -4,7 +4,7 @@
 
 __author__ = 'MIT Data To AI Lab'
 __email__ = 'dailabmit@gmail.com'
-__version__ = '0.14.0'
+__version__ = '0.14.1.dev1'
 
 import sys
 import warnings as python_warnings
@@ -144,7 +144,7 @@ def _find_addons():
         try:
             addon = entry_point.load()
         except Exception:  # pylint: disable=broad-exception-caught
-            msg = f'Failed to load "{entry_point.name}" from "{entry_point.module_name}".'
+            msg = f'Failed to load "{entry_point.name}" from "{entry_point.value}".'
             python_warnings.warn(msg)
             continue
 
