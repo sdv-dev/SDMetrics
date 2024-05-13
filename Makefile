@@ -209,6 +209,10 @@ check-deps: # Dependency targets
 	$(eval allow_list='numpy=|pandas=|scikit-learn=|scipy=|tqdm=|plotly=|copulas=')
 	pip freeze | grep -v "SDMetrics.git" | grep -E $(allow_list) | sort > $(OUTPUT_FILEPATH)
 
+.PHONY: git-push
+git-push: ## Simply push the repository to github
+	git push
+
 .PHONY: check-release
 check-release: check-clean check-main check-history ## Check if the release can be made
 	@echo "A new release can be made"
@@ -220,7 +224,7 @@ release: check-release bumpversion-release publish bumpversion-patch
 release-test: check-release bumpversion-release-test publish-test bumpversion-revert
 
 .PHONY: release-candidate
-release-candidate: check-main publish bumpversion-candidate
+release-candidate: check-main publish bumpversion-candidate git-push
 
 .PHONY: release-candidate-test
 release-candidate-test: check-clean check-main publish-test
