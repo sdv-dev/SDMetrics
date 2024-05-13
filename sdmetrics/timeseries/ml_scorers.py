@@ -20,7 +20,7 @@ def _x_to_packed_sequence(X, torch):
         for _, values in row.items():
             sequence.append(values)
 
-        sequences.append(torch.FloatTensor(sequence).T)
+        sequences.append(torch.FloatTensor(np.array(sequence)).T)
 
     return torch.nn.utils.rnn.pack_sequence(sequences, enforce_sorted=False)
 
@@ -50,7 +50,7 @@ def lstm_classifier(X_train, X_test, y_train, y_test):
 
     y_train = transformer.fit_transform(y_train[column])
     y_train = torch.LongTensor(y_train).to(device)
-    y_test = torch.LongTensor(transformer.transform(y_test)).to(device)
+    y_test = torch.LongTensor(transformer.transform(y_test[column])).to(device)
 
     optimizer = torch.optim.Adam(list(lstm.parameters()) + list(linear.parameters()), lr=1e-2)
 

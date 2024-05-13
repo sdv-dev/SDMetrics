@@ -44,3 +44,26 @@ def test_compute_all():
     scores = output[output.normalized_score.notna()]
 
     assert scores.normalized_score.between(0.0, 1.0).all()
+
+
+def test_compute_lstmdetection_multiple_categorical_columns():
+    """Test LSTMDetection metric handles multiple categorical columns."""
+    # Setup
+    real_data, synthetic_data, metadata = load_timeseries_demo()
+    metadata['columns']['day_of_week'] = {'sdtype': 'categorical'}
+    day_map = {
+        0: 'Sun', 1: 'Mon', 2: 'Tues', 3: 'Wed', 4: 'Thurs', 5: 'Fri', 6: 'Sat'
+    }
+    real_data['day_of_week'] = real_data['day_of_week'].replace(day_map)
+    synthetic_data['day_of_week'] = synthetic_data['day_of_week'].clip(0, 6).replace(day_map)
+
+    # Run
+    output = LSTMDetection.compute(
+        real_data,
+        synthetic_data,
+        metadata=metadata
+    )
+
+    # Assert
+    assert not pd.isna(output)
+    assert LSTMDetection.min_value <= output <= LSTMDetection.max_value
