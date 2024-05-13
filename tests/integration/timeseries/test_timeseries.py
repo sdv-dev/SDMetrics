@@ -47,7 +47,7 @@ def test_compute_all():
 
 
 def test_compute_lstmdetection_multiple_categorical_columns():
-    """"""
+    """Test LSTMDetection metric handles multiple categorical columns."""
     # Setup
     real_data, synthetic_data, metadata = load_timeseries_demo()
     metadata['columns']['day_of_week'] = {'sdtype': 'categorical'}
