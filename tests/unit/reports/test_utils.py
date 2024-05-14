@@ -4,8 +4,11 @@ from unittest.mock import Mock, call, patch
 import pandas as pd
 
 from sdmetrics.reports.utils import (
-    aggregate_metric_results, convert_to_datetime, discretize_and_apply_metric,
-    discretize_table_data)
+    aggregate_metric_results,
+    convert_to_datetime,
+    discretize_and_apply_metric,
+    discretize_table_data,
+)
 from tests.utils import DataFrameMatcher
 
 
@@ -111,7 +114,8 @@ def test_discretize_table_data():
 
     # Run
     discretized_real, discretized_synth, updated_metadata = discretize_table_data(
-        real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata
+    )
 
     # Assert
     expected_real = pd.DataFrame({
@@ -184,7 +188,8 @@ def test_discretize_table_data_new_metadata():
 
     # Run
     discretized_real, discretized_synth, updated_metadata = discretize_table_data(
-        real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata
+    )
 
     # Assert
     expected_real = pd.DataFrame({

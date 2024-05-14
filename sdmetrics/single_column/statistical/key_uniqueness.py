@@ -1,4 +1,5 @@
 """Key Uniqueness Metric."""
+
 import logging
 
 from sdmetrics.goal import Goal

@@ -6,7 +6,6 @@ from sdmetrics.reports.single_table._properties import Synthesis
 
 
 class TestSynthesis:
-
     def test_get_score(self):
         """Test the ``get_score`` method."""
         # Setup
@@ -34,12 +33,15 @@ class TestSynthesis:
         # Assert
         assert pd.isna(score)
 
-        expected_details = pd.DataFrame({
-            'Metric': 'NewRowSynthesis',
-            'Score': np.nan,
-            'Num Matched Rows': np.nan,
-            'Num New Rows': np.nan,
-            'Error': "AttributeError: 'list' object has no attribute 'columns'"
-        }, index=[0])
+        expected_details = pd.DataFrame(
+            {
+                'Metric': 'NewRowSynthesis',
+                'Score': np.nan,
+                'Num Matched Rows': np.nan,
+                'Num New Rows': np.nan,
+                'Error': "AttributeError: 'list' object has no attribute 'columns'",
+            },
+            index=[0],
+        )
 
         pd.testing.assert_frame_equal(synthesis_property.details, expected_details)

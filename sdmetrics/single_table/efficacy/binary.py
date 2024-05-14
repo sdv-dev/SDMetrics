@@ -59,10 +59,7 @@ class BinaryDecisionTreeClassifier(BinaryEfficacyMetric):
     """
 
     MODEL = DecisionTreeClassifier
-    MODEL_KWARGS = {
-        'max_depth': 15,
-        'class_weight': 'balanced'
-    }
+    MODEL_KWARGS = {'max_depth': 15, 'class_weight': 'balanced'}
 
 
 class BinaryAdaBoostClassifier(BinaryEfficacyMetric):
@@ -83,12 +80,7 @@ class BinaryLogisticRegression(BinaryEfficacyMetric):
     """
 
     MODEL = LogisticRegression
-    MODEL_KWARGS = {
-        'solver': 'lbfgs',
-        'n_jobs': 2,
-        'class_weight': 'balanced',
-        'max_iter': 50
-    }
+    MODEL_KWARGS = {'solver': 'lbfgs', 'n_jobs': 2, 'class_weight': 'balanced', 'max_iter': 50}
 
 
 class BinaryMLPClassifier(BinaryEfficacyMetric):
@@ -99,7 +91,4 @@ class BinaryMLPClassifier(BinaryEfficacyMetric):
     """
 
     MODEL = MLPClassifier
-    MODEL_KWARGS = {
-        'hidden_layer_sizes': (50, ),
-        'max_iter': 50
-    }
+    MODEL_KWARGS = {'hidden_layer_sizes': (50,), 'max_iter': 50}

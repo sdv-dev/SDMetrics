@@ -1,4 +1,5 @@
 """Single table quality report."""
+
 from sdmetrics.reports.base_report import BaseReport
 from sdmetrics.reports.single_table._properties import ColumnPairTrends, ColumnShapes
 
@@ -14,5 +15,5 @@ class QualityReport(BaseReport):
         super().__init__()
         self._properties = {
             'Column Shapes': ColumnShapes(),
-            'Column Pair Trends': ColumnPairTrends()
+            'Column Pair Trends': ColumnPairTrends(),
         }

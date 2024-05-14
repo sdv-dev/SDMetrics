@@ -80,15 +80,13 @@ install-develop: clean-build clean-pyc ## install the package in editable mode a
 # LINT TARGETS
 
 .PHONY: lint
-lint: ## check style with flake8 and isort
+lint:
 	invoke lint
 
 .PHONY: fix-lint
-fix-lint: ## fix lint issues using autoflake, autopep8, and isort
-	find sdmetrics tests -name '*.py' | xargs autoflake --in-place --remove-all-unused-imports --remove-unused-variables
-	autopep8 --in-place --recursive --aggressive sdmetrics tests
-	isort --apply --atomic sdmetrics tests
-
+fix-lint:
+	ruff check --fix .
+	ruff format .
 
 # TEST TARGETS
 

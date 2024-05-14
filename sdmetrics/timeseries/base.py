@@ -40,7 +40,7 @@ class TimeSeriesMetric(BaseMetric):
         },
         'M': {
             'sdtype': 'datetime',
-        }
+        },
     }
 
     @classmethod

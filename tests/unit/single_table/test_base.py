@@ -9,7 +9,6 @@ from sdmetrics.single_table import SingleTableMetric
 
 
 class TestSingleTableMetric:
-
     def test__validate_inputs(self):
         """Test the ``_validate_inputs`` method.
 
@@ -37,7 +36,8 @@ class TestSingleTableMetric:
 
         # Run
         validated_real, validated_synthetic, validated_meta = SingleTableMetric._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
 
         # Assert
         pd.testing.assert_frame_equal(real_data, validated_real)
@@ -65,7 +65,8 @@ class TestSingleTableMetric:
 
         # Run
         validated_real, validated_synthetic, metadata = SingleTableMetric._validate_inputs(
-            real_data, synthetic_data)
+            real_data, synthetic_data
+        )
 
         # Assert
         expected_metadata = {
@@ -204,7 +205,8 @@ class TestSingleTableMetric:
 
         # Run
         validated_real, validated_synthetic, metadata = SingleTableMetric._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
 
         # Assert
         expected_real_data = pd.DataFrame({

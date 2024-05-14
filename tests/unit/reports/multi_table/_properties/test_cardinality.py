@@ -10,7 +10,6 @@ from sdmetrics.reports.multi_table._properties.cardinality import Cardinality
 
 
 class TestCardinality:
-
     def test__get_num_iteration(self):
         """Test the ``_get_num_iterations`` method."""
         # Setup
@@ -20,19 +19,19 @@ class TestCardinality:
                     'parent_table_name': 'table1',
                     'parent_primary_key': 'col1',
                     'child_table_name': 'table2',
-                    'child_foreign_key': 'col6'
+                    'child_foreign_key': 'col6',
                 },
                 {
                     'parent_table_name': 'table1',
                     'parent_primary_key': 'col1',
                     'child_table_name': 'table3',
-                    'child_foreign_key': 'col7'
+                    'child_foreign_key': 'col7',
                 },
                 {
                     'parent_table_name': 'table2',
                     'parent_primary_key': 'col6',
                     'child_table_name': 'table4',
-                    'child_foreign_key': 'col8'
+                    'child_foreign_key': 'col8',
                 },
             ]
         }
@@ -67,7 +66,7 @@ class TestCardinality:
                 'child_table_name': 'sessions_child',
                 'parent_table_name': 'sessions_parent',
                 'child_foreign_key': 'sessions_child_id',
-            }
+            },
         ]
         metadata = {'relationships': relationships}
 
@@ -86,7 +85,7 @@ class TestCardinality:
         # Setup
         mock_cardinalityshapesimilarity.compute.side_effect = [
             ValueError('Users error'),
-            ValueError('Sessions error')
+            ValueError('Sessions error'),
         ]
         cardinality = Cardinality()
         progress_bar = Mock()
@@ -100,7 +99,7 @@ class TestCardinality:
                 'child_table_name': 'sessions_child',
                 'parent_table_name': 'sessions_parent',
                 'child_foreign_key': 'sessions_child_id',
-            }
+            },
         ]
         metadata = {'relationships': relationships}
 
@@ -114,7 +113,7 @@ class TestCardinality:
             'Foreign Key': ['users_child_id', 'sessions_child_id'],
             'Metric': ['CardinalityShapeSimilarity', 'CardinalityShapeSimilarity'],
             'Score': [np.nan, np.nan],
-            'Error': ['ValueError: Users error', 'ValueError: Sessions error']
+            'Error': ['ValueError: Users error', 'ValueError: Sessions error'],
         })
 
         assert pd.isna(score)
@@ -136,7 +135,7 @@ class TestCardinality:
             'Foreign Key': ['users_child_id', 'sessions_child_id'],
             'Metric': ['CardinalityShapeSimilarity', 'SomeOtherMetric'],
             'Score': [1.0, 0.5],
-            'Error': [None, 'Some error']
+            'Error': [None, 'Some error'],
         })
 
         # Run
@@ -144,24 +143,34 @@ class TestCardinality:
         details_sessions_parent = cardinality.get_details('sessions_parent')
 
         # Assert for child table
-        assert details_users_child.equals(pd.DataFrame({
-            'Child Table': ['users_child'],
-            'Parent Table': ['users_parent'],
-            'Foreign Key': ['users_child_id'],
-            'Metric': ['CardinalityShapeSimilarity'],
-            'Score': [1.0],
-            'Error': [None]
-        }, index=[0]))
+        assert details_users_child.equals(
+            pd.DataFrame(
+                {
+                    'Child Table': ['users_child'],
+                    'Parent Table': ['users_parent'],
+                    'Foreign Key': ['users_child_id'],
+                    'Metric': ['CardinalityShapeSimilarity'],
+                    'Score': [1.0],
+                    'Error': [None],
+                },
+                index=[0],
+            )
+        )
 
         # Assert for parent table
-        assert details_sessions_parent.equals(pd.DataFrame({
-            'Child Table': ['sessions_child'],
-            'Parent Table': ['sessions_parent'],
-            'Foreign Key': ['sessions_child_id'],
-            'Metric': ['SomeOtherMetric'],
-            'Score': [0.5],
-            'Error': ['Some error']
-        }, index=[1]))
+        assert details_sessions_parent.equals(
+            pd.DataFrame(
+                {
+                    'Child Table': ['sessions_child'],
+                    'Parent Table': ['sessions_parent'],
+                    'Foreign Key': ['sessions_child_id'],
+                    'Metric': ['SomeOtherMetric'],
+                    'Score': [0.5],
+                    'Error': ['Some error'],
+                },
+                index=[1],
+            )
+        )
 
     def test_get_table_relationships_plot(self):
         """Test the ``_get_table_relationships_plot`` method.
@@ -176,7 +185,7 @@ class TestCardinality:
             'Foreign Key': ['users_child_id', 'sessions_child_id'],
             'Metric': ['CardinalityShapeSimilarity', 'SomeOtherMetric'],
             'Score': [1.0, 0.5],
-            'Error': [None, 'Some error']
+            'Error': [None, 'Some error'],
         })
 
         # Run

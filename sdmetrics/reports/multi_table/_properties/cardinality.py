@@ -41,9 +41,7 @@ class Cardinality(BaseMultiTableProperty):
             relationships_metadata = {'relationships': [relation]}
             try:
                 relation_score = CardinalityShapeSimilarity.compute(
-                    real_data,
-                    synthetic_data,
-                    relationships_metadata
+                    real_data, synthetic_data, relationships_metadata
                 )
                 error_message = None
             except Exception as e:
@@ -82,8 +80,11 @@ class Cardinality(BaseMultiTableProperty):
         plot_data = self.get_details(table_name).copy()
         column_name = 'Child → Parent Relationship'
         plot_data[column_name] = (
-            plot_data['Child Table'] + ' (' + plot_data['Foreign Key'] + ') → ' +
-            plot_data['Parent Table']
+            plot_data['Child Table']
+            + ' ('
+            + plot_data['Foreign Key']
+            + ') → '
+            + plot_data['Parent Table']
         )
         plot_data = plot_data.drop(['Child Table', 'Parent Table'], axis=1)
 
@@ -109,7 +110,7 @@ class Cardinality(BaseMultiTableProperty):
         fig.update_layout(
             xaxis_categoryorder='total ascending',
             plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
-            font={'size': PlotConfig.FONT_SIZE}
+            font={'size': PlotConfig.FONT_SIZE},
         )
 
         return fig

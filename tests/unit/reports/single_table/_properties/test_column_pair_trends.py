@@ -8,7 +8,6 @@ from sdmetrics.reports.single_table._properties.column_pair_trends import Column
 
 
 class TestColumnPairTrends:
-
     def test__convert_datetime_columns_to_numeric(self):
         """Test the ``_convert_datetime_columns_to_numeric`` method."""
         # Setup
@@ -18,7 +17,7 @@ class TestColumnPairTrends:
             'col3': ['a', 'b', 'c'],
             'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-01']),
             'col5': [None, '2020-01-02', '2020-01-03'],
-            'col6': ['error', '2020-01-02', '2020-01-03']
+            'col6': ['error', '2020-01-02', '2020-01-03'],
         })
 
         metadata = {
@@ -28,7 +27,7 @@ class TestColumnPairTrends:
                 'col3': {'sdtype': 'categorical'},
                 'col4': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
                 'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-                'col6': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'}
+                'col6': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
             }
         }
         cpt_property = ColumnPairTrends()
@@ -47,13 +46,13 @@ class TestColumnPairTrends:
         data = pd.DataFrame({
             'err_col': ['a', 'b', 'c', 'd', 'e'],
             'int_col': [1, 2, 3, None, 5],
-            'float_col': [1.1, np.nan, 3.3, 4.4, 5.5]
+            'float_col': [1.1, np.nan, 3.3, 4.4, 5.5],
         })
         bin_edges = None
         cpt_property = ColumnPairTrends()
 
         # Run
-        col_err, bin_edges = cpt_property._discretize_column('err_col', data['err_col'])
+        _, bin_edges = cpt_property._discretize_column('err_col', data['err_col'])
         col_int, bin_edges = cpt_property._discretize_column('int_col', data['int_col'])
         col_float, bin_edges = cpt_property._discretize_column(
             'float_col', data['float_col'], bin_edges
@@ -71,14 +70,14 @@ class TestColumnPairTrends:
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
         })
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'boolean'},
                 'col3': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'datetime'}
+                'col4': {'sdtype': 'datetime'},
             }
         }
 
@@ -94,7 +93,7 @@ class TestColumnPairTrends:
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': expected_datetime
+            'col4': expected_datetime,
         })
 
         expected_discrete_data = pd.DataFrame({
@@ -112,14 +111,14 @@ class TestColumnPairTrends:
             'col1': [None, 2, 3],
             'col2': [False, np.nan, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', None, '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', None, '2020-01-03']),
         })
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'boolean'},
                 'col3': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'datetime'}
+                'col4': {'sdtype': 'datetime'},
             }
         }
 
@@ -224,8 +223,7 @@ class TestColumnPairTrends:
         ]
         for idx, (col1, col2) in enumerate(itertools.combinations(metadata['columns'], 2)):
             cols_real, cols_synthetic, metric = cpt_property._get_columns_data_and_metric(
-                col1, col2, real_data, discrete_real, synthetic_data,
-                discrete_synthetic, metadata
+                col1, col2, real_data, discrete_real, synthetic_data, discrete_synthetic, metadata
             )
             pd.testing.assert_frame_equal(cols_real, expected_real_data_return[idx])
             pd.testing.assert_frame_equal(cols_synthetic, expected_synthetic_data_return[idx])
@@ -250,10 +248,14 @@ class TestColumnPairTrends:
         assert result_3 == 'Error3'
         assert result_4 is None
 
-    @patch('sdmetrics.reports.single_table._properties.column_pair_trends.'
-           'ContingencySimilarity.compute_breakdown')
-    @patch('sdmetrics.reports.single_table._properties.column_pair_trends.'
-           'CorrelationSimilarity.compute_breakdown')
+    @patch(
+        'sdmetrics.reports.single_table._properties.column_pair_trends.'
+        'ContingencySimilarity.compute_breakdown'
+    )
+    @patch(
+        'sdmetrics.reports.single_table._properties.column_pair_trends.'
+        'CorrelationSimilarity.compute_breakdown'
+    )
     def test__generate_details(self, correlation_compute_mock, contingency_compute_mock):
         """Test the ``_generate_details`` method."""
         # Setup
@@ -348,11 +350,14 @@ class TestColumnPairTrends:
         heatmap = cpt_property._get_correlation_matrix('Score')
 
         # Assert
-        expected_heatmap = pd.DataFrame({
-            'col1': [1, 0.5, 0.6],
-            'col2': [0.5, 1, 0.7],
-            'col3': [0.6, 0.7, 1],
-        }, index=['col1', 'col2', 'col3'])
+        expected_heatmap = pd.DataFrame(
+            {
+                'col1': [1, 0.5, 0.6],
+                'col2': [0.5, 1, 0.7],
+                'col3': [0.6, 0.7, 1],
+            },
+            index=['col1', 'col2', 'col3'],
+        )
 
         pd.testing.assert_frame_equal(heatmap, expected_heatmap)
 
@@ -374,15 +379,21 @@ class TestColumnPairTrends:
         heatmap_synthetic = cpt_property._get_correlation_matrix('Synthetic Correlation')
 
         # Assert
-        expected_real_heatmap = pd.DataFrame({
-            'col1': [1, 0.3],
-            'col2': [0.3, 1],
-        }, index=['col1', 'col2'])
+        expected_real_heatmap = pd.DataFrame(
+            {
+                'col1': [1, 0.3],
+                'col2': [0.3, 1],
+            },
+            index=['col1', 'col2'],
+        )
 
-        expected_synthetic_heatmap = pd.DataFrame({
-            'col1': [1, 0.4],
-            'col2': [0.4, 1],
-        }, index=['col1', 'col2'])
+        expected_synthetic_heatmap = pd.DataFrame(
+            {
+                'col1': [1, 0.4],
+                'col2': [0.4, 1],
+            },
+            index=['col1', 'col2'],
+        )
 
         pd.testing.assert_frame_equal(heatmap_real, expected_real_heatmap)
         pd.testing.assert_frame_equal(heatmap_synthetic, expected_synthetic_heatmap)

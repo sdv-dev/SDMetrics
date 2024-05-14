@@ -7,8 +7,9 @@ from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
 from sdmetrics.utils import get_columns_from_metadata, nested_attrs_meta
 
 
-class ParentChildDetectionMetric(DetectionMetric,
-                                 metaclass=nested_attrs_meta('single_table_metric')):
+class ParentChildDetectionMetric(
+    DetectionMetric, metaclass=nested_attrs_meta('single_table_metric')
+):
     """Base class for Multi-table Detection metrics based on parent-child relationships.
 
     These metrics denormalize the parent-child relationships from the dataset and then
@@ -53,12 +54,17 @@ class ParentChildDetectionMetric(DetectionMetric,
         """Denormalize the child table over the parent."""
         parent_table, parent_key, child_table, child_key = foreign_key
 
-        flat = data[parent_table].set_index(parent_key).merge(
-            data[child_table].set_index(child_key),
-            how='right',
-            left_index=True,
-            right_index=True,
-        ).reset_index(drop=True)
+        flat = (
+            data[parent_table]
+            .set_index(parent_key)
+            .merge(
+                data[child_table].set_index(child_key),
+                how='right',
+                left_index=True,
+                right_index=True,
+            )
+            .reset_index(drop=True)
+        )
 
         return flat
 

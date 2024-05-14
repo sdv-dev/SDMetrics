@@ -100,8 +100,7 @@ def get_cardinality_distribution(parent_column, child_column):
             The cardinality distribution.
     """
     child_df = pd.DataFrame({'child_counts': child_column.value_counts()})
-    cardinality_df = pd.DataFrame({'parent': parent_column}).join(
-        child_df, on='parent').fillna(0)
+    cardinality_df = pd.DataFrame({'parent': parent_column}).join(child_df, on='parent').fillna(0)
 
     return cardinality_df['child_counts']
 
@@ -124,7 +123,7 @@ def is_datetime(data):
     )
 
 
-class HyperTransformer():
+class HyperTransformer:
     """HyperTransformer class.
 
     The ``HyperTransformer`` class contains a set of transforms to transform one or
@@ -164,8 +163,7 @@ class HyperTransformer():
             elif kind == 'M':
                 # Datetime column.
                 nulls = data[field].isna()
-                integers = pd.to_numeric(
-                    data[field], errors='coerce').to_numpy().astype(np.float64)
+                integers = pd.to_numeric(data[field], errors='coerce').to_numpy().astype(np.float64)
                 integers[nulls] = np.nan
                 self.column_transforms[field] = {'mean': pd.Series(integers).mean()}
 
@@ -199,14 +197,14 @@ class HyperTransformer():
                 col_data = pd.DataFrame({'field': data[field]})
                 out = transform_info['one_hot_encoder'].transform(col_data).toarray()
                 transformed = pd.DataFrame(
-                    out, columns=[f'{field}_value{i}' for i in range(np.shape(out)[1])])
+                    out, columns=[f'{field}_value{i}' for i in range(np.shape(out)[1])]
+                )
                 data = data.drop(columns=[field])
                 data = pd.concat([data, transformed.set_index(data.index)], axis=1)
             elif kind == 'M':
                 # Datetime column.
                 nulls = data[field].isna()
-                integers = pd.to_numeric(
-                    data[field], errors='coerce').to_numpy().astype(np.float64)
+                integers = pd.to_numeric(data[field], errors='coerce').to_numpy().astype(np.float64)
                 integers[nulls] = np.nan
                 data[field] = pd.Series(integers)
                 data[field] = data[field].fillna(transform_info['mean'])

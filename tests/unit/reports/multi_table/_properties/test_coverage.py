@@ -1,4 +1,5 @@
 """Test Coverage multi-table class."""
+
 from sdmetrics.reports.multi_table._properties import Coverage
 from sdmetrics.reports.single_table._properties import Coverage as SingleTableCoverage
 

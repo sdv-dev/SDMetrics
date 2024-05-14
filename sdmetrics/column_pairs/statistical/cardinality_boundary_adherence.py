@@ -55,8 +55,8 @@ class CardinalityBoundaryAdherence(ColumnPairsMetric):
         max_cardinality = real_cardinality['cardinality'].max()
 
         valid_cardinality = sum(
-            synthetic_cardinality['cardinality'].between(
-                min_cardinality, max_cardinality))
+            synthetic_cardinality['cardinality'].between(min_cardinality, max_cardinality)
+        )
         score = valid_cardinality / len(synthetic_cardinality)
 
         return {'score': score}

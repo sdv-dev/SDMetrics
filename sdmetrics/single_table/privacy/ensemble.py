@@ -55,8 +55,15 @@ class CategoricalEnsemble(CategoricalPrivacyMetric):
     ACCURACY_BASE = True
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key_fields=None,
-                sensitive_fields=None, model_kwargs=None):
+    def compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        key_fields=None,
+        sensitive_fields=None,
+        model_kwargs=None,
+    ):
         """Compute this metric.
 
         This fits the CategoricalEnsembleAttacker on the synthetic data and
@@ -95,15 +102,11 @@ class CategoricalEnsemble(CategoricalPrivacyMetric):
 
         if 'attackers' not in model_kwargs:  # no attackers specfied
             return ValueError('No attackers specified.')
-        elif (not isinstance(model_kwargs['attackers'], list)
-              or len(model_kwargs['attackers']) == 0):  # zero attackers specfied
+        elif (
+            not isinstance(model_kwargs['attackers'], list) or len(model_kwargs['attackers']) == 0
+        ):  # zero attackers specfied
             return ValueError('Zero attackers specified')
 
         return super().compute(
-            real_data,
-            synthetic_data,
-            metadata,
-            key_fields,
-            sensitive_fields,
-            model_kwargs
+            real_data, synthetic_data, metadata, key_fields, sensitive_fields, model_kwargs
         )

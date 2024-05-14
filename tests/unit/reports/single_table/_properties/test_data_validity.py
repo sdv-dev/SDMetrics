@@ -6,7 +6,6 @@ from sdmetrics.reports.single_table._properties.data_validity import DataValidit
 
 
 class TestDataValidity:
-
     @patch('sdmetrics.reports.single_table._properties.data_validity.BoundaryAdherence.compute')
     @patch('sdmetrics.reports.single_table._properties.data_validity.CategoryAdherence.compute')
     @patch('sdmetrics.reports.single_table._properties.data_validity.KeyUniqueness.compute')
@@ -21,7 +20,7 @@ class TestDataValidity:
             'col3': ['a', 'b', 'c'],
             'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
             'col5': ['ID_1', 'ID_2', 'ID_3'],
-            'col6': ['A', 'B', 'C']
+            'col6': ['A', 'B', 'C'],
         })
         synthetic_data = pd.DataFrame({
             'col1': [1, 2, 3],
@@ -29,7 +28,7 @@ class TestDataValidity:
             'col3': ['a', 'b', 'c'],
             'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
             'col5': ['ID_4', 'ID_5', 'ID_6'],
-            'col6': ['D', 'E', 'F']
+            'col6': ['D', 'E', 'F'],
         })
         metadata = {
             'primary_key': 'col5',
@@ -40,8 +39,8 @@ class TestDataValidity:
                 'col3': {'sdtype': 'categorical'},
                 'col4': {'sdtype': 'datetime'},
                 'col5': {'sdtype': 'id'},
-                'col6': {'sdtype': 'other'}
-            }
+                'col6': {'sdtype': 'other'},
+            },
         }
 
         # Run
@@ -59,7 +58,7 @@ class TestDataValidity:
         ]
         expected_calls_key = [
             call(real_data['col5'], synthetic_data['col5']),
-            call(real_data['col6'], synthetic_data['col6'])
+            call(real_data['col6'], synthetic_data['col6']),
         ]
         boundary_a_compute_mock.assert_has_calls(expected_calls_ba)
         category_a_compute_mock.assert_has_calls(expected_calls_ca)
@@ -78,9 +77,7 @@ class TestDataValidity:
         result = data_validity_property._generate_details(real_data, synthetic_data, metadata)
 
         # Assert
-        expected_message = (
-            "TypeError: '<=' not supported between instances of 'int' and 'str'"
-        )
+        expected_message = "TypeError: '<=' not supported between instances of 'int' and 'str'"
         result_nan = result.loc[pd.isna(result['Score'])]
         column_names_nan = result_nan['Column'].tolist()
         error_message = result_nan['Error'].tolist()
@@ -97,7 +94,7 @@ class TestDataValidity:
         mock_df = pd.DataFrame({
             'Column': ['Column1', 'Column2', 'Column3'],
             'Score': [0.7, 0.3, 0.5],
-            'Metric': ['BoundaryAdherence', 'CategoryAdherence', 'KeyUniqueness']
+            'Metric': ['BoundaryAdherence', 'CategoryAdherence', 'KeyUniqueness'],
         })
         data_validity_property.details = mock_df
 
@@ -153,5 +150,5 @@ class TestDataValidity:
             xaxis_categoryorder='total ascending',
             plot_bgcolor='#F5F5F8',
             margin={'t': 150},
-            font={'size': 18}
+            font={'size': 18},
         )

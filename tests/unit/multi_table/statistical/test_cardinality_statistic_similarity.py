@@ -8,7 +8,6 @@ from sdmetrics.warnings import ConstantInputWarning
 
 
 class TestCardinalityStatisticSimilarity:
-
     def test__compute_statistic(self):
         """Test the ``_compute_statistic`` method.
 
@@ -27,7 +26,8 @@ class TestCardinalityStatisticSimilarity:
 
         # Run
         result = CardinalityStatisticSimilarity._compute_statistic(
-            real_distribution, synthetic_distribution, 'mean')
+            real_distribution, synthetic_distribution, 'mean'
+        )
 
         # Assert
         assert result == {'real': 2.2, 'synthetic': 2.4, 'score': 0.9500000000000001}
@@ -59,7 +59,8 @@ class TestCardinalityStatisticSimilarity:
         # Run
         with np.testing.assert_warns(ConstantInputWarning, match=expected_warn_msg):
             result = CardinalityStatisticSimilarity._compute_statistic(
-                real_distribution, synthetic_distribution, 'mean')
+                real_distribution, synthetic_distribution, 'mean'
+            )
 
         # Assert
         assert result == {'score': np.nan}
@@ -170,26 +171,30 @@ class TestCardinalityStatisticSimilarity:
                     'parent_table_name': 'tableA',
                     'parent_primary_key': 'col1',
                     'child_table_name': 'tableB',
-                    'child_foreign_key': 'col1'
+                    'child_foreign_key': 'col1',
                 },
                 {
                     'parent_table_name': 'tableB',
                     'parent_primary_key': 'col2',
                     'child_table_name': 'tableC',
-                    'child_foreign_key': 'col2'
-                }
-            ]
+                    'child_foreign_key': 'col2',
+                },
+            ],
         }
         real_data = {
             'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
-            'tableB': pd.DataFrame(
-                {'col1': [1, 1, 2, 3, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableB': pd.DataFrame({
+                'col1': [1, 1, 2, 3, 3, 5],
+                'col2': ['a', 'b', 'c', 'd', 'e', 'f'],
+            }),
             'tableC': pd.DataFrame({'col2': ['a', 'b', 'c']}),
         }
         synthetic_data = {
             'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
-            'tableB': pd.DataFrame(
-                {'col1': [1, 2, 4, 4, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableB': pd.DataFrame({
+                'col1': [1, 2, 4, 4, 3, 5],
+                'col2': ['a', 'b', 'c', 'd', 'e', 'f'],
+            }),
             'tableC': pd.DataFrame({'col2': ['a', 'b', 'd']}),
         }
         expected_metric_breakdown = {
@@ -199,7 +204,8 @@ class TestCardinalityStatisticSimilarity:
 
         # Run
         result = CardinalityStatisticSimilarity.compute_breakdown(
-            real_data, synthetic_data, metadata, 'mean')
+            real_data, synthetic_data, metadata, 'mean'
+        )
 
         # Assert
         assert result == expected_metric_breakdown
@@ -230,27 +236,34 @@ class TestCardinalityStatisticSimilarity:
         }
         real_data = {
             'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
-            'tableB': pd.DataFrame(
-                {'col1': [1, 1, 2, 3, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableB': pd.DataFrame({
+                'col1': [1, 1, 2, 3, 3, 5],
+                'col2': ['a', 'b', 'c', 'd', 'e', 'f'],
+            }),
             'tableC': pd.DataFrame({'col2': ['a', 'b', 'c']}),
         }
         synthetic_data = {
             'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
-            'tableB': pd.DataFrame(
-                {'col1': [1, 2, 4, 4, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableB': pd.DataFrame({
+                'col1': [1, 2, 4, 4, 3, 5],
+                'col2': ['a', 'b', 'c', 'd', 'e', 'f'],
+            }),
             'tableC': pd.DataFrame({'col2': ['a', 'b', 'd']}),
         }
         expected_metric_breakdown = {'score': np.nan}
 
         # Run
         result = CardinalityStatisticSimilarity.compute_breakdown(
-            real_data, synthetic_data, metadata, 'mean')
+            real_data, synthetic_data, metadata, 'mean'
+        )
 
         # Assert
         assert result == expected_metric_breakdown
 
-    @patch('sdmetrics.multi_table.statistical.cardinality_statistic_similarity.MultiTableMetric.'
-           'normalize')
+    @patch(
+        'sdmetrics.multi_table.statistical.cardinality_statistic_similarity.MultiTableMetric.'
+        'normalize'
+    )
     def test_normalize(self, normalize_mock):
         """Test the ``normalize`` method.
 

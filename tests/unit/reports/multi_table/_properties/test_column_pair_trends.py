@@ -1,7 +1,9 @@
 """Test ColumnPairTrends multi-table class."""
+
 from sdmetrics.reports.multi_table._properties import ColumnPairTrends
 from sdmetrics.reports.single_table._properties import (
-    ColumnPairTrends as SingleTableColumnPairTrends)
+    ColumnPairTrends as SingleTableColumnPairTrends,
+)
 
 
 def test__init__():

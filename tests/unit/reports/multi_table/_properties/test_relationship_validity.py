@@ -15,13 +15,13 @@ def real_data_fixture():
     real_user_df = pd.DataFrame({
         'user_id': ['user1', 'user2'],
         'columnA': ['A', 'B'],
-        'columnB': [np.nan, 1.0]
+        'columnB': [np.nan, 1.0],
     })
     real_session_df = pd.DataFrame({
         'session_id': ['session1', 'session2', 'session3'],
         'user_id': ['user1', 'user1', 'user2'],
         'columnC': ['X', 'Y', 'Z'],
-        'columnD': [4.0, 6.0, 7.0]
+        'columnD': [4.0, 6.0, 7.0],
     })
     return {'users': real_user_df, 'sessions': real_session_df}
 
@@ -31,13 +31,13 @@ def synthetic_data_fixture():
     synthetic_user_df = pd.DataFrame({
         'user_id': ['user1', 'user2'],
         'columnA': ['A', 'A'],
-        'columnB': [0.5, np.nan]
+        'columnB': [0.5, np.nan],
     })
     synthetic_session_df = pd.DataFrame({
         'session_id': ['session1', 'session2', 'session3'],
         'user_id': ['user1', 'user1', 'user2'],
         'columnC': ['X', 'Z', 'Y'],
-        'columnD': [3.6, 5.0, 6.0]
+        'columnD': [3.6, 5.0, 6.0],
     })
     return {'users': synthetic_user_df, 'sessions': synthetic_session_df}
 
@@ -51,7 +51,7 @@ def metadata_fixture():
                 'columns': {
                     'user_id': {'sdtype': 'id'},
                     'columnA': {'sdtype': 'categorical'},
-                    'columnB': {'sdtype': 'numerical'}
+                    'columnB': {'sdtype': 'numerical'},
                 },
             },
             'sessions': {
@@ -60,23 +60,22 @@ def metadata_fixture():
                     'session_id': {'sdtype': 'id'},
                     'user_id': {'sdtype': 'id'},
                     'columnC': {'sdtype': 'categorical'},
-                    'columnD': {'sdtype': 'numerical'}
-                }
-            }
+                    'columnD': {'sdtype': 'numerical'},
+                },
+            },
         },
         'relationships': [
             {
                 'parent_table_name': 'users',
                 'child_table_name': 'sessions',
                 'parent_primary_key': 'user_id',
-                'child_foreign_key': 'user_id'
+                'child_foreign_key': 'user_id',
             }
-        ]
+        ],
     }
 
 
 class TestRelationshipValidity:
-
     def test__extract_tuple(self, real_data_fixture):
         """Test the ``_extract_tuple`` method."""
         # Setup
@@ -86,7 +85,7 @@ class TestRelationshipValidity:
             'parent_table_name': 'users',
             'child_table_name': 'sessions',
             'parent_primary_key': 'user_id',
-            'child_foreign_key': 'user_id'
+            'child_foreign_key': 'user_id',
         }
 
         # Run
@@ -104,19 +103,19 @@ class TestRelationshipValidity:
                     'parent_table_name': 'table1',
                     'parent_primary_key': 'col1',
                     'child_table_name': 'table2',
-                    'child_foreign_key': 'col6'
+                    'child_foreign_key': 'col6',
                 },
                 {
                     'parent_table_name': 'table1',
                     'parent_primary_key': 'col1',
                     'child_table_name': 'table3',
-                    'child_foreign_key': 'col7'
+                    'child_foreign_key': 'col7',
                 },
                 {
                     'parent_table_name': 'table2',
                     'parent_primary_key': 'col6',
                     'child_table_name': 'table4',
-                    'child_foreign_key': 'col8'
+                    'child_foreign_key': 'col8',
                 },
             ]
         }
@@ -128,12 +127,18 @@ class TestRelationshipValidity:
         # Assert
         assert num_iterations == 3
 
-    @patch('sdmetrics.reports.multi_table._properties.relationship_validity.'
-           'CardinalityBoundaryAdherence')
+    @patch(
+        'sdmetrics.reports.multi_table._properties.relationship_validity.'
+        'CardinalityBoundaryAdherence'
+    )
     @patch('sdmetrics.reports.multi_table._properties.relationship_validity.ReferentialIntegrity')
     def test_get_score(
-        self, mock_referentialintegrity, mock_cardinalityboundaryadherence,
-        real_data_fixture, synthetic_data_fixture, metadata_fixture
+        self,
+        mock_referentialintegrity,
+        mock_cardinalityboundaryadherence,
+        real_data_fixture,
+        synthetic_data_fixture,
+        metadata_fixture,
     ):
         """Test the ``get_score`` function.
 
@@ -157,8 +162,10 @@ class TestRelationshipValidity:
 
         # Run
         score = relationship_validity.get_score(
-            real_data=real_data, synthetic_data=synthetic_data, metadata=metadata,
-            progress_bar=progress_bar
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            progress_bar=progress_bar,
         )
 
         # Assert
@@ -177,12 +184,18 @@ class TestRelationshipValidity:
         mock_compute_average.assert_called_once()
         pd.testing.assert_frame_equal(relationship_validity.details, expected_details_property)
 
-    @patch('sdmetrics.reports.multi_table._properties.relationship_validity.'
-           'CardinalityBoundaryAdherence')
+    @patch(
+        'sdmetrics.reports.multi_table._properties.relationship_validity.'
+        'CardinalityBoundaryAdherence'
+    )
     @patch('sdmetrics.reports.multi_table._properties.relationship_validity.ReferentialIntegrity')
     def test_get_score_raises_errors(
-        self, mock_referentialintegrity, mock_cardinalityboundaryadherence,
-        real_data_fixture, synthetic_data_fixture, metadata_fixture
+        self,
+        mock_referentialintegrity,
+        mock_cardinalityboundaryadherence,
+        real_data_fixture,
+        synthetic_data_fixture,
+        metadata_fixture,
     ):
         """Test the ``get_score`` when ``ReferentialIntegrity`` or
         ``CardinalityBoundaryAdherence`` crashes"""
@@ -200,8 +213,10 @@ class TestRelationshipValidity:
 
         # Run
         score = relationship_validity.get_score(
-            real_data=real_data, synthetic_data=synthetic_data, metadata=metadata,
-            progress_bar=progress_bar
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            progress_bar=progress_bar,
         )
 
         # Assert
@@ -212,7 +227,7 @@ class TestRelationshipValidity:
             'Foreign Key': ['user_id', 'user_id'],
             'Metric': ['ReferentialIntegrity', 'CardinalityBoundaryAdherence'],
             'Score': [np.nan, np.nan],
-            'Error': ['ValueError: error 1', 'ValueError: error 2']
+            'Error': ['ValueError: error 1', 'ValueError: error 2'],
         })
 
         assert pd.isna(score)
@@ -235,7 +250,7 @@ class TestRelationshipValidity:
             'Foreign Key': ['user_id', 'user_id'],
             'Metric': ['ReferentialIntegrity', 'CardinalityBoundaryAdherence'],
             'Score': [1.0, 0.5],
-            'Error': [None, 'Some error']
+            'Error': [None, 'Some error'],
         })
 
         # Run
@@ -243,26 +258,36 @@ class TestRelationshipValidity:
         details_sessions_parent = relationship_validity.get_details('sessions_parent')
 
         # Assert for child table
-        assert details_users_child.equals(pd.DataFrame({
-            'Child Table': ['users_child'],
-            'Parent Table': ['users_parent'],
-            'Primary Key': ['user_id'],
-            'Foreign Key': ['user_id'],
-            'Metric': ['ReferentialIntegrity'],
-            'Score': [1.0],
-            'Error': [None]
-        }, index=[0]))
+        assert details_users_child.equals(
+            pd.DataFrame(
+                {
+                    'Child Table': ['users_child'],
+                    'Parent Table': ['users_parent'],
+                    'Primary Key': ['user_id'],
+                    'Foreign Key': ['user_id'],
+                    'Metric': ['ReferentialIntegrity'],
+                    'Score': [1.0],
+                    'Error': [None],
+                },
+                index=[0],
+            )
+        )
 
         # Assert for parent table
-        assert details_sessions_parent.equals(pd.DataFrame({
-            'Child Table': ['sessions_child'],
-            'Parent Table': ['sessions_parent'],
-            'Primary Key': ['user_id'],
-            'Foreign Key': ['user_id'],
-            'Metric': ['CardinalityBoundaryAdherence'],
-            'Score': [0.5],
-            'Error': ['Some error']
-        }, index=[1]))
+        assert details_sessions_parent.equals(
+            pd.DataFrame(
+                {
+                    'Child Table': ['sessions_child'],
+                    'Parent Table': ['sessions_parent'],
+                    'Primary Key': ['user_id'],
+                    'Foreign Key': ['user_id'],
+                    'Metric': ['CardinalityBoundaryAdherence'],
+                    'Score': [0.5],
+                    'Error': ['Some error'],
+                },
+                index=[1],
+            )
+        )
 
     def test_get_table_relationships_plot(self):
         """Test the ``_get_table_relationships_plot`` method.
@@ -278,7 +303,7 @@ class TestRelationshipValidity:
             'Foreign Key': ['user_id', 'user_id'],
             'Metric': ['ReferentialIntegrity', 'CardinalityBoundaryAdherence'],
             'Score': [1.0, 0.5],
-            'Error': [None, 'Some error']
+            'Error': [None, 'Some error'],
         })
 
         # Run

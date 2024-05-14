@@ -4,7 +4,7 @@ import numpy as np
 from copulas.univariate.base import Univariate
 
 
-class LossFunction():
+class LossFunction:
     """Base class for a loss function."""
 
     def fit(self, data, cols):
@@ -82,6 +82,6 @@ class InverseCDFDistance(LossFunction):
         dist = 0
         for idx in range(len(real)):
             percentiles = self.cdfs[idx].cdf(np.array([pred[idx], real[idx]]))
-            dist += abs(percentiles[0] - percentiles[1])**self.p
+            dist += abs(percentiles[0] - percentiles[1]) ** self.p
 
         return dist

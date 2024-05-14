@@ -1,4 +1,5 @@
 """RadiusNearestNeighbor module and its attacker/utilities."""
+
 import numpy as np
 
 from sdmetrics.single_table.privacy.base import NumericalPrivacyMetric, PrivacyAttackerModel
@@ -130,6 +131,4 @@ class NumericalRadiusNearestNeighbor(NumericalPrivacyMetric):
 
     name = 'Numerical Radius Nearest Neighbor'
     MODEL = NumericalRadiusNearestNeighborAttacker
-    MODEL_KWARGS = {
-        'weight_func': InverseCDFCutoff, 'weight_func_kwargs': {'p': 2, 'cutoff': 0.3}
-    }
+    MODEL_KWARGS = {'weight_func': InverseCDFCutoff, 'weight_func_kwargs': {'p': 2, 'cutoff': 0.3}}

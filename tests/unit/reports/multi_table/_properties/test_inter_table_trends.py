@@ -1,4 +1,5 @@
 """Test InterTableTrends multi-table class."""
+
 import itertools
 from unittest.mock import patch
 
@@ -28,24 +29,24 @@ def test__generate_details(column_pair_trends_mock):
     real_user_df = pd.DataFrame({
         'user_id': ['user1', 'user2'],
         'columnA': ['A', 'B'],
-        'columnB': [np.nan, 1.0]
+        'columnB': [np.nan, 1.0],
     })
     synthetic_user_df = pd.DataFrame({
         'user_id': ['user1', 'user2'],
         'columnA': ['A', 'A'],
-        'columnB': [0.5, np.nan]
+        'columnB': [0.5, np.nan],
     })
     real_session_df = pd.DataFrame({
         'session_id': ['session1', 'session2', 'session3'],
         'user_id': ['user1', 'user1', 'user2'],
         'columnC': ['X', 'Y', 'Z'],
-        'columnD': [4.0, 6.0, 7.0]
+        'columnD': [4.0, 6.0, 7.0],
     })
     synthetic_session_df = pd.DataFrame({
         'session_id': ['session1', 'session2', 'session3'],
         'user_id': ['user1', 'user1', 'user2'],
         'columnC': ['X', 'Z', 'Y'],
-        'columnD': [3.6, 5.0, 6.0]
+        'columnD': [3.6, 5.0, 6.0],
     })
 
     metadata = {
@@ -55,7 +56,7 @@ def test__generate_details(column_pair_trends_mock):
                 'columns': {
                     'user_id': {'sdtype': 'id'},
                     'columnA': {'sdtype': 'categorical'},
-                    'columnB': {'sdtype': 'numerical'}
+                    'columnB': {'sdtype': 'numerical'},
                 },
             },
             'sessions': {
@@ -64,42 +65,45 @@ def test__generate_details(column_pair_trends_mock):
                     'session_id': {'sdtype': 'id'},
                     'user_id': {'sdtype': 'id'},
                     'columnC': {'sdtype': 'categorical'},
-                    'columnD': {'sdtype': 'numerical'}
-                }
-            }
+                    'columnD': {'sdtype': 'numerical'},
+                },
+            },
         },
         'relationships': [
             {
                 'parent_table_name': 'users',
                 'child_table_name': 'sessions',
                 'parent_primary_key': 'user_id',
-                'child_foreign_key': 'user_id'
+                'child_foreign_key': 'user_id',
             }
-        ]
+        ],
     }
     instanced_mock = column_pair_trends_mock.return_value
     instanced_mock._generate_details.return_value = pd.DataFrame({
         'Column 1': ['users.columnA', 'users.columnA', 'users.columnB', 'users.columnB'],
         'Column 2': [
-            'sessions.columnC', 'sessions.columnD', 'sessions.columnC', 'sessions.columnB'
+            'sessions.columnC',
+            'sessions.columnD',
+            'sessions.columnC',
+            'sessions.columnB',
         ],
         'Metric': [
             'ContingencySimilarity',
             'ContingencySimilarity',
             'ContingencySimilarity',
-            'CorrelationSimilarity'
+            'CorrelationSimilarity',
         ],
         'Score': [1.0, 1.0, 0.5, 0.5],
         'Real Correlation': [None, None, None, 0.8],
         'Synthetic Correlation': [None, None, None, 0.6],
-        'Error': [None, None, None, None]
+        'Error': [None, None, None, None],
     })
 
     # Run
     instance._generate_details(
         real_data={'users': real_user_df, 'sessions': real_session_df},
         synthetic_data={'users': synthetic_user_df, 'sessions': synthetic_session_df},
-        metadata=metadata
+        metadata=metadata,
     )
 
     # Assert
@@ -110,7 +114,7 @@ def test__generate_details(column_pair_trends_mock):
         'sessions.columnD': [4.0, 6.0, 7.0],
         'users.user_id': ['user1', 'user1', 'user2'],
         'users.columnA': ['A', 'A', 'B'],
-        'users.columnB': [np.nan, np.nan, 1.0]
+        'users.columnB': [np.nan, np.nan, 1.0],
     })
     expected_denormalized_synthetic = pd.DataFrame({
         'sessions.session_id': ['session1', 'session2', 'session3'],
@@ -119,7 +123,7 @@ def test__generate_details(column_pair_trends_mock):
         'sessions.columnD': [3.6, 5.0, 6.0],
         'users.user_id': ['user1', 'user1', 'user2'],
         'users.columnA': ['A', 'A', 'A'],
-        'users.columnB': [0.5, 0.5, np.nan]
+        'users.columnB': [0.5, 0.5, np.nan],
     })
     expected_merged_metadata = {
         'primary_key': 'sessions.session_id',
@@ -135,7 +139,7 @@ def test__generate_details(column_pair_trends_mock):
     }
     expected_column_pairs = itertools.product(
         ['users.user_id', 'users.columnA', 'users.columnB'],
-        ['sessions.session_id', 'sessions.user_id', 'sessions.columnC', 'sessions.columnD']
+        ['sessions.session_id', 'sessions.user_id', 'sessions.columnC', 'sessions.columnD'],
     )
     expected_details = pd.DataFrame({
         'Parent Table': ['users', 'users', 'users', 'users'],
@@ -147,19 +151,19 @@ def test__generate_details(column_pair_trends_mock):
             'ContingencySimilarity',
             'ContingencySimilarity',
             'ContingencySimilarity',
-            'CorrelationSimilarity'
+            'CorrelationSimilarity',
         ],
         'Score': [1.0, 1.0, 0.5, 0.5],
         'Real Correlation': [None, None, None, 0.8],
         'Synthetic Correlation': [None, None, None, 0.6],
-        'Error': [None, None, None, None]
+        'Error': [None, None, None, None],
     })
     instanced_mock._generate_details.assert_called_once_with(
         DataFrameMatcher(expected_denormalized_real),
         DataFrameMatcher(expected_denormalized_synthetic),
         expected_merged_metadata,
         progress_bar=None,
-        column_pairs=IteratorMatcher(expected_column_pairs)
+        column_pairs=IteratorMatcher(expected_column_pairs),
     )
     pd.testing.assert_frame_equal(instance.details, expected_details)
 
@@ -188,26 +192,21 @@ def test__generate_details_empty_column_generate(column_pair_trends_mock):
         'tables': {
             'users': {
                 'primary_key': 'user_id',
-                'columns': {
-                    'user_id': {'sdtype': 'id'}
-                },
+                'columns': {'user_id': {'sdtype': 'id'}},
             },
             'sessions': {
                 'primary_key': 'session_id',
-                'columns': {
-                    'session_id': {'sdtype': 'id'},
-                    'user_id': {'sdtype': 'id'}
-                }
-            }
+                'columns': {'session_id': {'sdtype': 'id'}, 'user_id': {'sdtype': 'id'}},
+            },
         },
         'relationships': [
             {
                 'parent_table_name': 'users',
                 'child_table_name': 'sessions',
                 'parent_primary_key': 'user_id',
-                'child_foreign_key': 'user_id'
+                'child_foreign_key': 'user_id',
             }
-        ]
+        ],
     }
     instanced_mock = column_pair_trends_mock.return_value
     instanced_mock._generate_details.return_value = pd.DataFrame({
@@ -217,14 +216,14 @@ def test__generate_details_empty_column_generate(column_pair_trends_mock):
         'Score': [],
         'Real Correlation': [],
         'Synthetic Correlation': [],
-        'Error': []
+        'Error': [],
     })
 
     # Run
     instance._generate_details(
         real_data={'users': real_user_df, 'sessions': real_session_df},
         synthetic_data={'users': synthetic_user_df, 'sessions': synthetic_session_df},
-        metadata=metadata
+        metadata=metadata,
     )
 
     # Assert
@@ -247,8 +246,7 @@ def test__generate_details_empty_column_generate(column_pair_trends_mock):
         },
     }
     expected_column_pairs = itertools.product(
-        ['users.user_id'],
-        ['sessions.session_id', 'sessions.user_id']
+        ['users.user_id'], ['sessions.session_id', 'sessions.user_id']
     )
     expected_details = pd.DataFrame({
         'Parent Table': [],
@@ -260,7 +258,7 @@ def test__generate_details_empty_column_generate(column_pair_trends_mock):
         'Score': [],
         'Real Correlation': [],
         'Synthetic Correlation': [],
-        'Error': []
+        'Error': [],
     }).astype({
         'Parent Table': 'object',
         'Child Table': 'object',
@@ -271,7 +269,7 @@ def test__generate_details_empty_column_generate(column_pair_trends_mock):
         'Score': 'float64',
         'Real Correlation': 'float64',
         'Synthetic Correlation': 'float64',
-        'Error': 'float64'
+        'Error': 'float64',
     })
 
     instanced_mock._generate_details.assert_called_once_with(
@@ -279,7 +277,7 @@ def test__generate_details_empty_column_generate(column_pair_trends_mock):
         DataFrameMatcher(expected_denormalized_synthetic),
         expected_merged_metadata,
         progress_bar=None,
-        column_pairs=IteratorMatcher(expected_column_pairs)
+        column_pairs=IteratorMatcher(expected_column_pairs),
     )
     pd.testing.assert_frame_equal(instance.details, expected_details)
 
@@ -299,7 +297,7 @@ def test_get_visualization(plotly_mock):
         'Score': [1.0, 0.5],
         'Real Correlation': [np.nan, 1.0],
         'Synthetic Correlation': [0.8, 0.6],
-        'Error': ['Some error', None]
+        'Error': ['Some error', None],
     })
     instance.is_computed = True
 
@@ -318,7 +316,7 @@ def test_get_visualization(plotly_mock):
         'Real Correlation': ['None'],
         'Synthetic Correlation': [0.8],
         'Error': ['Some error'],
-        'Columns': ['users_parent.column_a, users_child.column_c']
+        'Columns': ['users_parent.column_a, users_child.column_c'],
     })
     plotly_mock.bar.assert_called_once_with(
         DataFrameMatcher(expected_plot_df),
@@ -333,13 +331,7 @@ def test_get_visualization(plotly_mock):
         },
         pattern_shape='Metric',
         pattern_shape_sequence=['', '/'],
-        custom_data=[
-            'Foreign Key',
-            'Metric',
-            'Score',
-            'Real Correlation',
-            'Synthetic Correlation'
-        ]
+        custom_data=['Foreign Key', 'Metric', 'Score', 'Real Correlation', 'Synthetic Correlation'],
     )
 
 
@@ -362,7 +354,7 @@ def test_get_visualization_multiple_relationships(plotly_mock):
         'Score': [1.0, 0.5],
         'Real Correlation': [np.nan, 1.0],
         'Synthetic Correlation': [0.8, 0.6],
-        'Error': ['Some error', None]
+        'Error': ['Some error', None],
     })
     instance.is_computed = True
 
@@ -383,8 +375,8 @@ def test_get_visualization_multiple_relationships(plotly_mock):
         'Error': ['Some error', None],
         'Columns': [
             'users.column_a, sessions.column_b (child_id1)',
-            'users.column_a, sessions.column_b (child_id2)'
-        ]
+            'users.column_a, sessions.column_b (child_id2)',
+        ],
     })
     plotly_mock.bar.assert_called_once_with(
         DataFrameMatcher(expected_plot_df),
@@ -399,13 +391,7 @@ def test_get_visualization_multiple_relationships(plotly_mock):
         },
         pattern_shape='Metric',
         pattern_shape_sequence=['', '/'],
-        custom_data=[
-            'Foreign Key',
-            'Metric',
-            'Score',
-            'Real Correlation',
-            'Synthetic Correlation'
-        ]
+        custom_data=['Foreign Key', 'Metric', 'Score', 'Real Correlation', 'Synthetic Correlation'],
     )
 
 

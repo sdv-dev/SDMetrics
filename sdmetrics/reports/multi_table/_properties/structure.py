@@ -1,4 +1,5 @@
 """Structure property for multi-table."""
+
 import plotly.express as px
 
 from sdmetrics.errors import VisualizationUnavailableError

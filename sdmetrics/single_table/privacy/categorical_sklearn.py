@@ -8,7 +8,10 @@ from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.svm import SVC
 
 from sdmetrics.single_table.privacy.base import (
-    CategoricalPrivacyMetric, CategoricalType, PrivacyAttackerModel)
+    CategoricalPrivacyMetric,
+    CategoricalType,
+    PrivacyAttackerModel,
+)
 from sdmetrics.single_table.privacy.util import allow_nan, allow_nan_array
 
 
@@ -35,12 +38,12 @@ class CategoricalSklearnAttacker(PrivacyAttackerModel):
     def __init__(self):
         self.predictor = self.SKL_LEARNER()
         self.key_processor = (
-            OrdinalEncoder() if self.KEY_TYPE == CategoricalType.CLASS_NUM
-            else OneHotEncoder()
+            OrdinalEncoder() if self.KEY_TYPE == CategoricalType.CLASS_NUM else OneHotEncoder()
         )
         self.sensitive_processor = (
-            OrdinalEncoder() if
-            self.SENSITIVE_TYPE == CategoricalType.CLASS_NUM else OneHotEncoder()
+            OrdinalEncoder()
+            if self.SENSITIVE_TYPE == CategoricalType.CLASS_NUM
+            else OneHotEncoder()
         )
 
     def fit(self, synthetic_data, key_fields, sensitive_fields):
@@ -90,7 +93,7 @@ class CategoricalSklearnAttacker(PrivacyAttackerModel):
         return tuple(sensitives[0])
 
 
-class SVCWrapper():
+class SVCWrapper:
     """A wrapper arround `sklearn.svm.SVC` to support multidimensional y."""
 
     def __init__(self):
@@ -130,7 +133,7 @@ class SVCWrapper():
         return Y
 
 
-class NBWrapper():
+class NBWrapper:
     """A wrapper arround `sklearn.naive_bayes.CategoricalNB` to support multidimensional y."""
 
     def __init__(self):

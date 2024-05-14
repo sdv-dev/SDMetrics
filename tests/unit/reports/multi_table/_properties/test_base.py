@@ -10,8 +10,7 @@ from sdmetrics.reports.multi_table._properties import BaseMultiTableProperty
 from tests.utils import DataFrameMatcher
 
 
-class TestBaseMultiTableProperty():
-
+class TestBaseMultiTableProperty:
     def test__init__(self):
         """Test the ``__init__`` method."""
         # Setup
@@ -32,8 +31,11 @@ class TestBaseMultiTableProperty():
             'tables': {
                 'table1': {
                     'columns': {
-                        'col1': {}, 'col2': {}, 'col3': {},
-                        'col4': {}, 'col5': {},
+                        'col1': {},
+                        'col2': {},
+                        'col3': {},
+                        'col4': {},
+                        'col5': {},
                     }
                 },
                 'table2': {
@@ -57,21 +59,21 @@ class TestBaseMultiTableProperty():
                     'parent_table_name': 'table1',
                     'parent_primary_key': 'col1',
                     'child_table_name': 'table2',
-                    'child_foreign_key': 'col6'
+                    'child_foreign_key': 'col6',
                 },
                 {
                     'parent_table_name': 'table1',
                     'parent_primary_key': 'col1',
                     'child_table_name': 'table3',
-                    'child_foreign_key': 'col7'
+                    'child_foreign_key': 'col7',
                 },
                 {
                     'parent_table_name': 'table2',
                     'parent_primary_key': 'col6',
                     'child_table_name': 'table4',
-                    'child_foreign_key': 'col8'
+                    'child_foreign_key': 'col8',
                 },
-            ]
+            ],
         }
 
         # Run and Assert
@@ -97,13 +99,13 @@ class TestBaseMultiTableProperty():
         real_user_df = pd.DataFrame({
             'user_id': ['user1', 'user2'],
             'columnA': ['A', 'B'],
-            'columnB': [np.nan, 1.0]
+            'columnB': [np.nan, 1.0],
         })
         real_session_df = pd.DataFrame({
             'session_id': ['session1', 'session2', 'session3'],
             'user_id': ['user1', 'user1', 'user2'],
             'columnC': ['X', 'Y', 'Z'],
-            'columnD': [4.0, 6.0, 7.0]
+            'columnD': [4.0, 6.0, 7.0],
         })
 
         real_data = {'users': real_user_df, 'sessions': real_session_df}
@@ -111,7 +113,7 @@ class TestBaseMultiTableProperty():
             'parent_table_name': 'users',
             'child_table_name': 'sessions',
             'parent_primary_key': 'user_id',
-            'child_foreign_key': 'user_id'
+            'child_foreign_key': 'user_id',
         }
 
         # Run
@@ -124,24 +126,12 @@ class TestBaseMultiTableProperty():
         """Test the ``_generate_details`` method."""
         # Setup
         real_data = {
-            'Table_1': pd.DataFrame({
-                'col1': [0, 1],
-                'col2': [0, 1]
-            }),
-            'Table_2': pd.DataFrame({
-                'col3': [2, 3],
-                'col4': [2, 3]
-            }),
+            'Table_1': pd.DataFrame({'col1': [0, 1], 'col2': [0, 1]}),
+            'Table_2': pd.DataFrame({'col3': [2, 3], 'col4': [2, 3]}),
         }
         synthetic_data = {
-            'Table_1': pd.DataFrame({
-                'col1': [4, 5],
-                'col2': [4, 5]
-            }),
-            'Table_2': pd.DataFrame({
-                'col3': [6, 7],
-                'col4': [6, 7]
-            }),
+            'Table_1': pd.DataFrame({'col1': [4, 5], 'col2': [4, 5]}),
+            'Table_2': pd.DataFrame({'col3': [6, 7], 'col4': [6, 7]}),
         }
 
         metadata = {
@@ -154,15 +144,9 @@ class TestBaseMultiTableProperty():
         progress_bar_mock = Mock()
 
         property_table_1 = Mock()
-        property_table_1.details = pd.DataFrame({
-            'Column': ['col1', 'col2'],
-            'Score': [0.5, 0.6]
-        })
+        property_table_1.details = pd.DataFrame({'Column': ['col1', 'col2'], 'Score': [0.5, 0.6]})
         property_table_2 = Mock()
-        property_table_2.details = pd.DataFrame({
-            'Column': ['col3', 'col4'],
-            'Score': [0.7, 0.8]
-        })
+        property_table_2.details = pd.DataFrame({'Column': ['col3', 'col4'], 'Score': [0.7, 0.8]})
         base_property = BaseMultiTableProperty()
         base_property._properties = {
             'Table_1': property_table_1,
@@ -179,19 +163,19 @@ class TestBaseMultiTableProperty():
         expected_details = pd.DataFrame({
             'Table': ['Table_1', 'Table_1', 'Table_2', 'Table_2'],
             'Column': ['col1', 'col2', 'col3', 'col4'],
-            'Score': [0.5, 0.6, 0.7, 0.8]
+            'Score': [0.5, 0.6, 0.7, 0.8],
         })
         property_table_1.get_score.assert_called_once_with(
             DataFrameMatcher(real_data['Table_1']),
             DataFrameMatcher(synthetic_data['Table_1']),
             metadata['tables']['Table_1'],
-            progress_bar_mock
+            progress_bar_mock,
         )
         property_table_2.get_score.assert_called_once_with(
             DataFrameMatcher(real_data['Table_2']),
             DataFrameMatcher(synthetic_data['Table_2']),
             metadata['tables']['Table_2'],
-            progress_bar_mock
+            progress_bar_mock,
         )
 
         pd.testing.assert_frame_equal(base_property.details, expected_details)
@@ -242,7 +226,7 @@ class TestBaseMultiTableProperty():
             'Table': ['Table1', 'Table2'],
             'Metric': ['Metric1', 'Metric2'],
             'Score': [1.0, 1.0],
-            'Error': [None, None]
+            'Error': [None, None],
         })
         base_multi_table_property.details = details_df.copy()
 
@@ -289,7 +273,7 @@ class TestBaseMultiTableProperty():
             'Table': ['Table1', 'Table2', 'Table3'],
             'Metric': ['Metric1', 'Metric2', 'Metric3'],
             'Score': [1.0, 1.0, 1.0],
-            'Error': [None, np.nan, 'Some Error']
+            'Error': [None, np.nan, 'Some Error'],
         })
         base_multi_table_property.details = details_df.copy()
 
@@ -303,7 +287,7 @@ class TestBaseMultiTableProperty():
             'Table': ['Table1', 'Table2', 'Table3'],
             'Metric': ['Metric1', 'Metric2', 'Metric3'],
             'Score': [1.0, 1.0, 1.0],
-            'Error': [None, None, 'Some Error']
+            'Error': [None, None, 'Some Error'],
         })
         base_multi_table_property._generate_details.assert_called_once_with(
             real_data, synthetic_data, metadata, progress_bar
@@ -348,7 +332,7 @@ class TestBaseMultiTableProperty():
             'Column 1': ['col1', 'col2', 'col3'],
             'Column 2': ['colA', 'colB', 'colC'],
             'Score': [0, 0.5, 1.0],
-            'Error': [None, None, None]
+            'Error': [None, None, None],
         })
 
         base_property = BaseMultiTableProperty()
@@ -359,13 +343,16 @@ class TestBaseMultiTableProperty():
         table_details = base_property.get_details('table2')
 
         # Assert
-        expected_table_details = pd.DataFrame({
-            'Table': ['table2'],
-            'Column 1': ['col2'],
-            'Column 2': ['colB'],
-            'Score': [0.5],
-            'Error': [None]
-        }, index=[1])
+        expected_table_details = pd.DataFrame(
+            {
+                'Table': ['table2'],
+                'Column 1': ['col2'],
+                'Column 2': ['colB'],
+                'Score': [0.5],
+                'Error': [None],
+            },
+            index=[1],
+        )
         pd.testing.assert_frame_equal(details, full_details)
         pd.testing.assert_frame_equal(table_details, expected_table_details)
 
@@ -378,7 +365,7 @@ class TestBaseMultiTableProperty():
             'Column 1': ['col1', 'col2', 'col3'],
             'Column 2': ['colA', 'colB', 'colC'],
             'Score': [0, 0.5, 1.0],
-            'Error': [None, None, None]
+            'Error': [None, None, None],
         })
 
         base_property = BaseMultiTableProperty()
@@ -399,7 +386,7 @@ class TestBaseMultiTableProperty():
             'Column 1': ['col1', 'col2'],
             'Column 2': ['colA', 'colB'],
             'Score': [0.0, 0.5],
-            'Error': [None, None]
+            'Error': [None, None],
         })
         for detail_df in full_details:
             pd.testing.assert_frame_equal(detail_df, details)

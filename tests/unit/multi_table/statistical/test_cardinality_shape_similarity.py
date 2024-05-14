@@ -7,7 +7,6 @@ from sdmetrics.multi_table.statistical import CardinalityShapeSimilarity
 
 
 class TestCardinalityShapeSimilarity:
-
     def test_compute(self):
         """Test the ``compute`` method.
 
@@ -112,26 +111,30 @@ class TestCardinalityShapeSimilarity:
                     'parent_table_name': 'tableA',
                     'parent_primary_key': 'col1',
                     'child_table_name': 'tableB',
-                    'child_foreign_key': 'col1'
+                    'child_foreign_key': 'col1',
                 },
                 {
                     'parent_table_name': 'tableB',
                     'parent_primary_key': 'col2',
                     'child_table_name': 'tableC',
-                    'child_foreign_key': 'col2'
-                }
-            ]
+                    'child_foreign_key': 'col2',
+                },
+            ],
         }
         real_data = {
             'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
-            'tableB': pd.DataFrame(
-                {'col1': [1, 1, 2, 3, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableB': pd.DataFrame({
+                'col1': [1, 1, 2, 3, 3, 5],
+                'col2': ['a', 'b', 'c', 'd', 'e', 'f'],
+            }),
             'tableC': pd.DataFrame({'col2': ['a', 'b', 'c']}),
         }
         synthetic_data = {
             'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
-            'tableB': pd.DataFrame(
-                {'col1': [1, 2, 4, 4, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableB': pd.DataFrame({
+                'col1': [1, 2, 4, 4, 3, 5],
+                'col2': ['a', 'b', 'c', 'd', 'e', 'f'],
+            }),
             'tableC': pd.DataFrame({'col2': ['a', 'b', 'd']}),
         }
         expected_metric_breakdown = {
@@ -171,14 +174,18 @@ class TestCardinalityShapeSimilarity:
         }
         real_data = {
             'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
-            'tableB': pd.DataFrame(
-                {'col1': [1, 1, 2, 3, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableB': pd.DataFrame({
+                'col1': [1, 1, 2, 3, 3, 5],
+                'col2': ['a', 'b', 'c', 'd', 'e', 'f'],
+            }),
             'tableC': pd.DataFrame({'col2': ['a', 'b', 'c']}),
         }
         synthetic_data = {
             'tableA': pd.DataFrame({'col1': [1, 2, 3, 4, 5]}),
-            'tableB': pd.DataFrame(
-                {'col1': [1, 2, 4, 4, 3, 5], 'col2': ['a', 'b', 'c', 'd', 'e', 'f']}),
+            'tableB': pd.DataFrame({
+                'col1': [1, 2, 4, 4, 3, 5],
+                'col2': ['a', 'b', 'c', 'd', 'e', 'f'],
+            }),
             'tableC': pd.DataFrame({'col2': ['a', 'b', 'd']}),
         }
         expected_metric_breakdown = {'score': np.nan}
@@ -189,8 +196,10 @@ class TestCardinalityShapeSimilarity:
         # Assert
         assert result == expected_metric_breakdown
 
-    @patch('sdmetrics.multi_table.statistical.cardinality_shape_similarity.MultiTableMetric.'
-           'normalize')
+    @patch(
+        'sdmetrics.multi_table.statistical.cardinality_shape_similarity.MultiTableMetric.'
+        'normalize'
+    )
     def test_normalize(self, normalize_mock):
         """Test the ``normalize`` method.
 

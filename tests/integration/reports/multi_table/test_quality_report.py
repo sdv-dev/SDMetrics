@@ -63,16 +63,16 @@ def load_test_data():
                     'col6': {'sdtype': 'id'},
                     'col7': {'sdtype': 'numerical'},
                 },
-            }
+            },
         },
         'relationships': [
             {
                 'parent_table_name': 'table1',
                 'parent_primary_key': 'col1',
                 'child_table_name': 'table2',
-                'child_foreign_key': 'col6'
+                'child_foreign_key': 'col6',
             }
-        ]
+        ],
     }
 
     return (real_data, synthetic_data, metadata)
@@ -108,17 +108,20 @@ def test_multi_table_quality_report():
 
     # Assert score
     assert score == 0.649582127409184
-    pd.testing.assert_frame_equal(properties, pd.DataFrame({
-        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.8, 0.7983285096367361, 0.75, 0.25],
-    }))
+    pd.testing.assert_frame_equal(
+        properties,
+        pd.DataFrame({
+            'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
+            'Score': [0.8, 0.7983285096367361, 0.75, 0.25],
+        }),
+    )
 
     # Assert Column Shapes details
     expected_df_0 = pd.DataFrame({
         'Table': ['table1', 'table1'],
         'Column': ['col2', 'col3'],
         'Metric': ['TVComplement', 'TVComplement'],
-        'Score': [.75, .75]
+        'Score': [0.75, 0.75],
     })
     pd.testing.assert_frame_equal(details[0], expected_df_0)
 
@@ -128,7 +131,7 @@ def test_multi_table_quality_report():
         'Column 1': ['col2'],
         'Column 2': ['col3'],
         'Metric': ['ContingencySimilarity'],
-        'Score': [.25],
+        'Score': [0.25],
         'Real Correlation': [np.nan],
         'Synthetic Correlation': [np.nan],
     })
@@ -153,8 +156,12 @@ def test_multi_table_quality_report():
         'Column 1': ['col2', 'col2', 'col2', 'col3', 'col3', 'col3'],
         'Column 2': ['col4', 'col5', 'col7', 'col4', 'col5', 'col7'],
         'Metric': [
-            'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity',
-            'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'
+            'ContingencySimilarity',
+            'ContingencySimilarity',
+            'ContingencySimilarity',
+            'ContingencySimilarity',
+            'ContingencySimilarity',
+            'ContingencySimilarity',
         ],
         'Score': [0.5, 0.5, 0.5, 0.0, 0.0, 0.0],
         'Real Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
@@ -168,7 +175,7 @@ def test_multi_table_quality_report():
         'Table': ['table1', 'table1', 'table2', 'table2', 'table2'],
         'Column': ['col2', 'col3', 'col4', 'col5', 'col7'],
         'Metric': ['TVComplement', 'TVComplement', 'KSComplement', 'KSComplement', 'KSComplement'],
-        'Score': [0.75, 0.75, 0.75, 0.75, 1.0]
+        'Score': [0.75, 0.75, 0.75, 0.75, 1.0],
     })
     pd.testing.assert_frame_equal(details[4], expected_df_3)
 
@@ -178,8 +185,10 @@ def test_multi_table_quality_report():
         'Column 1': ['col2', 'col4', 'col4', 'col5'],
         'Column 2': ['col3', 'col5', 'col7', 'col7'],
         'Metric': [
-            'ContingencySimilarity', 'CorrelationSimilarity', 'CorrelationSimilarity',
-            'CorrelationSimilarity'
+            'ContingencySimilarity',
+            'CorrelationSimilarity',
+            'CorrelationSimilarity',
+            'CorrelationSimilarity',
         ],
         'Score': [0.25, 0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
         'Real Correlation': [np.nan, 0.946664, 0.966247, 0.862622],
@@ -192,8 +201,13 @@ def test_multi_table_quality_report():
     assert report_info == report.report_info
 
     expected_info_keys = {
-        'report_type', 'generated_date', 'sdmetrics_version', 'num_tables', 'num_rows_real_data',
-        'num_rows_synthetic_data', 'generation_time'
+        'report_type',
+        'generated_date',
+        'sdmetrics_version',
+        'num_tables',
+        'num_rows_real_data',
+        'num_rows_synthetic_data',
+        'generation_time',
     }
     assert report_info.keys() == expected_info_keys
     assert report_info['report_type'] == 'QualityReport'
@@ -223,8 +237,13 @@ def test_quality_report_end_to_end():
     assert score == 0.6615076057048345
     pd.testing.assert_frame_equal(properties, expected_properties)
     expected_info_keys = {
-        'report_type', 'generated_date', 'sdmetrics_version', 'num_tables', 'num_rows_real_data',
-        'num_rows_synthetic_data', 'generation_time'
+        'report_type',
+        'generated_date',
+        'sdmetrics_version',
+        'num_tables',
+        'num_rows_real_data',
+        'num_rows_synthetic_data',
+        'generation_time',
     }
     assert info.keys() == expected_info_keys
     assert info['report_type'] == 'QualityReport'
@@ -278,31 +297,50 @@ def test_quality_report_with_errors():
     # Assert
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.8165079365079364, 0.55, 0.95, 0.5833333333333334]
+        'Score': [0.8165079365079364, 0.55, 0.95, 0.5833333333333334],
     })
     expected_details = pd.DataFrame({
         'Table': [
-            'users', 'users', 'users', 'sessions', 'sessions', 'transactions',
-            'transactions', 'transactions'
+            'users',
+            'users',
+            'users',
+            'sessions',
+            'sessions',
+            'transactions',
+            'transactions',
+            'transactions',
         ],
-        'Column': [
-            'country', 'gender', 'age', 'device', 'os', 'timestamp', 'amount', 'approved'
-        ],
+        'Column': ['country', 'gender', 'age', 'device', 'os', 'timestamp', 'amount', 'approved'],
         'Metric': [
-            'TVComplement', 'TVComplement', 'KSComplement', 'TVComplement', 'TVComplement',
-            'KSComplement', 'KSComplement', 'TVComplement'
+            'TVComplement',
+            'TVComplement',
+            'KSComplement',
+            'TVComplement',
+            'TVComplement',
+            'KSComplement',
+            'KSComplement',
+            'TVComplement',
         ],
         'Score': [
-            0.8, 0.6825396825396826, np.nan, 0.7999999999999999, 0.9, np.nan,
-            np.nan, 0.8999999999999999
+            0.8,
+            0.6825396825396826,
+            np.nan,
+            0.7999999999999999,
+            0.9,
+            np.nan,
+            np.nan,
+            0.8999999999999999,
         ],
         'Error': [
-            None, None, "TypeError: '<' not supported between instances of 'int' and 'str'",
-            np.nan, np.nan,
+            None,
+            None,
+            "TypeError: '<' not supported between instances of 'int' and 'str'",
+            np.nan,
+            np.nan,
             "TypeError: '<' not supported between instances of 'Timestamp' and 'str'",
             "TypeError: '<' not supported between instances of 'float' and 'str'",
-            None
-        ]
+            None,
+        ],
     })
     assert score == 0.7249603174603175
     pd.testing.assert_frame_equal(properties, expected_properties)
@@ -323,7 +361,7 @@ def test_quality_report_with_no_relationships():
     # Assert
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.7978174603174604, 0.45654629583521095, np.nan, np.nan]
+        'Score': [0.7978174603174604, 0.45654629583521095, np.nan, np.nan],
     })
     properties = report.get_properties()
     pd.testing.assert_frame_equal(properties, expected_properties)

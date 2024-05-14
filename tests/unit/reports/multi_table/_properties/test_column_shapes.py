@@ -1,4 +1,5 @@
 """Test ColumnShapes multi-table class."""
+
 from sdmetrics.reports.multi_table._properties import ColumnShapes
 from sdmetrics.reports.single_table._properties import ColumnShapes as SingleTableColumnShapes
 

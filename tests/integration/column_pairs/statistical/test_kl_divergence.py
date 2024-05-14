@@ -2,11 +2,12 @@ import numpy as np
 import pandas as pd
 
 from sdmetrics.column_pairs.statistical.kl_divergence import (
-    ContinuousKLDivergence, DiscreteKLDivergence)
+    ContinuousKLDivergence,
+    DiscreteKLDivergence,
+)
 
 
 class TestContinuousKLDivergence:
-
     @staticmethod
     def ones():
         return pd.DataFrame({
@@ -72,7 +73,6 @@ class TestContinuousKLDivergence:
 
 
 class TestDiscreteKLDivergence:
-
     @staticmethod
     def ones():
         return pd.DataFrame({

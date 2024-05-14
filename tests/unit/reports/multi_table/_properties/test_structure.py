@@ -1,4 +1,5 @@
 """Test Structure multi-table class."""
+
 from unittest.mock import Mock, patch
 
 import pandas as pd
@@ -29,7 +30,7 @@ def test_get_visualization(mock_px):
     mock_df = pd.DataFrame({
         'Table': ['Table1', 'Table2'],
         'Score': [0.7, 0.3],
-        'Metric': ['TableStructure', 'TableStructure']
+        'Metric': ['TableStructure', 'TableStructure'],
     })
     structure_property.details = mock_df
 
@@ -51,8 +52,7 @@ def test_get_visualization(mock_px):
         'x': 'Table',
         'y': 'Score',
         'title': (
-            'Data Diagnostic: Structure (Average '
-            f'Score={mock__compute_average.return_value})'
+            'Data Diagnostic: Structure (Average ' f'Score={mock__compute_average.return_value})'
         ),
         'category_orders': {'group': mock_df['Table'].tolist()},
         'color': 'Metric',
@@ -83,7 +83,7 @@ def test_get_visualization(mock_px):
         xaxis_categoryorder='total ascending',
         plot_bgcolor='#F5F5F8',
         margin={'t': 150},
-        font={'size': 18}
+        font={'size': 18},
     )
 
 

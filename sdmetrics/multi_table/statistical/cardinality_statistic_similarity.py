@@ -65,11 +65,14 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
             score_real = real_distribution.std()
             score_synthetic = synthetic_distribution.std()
         else:
-            raise ValueError(f'requested statistic {statistic} is not valid. '
-                             'Please choose either mean, std, or median.')
+            raise ValueError(
+                f'requested statistic {statistic} is not valid. '
+                'Please choose either mean, std, or median.'
+            )
 
         score = 1 - abs(score_real - score_synthetic) / (
-            real_distribution.max() - real_distribution.min())
+            real_distribution.max() - real_distribution.min()
+        )
 
         return {'real': score_real, 'synthetic': score_synthetic, 'score': max(score, 0)}
 
@@ -118,9 +121,9 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
                 synthetic_data[rel['child_table_name']][rel['child_foreign_key']],
             )
             score_breakdown = cls._compute_statistic(
-                cardinality_real, cardinality_synthetic, statistic)
-            score_breakdowns[
-                (rel['parent_table_name'], rel['child_table_name'])] = score_breakdown
+                cardinality_real, cardinality_synthetic, statistic
+            )
+            score_breakdowns[(rel['parent_table_name'], rel['child_table_name'])] = score_breakdown
 
         if len(score_breakdowns) == 0:
             return {'score': np.nan}

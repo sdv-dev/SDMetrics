@@ -7,7 +7,6 @@ from sdmetrics.reports.multi_table._properties import Coverage
 
 
 class TestCoverage:
-
     def test_end_to_end(self):
         """Test the ``Coverage`` multi-table property end to end."""
         # Setup

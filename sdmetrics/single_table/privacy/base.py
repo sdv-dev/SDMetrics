@@ -1,4 +1,5 @@
 """Base class for privacy metrics for single table datasets."""
+
 from enum import Enum
 
 import numpy as np
@@ -64,7 +65,8 @@ class CategoricalPrivacyMetric(SingleTableMetric):
     @classmethod
     def _validate_inputs(cls, real_data, synthetic_data, metadata, key_fields, sensitive_fields):
         real_data, synthetic_data, metadata = super()._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
         if 'key_fields' in metadata:
             key_fields = metadata['key_fields']
         elif key_fields is None:
@@ -74,7 +76,8 @@ class CategoricalPrivacyMetric(SingleTableMetric):
             sensitive_fields = metadata['sensitive_fields']
         elif sensitive_fields is None:
             raise TypeError(
-                '`sensitive_fields` must be passed either directly or inside `metadata`')
+                '`sensitive_fields` must be passed either directly or inside `metadata`'
+            )
 
         if len(key_fields) == 0 or len(sensitive_fields) == 0:
             raise ValueError('`key_fields` or `sensitive_fields` is empty')
@@ -82,8 +85,15 @@ class CategoricalPrivacyMetric(SingleTableMetric):
         return key_fields, sensitive_fields, metadata
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key_fields=None,
-                sensitive_fields=None, model_kwargs=None):
+    def compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        key_fields=None,
+        sensitive_fields=None,
+        model_kwargs=None,
+    ):
         """Compute this metric.
 
         This fits an adversial attacker model on the synthetic data and
@@ -118,18 +128,16 @@ class CategoricalPrivacyMetric(SingleTableMetric):
                 Scores obtained by the attackers when evaluated on the real data.
         """
         key_fields, sensitive_fields, metadata = cls._validate_inputs(
-            real_data,
-            synthetic_data,
-            metadata,
-            key_fields,
-            sensitive_fields
+            real_data, synthetic_data, metadata, key_fields, sensitive_fields
         )
 
         for col in key_fields + sensitive_fields:
             data_type = get_columns_from_metadata(metadata)[col]
-            if (data_type != cls._DTYPES_TO_TYPES['i']
-               and data_type != cls._DTYPES_TO_TYPES['O']
-               and data_type != cls._DTYPES_TO_TYPES['b']):  # check data type
+            if (
+                data_type != cls._DTYPES_TO_TYPES['i']
+                and data_type != cls._DTYPES_TO_TYPES['O']
+                and data_type != cls._DTYPES_TO_TYPES['b']
+            ):  # check data type
                 raise TypeError(f'Column {col} has invalid data type {data_type}')
 
         model = cls._fit(synthetic_data, key_fields, sensitive_fields, model_kwargs)
@@ -211,7 +219,8 @@ class NumericalPrivacyMetric(SingleTableMetric):
     @classmethod
     def _validate_inputs(cls, real_data, synthetic_data, metadata, key_fields, sensitive_fields):
         real_data, synthetic_data, metadata = super()._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
         if 'key_fields' in metadata:
             key_fields = metadata['key_fields']
         elif key_fields is None:
@@ -221,7 +230,8 @@ class NumericalPrivacyMetric(SingleTableMetric):
             sensitive_fields = metadata['sensitive_fields']
         elif sensitive_fields is None:
             raise TypeError(
-                '`sensitive_fields` must be passed either directly or inside `metadata`')
+                '`sensitive_fields` must be passed either directly or inside `metadata`'
+            )
 
         if len(key_fields) == 0 or len(sensitive_fields) == 0:
             raise ValueError('`key_fields` or `sensitive_fields` is empty')
@@ -229,9 +239,17 @@ class NumericalPrivacyMetric(SingleTableMetric):
         return key_fields, sensitive_fields, metadata
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, key_fields=None,
-                sensitive_fields=None, model_kwargs=None, loss_function=None,
-                loss_function_kwargs=None):
+    def compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        key_fields=None,
+        sensitive_fields=None,
+        model_kwargs=None,
+        loss_function=None,
+        loss_function_kwargs=None,
+    ):
         """Compute this metric.
 
         This fits an adversial attacker model on the synthetic data and
@@ -270,8 +288,8 @@ class NumericalPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        key_fields, sensitive_fields, metadata = (
-            cls._validate_inputs(real_data, synthetic_data, metadata, key_fields, sensitive_fields)
+        key_fields, sensitive_fields, metadata = cls._validate_inputs(
+            real_data, synthetic_data, metadata, key_fields, sensitive_fields
         )
 
         for col in key_fields + sensitive_fields:
@@ -304,7 +322,7 @@ class NumericalPrivacyMetric(SingleTableMetric):
         return score / count
 
 
-class PrivacyAttackerModel():
+class PrivacyAttackerModel:
     """Train and evaluate a privacy model.
 
     Train a model to predict sensitive attributes from key attributes
@@ -347,5 +365,6 @@ class PrivacyAttackerModel():
             sensitive_data(tuple):
                 The sensitive data.
         """
-        raise NotImplementedError('Posterior probability based scoring not supported'
-                                  'for this attacker!')
+        raise NotImplementedError(
+            'Posterior probability based scoring not supported' 'for this attacker!'
+        )
