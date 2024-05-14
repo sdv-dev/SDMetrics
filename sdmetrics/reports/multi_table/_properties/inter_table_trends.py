@@ -90,7 +90,8 @@ class InterTableTrends(BaseMultiTableProperty):
         }
         merged_metadata['columns'] = {**child_cols, **parent_cols}
         if 'primary_key' in merged_metadata:
-            merged_metadata['primary_key'] = f'{child_table}.{merged_metadata['primary_key']}'
+            primary_key = merged_metadata['primary_key']
+            merged_metadata['primary_key'] = f'{child_table}.{primary_key}'
 
         return merged_metadata, list(parent_cols.keys()), list(child_cols.keys())
 
