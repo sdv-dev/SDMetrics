@@ -1,4 +1,5 @@
 """Column pair trends property for multi-table."""
+
 import itertools
 
 import pandas as pd
@@ -6,7 +7,8 @@ import plotly.express as px
 
 from sdmetrics.reports.multi_table._properties import BaseMultiTableProperty
 from sdmetrics.reports.single_table._properties import (
-    ColumnPairTrends as SingleTableColumnPairTrends)
+    ColumnPairTrends as SingleTableColumnPairTrends,
+)
 from sdmetrics.reports.utils import PlotConfig
 
 
@@ -88,7 +90,7 @@ class InterTableTrends(BaseMultiTableProperty):
         }
         merged_metadata['columns'] = {**child_cols, **parent_cols}
         if 'primary_key' in merged_metadata:
-            merged_metadata['primary_key'] = f'{child_table}.{merged_metadata["primary_key"]}'
+            merged_metadata['primary_key'] = f'{child_table}.{merged_metadata['primary_key']}'
 
         return merged_metadata, list(parent_cols.keys()), list(child_cols.keys())
 
@@ -112,23 +114,20 @@ class InterTableTrends(BaseMultiTableProperty):
             foreign_key = relationship['child_foreign_key']
 
             denormalized_real, denormalized_synthetic = self._denormalize_tables(
-                real_data,
-                synthetic_data,
-                relationship
+                real_data, synthetic_data, relationship
             )
 
-            merged_metadata, parent_cols, child_cols = self._merge_metadata(
-                metadata,
-                parent,
-                child
-            )
+            merged_metadata, parent_cols, child_cols = self._merge_metadata(metadata, parent, child)
 
             parent_child_pairs = itertools.product(parent_cols, child_cols)
 
             self._properties[(parent, child, foreign_key)] = SingleTableColumnPairTrends()
             details = self._properties[(parent, child, foreign_key)]._generate_details(
-                denormalized_real, denormalized_synthetic, merged_metadata,
-                progress_bar=progress_bar, column_pairs=parent_child_pairs
+                denormalized_real,
+                denormalized_synthetic,
+                merged_metadata,
+                progress_bar=progress_bar,
+                column_pairs=parent_child_pairs,
             )
 
             details['Parent Table'] = parent
@@ -146,8 +145,15 @@ class InterTableTrends(BaseMultiTableProperty):
         if len(all_details) > 0:
             self.details = pd.concat(all_details, axis=0).reset_index(drop=True)
             detail_columns = [
-                'Parent Table', 'Child Table', 'Foreign Key', 'Column 1', 'Column 2',
-                'Metric', 'Score', 'Real Correlation', 'Synthetic Correlation'
+                'Parent Table',
+                'Child Table',
+                'Foreign Key',
+                'Column 1',
+                'Column 2',
+                'Metric',
+                'Score',
+                'Real Correlation',
+                'Synthetic Correlation',
             ]
             if 'Error' in self.details.columns:
                 detail_columns.append('Error')
@@ -179,16 +185,16 @@ class InterTableTrends(BaseMultiTableProperty):
         to_plot = self.details.copy()
         if table_name is not None:
             to_plot = to_plot[
-                (to_plot['Parent Table'] == table_name) |
-                (to_plot['Child Table'] == table_name)
+                (to_plot['Parent Table'] == table_name) | (to_plot['Child Table'] == table_name)
             ]
 
         parent_cols = to_plot['Parent Table'] + '.' + to_plot['Column 1']
         child_cols = to_plot['Child Table'] + '.' + to_plot['Column 2']
         to_plot['Columns'] = parent_cols + ', ' + child_cols
         duplicated = to_plot['Columns'].duplicated(keep=False)
-        to_plot['Columns'][duplicated] = to_plot['Columns'][duplicated] + \
-            ' (' + to_plot['Foreign Key'][duplicated] + ')'
+        to_plot['Columns'][duplicated] = (
+            to_plot['Columns'][duplicated] + ' (' + to_plot['Foreign Key'][duplicated] + ')'
+        )
 
         to_plot['Real Correlation'] = to_plot['Real Correlation'].fillna('None')
         to_plot['Synthetic Correlation'] = to_plot['Synthetic Correlation'].fillna('None')
@@ -213,8 +219,8 @@ class InterTableTrends(BaseMultiTableProperty):
                 'Metric',
                 'Score',
                 'Real Correlation',
-                'Synthetic Correlation'
-            ]
+                'Synthetic Correlation',
+            ],
         )
 
         fig.update_yaxes(range=[0, 1])
@@ -227,7 +233,7 @@ class InterTableTrends(BaseMultiTableProperty):
                 'Metric=%{customdata[1]}',
                 'Score=%{customdata[2]}',
                 'Real Correlation=%{customdata[3]}',
-                'Synthetic Correlation=%{customdata[4]}<extra></extra>'
+                'Synthetic Correlation=%{customdata[4]}<extra></extra>',
             ])
         )
 

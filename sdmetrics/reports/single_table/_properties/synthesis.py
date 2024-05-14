@@ -42,7 +42,7 @@ class Synthesis(BaseSingleTableProperty):
                 real_data=real_data,
                 synthetic_data=synthetic_data,
                 metadata=metadata,
-                synthetic_sample_size=sample_size
+                synthetic_sample_size=sample_size,
             )
             score = score_breakdown['score']
             num_matched_rows = score_breakdown['num_matched_rows']
@@ -58,13 +58,16 @@ class Synthesis(BaseSingleTableProperty):
             if progress_bar:
                 progress_bar.update()
 
-        result = pd.DataFrame({
-            'Metric': name,
-            'Score': score,
-            'Num Matched Rows': num_matched_rows,
-            'Num New Rows': num_new_rows,
-            'Error': error_message,
-        }, index=[0])
+        result = pd.DataFrame(
+            {
+                'Metric': name,
+                'Score': score,
+                'Num Matched Rows': num_matched_rows,
+                'Num New Rows': num_new_rows,
+                'Error': error_message,
+            },
+            index=[0],
+        )
 
         if pd.isna(result['Error'].iloc[0]):
             result = result.drop('Error', axis=1)
@@ -86,12 +89,9 @@ class Synthesis(BaseSingleTableProperty):
             values=values,
             names=labels,
             color=['Exact Matches', 'Novel Rows'],
-            color_discrete_map={
-                'Exact Matches': '#F16141',
-                'Novel Rows': '#36B37E'
-            },
+            color_discrete_map={'Exact Matches': '#F16141', 'Novel Rows': '#36B37E'},
             hole=0.4,
-            title=f'Data Diagnostic: Synthesis (Score={average_score})'
+            title=f'Data Diagnostic: Synthesis (Score={average_score})',
         )
 
         fig.update_traces(hovertemplate='<b>%{label}</b><br>%{value} rows')

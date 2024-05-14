@@ -1,4 +1,5 @@
 """Test BaseSingleTableProperty class."""
+
 import re
 from unittest.mock import Mock
 
@@ -9,7 +10,6 @@ from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 
 
 class TestBaseSingleTableProperty:
-
     def test__generate_details_raises_error(self):
         """Test that the method raises a ``NotImplementedError``."""
         # Setup
@@ -26,8 +26,11 @@ class TestBaseSingleTableProperty:
 
         metadata = {
             'columns': {
-                'col1': {}, 'col2': {}, 'col3': {},
-                'col4': {}, 'col5': {},
+                'col1': {},
+                'col2': {},
+                'col3': {},
+                'col4': {},
+                'col5': {},
             }
         }
 

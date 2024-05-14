@@ -1,4 +1,5 @@
 """Synthesis property for multi-table."""
+
 from sdmetrics.reports.multi_table._properties import BaseMultiTableProperty
 from sdmetrics.reports.single_table._properties import Synthesis as SingleTableSynthesis
 

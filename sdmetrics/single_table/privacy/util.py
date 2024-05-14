@@ -69,8 +69,9 @@ def hamming_distance(target, test):
             The hamming distance
     """
     dist = 0
-    assert len(target) == len(test), ('Tuples must have the same length in the'
-                                      'calculation of hamming distance!')
+    assert len(target) == len(test), (
+        'Tuples must have the same length in the' 'calculation of hamming distance!'
+    )
 
     for target_entry, test_entry in zip(target, test):
         if target_entry != test_entry:
@@ -98,7 +99,9 @@ def closest_neighbors(samples, target):
         hamming_dist = hamming_distance(target, element)
         if hamming_dist < dist:
             dist = hamming_dist
-            ret = [element, ]
+            ret = [
+                element,
+            ]
         elif hamming_dist == dist:
             ret.append(element)
 

@@ -10,7 +10,6 @@ from tests.utils import SeriesMatcher
 
 
 class TestCorrelationSimilarity:
-
     @patch('sdmetrics.column_pairs.statistical.correlation_similarity.pearsonr')
     def test_compute_breakdown(self, pearson_mock):
         """Test the ``compute_breakdown`` method.
@@ -91,13 +90,13 @@ class TestCorrelationSimilarity:
         # Assert
         pearson_mock.assert_has_calls([
             call(
-                SeriesMatcher(
-                    real_data['col1'].astype('int64')), SeriesMatcher(
-                    real_data['col2'].astype('int64'))),
+                SeriesMatcher(real_data['col1'].astype('int64')),
+                SeriesMatcher(real_data['col2'].astype('int64')),
+            ),
             call(
-                SeriesMatcher(
-                    synthetic_data['col1'].astype('int64')), SeriesMatcher(
-                    synthetic_data['col2'].astype('int64'))),
+                SeriesMatcher(synthetic_data['col1'].astype('int64')),
+                SeriesMatcher(synthetic_data['col2'].astype('int64')),
+            ),
         ])
         assert result == expected_score_breakdown
 
@@ -147,9 +146,7 @@ class TestCorrelationSimilarity:
         # Assert
         assert result == test_score
 
-    @patch(
-        'sdmetrics.column_pairs.statistical.correlation_similarity.ColumnPairsMetric.normalize'
-    )
+    @patch('sdmetrics.column_pairs.statistical.correlation_similarity.ColumnPairsMetric.normalize')
     def test_normalize(self, normalize_mock):
         """Test the ``normalize`` method.
 

@@ -7,7 +7,6 @@ from sdmetrics.multi_table import MultiSingleTableMetric
 
 
 class TestMultiSingleTableMetric:
-
     def test__compute(self):
         """Test the ``_compute`` method.
 
@@ -30,7 +29,8 @@ class TestMultiSingleTableMetric:
 
         metric_mock = Mock()
         metric_mock.single_table_metric.compute_breakdown.side_effect = [
-            table_a_breakdown, table_b_breakdown
+            table_a_breakdown,
+            table_b_breakdown,
         ]
 
         data = {
@@ -44,7 +44,7 @@ class TestMultiSingleTableMetric:
                 'col1': [0, 1, 2, 3, 4],
                 'col2': ['a', 'b', 'c', 'd', 'e'],
                 'col3': [4.3, 2.1, 4.1, 1.2, 3.2],
-            })
+            }),
         }
 
         # Run

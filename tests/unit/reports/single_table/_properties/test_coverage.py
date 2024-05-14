@@ -7,7 +7,6 @@ from sdmetrics.reports.single_table._properties.coverage import Coverage
 
 
 class TestCoverage:
-
     @patch('sdmetrics.reports.single_table._properties.coverage.RangeCoverage.compute')
     @patch('sdmetrics.reports.single_table._properties.coverage.CategoryCoverage.compute')
     def test__generate_details(self, category_coverage_mock, range_coverage_mock):
@@ -17,20 +16,20 @@ class TestCoverage:
             'col1': [1, 2, np.nan],
             'col2': [False, True, True],
             'col3': [None, 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
         })
         synthetic_data = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
         })
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'boolean'},
                 'col3': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'datetime'}
+                'col4': {'sdtype': 'datetime'},
             }
         }
 
@@ -60,7 +59,7 @@ class TestCoverage:
         mock_df = pd.DataFrame({
             'Column': ['Column1', 'Column2', 'Column3'],
             'Score': [0.7, 0.3, np.nan],
-            'Metric': ['RangeCoverage', 'CategoryCoverage', 'CategoryCoverage']
+            'Metric': ['RangeCoverage', 'CategoryCoverage', 'CategoryCoverage'],
         })
         coverage_property.details = mock_df
 
@@ -78,7 +77,7 @@ class TestCoverage:
         expected_df = pd.DataFrame({
             'Column': ['Column1', 'Column2'],
             'Score': [0.7, 0.3],
-            'Metric': ['RangeCoverage', 'CategoryCoverage']
+            'Metric': ['RangeCoverage', 'CategoryCoverage'],
         })
 
         expected_kwargs = {

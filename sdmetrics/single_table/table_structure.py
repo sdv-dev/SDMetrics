@@ -1,4 +1,5 @@
 """Table Format metric."""
+
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 

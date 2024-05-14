@@ -9,10 +9,7 @@ def test_compute_all():
     real_data, synthetic_data, metadata = load_multi_table_demo()
 
     output = compute_metrics(
-        MultiTableMetric.get_subclasses(),
-        real_data,
-        synthetic_data,
-        metadata=metadata
+        MultiTableMetric.get_subclasses(), real_data, synthetic_data, metadata=metadata
     )
 
     assert not pd.isna(output.raw_score.mean())

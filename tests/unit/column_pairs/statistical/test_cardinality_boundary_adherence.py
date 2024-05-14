@@ -1,11 +1,9 @@
-
 import pandas as pd
 
 from sdmetrics.column_pairs.statistical import CardinalityBoundaryAdherence
 
 
 class TestCardinalityBoundaryAdherence:
-
     def test_compute_breakdown(self):
         """Test the ``compute_breakdown`` method."""
         # Setup

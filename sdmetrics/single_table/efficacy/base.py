@@ -59,7 +59,7 @@ class MLEfficacyMetric(SingleTableMetric):
             pipeline = Pipeline([
                 ('imputer', SimpleImputer()),
                 ('scaler', RobustScaler()),
-                ('model', model)
+                ('model', model),
             ])
 
             pipeline.fit(train_data, train_target)
@@ -70,8 +70,7 @@ class MLEfficacyMetric(SingleTableMetric):
 
     @classmethod
     def _validate_inputs(cls, test_data, train_data, metadata, target):
-        test_data, train_data, metadata = super()._validate_inputs(
-            test_data, train_data, metadata)
+        test_data, train_data, metadata = super()._validate_inputs(test_data, train_data, metadata)
         if 'target' in metadata:
             target = metadata['target']
         elif target is None:

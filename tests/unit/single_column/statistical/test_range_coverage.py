@@ -7,7 +7,6 @@ from sdmetrics.single_column.statistical import RangeCoverage
 
 
 class TestRangeCoverage:
-
     def test_compute(self):
         """Test the ``compute`` method.
 

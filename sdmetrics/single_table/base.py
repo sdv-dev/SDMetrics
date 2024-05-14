@@ -7,8 +7,7 @@ import pandas as pd
 
 from sdmetrics.base import BaseMetric
 from sdmetrics.errors import IncomputableMetricError
-from sdmetrics.utils import (
-    get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta)
+from sdmetrics.utils import get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta
 
 
 class SingleTableMetric(BaseMetric):
@@ -34,21 +33,11 @@ class SingleTableMetric(BaseMetric):
     max_value = None
 
     _DTYPES_TO_TYPES = {
-        'i': {
-            'sdtype': 'numerical'
-        },
-        'f': {
-            'sdtype': 'numerical'
-        },
-        'O': {
-            'sdtype': 'categorical'
-        },
-        'b': {
-            'sdtype': 'boolean'
-        },
-        'M': {
-            'sdtype': 'datetime'
-        }
+        'i': {'sdtype': 'numerical'},
+        'f': {'sdtype': 'numerical'},
+        'O': {'sdtype': 'categorical'},
+        'b': {'sdtype': 'boolean'},
+        'M': {'sdtype': 'datetime'},
     }
 
     @classmethod
@@ -71,7 +60,7 @@ class SingleTableMetric(BaseMetric):
         """
         fields = []
         if isinstance(types, str):
-            types = (types, )
+            types = (types,)
 
         primary_key = metadata.get('primary_key', '')
         alternate_keys = get_alternate_keys(metadata)
@@ -82,7 +71,7 @@ class SingleTableMetric(BaseMetric):
 
             field_type = get_type_from_column_meta(field_meta)
             field_subtype = field_meta.get('subtype')
-            if any(t in types for t in (field_type, (field_type, ), (field_type, field_subtype))):
+            if any(t in types for t in (field_type, (field_type,), (field_type, field_subtype))):
                 fields.append(field_name)
 
         if len(fields) == 0:
@@ -132,9 +121,9 @@ class SingleTableMetric(BaseMetric):
                 if field not in real_data.columns:
                     raise ValueError(f'Field {field} not found in data')
                 if (
-                    field_type == 'datetime' and
-                    'datetime_format' in field_meta and
-                    real_data[field].dtype == 'O'
+                    field_type == 'datetime'
+                    and 'datetime_format' in field_meta
+                    and real_data[field].dtype == 'O'
                 ):
                     dt_format = field_meta['datetime_format']
                     real_data[field] = pd.to_datetime(real_data[field], format=dt_format)
@@ -143,9 +132,13 @@ class SingleTableMetric(BaseMetric):
             return real_data, synthetic_data, metadata
 
         dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
-        return real_data, synthetic_data, {
-            'columns': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
-        }
+        return (
+            real_data,
+            synthetic_data,
+            {
+                'columns': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
+            },
+        )
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None):

@@ -5,7 +5,9 @@ import pandas as pd
 import pytest
 
 from sdmetrics.multi_table.statistical import (
-    CardinalityShapeSimilarity, CardinalityStatisticSimilarity)
+    CardinalityShapeSimilarity,
+    CardinalityStatisticSimilarity,
+)
 
 METRICS = [CardinalityShapeSimilarity, CardinalityStatisticSimilarity]
 
@@ -66,11 +68,7 @@ def bad_data():
 
 METADATA = {
     'tables': {
-        'parent': {
-            'columns': {
-                'id': {}
-            }
-        },
+        'parent': {'columns': {'id': {}}},
         'child': {
             'columns': {
                 'parent_id': {},
@@ -82,9 +80,9 @@ METADATA = {
             'parent_table_name': 'parent',
             'parent_primary_key': 'id',
             'child_table_name': 'child',
-            'child_foreign_key': 'parent_id'
+            'child_foreign_key': 'parent_id',
         }
-    ]
+    ],
 }
 
 

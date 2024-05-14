@@ -9,10 +9,7 @@ from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.utils import nested_attrs_meta
 
 
-class MultiColumnPairsMetric(
-    SingleTableMetric,
-    metaclass=nested_attrs_meta('column_pairs_metric')
-):
+class MultiColumnPairsMetric(SingleTableMetric, metaclass=nested_attrs_meta('column_pairs_metric')):
     """SingleTableMetric subclass that applies a ColumnPairsMetric on each possible column pair.
 
     Attributes:
@@ -64,7 +61,8 @@ class MultiColumnPairsMetric(
                 Metric output.
         """
         real_data, synthetic_data, metadata = self._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
 
         fields = self._select_fields(metadata, self.field_types)
 
@@ -117,7 +115,8 @@ class MultiColumnPairsMetric(
                 Metric output.
         """
         real_data, synthetic_data, metadata = cls._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
 
         fields = cls._select_fields(metadata, cls.field_types)
 
@@ -127,7 +126,8 @@ class MultiColumnPairsMetric(
             real = real_data[list(sorted_columns)]
             synthetic = synthetic_data[list(sorted_columns)]
             breakdown[sorted_columns] = cls.column_pairs_metric.compute_breakdown(
-                real, synthetic, **kwargs)
+                real, synthetic, **kwargs
+            )
 
         return breakdown
 
@@ -169,7 +169,7 @@ class ContinuousKLDivergence(MultiColumnPairsMetric):
             Field types to which the SingleColumn metric will be applied.
     """
 
-    field_types = ('numerical', )
+    field_types = ('numerical',)
     column_pairs_metric = column_pairs.statistical.kl_divergence.ContinuousKLDivergence
 
 

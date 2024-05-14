@@ -9,9 +9,7 @@ from sdmetrics.reports.single_table._properties.structure import Structure
 
 
 class TestStructure:
-
-    @patch('sdmetrics.reports.single_table._properties.structure.'
-           'TableStructure.compute')
+    @patch('sdmetrics.reports.single_table._properties.structure.' 'TableStructure.compute')
     def test__generate_details(self, table_format_mock):
         """Test the ``_generate_details`` method."""
         # Setup
@@ -38,35 +36,38 @@ class TestStructure:
 
         # Assert
         table_format_mock.assert_called_once_with(
-            real_data, synthetic_data,
+            real_data,
+            synthetic_data,
         )
 
-        expected_details = pd.DataFrame({
-            'Metric': 'TableStructure',
-            'Score': 0.75,
-        }, index=[0])
+        expected_details = pd.DataFrame(
+            {
+                'Metric': 'TableStructure',
+                'Score': 0.75,
+            },
+            index=[0],
+        )
         pd.testing.assert_frame_equal(result, expected_details)
 
-    @patch('sdmetrics.reports.single_table._properties.structure.'
-           'TableStructure.compute')
+    @patch('sdmetrics.reports.single_table._properties.structure.' 'TableStructure.compute')
     def test__generate_details_with_id_column(self, table_format_mock):
         """Test the ``_generate_details`` method."""
         # Setup
         real_data = pd.DataFrame({
             'col1': [1, 2, np.nan],
             'col2': [False, True, True],
-            'id': [1, 2, 3]
+            'id': [1, 2, 3],
         })
         synthetic_data = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
-            'id': [1, 2, 3]
+            'id': [1, 2, 3],
         })
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'boolean'},
-                'id': {'sdtype': 'id'}
+                'id': {'sdtype': 'id'},
             }
         }
 
@@ -77,14 +78,15 @@ class TestStructure:
         result = structure_property._generate_details(real_data, synthetic_data, metadata)
 
         # Assert
-        table_format_mock.assert_called_once_with(
-            real_data, synthetic_data
-        )
+        table_format_mock.assert_called_once_with(real_data, synthetic_data)
 
-        expected_details = pd.DataFrame({
-            'Metric': 'TableStructure',
-            'Score': 0.75,
-        }, index=[0])
+        expected_details = pd.DataFrame(
+            {
+                'Metric': 'TableStructure',
+                'Score': 0.75,
+            },
+            index=[0],
+        )
         pd.testing.assert_frame_equal(result, expected_details)
 
     def test_get_visualization(self):
@@ -94,8 +96,7 @@ class TestStructure:
 
         # Run and Assert
         expected_message = (
-            'The single table Structure property does not have a'
-            ' supported visualization.'
+            'The single table Structure property does not have a' ' supported visualization.'
         )
         with pytest.raises(VisualizationUnavailableError, match=expected_message):
             structure_property.get_visualization()

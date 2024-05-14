@@ -5,8 +5,13 @@ import numpy as np
 import pandas as pd
 
 from sdmetrics.utils import (
-    HyperTransformer, get_alternate_keys, get_cardinality_distribution, get_columns_from_metadata,
-    get_missing_percentage, get_type_from_column_meta)
+    HyperTransformer,
+    get_alternate_keys,
+    get_cardinality_distribution,
+    get_columns_from_metadata,
+    get_missing_percentage,
+    get_type_from_column_meta,
+)
 
 
 def test_get_cardinality_distribution():
@@ -122,7 +127,6 @@ def test_get_alternate_keys():
 
 
 class TestHyperTransformer:
-
     @patch('sdmetrics.utils.OneHotEncoder')
     def test_fit(self, one_hot_encoder_mock):
         """Test the ``fit`` method.
@@ -151,7 +155,7 @@ class TestHyperTransformer:
         assert ht.column_transforms == {
             'numerical': {'mean': 2.0},
             'categorical': {'one_hot_encoder': one_hot_encoder_mock.return_value},
-            'datetime': {'mean': 1.6120224e+18},
+            'datetime': {'mean': 1.6120224e18},
             'boolean': {'mode': 0.0},
         }
         assert ht.column_kind == {
@@ -187,7 +191,7 @@ class TestHyperTransformer:
         ht.column_transforms = {
             'numerical': {'mean': 2.0},
             'categorical': {'one_hot_encoder': enc},
-            'datetime': {'mean': 1.6120224e+18},
+            'datetime': {'mean': 1.6120224e18},
             'boolean': {'mode': 0.0},
         }
         ht.column_kind = {
@@ -203,7 +207,7 @@ class TestHyperTransformer:
         # Assert
         expected = pd.DataFrame({
             'numerical': [1.0, 2.0, 3.0],
-            'datetime': [1.577837e+18, 1.612138e+18, 1.646093e+18],
+            'datetime': [1.577837e18, 1.612138e18, 1.646093e18],
             'boolean': [1.0, 0.0, 0.0],
             'categorical_value0': [1, 0, 0],
             'categorical_value1': [0, 1, 0],

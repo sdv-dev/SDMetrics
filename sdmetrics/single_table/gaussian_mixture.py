@@ -1,4 +1,5 @@
 """GaussianMixture based metrics for single table."""
+
 import itertools
 import logging
 
@@ -48,7 +49,7 @@ class GMLogLikelihood(SingleTableMetric):
             min_comp, max_comp = n_components
 
         if isinstance(covariance_type, str):
-            covariance_type = (covariance_type, )
+            covariance_type = (covariance_type,)
 
         combinations = list(itertools.product(range(min_comp, max_comp + 1), covariance_type))
         if len(combinations) == 1:
@@ -76,8 +77,16 @@ class GMLogLikelihood(SingleTableMetric):
         return best
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, n_components=(1, 30),
-                covariance_type='diag', iterations=3, retries=3):
+    def compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        n_components=(1, 30),
+        covariance_type='diag',
+        iterations=3,
+        retries=3,
+    ):
         """Compute this metric.
 
         This fits multiple GaussianMixture models to the real data and then
@@ -122,7 +131,8 @@ class GMLogLikelihood(SingleTableMetric):
                 Average score returned by the GaussianMixtures.
         """
         real_data, synthetic_data, metadata = cls._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
         fields = cls._select_fields(metadata, 'numerical')
 
         real_data = real_data[fields]
@@ -137,8 +147,9 @@ class GMLogLikelihood(SingleTableMetric):
                 return np.nan
 
             n_components, covariance_type = best_gmm
-            LOGGER.debug('n_components=%s and covariance_type=%s selected',
-                         n_components, covariance_type)
+            LOGGER.debug(
+                'n_components=%s and covariance_type=%s selected', n_components, covariance_type
+            )
 
         scores = []
         for _ in range(iterations * retries):

@@ -1,13 +1,20 @@
 """Test utility methods for single table report plots."""
+
 from unittest.mock import Mock, call, patch
 
 import numpy as np
 import pandas as pd
 
 from sdmetrics.reports.single_table.plot_utils import (
-    _get_column_shapes_data, _get_numerical_correlation_matrices,
-    _get_similarity_correlation_matrix, get_column_boundaries_plot, get_column_coverage_plot,
-    get_column_pairs_plot, get_column_shapes_plot, get_synthesis_plot)
+    _get_column_shapes_data,
+    _get_numerical_correlation_matrices,
+    _get_similarity_correlation_matrix,
+    get_column_boundaries_plot,
+    get_column_coverage_plot,
+    get_column_pairs_plot,
+    get_column_shapes_plot,
+    get_synthesis_plot,
+)
 
 
 def test__get_column_shapes_data():
@@ -36,11 +43,14 @@ def test__get_column_shapes_data():
     out = _get_column_shapes_data(score_breakdowns)
 
     # Assert
-    pd.testing.assert_frame_equal(out, pd.DataFrame({
-        'Column Name': ['col2', 'col3', 'col1'],
-        'Metric': ['METRIC1', 'METRIC1', 'METRIC2'],
-        'Score': [0.1, 0.3, 0.2],
-    }))
+    pd.testing.assert_frame_equal(
+        out,
+        pd.DataFrame({
+            'Column Name': ['col2', 'col3', 'col1'],
+            'Metric': ['METRIC1', 'METRIC1', 'METRIC2'],
+            'Score': [0.1, 0.3, 0.2],
+        }),
+    )
 
 
 @patch('sdmetrics.reports.single_table.plot_utils.px.bar')
@@ -185,7 +195,8 @@ def test__get_numerical_correlation_matrices():
 
     # Run
     (real_correlation, synthetic_correlation) = _get_numerical_correlation_matrices(
-        score_breakdowns)
+        score_breakdowns
+    )
 
     # Assert
     expected_real = pd.DataFrame(

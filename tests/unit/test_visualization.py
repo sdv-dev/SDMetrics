@@ -5,9 +5,17 @@ import pandas as pd
 import pytest
 
 from sdmetrics.visualization import (
-    _generate_box_plot, _generate_cardinality_plot, _generate_heatmap_plot, _generate_line_plot,
-    _generate_scatter_plot, _get_cardinality, get_cardinality_plot, get_column_line_plot,
-    get_column_pair_plot, get_column_plot)
+    _generate_box_plot,
+    _generate_cardinality_plot,
+    _generate_heatmap_plot,
+    _generate_line_plot,
+    _generate_scatter_plot,
+    _get_cardinality,
+    get_cardinality_plot,
+    get_column_line_plot,
+    get_column_pair_plot,
+    get_column_plot,
+)
 from tests.utils import DataFrameMatcher, SeriesMatcher
 
 
@@ -16,11 +24,11 @@ def test_get_cardinality():
     # Setup
     parent_table = pd.DataFrame({
         'id': [1, 2, 3, 4, 5],
-        'name': ['Alice', 'Bob', 'Charlie', 'Dave', 'Eve']
+        'name': ['Alice', 'Bob', 'Charlie', 'Dave', 'Eve'],
     })
     child_table = pd.DataFrame({
         'id': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'parent_id': [1, 1, 2, 2, 2, 3, 3, 3, 3, 4]
+        'parent_id': [1, 1, 2, 2, 2, 3, 3, 3, 3, 4],
     })
     parent_primary_key = 'id'
     child_foreign_key = 'parent_id'
@@ -44,7 +52,7 @@ def test_generate_cardinality_bar_plot(mock_px):
     mock_synthetic_data = pd.Series([3, 3, 4])
     mock_data = pd.DataFrame({
         'values': [1, 1, 2, 2, 2, 3, 3, 4],
-        'Data': [*['Real'] * 5, *['Synthetic'] * 3]
+        'Data': [*['Real'] * 5, *['Synthetic'] * 3],
     })
 
     parent_primary_key = 'parent_key'
@@ -56,10 +64,8 @@ def test_generate_cardinality_bar_plot(mock_px):
 
     # Run
     _generate_cardinality_plot(
-        mock_real_data,
-        mock_synthetic_data,
-        parent_primary_key,
-        child_foreign_key)
+        mock_real_data, mock_synthetic_data, parent_primary_key, child_foreign_key
+    )
 
     # Expected call
     expected_kwargs = {
@@ -70,7 +76,7 @@ def test_generate_cardinality_bar_plot(mock_px):
         'pattern_shape': 'Data',
         'pattern_shape_sequence': ['', '/'],
         'nbins': 4,
-        'histnorm': 'probability density'
+        'histnorm': 'probability density',
     }
 
     # Assert
@@ -88,14 +94,14 @@ def test_generate_cardinality_bar_plot(mock_px):
         yaxis_title='Frequency',
         plot_bgcolor='#F5F5F8',
         annotations=[],
-        font={'size': 18}
+        font={'size': 18},
     )
 
     for i, name in enumerate(['Real', 'Synthetic']):
         mock_fig.update_traces.assert_any_call(
             x=mock_fig.data[i].x,
             hovertemplate=f'<b>{name}</b><br>Frequency: %{{y}}<extra></extra>',
-            selector={'name': name}
+            selector={'name': name},
         )
 
 
@@ -114,21 +120,23 @@ def test_generate_cardinality_distplot(mock_ff):
     mock_fig.data = [Mock(), Mock()]
 
     # Run
-    _generate_cardinality_plot(mock_real_data, mock_synthetic_data, parent_primary_key,
-                               child_foreign_key, plot_type='distplot')
+    _generate_cardinality_plot(
+        mock_real_data,
+        mock_synthetic_data,
+        parent_primary_key,
+        child_foreign_key,
+        plot_type='distplot',
+    )
 
     # Expected call
-    expected_kwargs = {
-        'show_hist': False,
-        'show_rug': False,
-        'colors': ['#000036', '#01E0C9']
-    }
+    expected_kwargs = {'show_hist': False, 'show_rug': False, 'colors': ['#000036', '#01E0C9']}
 
     # Assert
     mock_ff.create_distplot.assert_called_once_with(
         [SeriesMatcher(mock_real_data), SeriesMatcher(mock_synthetic_data)],
         ['Real', 'Synthetic'],
-        **expected_kwargs)
+        **expected_kwargs,
+    )
 
     title = (
         f"Relationship (child foreign key='{child_foreign_key}' and parent "
@@ -142,7 +150,7 @@ def test_generate_cardinality_distplot(mock_ff):
         yaxis_title='Frequency',
         plot_bgcolor='#F5F5F8',
         annotations=[],
-        font={'size': 18}
+        font={'size': 18},
     )
 
     for i, name in enumerate(['Real', 'Synthetic']):
@@ -150,7 +158,7 @@ def test_generate_cardinality_distplot(mock_ff):
             x=mock_fig.data[i].x,
             fill='tozeroy',
             hovertemplate=f'<b>{name}</b><br>Frequency: %{{y}}<extra></extra>',
-            selector={'name': name}
+            selector={'name': name},
         )
 
 
@@ -174,8 +182,12 @@ def test_get_cardinality_plot(mock_generate_cardinality_plot, mock_get_cardinali
 
     # Run
     fig = get_cardinality_plot(
-        real_data, synthetic_data, child_table_name, parent_table_name,
-        child_foreign_key, parent_primary_key
+        real_data,
+        synthetic_data,
+        child_table_name,
+        parent_table_name,
+        child_foreign_key,
+        parent_primary_key,
     )
 
     # Assert
@@ -184,16 +196,14 @@ def test_get_cardinality_plot(mock_generate_cardinality_plot, mock_get_cardinali
     # Check the calls
     calls = [
         call(real_data['table1'], real_data['table2'], 'parent_key', 'child_key'),
-        call(synthetic_data['table1'], synthetic_data['table2'], 'parent_key', 'child_key')
+        call(synthetic_data['table1'], synthetic_data['table2'], 'parent_key', 'child_key'),
     ]
     mock_get_cardinality.assert_has_calls(calls)
 
     real_cardinality['data'] = 'Real'
     synthetic_cardinality['data'] = 'Synthetic'
 
-    pd.testing.assert_series_equal(
-        real_cardinality, mock_generate_cardinality_plot.call_args[0][0]
-    )
+    pd.testing.assert_series_equal(real_cardinality, mock_generate_cardinality_plot.call_args[0][0])
     pd.testing.assert_series_equal(
         synthetic_cardinality, mock_generate_cardinality_plot.call_args[0][1]
     )
@@ -220,8 +230,13 @@ def test_get_cardinality_plot_bad_plot_type():
     match = re.escape("Invalid plot_type 'bad_type'. Please use one of ['bar', 'distplot'].")
     with pytest.raises(ValueError, match=match):
         get_cardinality_plot(
-            real_data, synthetic_data, child_table_name, parent_table_name, child_foreign_key,
-            parent_primary_key, plot_type='bad_type'
+            real_data,
+            synthetic_data,
+            child_table_name,
+            parent_table_name,
+            child_foreign_key,
+            parent_primary_key,
+            plot_type='bad_type',
         )
 
 
@@ -265,9 +280,7 @@ def test_get_column_plot_plot_type_none_data_int(mock__generate_column_plot):
 
     # Assert
     mock__generate_column_plot.assert_called_once_with(
-        real_data['values'],
-        synthetic_data['values'],
-        'distplot'
+        real_data['values'], synthetic_data['values'], 'distplot'
     )
     assert figure == mock__generate_column_plot.return_value
 
@@ -276,17 +289,15 @@ def test_get_column_plot_plot_type_none_data_int(mock__generate_column_plot):
 def test_get_column_plot_plot_type_none_data_float(mock__generate_column_plot):
     """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``float``."""
     # Setup
-    real_data = pd.DataFrame({'values': [1., 2., 2., 3., 5.]})
-    synthetic_data = pd.DataFrame({'values': [2., 2., 3., 4., 5.]})
+    real_data = pd.DataFrame({'values': [1.0, 2.0, 2.0, 3.0, 5.0]})
+    synthetic_data = pd.DataFrame({'values': [2.0, 2.0, 3.0, 4.0, 5.0]})
 
     # Run
     figure = get_column_plot(real_data, synthetic_data, 'values')
 
     # Assert
     mock__generate_column_plot.assert_called_once_with(
-        real_data['values'],
-        synthetic_data['values'],
-        'distplot'
+        real_data['values'], synthetic_data['values'], 'distplot'
     )
     assert figure == mock__generate_column_plot.return_value
 
@@ -303,9 +314,7 @@ def test_get_column_plot_plot_type_none_data_datetime(mock__generate_column_plot
 
     # Assert
     mock__generate_column_plot.assert_called_once_with(
-        real_data['values'],
-        synthetic_data['values'],
-        'distplot'
+        real_data['values'], synthetic_data['values'], 'distplot'
     )
     assert figure == mock__generate_column_plot.return_value
 
@@ -322,9 +331,7 @@ def test_get_column_plot_plot_type_none_data_category(mock__generate_column_plot
 
     # Assert
     mock__generate_column_plot.assert_called_once_with(
-        real_data['values'],
-        synthetic_data['values'],
-        'bar'
+        real_data['values'], synthetic_data['values'], 'bar'
     )
     assert figure == mock__generate_column_plot.return_value
 
@@ -333,17 +340,15 @@ def test_get_column_plot_plot_type_none_data_category(mock__generate_column_plot
 def test_get_column_plot_plot_type_bar(mock__generate_column_plot):
     """Test ``get_column_plot`` when ``plot_type`` is ``bar``."""
     # Setup
-    real_data = pd.DataFrame({'values': [1., 2., 2., 3., 5.]})
-    synthetic_data = pd.DataFrame({'values': [2., 2., 3., 4., 5.]})
+    real_data = pd.DataFrame({'values': [1.0, 2.0, 2.0, 3.0, 5.0]})
+    synthetic_data = pd.DataFrame({'values': [2.0, 2.0, 3.0, 4.0, 5.0]})
 
     # Run
     figure = get_column_plot(real_data, synthetic_data, 'values', plot_type='bar')
 
     # Assert
     mock__generate_column_plot.assert_called_once_with(
-        real_data['values'],
-        synthetic_data['values'],
-        'bar'
+        real_data['values'], synthetic_data['values'], 'bar'
     )
     assert figure == mock__generate_column_plot.return_value
 
@@ -360,9 +365,7 @@ def test_get_column_plot_plot_type_distplot(mock__generate_column_plot):
 
     # Assert
     mock__generate_column_plot.assert_called_once_with(
-        real_data['values'],
-        synthetic_data['values'],
-        'distplot'
+        real_data['values'], synthetic_data['values'], 'distplot'
     )
     assert figure == mock__generate_column_plot.return_value
 
@@ -374,12 +377,12 @@ def test__generate_scatter_plot(px_mock):
     real_column = pd.DataFrame({
         'col1': [1, 2, 3, 4],
         'col2': [1.1, 1.2, 1.3, 1.4],
-        'Data': ['Real'] * 4
+        'Data': ['Real'] * 4,
     })
     synthetic_column = pd.DataFrame({
         'col1': [1, 2, 4, 5],
         'col2': [1.1, 1.2, 1.3, 1.4],
-        'Data': ['Synthetic'] * 4
+        'Data': ['Synthetic'] * 4,
     })
 
     all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
@@ -392,20 +395,22 @@ def test__generate_scatter_plot(px_mock):
 
     # Assert
     px_mock.scatter.assert_called_once_with(
-        DataFrameMatcher(pd.DataFrame({
-            'col1': [1, 2, 3, 4, 1, 2, 4, 5],
-            'col2': [1.1, 1.2, 1.3, 1.4, 1.1, 1.2, 1.3, 1.4],
-            'Data': [
-                'Real',
-                'Real',
-                'Real',
-                'Real',
-                'Synthetic',
-                'Synthetic',
-                'Synthetic',
-                'Synthetic',
-            ],
-        })),
+        DataFrameMatcher(
+            pd.DataFrame({
+                'col1': [1, 2, 3, 4, 1, 2, 4, 5],
+                'col2': [1.1, 1.2, 1.3, 1.4, 1.1, 1.2, 1.3, 1.4],
+                'Data': [
+                    'Real',
+                    'Real',
+                    'Real',
+                    'Real',
+                    'Synthetic',
+                    'Synthetic',
+                    'Synthetic',
+                    'Synthetic',
+                ],
+            })
+        ),
         x='col1',
         y='col2',
         color='Data',
@@ -423,12 +428,12 @@ def test__generate_heatmap_plot(px_mock):
     real_column = pd.DataFrame({
         'col1': [1, 2, 3, 4],
         'col2': ['a', 'b', 'c', 'd'],
-        'Data': ['Real'] * 4
+        'Data': ['Real'] * 4,
     })
     synthetic_column = pd.DataFrame({
         'col1': [1, 2, 4, 5],
         'col2': ['a', 'b', 'c', 'd'],
-        'Data': ['Synthetic'] * 4
+        'Data': ['Synthetic'] * 4,
     })
     columns = ['col1', 'col2']
     all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
@@ -441,20 +446,22 @@ def test__generate_heatmap_plot(px_mock):
 
     # Assert
     px_mock.density_heatmap.assert_called_once_with(
-        DataFrameMatcher(pd.DataFrame({
-            'col1': [1, 2, 3, 4, 1, 2, 4, 5],
-            'col2': ['a', 'b', 'c', 'd', 'a', 'b', 'c', 'd'],
-            'Data': [
-                'Real',
-                'Real',
-                'Real',
-                'Real',
-                'Synthetic',
-                'Synthetic',
-                'Synthetic',
-                'Synthetic',
-            ],
-        })),
+        DataFrameMatcher(
+            pd.DataFrame({
+                'col1': [1, 2, 3, 4, 1, 2, 4, 5],
+                'col2': ['a', 'b', 'c', 'd', 'a', 'b', 'c', 'd'],
+                'Data': [
+                    'Real',
+                    'Real',
+                    'Real',
+                    'Real',
+                    'Synthetic',
+                    'Synthetic',
+                    'Synthetic',
+                    'Synthetic',
+                ],
+            })
+        ),
         x='col1',
         y='col2',
         facet_col='Data',
@@ -469,44 +476,43 @@ def test__generate_heatmap_plot(px_mock):
 def test__generate_line_plot(px_mock):
     """Test the ``_generate_line_plot`` method."""
     # Setup
-    real_data = pd.DataFrame({
-        'colX': [1, 2, 3, 4],
-        'colY': [10, 4, 20, 21],
-        'Data': ['Real'] * 4
-    })
+    real_data = pd.DataFrame({'colX': [1, 2, 3, 4], 'colY': [10, 4, 20, 21], 'Data': ['Real'] * 4})
     synthetic_data = pd.DataFrame({
         'colX': [1, 2, 4, 5],
         'colY': [6, 11, 9, 18],
-        'Data': ['Synthetic'] * 4
+        'Data': ['Synthetic'] * 4,
     })
 
     mock_figure = Mock()
     px_mock.line.return_value = mock_figure
 
     # Run
-    fig = _generate_line_plot(real_data, synthetic_data, x_axis='colX',
-                              y_axis='colY', marker='Data')
+    fig = _generate_line_plot(
+        real_data, synthetic_data, x_axis='colX', y_axis='colY', marker='Data'
+    )
 
     # Assert
     px_mock.line.assert_called_once_with(
-        DataFrameMatcher(pd.DataFrame({
-            'colX': [1, 2, 3, 4, 1, 2, 4, 5],
-            'colY': [10, 4, 20, 21, 6, 11, 9, 18],
-            'Data': [
-                'Real',
-                'Real',
-                'Real',
-                'Real',
-                'Synthetic',
-                'Synthetic',
-                'Synthetic',
-                'Synthetic',
-            ],
-        })),
+        DataFrameMatcher(
+            pd.DataFrame({
+                'colX': [1, 2, 3, 4, 1, 2, 4, 5],
+                'colY': [10, 4, 20, 21, 6, 11, 9, 18],
+                'Data': [
+                    'Real',
+                    'Real',
+                    'Real',
+                    'Real',
+                    'Synthetic',
+                    'Synthetic',
+                    'Synthetic',
+                    'Synthetic',
+                ],
+            })
+        ),
         x='colX',
         y='colY',
         color='Data',
-        color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'}
+        color_discrete_map={'Real': '#000036', 'Synthetic': '#01E0C9'},
     )
     mock_figure.update_layout.assert_called_once()
     mock_figure.for_each_annotation.assert_not_called()
@@ -516,7 +522,7 @@ def test__generate_line_plot(px_mock):
     bad_data = pd.DataFrame({
         'colX': [1, 'bad_value', 4, 5],
         'colY': [6, 7, 9, 18],
-        'Data': ['Synthetic'] * 4
+        'Data': ['Synthetic'] * 4,
     })
 
     # Run and Assert
@@ -528,7 +534,7 @@ def test__generate_line_plot(px_mock):
     bad_column = pd.DataFrame({
         'colX': [1, 2, 4, 5],
         'colY': [6, 'bad_value', 9, 18],
-        'Data': ['Synthetic'] * 4
+        'Data': ['Synthetic'] * 4,
     })
 
     # Run and Assert
@@ -544,12 +550,12 @@ def test__generate_box_plot(px_mock):
     real_column = pd.DataFrame({
         'col1': [1, 2, 3, 4],
         'col2': ['a', 'b', 'c', 'd'],
-        'Data': ['Real'] * 4
+        'Data': ['Real'] * 4,
     })
     synthetic_column = pd.DataFrame({
         'col1': [1, 2, 4, 5],
         'col2': ['a', 'b', 'c', 'd'],
-        'Data': ['Synthetic'] * 4
+        'Data': ['Synthetic'] * 4,
     })
     columns = ['col1', 'col2']
     all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
@@ -562,20 +568,22 @@ def test__generate_box_plot(px_mock):
 
     # Assert
     px_mock.box.assert_called_once_with(
-        DataFrameMatcher(pd.DataFrame({
-            'col1': [1, 2, 3, 4, 1, 2, 4, 5],
-            'col2': ['a', 'b', 'c', 'd', 'a', 'b', 'c', 'd'],
-            'Data': [
-                'Real',
-                'Real',
-                'Real',
-                'Real',
-                'Synthetic',
-                'Synthetic',
-                'Synthetic',
-                'Synthetic',
-            ],
-        })),
+        DataFrameMatcher(
+            pd.DataFrame({
+                'col1': [1, 2, 3, 4, 1, 2, 4, 5],
+                'col2': ['a', 'b', 'c', 'd', 'a', 'b', 'c', 'd'],
+                'Data': [
+                    'Real',
+                    'Real',
+                    'Real',
+                    'Real',
+                    'Synthetic',
+                    'Synthetic',
+                    'Synthetic',
+                    'Synthetic',
+                ],
+            })
+        ),
         x='col1',
         y='col2',
         color='Data',
@@ -642,7 +650,7 @@ def test_get_column_pair_plot_plot_type_none_continuous_data(mock__generate_scat
     # Setup
     columns = ['amount', 'price']
     real_data = pd.DataFrame({'amount': [1, 2, 3], 'price': [4, 5, 6]})
-    synthetic_data = pd.DataFrame({'amount': [1., 2., 3.], 'price': [4., 5., 6.]})
+    synthetic_data = pd.DataFrame({'amount': [1.0, 2.0, 3.0], 'price': [4.0, 5.0, 6.0]})
 
     # Run
     fig = get_column_pair_plot(real_data, synthetic_data, columns)
@@ -653,8 +661,7 @@ def test_get_column_pair_plot_plot_type_none_continuous_data(mock__generate_scat
     expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
 
     mock__generate_scatter_plot.assert_called_once_with(
-        DataFrameMatcher(expected_call_data),
-        ['amount', 'price']
+        DataFrameMatcher(expected_call_data), ['amount', 'price']
     )
     assert fig == mock__generate_scatter_plot.return_value
 
@@ -669,7 +676,7 @@ def test_get_column_pair_plot_plot_type_none_continuous_data_and_date(mock__gene
         'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
     })
     synthetic_data = pd.DataFrame({
-        'amount': [1., 2., 3.],
+        'amount': [1.0, 2.0, 3.0],
         'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
     })
 
@@ -693,14 +700,8 @@ def test_get_column_pair_plot_plot_type_none_discrete_data(mock__generate_heatma
     """Test ``get_column_pair_plot`` with discrete data and ``plot_type`` ``None``."""
     # Setup
     columns = ['name', 'surname']
-    real_data = pd.DataFrame({
-        'name': ['John', 'Emily'],
-        'surname': ['Morales', 'Terry']
-    })
-    synthetic_data = pd.DataFrame({
-        'name': ['John', 'Johanna'],
-        'surname': ['Dominic', 'Rogers']
-    })
+    real_data = pd.DataFrame({'name': ['John', 'Emily'], 'surname': ['Morales', 'Terry']})
+    synthetic_data = pd.DataFrame({'name': ['John', 'Johanna'], 'surname': ['Dominic', 'Rogers']})
 
     # Run
     fig = get_column_pair_plot(real_data, synthetic_data, columns)
@@ -722,14 +723,8 @@ def test_get_column_pair_plot_plot_type_none_discrete_and_continuous(mock__gener
     """Test ``get_column_pair_plot`` with discrete and continuous data."""
     # Setup
     columns = ['name', 'counts']
-    real_data = pd.DataFrame({
-        'name': ['John', 'Emily'],
-        'counts': [1, 2]
-    })
-    synthetic_data = pd.DataFrame({
-        'name': ['John', 'Johanna'],
-        'counts': [3, 1]
-    })
+    real_data = pd.DataFrame({'name': ['John', 'Emily'], 'counts': [1, 2]})
+    synthetic_data = pd.DataFrame({'name': ['John', 'Johanna'], 'counts': [3, 1]})
 
     # Run
     fig = get_column_pair_plot(real_data, synthetic_data, columns)
@@ -740,8 +735,7 @@ def test_get_column_pair_plot_plot_type_none_discrete_and_continuous(mock__gener
     expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
 
     mock__generate_box_plot.assert_called_once_with(
-        DataFrameMatcher(expected_call_data),
-        ['name', 'counts']
+        DataFrameMatcher(expected_call_data), ['name', 'counts']
     )
     assert fig == mock__generate_box_plot.return_value
 
@@ -753,11 +747,11 @@ def test_get_column_pair_plot_plot_type_is_box(mock__generate_heatmap_plot):
     columns = ['amount', 'date']
     real_data = pd.DataFrame({
         'amount': [1, 2, 3],
-        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01'])
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
     })
     synthetic_data = pd.DataFrame({
-        'amount': [1., 2., 3.],
-        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01'])
+        'amount': [1.0, 2.0, 3.0],
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
     })
 
     # Run
@@ -769,8 +763,7 @@ def test_get_column_pair_plot_plot_type_is_box(mock__generate_heatmap_plot):
     expected_call_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
 
     mock__generate_heatmap_plot.assert_called_once_with(
-        DataFrameMatcher(expected_call_data),
-        ['amount', 'date']
+        DataFrameMatcher(expected_call_data), ['amount', 'date']
     )
     assert fig == mock__generate_heatmap_plot.return_value
 
@@ -781,38 +774,37 @@ def test_get_column_line_plot(mock__generate_line_plot):
     # Setup
     real_data = pd.DataFrame({
         'amount': [1, 2, 3, 2, 4, 6],
-        'date': pd.to_datetime(
-            [
-                '2021-01-01', '2022-01-01', '2023-01-01',
-                '2021-01-01', '2022-01-01', '2023-01-01'
-            ]
-        ),
+        'date': pd.to_datetime([
+            '2021-01-01',
+            '2022-01-01',
+            '2023-01-01',
+            '2021-01-01',
+            '2022-01-01',
+            '2023-01-01',
+        ]),
         'object': ['a', 'a', 'a', 'b', 'b', 'b'],
     })
     synthetic_data = pd.DataFrame({
-        'amount': [4., 1., 1., 4., 3., 3.],
-        'date': pd.to_datetime(
-            [
-                '2021-01-01', '2022-01-01', '2023-01-01',
-                '2021-01-01', '2022-01-01', '2023-01-01'
-            ]
-        ),
+        'amount': [4.0, 1.0, 1.0, 4.0, 3.0, 3.0],
+        'date': pd.to_datetime([
+            '2021-01-01',
+            '2022-01-01',
+            '2023-01-01',
+            '2021-01-01',
+            '2022-01-01',
+            '2023-01-01',
+        ]),
         'object': ['b', 'b', 'b', 'a', 'a', 'a'],
     })
 
     metadata = {
         'columns': {
-            'amount': {
-                'sdtype': 'numerical',
-                'computer_representation': 'Float'
-            },
-            'date': {
-                'sdtype': 'datetime'
-            },
+            'amount': {'sdtype': 'numerical', 'computer_representation': 'Float'},
+            'date': {'sdtype': 'datetime'},
         },
         'sequence_index': 'date',
         'sequence_key': 'object',
-        'METADATA_SPEC_VERSION': 'SINGLE_TABLE_V1'
+        'METADATA_SPEC_VERSION': 'SINGLE_TABLE_V1',
     }
 
     # Run
@@ -820,26 +812,18 @@ def test_get_column_line_plot(mock__generate_line_plot):
 
     # Assert
     real_data_submitted = pd.DataFrame({
-        'date': pd.to_datetime(
-            [
-                '2021-01-01', '2022-01-01', '2023-01-01'
-            ]
-        ),
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
         'amount': [1.5, 3, 4.5],
         'min': [1, 2, 3],
         'max': [2, 4, 6],
         'Data': ['Real', 'Real', 'Real'],
     })
     synthetic_data_submitted = pd.DataFrame({
-        'date': pd.to_datetime(
-            [
-                '2021-01-01', '2022-01-01', '2023-01-01'
-            ]
-        ),
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
         'amount': [4.0, 2.0, 2.0],
-        'min': [4., 1., 1.],
-        'max': [4., 3., 3.],
-        'Data': ['Synthetic', 'Synthetic', 'Synthetic']
+        'min': [4.0, 1.0, 1.0],
+        'max': [4.0, 3.0, 3.0],
+        'Data': ['Synthetic', 'Synthetic', 'Synthetic'],
     })
     mock__generate_line_plot.assert_called_once_with(
         real_data=DataFrameMatcher(real_data_submitted),
@@ -847,7 +831,7 @@ def test_get_column_line_plot(mock__generate_line_plot):
         x_axis='date',
         y_axis='amount',
         marker='Data',
-        annotations=None
+        annotations=None,
     )
     assert fig == mock__generate_line_plot.return_value
 
@@ -857,34 +841,21 @@ def test_get_column_line_plot_no_sequence_key(mock__generate_line_plot):
     """Test ``get_column_line_plot`` with only a sequence index."""
     # Setup
     real_data = pd.DataFrame({
-        'date': pd.to_datetime(
-            [
-                '2021-01-01', '2022-01-01', '2023-01-01'
-            ]
-        ),
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
         'amount': [1, 2, 3],
     })
     synthetic_data = pd.DataFrame({
-        'date': pd.to_datetime(
-            [
-                '2021-01-01', '2022-01-01', '2023-01-01'
-            ]
-        ),
-        'amount': [4., 1., 1.],
+        'date': pd.to_datetime(['2021-01-01', '2022-01-01', '2023-01-01']),
+        'amount': [4.0, 1.0, 1.0],
     })
 
     metadata = {
         'columns': {
-            'amount': {
-                'sdtype': 'numerical',
-                'computer_representation': 'Float'
-            },
-            'date': {
-                'sdtype': 'datetime'
-            },
+            'amount': {'sdtype': 'numerical', 'computer_representation': 'Float'},
+            'date': {'sdtype': 'datetime'},
         },
         'sequence_index': 'date',
-        'METADATA_SPEC_VERSION': 'SINGLE_TABLE_V1'
+        'METADATA_SPEC_VERSION': 'SINGLE_TABLE_V1',
     }
 
     # Run
@@ -902,7 +873,7 @@ def test_get_column_line_plot_no_sequence_key(mock__generate_line_plot):
         x_axis='date',
         y_axis='amount',
         marker='Data',
-        annotations=None
+        annotations=None,
     )
     assert fig == mock__generate_line_plot.return_value
 
@@ -916,22 +887,24 @@ def test_get_column_line_plot_no_sequence_index(mock__generate_line_plot):
         'object': ['a', 'a', 'a', 'b', 'b', 'b'],
     })
     synthetic_data = pd.DataFrame({
-        'amount': [4., 1., 1., 4., 3., 3., ],
+        'amount': [
+            4.0,
+            1.0,
+            1.0,
+            4.0,
+            3.0,
+            3.0,
+        ],
         'object': ['b', 'b', 'b', 'a', 'a', 'a'],
     })
 
     metadata = {
         'columns': {
-            'amount': {
-                'sdtype': 'numerical',
-                'computer_representation': 'Float'
-            },
-            'date': {
-                'sdtype': 'datetime'
-            },
+            'amount': {'sdtype': 'numerical', 'computer_representation': 'Float'},
+            'date': {'sdtype': 'datetime'},
         },
         'sequence_key': 'object',
-        'METADATA_SPEC_VERSION': 'SINGLE_TABLE_V1'
+        'METADATA_SPEC_VERSION': 'SINGLE_TABLE_V1',
     }
 
     # Run
@@ -951,6 +924,6 @@ def test_get_column_line_plot_no_sequence_index(mock__generate_line_plot):
         x_axis='sequence_index',
         y_axis='amount',
         marker='Data',
-        annotations=None
+        annotations=None,
     )
     assert fig == mock__generate_line_plot.return_value

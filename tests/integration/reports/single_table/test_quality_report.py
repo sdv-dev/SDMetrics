@@ -9,7 +9,6 @@ from sdmetrics.reports.single_table import QualityReport
 
 
 class TestQualityReport:
-
     def test__get_properties(self):
         """Test the properties of the report."""
         # Setup
@@ -56,10 +55,13 @@ class TestQualityReport:
         properties = report.get_properties()
 
         # Assert
-        pd.testing.assert_frame_equal(properties, pd.DataFrame({
-            'Property': ['Column Shapes', 'Column Pair Trends'],
-            'Score': [0.750000, 0.5005754481922459],
-        }))
+        pd.testing.assert_frame_equal(
+            properties,
+            pd.DataFrame({
+                'Property': ['Column Shapes', 'Column Pair Trends'],
+                'Score': [0.750000, 0.5005754481922459],
+            }),
+        )
 
     def test_report_end_to_end(self):
         """Test the quality report end to end.
@@ -67,9 +69,7 @@ class TestQualityReport:
         The report must compute each property and the overall quality score.
         """
         # Setup
-        column_names = [
-            'student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience'
-        ]
+        column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
 
         metadata['columns'] = {
@@ -87,33 +87,48 @@ class TestQualityReport:
             'Column': ['start_date', 'second_perc', 'work_experience', 'degree_type'],
             'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
             'Score': [
-                0.6621621621621622, 0.8976744186046511, 0.9953488372093023, 0.9395348837209302
+                0.6621621621621622,
+                0.8976744186046511,
+                0.9953488372093023,
+                0.9395348837209302,
             ],
         }
 
         expected_details_cpt__dict = {
             'Column 1': [
-                'start_date', 'start_date', 'start_date', 'second_perc',
-                'second_perc', 'work_experience'
+                'start_date',
+                'start_date',
+                'start_date',
+                'second_perc',
+                'second_perc',
+                'work_experience',
             ],
             'Column 2': [
-                'second_perc', 'work_experience', 'degree_type', 'work_experience',
-                'degree_type', 'degree_type'
+                'second_perc',
+                'work_experience',
+                'degree_type',
+                'work_experience',
+                'degree_type',
+                'degree_type',
             ],
             'Metric': [
-                'CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity',
-                'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'
+                'CorrelationSimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
             ],
             'Score': [
-                0.9187918131436303, 0.6744186046511629, 0.7162790697674419, 0.813953488372093,
-                0.772093023255814, 0.9348837209302325
+                0.9187918131436303,
+                0.6744186046511629,
+                0.7162790697674419,
+                0.813953488372093,
+                0.772093023255814,
+                0.9348837209302325,
             ],
-            'Real Correlation': [
-                0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan
-            ],
-            'Synthetic Correlation': [
-                -0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan
-            ]
+            'Real Correlation': [0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan],
+            'Synthetic Correlation': [-0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan],
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
         expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)
@@ -130,8 +145,12 @@ class TestQualityReport:
         assert report_info == report.report_info
 
         expected_info_keys = {
-            'report_type', 'generated_date', 'sdmetrics_version', 'num_rows_real_data',
-            'num_rows_synthetic_data', 'generation_time'
+            'report_type',
+            'generated_date',
+            'sdmetrics_version',
+            'num_rows_real_data',
+            'num_rows_synthetic_data',
+            'generation_time',
         }
         assert report_info.keys() == expected_info_keys
         assert report_info['report_type'] == 'QualityReport'
@@ -145,9 +164,7 @@ class TestQualityReport:
         The report must compute each property and the overall quality score.
         """
         # Setup
-        column_names = [
-            'student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience'
-        ]
+        column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
         for column, column_meta in metadata['columns'].items():
             if column_meta['sdtype'] == 'datetime':
@@ -167,33 +184,48 @@ class TestQualityReport:
             'Column': ['start_date', 'second_perc', 'work_experience', 'degree_type'],
             'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
             'Score': [
-                0.6621621621621622, 0.8976744186046511, 0.9953488372093023, 0.9395348837209302
+                0.6621621621621622,
+                0.8976744186046511,
+                0.9953488372093023,
+                0.9395348837209302,
             ],
         }
 
         expected_details_cpt__dict = {
             'Column 1': [
-                'start_date', 'start_date', 'start_date', 'second_perc',
-                'second_perc', 'work_experience'
+                'start_date',
+                'start_date',
+                'start_date',
+                'second_perc',
+                'second_perc',
+                'work_experience',
             ],
             'Column 2': [
-                'second_perc', 'work_experience', 'degree_type', 'work_experience',
-                'degree_type', 'degree_type'
+                'second_perc',
+                'work_experience',
+                'degree_type',
+                'work_experience',
+                'degree_type',
+                'degree_type',
             ],
             'Metric': [
-                'CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity',
-                'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'
+                'CorrelationSimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
             ],
             'Score': [
-                0.9187918131436303, 0.6744186046511629, 0.7162790697674419, 0.813953488372093,
-                0.772093023255814, 0.9348837209302325
+                0.9187918131436303,
+                0.6744186046511629,
+                0.7162790697674419,
+                0.813953488372093,
+                0.772093023255814,
+                0.9348837209302325,
             ],
-            'Real Correlation': [
-                0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan
-            ],
-            'Synthetic Correlation': [
-                -0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan
-            ]
+            'Real Correlation': [0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan],
+            'Synthetic Correlation': [-0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan],
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
         expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)
@@ -209,9 +241,7 @@ class TestQualityReport:
     def test_report_end_to_end_with_errors(self):
         """Test the quality report end to end with errors in the properties computation."""
         # Setup
-        column_names = [
-            'student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience'
-        ]
+        column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
 
         metadata['columns'] = {
@@ -234,25 +264,42 @@ class TestQualityReport:
                 None,
                 "TypeError: '<' not supported between instances of 'str' and 'float'",
                 None,
-                None
-            ]
+                None,
+            ],
         }
 
         expected_details_cpt__dict = {
             'Column 1': [
-                'start_date', 'start_date', 'start_date', 'second_perc',
-                'second_perc', 'work_experience'
+                'start_date',
+                'start_date',
+                'start_date',
+                'second_perc',
+                'second_perc',
+                'work_experience',
             ],
             'Column 2': [
-                'second_perc', 'work_experience', 'degree_type', 'work_experience',
-                'degree_type', 'degree_type'
+                'second_perc',
+                'work_experience',
+                'degree_type',
+                'work_experience',
+                'degree_type',
+                'degree_type',
             ],
             'Metric': [
-                'CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity',
-                'ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'
+                'CorrelationSimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
             ],
             'Score': [
-                np.nan, 0.6744186046511629, 0.7162790697674419, np.nan, np.nan, 0.9348837209302325
+                np.nan,
+                0.6744186046511629,
+                0.7162790697674419,
+                np.nan,
+                np.nan,
+                0.9348837209302325,
             ],
             'Real Correlation': [np.nan] * 6,
             'Synthetic Correlation': [np.nan] * 6,
@@ -262,8 +309,8 @@ class TestQualityReport:
                 None,
                 "TypeError: '<=' not supported between instances of 'float' and 'str'",
                 "TypeError: '<=' not supported between instances of 'float' and 'str'",
-                None
-            ]
+                None,
+            ],
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
         expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)
@@ -279,9 +326,7 @@ class TestQualityReport:
     def test_report_with_column_nan(self):
         """Test the report with column full of NaNs."""
         # Setup
-        column_names = [
-            'student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience'
-        ]
+        column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
 
         metadata['columns'] = {
@@ -300,57 +345,115 @@ class TestQualityReport:
 
         # Assert
         expected_details_column_shapes_dict = {
-            'Column': [
-                'start_date', 'second_perc', 'work_experience', 'degree_type', 'nan_column'
-            ],
+            'Column': ['start_date', 'second_perc', 'work_experience', 'degree_type', 'nan_column'],
             'Metric': [
-                'KSComplement', 'KSComplement', 'TVComplement', 'TVComplement', 'KSComplement'
+                'KSComplement',
+                'KSComplement',
+                'TVComplement',
+                'TVComplement',
+                'KSComplement',
             ],
             'Score': [
-                0.6621621621621622, 0.8976744186046511, 0.9953488372093023, 0.9395348837209302,
-                np.nan
+                0.6621621621621622,
+                0.8976744186046511,
+                0.9953488372093023,
+                0.9395348837209302,
+                np.nan,
             ],
             'Error': [
-                None, None, None, None,
-                'ValueError: Data passed to ks_2samp must not be empty'
-            ]
+                None,
+                None,
+                None,
+                None,
+                'ValueError: Data passed to ks_2samp must not be empty',
+            ],
         }
 
         expected_details_cpt__dict = {
             'Column 1': [
-                'start_date', 'start_date', 'start_date', 'start_date', 'second_perc',
-                'second_perc', 'second_perc', 'work_experience', 'work_experience',
-                'degree_type'
+                'start_date',
+                'start_date',
+                'start_date',
+                'start_date',
+                'second_perc',
+                'second_perc',
+                'second_perc',
+                'work_experience',
+                'work_experience',
+                'degree_type',
             ],
             'Column 2': [
-                'second_perc', 'work_experience', 'degree_type', 'nan_column',
-                'work_experience', 'degree_type', 'nan_column', 'degree_type',
-                'nan_column', 'nan_column'
+                'second_perc',
+                'work_experience',
+                'degree_type',
+                'nan_column',
+                'work_experience',
+                'degree_type',
+                'nan_column',
+                'degree_type',
+                'nan_column',
+                'nan_column',
             ],
             'Metric': [
-                'CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity',
-                'CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity',
-                'CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity',
-                'ContingencySimilarity'
+                'CorrelationSimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'CorrelationSimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'CorrelationSimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
+                'ContingencySimilarity',
             ],
             'Score': [
-                0.9187918131436303, 0.6744186046511629, 0.7162790697674419, np.nan,
-                0.813953488372093, 0.772093023255814, np.nan, 0.9348837209302325,
-                0.9953488372093023, 0.9395348837209302
+                0.9187918131436303,
+                0.6744186046511629,
+                0.7162790697674419,
+                np.nan,
+                0.813953488372093,
+                0.772093023255814,
+                np.nan,
+                0.9348837209302325,
+                0.9953488372093023,
+                0.9395348837209302,
             ],
             'Real Correlation': [
-                0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
-                np.nan, np.nan
+                0.04735340044317632,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
             ],
             'Synthetic Correlation': [
-                -0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
-                np.nan, np.nan
+                -0.11506297326956302,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
             ],
             'Error': [
-                None, None, None, 'ValueError: x and y must have length at least 2.',
-                None, None, 'ValueError: x and y must have length at least 2.', None,
-                None, None
-            ]
+                None,
+                None,
+                None,
+                'ValueError: x and y must have length at least 2.',
+                None,
+                None,
+                'ValueError: x and y must have length at least 2.',
+                None,
+                None,
+                None,
+            ],
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
         expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)

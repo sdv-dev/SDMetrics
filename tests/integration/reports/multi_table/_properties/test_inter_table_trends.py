@@ -7,7 +7,6 @@ from sdmetrics.reports.multi_table._properties import InterTableTrends
 
 
 class TestInterTableTrends:
-
     def test_end_to_end(self):
         """Test ``ColumnPairTrends`` multi-table property end to end."""
         # Setup

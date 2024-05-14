@@ -88,8 +88,11 @@ class RelationshipValidity(BaseMultiTableProperty):
         plot_data = self.get_details(table_name).copy()
         column_name = 'Child → Parent Relationship'
         plot_data[column_name] = (
-            plot_data['Child Table'] + ' (' + plot_data['Foreign Key'] + ') → ' +
-            plot_data['Parent Table']
+            plot_data['Child Table']
+            + ' ('
+            + plot_data['Foreign Key']
+            + ') → '
+            + plot_data['Parent Table']
         )
         plot_data = plot_data.drop(['Child Table', 'Parent Table'], axis=1)
 
@@ -110,7 +113,7 @@ class RelationshipValidity(BaseMultiTableProperty):
                 'Metric': True,
                 'Score': True,
             },
-            barmode='group'
+            barmode='group',
         )
 
         fig.update_yaxes(range=[0, 1])
@@ -118,7 +121,7 @@ class RelationshipValidity(BaseMultiTableProperty):
         fig.update_layout(
             xaxis_categoryorder='total ascending',
             plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
-            font={'size': PlotConfig.FONT_SIZE}
+            font={'size': PlotConfig.FONT_SIZE},
         )
 
         return fig

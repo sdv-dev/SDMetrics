@@ -54,7 +54,8 @@ class ContinuousKLDivergence(ColumnPairsMetric):
 
         real, xedges, yedges = np.histogram2d(real_data[column1], real_data[column2])
         synthetic, _, _ = np.histogram2d(
-            synthetic_data[column1], synthetic_data[column2], bins=[xedges, yedges])
+            synthetic_data[column1], synthetic_data[column2], bins=[xedges, yedges]
+        )
 
         f_obs, f_exp = synthetic.flatten() + 1e-5, real.flatten() + 1e-5
         f_obs, f_exp = f_obs / np.sum(f_obs), f_exp / np.sum(f_exp)

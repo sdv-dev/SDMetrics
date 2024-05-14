@@ -1,6 +1,11 @@
 """Multi table quality report."""
+
 from sdmetrics.reports.multi_table._properties import (
-    Cardinality, ColumnPairTrends, ColumnShapes, InterTableTrends)
+    Cardinality,
+    ColumnPairTrends,
+    ColumnShapes,
+    InterTableTrends,
+)
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
 
 
@@ -17,5 +22,5 @@ class QualityReport(BaseMultiTableReport):
             'Column Shapes': ColumnShapes(),
             'Column Pair Trends': ColumnPairTrends(),
             'Cardinality': Cardinality(),
-            'Intertable Trends': InterTableTrends()
+            'Intertable Trends': InterTableTrends(),
         }

@@ -1,4 +1,5 @@
 """Test Synthesis multi-table class."""
+
 from sdmetrics.reports.multi_table._properties import Synthesis
 from sdmetrics.reports.single_table._properties import Synthesis as SingleTableSynthesis
 

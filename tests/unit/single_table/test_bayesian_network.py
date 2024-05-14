@@ -6,7 +6,6 @@ from sdmetrics.single_table import BNLikelihood, BNLogLikelihood
 
 
 class TestBNLikelihood:
-
     def test_compute(self):
         """Test that an ``ImportError`` is raised."""
         # Setup
@@ -22,7 +21,6 @@ class TestBNLikelihood:
 
 
 class TestBNLogLikelihood:
-
     def test_compute(self):
         """Test that an ``ImportError`` is raised."""
         # Setup

@@ -15,7 +15,15 @@ from types import ModuleType
 import pandas as pd
 
 from sdmetrics import (
-    column_pairs, demos, goal, multi_table, reports, single_column, single_table, timeseries)
+    column_pairs,
+    demos,
+    goal,
+    multi_table,
+    reports,
+    single_column,
+    single_table,
+    timeseries,
+)
 from sdmetrics.demos import load_demo
 
 __all__ = [

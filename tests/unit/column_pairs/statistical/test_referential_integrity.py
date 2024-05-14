@@ -7,17 +7,13 @@ from sdmetrics.column_pairs.statistical import ReferentialIntegrity
 
 
 class TestReferentialIntegrity:
-
     def test_compute_breakdown(self):
         """Test the ``compute_breakdown`` method."""
         # Setup
-        real_data = pd.DataFrame({
-            'primary_key': [1, 2, 3, 4, 5],
-            'foreign_key': [1, 2, 3, 2, 1]
-        })
+        real_data = pd.DataFrame({'primary_key': [1, 2, 3, 4, 5], 'foreign_key': [1, 2, 3, 2, 1]})
         synthetic_data = pd.DataFrame({
             'primary_key': [1, 2, 3, 4, 5],
-            'foreign_key': [1, 6, 3, 4, 5]
+            'foreign_key': [1, 6, 3, 4, 5],
         })
 
         metric = ReferentialIntegrity()
@@ -34,13 +30,10 @@ class TestReferentialIntegrity:
     def test_compute_breakdown_with_missing_relations_real_data(self, logger_mock):
         """Test the ``compute_breakdown`` when there is missing relationships in the real data."""
         # Setup
-        real_data = pd.DataFrame({
-            'primary_key': [1, 2, 3, 4, 5],
-            'foreign_key': [1, 2, 6, 2, 1]
-        })
+        real_data = pd.DataFrame({'primary_key': [1, 2, 3, 4, 5], 'foreign_key': [1, 2, 6, 2, 1]})
         synthetic_data = pd.DataFrame({
             'primary_key': [1, 2, 3, 4, 5],
-            'foreign_key': [1, 6, 3, 4, 5]
+            'foreign_key': [1, 6, 3, 4, 5],
         })
 
         metric = ReferentialIntegrity()
@@ -55,8 +48,10 @@ class TestReferentialIntegrity:
         assert result == {'score': 0.8}
         logger_mock.info.assert_called_once_with(expected_message)
 
-    @patch('sdmetrics.column_pairs.statistical.referential_integrity.'
-           'ReferentialIntegrity.compute_breakdown')
+    @patch(
+        'sdmetrics.column_pairs.statistical.referential_integrity.'
+        'ReferentialIntegrity.compute_breakdown'
+    )
     def test_compute(self, compute_breakdown_mock):
         """Test the ``compute`` method."""
         # Setup
@@ -81,8 +76,7 @@ class TestReferentialIntegrity:
 
         # Run
         result = metric.compute(
-            real_data=(parent_keys, foreign_keys),
-            synthetic_data=(parent_keys, foreign_keys)
+            real_data=(parent_keys, foreign_keys), synthetic_data=(parent_keys, foreign_keys)
         )
 
         # Assert
@@ -98,8 +92,7 @@ class TestReferentialIntegrity:
 
         # Run
         result = metric.compute(
-            real_data=(parent_keys, foreign_keys),
-            synthetic_data=(parent_keys, synth_foreign_keys)
+            real_data=(parent_keys, foreign_keys), synthetic_data=(parent_keys, synth_foreign_keys)
         )
 
         # Assert

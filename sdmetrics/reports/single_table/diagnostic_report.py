@@ -1,4 +1,5 @@
 """Single table diagnostic report."""
+
 from sdmetrics.reports.base_report import BaseReport
 from sdmetrics.reports.single_table._properties import DataValidity, Structure
 

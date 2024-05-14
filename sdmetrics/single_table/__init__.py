@@ -1,36 +1,74 @@
 """Metrics for single table datasets."""
 
 from sdmetrics.single_table import (
-    base, bayesian_network, detection, efficacy, gaussian_mixture, multi_single_column, privacy)
+    base,
+    bayesian_network,
+    detection,
+    efficacy,
+    gaussian_mixture,
+    multi_single_column,
+    privacy,
+)
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection.base import DetectionMetric
 from sdmetrics.single_table.detection.sklearn import (
-    LogisticDetection, ScikitLearnClassifierDetectionMetric, SVCDetection)
+    LogisticDetection,
+    ScikitLearnClassifierDetectionMetric,
+    SVCDetection,
+)
 from sdmetrics.single_table.efficacy.base import MLEfficacyMetric
 from sdmetrics.single_table.efficacy.binary import (
-    BinaryAdaBoostClassifier, BinaryDecisionTreeClassifier, BinaryEfficacyMetric,
-    BinaryLogisticRegression, BinaryMLPClassifier)
+    BinaryAdaBoostClassifier,
+    BinaryDecisionTreeClassifier,
+    BinaryEfficacyMetric,
+    BinaryLogisticRegression,
+    BinaryMLPClassifier,
+)
 from sdmetrics.single_table.efficacy.multiclass import (
-    MulticlassDecisionTreeClassifier, MulticlassEfficacyMetric, MulticlassMLPClassifier)
+    MulticlassDecisionTreeClassifier,
+    MulticlassEfficacyMetric,
+    MulticlassMLPClassifier,
+)
 from sdmetrics.single_table.efficacy.regression import (
-    LinearRegression, MLPRegressor, RegressionEfficacyMetric)
+    LinearRegression,
+    MLPRegressor,
+    RegressionEfficacyMetric,
+)
 from sdmetrics.single_table.gaussian_mixture import GMLogLikelihood
 from sdmetrics.single_table.multi_column_pairs import (
-    ContingencySimilarity, ContinuousKLDivergence, CorrelationSimilarity, DiscreteKLDivergence,
-    MultiColumnPairsMetric)
+    ContingencySimilarity,
+    ContinuousKLDivergence,
+    CorrelationSimilarity,
+    DiscreteKLDivergence,
+    MultiColumnPairsMetric,
+)
 from sdmetrics.single_table.multi_single_column import (
-    BoundaryAdherence, CategoryCoverage, CSTest, KSComplement, MissingValueSimilarity,
-    MultiSingleColumnMetric, RangeCoverage, StatisticSimilarity, TVComplement)
+    BoundaryAdherence,
+    CategoryCoverage,
+    CSTest,
+    KSComplement,
+    MissingValueSimilarity,
+    MultiSingleColumnMetric,
+    RangeCoverage,
+    StatisticSimilarity,
+    TVComplement,
+)
 from sdmetrics.single_table.new_row_synthesis import NewRowSynthesis
 from sdmetrics.single_table.privacy.base import CategoricalPrivacyMetric, NumericalPrivacyMetric
 from sdmetrics.single_table.privacy.cap import (
-    CategoricalCAP, CategoricalGeneralizedCAP, CategoricalZeroCAP)
+    CategoricalCAP,
+    CategoricalGeneralizedCAP,
+    CategoricalZeroCAP,
+)
 from sdmetrics.single_table.privacy.categorical_sklearn import (
-    CategoricalKNN, CategoricalNB, CategoricalRF, CategoricalSVM)
+    CategoricalKNN,
+    CategoricalNB,
+    CategoricalRF,
+    CategoricalSVM,
+)
 from sdmetrics.single_table.privacy.ensemble import CategoricalEnsemble
-from sdmetrics.single_table.privacy.numerical_sklearn import (
-    NumericalLR, NumericalMLP, NumericalSVR)
+from sdmetrics.single_table.privacy.numerical_sklearn import NumericalLR, NumericalMLP, NumericalSVR
 from sdmetrics.single_table.privacy.radius_nearest_neighbor import NumericalRadiusNearestNeighbor
 from sdmetrics.single_table.table_structure import TableStructure
 

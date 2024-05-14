@@ -89,11 +89,13 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
             with warnings.catch_warnings(record=True) as caught_warnings:
                 try:
                     score_breakdown = self.single_table_metric.compute_breakdown(
-                        real_table, synthetic_table, table_meta, **kwargs)
+                        real_table, synthetic_table, table_meta, **kwargs
+                    )
                     scores[table_name] = score_breakdown
                 except AttributeError:
                     score = self.single_table_metric.compute(
-                        real_table, synthetic_table, table_meta, **kwargs)
+                        real_table, synthetic_table, table_meta, **kwargs
+                    )
                     scores[table_name] = score
                 except Exception as error:
                     errors[table_name] = error

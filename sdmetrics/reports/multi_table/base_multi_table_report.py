@@ -1,4 +1,5 @@
 """Single table base property class."""
+
 import pandas as pd
 
 from sdmetrics.reports.base_report import BaseReport
@@ -61,7 +62,8 @@ class BaseMultiTableReport(BaseReport):
             parent_dtype = real_data[rel['parent_table_name']][rel['parent_primary_key']].dtype
             child_dtype = real_data[rel['child_table_name']][rel['child_foreign_key']].dtype
             if (parent_dtype == 'object' and child_dtype != 'object') or (
-                    parent_dtype != 'object' and child_dtype == 'object'):
+                parent_dtype != 'object' and child_dtype == 'object'
+            ):
                 parent = rel['parent_table_name']
                 parent_key = rel['parent_primary_key']
                 child = rel['child_table_name']
@@ -162,9 +164,7 @@ class BaseMultiTableReport(BaseReport):
             return self._properties[property_name].get_visualization(table_name)
 
         if table_name is None:
-            raise ValueError(
-                'Please provide a table name to get a visualization for the property.'
-            )
+            raise ValueError('Please provide a table name to get a visualization for the property.')
 
         self._validate_property_generated(property_name)
         self._check_table_names(table_name)

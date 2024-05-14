@@ -2,7 +2,9 @@
 
 from sdmetrics.timeseries.efficacy.base import TimeSeriesEfficacyMetric
 from sdmetrics.timeseries.efficacy.classification import (
-    LSTMClassifierEfficacy, TimeSeriesClassificationEfficacyMetric)
+    LSTMClassifierEfficacy,
+    TimeSeriesClassificationEfficacyMetric,
+)
 
 __all__ = [
     'TimeSeriesEfficacyMetric',

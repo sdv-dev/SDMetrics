@@ -48,7 +48,8 @@ class TVComplement(SingleColumnMetric):
 
         if len(synthetic_data) == 0 or len(real_data) == 0:
             raise IncomputableMetricError(
-                'The TVComplement metric must have 1 or more non-null values.')
+                'The TVComplement metric must have 1 or more non-null values.'
+            )
 
         f_obs, f_exp = get_frequencies(real_data, synthetic_data)
         total_variation = 0

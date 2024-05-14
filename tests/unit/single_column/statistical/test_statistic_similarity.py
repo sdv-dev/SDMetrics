@@ -8,7 +8,6 @@ from sdmetrics.warnings import ConstantInputWarning
 
 
 class TestStatisticSimilarity:
-
     def test_compute_breakdown(self):
         """Test the ``compute_breakdown`` method.
 
