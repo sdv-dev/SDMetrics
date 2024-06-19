@@ -20,8 +20,8 @@ class TestColumnPairTrends:
         }
 
         # Run
-        column_shape_property = ColumnPairTrends()
-        score = column_shape_property.get_score(real_data, synthetic_data, metadata)
+        column_pair_trends = ColumnPairTrends()
+        score = column_pair_trends.get_score(real_data, synthetic_data, metadata)
 
         # Assert
         expected_details_dict = {
@@ -61,7 +61,7 @@ class TestColumnPairTrends:
             'Synthetic Correlation': [-0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan],
         }
         expected_details = pd.DataFrame(expected_details_dict)
-        pd.testing.assert_frame_equal(column_shape_property.details, expected_details)
+        pd.testing.assert_frame_equal(column_pair_trends.details, expected_details)
         assert score == 0.8050699533533958
 
     def test_get_score_warnings(self, recwarn):
@@ -77,7 +77,7 @@ class TestColumnPairTrends:
         real_data['second_perc'].iloc[2] = 'a'
 
         # Run
-        column_shape_property = ColumnPairTrends()
+        column_pair_trends = ColumnPairTrends()
 
         exp_message_1 = "ValueError: could not convert string to float: 'a'"
 
@@ -85,10 +85,10 @@ class TestColumnPairTrends:
 
         exp_error_serie = pd.Series([exp_message_1, None, None, exp_message_2, exp_message_2, None])
 
-        score = column_shape_property.get_score(real_data, synthetic_data, metadata)
+        score = column_pair_trends.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        details = column_shape_property.details
+        details = column_pair_trends.details
         pd.testing.assert_series_equal(details['Error'], exp_error_serie, check_names=False)
         assert score == 0.7751937984496124
 
@@ -103,8 +103,8 @@ class TestColumnPairTrends:
         }
 
         # Run
-        column_shape_property = ColumnPairTrends()
-        score = column_shape_property.get_score(real_data, synthetic_data, metadata)
+        column_pair_trends = ColumnPairTrends()
+        score = column_pair_trends.get_score(real_data, synthetic_data, metadata)
 
         # Assert
         expected_details_dict = {
@@ -137,5 +137,21 @@ class TestColumnPairTrends:
             'Synthetic Correlation': [np.nan] * 6,
         }
         expected_details = pd.DataFrame(expected_details_dict)
-        pd.testing.assert_frame_equal(column_shape_property.details, expected_details)
+        pd.testing.assert_frame_equal(column_pair_trends.details, expected_details)
         assert score == 0.8930232558139535
+
+    def test_with_different_index(self):
+        """Test the property when the real and synthetic data only differs by their indexes."""
+        # Setup
+        real_data = pd.DataFrame({'A': [1, 2, 3], 'B': ['a', 'b', 'a']}, index=[0, 1, 2])
+
+        synthetic_data = pd.DataFrame({'A': [1, 2, 3], 'B': ['a', 'b', 'a']}, index=[0, 4, 2])
+
+        metadata = {'columns': {'A': {'sdtype': 'numerical'}, 'B': {'sdtype': 'categorical'}}}
+
+        # Run
+        column_pair_trends = ColumnPairTrends()
+        score = column_pair_trends.get_score(real_data, synthetic_data, metadata)
+
+        # Assert
+        assert score == 1.0
