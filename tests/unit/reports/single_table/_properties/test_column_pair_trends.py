@@ -66,12 +66,15 @@ class TestColumnPairTrends:
     def test__get_processed_data(self):
         """Test the ``_get_processed_data`` method."""
         # Setup
-        data = pd.DataFrame({
-            'col1': [1, 2, 3],
-            'col2': [False, True, True],
-            'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
-        })
+        data = pd.DataFrame(
+            {
+                'col1': [1, 2, 3],
+                'col2': [False, True, True],
+                'col3': ['a', 'b', 'c'],
+                'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
+            },
+            index=[4, 5, 6],
+        )
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
@@ -89,17 +92,23 @@ class TestColumnPairTrends:
         expected_datetime = pd.to_numeric(
             pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
         )
-        expected_processed_data = pd.DataFrame({
-            'col1': [1, 2, 3],
-            'col2': [False, True, True],
-            'col3': ['a', 'b', 'c'],
-            'col4': expected_datetime,
-        })
+        expected_processed_data = pd.DataFrame(
+            {
+                'col1': [1, 2, 3],
+                'col2': [False, True, True],
+                'col3': ['a', 'b', 'c'],
+                'col4': expected_datetime,
+            },
+            index=[4, 5, 6],
+        )
 
-        expected_discrete_data = pd.DataFrame({
-            'col1': [1, 6, 11],
-            'col4': [1, 6, 11],
-        })
+        expected_discrete_data = pd.DataFrame(
+            {
+                'col1': [1, 6, 11],
+                'col4': [1, 6, 11],
+            },
+            index=[4, 5, 6],
+        )
 
         pd.testing.assert_frame_equal(processed_data, expected_processed_data)
         pd.testing.assert_frame_equal(discrete_data, expected_discrete_data)
