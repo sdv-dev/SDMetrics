@@ -140,8 +140,8 @@ class TestColumnPairTrends:
         pd.testing.assert_frame_equal(column_pair_trends.details, expected_details)
         assert score == 0.8930232558139535
 
-    def test_with_different_index(self):
-        """Test the property when the real and synthetic data only differs by their indexes."""
+    def test_with_different_indexes(self):
+        """Test the property when the real and synthetic data only differ by their indexes."""
         # Setup
         real_data = pd.DataFrame({'A': [1, 2, 3], 'B': ['a', 'b', 'a']}, index=[0, 1, 2])
 
