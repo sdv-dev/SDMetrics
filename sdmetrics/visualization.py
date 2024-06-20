@@ -264,6 +264,7 @@ def _generate_column_plot(
     missing_data_synthetic = 0
     col_dtype = None
     col_names = []
+    title = ''
     if real_column is not None and hasattr(real_column, 'name'):
         column_name = real_column.name
     elif synthetic_column is not None and hasattr(synthetic_column, 'name'):
@@ -276,6 +277,7 @@ def _generate_column_plot(
         real_data['Data'] = 'Real'
         col_dtype = real_column.dtype
         col_names.append('Real')
+        title += 'Real vs. '
 
     synthetic_data = None
     if synthetic_column is not None:
@@ -283,8 +285,12 @@ def _generate_column_plot(
         synthetic_data = pd.DataFrame({'values': synthetic_column.copy().dropna()})
         synthetic_data['Data'] = 'Synthetic'
         col_names.append('Synthetic')
+        title += 'Synthetic vs. '
         if col_dtype is None:
             col_dtype = synthetic_column.dtype
+
+    title = title[:-4]
+    title += f"Data for column '{column_name}'"
 
     is_datetime_sdtype = False
     if is_datetime64_dtype(col_dtype):
@@ -336,7 +342,7 @@ def _generate_column_plot(
     )
 
     if not plot_title:
-        plot_title = f"Real vs. Synthetic Data for column '{column_name}'"
+        plot_title = title
 
     if not x_label:
         x_label = 'Category'
@@ -427,7 +433,8 @@ def get_cardinality_plot(
         plotly.graph_objects._figure.Figure
     """
     if plot_type not in ['bar', 'distplot']:
-        raise ValueError(f"Invalid plot_type '{plot_type}'. Please use one of ['bar', 'distplot'].")
+        raise ValueError(
+            f"Invalid plot_type '{plot_type}'. Please use one of ['bar', 'distplot'].")
 
     real_cardinality = _get_cardinality(
         real_data[parent_table_name],
