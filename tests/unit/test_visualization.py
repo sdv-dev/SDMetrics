@@ -271,7 +271,7 @@ def test_get_column_plot_bad_plot_type():
 def test_get_column_plot_no_data():
     """Test the ``get_column_plot`` method with no data passed in."""
     # Run and assert
-    error_msg = re.escape('Must provide at least one dataset to plot.')
+    error_msg = re.escape('No data provided to plot. Please provide either real or synthetic data.')
     with pytest.raises(ValueError, match=error_msg):
         get_column_plot(None, None, 'values')
 

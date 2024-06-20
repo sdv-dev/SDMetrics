@@ -258,7 +258,7 @@ def _generate_column_plot(
     """
 
     if real_column is None and synthetic_column is None:
-        raise ValueError('Must provide at least one dataset to plot.')
+        raise ValueError('No data provided to plot. Please provide either real or synthetic data.')
 
     if plot_type not in ['bar', 'distplot']:
         raise ValueError(
@@ -487,7 +487,7 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     """
 
     if real_data is None and synthetic_data is None:
-        raise ValueError('Must provide at least one dataset to plot.')
+        raise ValueError('No data provided to plot. Please provide either real or synthetic data.')
 
     if plot_type not in ['bar', 'distplot', None]:
         raise ValueError(
