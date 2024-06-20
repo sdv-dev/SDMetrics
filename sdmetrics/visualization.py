@@ -58,16 +58,19 @@ def _generate_column_bar_plot(real_data, synthetic_data, plot_kwargs={}):
         plotly.graph_objects._figure.Figure
     """
     all_data = pd.DataFrame()
+    color_sequence = []
     if real_data is not None:
         all_data = pd.concat([all_data, real_data], axis=0, ignore_index=True)
+        color_sequence.append(PlotConfig.DATACEBO_DARK)
     if synthetic_data is not None:
         all_data = pd.concat([all_data, synthetic_data], axis=0, ignore_index=True)
+        color_sequence.append(PlotConfig.DATACEBO_GREEN)
 
     histogram_kwargs = {
         'x': 'values',
         'color': 'Data',
         'barmode': 'group',
-        'color_discrete_sequence': [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN],
+        'color_discrete_sequence': color_sequence,
         'pattern_shape': 'Data',
         'pattern_shape_sequence': ['', '/'],
         'histnorm': 'probability density',
@@ -203,20 +206,23 @@ def _generate_column_distplot(real_data, synthetic_data, plot_kwargs={}):
     Returns:
         plotly.graph_objects._figure.Figure
     """
-    default_distplot_kwargs = {
-        'show_hist': False,
-        'show_rug': False,
-        'colors': [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN],
-    }
-
     hist_data = []
     col_names = []
+    colors = []
     if real_data is not None:
         hist_data.append(real_data['values'])
         col_names.append('Real')
+        colors.append(PlotConfig.DATACEBO_DARK)
     if synthetic_data is not None:
         hist_data.append(synthetic_data['values'])
         col_names.append('Synthetic')
+        colors.append(PlotConfig.DATACEBO_GREEN)
+
+    default_distplot_kwargs = {
+        'show_hist': False,
+        'show_rug': False,
+        'colors': colors,
+    }
 
     fig = ff.create_distplot(
         hist_data,
@@ -433,8 +439,7 @@ def get_cardinality_plot(
         plotly.graph_objects._figure.Figure
     """
     if plot_type not in ['bar', 'distplot']:
-        raise ValueError(
-            f"Invalid plot_type '{plot_type}'. Please use one of ['bar', 'distplot'].")
+        raise ValueError(f"Invalid plot_type '{plot_type}'. Please use one of ['bar', 'distplot'].")
 
     real_cardinality = _get_cardinality(
         real_data[parent_table_name],
