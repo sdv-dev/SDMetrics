@@ -91,12 +91,20 @@ def _generate_heatmap_plot(all_data, columns):
     Returns:
         plotly.graph_objects._figure.Figure
     """
+    unique_values = all_data['Data'].unique()
+
     fig = px.density_heatmap(
         all_data, x=columns[0], y=columns[1], facet_col='Data', histnorm='probability'
     )
 
+    title = ''
+    for name in unique_values:
+        title += f'{name} vs. '
+    title = title[:-4]
+    title += f"Data for columns '{columns[0]}' and '{columns[1]}"
+
     fig.update_layout(
-        title_text=f"Real vs Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
+        title_text=title,
         coloraxis={'colorscale': [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]},
         font={'size': PlotConfig.FONT_SIZE},
     )
@@ -152,6 +160,7 @@ def _generate_scatter_plot(all_data, columns):
     Returns:
         plotly.graph_objects._figure.Figure
     """
+    unique_values = all_data['Data'].unique()
     fig = px.scatter(
         all_data,
         x=columns[0],
@@ -164,8 +173,14 @@ def _generate_scatter_plot(all_data, columns):
         symbol='Data',
     )
 
+    title = ''
+    for name in unique_values:
+        title += f'{name} vs. '
+    title = title[:-4]
+    title += f"Data for columns '{columns[0]}' and '{columns[1]}'"
+
     fig.update_layout(
-        title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
+        title=title,
         plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
         font={'size': PlotConfig.FONT_SIZE},
     )
