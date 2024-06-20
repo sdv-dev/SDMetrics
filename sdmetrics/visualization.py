@@ -448,10 +448,10 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
     """Return a plot of the real and synthetic data for a given column pair.
 
     Args:
-        real_data (pandas.DataFrame):
-            The real table data.
-        synthetic_column (pandas.Dataframe):
-            The synthetic table data.
+        real_data (pandas.DataFrame or None):
+            The real table data. If None this data will not be graphed.
+        synthetic_column (pandas.Dataframe or None):
+            The synthetic table data. If None this data will not be graphed.
         column_names (list[string]):
             The names of the two columns to plot.
         plot_type (str or None):
@@ -466,16 +466,23 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
     if len(column_names) != 2:
         raise ValueError('Must provide exactly two column names.')
 
-    if not set(column_names).issubset(real_data.columns):
-        raise ValueError(
-            f'Missing column(s) {set(column_names) - set(real_data.columns)} in real data.'
-        )
+    if real_data is None and synthetic_data is None:
+        raise ValueError('Must provide at least one dataset to plot.')
 
-    if not set(column_names).issubset(synthetic_data.columns):
-        raise ValueError(
-            f'Missing column(s) {set(column_names) - set(synthetic_data.columns)} '
-            'in synthetic data.'
-        )
+    if real_data is not None:
+        if not set(column_names).issubset(real_data.columns):
+            raise ValueError(
+                f'Missing column(s) {set(column_names) - set(real_data.columns)} in real data.'
+            )
+        real_data = real_data[column_names]
+
+    if synthetic_data is not None:
+        if not set(column_names).issubset(synthetic_data.columns):
+            raise ValueError(
+                f'Missing column(s) {set(column_names) - set(synthetic_data.columns)} '
+                'in synthetic data.'
+            )
+        synthetic_data = synthetic_data[column_names]
 
     if plot_type not in ['box', 'heatmap', 'scatter', None]:
         raise ValueError(
@@ -483,12 +490,13 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
             "['box', 'heatmap', 'scatter', None]."
         )
 
-    real_data = real_data[column_names]
-    synthetic_data = synthetic_data[column_names]
     if plot_type is None:
         plot_type = []
         for column_name in column_names:
-            column = real_data[column_name]
+            if real_data is not None:
+                column = real_data[column_name]
+            else:
+                column = synthetic_data[column_name]
             dtype = column.dropna().infer_objects().dtype.kind
             if dtype in ('i', 'f') or is_datetime(column):
                 plot_type.append('scatter')
@@ -501,19 +509,22 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
             plot_type = plot_type.pop()
 
     # Merge the real and synthetic data and add a flag ``Data`` to indicate each one.
-    columns = list(real_data.columns)
-    real_data = real_data.copy()
-    real_data['Data'] = 'Real'
-    synthetic_data = synthetic_data.copy()
-    synthetic_data['Data'] = 'Synthetic'
-    all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+    all_data = pd.DataFrame()
+    if real_data is not None:
+        real_data = real_data.copy()
+        real_data['Data'] = 'Real'
+        all_data = pd.concat([all_data, real_data], axis=0, ignore_index=True)
+    if synthetic_data is not None:
+        synthetic_data = synthetic_data.copy()
+        synthetic_data['Data'] = 'Synthetic'
+        all_data = pd.concat([all_data, synthetic_data], axis=0, ignore_index=True)
 
     if plot_type == 'scatter':
-        return _generate_scatter_plot(all_data, columns)
+        return _generate_scatter_plot(all_data, column_names)
     elif plot_type == 'heatmap':
-        return _generate_heatmap_plot(all_data, columns)
+        return _generate_heatmap_plot(all_data, column_names)
 
-    return _generate_box_plot(all_data, columns)
+    return _generate_box_plot(all_data, column_names)
 
 
 def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annotations=None):
