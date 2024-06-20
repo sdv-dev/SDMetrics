@@ -268,6 +268,38 @@ def test_get_column_plot_bad_plot_type():
         get_column_plot(real_data, synthetic_data, 'valeus', plot_type='bad_type')
 
 
+def test_get_column_plot_no_data():
+    """Test the ``get_column_plot`` method with no data passed in."""
+    # Run and assert
+    error_msg = re.escape('Must provide at least one dataset to plot.')
+    with pytest.raises(ValueError, match=error_msg):
+        get_column_plot(None, None, 'values')
+
+
+@patch('sdmetrics.visualization._generate_column_plot')
+def test_get_column_plot_plot_one_data_set(mock__generate_column_plot):
+    """Test ``get_column_plot`` for real data and synthetic data individually."""
+    # Setup
+    real_data = pd.DataFrame({'values': [1, 2, 2, 3, 5]})
+    synthetic_data = pd.DataFrame({'values': [2, 2, 3, 4, 5]})
+    mock__generate_column_plot.side_effect = ['mock_return_1', 'mock_return_2']
+
+    # Run
+    fig_real = get_column_plot(real_data, None, 'values')
+    fig_synth = get_column_plot(None, synthetic_data, 'values')
+
+    # Assert
+    expected_real_call_data = real_data['values']
+    expected_synth_call_data = synthetic_data['values']
+    expected_calls = [
+        call(SeriesMatcher(expected_real_call_data), None, 'distplot'),
+        call(None, SeriesMatcher(expected_synth_call_data), 'distplot'),
+    ]
+    mock__generate_column_plot.assert_has_calls(expected_calls, any_order=False)
+    assert fig_real == 'mock_return_1'
+    assert fig_synth == 'mock_return_2'
+
+
 @patch('sdmetrics.visualization._generate_column_plot')
 def test_get_column_plot_plot_type_none_data_int(mock__generate_column_plot):
     """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``int``."""
