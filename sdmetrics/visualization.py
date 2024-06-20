@@ -482,7 +482,7 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
         raise ValueError('Must provide exactly two column names.')
 
     if real_data is None and synthetic_data is None:
-        raise ValueError('Must provide at least one dataset to plot.')
+        raise ValueError('No data provided to plot. Please provide either real or synthetic data.')
 
     if real_data is not None:
         if not set(column_names).issubset(real_data.columns):

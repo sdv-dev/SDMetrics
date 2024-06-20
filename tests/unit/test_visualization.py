@@ -698,8 +698,8 @@ def test_get_column_pair_plot_plot_no_data(mock__generate_scatter_plot):
     """Test ``get_column_pair_plot`` with neither real or synthetic data"""
     # Setup
     columns = ['amount', 'price']
-    error_msg = re.escape('Must provide at least one dataset to plot.')
-    # Run and Aassert
+    error_msg = re.escape('No data provided to plot. Please provide either real or synthetic data.')
+    # Run and Assert
     with pytest.raises(ValueError, match=error_msg):
         get_column_pair_plot(None, None, columns)
 
