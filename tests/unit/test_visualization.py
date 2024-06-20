@@ -213,6 +213,64 @@ def test_get_cardinality_plot(mock_generate_cardinality_plot, mock_get_cardinali
     assert mock_generate_cardinality_plot.call_args.kwargs == {'plot_type': 'bar'}
 
 
+def test_get_cardinality_plot_no_data():
+    """Test the ``get_cardinality_plot`` method with no data passed in."""
+    # Run and assert
+    error_msg = re.escape('No data provided to plot. Please provide either real or synthetic data.')
+    with pytest.raises(ValueError, match=error_msg):
+        get_cardinality_plot(
+            None, None, 'mock_child_table', 'mock_parent_name', 'child_fk', 'parent_fk', 'bar'
+        )
+
+
+@patch('sdmetrics.visualization._get_cardinality')
+@patch('sdmetrics.visualization._generate_cardinality_plot')
+def test_get_cardinality_plot_plot_single_data(
+    mock_generate_cardinality_plot, mock_get_cardinality
+):
+    """Test the ``get_cardinality_plot`` method runs fine with individual datasets."""
+    # Setup
+    real_data = {'table1': None, 'table2': None}
+    synthetic_data = {'table1': None, 'table2': None}
+    child_foreign_key = 'child_key'
+    parent_primary_key = 'parent_key'
+    parent_table_name = 'table1'
+    child_table_name = 'table2'
+
+    real_cardinality = pd.Series([1, 2, 2, 3, 5])
+    synthetic_cardinality = pd.Series([2, 2, 3, 4, 5])
+    mock_get_cardinality.side_effect = [real_cardinality, synthetic_cardinality]
+
+    mock_generate_cardinality_plot.side_effect = ['mock_return_1', 'mock_return_2']
+
+    # Run
+    fig_real = get_cardinality_plot(
+        real_data,
+        None,
+        child_table_name,
+        parent_table_name,
+        child_foreign_key,
+        parent_primary_key,
+    )
+    fig_synth = get_cardinality_plot(
+        None,
+        synthetic_data,
+        child_table_name,
+        parent_table_name,
+        child_foreign_key,
+        parent_primary_key,
+    )
+    assert fig_real == 'mock_return_1'
+    assert fig_synth == 'mock_return_2'
+
+    # Assert by checking the calls
+    calls = [
+        call(real_data['table1'], real_data['table2'], 'parent_key', 'child_key'),
+        call(synthetic_data['table1'], synthetic_data['table2'], 'parent_key', 'child_key'),
+    ]
+    mock_get_cardinality.assert_has_calls(calls)
+
+
 def test_get_cardinality_plot_bad_plot_type():
     """Test the ``get_cardinality_plot`` method."""
     # Setup
