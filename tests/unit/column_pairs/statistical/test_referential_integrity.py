@@ -120,4 +120,4 @@ class TestReferentialIntegrity:
         # Assert
         assert result_0 == 1.0
         assert result_1 == 0.8
-        assert result_2 == 0.6666666666666666
+        assert result_2 == 2 / 3
