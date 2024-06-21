@@ -70,8 +70,8 @@ class TestReferentialIntegrity:
     def test_compute_with_nan_foreign_keys_real_data(self):
         """Test the ``compute`` method with NaN foreign keys inside the real data.
 
-        Here the score should be 1.0 regardless of if the synthetic data has NaN values or not
-        because the real data has null foreign keys.
+        Here, the score should be 1.0, whether or not the synthetic data have NaN values
+        values, as the real data have null foreign keys.
         """
         # Setup
         parent_keys = pd.Series(['a', 'b', 'c'])
@@ -95,8 +95,8 @@ class TestReferentialIntegrity:
     def test_compute_with_nan_foreign_keys_only_synthetic_data(self):
         """Test the ``compute`` method with NaN foreign keys inside the synthetic data.
 
-        Here the real data has no null foreign keys, so the score should decrease as the number of
-        NaN values in the synthetic data increases.
+        Here, the real data have no null foreign keys, so the score should decrease as
+        the number of NaN values in the synthetic data increases.
         """
         # Setup
         parent_keys = pd.Series(['a', 'b', 'c'])
