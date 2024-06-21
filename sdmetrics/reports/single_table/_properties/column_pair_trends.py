@@ -123,7 +123,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
                     column_name, processed_data[column_name]
                 )
 
-        return processed_data, pd.DataFrame(discretized_dict)
+        return processed_data, pd.DataFrame(discretized_dict, index=processed_data.index)
 
     def _get_columns_data_and_metric(
         self,
