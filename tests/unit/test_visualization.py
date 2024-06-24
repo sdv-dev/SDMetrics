@@ -1,12 +1,16 @@
 import re
-from unittest.mock import Mock, call, patch
+from unittest.mock import ANY, Mock, call, patch
 
 import pandas as pd
 import pytest
 
+from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.visualization import (
     _generate_box_plot,
     _generate_cardinality_plot,
+    _generate_column_bar_plot,
+    _generate_column_distplot,
+    _generate_column_plot,
     _generate_heatmap_plot,
     _generate_line_plot,
     _generate_scatter_plot,
@@ -334,6 +338,183 @@ def test_get_column_plot_no_data():
         get_column_plot(None, None, 'values')
 
 
+@patch('sdmetrics.visualization.px.histogram')
+def test__generate_column_bar_plot(mock_histogram):
+    """Test ``_generate_column_bar_plot`` functionality"""
+    # Setup
+    real_data = pd.DataFrame([1, 2, 2, 3, 5])
+    synthetic_data = pd.DataFrame([2, 2, 3, 4, 5])
+
+    # Run
+    _generate_column_bar_plot(real_data, synthetic_data)
+
+    # Assert
+    expected_data = pd.DataFrame(pd.concat([real_data, synthetic_data], axis=0, ignore_index=True))
+    expected_parameters = {
+        'x': 'values',
+        'color': 'Data',
+        'barmode': 'group',
+        'color_discrete_sequence': ['#000036', '#01E0C9'],
+        'pattern_shape': 'Data',
+        'pattern_shape_sequence': ['', '/'],
+        'histnorm': 'probability density',
+    }
+    pd.testing.assert_frame_equal(expected_data, mock_histogram.call_args[0][0])
+    mock_histogram.assert_called_once_with(ANY, **expected_parameters)
+
+
+@patch('sdmetrics.visualization.ff.create_distplot')
+def test__generate_column_distplot(mock_distplot):
+    """Test ``_generate_column_distplot`` functionality"""
+    # Setup
+    real_data = pd.DataFrame({'values': [1, 2, 2, 3, 5]})
+    synthetic_data = pd.DataFrame({'values': [2, 2, 3, 4, 5]})
+
+    # Run
+    _generate_column_distplot(real_data, synthetic_data)
+
+    # Assert
+    expected_data = []
+    expected_data.append(real_data['values'])
+    expected_data.append(synthetic_data['values'])
+    expected_data == mock_distplot.call_args[0][0]
+    expected_col = ['Real', 'Synthetic']
+    expected_colors = [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]
+    expected_parameters = {
+        'show_hist': False,
+        'show_rug': False,
+        'colors': expected_colors,
+    }
+    assert expected_parameters == mock_distplot.call_args[1]
+    mock_distplot.assert_called_once_with(expected_data, expected_col, **expected_parameters)
+
+
+@patch('sdmetrics.visualization._generate_column_distplot')
+def test___generate_column_plot_type_distplot(mock_dist_plot):
+    """Test ``_generate_column_plot`` with a dist_plot"""
+    # Setup
+    real_data = pd.DataFrame({'values': [1, 2, 2, 3, 5]})
+    synthetic_data = pd.DataFrame({'values': [2, 2, 3, 4, 5]})
+    mock_fig = Mock()
+    mock_object = Mock()
+    mock_object.x = [1, 2, 2, 3, 5]
+    mock_fig.data = [mock_object, mock_object]
+    mock_dist_plot.return_value = mock_fig
+
+    # Run
+    _generate_column_plot(real_data['values'], synthetic_data['values'], 'distplot')
+
+    # Assert
+    expected_real_data = pd.DataFrame({
+        'values': [1, 2, 2, 3, 5],
+        'Data': ['Real', 'Real', 'Real', 'Real', 'Real'],
+    })
+    expected_synth_data = pd.DataFrame({
+        'values': [2, 2, 3, 4, 5],
+        'Data': ['Synthetic', 'Synthetic', 'Synthetic', 'Synthetic', 'Synthetic'],
+    })
+    pd.testing.assert_frame_equal(mock_dist_plot.call_args[0][0], expected_real_data)
+    pd.testing.assert_frame_equal(mock_dist_plot.call_args[0][1], expected_synth_data)
+    mock_dist_plot.assert_called_once_with(ANY, ANY, {})
+
+    mock_fig.update_layout.assert_called_once_with(
+        title="Real vs. Synthetic Data for column 'values'",
+        xaxis_title='Value',
+        yaxis_title='Frequency',
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        annotations=[],
+        font={'size': PlotConfig.FONT_SIZE},
+    )
+
+
+@patch('sdmetrics.visualization._generate_column_bar_plot')
+def test___generate_column_plot_type_bar(mock_bar_plot):
+    """Test ``_generate_column_plot`` with a bar plot"""
+    # Setup
+    real_data = pd.DataFrame({'values': [1, 2, 2, 3, 5]})
+    synthetic_data = pd.DataFrame({'values': [2, 2, 3, 4, 5]})
+    mock_fig = Mock()
+    mock_object = Mock()
+    mock_object.x = [1, 2, 2, 3, 5]
+    mock_fig.data = [mock_object, mock_object]
+    mock_bar_plot.return_value = mock_fig
+
+    # Run
+    _generate_column_plot(real_data['values'], synthetic_data['values'], 'bar')
+
+    # Assert
+    expected_real_data = pd.DataFrame({
+        'values': [1, 2, 2, 3, 5],
+        'Data': ['Real', 'Real', 'Real', 'Real', 'Real'],
+    })
+    expected_synth_data = pd.DataFrame({
+        'values': [2, 2, 3, 4, 5],
+        'Data': ['Synthetic', 'Synthetic', 'Synthetic', 'Synthetic', 'Synthetic'],
+    })
+    pd.testing.assert_frame_equal(mock_bar_plot.call_args[0][0], expected_real_data)
+    pd.testing.assert_frame_equal(mock_bar_plot.call_args[0][1], expected_synth_data)
+    mock_bar_plot.assert_called_once_with(ANY, ANY, {})
+    mock_fig.update_layout.assert_called_once_with(
+        title="Real vs. Synthetic Data for column 'values'",
+        xaxis_title='Category',
+        yaxis_title='Frequency',
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        annotations=[],
+        font={'size': PlotConfig.FONT_SIZE},
+    )
+
+
+@patch('sdmetrics.visualization._generate_column_bar_plot')
+def test___generate_column_plot_with_datetimes(mock_bar_plot):
+    """Test ``_generate_column_plot`` using datetimes"""
+    # Setup
+    real_data = pd.DataFrame({'values': pd.to_datetime(['2021-01-20', '2022-01-21'])})
+    synthetic_data = pd.DataFrame({'values': pd.to_datetime(['2021-01-20', '2022-01-21'])})
+    mock_fig = Mock()
+    mock_object = Mock()
+    mock_object.x = [1, 2, 2, 3, 5]
+    mock_fig.data = [mock_object, mock_object]
+    mock_bar_plot.return_value = mock_fig
+
+    # Run
+    _generate_column_plot(real_data['values'], synthetic_data['values'], 'bar')
+
+    # Assert
+    print(mock_bar_plot.call_args[0][1])
+    expected_real_data = pd.DataFrame({
+        'values': [1611100800000000000, 1642723200000000000],
+        'Data': ['Real', 'Real'],
+    })
+    expected_synth_data = pd.DataFrame({
+        'values': [1611100800000000000, 1642723200000000000],
+        'Data': ['Synthetic', 'Synthetic'],
+    })
+    pd.testing.assert_frame_equal(mock_bar_plot.call_args[0][0], expected_real_data)
+    pd.testing.assert_frame_equal(mock_bar_plot.call_args[0][1], expected_synth_data)
+    mock_bar_plot.assert_called_once_with(ANY, ANY, {})
+
+
+def test___generate_column_plot_no_data():
+    """Test ``_generate_column_plot`` when no data is passed in."""
+    # Run and Assert
+    error_msg = re.escape('No data provided to plot. Please provide either real or synthetic data.')
+    with pytest.raises(ValueError, match=error_msg):
+        _generate_column_plot(None, None, 'bar')
+
+
+def test___generate_column_plot_with_bad_plot():
+    """Test ``_generate_column_plot`` when an incorrect plot is set."""
+    # Setup
+    real_data = pd.DataFrame({'values': [1, 2, 2, 3, 5]})
+    synthetic_data = pd.DataFrame({'values': [2, 2, 3, 4, 5]})
+    # Run and Assert
+    error_msg = re.escape(
+        "Unrecognized plot_type 'bad_plot'. Please use one of 'bar' or 'distplot'"
+    )
+    with pytest.raises(ValueError, match=error_msg):
+        _generate_column_plot(real_data, synthetic_data, 'bad_plot')
+
+
 @patch('sdmetrics.visualization._generate_column_plot')
 def test_get_column_plot_plot_one_data_set(mock__generate_column_plot):
     """Test ``get_column_plot`` for real data and synthetic data individually."""
@@ -512,6 +693,32 @@ def test__generate_scatter_plot(px_mock):
 
 
 @patch('sdmetrics.visualization.px')
+def test__generate_scatter_plot_one_column_failure(px_mock):
+    """Test the ``_generate_scatter_plot`` method."""
+    # Setup
+    real_column = pd.DataFrame({
+        'col1': [1, 2, 3, 4],
+        'col2': [1.1, 1.2, 1.3, 1.4],
+        'Data': ['Real'] * 4,
+    })
+    synthetic_column = pd.DataFrame({
+        'col1': [1, 2, 4, 5],
+        'col2': [1.1, 1.2, 1.3, 1.4],
+        'Data': ['Synthetic'] * 4,
+    })
+
+    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
+    columns = ['col1']
+    mock_figure = Mock()
+    px_mock.scatter.return_value = mock_figure
+
+    # Run and assert
+    error_msg = re.escape('Generating a scatter plot requires only two columns for the axis.')
+    with pytest.raises(ValueError, match=error_msg):
+        _generate_scatter_plot(all_data, columns)
+
+
+@patch('sdmetrics.visualization.px')
 def test__generate_heatmap_plot(px_mock):
     """Test the ``_generate_heatmap_plot`` method."""
     # Setup
@@ -560,6 +767,32 @@ def test__generate_heatmap_plot(px_mock):
     mock_figure.update_layout.assert_called_once()
     mock_figure.for_each_annotation.assert_called_once()
     assert fig == mock_figure
+
+
+@patch('sdmetrics.visualization.px')
+def test__generate_heatmap_plot_one_column(px_mock):
+    """Test the ``_generate_heatmap_plot`` method."""
+    # Setup
+    real_column = pd.DataFrame({
+        'col1': [1, 2, 3, 4],
+        'col2': ['a', 'b', 'c', 'd'],
+        'Data': ['Real'] * 4,
+    })
+    synthetic_column = pd.DataFrame({
+        'col1': [1, 2, 4, 5],
+        'col2': ['a', 'b', 'c', 'd'],
+        'Data': ['Synthetic'] * 4,
+    })
+    columns = ['col1']
+    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
+
+    mock_figure = Mock()
+    px_mock.density_heatmap.return_value = mock_figure
+
+    # Run and assert
+    error_msg = re.escape('Generating a heatmap plot requires only two columns for the axis.')
+    with pytest.raises(ValueError, match=error_msg):
+        _generate_heatmap_plot(all_data, columns)
 
 
 @patch('sdmetrics.visualization.px')
