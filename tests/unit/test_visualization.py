@@ -1,5 +1,5 @@
 import re
-from unittest.mock import Mock, call, patch
+from unittest.mock import ANY, Mock, call, patch
 
 import pandas as pd
 import pytest
@@ -304,8 +304,7 @@ def test__generate_column_bar_plot(mock_histogram):
         'histnorm': 'probability density',
     }
     pd.testing.assert_frame_equal(expected_data, mock_histogram.call_args[0][0])
-    assert expected_parameters == mock_histogram.call_args[1]
-    mock_histogram.assert_called_once()
+    mock_histogram.assert_called_once_with(ANY, **expected_parameters)
 
 
 @patch('sdmetrics.visualization.ff.create_distplot')
@@ -323,9 +322,7 @@ def test__generate_column_distplot(mock_distplot):
     expected_data.append(real_data['values'])
     expected_data.append(synthetic_data['values'])
     expected_data == mock_distplot.call_args[0][0]
-
-    ['Real', 'Synthetic'] == mock_distplot.call_args[0][1]
-
+    expected_col = ['Real', 'Synthetic']
     expected_colors = [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]
     expected_parameters = {
         'show_hist': False,
@@ -333,7 +330,7 @@ def test__generate_column_distplot(mock_distplot):
         'colors': expected_colors,
     }
     assert expected_parameters == mock_distplot.call_args[1]
-    mock_distplot.assert_called_once()
+    mock_distplot.assert_called_once_with(expected_data, expected_col, **expected_parameters)
 
 
 @patch('sdmetrics.visualization._generate_column_distplot')
@@ -362,8 +359,7 @@ def test___generate_column_plot_type_distplot(mock_dist_plot):
     })
     pd.testing.assert_frame_equal(mock_dist_plot.call_args[0][0], expected_real_data)
     pd.testing.assert_frame_equal(mock_dist_plot.call_args[0][1], expected_synth_data)
-    assert mock_dist_plot.call_args[0][2] == {}
-    mock_dist_plot.assert_called_once()
+    mock_dist_plot.assert_called_once_with(ANY, ANY, {})
 
     mock_fig.update_layout.assert_called_once_with(
         title="Real vs. Synthetic Data for column 'values'",
@@ -401,8 +397,7 @@ def test___generate_column_plot_type_bar(mock_bar_plot):
     })
     pd.testing.assert_frame_equal(mock_bar_plot.call_args[0][0], expected_real_data)
     pd.testing.assert_frame_equal(mock_bar_plot.call_args[0][1], expected_synth_data)
-    assert mock_bar_plot.call_args[0][2] == {}
-    mock_bar_plot.assert_called_once()
+    mock_bar_plot.assert_called_once_with(ANY, ANY, {})
     mock_fig.update_layout.assert_called_once_with(
         title="Real vs. Synthetic Data for column 'values'",
         xaxis_title='Category',
@@ -440,8 +435,7 @@ def test___generate_column_plot_with_datetimes(mock_bar_plot):
     })
     pd.testing.assert_frame_equal(mock_bar_plot.call_args[0][0], expected_real_data)
     pd.testing.assert_frame_equal(mock_bar_plot.call_args[0][1], expected_synth_data)
-    assert mock_bar_plot.call_args[0][2] == {}
-    mock_bar_plot.assert_called_once()
+    mock_bar_plot.assert_called_once_with(ANY, ANY, {})
 
 
 def test___generate_column_plot_no_data():
