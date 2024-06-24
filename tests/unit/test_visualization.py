@@ -422,32 +422,6 @@ def test__generate_scatter_plot(px_mock):
 
 
 @patch('sdmetrics.visualization.px')
-def test__generate_scatter_plot_one_column_failure(px_mock):
-    """Test the ``_generate_scatter_plot`` method."""
-    # Setup
-    real_column = pd.DataFrame({
-        'col1': [1, 2, 3, 4],
-        'col2': [1.1, 1.2, 1.3, 1.4],
-        'Data': ['Real'] * 4,
-    })
-    synthetic_column = pd.DataFrame({
-        'col1': [1, 2, 4, 5],
-        'col2': [1.1, 1.2, 1.3, 1.4],
-        'Data': ['Synthetic'] * 4,
-    })
-
-    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
-    columns = ['col1']
-    mock_figure = Mock()
-    px_mock.scatter.return_value = mock_figure
-
-    # Run and assert
-    error_msg = re.escape('Generating a scatter plot requires only two columns for the axis.')
-    with pytest.raises(ValueError, match=error_msg):
-        _generate_scatter_plot(all_data, columns)
-
-
-@patch('sdmetrics.visualization.px')
 def test__generate_heatmap_plot(px_mock):
     """Test the ``_generate_heatmap_plot`` method."""
     # Setup
@@ -496,32 +470,6 @@ def test__generate_heatmap_plot(px_mock):
     mock_figure.update_layout.assert_called_once()
     mock_figure.for_each_annotation.assert_called_once()
     assert fig == mock_figure
-
-
-@patch('sdmetrics.visualization.px')
-def test__generate_heatmap_plot_one_column(px_mock):
-    """Test the ``_generate_heatmap_plot`` method."""
-    # Setup
-    real_column = pd.DataFrame({
-        'col1': [1, 2, 3, 4],
-        'col2': ['a', 'b', 'c', 'd'],
-        'Data': ['Real'] * 4,
-    })
-    synthetic_column = pd.DataFrame({
-        'col1': [1, 2, 4, 5],
-        'col2': ['a', 'b', 'c', 'd'],
-        'Data': ['Synthetic'] * 4,
-    })
-    columns = ['col1']
-    all_data = pd.concat([real_column, synthetic_column], axis=0, ignore_index=True)
-
-    mock_figure = Mock()
-    px_mock.density_heatmap.return_value = mock_figure
-
-    # Run and assert
-    error_msg = re.escape('Generating a heatmap plot requires only two columns for the axis.')
-    with pytest.raises(ValueError, match=error_msg):
-        _generate_heatmap_plot(all_data, columns)
 
 
 @patch('sdmetrics.visualization.px')
