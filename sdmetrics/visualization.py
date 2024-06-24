@@ -262,7 +262,7 @@ def _generate_column_plot(
 
     if plot_type not in ['bar', 'distplot']:
         raise ValueError(
-            "Unrecognized plot_type '{plot_type}'. Pleas use one of 'bar' or 'distplot'"
+            f"Unrecognized plot_type '{plot_type}'. Please use one of 'bar' or 'distplot'"
         )
 
     column_name = ''
