@@ -284,15 +284,15 @@ def test_get_column_plot_no_data():
 def test__generate_column_bar_plot(mock_histogram):
     """Test ``_generate_column_bar_plot`` functionality"""
     # Setup
-    real_data = pd.Series([1, 2, 2, 3, 5])
-    synthetic_data = pd.Series([2, 2, 3, 4, 5])
+    real_data = pd.DataFrame([1, 2, 2, 3, 5])
+    synthetic_data = pd.DataFrame([2, 2, 3, 4, 5])
 
     # Run
     _generate_column_bar_plot(real_data, synthetic_data)
 
     # Assert
     expected_data = pd.DataFrame(
-        pd.concat([real_data, synthetic_data], axis=0, ignore_index=True).astype('float64')
+        pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
     )
     expected_parameters = {
         'x': 'values',
