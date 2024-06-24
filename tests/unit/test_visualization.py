@@ -291,9 +291,7 @@ def test__generate_column_bar_plot(mock_histogram):
     _generate_column_bar_plot(real_data, synthetic_data)
 
     # Assert
-    expected_data = pd.DataFrame(
-        pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
-    )
+    expected_data = pd.DataFrame(pd.concat([real_data, synthetic_data], axis=0, ignore_index=True))
     expected_parameters = {
         'x': 'values',
         'color': 'Data',
