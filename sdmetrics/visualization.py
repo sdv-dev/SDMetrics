@@ -97,7 +97,7 @@ def _generate_heatmap_plot(all_data, columns):
     unique_values = all_data['Data'].unique()
 
     if len(columns) != 2:
-        raise ValueError('Generating a heatmap plot requires only two columns for the axis.')
+        raise ValueError('Generating a heatmap plot requires exactly two columns for the axis.')
 
     fig = px.density_heatmap(
         all_data, x=columns[0], y=columns[1], facet_col='Data', histnorm='probability'
@@ -165,7 +165,7 @@ def _generate_scatter_plot(all_data, columns):
     """
 
     if len(columns) != 2:
-        raise ValueError('Generating a scatter plot requires only two columns for the axis.')
+        raise ValueError('Generating a scatter plot requires exactly two columns for the axis.')
 
     unique_values = all_data['Data'].unique()
     fig = px.scatter(
