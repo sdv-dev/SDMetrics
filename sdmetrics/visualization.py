@@ -96,15 +96,15 @@ def _generate_heatmap_plot(all_data, columns):
     """
     unique_values = all_data['Data'].unique()
 
+    if len(columns) != 2:
+        raise ValueError('Generating a heatmap plot requires only two columns for the axis.')
+
     fig = px.density_heatmap(
         all_data, x=columns[0], y=columns[1], facet_col='Data', histnorm='probability'
     )
 
-    title = ''
-    for name in unique_values:
-        title += f'{name} vs. '
-    title = title[:-4]
-    title += f"Data for columns '{columns[0]}' and '{columns[1]}"
+    title = ' vs. '.join(unique_values)
+    title += f" Data for columns '{columns[0]}' and '{columns[1]}"
 
     fig.update_layout(
         title_text=title,
@@ -163,6 +163,10 @@ def _generate_scatter_plot(all_data, columns):
     Returns:
         plotly.graph_objects._figure.Figure
     """
+
+    if len(columns) != 2:
+        raise ValueError('Generating a scatter plot requires only two columns for the axis.')
+
     unique_values = all_data['Data'].unique()
     fig = px.scatter(
         all_data,
@@ -176,11 +180,8 @@ def _generate_scatter_plot(all_data, columns):
         symbol='Data',
     )
 
-    title = ''
-    for name in unique_values:
-        title += f'{name} vs. '
-    title = title[:-4]
-    title += f"Data for columns '{columns[0]}' and '{columns[1]}'"
+    title = ' vs. '.join(unique_values)
+    title += f" Data for columns '{columns[0]}' and '{columns[1]}'"
 
     fig.update_layout(
         title=title,
