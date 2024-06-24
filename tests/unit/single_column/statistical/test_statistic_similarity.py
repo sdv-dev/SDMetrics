@@ -54,7 +54,10 @@ class TestStatisticSimilarity:
         expected_score_breakdown = {
             'score': np.nan,
         }
-        expected_warn_msg = 'The real data input array is constant. The StatisticSimilarity metric is either undefined or infinite.'
+        expected_warn_msg = (
+            'The real data input array is constant. The StatisticSimilarity '
+            'metric is either undefined or infinite.'
+        )
 
         # Run
         metric = StatisticSimilarity()
