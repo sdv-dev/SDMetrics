@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from sdmetrics.multi_table.statistical import CardinalityStatisticSimilarity
 from sdmetrics.warnings import ConstantInputWarning
@@ -57,7 +58,7 @@ class TestCardinalityStatisticSimilarity:
         )
 
         # Run
-        with np.testing.assert_warns(ConstantInputWarning, match=expected_warn_msg):
+        with pytest.warns(ConstantInputWarning, match=expected_warn_msg):
             result = CardinalityStatisticSimilarity._compute_statistic(
                 real_distribution, synthetic_distribution, 'mean'
             )

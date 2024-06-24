@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from sdmetrics.single_column.statistical import StatisticSimilarity
 from sdmetrics.warnings import ConstantInputWarning
@@ -53,14 +54,11 @@ class TestStatisticSimilarity:
         expected_score_breakdown = {
             'score': np.nan,
         }
-        expected_warn_msg = (
-            'The real data input array is constant. '
-            'The StatisticSimilarity metric is either undefined or infinte.'
-        )
+        expected_warn_msg = 'The real data input array is constant. The StatisticSimilarity metric is either undefined or infinite.'
 
         # Run
         metric = StatisticSimilarity()
-        with np.testing.assert_warns(ConstantInputWarning, match=expected_warn_msg):
+        with pytest.warns(ConstantInputWarning, match=expected_warn_msg):
             result = metric.compute_breakdown(real_data, synthetic_data, statistic='mean')
 
         # Assert
