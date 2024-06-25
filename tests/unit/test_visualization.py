@@ -475,6 +475,7 @@ def test__generate_heatmap_plot(px_mock):
 @patch('sdmetrics.visualization.px')
 def test__generate_line_plot(px_mock):
     """Test the ``_generate_line_plot`` method."""
+
     # Setup
     real_data = pd.DataFrame({'colX': [1, 2, 3, 4], 'colY': [10, 4, 20, 21], 'Data': ['Real'] * 4})
     synthetic_data = pd.DataFrame({
