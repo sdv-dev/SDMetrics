@@ -15,6 +15,8 @@ from sdmetrics.visualization import (
     _generate_line_plot,
     _generate_scatter_plot,
     _get_cardinality,
+    _get_max_between_datasets,
+    _get_min_between_datasets,
     get_cardinality_plot,
     get_column_line_plot,
     get_column_pair_plot,
@@ -46,6 +48,54 @@ def test_get_cardinality():
     )
 
     pd.testing.assert_series_equal(result, expected_result)
+
+
+def test__get_max_between_datasets():
+    """Test the ``_get_max_between_datasets`` method"""
+    # Setup
+    mock_real_data = pd.Series([1, 1, 2, 2, 2])
+    mock_synthetic_data = pd.Series([3, 3, 4])
+
+    # Run
+    real_only_val = _get_max_between_datasets(mock_real_data, None)
+    synth_only_val = _get_max_between_datasets(None, mock_synthetic_data)
+    all_val = _get_max_between_datasets(mock_real_data, mock_synthetic_data)
+
+    # Assert
+    expected_real_only_val = 2
+    expected_synth_only_val = 4
+    expected_all_val = 4
+    assert expected_real_only_val == real_only_val
+    assert expected_synth_only_val == synth_only_val
+    assert expected_all_val == all_val
+
+    error_msg = re.escape('Cannot get max between two None values.')
+    with pytest.raises(ValueError, match=error_msg):
+        _get_max_between_datasets(None, None)
+
+
+def test__get_min_between_datasets():
+    """Test the ``_get_min_between_datasets`` method"""
+    # Setup
+    mock_real_data = pd.Series([1, 1, 2, 2, 2])
+    mock_synthetic_data = pd.Series([3, 3, 4])
+
+    # Run
+    real_only_val = _get_min_between_datasets(mock_real_data, None)
+    synth_only_val = _get_min_between_datasets(None, mock_synthetic_data)
+    all_val = _get_min_between_datasets(mock_real_data, mock_synthetic_data)
+
+    # Assert
+    expected_real_only_val = 1
+    expected_synth_only_val = 3
+    expected_all_val = 1
+    assert expected_real_only_val == real_only_val
+    assert expected_synth_only_val == synth_only_val
+    assert expected_all_val == all_val
+
+    error_msg = re.escape('Cannot get min between two None values.')
+    with pytest.raises(ValueError, match=error_msg):
+        _get_min_between_datasets(None, None)
 
 
 @patch('sdmetrics.visualization.px')

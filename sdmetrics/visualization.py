@@ -372,8 +372,7 @@ def _get_max_between_datasets(real_data, synthetic_data):
         return max(synthetic_data)
     elif synthetic_data is None:
         return max(real_data)
-    else:
-        return max(max(real_data), max(synthetic_data))
+    return max(max(real_data), max(synthetic_data))
 
 
 def _get_min_between_datasets(real_data, synthetic_data):
@@ -383,8 +382,7 @@ def _get_min_between_datasets(real_data, synthetic_data):
         return min(synthetic_data)
     elif synthetic_data is None:
         return min(real_data)
-    else:
-        return min(min(real_data), min(synthetic_data))
+    return min(min(real_data), min(synthetic_data))
 
 
 def _generate_cardinality_plot(
