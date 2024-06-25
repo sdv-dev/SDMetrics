@@ -667,6 +667,44 @@ def test_get_column_pair_plot_plot_type_none_continuous_data(mock__generate_scat
 
 
 @patch('sdmetrics.visualization._generate_scatter_plot')
+def test_get_column_pair_plot_plot_single_data(mock__generate_scatter_plot):
+    """Test ``get_column_pair_plot`` with only real or synthetic data"""
+    # Setup
+    columns = ['amount', 'price']
+    real_data = pd.DataFrame({'amount': [1, 2, 3], 'price': [4, 5, 6]})
+    synthetic_data = pd.DataFrame({'amount': [1.0, 2.0, 3.0], 'price': [4.0, 5.0, 6.0]})
+    mock__generate_scatter_plot.side_effect = ['mock_return_1', 'mock_return_2']
+
+    # Run
+    real_fig = get_column_pair_plot(real_data, None, columns)
+    synth_fig = get_column_pair_plot(None, synthetic_data, columns)
+
+    # Assert
+    real_data['Data'] = 'Real'
+    synthetic_data['Data'] = 'Synthetic'
+    expected_real_call_data = real_data
+    expected_synth_call_data = synthetic_data
+    expected_calls = [
+        call(DataFrameMatcher(expected_real_call_data), columns),
+        call(DataFrameMatcher(expected_synth_call_data), columns),
+    ]
+    mock__generate_scatter_plot.assert_has_calls(expected_calls, any_order=False)
+    assert real_fig == 'mock_return_1'
+    assert synth_fig == 'mock_return_2'
+
+
+@patch('sdmetrics.visualization._generate_scatter_plot')
+def test_get_column_pair_plot_plot_no_data(mock__generate_scatter_plot):
+    """Test ``get_column_pair_plot`` with neither real or synthetic data"""
+    # Setup
+    columns = ['amount', 'price']
+    error_msg = re.escape('No data provided to plot. Please provide either real or synthetic data.')
+    # Run and Assert
+    with pytest.raises(ValueError, match=error_msg):
+        get_column_pair_plot(None, None, columns)
+
+
+@patch('sdmetrics.visualization._generate_scatter_plot')
 def test_get_column_pair_plot_plot_type_none_continuous_data_and_date(mock__generate_scatter_plot):
     """Test ``get_column_pair_plot`` with continuous data and ``plot_type`` ``None``."""
     # Setup
