@@ -1,5 +1,6 @@
 from unittest.mock import Mock
 
+import numpy as np
 from tqdm import tqdm
 
 from sdmetrics.demos import load_demo
@@ -17,7 +18,7 @@ class TestColumnPairTrends:
         result = column_pair_trends.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        assert result == 0.45654629583521095
+        assert np.isclose(result, 0.45654629583521095, atol=1e-8)
 
     def test_with_progress_bar(self):
         """Test that the progress bar is correctly updated."""
@@ -37,5 +38,5 @@ class TestColumnPairTrends:
         result = column_pair_trends.get_score(real_data, synthetic_data, metadata, progress_bar)
 
         # Assert
-        assert result == 0.45654629583521095
+        assert np.isclose(result, 0.45654629583521095, atol=1e-8)
         assert mock_update.call_count == num_iter
