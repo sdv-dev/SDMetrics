@@ -365,6 +365,26 @@ def _generate_column_plot(
     return fig
 
 
+def _get_max_between_datasets(real_data, synthetic_data):
+    if synthetic_data is None and real_data is None:
+        raise ValueError('Cannot get max between two None values.')
+    if real_data is None:
+        return max(synthetic_data)
+    elif synthetic_data is None:
+        return max(real_data)
+    return max(max(real_data), max(synthetic_data))
+
+
+def _get_min_between_datasets(real_data, synthetic_data):
+    if synthetic_data is None and real_data is None:
+        raise ValueError('Cannot get min between two None values.')
+    if real_data is None:
+        return min(synthetic_data)
+    elif synthetic_data is None:
+        return min(real_data)
+    return min(min(real_data), min(synthetic_data))
+
+
 def _generate_cardinality_plot(
     real_data, synthetic_data, parent_primary_key, child_foreign_key, plot_type='bar'
 ):
@@ -376,8 +396,8 @@ def _generate_cardinality_plot(
 
     plot_kwargs = {}
     if plot_type == 'bar':
-        max_cardinality = max(max(real_data), max(synthetic_data))
-        min_cardinality = min(min(real_data), min(synthetic_data))
+        max_cardinality = _get_max_between_datasets(real_data, synthetic_data)
+        min_cardinality = _get_min_between_datasets(real_data, synthetic_data)
         plot_kwargs = {'nbins': max_cardinality - min_cardinality + 1}
 
     return _generate_column_plot(
@@ -420,10 +440,10 @@ def get_cardinality_plot(
     """Return a plot of the cardinality of the parent-child relationship.
 
     Args:
-        real_data (dict):
-            The real data.
-        synthetic_data (dict):
-            The synthetic data.
+        real_data (dict or None):
+            The real data. If None this data will not be graphed.
+        synthetic_data (dict or None):
+            The synthetic data. If None this data will not be graphed.
         child_table_name (string):
             The name of the child table.
         parent_table_name (string):
@@ -442,18 +462,27 @@ def get_cardinality_plot(
     if plot_type not in ['bar', 'distplot']:
         raise ValueError(f"Invalid plot_type '{plot_type}'. Please use one of ['bar', 'distplot'].")
 
-    real_cardinality = _get_cardinality(
-        real_data[parent_table_name],
-        real_data[child_table_name],
-        parent_primary_key,
-        child_foreign_key,
-    )
-    synth_cardinality = _get_cardinality(
-        synthetic_data[parent_table_name],
-        synthetic_data[child_table_name],
-        parent_primary_key,
-        child_foreign_key,
-    )
+    if real_data is None and synthetic_data is None:
+        raise ValueError('No data provided to plot. Please provide either real or synthetic data.')
+
+    real_cardinality = None
+    synth_cardinality = None
+
+    if real_data is not None:
+        real_cardinality = _get_cardinality(
+            real_data[parent_table_name],
+            real_data[child_table_name],
+            parent_primary_key,
+            child_foreign_key,
+        )
+
+    if synthetic_data is not None:
+        synth_cardinality = _get_cardinality(
+            synthetic_data[parent_table_name],
+            synthetic_data[child_table_name],
+            parent_primary_key,
+            child_foreign_key,
+        )
 
     fig = _generate_cardinality_plot(
         real_cardinality,
