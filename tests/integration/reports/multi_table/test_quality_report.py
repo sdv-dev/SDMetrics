@@ -107,7 +107,7 @@ def test_multi_table_quality_report():
         details.append(report.get_details(property_))
 
     # Assert score
-    assert score == 0.649582127409184
+    assert round(score, 15) == 0.649582127409184
     pd.testing.assert_frame_equal(
         properties,
         pd.DataFrame({

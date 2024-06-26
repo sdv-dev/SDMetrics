@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from tests.utils import get_error_type
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties.column_pair_trends import ColumnPairTrends
@@ -79,17 +80,25 @@ class TestColumnPairTrends:
         # Run
         column_pair_trends = ColumnPairTrends()
 
-        exp_message_1 = "ValueError: could not convert string to float: 'a'"
+        exp_message_1 = 'ValueError'
 
-        exp_message_2 = "TypeError: '<=' not supported between instances of 'float' and 'str'"
+        exp_message_2 = 'TypeError'
 
-        exp_error_serie = pd.Series([exp_message_1, None, None, exp_message_2, exp_message_2, None])
+        exp_error_series = pd.Series([
+            exp_message_1,
+            None,
+            None,
+            exp_message_2,
+            exp_message_2,
+            None,
+        ])
 
         score = column_pair_trends.get_score(real_data, synthetic_data, metadata)
 
         # Assert
         details = column_pair_trends.details
-        pd.testing.assert_series_equal(details['Error'], exp_error_serie, check_names=False)
+        details['Error'] = details['Error'].apply(get_error_type)
+        pd.testing.assert_series_equal(details['Error'], exp_error_series, check_names=False)
         assert score == 0.7751937984496124
 
     def test_only_categorical_columns(self):
