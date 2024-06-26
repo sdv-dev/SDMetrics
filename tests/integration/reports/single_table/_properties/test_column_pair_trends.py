@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from tests.utils import get_error_type
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties.column_pair_trends import ColumnPairTrends
@@ -75,12 +76,6 @@ class TestColumnPairTrends:
         }
 
         real_data['second_perc'].iloc[2] = 'a'
-
-        def get_error_type(error):
-            if error is not None:
-                colon_index = error.find(':')
-                return error[:colon_index]
-            return None
 
         # Run
         column_pair_trends = ColumnPairTrends()

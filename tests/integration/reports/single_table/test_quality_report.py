@@ -6,6 +6,7 @@ import pandas as pd
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table import QualityReport
+from tests.utils import get_error_type
 
 
 class TestQualityReport:
@@ -250,12 +251,6 @@ class TestQualityReport:
 
         real_data['second_perc'].iloc[2] = 'a'
 
-        def get_error_type(error):
-            if error is not None:
-                colon_index = error.find(':')
-                return error[:colon_index]
-            return None
-
         report = QualityReport()
 
         # Run
@@ -345,12 +340,6 @@ class TestQualityReport:
         synthetic_data['nan_column'] = np.nan * len(synthetic_data)
         metadata['columns']['nan_column'] = {'sdtype': 'numerical'}
         column_names.append('nan_column')
-
-        def get_error_type(error):
-            if error is not None:
-                colon_index = error.find(':')
-                return error[:colon_index]
-            return None
 
         report = QualityReport()
 
