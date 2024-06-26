@@ -250,6 +250,12 @@ class TestQualityReport:
 
         real_data['second_perc'].iloc[2] = 'a'
 
+        def get_error_type(error):
+            if error is not None:
+                colon_index = error.find(':')
+                return error[:colon_index]
+            return None
+
         report = QualityReport()
 
         # Run
@@ -262,7 +268,7 @@ class TestQualityReport:
             'Score': [0.6621621621621622, np.nan, 0.9953488372093023, 0.9395348837209302],
             'Error': [
                 None,
-                "TypeError: '<' not supported between instances of 'str' and 'float'",
+                'TypeError',
                 None,
                 None,
             ],
@@ -304,23 +310,25 @@ class TestQualityReport:
             'Real Correlation': [np.nan] * 6,
             'Synthetic Correlation': [np.nan] * 6,
             'Error': [
-                "ValueError: could not convert string to float: 'a'",
+                'ValueError',
                 None,
                 None,
-                "TypeError: '<=' not supported between instances of 'float' and 'str'",
-                "TypeError: '<=' not supported between instances of 'float' and 'str'",
+                'TypeError',
+                'TypeError',
                 None,
             ],
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
         expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)
 
-        pd.testing.assert_frame_equal(
-            report.get_details('Column Shapes'), expected_details_column_shapes
-        )
-        pd.testing.assert_frame_equal(
-            report.get_details('Column Pair Trends'), expected_details_cpt
-        )
+        # Errors may change based on versions of scipy installed.
+        col_shape_report = report.get_details('Column Shapes')
+        col_pair_report = report.get_details('Column Pair Trends')
+        col_shape_report['Error'] = col_shape_report['Error'].apply(get_error_type)
+        col_pair_report['Error'] = col_pair_report['Error'].apply(get_error_type)
+
+        pd.testing.assert_frame_equal(col_shape_report, expected_details_column_shapes)
+        pd.testing.assert_frame_equal(col_pair_report, expected_details_cpt)
         assert report.get_score() == 0.8204378797402054
 
     def test_report_with_column_nan(self):
@@ -337,6 +345,12 @@ class TestQualityReport:
         synthetic_data['nan_column'] = np.nan * len(synthetic_data)
         metadata['columns']['nan_column'] = {'sdtype': 'numerical'}
         column_names.append('nan_column')
+
+        def get_error_type(error):
+            if error is not None:
+                colon_index = error.find(':')
+                return error[:colon_index]
+            return None
 
         report = QualityReport()
 
@@ -446,10 +460,10 @@ class TestQualityReport:
                 None,
                 None,
                 None,
-                'ValueError: x and y must have length at least 2.',
+                'ValueError',
                 None,
                 None,
-                'ValueError: x and y must have length at least 2.',
+                'ValueError',
                 None,
                 None,
                 None,
@@ -458,12 +472,17 @@ class TestQualityReport:
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
         expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)
 
-        pd.testing.assert_frame_equal(
-            report.get_details('Column Shapes'), expected_details_column_shapes
-        )
-        pd.testing.assert_frame_equal(
-            report.get_details('Column Pair Trends'), expected_details_cpt
-        )
+        col_shape_report = report.get_details('Column Shapes')
+        if 'Error' not in col_shape_report:
+            # Errors may not occur in certain scipy versions
+            expected_details_column_shapes.drop(columns=['Error'], inplace=True)
+
+        # Errors may change based on versions of library installed.
+        col_pair_report = report.get_details('Column Pair Trends')
+        col_pair_report['Error'] = col_pair_report['Error'].apply(get_error_type)
+
+        pd.testing.assert_frame_equal(col_shape_report, expected_details_column_shapes)
+        pd.testing.assert_frame_equal(col_pair_report, expected_details_cpt)
 
     def test_report_with_verbose(self, capsys):
         """Test the report with verbose.

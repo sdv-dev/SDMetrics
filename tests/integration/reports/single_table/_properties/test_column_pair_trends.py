@@ -76,20 +76,34 @@ class TestColumnPairTrends:
 
         real_data['second_perc'].iloc[2] = 'a'
 
+        def get_error_type(error):
+            if error is not None:
+                colon_index = error.find(':')
+                return error[:colon_index]
+            return None
+
         # Run
         column_pair_trends = ColumnPairTrends()
 
-        exp_message_1 = "ValueError: could not convert string to float: 'a'"
+        exp_message_1 = 'ValueError'
 
-        exp_message_2 = "TypeError: '<=' not supported between instances of 'float' and 'str'"
+        exp_message_2 = 'TypeError'
 
-        exp_error_serie = pd.Series([exp_message_1, None, None, exp_message_2, exp_message_2, None])
+        exp_error_series = pd.Series([
+            exp_message_1,
+            None,
+            None,
+            exp_message_2,
+            exp_message_2,
+            None,
+        ])
 
         score = column_pair_trends.get_score(real_data, synthetic_data, metadata)
 
         # Assert
         details = column_pair_trends.details
-        pd.testing.assert_series_equal(details['Error'], exp_error_serie, check_names=False)
+        details['Error'] = details['Error'].apply(get_error_type)
+        pd.testing.assert_series_equal(details['Error'], exp_error_series, check_names=False)
         assert score == 0.7751937984496124
 
     def test_only_categorical_columns(self):
