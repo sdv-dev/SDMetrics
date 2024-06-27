@@ -179,7 +179,7 @@ build-backend = "setuptools.build_meta"
 preview = true
 line-length = 100
 indent-width = 4
-src = ["sdv"]
+src = ["sdmetrics"]
 exclude = [
     "docs",
     ".tox",
