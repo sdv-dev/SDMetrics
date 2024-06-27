@@ -464,7 +464,7 @@ class TestQualityReport:
         col_shape_report = report.get_details('Column Shapes')
         if 'Error' not in col_shape_report:
             # Errors may not occur in certain scipy versions
-            expected_details_column_shapes.drop(columns=['Error'], inplace=True)
+            expected_details_column_shapes = expected_details_column_shapes.drop(columns=['Error'])
 
         # Errors may change based on versions of library installed.
         col_pair_report = report.get_details('Column Pair Trends')

@@ -530,7 +530,6 @@ def test___generate_column_plot_with_datetimes(mock_bar_plot):
     _generate_column_plot(real_data['values'], synthetic_data['values'], 'bar')
 
     # Assert
-    print(mock_bar_plot.call_args[0][1])
     expected_real_data = pd.DataFrame({
         'values': [1611100800000000000, 1642723200000000000],
         'Data': ['Real', 'Real'],
