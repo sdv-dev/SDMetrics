@@ -163,7 +163,6 @@ def _generate_scatter_plot(all_data, columns):
     Returns:
         plotly.graph_objects._figure.Figure
     """
-
     if len(columns) != 2:
         raise ValueError('Generating a scatter plot requires exactly two columns for the axis.')
 
@@ -257,7 +256,6 @@ def _generate_column_plot(
     Returns:
         plotly.graph_objects._figure.Figure
     """
-
     if real_column is None and synthetic_column is None:
         raise ValueError('No data provided to plot. Please provide either real or synthetic data.')
 
@@ -515,7 +513,6 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     Returns:
         plotly.graph_objects._figure.Figure
     """
-
     if real_data is None and synthetic_data is None:
         raise ValueError('No data provided to plot. Please provide either real or synthetic data.')
 
