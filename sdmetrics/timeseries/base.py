@@ -2,6 +2,8 @@
 
 from operator import attrgetter
 
+import pandas as pd
+
 from sdmetrics.base import BaseMetric
 from sdmetrics.utils import get_columns_from_metadata
 
@@ -60,6 +62,14 @@ class TimeSeriesMetric(BaseMetric):
             for field in fields.keys():
                 if field not in real_data.columns:
                     raise ValueError(f'Field {field} not found in data')
+
+            for column, sdtype in metadata['columns'].items():
+                if sdtype['sdtype'] == 'datetime':
+                    try:
+                        real_data[column] = pd.to_datetime(real_data[column])
+                        synthetic_data[column] = pd.to_datetime(synthetic_data[column])
+                    except ValueError:
+                        raise ValueError(f"Column '{column}' is not a valid datetime")
 
         else:
             dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
