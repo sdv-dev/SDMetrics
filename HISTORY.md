@@ -1,5 +1,19 @@
 # History
 
+## v0.15.0 - 2024-07-12
+
+This release adds support for NumPy 2.0!
+
+### New Features
+
+* Allow me to visualize just the real or synthetic data - Issue [#581](https://github.com/sdv-dev/SDMetrics/issues/581) by @lajohn4747
+* Update Referential Integrity metric to support NaNs in child column  - Issue [#587](https://github.com/sdv-dev/SDMetrics/issues/587) by @R-Palazzo
+* Add support for numpy 2.0.0 - Issue [#593](https://github.com/sdv-dev/SDMetrics/issues/593) by @R-Palazzo
+
+### Bugs Fixed
+
+* ColumnPairTrends score depends on the data index - Issue [#582](https://github.com/sdv-dev/SDMetrics/issues/582) by @R-Palazzo
+
 ## v0.14.1 - 2024-05-13
 
 This release patches a bug on the `LSTMDetection` metric.
