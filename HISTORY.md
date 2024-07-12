@@ -2,7 +2,17 @@
 
 ## v0.15.0 - 2024-07-12
 
-This release adds support for NumPy 2.0!
+This release adds support for NumPy 2.0! Additionally, the visualization utilities no longer require both real and synthetic data to be provided, and they can now be used to visualize only real or only synthetic data.
+
+### Maintenance
+
+* Switch to using ruff for Python linting and code formatting - Issue [#536](https://github.com/sdv-dev/SDMetrics/issues/536) by @gsheni
+* Change job names in integration workflow to "integration" - Issue [#577](https://github.com/sdv-dev/SDMetrics/issues/577) by @rwedge
+* Cap numpy to less than 2.0.0 until SDMetrics supports - Issue [#591](https://github.com/sdv-dev/SDMetrics/issues/591) by @gsheni
+
+### Internal
+
+* Switch to using ruff for Python linting and code formatting - Issue [#536](https://github.com/sdv-dev/SDMetrics/issues/536) by @gsheni
 
 ### New Features
 
@@ -13,6 +23,7 @@ This release adds support for NumPy 2.0!
 ### Bugs Fixed
 
 * ColumnPairTrends score depends on the data index - Issue [#582](https://github.com/sdv-dev/SDMetrics/issues/582) by @R-Palazzo
+* Datetime columns set to Object pandas dtype breaks LSTMDetection - Issue [#584](https://github.com/sdv-dev/SDMetrics/issues/584) by @fealho
 
 ## v0.14.1 - 2024-05-13
 
