@@ -58,3 +58,76 @@ def test_compute_lstmdetection_multiple_categorical_columns():
     # Assert
     assert not pd.isna(output)
     assert LSTMDetection.min_value <= output <= LSTMDetection.max_value
+
+
+def test_compute_lstmdetection_mismatching_datetime_columns():
+    """Test LSTMDetection metric with mismatching datetime columns.
+
+    Test it when the real data has a date column and the synthetic data has a string column.
+    """
+    # Setup
+    df1 = pd.DataFrame({
+        's_key': [1, 2, 3, 4, 5],
+        'visits': pd.to_datetime(['1/1/2019', '1/2/2019', '1/3/2019', '1/4/2019', '1/5/2019']),
+    })
+    df1['visits'] = df1['visits'].dt.date
+    df2 = pd.DataFrame({
+        's_key': [1, 2, 3, 4, 5],
+        'visits': ['1/2/2019', '1/2/2019', '1/3/2019', '1/4/2019', '1/5/2019'],
+    })
+    metadata = {
+        'columns': {'s_key': {'sdtype': 'numerical'}, 'visits': {'sdtype': 'datetime'}},
+        'sequence_key': 's_key',
+    }
+
+    # Run
+    score = LSTMDetection.compute(
+        real_data=df1, synthetic_data=df2, sequence_key=['s_key'], metadata=metadata
+    )
+
+    # Assert
+    assert score == 0.6666666666666667
+
+
+def test_compute_lstmdetection_mismatching_datetime_columns_with_datetime_format():
+    """Test LSTMDetection metric with mismatching datetime columns and datetime formats.
+
+    Test it when the real data has a date column and the synthetic data has a string column.
+    """
+    # Setup
+    df1 = pd.DataFrame({
+        's_key': [1, 2, 3, 4, 5],
+        'visits': pd.to_datetime([
+            '2023-03-17 14:30:00',
+            '2024-09-17 14:30:00',
+            '2043-09-17 14:32:00',
+            '2023-09-11 14:30:00',
+            '2023-09-17 14:30:00',
+        ]),
+    })
+    df1['visits'] = df1['visits'].dt.date
+    df2 = pd.DataFrame({
+        's_key': [1, 2, 3, 4, 5],
+        'visits': [
+            '2023-03-17 14:30:05',
+            '2024-09-17 14:30:00',
+            '2043-09-17 14:32:00',
+            '2023-09-11 14:30:00',
+            '2023-09-17 14:30:00',
+        ],
+    })
+    metadata = {
+        'columns': {
+            's_key': {'sdtype': 'numerical'},
+            'visits': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d %H:%M:%S'},
+        },
+        'sequence_key': 's_key',
+    }
+
+    # Run
+    score = LSTMDetection.compute(
+        real_data=df1, synthetic_data=df2, sequence_key=['s_key'], metadata=metadata
+    )
+
+    # Assert
+    assert score == 0.6666666666666667

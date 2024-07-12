@@ -74,6 +74,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
             Union[float, tuple[float]]:
                 Metric output.
         """
+        real_data, synthetic_data = real_data.copy(), synthetic_data.copy()
         _, sequence_key = cls._validate_inputs(real_data, synthetic_data, metadata, sequence_key)
 
         ht = HyperTransformer()
