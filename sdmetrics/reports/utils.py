@@ -9,7 +9,11 @@ import pandas as pd
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
 from sdmetrics.utils import (
-    get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta, is_datetime)
+    get_alternate_keys,
+    get_columns_from_metadata,
+    get_type_from_column_meta,
+    is_datetime,
+)
 
 CONTINUOUS_SDTYPES = ['numerical', 'datetime']
 DISCRETE_SDTYPES = ['categorical', 'boolean']
@@ -69,8 +73,10 @@ def convert_datetime_columns(real_column, synthetic_column, col_metadata):
             The converted real and synthetic column data.
     """
     datetime_format = col_metadata.get('format') or col_metadata.get('datetime_format')
-    return (convert_to_datetime(real_column, datetime_format),
-            convert_to_datetime(synthetic_column, datetime_format))
+    return (
+        convert_to_datetime(real_column, datetime_format),
+        convert_to_datetime(synthetic_column, datetime_format),
+    )
 
 
 def discretize_table_data(real_data, synthetic_data, metadata):
@@ -155,14 +161,15 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
     metric_results = {}
 
     binned_real, binned_synthetic, binned_metadata = discretize_table_data(
-        real_data, synthetic_data, metadata)
+        real_data, synthetic_data, metadata
+    )
 
     non_id_cols = _get_non_id_columns(metadata, binned_metadata)
     for columns in itertools.combinations(non_id_cols, r=2):
         sorted_columns = tuple(sorted(columns))
         if (
-            sorted_columns not in keys_to_skip and
-            (sorted_columns[1], sorted_columns[0]) not in keys_to_skip
+            sorted_columns not in keys_to_skip
+            and (sorted_columns[1], sorted_columns[0]) not in keys_to_skip
         ):
             result = metric.column_pairs_metric.compute_breakdown(
                 binned_real[list(sorted_columns)],
@@ -215,8 +222,7 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
             The name of the current table, if one exists
     """
     if table:
-        warning_format = ('Unexpected values ({values}) in column "{column}" '
-                          f'and table "{table}"')
+        warning_format = 'Unexpected values ({values}) in column "{column}" ' f'and table "{table}"'
     else:
         warning_format = 'Unexpected values ({values}) in column "{column}"'
 
@@ -225,11 +231,13 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
         column_type = get_type_from_column_meta(column_meta)
         if column_type == 'categorical':
             extra_categories = [
-                value for value in synthetic_data[column].unique()
+                value
+                for value in synthetic_data[column].unique()
                 if value not in real_data[column].unique()
             ]
             if extra_categories:
                 value_list = '", "'.join(str(value) for value in extra_categories[:5])
-                values = f'"{value_list}" + more' if len(
-                    extra_categories) > 5 else f'"{value_list}"'
+                values = (
+                    f'"{value_list}" + more' if len(extra_categories) > 5 else f'"{value_list}"'
+                )
                 warnings.warn(warning_format.format(values=values, column=column))

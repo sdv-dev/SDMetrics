@@ -1,4 +1,5 @@
 """Utils for testing."""
+
 import pandas as pd
 
 
@@ -39,3 +40,10 @@ class IteratorMatcher:
         """Assert equality by expanding the iterator."""
         assert all(x == y for x, y in zip(self.iterator, other))
         return True
+
+
+def get_error_type(error):
+    if error is not None:
+        colon_index = error.find(':')
+        return error[:colon_index]
+    return None

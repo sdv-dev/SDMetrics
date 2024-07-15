@@ -1,4 +1,5 @@
 """BaseMetric class."""
+
 import numpy as np
 
 from sdmetrics.goal import Goal
@@ -97,8 +98,10 @@ class BaseMetric:
             score = 1 / (1 + np.exp(-raw_score))
 
         if score is None or score < 0 or score > 1:
-            raise AssertionError(f'This should be unreachable. The score {score} should be'
-                                 f'a value between 0 and 1.')
+            raise AssertionError(
+                f'This should be unreachable. The score {score} should be'
+                f'a value between 0 and 1.'
+            )
 
         if cls.goal == Goal.MINIMIZE:
             return 1.0 - score

@@ -1,7 +1,9 @@
 """Column pair trends property for multi-table."""
+
 from sdmetrics.reports.multi_table._properties import BaseMultiTableProperty
 from sdmetrics.reports.single_table._properties import (
-    ColumnPairTrends as SingleTableColumnPairTrends)
+    ColumnPairTrends as SingleTableColumnPairTrends,
+)
 
 
 class ColumnPairTrends(BaseMultiTableProperty):

@@ -1,10 +1,13 @@
 from sdmetrics.reports.multi_table import QualityReport
 from sdmetrics.reports.multi_table._properties import (
-    Cardinality, ColumnPairTrends, ColumnShapes, InterTableTrends)
+    Cardinality,
+    ColumnPairTrends,
+    ColumnShapes,
+    InterTableTrends,
+)
 
 
 class TestQualityReport:
-
     def test___init__(self):
         """Test that the ``__init__`` method"""
         # Setup

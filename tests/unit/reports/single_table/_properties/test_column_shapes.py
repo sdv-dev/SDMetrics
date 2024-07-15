@@ -7,7 +7,6 @@ from sdmetrics.reports.single_table._properties.column_shapes import ColumnShape
 
 
 class TestColumnShapes:
-
     @patch('sdmetrics.reports.single_table._properties.column_shapes.KSComplement.compute')
     @patch('sdmetrics.reports.single_table._properties.column_shapes.TVComplement.compute')
     def test__generate_details(self, tv_complement_compute_mock, ks_complement_compute_mock):
@@ -17,20 +16,20 @@ class TestColumnShapes:
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
         })
         synthetic_data = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
         })
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'boolean'},
                 'col3': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'datetime'}
+                'col4': {'sdtype': 'datetime'},
             }
         }
 
@@ -62,20 +61,20 @@ class TestColumnShapes:
             'col1': [1, None, 3],
             'col2': [False, True, np.nan],
             'col3': [None, 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', np.nan, '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', np.nan, '2020-01-03']),
         })
         synthetic_data = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', None, 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
         })
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'boolean'},
                 'col3': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'datetime'}
+                'col4': {'sdtype': 'datetime'},
             }
         }
 
@@ -109,9 +108,7 @@ class TestColumnShapes:
         result = column_shape_property._generate_details(real_data, synthetic_data, metadata)
 
         # Assert
-        expected_message = (
-            "TypeError: '<' not supported between instances of 'str' and 'int'"
-        )
+        expected_message = "TypeError: '<' not supported between instances of 'str' and 'int'"
         result_nan = result.loc[pd.isna(result['Score'])]
         column_names_nan = result_nan['Column'].tolist()
         error_message = result_nan['Error'].tolist()
@@ -128,7 +125,7 @@ class TestColumnShapes:
         mock_df = pd.DataFrame({
             'Column': ['Column1', 'Column2'],
             'Score': [0.7, 0.3],
-            'Metric': ['KSComplement', 'TVComplement']
+            'Metric': ['KSComplement', 'TVComplement'],
         })
         column_shape_property.details = mock_df
 
@@ -183,5 +180,5 @@ class TestColumnShapes:
             xaxis_categoryorder='total ascending',
             plot_bgcolor='#F5F5F8',
             margin={'t': 150},
-            font={'size': 18}
+            font={'size': 18},
         )

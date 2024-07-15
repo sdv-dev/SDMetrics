@@ -32,9 +32,7 @@ class Structure(BaseSingleTableProperty):
             pandas.DataFrame
         """
         try:
-            score = TableStructure.compute(
-                real_data, synthetic_data
-            )
+            score = TableStructure.compute(real_data, synthetic_data)
             error_message = None
 
         except Exception as e:
@@ -45,11 +43,14 @@ class Structure(BaseSingleTableProperty):
             if progress_bar:
                 progress_bar.update()
 
-        result = pd.DataFrame({
-            'Metric': 'TableStructure',
-            'Score': score,
-            'Error': error_message,
-        }, index=[0])
+        result = pd.DataFrame(
+            {
+                'Metric': 'TableStructure',
+                'Score': score,
+                'Error': error_message,
+            },
+            index=[0],
+        )
 
         if result['Error'].isna().all():
             result = result.drop('Error', axis=1)

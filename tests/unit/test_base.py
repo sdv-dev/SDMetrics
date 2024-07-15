@@ -5,7 +5,6 @@ from sdmetrics.goal import Goal
 
 
 class TestBaseMetric:
-
     def test_normalize_bounded(self):
         BaseMetric.max_value = 1
         BaseMetric.min_value = -1
@@ -14,7 +13,7 @@ class TestBaseMetric:
         raw_score = 0
         normalized = BaseMetric.normalize(raw_score)
 
-        assert normalized == .5
+        assert normalized == 0.5
 
     def test_normalize_high_bound(self):
         BaseMetric.max_value = 1
@@ -44,7 +43,7 @@ class TestBaseMetric:
         raw_score = 0
         normalized = BaseMetric.normalize(raw_score)
 
-        assert normalized == .5
+        assert normalized == 0.5
 
     def test_normalize_minimize(self):
         BaseMetric.max_value = 1

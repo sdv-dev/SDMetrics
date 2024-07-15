@@ -58,6 +58,7 @@ def test__find_addons_object(entry_points_mock, mock_sdmetrics):
 @patch('sdmetrics.entry_points')
 def test__find_addons_bad_addon(entry_points_mock, warning_mock):
     """Test failing to load an add-on generates a warning."""
+
     # Setup
     def entry_point_error():
         raise ValueError()
@@ -148,7 +149,7 @@ def test__find_addons_missing_object(entry_points_mock, warning_mock, mock_sdmet
     bad_entry_point = Mock()
     bad_entry_point.name = 'sdmetrics.submodule:missing_object.new_method'
     entry_points_mock.return_value = [bad_entry_point]
-    msg = ("Failed to set 'sdmetrics.submodule:missing_object.new_method': missing_object.")
+    msg = "Failed to set 'sdmetrics.submodule:missing_object.new_method': missing_object."
 
     del mock_sdmetrics.submodule.missing_object
 

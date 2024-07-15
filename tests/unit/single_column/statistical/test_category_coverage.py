@@ -6,7 +6,6 @@ from sdmetrics.single_column.statistical import CategoryCoverage
 
 
 class TestCategoryCoverage:
-
     def test_compute_breakdown(self):
         """Test the ``compute_breakdown`` method.
 

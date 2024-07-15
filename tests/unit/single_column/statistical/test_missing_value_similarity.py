@@ -7,7 +7,6 @@ from sdmetrics.single_column.statistical import MissingValueSimilarity
 
 
 class TestMissingValueSimilarity:
-
     def test_compute_breakdown(self):
         """Test the ``compute_breakdown`` method.
 

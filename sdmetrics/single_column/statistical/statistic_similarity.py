@@ -85,8 +85,10 @@ class StatisticSimilarity(SingleColumnMetric):
             score_real = real_data.median()
             score_synthetic = synthetic_data.median()
         else:
-            raise ValueError(f'requested statistic {statistic} is not valid. '
-                             'Please choose either mean, std, or median.')
+            raise ValueError(
+                f'requested statistic {statistic} is not valid. '
+                'Please choose either mean, std, or median.'
+            )
 
         score = 1 - abs(score_real - score_synthetic) / (real_data.max() - real_data.min())
         return {'real': score_real, 'synthetic': score_synthetic, 'score': max(score, 0)}

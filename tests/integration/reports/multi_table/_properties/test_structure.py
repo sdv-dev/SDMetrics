@@ -8,7 +8,6 @@ from sdmetrics.reports.multi_table._properties import Structure
 
 
 class TestStructure:
-
     def test_end_to_end(self):
         """Test Structure multi-table."""
         # Setup

@@ -9,10 +9,18 @@ from sdmetrics.single_table import NewRowSynthesis
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
 from sdmetrics.single_table.multi_column_pairs import (
-    ContingencySimilarity, ContinuousKLDivergence, DiscreteKLDivergence)
+    ContingencySimilarity,
+    ContinuousKLDivergence,
+    DiscreteKLDivergence,
+)
 from sdmetrics.single_table.multi_single_column import (
-    BoundaryAdherence, CategoryCoverage, CSTest, KSComplement, MissingValueSimilarity,
-    TVComplement)
+    BoundaryAdherence,
+    CategoryCoverage,
+    CSTest,
+    KSComplement,
+    MissingValueSimilarity,
+    TVComplement,
+)
 
 METRICS = [
     CSTest,
@@ -108,10 +116,7 @@ def test_compute_all():
     real_data, synthetic_data, metadata = load_single_table_demo()
 
     output = compute_metrics(
-        SingleTableMetric.get_subclasses(),
-        real_data,
-        synthetic_data,
-        metadata=metadata
+        SingleTableMetric.get_subclasses(), real_data, synthetic_data, metadata=metadata
     )
 
     assert not pd.isna(output.raw_score.mean())
@@ -140,10 +145,7 @@ def test_newrowsynthesis_with_special_characters_in_column_names():
     })
 
     # Run
-    metric = NewRowSynthesis.compute(
-        real_data=real_data,
-        synthetic_data=synthetic_data
-    )
+    metric = NewRowSynthesis.compute(real_data=real_data, synthetic_data=synthetic_data)
 
     # Assert
     assert metric == 0.66666666666666667
@@ -152,20 +154,27 @@ def test_newrowsynthesis_with_special_characters_in_column_names():
 def test_new_row_synthesis_datetime_as_string():
     """Test it works when the datetime column is a string."""
     # Setup
-    data = pd.DataFrame(data={
-        'id': [0, 1, 2, 3, 4],
-        'datetime_column': ['2010-02-23', '2010-01-01', '2010-03-30', '2010-03-23', '2010-03-04'],
-        'numerical_column': [1, 2, 3, 4, 5],
-        'categorical_column': [1, 2, 2, 1, 2]
-    })
+    data = pd.DataFrame(
+        data={
+            'id': [0, 1, 2, 3, 4],
+            'datetime_column': [
+                '2010-02-23',
+                '2010-01-01',
+                '2010-03-30',
+                '2010-03-23',
+                '2010-03-04',
+            ],
+            'numerical_column': [1, 2, 3, 4, 5],
+            'categorical_column': [1, 2, 2, 1, 2],
+        }
+    )
 
     # Run
     metric = NewRowSynthesis.compute(
         real_data=data,
         synthetic_data=data,
         numerical_match_tolerance=0.01,
-        synthetic_sample_size=10_000
-
+        synthetic_sample_size=10_000,
     )
 
     # Assert

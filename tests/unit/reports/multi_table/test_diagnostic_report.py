@@ -3,7 +3,6 @@ from sdmetrics.reports.multi_table._properties import DataValidity, Relationship
 
 
 class TestDiagnosticReport:
-
     def test___init__(self):
         """Test that the ``__init__`` method"""
         # Setup

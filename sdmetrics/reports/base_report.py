@@ -1,4 +1,5 @@
 """Single table base report."""
+
 import importlib.metadata
 import pickle
 import sys
@@ -16,7 +17,7 @@ from sdmetrics.reports.utils import convert_datetime_columns
 from sdmetrics.visualization import set_plotly_config
 
 
-class BaseReport():
+class BaseReport:
     """Base report class for single table reports.
 
     This class creates a base report for single-table data.
@@ -29,7 +30,7 @@ class BaseReport():
         self.report_info = {
             'report_type': self.__class__.__name__,
             'generated_date': None,
-            'sdmetrics_version': version('sdmetrics')
+            'sdmetrics_version': version('sdmetrics'),
         }
 
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):
@@ -64,7 +65,6 @@ class BaseReport():
             f'Single table {self.__class__.__name__} expects real and synthetic data to be'
             ' pandas.DataFrame. If your real and synthetic data are dictionaries of tables, '
             f'please use the multi-table {self.__class__.__name__} instead.'
-
         )
         raise ValueError(error_message)
 
@@ -124,9 +124,7 @@ class BaseReport():
                 Whether or not to print results to std.out.
         """
         if verbose:
-            sys.stdout.write(
-                f'Overall Score (Average): {round(self._overall_score * 100, 2)}%\n\n'
-            )
+            sys.stdout.write(f'Overall Score (Average): {round(self._overall_score * 100, 2)}%\n\n')
 
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
@@ -173,9 +171,7 @@ class BaseReport():
             if verbose:
                 num_iterations = int(property_instance._get_num_iterations(metadata))
                 progress_bar = tqdm.tqdm(
-                    total=num_iterations,
-                    file=sys.stdout,
-                    bar_format='{desc}|{bar}{r_bar}|'
+                    total=num_iterations, file=sys.stdout, bar_format='{desc}|{bar}{r_bar}|'
                 )
                 progress_bar.set_description(
                     f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}'
@@ -312,6 +308,7 @@ class BaseReport():
                 warnings.warn(
                     f'The report was created using SDMetrics version `{report._package_version}` '
                     f'but you are currently using version `{current_version}`. '
-                    'Some features may not work as intended.')
+                    'Some features may not work as intended.'
+                )
 
             return report

@@ -4,14 +4,17 @@ import pytest
 from sklearn.datasets import load_breast_cancer
 
 from sdmetrics.single_table.efficacy.binary import (
-    BinaryAdaBoostClassifier, BinaryDecisionTreeClassifier, BinaryLogisticRegression,
-    BinaryMLPClassifier)
+    BinaryAdaBoostClassifier,
+    BinaryDecisionTreeClassifier,
+    BinaryLogisticRegression,
+    BinaryMLPClassifier,
+)
 
 METRICS = [
     BinaryAdaBoostClassifier,
     BinaryDecisionTreeClassifier,
     BinaryLogisticRegression,
-    BinaryMLPClassifier
+    BinaryMLPClassifier,
 ]
 
 

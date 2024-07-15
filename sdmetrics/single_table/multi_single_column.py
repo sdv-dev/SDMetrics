@@ -7,8 +7,9 @@ from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.utils import get_columns_from_metadata, nested_attrs_meta
 
 
-class MultiSingleColumnMetric(SingleTableMetric,
-                              metaclass=nested_attrs_meta('single_column_metric')):
+class MultiSingleColumnMetric(
+    SingleTableMetric, metaclass=nested_attrs_meta('single_column_metric')
+):
     """SingleTableMetric subclass that applies a SingleColumnMetric on each column.
 
     This class can either be used by creating a subclass that inherits from it and
@@ -66,7 +67,8 @@ class MultiSingleColumnMetric(SingleTableMetric,
                 A mapping of column name to metric output.
         """
         real_data, synthetic_data, metadata = self._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
 
         fields = self._select_fields(metadata, self.field_types)
         invalid_cols = set(get_columns_from_metadata(metadata).keys()) - set(fields)
@@ -82,7 +84,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
                         real_column,
                         synthetic_column,
                         **(self.single_column_metric_kwargs or {}),
-                        **kwargs
+                        **kwargs,
                     )
                     scores[column_name] = score
                 except Exception as error:
@@ -144,8 +146,7 @@ class MultiSingleColumnMetric(SingleTableMetric,
             Dict[string -> Union[float, tuple[float]]]:
                 A mapping of column name to metric output.
         """
-        return cls._compute(
-            cls, real_data, synthetic_data, metadata, store_errors=True, **kwargs)
+        return cls._compute(cls, real_data, synthetic_data, metadata, store_errors=True, **kwargs)
 
     @classmethod
     def normalize(cls, raw_score):

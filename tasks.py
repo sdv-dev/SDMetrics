@@ -12,12 +12,7 @@ from invoke import task
 from packaging.requirements import Requirement
 from packaging.version import Version
 
-COMPARISONS = {
-    '>=': operator.ge,
-    '>': operator.gt,
-    '<': operator.lt,
-    '<=': operator.le
-}
+COMPARISONS = {'>=': operator.ge, '>': operator.gt, '<': operator.lt, '<=': operator.le}
 
 
 if not hasattr(inspect, 'getargspec'):
@@ -55,14 +50,17 @@ def _get_minimum_versions(dependencies, python_version):
 
         if req.name not in min_versions:
             min_version = next(
-                (spec.version for spec in req.specifier if spec.operator in ('>=', '==')), None)
+                (spec.version for spec in req.specifier if spec.operator in ('>=', '==')), None
+            )
             if min_version:
                 min_versions[req.name] = f'{req.name}=={min_version}'
 
         elif '@' not in min_versions[req.name]:
             existing_version = Version(min_versions[req.name].split('==')[1])
             new_version = next(
-                (spec.version for spec in req.specifier if spec.operator in ('>=', '==')), existing_version)
+                (spec.version for spec in req.specifier if spec.operator in ('>=', '==')),
+                existing_version,
+            )
             if new_version > existing_version:
                 # Change when a valid newer version is found
                 min_versions[req.name] = f'{req.name}=={new_version}'
@@ -80,7 +78,8 @@ def install_minimum(c):
     minimum_versions = _get_minimum_versions(dependencies, python_version)
 
     if minimum_versions:
-        c.run(f'python -m pip install {" ".join(minimum_versions)}')
+        install_deps = ' '.join(minimum_versions)
+        c.run(f'python -m pip install {install_deps}')
 
 
 @task
@@ -110,20 +109,27 @@ def readme(c):
 def tutorials(c):
     for ipynb_file in glob.glob('tutorials/*.ipynb') + glob.glob('tutorials/**/*.ipynb'):
         if '.ipynb_checkpoints' not in ipynb_file:
-            c.run((
-                'jupyter nbconvert --execute --ExecutePreprocessor.timeout=3600 '
-                f'--to=html --stdout {ipynb_file}'
-            ), hide='out')
+            c.run(
+                (
+                    'jupyter nbconvert --execute --ExecutePreprocessor.timeout=3600 '
+                    f'--to=html --stdout {ipynb_file}'
+                ),
+                hide='out',
+            )
 
 
 @task
 def lint(c):
     check_dependencies(c)
-    c.run('flake8 sdmetrics')
-    c.run('pydocstyle sdmetrics')
-    c.run('flake8 tests --ignore=D')
-    c.run('pydocstyle tests')
-    c.run('isort -c sdmetrics tests')
+    c.run('ruff check . --diff')
+    c.run('ruff format --check --diff .')
+
+
+@task
+def fix_lint(c):
+    check_dependencies(c)
+    c.run('ruff check --fix .')
+    c.run('ruff format .')
 
 
 def remove_readonly(func, path, _):

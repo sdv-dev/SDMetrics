@@ -1,4 +1,5 @@
 """Test Boundary multi-table class."""
+
 from sdmetrics.reports.multi_table._properties import Boundary
 from sdmetrics.reports.single_table._properties import Boundary as SingleTableBoundary
 

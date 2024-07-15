@@ -1,4 +1,5 @@
 """Test multi-table cardinality properties."""
+
 import pandas as pd
 from plotly.graph_objs._figure import Figure
 
@@ -33,19 +34,19 @@ def test_with_multi_foreign_key():
         'transactions': pd.DataFrame({
             'f_key_1': [1, 2, 3, 2, 1],
             'f_key_2': [1, 5, 3, 2, 4],
-        })
+        }),
     }
 
     synthetic_data = {
         'bank': pd.DataFrame({
             'primary_key': [1, 2, 3, 4, 5],
             'category': ['a', 'b', 'c', 'd', 'e'],
-            'numerical': [1, 2, 3, 4, 5]
+            'numerical': [1, 2, 3, 4, 5],
         }),
         'transactions': pd.DataFrame({
             'f_key_1': [5, 2, 3, 4, 1],
             'f_key_2': [1, 5, 5, 2, 4],
-        })
+        }),
     }
 
     metadata = {
@@ -55,30 +56,25 @@ def test_with_multi_foreign_key():
                 'columns': {
                     'primary_key': {'sdtype': 'id'},
                     'category': {'sdtype': 'categorical'},
-                    'numerical': {'sdtype': 'numerical'}
-                }
+                    'numerical': {'sdtype': 'numerical'},
+                },
             },
-            'transactions': {
-                'columns': {
-                    'f_key_1': {'sdtype': 'id'},
-                    'f_key_2': {'sdtype': 'id'}
-                }
-            }
+            'transactions': {'columns': {'f_key_1': {'sdtype': 'id'}, 'f_key_2': {'sdtype': 'id'}}},
         },
         'relationships': [
             {
                 'parent_table_name': 'bank',
                 'child_table_name': 'transactions',
                 'parent_primary_key': 'primary_key',
-                'child_foreign_key': 'f_key_1'
+                'child_foreign_key': 'f_key_1',
             },
             {
                 'parent_table_name': 'bank',
                 'child_table_name': 'transactions',
                 'parent_primary_key': 'primary_key',
-                'child_foreign_key': 'f_key_2'
-            }
-        ]
+                'child_foreign_key': 'f_key_2',
+            },
+        ],
     }
 
     cardinality_property = Cardinality()

@@ -59,7 +59,7 @@ class NumericalSklearnAttacker(PrivacyAttackerModel):
         return tuple(sensitive_pred[0])
 
 
-class SVRWrapper():
+class SVRWrapper:
     """A wrapper arround `sklearn.svm.SVR` to support multidimensional y."""
 
     def __init__(self):

@@ -41,9 +41,7 @@ class TestBaseReport:
         metadata = 'metadata'
 
         # Run and Assert
-        expected_message = (
-            'The provided metadata is not a dictionary.'
-        )
+        expected_message = 'The provided metadata is not a dictionary.'
         with pytest.raises(TypeError, match=expected_message):
             base_report._validate_metadata_format(metadata)
 
@@ -77,12 +75,12 @@ class TestBaseReport:
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
             'column2': ['a', 'b', 'c'],
-            'column3': [4, 5, 6]
+            'column3': [4, 5, 6],
         })
         synthetic_data = pd.DataFrame({
             'column1': [1, 2, 3],
             'column2': ['a', 'b', 'c'],
-            'column4': [4, 5, 6]
+            'column4': [4, 5, 6],
         })
         metadata = {
             'columns': {
@@ -121,12 +119,12 @@ class TestBaseReport:
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
             'column2': ['a', 'b', 'c'],
-            'column3': [4, 5, 6]
+            'column3': [4, 5, 6],
         })
         synthetic_data = pd.DataFrame({
             'column1': [1, 2, 3],
             'column2': ['a', 'b', 'c'],
-            'column3': [4, 5, 6]
+            'column3': [4, 5, 6],
         })
         metadata = {
             'columns': {
@@ -149,12 +147,12 @@ class TestBaseReport:
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
             'column2': ['a', 'b', 'c'],
-            'column3': [4, 5, 6]
+            'column3': [4, 5, 6],
         })
         synthetic_data = pd.DataFrame({
             'column1': [1, 2, 3],
             'column2': ['a', 'b', 'c'],
-            'column4': [4, 5, 6]
+            'column4': [4, 5, 6],
         })
         metadata = {
             'columns': {
@@ -175,20 +173,18 @@ class TestBaseReport:
         """Test the ``_validate`` method with a ValueError."""
         # Setup
         base_report = BaseReport()
-        mock__validate_metadata_matches_data = Mock(
-            side_effect=ValueError('error message')
-        )
+        mock__validate_metadata_matches_data = Mock(side_effect=ValueError('error message'))
         base_report._validate_metadata_matches_data = mock__validate_metadata_matches_data
 
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
             'column2': ['a', 'b', 'c'],
-            'column3': [4, 5, 6]
+            'column3': [4, 5, 6],
         })
         synthetic_data = pd.DataFrame({
             'column1': [1, 2, 3],
             'column2': ['a', 'b', 'c'],
-            'column4': [4, 5, 6]
+            'column4': [4, 5, 6],
         })
         metadata = {
             'columns': {
@@ -205,19 +201,10 @@ class TestBaseReport:
         """Test that ``_convert_datetimes`` tries to convert datetime columns."""
         # Setup
         base_report = BaseReport()
-        real_data = pd.DataFrame({
-            'col1': ['2020-01-02', '2021-01-02'],
-            'col2': ['a', 'b']
-        })
-        synthetic_data = pd.DataFrame({
-            'col1': ['2022-01-03', '2023-04-05'],
-            'col2': ['b', 'a']
-        })
+        real_data = pd.DataFrame({'col1': ['2020-01-02', '2021-01-02'], 'col2': ['a', 'b']})
+        synthetic_data = pd.DataFrame({'col1': ['2022-01-03', '2023-04-05'], 'col2': ['b', 'a']})
         metadata = {
-            'columns': {
-                'col1': {'sdtype': 'datetime'},
-                'col2': {'sdtype': 'datetime'}
-            },
+            'columns': {'col1': {'sdtype': 'datetime'}, 'col2': {'sdtype': 'datetime'}},
         }
 
         # Run
@@ -226,11 +213,11 @@ class TestBaseReport:
         # Assert
         expected_real_data = pd.DataFrame({
             'col1': [datetime(2020, 1, 2), datetime(2021, 1, 2)],
-            'col2': ['a', 'b']
+            'col2': ['a', 'b'],
         })
         expected_synthetic_data = pd.DataFrame({
             'col1': [datetime(2022, 1, 3), datetime(2023, 4, 5)],
-            'col2': ['b', 'a']
+            'col2': ['b', 'a'],
         })
 
         pd.testing.assert_frame_equal(real_data, expected_real_data)
@@ -240,20 +227,12 @@ class TestBaseReport:
         """Test the ``generate`` method with metadata not being a dict."""
         # Setup
         base_report = BaseReport()
-        real_data = pd.DataFrame({
-            'column1': [1, 2, 3],
-            'column2': ['a', 'b', 'c']
-        })
-        synthetic_data = pd.DataFrame({
-            'column1': [1, 2, 3],
-            'column2': ['a', 'b', 'c']
-        })
+        real_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
+        synthetic_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
         metadata = 'metadata'
 
         # Run and Assert
-        expected_message = (
-            'The provided metadata is not a dictionary.'
-        )
+        expected_message = 'The provided metadata is not a dictionary.'
         with pytest.raises(TypeError, match=expected_message):
             base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
@@ -269,16 +248,14 @@ class TestBaseReport:
         mock_column_pair_trends._compute_average.return_value = 0.4
         report._properties = {
             'Column Shapes': mock_column_shapes,
-            'Column Pair Trends': mock_column_pair_trends
+            'Column Pair Trends': mock_column_pair_trends,
         }
 
         # Run
         report._print_results(True)
 
         # Assert
-        calls = [
-            call('Overall Score (Average): 50.0%\n\n')
-        ]
+        calls = [call('Overall Score (Average): 50.0%\n\n')]
         assert mock_write.call_count == 1
         mock_write.assert_has_calls(calls, any_order=True)
 
@@ -290,7 +267,7 @@ class TestBaseReport:
         report._overall_score = 0.5
         report._properties = {
             'Column Shapes': Mock(_compute_average=Mock(return_value=0.6)),
-            'Column Pair Trends': Mock(_compute_average=Mock(return_value=0.4))
+            'Column Pair Trends': Mock(_compute_average=Mock(return_value=0.4)),
         }
 
         # Run
@@ -324,19 +301,10 @@ class TestBaseReport:
         base_report._properties['Property 2'] = Mock()
         base_report._properties['Property 2'].get_score.return_value = 1.0
 
-        real_data = pd.DataFrame({
-            'column1': [1, 2, 3],
-            'column2': ['a', 'b', 'c']
-        })
-        synthetic_data = pd.DataFrame({
-            'column1': [1, 2, 3],
-            'column2': ['a', 'b', 'c']
-        })
+        real_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
+        synthetic_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
         metadata = {
-            'columns': {
-                'column1': {'sdtype': 'numerical'},
-                'column2': {'sdtype': 'categorical'}
-            }
+            'columns': {'column1': {'sdtype': 'numerical'}, 'column2': {'sdtype': 'categorical'}}
         }
 
         # Run
@@ -357,7 +325,7 @@ class TestBaseReport:
             'sdmetrics_version': 'version',
             'num_rows_real_data': 3,
             'num_rows_synthetic_data': 3,
-            'generation_time': 5
+            'generation_time': 5,
         }
         assert base_report.report_info == expected_info
 
@@ -385,39 +353,27 @@ class TestBaseReport:
         base_report._properties['Property 2'].get_score.return_value = 1.0
 
         real_data = {
-            'table1': pd.DataFrame({
-                'column1': [1, 2, 3],
-                'column2': ['a', 'b', 'c']
-            }),
-            'table2': pd.DataFrame({
-                'column3': ['x', 'y', 'z'],
-                'column4': [10, 9, 8]
-            })
+            'table1': pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']}),
+            'table2': pd.DataFrame({'column3': ['x', 'y', 'z'], 'column4': [10, 9, 8]}),
         }
         synthetic_data = {
-            'table1': pd.DataFrame({
-                'column1': [1, 2, 3],
-                'column2': ['a', 'b', 'c']
-            }),
-            'table2': pd.DataFrame({
-                'column3': ['x', 'y', 'z'],
-                'column4': [10, 9, 8]
-            })
+            'table1': pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']}),
+            'table2': pd.DataFrame({'column3': ['x', 'y', 'z'], 'column4': [10, 9, 8]}),
         }
         metadata = {
             'tables': {
                 'table1': {
                     'columns': {
                         'column1': {'sdtype': 'numerical'},
-                        'column2': {'sdtype': 'categorical'}
+                        'column2': {'sdtype': 'categorical'},
                     }
                 },
                 'table2': {
                     'columns': {
                         'column3': {'sdtype': 'categorical'},
-                        'column4': {'sdtype': 'numerical'}
+                        'column4': {'sdtype': 'numerical'},
                     }
-                }
+                },
             }
         }
 
@@ -436,15 +392,9 @@ class TestBaseReport:
             'generated_date': '2020-01-05',
             'sdmetrics_version': 'version',
             'num_tables': 2,
-            'num_rows_real_data': {
-                'table1': 3,
-                'table2': 3
-            },
-            'num_rows_synthetic_data': {
-                'table1': 3,
-                'table2': 3
-            },
-            'generation_time': 5
+            'num_rows_real_data': {'table1': 3, 'table2': 3},
+            'num_rows_synthetic_data': {'table1': 3, 'table2': 3},
+            'generation_time': 5,
         }
         assert base_report.report_info == expected_info
 
@@ -500,7 +450,7 @@ class TestBaseReport:
 
         calls = [
             call(total=4, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout),
-            call(total=6, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout)
+            call(total=6, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout),
         ]
         mock_tqdm.assert_has_calls(calls, any_order=True)
         base_report._print_results.assert_called_once_with(True)
@@ -512,9 +462,7 @@ class TestBaseReport:
         base_report.is_generated = False
 
         # Run and Assert
-        expected_message = (
-            'The report has not been generated. Please call `generate` first.'
-        )
+        expected_message = 'The report has not been generated. Please call `generate` first.'
         with pytest.raises(ValueError, match=expected_message):
             base_report._check_report_generated()
 
@@ -530,9 +478,7 @@ class TestBaseReport:
         base_report.is_generated = False
 
         # Run and Assert
-        expected_message_1 = (
-            'The report has not been generated. Please call `generate` first.'
-        )
+        expected_message_1 = 'The report has not been generated. Please call `generate` first.'
         with pytest.raises(ValueError, match=expected_message_1):
             base_report._validate_property_generated('Valid Property Name')
 
@@ -603,19 +549,10 @@ class TestBaseReport:
         base_report._properties['Property 2'] = Mock()
         base_report._properties['Property 2'].get_score.return_value = 1.0
 
-        real_data = pd.DataFrame({
-            'column1': [1, 2, 3],
-            'column2': ['a', 'b', 'c']
-        })
-        synthetic_data = pd.DataFrame({
-            'column1': [1, 2, 3],
-            'column2': ['a', 'b', 'c']
-        })
+        real_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
+        synthetic_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
         metadata = {
-            'columns': {
-                'column1': {'sdtype': 'numerical'},
-                'column2': {'sdtype': 'categorical'}
-            }
+            'columns': {'column1': {'sdtype': 'numerical'}, 'column2': {'sdtype': 'categorical'}}
         }
 
         # Run
@@ -628,7 +565,7 @@ class TestBaseReport:
             'sdmetrics_version': 'version',
             'num_rows_real_data': 3,
             'num_rows_synthetic_data': 3,
-            'generation_time': 5
+            'generation_time': 5,
         }
         assert base_report.get_info() == expected_info
 
@@ -663,9 +600,7 @@ class TestBaseReport:
         base_report.get_details('Property 2')
 
         # Assert
-        mock_validate_property_generated.assert_has_calls([
-            call('Property 1'), call('Property 2')
-        ])
+        mock_validate_property_generated.assert_has_calls([call('Property 1'), call('Property 2')])
         base_report._properties['Property 1'].details.copy.assert_called_once()
         base_report._properties['Property 2'].details.copy.assert_called_once()
 

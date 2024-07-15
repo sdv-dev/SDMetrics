@@ -24,7 +24,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
         'numerical': 'continuous',
         'datetime': 'continuous',
         'categorical': 'discrete',
-        'boolean': 'discrete'
+        'boolean': 'discrete',
     }
 
     def __init__(self):
@@ -113,23 +113,28 @@ class ColumnPairTrends(BaseSingleTableProperty):
         processed_data = data.copy()
         discretized_dict = {}
 
-        processed_data = self._convert_datetime_columns_to_numeric(
-            processed_data, metadata
-        )
+        processed_data = self._convert_datetime_columns_to_numeric(processed_data, metadata)
 
         for column_name in metadata['columns']:
             column_meta = metadata['columns'][column_name]
             column_sdtype = column_meta['sdtype']
             if column_sdtype in ['numerical', 'datetime']:
-                discretized_dict[column_name], bin_edges = self._discretize_column(
+                discretized_dict[column_name], _ = self._discretize_column(
                     column_name, processed_data[column_name]
                 )
 
-        return processed_data, pd.DataFrame(discretized_dict)
+        return processed_data, pd.DataFrame(discretized_dict, index=processed_data.index)
 
     def _get_columns_data_and_metric(
-            self, column_name_1, column_name_2, real_data, real_discrete_data,
-            synthetic_data, synthetic_discrete_data, metadata):
+        self,
+        column_name_1,
+        column_name_2,
+        real_data,
+        real_discrete_data,
+        synthetic_data,
+        synthetic_discrete_data,
+        metadata,
+    ):
         """Get the data and the metric for the property.
 
         If one is comparing a continuous column to a discrete column, use the discrete version
@@ -209,8 +214,9 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         return error
 
-    def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None,
-                          column_pairs=None):
+    def _generate_details(
+        self, real_data, synthetic_data, metadata, progress_bar=None, column_pairs=None
+    ):
         """Generate the _details dataframe for the column pair trends property.
 
         Args:
@@ -241,10 +247,11 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         list_dtypes = self._sdtype_to_shape.keys()
 
-        column_pairs = itertools.combinations(
-            list(
-                metadata['columns']),
-            r=2) if column_pairs is None else column_pairs
+        column_pairs = (
+            itertools.combinations(list(metadata['columns']), r=2)
+            if column_pairs is None
+            else column_pairs
+        )
         for column_names in column_pairs:
             column_name_1 = column_names[0]
             column_name_2 = column_names[1]
@@ -261,16 +268,18 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 continue
 
             columns_real, columns_synthetic, metric = self._get_columns_data_and_metric(
-                column_name_1, column_name_2, processed_real_data, discrete_real,
-                processed_synthetic_data, discrete_synthetic, metadata
+                column_name_1,
+                column_name_2,
+                processed_real_data,
+                discrete_real,
+                processed_synthetic_data,
+                discrete_synthetic,
+                metadata,
             )
 
             try:
                 error = self._preprocessing_failed(
-                    column_name_1,
-                    column_name_2,
-                    sdtype_col_1,
-                    sdtype_col_2
+                    column_name_1, column_name_2, sdtype_col_1, sdtype_col_2
                 )
                 if error:
                     raise Exception('Preprocessing failed')
@@ -311,7 +320,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             'Score': scores,
             'Real Correlation': real_correlations,
             'Synthetic Correlation': synthetic_correlations,
-            'Error': error_messages
+            'Error': error_messages,
         })
 
         if result['Error'].isna().all():
@@ -341,11 +350,11 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
                 # check wether the combination (Colunm 1, Column 2) or (Column 2, Column 1)
                 # is in the table
-                col_1_loc = (table['Column 1'] == column_name_1)
-                col_2_loc = (table['Column 2'] == column_name_2)
+                col_1_loc = table['Column 1'] == column_name_1
+                col_2_loc = table['Column 2'] == column_name_2
                 if table.loc[col_1_loc & col_2_loc].empty:
-                    col_1_loc = (table['Column 1'] == column_name_2)
-                    col_2_loc = (table['Column 2'] == column_name_1)
+                    col_1_loc = table['Column 1'] == column_name_2
+                    col_2_loc = table['Column 2'] == column_name_1
 
                 if not table.loc[col_1_loc & col_2_loc].empty:
                     score = table.loc[col_1_loc & col_2_loc][column_name].array[0]
@@ -405,7 +414,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             xaxis3={'matches': 'x2'},
             height=900,
             width=900,
-            font={'size': PlotConfig.FONT_SIZE}
+            font={'size': PlotConfig.FONT_SIZE},
         )
 
         fig.update_yaxes(autorange='reversed')
@@ -438,9 +447,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         fig.update_xaxes(tickangle=45)
 
-        fig.add_trace(
-            self._get_heatmap(similarity_correlation, 'coloraxis', tmpl_1), 1, 1
-        )
+        fig.add_trace(self._get_heatmap(similarity_correlation, 'coloraxis', tmpl_1), 1, 1)
         fig.add_trace(
             self._get_heatmap(real_correlation, 'coloraxis2', tmpl_2, synthetic_correlation), 2, 1
         )

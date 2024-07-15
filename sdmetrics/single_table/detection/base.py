@@ -53,9 +53,9 @@ class DetectionMetric(SingleTableMetric):
             drop_columns = []
             drop_columns.extend(get_alternate_keys(metadata))
             for column in metadata.get('columns', []):
-                if ('primary_key' in metadata and
-                        (column == metadata['primary_key'] or
-                         column in metadata['primary_key'])):
+                if 'primary_key' in metadata and (
+                    column == metadata['primary_key'] or column in metadata['primary_key']
+                ):
                     drop_columns.append(column)
 
                 column_info = metadata['columns'].get(column, {})
@@ -92,17 +92,20 @@ class DetectionMetric(SingleTableMetric):
                 One minus the ROC AUC Cross Validation Score obtained by the classifier.
         """
         real_data, synthetic_data, metadata = cls._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
 
         transformed_real_data, transformed_synthetic_data = cls._drop_non_compute_columns(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
 
         ht = HyperTransformer()
         transformed_real_data = ht.fit_transform(transformed_real_data).to_numpy()
         transformed_synthetic_data = ht.transform(transformed_synthetic_data).to_numpy()
         X = np.concatenate([transformed_real_data, transformed_synthetic_data])
         y = np.hstack([
-            np.ones(len(transformed_real_data)), np.zeros(len(transformed_synthetic_data))
+            np.ones(len(transformed_real_data)),
+            np.zeros(len(transformed_synthetic_data)),
         ])
         if np.isin(X, [np.inf, -np.inf]).any():
             X[np.isin(X, [np.inf, -np.inf])] = np.nan

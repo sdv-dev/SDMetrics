@@ -21,10 +21,12 @@ class BNLikelihoodBase(SingleTableMetric):
         except ImportError:
             raise ImportError(
                 'Please install pomegranate with `pip install pomegranate` on a version of python '
-                '< 3.11. This metric is not supported on python versions >= 3.11.')
+                '< 3.11. This metric is not supported on python versions >= 3.11.'
+            )
 
         real_data, synthetic_data, metadata = cls._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
         structure = metadata.get('structure', structure)
         fields = cls._select_fields(metadata, ('categorical', 'boolean'))
 

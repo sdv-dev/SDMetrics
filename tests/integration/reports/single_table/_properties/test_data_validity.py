@@ -5,7 +5,6 @@ from sdmetrics.reports.single_table._properties import DataValidity
 
 
 class TestDataValidity:
-
     def test_get_score(self):
         """Test the ``get_score`` method"""
         # Setup
@@ -18,19 +17,44 @@ class TestDataValidity:
         # Assert
         expected_details_dict = {
             'Column': [
-                'start_date', 'end_date', 'salary', 'duration', 'student_id',
-                'high_perc', 'high_spec', 'mba_spec', 'second_perc', 'gender',
-                'degree_perc', 'placed', 'experience_years', 'employability_perc',
-                'mba_perc', 'work_experience', 'degree_type'
+                'start_date',
+                'end_date',
+                'salary',
+                'duration',
+                'student_id',
+                'high_perc',
+                'high_spec',
+                'mba_spec',
+                'second_perc',
+                'gender',
+                'degree_perc',
+                'placed',
+                'experience_years',
+                'employability_perc',
+                'mba_perc',
+                'work_experience',
+                'degree_type',
             ],
             'Metric': [
-                'BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence',
-                'KeyUniqueness', 'BoundaryAdherence', 'CategoryAdherence', 'CategoryAdherence',
-                'BoundaryAdherence', 'CategoryAdherence', 'BoundaryAdherence', 'CategoryAdherence',
-                'BoundaryAdherence', 'BoundaryAdherence', 'BoundaryAdherence', 'CategoryAdherence',
-                'CategoryAdherence'
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'KeyUniqueness',
+                'BoundaryAdherence',
+                'CategoryAdherence',
+                'CategoryAdherence',
+                'BoundaryAdherence',
+                'CategoryAdherence',
+                'BoundaryAdherence',
+                'CategoryAdherence',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'CategoryAdherence',
+                'CategoryAdherence',
             ],
-            'Score': [1.0] * 17
+            'Score': [1.0] * 17,
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(data_validity_property.details, expected_details)
@@ -50,9 +74,7 @@ class TestDataValidity:
         expected_message_1 = (
             "TypeError: '<=' not supported between instances of 'int' and 'Timestamp'"
         )
-        expected_message_2 = (
-            "TypeError: '<=' not supported between instances of 'float' and 'str'"
-        )
+        expected_message_2 = "TypeError: '<=' not supported between instances of 'float' and 'str'"
 
         score = data_validity_property.get_score(real_data, synthetic_data, metadata)
 

@@ -1,4 +1,5 @@
 """Test Data Validity multi-table class."""
+
 from sdmetrics.reports.multi_table._properties import DataValidity
 from sdmetrics.reports.single_table._properties import DataValidity as SingleTableDataValidity
 

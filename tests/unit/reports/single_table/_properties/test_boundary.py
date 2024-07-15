@@ -7,7 +7,6 @@ from sdmetrics.reports.single_table._properties.boundary import Boundary
 
 
 class TestBoundary:
-
     @patch('sdmetrics.reports.single_table._properties.boundary.BoundaryAdherence.compute')
     def test__generate_details(self, boundary_adherence_mock):
         """Test the ``_generate_details`` method."""
@@ -16,20 +15,20 @@ class TestBoundary:
             'col1': [1, 2, np.nan],
             'col2': [False, True, True],
             'col3': [None, 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
         })
         synthetic_data = pd.DataFrame({
             'col1': [1, 2, 3],
             'col2': [False, True, True],
             'col3': ['a', 'b', 'c'],
-            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03'])
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
         })
         metadata = {
             'columns': {
                 'col1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'boolean'},
                 'col3': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'datetime'}
+                'col4': {'sdtype': 'datetime'},
             }
         }
 
@@ -54,14 +53,8 @@ class TestBoundary:
         real_data = pd.DataFrame({
             'col1': [1, 2, np.nan],
         })
-        synthetic_data = pd.DataFrame({
-            'col1': [1, 2, 3]
-        })
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'}
-            }
-        }
+        synthetic_data = pd.DataFrame({'col1': [1, 2, 3]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}}}
 
         # Run
         boundary_property = Boundary()
@@ -77,7 +70,7 @@ class TestBoundary:
             'Column': ['col1'],
             'Metric': ['BoundaryAdherence'],
             'Score': [np.nan],
-            'Error': ['ValueError: Mock Error']
+            'Error': ['ValueError: Mock Error'],
         })
 
         pd.testing.assert_frame_equal(details, expected_details)
@@ -89,14 +82,8 @@ class TestBoundary:
         real_data = pd.DataFrame({
             'col1': [np.nan, np.nan, np.nan],
         })
-        synthetic_data = pd.DataFrame({
-            'col1': [np.nan, np.nan, np.nan]
-        })
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'}
-            }
-        }
+        synthetic_data = pd.DataFrame({'col1': [np.nan, np.nan, np.nan]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}}}
 
         # Run
         boundary_property = Boundary()
@@ -108,7 +95,7 @@ class TestBoundary:
             'Column': ['col1'],
             'Metric': ['BoundaryAdherence'],
             'Score': [np.nan],
-            'Error': ['InvalidDataError: All NaN values in both real and synthetic data.']
+            'Error': ['InvalidDataError: All NaN values in both real and synthetic data.'],
         })
 
         pd.testing.assert_frame_equal(details, expected_details)
@@ -120,14 +107,8 @@ class TestBoundary:
         real_data = pd.DataFrame({
             'col1': [np.nan, np.nan, np.nan],
         })
-        synthetic_data = pd.DataFrame({
-            'col1': [1, 2, 3]
-        })
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'}
-            }
-        }
+        synthetic_data = pd.DataFrame({'col1': [1, 2, 3]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}}}
 
         # Run
         boundary_property = Boundary()
@@ -139,7 +120,7 @@ class TestBoundary:
             'Column': ['col1'],
             'Metric': ['BoundaryAdherence'],
             'Score': [np.nan],
-            'Error': ['InvalidDataError: All NaN values in real data.']
+            'Error': ['InvalidDataError: All NaN values in real data.'],
         })
 
         pd.testing.assert_frame_equal(details, expected_details)
@@ -151,14 +132,8 @@ class TestBoundary:
         real_data = pd.DataFrame({
             'col1': [1, 2, 3],
         })
-        synthetic_data = pd.DataFrame({
-            'col1': [np.nan, np.nan, np.nan]
-        })
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'}
-            }
-        }
+        synthetic_data = pd.DataFrame({'col1': [np.nan, np.nan, np.nan]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}}}
 
         # Run
         boundary_property = Boundary()
@@ -170,7 +145,7 @@ class TestBoundary:
             'Column': ['col1'],
             'Metric': ['BoundaryAdherence'],
             'Score': [np.nan],
-            'Error': ['InvalidDataError: All NaN values in synthetic data.']
+            'Error': ['InvalidDataError: All NaN values in synthetic data.'],
         })
 
         pd.testing.assert_frame_equal(details, expected_details)
@@ -184,7 +159,7 @@ class TestBoundary:
         mock_df = pd.DataFrame({
             'Column': ['Column1', 'Column2'],
             'Score': [0.7, 0.3],
-            'Metric': ['Rangeboundary', 'Categoryboundary']
+            'Metric': ['Rangeboundary', 'Categoryboundary'],
         })
         boundary_property.details = mock_df
 

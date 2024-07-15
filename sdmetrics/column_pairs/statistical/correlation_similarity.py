@@ -1,6 +1,5 @@
 """Correlation Similarity Metric."""
 
-
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr
@@ -96,8 +95,10 @@ class CorrelationSimilarity(ColumnPairsMetric):
         elif coefficient == 'Spearman':
             correlation_fn = spearmanr
         else:
-            raise ValueError(f'requested coefficient {coefficient} is not valid. '
-                             'Please choose either Pearson or Spearman.')
+            raise ValueError(
+                f'requested coefficient {coefficient} is not valid. '
+                'Please choose either Pearson or Spearman.'
+            )
 
         correlation_real, _ = correlation_fn(real_data[column1], real_data[column2])
         correlation_synthetic, _ = correlation_fn(synthetic_data[column1], synthetic_data[column2])
@@ -108,7 +109,7 @@ class CorrelationSimilarity(ColumnPairsMetric):
         return {
             'score': 1 - abs(correlation_real - correlation_synthetic) / 2,
             'real': correlation_real,
-            'synthetic': correlation_synthetic
+            'synthetic': correlation_synthetic,
         }
 
     @classmethod

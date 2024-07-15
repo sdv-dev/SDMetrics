@@ -1,4 +1,5 @@
 """New Row Synthesis metric for single table."""
+
 import warnings
 
 import pandas as pd
@@ -32,8 +33,14 @@ class NewRowSynthesis(SingleTableMetric):
     max_value = 1
 
     @classmethod
-    def compute_breakdown(cls, real_data, synthetic_data, metadata=None,
-                          numerical_match_tolerance=0.01, synthetic_sample_size=None):
+    def compute_breakdown(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        numerical_match_tolerance=0.01,
+        synthetic_sample_size=None,
+    ):
         """Compute this metric.
 
         This metric looks for matches between the real and synthetic data for
@@ -61,13 +68,16 @@ class NewRowSynthesis(SingleTableMetric):
                 The new row synthesis score breakdown.
         """
         real_data, synthetic_data, metadata = cls._validate_inputs(
-            real_data, synthetic_data, metadata)
+            real_data, synthetic_data, metadata
+        )
 
         if synthetic_sample_size is not None:
             if synthetic_sample_size > len(synthetic_data):
-                warnings.warn(f'The provided `synthetic_sample_size` of {synthetic_sample_size} '
-                              'is larger than the number of synthetic data rows '
-                              f'({len(synthetic_data)}). Proceeding without sampling.')
+                warnings.warn(
+                    f'The provided `synthetic_sample_size` of {synthetic_sample_size} '
+                    'is larger than the number of synthetic data rows '
+                    f'({len(synthetic_data)}). Proceeding without sampling.'
+                )
             else:
                 synthetic_data = synthetic_data.sample(n=synthetic_sample_size)
 
@@ -135,8 +145,10 @@ class NewRowSynthesis(SingleTableMetric):
                 matches = real_data.query(' and '.join(row_filter), engine=engine)
             except TypeError:
                 if len(real_data) > 10000:
-                    warnings.warn('Unable to optimize query. For better formance, set the '
-                                  '`synthetic_sample_size` parameter or upgrade to Python 3.8')
+                    warnings.warn(
+                        'Unable to optimize query. For better formance, set the '
+                        '`synthetic_sample_size` parameter or upgrade to Python 3.8'
+                    )
 
                 matches = real_data.query(' and '.join(row_filter), engine='python')
 
@@ -150,8 +162,14 @@ class NewRowSynthesis(SingleTableMetric):
         }
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, numerical_match_tolerance=0.01,
-                synthetic_sample_size=None):
+    def compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        numerical_match_tolerance=0.01,
+        synthetic_sample_size=None,
+    ):
         """Compute this metric.
 
         This metric looks for matches between the real and synthetic data for

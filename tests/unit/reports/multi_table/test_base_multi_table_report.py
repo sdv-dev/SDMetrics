@@ -11,7 +11,6 @@ from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTable
 
 
 class TestBaseReport:
-
     def test__init__(self):
         """Test the ``__init__`` method."""
         # Setup
@@ -82,11 +81,7 @@ class TestBaseReport:
         """
         # Setup
         base_report = BaseMultiTableReport()
-        metadata = {
-            'tables': {
-                'Table_1': {}
-            }
-        }
+        metadata = {'tables': {'Table_1': {}}}
 
         # Run and Assert
         expected_message = 'The metadata for table "Table_1" is missing a "columns" key.'
@@ -116,9 +111,7 @@ class TestBaseReport:
                     },
                 },
                 'Table_2': {
-                    'columns': {
-                        'col2': {}
-                    },
+                    'columns': {'col2': {}},
                 },
             },
             'relationships': [
@@ -126,9 +119,9 @@ class TestBaseReport:
                     'parent_table_name': 'Table_1',
                     'parent_primary_key': 'col1',
                     'child_table_name': 'Table_2',
-                    'child_foreign_key': 'col2'
+                    'child_foreign_key': 'col2',
                 },
-            ]
+            ],
         }
 
         report = BaseMultiTableReport()
@@ -164,9 +157,7 @@ class TestBaseReport:
                     },
                 },
                 'Table_2': {
-                    'columns': {
-                        'col2': {}
-                    },
+                    'columns': {'col2': {}},
                 },
             },
             'relationships': [
@@ -174,9 +165,9 @@ class TestBaseReport:
                     'parent_table_name': 'Table_1',
                     'parent_primary_key': 'col1',
                     'child_table_name': 'Table_2',
-                    'child_foreign_key': 'col2'
+                    'child_foreign_key': 'col2',
                 },
-            ]
+            ],
         }
         mock__validate_relationships = Mock()
 
@@ -223,9 +214,7 @@ class TestBaseReport:
                     },
                 },
                 'Table_2': {
-                    'columns': {
-                        'col2': {}
-                    },
+                    'columns': {'col2': {}},
                 },
             },
         }
@@ -259,24 +248,15 @@ class TestBaseReport:
         # Setup
         base_report = BaseMultiTableReport()
         real_data = {
-            'table1': pd.DataFrame({
-                'col1': ['2020-01-02', '2021-01-02'],
-                'col2': ['a', 'b']
-            }),
+            'table1': pd.DataFrame({'col1': ['2020-01-02', '2021-01-02'], 'col2': ['a', 'b']}),
         }
         synthetic_data = {
-            'table1': pd.DataFrame({
-                'col1': ['2022-01-03', '2023-04-05'],
-                'col2': ['b', 'a']
-            }),
+            'table1': pd.DataFrame({'col1': ['2022-01-03', '2023-04-05'], 'col2': ['b', 'a']}),
         }
         metadata = {
             'tables': {
                 'table1': {
-                    'columns': {
-                        'col1': {'sdtype': 'datetime'},
-                        'col2': {'sdtype': 'datetime'}
-                    },
+                    'columns': {'col1': {'sdtype': 'datetime'}, 'col2': {'sdtype': 'datetime'}},
                 },
             },
         }
@@ -288,13 +268,13 @@ class TestBaseReport:
         expected_real_data = {
             'table1': pd.DataFrame({
                 'col1': [datetime(2020, 1, 2), datetime(2021, 1, 2)],
-                'col2': ['a', 'b']
+                'col2': ['a', 'b'],
             }),
         }
         expected_synthetic_data = {
             'table1': pd.DataFrame({
                 'col1': [datetime(2022, 1, 3), datetime(2023, 4, 5)],
-                'col2': ['b', 'a']
+                'col2': ['b', 'a'],
             }),
         }
         for real, expected in zip(real_data.values(), expected_real_data.values()):
@@ -310,7 +290,7 @@ class TestBaseReport:
             'Table': ['Table_1', 'Table_1', 'Table_2'],
             'Column': ['col1', 'col2', 'col3'],
             'Score': [0.3, 0.4, 0.5],
-            'Error': ['Error', np.nan, np.nan]
+            'Error': ['Error', np.nan, np.nan],
         })
 
         mock__validate_property_generated = Mock()
@@ -334,7 +314,7 @@ class TestBaseReport:
             'Table': ['Table_1', 'Table_1', 'Table_2'],
             'Column': ['col1', 'col2', 'col3'],
             'Score': [0.3, 0.4, 0.5],
-            'Error': ['Error', None, None]
+            'Error': ['Error', None, None],
         })
         mock__validate_property_generated.assert_called_once_with('Property_1')
         pd.testing.assert_frame_equal(result, expected_result)
@@ -424,9 +404,7 @@ class TestBaseReport:
         """Test the ``get_visualization`` method for the structure property."""
         # Setup
         report = BaseMultiTableReport()
-        report._properties = {
-            'Data Structure': Mock()
-        }
+        report._properties = {'Data Structure': Mock()}
         report._properties['Data Structure'].get_visualization = Mock()
 
         # Run

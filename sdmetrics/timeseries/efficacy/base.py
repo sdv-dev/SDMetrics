@@ -36,7 +36,8 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
     @classmethod
     def _validate_inputs(cls, real_data, synthetic_data, metadata, sequence_key, target):
         metadata, sequence_key = super()._validate_inputs(
-            real_data, synthetic_data, metadata, sequence_key)
+            real_data, synthetic_data, metadata, sequence_key
+        )
 
         if 'target' in metadata:
             target = metadata['target']
@@ -54,10 +55,10 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
             y = pd.concat([y, series], ignore_index=True)
             entity_data = group.drop(sequence_key, axis=1)
             entity_data = hypertransformer.transform(entity_data)
-            entity_data = pd.Series({
-                column: entity_data[column].to_numpy()
-                for column in entity_data.columns
-            }, name=entity_id)
+            entity_data = pd.Series(
+                {column: entity_data[column].to_numpy() for column in entity_data.columns},
+                name=entity_id,
+            )
 
             X = pd.concat([X, pd.DataFrame(entity_data).T], ignore_index=True)
 
@@ -103,6 +104,7 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
                 Metric output.
         """
         sequence_key, target = cls._validate_inputs(
-            real_data, synthetic_data, metadata, sequence_key, target)
+            real_data, synthetic_data, metadata, sequence_key, target
+        )
 
         return cls._compute_score(real_data, synthetic_data, sequence_key, target)

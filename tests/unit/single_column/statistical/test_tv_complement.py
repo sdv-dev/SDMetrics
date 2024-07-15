@@ -9,7 +9,6 @@ from sdmetrics.single_column.statistical import TVComplement
 
 
 class TestTVComplement:
-
     def test_compute(self):
         """Test the ``compute`` method.
 
