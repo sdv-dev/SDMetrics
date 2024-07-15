@@ -1,6 +1,6 @@
 # History
 
-## v0.15.0 - 2024-07-12
+## v0.15.0 - 2024-07-15
 
 This release adds support for NumPy 2.0! Additionally, the visualization utilities no longer require both real and synthetic data to be provided, and they can now be used to visualize only real or only synthetic data.
 
