@@ -38,7 +38,7 @@ def test_shuffling_data_single_table(property):
 
 
 @pytest.mark.parametrize('property', MULTI_TABLE_PROPERTIES)
-def test_property_multi_table(property):
+def test_shuffling_data_multi_table(property):
     """Test the property score is the same when shuffling the data for multi-table."""
     # Setup
     property_instance = property()
@@ -56,4 +56,4 @@ def test_property_multi_table(property):
     )
 
     # Assert
-    assert np.isclose(score, score_shuffled, rtol=1e-10)
+    assert np.isclose(score, score_shuffled, rtol=1e-12)
