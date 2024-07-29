@@ -101,8 +101,10 @@ class BaseMultiTableReport(BaseReport):
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
+        results = super().generate(real_data, synthetic_data, metadata, verbose)
         self.table_names = list(metadata.get('tables', {}).keys())
-        return super().generate(real_data, synthetic_data, metadata, verbose)
+
+        return results
 
     def _check_table_names(self, table_name):
         if table_name not in self.table_names:
