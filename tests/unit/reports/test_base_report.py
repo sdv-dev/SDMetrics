@@ -232,7 +232,10 @@ class TestBaseReport:
         metadata = 'metadata'
 
         # Run and Assert
-        expected_message = 'The provided metadata is not a dictionary.'
+        expected_message = (
+            "Expected a dictionary but received a 'str' instead. For SDV metadata objects, "
+            "please use the 'to_dict' function to convert it to a dictionary."
+        )
         with pytest.raises(TypeError, match=expected_message):
             base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
