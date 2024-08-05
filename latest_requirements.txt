@@ -4,4 +4,4 @@ pandas==2.2.2
 plotly==5.23.0
 scikit-learn==1.5.1
 scipy==1.13.1
-tqdm==4.66.4
+tqdm==4.66.5
