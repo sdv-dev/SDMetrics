@@ -104,7 +104,7 @@ def _generate_heatmap_plot(all_data, columns):
     )
 
     title = ' vs. '.join(unique_values)
-    title += f" Data for columns '{columns[0]}' and '{columns[1]}"
+    title += f" Data for columns '{columns[0]}' and '{columns[1]}'"
 
     fig.update_layout(
         title_text=title,
@@ -141,8 +141,11 @@ def _generate_box_plot(all_data, columns):
         },
     )
 
+    unique_values = all_data['Data'].unique()
+    title = ' vs. '.join(unique_values)
+    title += f" Data for columns '{columns[0]}' and '{columns[1]}'"
     fig.update_layout(
-        title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
+        title=title,
         plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
         font={'size': PlotConfig.FONT_SIZE},
     )
