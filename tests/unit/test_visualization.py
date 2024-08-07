@@ -589,6 +589,39 @@ def test_get_column_plot_plot_one_data_set(mock__generate_column_plot):
 
 
 @patch('sdmetrics.visualization._generate_column_plot')
+def test_get_column_plot_constant_data(mock__generate_column_plot):
+    """Test ``get_column_plot`` when data is constant."""
+    # Setup
+    data_constant = pd.DataFrame(data={'A': [3] * 10})
+    data_non_constant = pd.DataFrame(data={'A': [1, 2, 3]})
+    expected_error = re.escape(
+        "Plot type 'distplot' cannot be created because column 'A' has a constant value"
+        ' inside the real or synthetic data. To render a visualization, please update'
+        " the plot_type to 'bar'."
+    )
+
+    # Run
+    get_column_plot(data_constant, data_non_constant, 'A')
+
+    with pytest.raises(ValueError, match=expected_error):
+        get_column_plot(data_constant, data_non_constant, 'A', plot_type='distplot')
+
+    with pytest.raises(ValueError, match=expected_error):
+        get_column_plot(data_non_constant, data_constant, 'A', plot_type='distplot')
+
+    with pytest.raises(ValueError, match=expected_error):
+        get_column_plot(None, data_constant, 'A', plot_type='distplot')
+
+    with pytest.raises(ValueError, match=expected_error):
+        get_column_plot(data_constant, None, 'A', plot_type='distplot')
+
+    # Assert
+    mock__generate_column_plot.assert_called_once_with(
+        data_constant['A'], data_non_constant['A'], 'bar'
+    )
+
+
+@patch('sdmetrics.visualization._generate_column_plot')
 def test_get_column_plot_plot_type_none_data_int(mock__generate_column_plot):
     """Test ``get_column_plot`` when ``plot_type`` is ``None`` and data is ``int``."""
     # Setup
