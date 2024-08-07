@@ -530,6 +530,7 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     if real_data is not None:
         if column_name not in real_data.columns:
             raise ValueError(f"Column '{column_name}' not found in real table data.")
+
         column = real_data[column_name]
         real_column = real_data[column_name]
 
@@ -538,15 +539,24 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
             raise ValueError(f"Column '{column_name}' not found in synthetic table data.")
         if column is None:
             column = synthetic_data[column_name]
+
         synthetic_column = synthetic_data[column_name]
 
+    real_constant = real_column is not None and real_column.nunique() == 1
+    synthetic_constant = synthetic_column is not None and synthetic_column.nunique() == 1
+    column_is_constant = real_constant or synthetic_constant
     if plot_type is None:
         column_is_datetime = is_datetime(column)
         dtype = column.dropna().infer_objects().dtype.kind
-        if column_is_datetime or dtype in ('i', 'f'):
+        if column_is_datetime or dtype in ('i', 'f') and not column_is_constant:
             plot_type = 'distplot'
         else:
             plot_type = 'bar'
+    elif plot_type == 'distplot' and column_is_constant:
+        raise ValueError(
+            f"Plot type 'distplot' cannot be created because column '{column_name}' has a constant value inside"
+            " the real or synthetic data. To render a visualization, please update the plot_type to 'bar'."
+        )
 
     fig = _generate_column_plot(real_column, synthetic_column, plot_type)
 
