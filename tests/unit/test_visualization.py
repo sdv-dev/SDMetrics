@@ -506,7 +506,7 @@ def test___generate_column_plot_type_bar(mock_bar_plot):
     mock_bar_plot.assert_called_once_with(ANY, ANY, {})
     mock_fig.update_layout.assert_called_once_with(
         title="Real vs. Synthetic Data for column 'values'",
-        xaxis_title='Category',
+        xaxis_title='Value',
         yaxis_title='Frequency',
         plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
         annotations=[],

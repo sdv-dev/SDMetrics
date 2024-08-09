@@ -254,7 +254,7 @@ def _generate_column_plot(
         plot_title (str, optional):
             Title to use for the plot. Defaults to 'Real vs. Synthetic Data for column {column}'
         x_label (str, optional):
-            Label to use for x-axis. Defaults to 'Category'.
+            Label to use for x-axis. Defaults to 'Value'.
 
     Returns:
         plotly.graph_objects._figure.Figure
@@ -353,7 +353,7 @@ def _generate_column_plot(
         plot_title = title
 
     if not x_label:
-        x_label = 'Category'
+        x_label = 'Value'
 
     fig.update_layout(
         title=plot_title,
