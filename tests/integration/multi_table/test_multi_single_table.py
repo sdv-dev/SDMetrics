@@ -3,7 +3,11 @@ import pandas as pd
 import pytest
 
 from sdmetrics.multi_table.multi_single_table import (
-    CSTest, KSComplement, LogisticDetection, SVCDetection)
+    CSTest,
+    KSComplement,
+    LogisticDetection,
+    SVCDetection,
+)
 
 METRICS = [CSTest, KSComplement, LogisticDetection, SVCDetection]
 

@@ -4,7 +4,9 @@ import pytest
 from sklearn.datasets import load_wine
 
 from sdmetrics.single_table.efficacy.multiclass import (
-    MulticlassDecisionTreeClassifier, MulticlassMLPClassifier)
+    MulticlassDecisionTreeClassifier,
+    MulticlassMLPClassifier,
+)
 
 METRICS = [
     MulticlassDecisionTreeClassifier,

@@ -1,5 +1,43 @@
 # History
 
+## v0.15.1 - 2024-08-13
+
+### Bugs Fixed
+
+* X-axis for the bar plot should be labeled `Value` instead of `Category` - Issue [#620](https://github.com/sdv-dev/SDMetrics/issues/620) by @R-Palazzo
+* LinAlgError when plotting data that is constant - Issue [#616](https://github.com/sdv-dev/SDMetrics/issues/616) by @R-Palazzo
+* Wrong chart title when generating a box plot for just the real data using `get_column_pair_plot()`  - Issue [#615](https://github.com/sdv-dev/SDMetrics/issues/615) by @R-Palazzo
+
+### New Features
+
+* Better error message when passing an SDV Metadata object - Issue [#610](https://github.com/sdv-dev/SDMetrics/issues/610) by @R-Palazzo
+* Check that every property score are index-free - Issue [#583](https://github.com/sdv-dev/SDMetrics/issues/583) by @R-Palazzo
+
+## v0.15.0 - 2024-07-15
+
+This release adds support for NumPy 2.0! Additionally, the visualization utilities no longer require both real and synthetic data to be provided, and they can now be used to visualize only real or only synthetic data.
+
+### Maintenance
+
+* Switch to using ruff for Python linting and code formatting - Issue [#536](https://github.com/sdv-dev/SDMetrics/issues/536) by @gsheni
+* Change job names in integration workflow to "integration" - Issue [#577](https://github.com/sdv-dev/SDMetrics/issues/577) by @rwedge
+* Cap numpy to less than 2.0.0 until SDMetrics supports - Issue [#591](https://github.com/sdv-dev/SDMetrics/issues/591) by @gsheni
+
+### Internal
+
+* Switch to using ruff for Python linting and code formatting - Issue [#536](https://github.com/sdv-dev/SDMetrics/issues/536) by @gsheni
+
+### New Features
+
+* Allow me to visualize just the real or synthetic data - Issue [#581](https://github.com/sdv-dev/SDMetrics/issues/581) by @lajohn4747
+* Update Referential Integrity metric to support NaNs in child column  - Issue [#587](https://github.com/sdv-dev/SDMetrics/issues/587) by @R-Palazzo
+* Add support for numpy 2.0.0 - Issue [#593](https://github.com/sdv-dev/SDMetrics/issues/593) by @R-Palazzo
+
+### Bugs Fixed
+
+* ColumnPairTrends score depends on the data index - Issue [#582](https://github.com/sdv-dev/SDMetrics/issues/582) by @R-Palazzo
+* Datetime columns set to Object pandas dtype breaks LSTMDetection - Issue [#584](https://github.com/sdv-dev/SDMetrics/issues/584) by @fealho
+
 ## v0.14.1 - 2024-05-13
 
 This release patches a bug on the `LSTMDetection` metric.

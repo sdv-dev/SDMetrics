@@ -50,7 +50,4 @@ class MLPRegressor(RegressionEfficacyMetric):
     """
 
     MODEL = neural_network.MLPRegressor
-    MODEL_KWARGS = {
-        'hidden_layer_sizes': (100, ),
-        'max_iter': 50
-    }
+    MODEL_KWARGS = {'hidden_layer_sizes': (100,), 'max_iter': 50}

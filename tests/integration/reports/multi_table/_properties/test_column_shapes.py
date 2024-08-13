@@ -7,7 +7,6 @@ from sdmetrics.reports.multi_table._properties import ColumnShapes
 
 
 class TestColumnShapes:
-
     def test_end_to_end(self):
         """Test the ``ColumnShapes`` multi-table property end to end."""
         # Setup

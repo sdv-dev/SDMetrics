@@ -53,9 +53,7 @@ class DataValidity(BaseSingleTableProperty):
                     continue
 
                 metric = self._sdtype_to_metric.get(sdtype, KeyUniqueness)
-                column_score = metric.compute(
-                    real_data[column_name], synthetic_data[column_name]
-                )
+                column_score = metric.compute(real_data[column_name], synthetic_data[column_name])
                 error_message = None
 
             except Exception as e:
@@ -100,8 +98,7 @@ class DataValidity(BaseSingleTableProperty):
             color_discrete_map={
                 'BoundaryAdherence': PlotConfig.DATACEBO_DARK,
                 'CategoryAdherence': PlotConfig.DATACEBO_BLUE,
-                'KeyUniqueness': PlotConfig.DATACEBO_GREEN
-
+                'KeyUniqueness': PlotConfig.DATACEBO_GREEN,
             },
             pattern_shape='Metric',
             pattern_shape_sequence=['', '/', '.'],

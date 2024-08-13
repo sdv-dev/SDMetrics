@@ -7,7 +7,6 @@ from sdmetrics.single_table import NewRowSynthesis
 
 
 class TestNewRowSynthesis:
-
     def test_compute(self):
         """Test the ``compute`` method and expect that the new row synthesis score is returned."""
         # Setup
@@ -101,7 +100,8 @@ class TestNewRowSynthesis:
 
         # Run
         score = metric.compute(
-            real_data, synthetic_data, metadata, synthetic_sample_size=sample_size)
+            real_data, synthetic_data, metadata, synthetic_sample_size=sample_size
+        )
 
         # Assert
         assert score == 1
@@ -135,7 +135,8 @@ class TestNewRowSynthesis:
 
         # Run
         score = metric.compute(
-            real_data, synthetic_data, metadata, synthetic_sample_size=sample_size)
+            real_data, synthetic_data, metadata, synthetic_sample_size=sample_size
+        )
 
         # Assert
         assert score == 1
@@ -158,9 +159,7 @@ class TestNewRowSynthesis:
             f'col{i}': list(np.random.uniform(low=0, high=10, size=100)) for i in range(num_cols)
         })
         metadata = {
-            'columns': {
-                f'col{i}': {'sdtype': 'numerical'} for i in range(num_cols)
-            },
+            'columns': {f'col{i}': {'sdtype': 'numerical'} for i in range(num_cols)},
         }
         metric = NewRowSynthesis()
 

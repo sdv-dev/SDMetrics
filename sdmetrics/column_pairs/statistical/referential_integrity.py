@@ -1,4 +1,5 @@
 """Referential Integrity Metric."""
+
 import logging
 
 import pandas as pd
@@ -51,9 +52,7 @@ class ReferentialIntegrity(ColumnPairsMetric):
 
         missing_parents = not real_data[1].isin(real_data[0]).all()
         if missing_parents:
-            LOGGER.info(
-                "The real data has foreign keys that don't reference any primary key."
-            )
+            LOGGER.info("The real data has foreign keys that don't reference any primary key.")
 
         score = synthetic_data[1].isin(synthetic_data[0]).mean()
 

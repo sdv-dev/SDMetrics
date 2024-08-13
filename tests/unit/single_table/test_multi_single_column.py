@@ -8,7 +8,6 @@ from sdmetrics.single_table import MultiSingleColumnMetric
 
 
 class TestMultiSingleColumnMetric:
-
     def test__compute(self):
         """Test the ``_compute`` method.
 
@@ -40,7 +39,8 @@ class TestMultiSingleColumnMetric:
         metric_mock._validate_inputs.return_value = (data, data, metadata)
         metric_mock._select_fields.return_value = ['a', 'b']
         metric_mock.single_column_metric.compute_breakdown.side_effect = [
-            {'score': 1.0}, {'score': 2.0},
+            {'score': 1.0},
+            {'score': 2.0},
         ]
         metric_mock.single_column_metric_kwargs = None
 
@@ -131,7 +131,9 @@ class TestMultiSingleColumnMetric:
         metric_mock._validate_inputs.return_value = (data, data, metadata)
         metric_mock._select_fields.return_value = ['a', 'b', 'c']
         metric_mock.single_column_metric.compute_breakdown.side_effect = [
-            {'score': 1.0}, {'score': 2.0}, {'error': test_error},
+            {'score': 1.0},
+            {'score': 2.0},
+            {'error': test_error},
         ]
         metric_mock.single_column_metric_kwargs = None
 

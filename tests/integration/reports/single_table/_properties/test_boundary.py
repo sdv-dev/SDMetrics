@@ -6,7 +6,6 @@ from sdmetrics.reports.single_table._properties import Boundary
 
 
 class TestBoundary:
-
     def test_get_score(self):
         """Test the ``get_score`` method."""
         # Setup
@@ -20,11 +19,19 @@ class TestBoundary:
         assert score == 1.0
         expected_details = pd.DataFrame({
             'Column': [
-                'start_date', 'end_date', 'salary', 'duration', 'high_perc', 'second_perc',
-                'degree_perc', 'experience_years', 'employability_perc', 'mba_perc'
+                'start_date',
+                'end_date',
+                'salary',
+                'duration',
+                'high_perc',
+                'second_perc',
+                'degree_perc',
+                'experience_years',
+                'employability_perc',
+                'mba_perc',
             ],
             'Metric': ['BoundaryAdherence'] * 10,
-            'Score': [1.0] * 10
+            'Score': [1.0] * 10,
         })
 
         pd.testing.assert_frame_equal(boundary_property.details, expected_details)
@@ -47,9 +54,7 @@ class TestBoundary:
             "TypeError: '<=' not supported between instances of 'int' and 'Timestamp'"
         )
         expected_message_2 = 'InvalidDataError: All NaN values in real data.'
-        expected_message_3 = (
-            "TypeError: '<=' not supported between instances of 'float' and 'str'"
-        )
+        expected_message_3 = "TypeError: '<=' not supported between instances of 'float' and 'str'"
 
         details = boundary_property.details
         details_nan = details.loc[pd.isna(details['Score'])]

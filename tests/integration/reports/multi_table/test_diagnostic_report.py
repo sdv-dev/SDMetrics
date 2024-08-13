@@ -7,7 +7,6 @@ from sdmetrics.reports.multi_table import DiagnosticReport
 
 
 class TestDiagnosticReport:
-
     def test_end_to_end(self):
         """Test the end-to-end functionality of the ``DiagnosticReport`` report."""
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
@@ -39,7 +38,7 @@ class TestDiagnosticReport:
         # Assert
         expected_dataframe = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-            'Score': [1.0, 1.0, 1.0]
+            'Score': [1.0, 1.0, 1.0],
         })
         assert results == 1.0
         pd.testing.assert_frame_equal(properties, expected_dataframe)
@@ -63,34 +62,62 @@ class TestDiagnosticReport:
         # Assert
         expected_properties = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-            'Score': [1.0, 1.0, 1.0]
+            'Score': [1.0, 1.0, 1.0],
         })
         expected_details = pd.DataFrame({
             'Table': [
-                'users', 'users', 'users', 'users', 'sessions', 'sessions', 'sessions',
-                'transactions', 'transactions', 'transactions', 'transactions',
+                'users',
+                'users',
+                'users',
+                'users',
+                'sessions',
+                'sessions',
+                'sessions',
+                'transactions',
+                'transactions',
+                'transactions',
+                'transactions',
             ],
             'Column': [
-                'user_id', 'country', 'gender', 'age', 'session_id', 'device',
-                'os', 'transaction_id', 'timestamp', 'amount', 'approved'
+                'user_id',
+                'country',
+                'gender',
+                'age',
+                'session_id',
+                'device',
+                'os',
+                'transaction_id',
+                'timestamp',
+                'amount',
+                'approved',
             ],
             'Metric': [
-                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence', 'BoundaryAdherence',
-                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence',
-                'KeyUniqueness', 'BoundaryAdherence', 'BoundaryAdherence',
-                'CategoryAdherence'
+                'KeyUniqueness',
+                'CategoryAdherence',
+                'CategoryAdherence',
+                'BoundaryAdherence',
+                'KeyUniqueness',
+                'CategoryAdherence',
+                'CategoryAdherence',
+                'KeyUniqueness',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'CategoryAdherence',
             ],
-            'Score': [
-                1.0, 1.0, 1.0, np.nan, 1.0, 1.0, 1.0, 1.0,
-                np.nan, np.nan, 1.0
-            ],
+            'Score': [1.0, 1.0, 1.0, np.nan, 1.0, 1.0, 1.0, 1.0, np.nan, np.nan, 1.0],
             'Error': [
-                None, None, None,
+                None,
+                None,
+                None,
                 "TypeError: '<=' not supported between instances of 'str' and 'int'",
-                None, None, None, None,
+                None,
+                None,
+                None,
+                None,
                 "TypeError: '<=' not supported between instances of 'str' and 'Timestamp'",
-                "TypeError: '<=' not supported between instances of 'str' and 'float'", None
-            ]
+                "TypeError: '<=' not supported between instances of 'str' and 'float'",
+                None,
+            ],
         })
         assert results == 1.0
         pd.testing.assert_frame_equal(
@@ -111,7 +138,7 @@ class TestDiagnosticReport:
         # Assert
         expected_dataframe = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-            'Score': [1.0, 1.0, 1.0]
+            'Score': [1.0, 1.0, 1.0],
         })
 
         pd.testing.assert_frame_equal(properties, expected_dataframe)
@@ -129,23 +156,45 @@ class TestDiagnosticReport:
         # Assert
         expected_dataframe = pd.DataFrame({
             'Table': [
-                'users', 'users', 'users', 'users', 'sessions', 'sessions', 'sessions',
-                'transactions', 'transactions', 'transactions', 'transactions',
+                'users',
+                'users',
+                'users',
+                'users',
+                'sessions',
+                'sessions',
+                'sessions',
+                'transactions',
+                'transactions',
+                'transactions',
+                'transactions',
             ],
             'Column': [
-                'user_id', 'country', 'gender', 'age', 'session_id', 'device',
-                'os', 'transaction_id', 'timestamp', 'amount', 'approved'
+                'user_id',
+                'country',
+                'gender',
+                'age',
+                'session_id',
+                'device',
+                'os',
+                'transaction_id',
+                'timestamp',
+                'amount',
+                'approved',
             ],
             'Metric': [
-                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence', 'BoundaryAdherence',
-                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence',
-                'KeyUniqueness', 'BoundaryAdherence', 'BoundaryAdherence',
-                'CategoryAdherence'
+                'KeyUniqueness',
+                'CategoryAdherence',
+                'CategoryAdherence',
+                'BoundaryAdherence',
+                'KeyUniqueness',
+                'CategoryAdherence',
+                'CategoryAdherence',
+                'KeyUniqueness',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'CategoryAdherence',
             ],
-            'Score': [
-                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-                1.0, 1.0
-            ]
+            'Score': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
         })
 
         pd.testing.assert_frame_equal(details, expected_dataframe)
@@ -165,9 +214,12 @@ class TestDiagnosticReport:
             'Table': ['users', 'users', 'users', 'users'],
             'Column': ['user_id', 'country', 'gender', 'age'],
             'Metric': [
-                'KeyUniqueness', 'CategoryAdherence', 'CategoryAdherence', 'BoundaryAdherence'
+                'KeyUniqueness',
+                'CategoryAdherence',
+                'CategoryAdherence',
+                'BoundaryAdherence',
             ],
-            'Score': [1.0, 1.0, 1.0, 1.0]
+            'Score': [1.0, 1.0, 1.0, 1.0],
         })
 
         pd.testing.assert_frame_equal(details, expected_dataframe)

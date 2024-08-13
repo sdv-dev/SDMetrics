@@ -4,7 +4,6 @@ from sdmetrics.column_pairs.base import ColumnPairsMetric
 
 
 class TestColumnPairsMetric:
-
     def test_compute_breakdown(self):
         """Test the ``compute_breakdown`` method.
 

@@ -6,7 +6,6 @@ from sdmetrics.column_pairs.statistical import ContingencySimilarity
 
 
 class TestContingencySimilarity:
-
     def test_compute(self):
         """Test the ``compute`` method.
 
@@ -32,9 +31,7 @@ class TestContingencySimilarity:
         # Assert
         assert result == expected_score
 
-    @patch(
-        'sdmetrics.column_pairs.statistical.contingency_similarity.ColumnPairsMetric.normalize'
-    )
+    @patch('sdmetrics.column_pairs.statistical.contingency_similarity.ColumnPairsMetric.normalize')
     def test_normalize(self, normalize_mock):
         """Test the ``normalize`` method.
 

@@ -7,9 +7,9 @@ from sdmetrics.reports.single_table._properties.synthesis import Synthesis
 
 
 class TestSynthesis:
-
-    @patch('sdmetrics.reports.single_table._properties.synthesis.'
-           'NewRowSynthesis.compute_breakdown')
+    @patch(
+        'sdmetrics.reports.single_table._properties.synthesis.' 'NewRowSynthesis.compute_breakdown'
+    )
     def test__generate_details(self, newrowsynthesis_mock):
         """Test the ``_generate_details`` method.
 
@@ -40,29 +40,33 @@ class TestSynthesis:
                 real_data=real_data,
                 synthetic_data=synthetic_data_20000,
                 metadata=metadata,
-                synthetic_sample_size=10000
+                synthetic_sample_size=10000,
             ),
             call(
                 real_data=real_data,
                 synthetic_data=synthetic_data,
                 metadata=metadata,
-                synthetic_sample_size=4
-            )
+                synthetic_sample_size=4,
+            ),
         ]
 
         newrowsynthesis_mock.assert_has_calls(expected_calls)
 
-        expected__details = pd.DataFrame({
-            'Metric': 'NewRowSynthesis',
-            'Score': 0.25,
-            'Num Matched Rows': 3,
-            'Num New Rows': 1,
-        }, index=[0])
+        expected__details = pd.DataFrame(
+            {
+                'Metric': 'NewRowSynthesis',
+                'Score': 0.25,
+                'Num Matched Rows': 3,
+                'Num New Rows': 1,
+            },
+            index=[0],
+        )
 
         pd.testing.assert_frame_equal(details, expected__details)
 
-    @patch('sdmetrics.reports.single_table._properties.synthesis.'
-           'NewRowSynthesis.compute_breakdown')
+    @patch(
+        'sdmetrics.reports.single_table._properties.synthesis.' 'NewRowSynthesis.compute_breakdown'
+    )
     def test__generate_details_error(self, newrowsynthesis_mock):
         """Test the ``_generate_details`` method when the metric raises an error."""
         # Setup
@@ -80,16 +84,19 @@ class TestSynthesis:
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
-            synthetic_sample_size=4
+            synthetic_sample_size=4,
         )
 
-        expected_details = pd.DataFrame({
-            'Metric': 'NewRowSynthesis',
-            'Score': np.nan,
-            'Num Matched Rows': np.nan,
-            'Num New Rows': np.nan,
-            'Error': 'ValueError: Mock Error'
-        }, index=[0])
+        expected_details = pd.DataFrame(
+            {
+                'Metric': 'NewRowSynthesis',
+                'Score': np.nan,
+                'Num Matched Rows': np.nan,
+                'Num New Rows': np.nan,
+                'Error': 'ValueError: Mock Error',
+            },
+            index=[0],
+        )
 
         pd.testing.assert_frame_equal(details, expected_details)
 
@@ -98,12 +105,15 @@ class TestSynthesis:
         """Test the ``get_visualization`` method."""
         # Setup
         synthesis_property = Synthesis()
-        synthesis_property.details = pd.DataFrame({
-            'Metric': 'NewRowSynthesis',
-            'Score': 0.25,
-            'Num Matched Rows': 3,
-            'Num New Rows': 1,
-        }, index=[0])
+        synthesis_property.details = pd.DataFrame(
+            {
+                'Metric': 'NewRowSynthesis',
+                'Score': 0.25,
+                'Num Matched Rows': 3,
+                'Num New Rows': 1,
+            },
+            index=[0],
+        )
 
         mock_pie = Mock()
         mock_px.pie.return_value = mock_pie
@@ -116,12 +126,9 @@ class TestSynthesis:
             values=[3, 1],
             names=['Exact Matches', 'Novel Rows'],
             color=['Exact Matches', 'Novel Rows'],
-            color_discrete_map={
-                'Exact Matches': '#F16141',
-                'Novel Rows': '#36B37E'
-            },
+            color_discrete_map={'Exact Matches': '#F16141', 'Novel Rows': '#36B37E'},
             hole=0.4,
-            title='Data Diagnostic: Synthesis (Score=0.25)'
+            title='Data Diagnostic: Synthesis (Score=0.25)',
         )
 
         mock_pie.update_traces.assert_called_once_with(

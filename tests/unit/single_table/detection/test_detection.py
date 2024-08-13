@@ -7,7 +7,6 @@ from tests.utils import DataFrameMatcher
 
 
 class TestDetectionMetric:
-
     @patch('sdmetrics.utils.HyperTransformer.transform')
     @patch('sdmetrics.utils.HyperTransformer.fit_transform')
     def test_primary_key_detection_metrics(self, fit_transform_mock, transform_mock):
@@ -22,31 +21,31 @@ class TestDetectionMetric:
             'ID_1': [1, 2, 1, 3, 4],
             'col2': [1.0, 2.0, 3.0, 4.0, 5.0],
             'ID_2': ['aa', 'bb', 'cc', 'dd', 'bb'],
-            'col4': [5, 6, 7, 8, 9]
+            'col4': [5, 6, 7, 8, 9],
         })
         synthetic_data = pd.DataFrame({
             'ID_1': [1, 3, 4, 2, 2],
             'col2': [11.0, 22.0, 33.0, 44.0, 55.0],
             'ID_2': ['aa', 'bb', 'cc', 'dd', 'ee'],
-            'col4': [55, 66, 77, 88, 99]
+            'col4': [55, 66, 77, 88, 99],
         })
         metadata = {
             'columns': {
                 'ID_1': {'sdtype': 'numerical'},
                 'col2': {'sdtype': 'numerical'},
                 'ID_2': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'numerical'}
+                'col4': {'sdtype': 'numerical'},
             },
-            'primary_key': {'ID_1', 'ID_2'}
+            'primary_key': {'ID_1', 'ID_2'},
         }
 
         expected_real_dataframe = pd.DataFrame({
             'col2': [1.0, 2.0, 3.0, 4.0, 5.0],
-            'col4': [5, 6, 7, 8, 9]
+            'col4': [5, 6, 7, 8, 9],
         })
         expected_synthetic_dataframe = pd.DataFrame({
             'col2': [11.0, 22.0, 33.0, 44.0, 55.0],
-            'col4': [55, 66, 77, 88, 99]
+            'col4': [55, 66, 77, 88, 99],
         })
         expected_return_real = DataFrameMatcher(expected_real_dataframe)
         expected_return_synthetic = DataFrameMatcher(expected_synthetic_dataframe)
@@ -85,7 +84,7 @@ class TestDetectionMetric:
             'ID_3': ['a', 'b', 'c', 'd', 'e'],
             'blob': ['Hello world!', 'Hello world!', 'This is SDV', 'This is SDV', 'Hello world!'],
             'col4': [1, 3, 9, 2, 1],
-            'col5': [10, 20, 30, 40, 50]
+            'col5': [10, 20, 30, 40, 50],
         })
         synthetic_data = pd.DataFrame({
             'ID_1': [1, 3, 4, 2, 2],
@@ -96,7 +95,7 @@ class TestDetectionMetric:
             'ID_3': ['a', 'b', 'e', 'd', 'c'],
             'blob': ['Hello world!', 'Hello world!', 'This is SDV', 'This is SDV', 'Hello world!'],
             'col4': [4, 1, 3, 1, 9],
-            'col5': [10, 20, 30, 40, 50]
+            'col5': [10, 20, 30, 40, 50],
         })
         metadata = {
             'columns': {
@@ -108,21 +107,21 @@ class TestDetectionMetric:
                 'ID_3': {'sdtype': 'id'},
                 'blob': {'sdtype': 'text'},
                 'col4': {'sdtype': 'numerical', 'pii': False},
-                'col5': {'sdtype': 'numerical'}
+                'col5': {'sdtype': 'numerical'},
             },
             'primary_key': {'ID_1', 'ID_2'},
-            'alternate_keys': ['col5']
+            'alternate_keys': ['col5'],
         }
 
         expected_real_dataframe = pd.DataFrame({
             'col2': [1.0, 2.0, 3.0, 4.0, 5.0],
             'col3': [5, 6, 7, 8, 9],
-            'col4': [1, 3, 9, 2, 1]
+            'col4': [1, 3, 9, 2, 1],
         })
         expected_synthetic_dataframe = pd.DataFrame({
             'col2': [11.0, 22.0, 33.0, 44.0, 55.0],
             'col3': [55, 66, 77, 88, 99],
-            'col4': [4, 1, 3, 1, 9]
+            'col4': [4, 1, 3, 1, 9],
         })
 
         expected_return_real = DataFrameMatcher(expected_real_dataframe)

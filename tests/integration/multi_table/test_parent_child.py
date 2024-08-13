@@ -3,7 +3,9 @@ import pandas as pd
 import pytest
 
 from sdmetrics.multi_table.detection.parent_child import (
-    LogisticParentChildDetection, SVCParentChildDetection)
+    LogisticParentChildDetection,
+    SVCParentChildDetection,
+)
 
 METRICS = [LogisticParentChildDetection, SVCParentChildDetection]
 
@@ -90,9 +92,7 @@ def bad_data():
     return {'parent': parent, 'child': child}
 
 
-FKS = [
-    ('parent', 'id', 'child', 'parent_id')
-]
+FKS = [('parent', 'id', 'child', 'parent_id')]
 
 
 @pytest.mark.parametrize('metric', METRICS)

@@ -300,7 +300,8 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
             'Numerical Correlation (Real Data)',
             'Numerical Correlation (Synthetic Data)',
         ],
-        specs=[[{'colspan': 2, 'l': 0.26, 'r': 0.26}, None], [{}, {}]])
+        specs=[[{'colspan': 2, 'l': 0.26, 'r': 0.26}, None], [{}, {}]],
+    )
 
     # Top row: Overall Similarity Graph
     fig.add_trace(
@@ -312,8 +313,7 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
             xaxis='x',
             yaxis='y',
             hovertemplate=(
-                '<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: '
-                '%{z}<extra></extra>'
+                '<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: ' '%{z}<extra></extra>'
             ),
         ),
         1,
@@ -369,9 +369,7 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
             'colorbar_y': 0.8,
             'cmin': 0,
             'cmax': 1,
-            'colorscale': [
-                PlotConfig.RED, PlotConfig.ORANGE, PlotConfig.GREEN
-            ],
+            'colorscale': [PlotConfig.RED, PlotConfig.ORANGE, PlotConfig.GREEN],
         },
         # Correlation heatmaps color axis
         coloraxis2={
@@ -380,7 +378,9 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
             'cmin': -1,
             'cmax': 1,
             'colorscale': [
-                PlotConfig.DATACEBO_BLUE, PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN
+                PlotConfig.DATACEBO_BLUE,
+                PlotConfig.DATACEBO_DARK,
+                PlotConfig.DATACEBO_GREEN,
             ],
         },
         # Sync the zoom and pan of the bottom 2 graphs
@@ -420,17 +420,12 @@ def get_synthesis_plot(score_breakdown):
         values=values,
         names=labels,
         color=['Exact Matches', 'Novel Rows'],
-        color_discrete_map={
-            'Exact Matches': PlotConfig.ORANGE,
-            'Novel Rows': PlotConfig.GREEN
-        },
+        color_discrete_map={'Exact Matches': PlotConfig.ORANGE, 'Novel Rows': PlotConfig.GREEN},
         hole=0.4,
-        title=f'Data Diagnostic: Synthesis (Score={average_score})'
+        title=f'Data Diagnostic: Synthesis (Score={average_score})',
     )
 
     fig.update_traces(hovertemplate='<b>%{label}</b><br>%{value} rows')
-    fig.update_layout(
-        font={'size': PlotConfig.FONT_SIZE}
-    )
+    fig.update_layout(font={'size': PlotConfig.FONT_SIZE})
 
     return fig

@@ -2,7 +2,4 @@
 
 from sdmetrics.single_table.detection.sklearn import LogisticDetection, SVCDetection
 
-__all__ = [
-    'LogisticDetection',
-    'SVCDetection'
-]
+__all__ = ['LogisticDetection', 'SVCDetection']

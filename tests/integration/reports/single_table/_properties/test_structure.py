@@ -6,7 +6,6 @@ from sdmetrics.reports.single_table._properties import Structure
 
 
 class TestStructure:
-
     def test_get_score(self):
         """Test the ``get_score`` method."""
         # Setup
@@ -19,10 +18,13 @@ class TestStructure:
         # Assert
         assert score == 1.0
 
-        expected_details = pd.DataFrame({
-            'Metric': 'TableStructure',
-            'Score': 1.0,
-        }, index=[0])
+        expected_details = pd.DataFrame(
+            {
+                'Metric': 'TableStructure',
+                'Score': 1.0,
+            },
+            index=[0],
+        )
 
         pd.testing.assert_frame_equal(synthesis_property.details, expected_details)
 
@@ -40,10 +42,13 @@ class TestStructure:
         # Assert
         assert pd.isna(score)
 
-        expected_details = pd.DataFrame({
-            'Metric': 'TableStructure',
-            'Score': np.nan,
-            'Error': "AttributeError: 'list' object has no attribute 'columns'"
-        }, index=[0])
+        expected_details = pd.DataFrame(
+            {
+                'Metric': 'TableStructure',
+                'Score': np.nan,
+                'Error': "AttributeError: 'list' object has no attribute 'columns'",
+            },
+            index=[0],
+        )
 
         pd.testing.assert_frame_equal(synthesis_property.details, expected_details)

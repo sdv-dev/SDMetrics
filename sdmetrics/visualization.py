@@ -21,6 +21,7 @@ def set_plotly_config(function):
     ``Jupyter Notebooks``, select the ``iframe`` rendering engine otherwise leave the default
     one.
     """
+
     @wraps(function)
     def wrapper(*args, **kwargs):
         renderers = list(pio.renderers)
@@ -45,10 +46,10 @@ def _generate_column_bar_plot(real_data, synthetic_data, plot_kwargs={}):
     """Generate a bar plot of the real and synthetic data.
 
     Args:
-        real_column (pandas.Series):
-            The real data for the desired column.
-        synthetic_column (pandas.Series):
-            The synthetic data for the desired column.
+        real_column (pandas.Series or None):
+            The real data for the desired column. If None this data will not be graphed.
+        synthetic_column (pandas.Series or None):
+            The synthetic data for the desired column. If None this data will not be graphed.
         plot_kwargs (dict, optional):
             Dictionary of keyword arguments to pass to px.histogram. Keyword arguments
             provided this way will overwrite defaults.
@@ -56,21 +57,26 @@ def _generate_column_bar_plot(real_data, synthetic_data, plot_kwargs={}):
     Returns:
         plotly.graph_objects._figure.Figure
     """
-    all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+    all_data = pd.DataFrame()
+    color_sequence = []
+    if real_data is not None:
+        all_data = pd.concat([all_data, real_data], axis=0, ignore_index=True)
+        color_sequence.append(PlotConfig.DATACEBO_DARK)
+    if synthetic_data is not None:
+        all_data = pd.concat([all_data, synthetic_data], axis=0, ignore_index=True)
+        color_sequence.append(PlotConfig.DATACEBO_GREEN)
+
     histogram_kwargs = {
         'x': 'values',
         'color': 'Data',
         'barmode': 'group',
-        'color_discrete_sequence': [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN],
+        'color_discrete_sequence': color_sequence,
         'pattern_shape': 'Data',
         'pattern_shape_sequence': ['', '/'],
         'histnorm': 'probability density',
     }
     histogram_kwargs.update(plot_kwargs)
-    fig = px.histogram(
-        all_data,
-        **histogram_kwargs
-    )
+    fig = px.histogram(all_data, **histogram_kwargs)
 
     return fig
 
@@ -88,16 +94,20 @@ def _generate_heatmap_plot(all_data, columns):
     Returns:
         plotly.graph_objects._figure.Figure
     """
+    unique_values = all_data['Data'].unique()
+
+    if len(columns) != 2:
+        raise ValueError('Generating a heatmap plot requires exactly two columns for the axis.')
+
     fig = px.density_heatmap(
-        all_data,
-        x=columns[0],
-        y=columns[1],
-        facet_col='Data',
-        histnorm='probability'
+        all_data, x=columns[0], y=columns[1], facet_col='Data', histnorm='probability'
     )
 
+    title = ' vs. '.join(unique_values)
+    title += f" Data for columns '{columns[0]}' and '{columns[1]}'"
+
     fig.update_layout(
-        title_text=f"Real vs Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
+        title_text=title,
         coloraxis={'colorscale': [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]},
         font={'size': PlotConfig.FONT_SIZE},
     )
@@ -127,12 +137,15 @@ def _generate_box_plot(all_data, columns):
         color='Data',
         color_discrete_map={
             'Real': PlotConfig.DATACEBO_DARK,
-            'Synthetic': PlotConfig.DATACEBO_GREEN
+            'Synthetic': PlotConfig.DATACEBO_GREEN,
         },
     )
 
+    unique_values = all_data['Data'].unique()
+    title = ' vs. '.join(unique_values)
+    title += f" Data for columns '{columns[0]}' and '{columns[1]}'"
     fig.update_layout(
-        title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
+        title=title,
         plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
         font={'size': PlotConfig.FONT_SIZE},
     )
@@ -153,6 +166,10 @@ def _generate_scatter_plot(all_data, columns):
     Returns:
         plotly.graph_objects._figure.Figure
     """
+    if len(columns) != 2:
+        raise ValueError('Generating a scatter plot requires exactly two columns for the axis.')
+
+    unique_values = all_data['Data'].unique()
     fig = px.scatter(
         all_data,
         x=columns[0],
@@ -160,13 +177,16 @@ def _generate_scatter_plot(all_data, columns):
         color='Data',
         color_discrete_map={
             'Real': PlotConfig.DATACEBO_DARK,
-            'Synthetic': PlotConfig.DATACEBO_GREEN
+            'Synthetic': PlotConfig.DATACEBO_GREEN,
         },
-        symbol='Data'
+        symbol='Data',
     )
 
+    title = ' vs. '.join(unique_values)
+    title += f" Data for columns '{columns[0]}' and '{columns[1]}'"
+
     fig.update_layout(
-        title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
+        title=title,
         plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
         font={'size': PlotConfig.FONT_SIZE},
     )
@@ -178,10 +198,10 @@ def _generate_column_distplot(real_data, synthetic_data, plot_kwargs={}):
     """Plot the real and synthetic data as a distplot.
 
     Args:
-        real_data (pandas.DataFrame):
-            The real data for the desired column.
-        synthetic_data (pandas.DataFrame):
-            The synthetic data for the desired column.
+        real_data (pandas.DataFrame or None):
+            The real data for the desired column. If None this data will not be graphed.
+        synthetic_data (pandas.DataFrame or None):
+            The synthetic data for the desired column. If None this data will not be graphed.
         plot_kwargs (dict, optional):
             Dictionary of keyword arguments to pass to px.histogram. Keyword arguments
             provided this way will overwrite defaults.
@@ -189,34 +209,43 @@ def _generate_column_distplot(real_data, synthetic_data, plot_kwargs={}):
     Returns:
         plotly.graph_objects._figure.Figure
     """
+    hist_data = []
+    col_names = []
+    colors = []
+    if real_data is not None:
+        hist_data.append(real_data['values'])
+        col_names.append('Real')
+        colors.append(PlotConfig.DATACEBO_DARK)
+    if synthetic_data is not None:
+        hist_data.append(synthetic_data['values'])
+        col_names.append('Synthetic')
+        colors.append(PlotConfig.DATACEBO_GREEN)
+
     default_distplot_kwargs = {
         'show_hist': False,
         'show_rug': False,
-        'colors': [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]
+        'colors': colors,
     }
 
     fig = ff.create_distplot(
-        [real_data['values'], synthetic_data['values']],
-        ['Real', 'Synthetic'],
-        **{**default_distplot_kwargs, **plot_kwargs}
+        hist_data,
+        col_names,
+        **{**default_distplot_kwargs, **plot_kwargs},
     )
 
     return fig
 
 
-def _generate_column_plot(real_column,
-                          synthetic_column,
-                          plot_type,
-                          plot_kwargs={},
-                          plot_title=None,
-                          x_label=None):
+def _generate_column_plot(
+    real_column, synthetic_column, plot_type, plot_kwargs={}, plot_title=None, x_label=None
+):
     """Generate a plot of the real and synthetic data.
 
     Args:
-        real_column (pandas.Series):
-            The real data for the desired column.
-        synthetic_column (pandas.Series):
-            The synthetic data for the desired column.
+        real_column (pandas.Series or None):
+            The real data for the desired column. If None this data will not be graphed.
+        synthetic_column (pandas.Series or None)
+            The synthetic data for the desired column. If None this data will not be graphed.
         plot_type (str):
             The type of plot to use. Must be one of 'bar' or 'distplot'.
         hist_kwargs (dict, optional):
@@ -225,31 +254,59 @@ def _generate_column_plot(real_column,
         plot_title (str, optional):
             Title to use for the plot. Defaults to 'Real vs. Synthetic Data for column {column}'
         x_label (str, optional):
-            Label to use for x-axis. Defaults to 'Category'.
+            Label to use for x-axis. Defaults to 'Value'.
 
     Returns:
         plotly.graph_objects._figure.Figure
     """
+    if real_column is None and synthetic_column is None:
+        raise ValueError('No data provided to plot. Please provide either real or synthetic data.')
+
     if plot_type not in ['bar', 'distplot']:
         raise ValueError(
-            "Unrecognized plot_type '{plot_type}'. Pleas use one of 'bar' or 'distplot'"
+            f"Unrecognized plot_type '{plot_type}'. Please use one of 'bar' or 'distplot'"
         )
 
-    column_name = real_column.name if hasattr(real_column, 'name') else ''
+    column_name = ''
+    missing_data_real = 0
+    missing_data_synthetic = 0
+    col_dtype = None
+    col_names = []
+    title = ''
+    if real_column is not None and hasattr(real_column, 'name'):
+        column_name = real_column.name
+    elif synthetic_column is not None and hasattr(synthetic_column, 'name'):
+        column_name = synthetic_column.name
 
-    missing_data_real = get_missing_percentage(real_column)
-    missing_data_synthetic = get_missing_percentage(synthetic_column)
+    real_data = None
+    if real_column is not None:
+        missing_data_real = get_missing_percentage(real_column)
+        real_data = pd.DataFrame({'values': real_column.copy().dropna()})
+        real_data['Data'] = 'Real'
+        col_dtype = real_column.dtype
+        col_names.append('Real')
+        title += 'Real vs. '
 
-    real_data = pd.DataFrame({'values': real_column.copy().dropna()})
-    real_data['Data'] = 'Real'
-    synthetic_data = pd.DataFrame({'values': synthetic_column.copy().dropna()})
-    synthetic_data['Data'] = 'Synthetic'
+    synthetic_data = None
+    if synthetic_column is not None:
+        missing_data_synthetic = get_missing_percentage(synthetic_column)
+        synthetic_data = pd.DataFrame({'values': synthetic_column.copy().dropna()})
+        synthetic_data['Data'] = 'Synthetic'
+        col_names.append('Synthetic')
+        title += 'Synthetic vs. '
+        if col_dtype is None:
+            col_dtype = synthetic_column.dtype
+
+    title = title[:-4]
+    title += f"Data for column '{column_name}'"
 
     is_datetime_sdtype = False
-    if is_datetime64_dtype(real_column.dtype):
+    if is_datetime64_dtype(col_dtype):
         is_datetime_sdtype = True
-        real_data['values'] = real_data['values'].astype('int64')
-        synthetic_data['values'] = synthetic_data['values'].astype('int64')
+        if real_data is not None:
+            real_data['values'] = real_data['values'].astype('int64')
+        if synthetic_data is not None:
+            synthetic_data['values'] = synthetic_data['values'].astype('int64')
 
     trace_args = {}
 
@@ -260,34 +317,43 @@ def _generate_column_plot(real_column,
         fig = _generate_column_distplot(real_data, synthetic_data, plot_kwargs)
         trace_args = {'fill': 'tozeroy'}
 
-    for i, name in enumerate(['Real', 'Synthetic']):
+    for i, name in enumerate(col_names):
         fig.update_traces(
             x=pd.to_datetime(fig.data[i].x) if is_datetime_sdtype else fig.data[i].x,
             hovertemplate=f'<b>{name}</b><br>Frequency: %{{y}}<extra></extra>',
             selector={'name': name},
-            **trace_args
+            **trace_args,
         )
 
     show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
-    annotations = [] if not show_missing_values else [
-        {
-            'xref': 'paper',
-            'yref': 'paper',
-            'x': 1.0,
-            'y': 1.05,
-            'showarrow': False,
-            'text': (
-                f'*Missing Values: Real Data ({missing_data_real}%), '
-                f'Synthetic Data ({missing_data_synthetic}%)'
-            ),
-        },
-    ]
+    text = '*Missing Values:'
+    if real_column is not None and show_missing_values:
+        text += f' Real Data ({missing_data_real}%), '
+    if synthetic_column is not None and show_missing_values:
+        text += f'Synthetic Data ({missing_data_synthetic}%), '
+
+    text = text[:-2]
+
+    annotations = (
+        []
+        if not show_missing_values
+        else [
+            {
+                'xref': 'paper',
+                'yref': 'paper',
+                'x': 1.0,
+                'y': 1.05,
+                'showarrow': False,
+                'text': text,
+            },
+        ]
+    )
 
     if not plot_title:
-        plot_title = f"Real vs. Synthetic Data for column '{column_name}'"
+        plot_title = title
 
     if not x_label:
-        x_label = 'Category'
+        x_label = 'Value'
 
     fig.update_layout(
         title=plot_title,
@@ -300,11 +366,29 @@ def _generate_column_plot(real_column,
     return fig
 
 
-def _generate_cardinality_plot(real_data,
-                               synthetic_data,
-                               parent_primary_key,
-                               child_foreign_key,
-                               plot_type='bar'):
+def _get_max_between_datasets(real_data, synthetic_data):
+    if synthetic_data is None and real_data is None:
+        raise ValueError('Cannot get max between two None values.')
+    if real_data is None:
+        return max(synthetic_data)
+    elif synthetic_data is None:
+        return max(real_data)
+    return max(max(real_data), max(synthetic_data))
+
+
+def _get_min_between_datasets(real_data, synthetic_data):
+    if synthetic_data is None and real_data is None:
+        raise ValueError('Cannot get min between two None values.')
+    if real_data is None:
+        return min(synthetic_data)
+    elif synthetic_data is None:
+        return min(real_data)
+    return min(min(real_data), min(synthetic_data))
+
+
+def _generate_cardinality_plot(
+    real_data, synthetic_data, parent_primary_key, child_foreign_key, plot_type='bar'
+):
     plot_title = (
         f"Relationship (child foreign key='{child_foreign_key}' and parent "
         f"primary key='{parent_primary_key}')"
@@ -313,14 +397,13 @@ def _generate_cardinality_plot(real_data,
 
     plot_kwargs = {}
     if plot_type == 'bar':
-        max_cardinality = max(max(real_data), max(synthetic_data))
-        min_cardinality = min(min(real_data), min(synthetic_data))
-        plot_kwargs = {
-            'nbins': max_cardinality - min_cardinality + 1
-        }
+        max_cardinality = _get_max_between_datasets(real_data, synthetic_data)
+        min_cardinality = _get_min_between_datasets(real_data, synthetic_data)
+        plot_kwargs = {'nbins': max_cardinality - min_cardinality + 1}
 
-    return _generate_column_plot(real_data, synthetic_data, plot_type,
-                                 plot_kwargs, plot_title, x_label)
+    return _generate_column_plot(
+        real_data, synthetic_data, plot_type, plot_kwargs, plot_title, x_label
+    )
 
 
 def _get_cardinality(parent_table, child_table, parent_primary_key, child_foreign_key):
@@ -346,15 +429,22 @@ def _get_cardinality(parent_table, child_table, parent_primary_key, child_foreig
 
 
 @set_plotly_config
-def get_cardinality_plot(real_data, synthetic_data, child_table_name, parent_table_name,
-                         child_foreign_key, parent_primary_key, plot_type='bar'):
+def get_cardinality_plot(
+    real_data,
+    synthetic_data,
+    child_table_name,
+    parent_table_name,
+    child_foreign_key,
+    parent_primary_key,
+    plot_type='bar',
+):
     """Return a plot of the cardinality of the parent-child relationship.
 
     Args:
-        real_data (dict):
-            The real data.
-        synthetic_data (dict):
-            The synthetic data.
+        real_data (dict or None):
+            The real data. If None this data will not be graphed.
+        synthetic_data (dict or None):
+            The synthetic data. If None this data will not be graphed.
         child_table_name (string):
             The name of the child table.
         parent_table_name (string):
@@ -371,25 +461,36 @@ def get_cardinality_plot(real_data, synthetic_data, child_table_name, parent_tab
         plotly.graph_objects._figure.Figure
     """
     if plot_type not in ['bar', 'distplot']:
-        raise ValueError(
-            f"Invalid plot_type '{plot_type}'. Please use one of ['bar', 'distplot'].")
+        raise ValueError(f"Invalid plot_type '{plot_type}'. Please use one of ['bar', 'distplot'].")
 
-    real_cardinality = _get_cardinality(
-        real_data[parent_table_name], real_data[child_table_name],
-        parent_primary_key, child_foreign_key
-    )
-    synth_cardinality = _get_cardinality(
-        synthetic_data[parent_table_name],
-        synthetic_data[child_table_name],
-        parent_primary_key, child_foreign_key
-    )
+    if real_data is None and synthetic_data is None:
+        raise ValueError('No data provided to plot. Please provide either real or synthetic data.')
+
+    real_cardinality = None
+    synth_cardinality = None
+
+    if real_data is not None:
+        real_cardinality = _get_cardinality(
+            real_data[parent_table_name],
+            real_data[child_table_name],
+            parent_primary_key,
+            child_foreign_key,
+        )
+
+    if synthetic_data is not None:
+        synth_cardinality = _get_cardinality(
+            synthetic_data[parent_table_name],
+            synthetic_data[child_table_name],
+            parent_primary_key,
+            child_foreign_key,
+        )
 
     fig = _generate_cardinality_plot(
         real_cardinality,
         synth_cardinality,
         parent_primary_key,
         child_foreign_key,
-        plot_type=plot_type
+        plot_type=plot_type,
     )
 
     return fig
@@ -400,10 +501,10 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     """Return a plot of the real and synthetic data for a given column.
 
     Args:
-        real_data (pandas.DataFrame):
-            The real table data.
-        synthetic_data (pandas.DataFrame):
-            The synthetic table data.
+        real_data (pandas.DataFrame or None):
+            The real table data. If None this data will not be graphed.
+        synthetic_data (pandas.DataFrame or None):
+            The synthetic table data. If None this data will not be graphed.
         column_name (str):
             The name of the column.
         plot_type (str or None):
@@ -415,27 +516,47 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
     Returns:
         plotly.graph_objects._figure.Figure
     """
+    if real_data is None and synthetic_data is None:
+        raise ValueError('No data provided to plot. Please provide either real or synthetic data.')
+
     if plot_type not in ['bar', 'distplot', None]:
         raise ValueError(
             f"Invalid plot_type '{plot_type}'. Please use one of ['bar', 'distplot', None]."
         )
 
-    if column_name not in real_data.columns:
-        raise ValueError(f"Column '{column_name}' not found in real table data.")
-    if column_name not in synthetic_data.columns:
-        raise ValueError(f"Column '{column_name}' not found in synthetic table data.")
+    column = None
+    real_column = None
+    synthetic_column = None
+    if real_data is not None:
+        if column_name not in real_data.columns:
+            raise ValueError(f"Column '{column_name}' not found in real table data.")
 
-    real_column = real_data[column_name]
+        column = real_data[column_name]
+        real_column = real_data[column_name]
+
+    if synthetic_data is not None:
+        if column_name not in synthetic_data.columns:
+            raise ValueError(f"Column '{column_name}' not found in synthetic table data.")
+        if column is None:
+            column = synthetic_data[column_name]
+
+        synthetic_column = synthetic_data[column_name]
+
+    real_constant = real_column is not None and real_column.nunique() == 1
+    synthetic_constant = synthetic_column is not None and synthetic_column.nunique() == 1
+    column_is_constant = real_constant or synthetic_constant
     if plot_type is None:
-        column_is_datetime = is_datetime(real_data[column_name])
-        dtype = real_column.dropna().infer_objects().dtype.kind
-        if column_is_datetime or dtype in ('i', 'f'):
+        column_is_datetime = is_datetime(column)
+        dtype = column.dropna().infer_objects().dtype.kind
+        if column_is_datetime or dtype in ('i', 'f') and not column_is_constant:
             plot_type = 'distplot'
         else:
             plot_type = 'bar'
-
-    real_column = real_data[column_name]
-    synthetic_column = synthetic_data[column_name]
+    elif plot_type == 'distplot' and column_is_constant:
+        raise ValueError(
+            f"Plot type 'distplot' cannot be created because column '{column_name}' has a constant value inside"
+            " the real or synthetic data. To render a visualization, please update the plot_type to 'bar'."
+        )
 
     fig = _generate_column_plot(real_column, synthetic_column, plot_type)
 
@@ -447,10 +568,10 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
     """Return a plot of the real and synthetic data for a given column pair.
 
     Args:
-        real_data (pandas.DataFrame):
-            The real table data.
-        synthetic_column (pandas.Dataframe):
-            The synthetic table data.
+        real_data (pandas.DataFrame or None):
+            The real table data. If None this data will not be graphed.
+        synthetic_column (pandas.Dataframe or None):
+            The synthetic table data. If None this data will not be graphed.
         column_names (list[string]):
             The names of the two columns to plot.
         plot_type (str or None):
@@ -465,16 +586,23 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
     if len(column_names) != 2:
         raise ValueError('Must provide exactly two column names.')
 
-    if not set(column_names).issubset(real_data.columns):
-        raise ValueError(
-            f'Missing column(s) {set(column_names) - set(real_data.columns)} in real data.'
-        )
+    if real_data is None and synthetic_data is None:
+        raise ValueError('No data provided to plot. Please provide either real or synthetic data.')
 
-    if not set(column_names).issubset(synthetic_data.columns):
-        raise ValueError(
-            f'Missing column(s) {set(column_names) - set(synthetic_data.columns)} '
-            'in synthetic data.'
-        )
+    if real_data is not None:
+        if not set(column_names).issubset(real_data.columns):
+            raise ValueError(
+                f'Missing column(s) {set(column_names) - set(real_data.columns)} in real data.'
+            )
+        real_data = real_data[column_names]
+
+    if synthetic_data is not None:
+        if not set(column_names).issubset(synthetic_data.columns):
+            raise ValueError(
+                f'Missing column(s) {set(column_names) - set(synthetic_data.columns)} '
+                'in synthetic data.'
+            )
+        synthetic_data = synthetic_data[column_names]
 
     if plot_type not in ['box', 'heatmap', 'scatter', None]:
         raise ValueError(
@@ -482,12 +610,13 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
             "['box', 'heatmap', 'scatter', None]."
         )
 
-    real_data = real_data[column_names]
-    synthetic_data = synthetic_data[column_names]
     if plot_type is None:
         plot_type = []
         for column_name in column_names:
-            column = real_data[column_name]
+            if real_data is not None:
+                column = real_data[column_name]
+            else:
+                column = synthetic_data[column_name]
             dtype = column.dropna().infer_objects().dtype.kind
             if dtype in ('i', 'f') or is_datetime(column):
                 plot_type.append('scatter')
@@ -500,19 +629,22 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
             plot_type = plot_type.pop()
 
     # Merge the real and synthetic data and add a flag ``Data`` to indicate each one.
-    columns = list(real_data.columns)
-    real_data = real_data.copy()
-    real_data['Data'] = 'Real'
-    synthetic_data = synthetic_data.copy()
-    synthetic_data['Data'] = 'Synthetic'
-    all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
+    all_data = pd.DataFrame()
+    if real_data is not None:
+        real_data = real_data.copy()
+        real_data['Data'] = 'Real'
+        all_data = pd.concat([all_data, real_data], axis=0, ignore_index=True)
+    if synthetic_data is not None:
+        synthetic_data = synthetic_data.copy()
+        synthetic_data['Data'] = 'Synthetic'
+        all_data = pd.concat([all_data, synthetic_data], axis=0, ignore_index=True)
 
     if plot_type == 'scatter':
-        return _generate_scatter_plot(all_data, columns)
+        return _generate_scatter_plot(all_data, column_names)
     elif plot_type == 'heatmap':
-        return _generate_heatmap_plot(all_data, columns)
+        return _generate_heatmap_plot(all_data, column_names)
 
-    return _generate_box_plot(all_data, columns)
+    return _generate_box_plot(all_data, column_names)
 
 
 def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annotations=None):
@@ -537,20 +669,23 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
     """
     # Check if the column is the appropriate type
     all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
-    if not (is_datetime(all_data[x_axis]) or
-            pd.api.types.is_numeric_dtype(all_data[x_axis])):
+    if not (is_datetime(all_data[x_axis]) or pd.api.types.is_numeric_dtype(all_data[x_axis])):
         raise ValueError(
-            f"Sequence Index '{x_axis}' must contain numerical or datetime values only")
-    if not (is_datetime(all_data[y_axis]) or
-            pd.api.types.is_numeric_dtype(all_data[y_axis])):
-        raise ValueError(
-            f"Column Name '{y_axis}' must contain numerical or datetime values only")
+            f"Sequence Index '{x_axis}' must contain numerical or datetime values only"
+        )
+    if not (is_datetime(all_data[y_axis]) or pd.api.types.is_numeric_dtype(all_data[y_axis])):
+        raise ValueError(f"Column Name '{y_axis}' must contain numerical or datetime values only")
 
-    fig = px.line(all_data, x=x_axis, y=y_axis, color=marker,
-                  color_discrete_map={
-                      'Real': PlotConfig.DATACEBO_DARK,
-                      'Synthetic': PlotConfig.DATACEBO_GREEN
-                  })
+    fig = px.line(
+        all_data,
+        x=x_axis,
+        y=y_axis,
+        color=marker,
+        color_discrete_map={
+            'Real': PlotConfig.DATACEBO_DARK,
+            'Synthetic': PlotConfig.DATACEBO_GREEN,
+        },
+    )
     if annotations:
         fig.add_annotation(annotations)
 
@@ -573,7 +708,7 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                 hoverinfo='skip',
                 marker={'color': PlotConfig.DATACEBO_DARK_TRANSPARENT},
                 showlegend=False,
-                mode='lines'
+                mode='lines',
             )
         )
         fig.add_trace(
@@ -597,7 +732,7 @@ def _generate_line_plot(real_data, synthetic_data, x_axis, y_axis, marker, annot
                 hoverinfo='skip',
                 marker={'color': PlotConfig.DATACEBO_GREEN_TRANSPARENT},
                 showlegend=False,
-                mode='lines'
+                mode='lines',
             )
         )
         fig.add_trace(
@@ -641,17 +776,21 @@ def get_column_line_plot(real_data, synthetic_data, column_name, metadata):
     missing_data_synthetic = get_missing_percentage(synthetic_column)
     show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
 
-    annotations = None if not show_missing_values else {
-        'xref': 'paper',
-        'yref': 'paper',
-        'x': 1.0,
-        'y': 1.05,
-        'showarrow': False,
-        'text': (
+    annotations = (
+        None
+        if not show_missing_values
+        else {
+            'xref': 'paper',
+            'yref': 'paper',
+            'x': 1.0,
+            'y': 1.05,
+            'showarrow': False,
+            'text': (
                 f'*Missing Values: Real Data ({missing_data_real}%), '
                 f'Synthetic Data ({missing_data_synthetic}%)'
-        ),
-    }
+            ),
+        }
+    )
 
     # Merge the real and synthetic data and add a flag ``Data`` to indicate each one.
     r_data = real_data.copy()
@@ -663,18 +802,16 @@ def get_column_line_plot(real_data, synthetic_data, column_name, metadata):
     if 'sequence_index' in metadata:
         x_axis = metadata['sequence_index']
         if 'sequence_key' in metadata:
-            r_data = r_data.groupby(x_axis, as_index=False).agg(
-                {
-                    x_axis: 'first',
-                    column_name: ['mean', 'min', 'max']
-                }
-            ).rename(columns={'mean': column_name, 'first': x_axis})
-            s_data = s_data.groupby(x_axis, as_index=False).agg(
-                {
-                    x_axis: 'first',
-                    column_name: ['mean', 'min', 'max']
-                }
-            ).rename(columns={'mean': column_name, 'first': x_axis})
+            r_data = (
+                r_data.groupby(x_axis, as_index=False)
+                .agg({x_axis: 'first', column_name: ['mean', 'min', 'max']})
+                .rename(columns={'mean': column_name, 'first': x_axis})
+            )
+            s_data = (
+                s_data.groupby(x_axis, as_index=False)
+                .agg({x_axis: 'first', column_name: ['mean', 'min', 'max']})
+                .rename(columns={'mean': column_name, 'first': x_axis})
+            )
 
             r_data.columns = r_data.columns.droplevel(0)
             s_data.columns = s_data.columns.droplevel(0)
@@ -693,6 +830,6 @@ def get_column_line_plot(real_data, synthetic_data, column_name, metadata):
         x_axis=x_axis,
         y_axis=y_axis,
         marker=marker_name,
-        annotations=annotations
+        annotations=annotations,
     )
     return fig

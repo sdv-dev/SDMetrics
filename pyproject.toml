@@ -76,32 +76,7 @@ dev = [
     'watchdog>=1.0.1,<5',
 
     # style check
-    'flake8>=3.7.7,<8',
-    'flake8-absolute-import>=1.0,<2',
-    'flake8-builtins>=1.5.3,<3',
-    'flake8-comprehensions>=3.6.1,<4',
-    'flake8-debugger>=4.0.0,<5',
-    'flake8-docstrings>=1.5.0,<2',
-    'flake8-eradicate>=1.1.0,<2',
-    'flake8-fixme>=1.1.1,<1.2',
-    'flake8-mock>=0.3,<1',
-    'flake8-multiline-containers>=0.0.18,<0.1',
-    'flake8-mutable>=1.2.0,<1.3',
-    'flake8-expression-complexity>=0.0.9,<0.1',
-    'flake8-print>=4.0.0,<4.1',
-    'flake8-pytest-style>=2.0.0,<3',
-    'flake8-quotes>=3.3.0,<4',
-    'flake8-sfs>=0.0.3,<2',
-    'flake8-variables-names>=0.0.4,<0.1',
-    'dlint>=0.11.0,<1',
-    'isort>=5.13.2,<6',
-    'pandas-vet>=0.2.3,<2024',
-    'pep8-naming>=0.12.1,<1',
-    'pydocstyle>=6.1.1,<7',
-
-    # fix style issues
-    'autoflake>=1.1,<3',
-    'autopep8>=1.4.3,<3',
+    'ruff>=0.3.2,<1',
 
     # distribute on PyPI
     'twine>=1.10.0,<6',
@@ -159,7 +134,7 @@ convention = 'google'
 add-ignore = ['D107', 'D407', 'D417']
 
 [tool.bumpversion]
-current_version = "0.14.1"
+current_version = "0.15.1.dev1"
 parse = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(\.(?P<release>[a-z]+)(?P<candidate>\d+))?'
 serialize = [
     '{major}.{minor}.{patch}.{release}{candidate}',
@@ -199,3 +174,65 @@ replace = "version = '{new_version}'"
 [build-system]
 requires = ['setuptools', 'wheel']
 build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+preview = true
+line-length = 100
+indent-width = 4
+src = ["sdmetrics"]
+exclude = [
+    "docs",
+    ".tox",
+    ".git",
+    "__pycache__",
+    ".ipynb_checkpoints",
+    "tasks.py",
+]
+
+[tool.ruff.lint]
+select = [
+    # Pyflakes
+    "F",
+    # Pycodestyle
+    "E",
+    "W",
+    # pydocstyle
+    "D",
+    # isort
+    "I001",
+    # print statements
+    "T201",
+    # pandas-vet
+    "PD"
+]
+ignore = [
+    "E501",
+    # pydocstyle
+    "D107",  # Missing docstring in __init__
+    "D417",   # Missing argument descriptions in the docstring, this is a bug from pydocstyle: https://github.com/PyCQA/pydocstyle/issues/449
+    "PD901",
+    "PD101",
+]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+preview = true
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint.isort]
+known-first-party = ["sdmetrics"]
+lines-between-types = 0
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "E402", "F403", "F405", "E501", "I001"]
+"errors.py" = ["D105"]
+"tests/**.py" = ["D", "W505"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 100
+max-line-length = 100

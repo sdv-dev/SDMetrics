@@ -4,7 +4,6 @@ from sdmetrics.single_column.base import SingleColumnMetric
 
 
 class TestSingleColumnMetric:
-
     def test_compute_breakdown(self):
         """Test the ``compute_breakdown`` method.
 

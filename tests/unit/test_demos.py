@@ -12,7 +12,7 @@ def test_load_single_table_demo():
     # Assert
     assert metadata['columns']['duration'] == {
         'sdtype': 'numerical',
-        'computer_representation': 'Int64'
+        'computer_representation': 'Int64',
     }
     assert real_data['duration'].dtype == 'float64'
     assert synthetic_data['duration'].dtype == 'float64'

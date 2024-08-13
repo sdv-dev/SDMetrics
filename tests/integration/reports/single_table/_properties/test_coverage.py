@@ -5,7 +5,6 @@ from sdmetrics.reports.single_table._properties import Coverage
 
 
 class TestCoverage:
-
     def test_get_score(self):
         """Test the ``get_score`` method."""
         # Setup
@@ -20,22 +19,59 @@ class TestCoverage:
 
         expected_details = pd.DataFrame({
             'Column': [
-                'start_date', 'end_date', 'salary', 'duration', 'high_perc', 'high_spec',
-                'mba_spec', 'second_perc', 'gender', 'degree_perc', 'placed', 'experience_years',
-                'employability_perc', 'mba_perc', 'work_experience', 'degree_type'
+                'start_date',
+                'end_date',
+                'salary',
+                'duration',
+                'high_perc',
+                'high_spec',
+                'mba_spec',
+                'second_perc',
+                'gender',
+                'degree_perc',
+                'placed',
+                'experience_years',
+                'employability_perc',
+                'mba_perc',
+                'work_experience',
+                'degree_type',
             ],
             'Metric': [
-                'RangeCoverage', 'RangeCoverage', 'RangeCoverage', 'RangeCoverage',
-                'RangeCoverage', 'CategoryCoverage', 'CategoryCoverage', 'RangeCoverage',
-                'CategoryCoverage', 'RangeCoverage', 'CategoryCoverage', 'RangeCoverage',
-                'RangeCoverage', 'RangeCoverage', 'CategoryCoverage', 'CategoryCoverage'
+                'RangeCoverage',
+                'RangeCoverage',
+                'RangeCoverage',
+                'RangeCoverage',
+                'RangeCoverage',
+                'CategoryCoverage',
+                'CategoryCoverage',
+                'RangeCoverage',
+                'CategoryCoverage',
+                'RangeCoverage',
+                'CategoryCoverage',
+                'RangeCoverage',
+                'RangeCoverage',
+                'RangeCoverage',
+                'CategoryCoverage',
+                'CategoryCoverage',
             ],
             'Score': [
-                0.9952153110047847, 0.9554140127388535, 0.45462162162162156,
-                0.7777777777777778, 0.928171334431631, 1.0, 1.0, 0.9659863945578232,
-                1.0, 1.0, 1.0, 0.33333333333333337, 0.9943749999999998, 0.943778110944528,
-                1.0, 1.0
-            ]
+                0.9952153110047847,
+                0.9554140127388535,
+                0.45462162162162156,
+                0.7777777777777778,
+                0.928171334431631,
+                1.0,
+                1.0,
+                0.9659863945578232,
+                1.0,
+                1.0,
+                1.0,
+                0.33333333333333337,
+                0.9943749999999998,
+                0.943778110944528,
+                1.0,
+                1.0,
+            ],
         })
 
         pd.testing.assert_frame_equal(coverage_property.details, expected_details)
@@ -56,9 +92,7 @@ class TestCoverage:
         expected_message_1 = (
             "TypeError: '<=' not supported between instances of 'int' and 'Timestamp'"
         )
-        expected_message_2 = (
-            "TypeError: '<=' not supported between instances of 'float' and 'str'"
-        )
+        expected_message_2 = "TypeError: '<=' not supported between instances of 'float' and 'str'"
         details = coverage_property.details
         details_nan = details.loc[pd.isna(details['Score'])]
         column_names_nan = details_nan['Column'].tolist()

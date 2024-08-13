@@ -7,7 +7,6 @@ from sdmetrics.reports.multi_table._properties import DataValidity
 
 
 class TestDataValidity:
-
     def test_end_to_end(self):
         """Test the ``DataValidity`` multi-table property end to end."""
         # Setup

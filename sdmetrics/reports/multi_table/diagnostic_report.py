@@ -1,4 +1,5 @@
 """Multi table diagnostic report."""
+
 from sdmetrics.reports.multi_table._properties import DataValidity, RelationshipValidity, Structure
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
 
@@ -15,7 +16,7 @@ class DiagnosticReport(BaseMultiTableReport):
         self._properties = {
             'Data Validity': DataValidity(),
             'Data Structure': Structure(),
-            'Relationship Validity': RelationshipValidity()
+            'Relationship Validity': RelationshipValidity(),
         }
 
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):

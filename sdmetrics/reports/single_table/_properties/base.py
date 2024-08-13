@@ -1,8 +1,9 @@
 """Single table base property class."""
+
 import pandas as pd
 
 
-class BaseSingleTableProperty():
+class BaseSingleTableProperty:
     """Base class for single table properties.
 
     A property is a higher-level concept for a class that loops through all the base-level data

@@ -67,8 +67,9 @@ class CardinalityShapeSimilarity(MultiTableMetric):
                 synthetic_data[rel['child_table_name']][rel['child_foreign_key']],
             )
             statistic, _ = ks_2samp(cardinality_real, cardinality_synthetic)
-            score_breakdowns[
-                (rel['parent_table_name'], rel['child_table_name'])] = {'score': 1 - statistic}
+            score_breakdowns[(rel['parent_table_name'], rel['child_table_name'])] = {
+                'score': 1 - statistic
+            }
 
         if len(score_breakdowns) == 0:
             return {'score': np.nan}

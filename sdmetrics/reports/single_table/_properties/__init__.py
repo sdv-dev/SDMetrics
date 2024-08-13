@@ -17,5 +17,5 @@ __all__ = [
     'Boundary',
     'Synthesis',
     'Structure',
-    'DataValidity'
+    'DataValidity',
 ]

@@ -1,9 +1,10 @@
 """Multi table base property class."""
+
 import numpy as np
 import pandas as pd
 
 
-class BaseMultiTableProperty():
+class BaseMultiTableProperty:
     """Base class for multi table properties.
 
     A property is a higher-level concept for a class that loops through all the base-level data
@@ -43,11 +44,9 @@ class BaseMultiTableProperty():
         elif self._num_iteration_case == 'inter_table_column_pair':
             iterations = 0
             for relationship in metadata.get('relationships', []):
-                parent_columns = \
-                    metadata['tables'][relationship['parent_table_name']]['columns']
-                child_columns = \
-                    metadata['tables'][relationship['child_table_name']]['columns']
-                iterations += (len(parent_columns) * len(child_columns))
+                parent_columns = metadata['tables'][relationship['parent_table_name']]['columns']
+                child_columns = metadata['tables'][relationship['child_table_name']]['columns']
+                iterations += len(parent_columns) * len(child_columns)
             return iterations
 
     @staticmethod
@@ -55,7 +54,8 @@ class BaseMultiTableProperty():
         parent_data = data[relation['parent_table_name']]
         child_data = data[relation['child_table_name']]
         return (
-            parent_data[relation['parent_primary_key']], child_data[relation['child_foreign_key']]
+            parent_data[relation['parent_primary_key']],
+            child_data[relation['child_foreign_key']],
         )
 
     def _compute_average(self):
@@ -89,8 +89,7 @@ class BaseMultiTableProperty():
         for table_name, metadata_table in metadata['tables'].items():
             self._properties[table_name] = self._single_table_property()
             self._properties[table_name].get_score(
-                real_data[table_name], synthetic_data[table_name], metadata_table,
-                progress_bar
+                real_data[table_name], synthetic_data[table_name], metadata_table, progress_bar
             )
 
         details_frames = []
@@ -166,9 +165,8 @@ class BaseMultiTableProperty():
             return self.details.copy()
 
         if self._num_iteration_case in ['relationship', 'inter_table_column_pair']:
-            table_rows = (
-                (self.details['Parent Table'] == table_name) |
-                (self.details['Child Table'] == table_name)
+            table_rows = (self.details['Parent Table'] == table_name) | (
+                self.details['Child Table'] == table_name
             )
         else:
             table_rows = self.details['Table'] == table_name

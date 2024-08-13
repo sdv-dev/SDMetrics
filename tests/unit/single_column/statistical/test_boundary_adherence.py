@@ -8,7 +8,6 @@ from sdmetrics.single_column.statistical import BoundaryAdherence
 
 
 class TestBoundaryAdherence:
-
     def test_compute(self):
         """Test the ``compute`` method.
 
@@ -61,26 +60,34 @@ class TestBoundaryAdherence:
         out of bounds if the real data does not also containt nan values.
         """
         # Setup
-        real_data = pd.Series([
-            datetime(2020, 10, 1),
-            datetime(2021, 1, 2),
-            datetime(2021, 9, 12),
-            datetime(2022, 10, 1),
-
-        ], dtype='datetime64[ns]')
-        real_data_nans = pd.Series([
-            datetime(2020, 10, 1),
-            datetime(2021, 1, 2),
-            datetime(2021, 9, 12),
-            datetime(2022, 10, 1),
-            pd.NaT
-        ], dtype='datetime64[ns]')
-        synthetic_data = pd.Series([
-            datetime(2020, 11, 1),
-            datetime(2021, 1, 2),
-            datetime(2021, 2, 9),
-            pd.NaT,
-        ], dtype='datetime64[ns]')
+        real_data = pd.Series(
+            [
+                datetime(2020, 10, 1),
+                datetime(2021, 1, 2),
+                datetime(2021, 9, 12),
+                datetime(2022, 10, 1),
+            ],
+            dtype='datetime64[ns]',
+        )
+        real_data_nans = pd.Series(
+            [
+                datetime(2020, 10, 1),
+                datetime(2021, 1, 2),
+                datetime(2021, 9, 12),
+                datetime(2022, 10, 1),
+                pd.NaT,
+            ],
+            dtype='datetime64[ns]',
+        )
+        synthetic_data = pd.Series(
+            [
+                datetime(2020, 11, 1),
+                datetime(2021, 1, 2),
+                datetime(2021, 2, 9),
+                pd.NaT,
+            ],
+            dtype='datetime64[ns]',
+        )
 
         metric = BoundaryAdherence()
 

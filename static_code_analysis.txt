@@ -1,24 +1,24 @@
-Run started:2024-04-11 21:52:58.272499
+Run started:2024-07-15 14:59:18.204597
 
 Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
    More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
-   Location: ./sdmetrics/multi_table/multi_single_table.py:185:8
-184	        """
-185	        assert cls.min_value == 0.0
-186	        return super().normalize(raw_score)
+   Location: ./sdmetrics/multi_table/multi_single_table.py:187:8
+186	        """
+187	        assert cls.min_value == 0.0
+188	        return super().normalize(raw_score)
 
 --------------------------------------------------
 >> Issue: [B403:blacklist] Consider possible security implications associated with pickle module.
    Severity: Low   Confidence: High
    CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
    More Info: https://bandit.readthedocs.io/en/1.7.7/blacklists/blacklist_imports.html#b403-import-pickle
-   Location: ./sdmetrics/reports/base_report.py:3:0
-2	import importlib.metadata
-3	import pickle
-4	import sys
+   Location: ./sdmetrics/reports/base_report.py:4:0
+3	import importlib.metadata
+4	import pickle
+5	import sys
 
 --------------------------------------------------
 >> Issue: [B112:try_except_continue] Try, Except, Continue detected.
@@ -36,10 +36,10 @@ Test results:
    Severity: Medium   Confidence: High
    CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
    More Info: https://bandit.readthedocs.io/en/1.7.7/blacklists/blacklist_calls.html#b301-pickle
-   Location: ./sdmetrics/reports/base_report.py:310:21
-309	        with open(filepath, 'rb') as f:
-310	            report = pickle.load(f)
-311	            if current_version != report._package_version:
+   Location: ./sdmetrics/reports/base_report.py:306:21
+305	        with open(filepath, 'rb') as f:
+306	            report = pickle.load(f)
+307	            if current_version != report._package_version:
 
 --------------------------------------------------
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -66,10 +66,10 @@ Test results:
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
    More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
-   Location: ./sdmetrics/single_table/multi_single_column.py:162:8
-161	        """
-162	        assert cls.min_value == 0.0
-163	        return super().normalize(raw_score)
+   Location: ./sdmetrics/single_table/multi_single_column.py:163:8
+162	        """
+163	        assert cls.min_value == 0.0
+164	        return super().normalize(raw_score)
 
 --------------------------------------------------
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -88,9 +88,10 @@ Test results:
    More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
    Location: ./sdmetrics/single_table/privacy/util.py:72:4
 71	    dist = 0
-72	    assert len(target) == len(test), ('Tuples must have the same length in the'
-73	                                      'calculation of hamming distance!')
-74	
+72	    assert len(target) == len(test), (
+73	        'Tuples must have the same length in the' 'calculation of hamming distance!'
+74	    )
+75	
 
 --------------------------------------------------
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -107,16 +108,16 @@ Test results:
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
    More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b110_try_except_pass.html
-   Location: ./sdmetrics/visualization.py:36:8
-35	
-36	        except Exception:
-37	            pass
-38	
+   Location: ./sdmetrics/visualization.py:37:8
+36	
+37	        except Exception:
+38	            pass
+39	
 
 --------------------------------------------------
 
 Code scanned:
-	Total lines of code: 8962
+	Total lines of code: 9234
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 

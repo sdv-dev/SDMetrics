@@ -1,4 +1,5 @@
 """Single table base property class."""
+
 import pandas as pd
 
 from sdmetrics.reports.base_report import BaseReport
@@ -61,7 +62,8 @@ class BaseMultiTableReport(BaseReport):
             parent_dtype = real_data[rel['parent_table_name']][rel['parent_primary_key']].dtype
             child_dtype = real_data[rel['child_table_name']][rel['child_foreign_key']].dtype
             if (parent_dtype == 'object' and child_dtype != 'object') or (
-                    parent_dtype != 'object' and child_dtype == 'object'):
+                parent_dtype != 'object' and child_dtype == 'object'
+            ):
                 parent = rel['parent_table_name']
                 parent_key = rel['parent_primary_key']
                 child = rel['child_table_name']
@@ -99,8 +101,10 @@ class BaseMultiTableReport(BaseReport):
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
+        results = super().generate(real_data, synthetic_data, metadata, verbose)
         self.table_names = list(metadata.get('tables', {}).keys())
-        return super().generate(real_data, synthetic_data, metadata, verbose)
+
+        return results
 
     def _check_table_names(self, table_name):
         if table_name not in self.table_names:
@@ -162,9 +166,7 @@ class BaseMultiTableReport(BaseReport):
             return self._properties[property_name].get_visualization(table_name)
 
         if table_name is None:
-            raise ValueError(
-                'Please provide a table name to get a visualization for the property.'
-            )
+            raise ValueError('Please provide a table name to get a visualization for the property.')
 
         self._validate_property_generated(property_name)
         self._check_table_names(table_name)
