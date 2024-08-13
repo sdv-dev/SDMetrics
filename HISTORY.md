@@ -1,5 +1,18 @@
 # History
 
+## v0.15.1 - 2024-08-13
+
+### Bugs Fixed
+
+* X-axis for the bar plot should be labeled `Value` instead of `Category` - Issue [#620](https://github.com/sdv-dev/SDMetrics/issues/620) by @R-Palazzo
+* LinAlgError when plotting data that is constant - Issue [#616](https://github.com/sdv-dev/SDMetrics/issues/616) by @R-Palazzo
+* Wrong chart title when generating a box plot for just the real data using `get_column_pair_plot()`  - Issue [#615](https://github.com/sdv-dev/SDMetrics/issues/615) by @R-Palazzo
+
+### New Features
+
+* Better error message when passing an SDV Metadata object - Issue [#610](https://github.com/sdv-dev/SDMetrics/issues/610) by @R-Palazzo
+* Check that every property score are index-free - Issue [#583](https://github.com/sdv-dev/SDMetrics/issues/583) by @R-Palazzo
+
 ## v0.15.0 - 2024-07-15
 
 This release adds support for NumPy 2.0! Additionally, the visualization utilities no longer require both real and synthetic data to be provided, and they can now be used to visualize only real or only synthetic data.
