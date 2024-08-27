@@ -1,6 +1,5 @@
 """Contingency Similarity Metric."""
 
-
 from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
 
