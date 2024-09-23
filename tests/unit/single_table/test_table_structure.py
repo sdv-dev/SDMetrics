@@ -50,6 +50,28 @@ class TestTableStructure:
         expected_result = {'score': 1.0}
         assert result == expected_result
 
+    def test_compute_breakdown_with_different_dtypes(self, real_data):
+        """Test the ``compute_breakdown`` method with different data types.
+
+        - Real data has 5 columns.
+        - Synthetic data is identical except 'col_1' has a different data type.
+        - Total unique (column_name, dtype) combinations: 6.
+        - Matching combinations: 4.
+        - Expected score: 4 / 6 = 2 / 3.
+        """
+        # Setup
+        synthetic_data = real_data.copy()
+        synthetic_data['col_1'] = synthetic_data['col_1'].astype('float')
+
+        metric = TableStructure()
+
+        # Run
+        result = metric.compute_breakdown(real_data, synthetic_data)
+
+        # Assert
+        expected_result = {'score': 2 / 3}
+        assert result == expected_result
+
     def test_compute_breakdown_with_missing_columns(self, real_data):
         """Test the ``compute_breakdown`` method with missing columns."""
         # Setup

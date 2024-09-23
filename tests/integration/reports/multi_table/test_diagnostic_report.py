@@ -47,6 +47,7 @@ class TestDiagnosticReport:
         """Test the ``DiagnosticReport`` report when some metrics crash.
 
         This test makes fail the 'Boundary' property to check that the report still works.
+        The TableStructure should no longer be 1.0 since there is some dtype mismatch.
         """
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
         real_data['users']['age'].iloc[0] = 'error_1'
@@ -62,7 +63,7 @@ class TestDiagnosticReport:
         # Assert
         expected_properties = pd.DataFrame({
             'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-            'Score': [1.0, 1.0, 1.0],
+            'Score': [1.0, 0.6761904761904761, 1.0],
         })
         expected_details = pd.DataFrame({
             'Table': [
@@ -119,7 +120,7 @@ class TestDiagnosticReport:
                 None,
             ],
         })
-        assert results == 1.0
+        assert results == 0.892063492063492
         pd.testing.assert_frame_equal(
             report.get_properties(), expected_properties, check_exact=False, atol=2e-2
         )

@@ -36,11 +36,12 @@ class TableStructure(SingleTableMetric):
             synthetic_data (pandas.DataFrame):
                 The synthetic data.
         """
-        synthetic_columns = set(synthetic_data.columns)
-        real_columns = set(real_data.columns)
-        intersection_columns = real_columns & synthetic_columns
-        union_columns = real_columns | synthetic_columns
-        score = len(intersection_columns) / len(union_columns)
+        real_columns_dtypes = set(zip(real_data.columns, map(str, real_data.dtypes)))
+        synthetic_columns_dtypes = set(zip(synthetic_data.columns, map(str, synthetic_data.dtypes)))
+
+        intersection = real_columns_dtypes & synthetic_columns_dtypes
+        union = real_columns_dtypes | synthetic_columns_dtypes
+        score = len(intersection) / len(union)
 
         return {'score': score}
 
