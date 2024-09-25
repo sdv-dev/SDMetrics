@@ -232,9 +232,9 @@ def test_quality_report_end_to_end():
     # Assert
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.7978174603174604, 0.45654629583521095, 0.95, 0.4416666666666667],
+        'Score': [0.7978174603174604, 0.45654629583521095, 0.95, 0.4416666666666666],
     })
-    assert score == 0.6615076057048345
+    assert score == 0.6615076057048344
     pd.testing.assert_frame_equal(properties, expected_properties)
     expected_info_keys = {
         'report_type',
@@ -272,9 +272,9 @@ def test_quality_report_with_object_datetimes():
     # Assert
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.7978174603174604, 0.45654629583521095, 0.95, 0.4416666666666667],
+        'Score': [0.7978174603174604, 0.45654629583521095, 0.95, 0.4416666666666666],
     })
-    assert score == 0.6615076057048345
+    assert score == 0.6615076057048344
     pd.testing.assert_frame_equal(properties, expected_properties)
 
 
@@ -342,7 +342,7 @@ def test_quality_report_with_errors():
             None,
         ],
     })
-    assert score == 0.7249603174603175
+    assert score == 0.7249603174603174
     pd.testing.assert_frame_equal(properties, expected_properties)
     pd.testing.assert_frame_equal(details_column_shapes, expected_details)
 

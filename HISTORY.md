@@ -1,5 +1,17 @@
 # History
 
+## v0.16.0 - 2024-09-25
+
+This release improves the performance of the `contingency_similarity` metric. It also factors dtypes into the score of the `TableStructure` metric.
+
+### Internal
+
+* Try to improve performance of contingency_similarity - Issue [#622](https://github.com/sdv-dev/SDMetrics/issues/622) by @amontanez24
+
+### New Features
+
+* Add dtype comparison in `TableStructure` metric (used in Diagnostic report) - Issue [#631](https://github.com/sdv-dev/SDMetrics/issues/631) by @R-Palazzo
+
 ## v0.15.1 - 2024-08-13
 
 ### Bugs Fixed

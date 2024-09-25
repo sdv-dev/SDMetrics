@@ -1,7 +1,7 @@
-copulas==0.11.0
-numpy==2.0.1
-pandas==2.2.2
-plotly==5.23.0
-scikit-learn==1.5.1
+copulas==0.11.1
+numpy==2.0.2
+pandas==2.2.3
+plotly==5.24.1
+scikit-learn==1.5.2
 scipy==1.13.1
 tqdm==4.66.5
