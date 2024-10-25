@@ -99,8 +99,7 @@ class BaseMetric:
 
         if score is None or score < 0 or score > 1:
             raise AssertionError(
-                f'This should be unreachable. The score {score} should be'
-                f'a value between 0 and 1.'
+                f'This should be unreachable. The score {score} should bea value between 0 and 1.'
             )
 
         if cls.goal == Goal.MINIMIZE:

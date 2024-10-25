@@ -366,5 +366,5 @@ class PrivacyAttackerModel:
                 The sensitive data.
         """
         raise NotImplementedError(
-            'Posterior probability based scoring not supported' 'for this attacker!'
+            'Posterior probability based scoring not supportedfor this attacker!'
         )
