@@ -197,8 +197,7 @@ class TestCardinalityShapeSimilarity:
         assert result == expected_metric_breakdown
 
     @patch(
-        'sdmetrics.multi_table.statistical.cardinality_shape_similarity.MultiTableMetric.'
-        'normalize'
+        'sdmetrics.multi_table.statistical.cardinality_shape_similarity.MultiTableMetric.normalize'
     )
     def test_normalize(self, normalize_mock):
         """Test the ``normalize`` method.

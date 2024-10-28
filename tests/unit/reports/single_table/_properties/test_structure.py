@@ -9,7 +9,7 @@ from sdmetrics.reports.single_table._properties.structure import Structure
 
 
 class TestStructure:
-    @patch('sdmetrics.reports.single_table._properties.structure.' 'TableStructure.compute')
+    @patch('sdmetrics.reports.single_table._properties.structure.TableStructure.compute')
     def test__generate_details(self, table_format_mock):
         """Test the ``_generate_details`` method."""
         # Setup
@@ -49,7 +49,7 @@ class TestStructure:
         )
         pd.testing.assert_frame_equal(result, expected_details)
 
-    @patch('sdmetrics.reports.single_table._properties.structure.' 'TableStructure.compute')
+    @patch('sdmetrics.reports.single_table._properties.structure.TableStructure.compute')
     def test__generate_details_with_id_column(self, table_format_mock):
         """Test the ``_generate_details`` method."""
         # Setup
@@ -96,7 +96,7 @@ class TestStructure:
 
         # Run and Assert
         expected_message = (
-            'The single table Structure property does not have a' ' supported visualization.'
+            'The single table Structure property does not have a supported visualization.'
         )
         with pytest.raises(VisualizationUnavailableError, match=expected_message):
             structure_property.get_visualization()

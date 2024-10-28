@@ -7,9 +7,7 @@ from sdmetrics.reports.single_table._properties.synthesis import Synthesis
 
 
 class TestSynthesis:
-    @patch(
-        'sdmetrics.reports.single_table._properties.synthesis.' 'NewRowSynthesis.compute_breakdown'
-    )
+    @patch('sdmetrics.reports.single_table._properties.synthesis.NewRowSynthesis.compute_breakdown')
     def test__generate_details(self, newrowsynthesis_mock):
         """Test the ``_generate_details`` method.
 
@@ -64,9 +62,7 @@ class TestSynthesis:
 
         pd.testing.assert_frame_equal(details, expected__details)
 
-    @patch(
-        'sdmetrics.reports.single_table._properties.synthesis.' 'NewRowSynthesis.compute_breakdown'
-    )
+    @patch('sdmetrics.reports.single_table._properties.synthesis.NewRowSynthesis.compute_breakdown')
     def test__generate_details_error(self, newrowsynthesis_mock):
         """Test the ``_generate_details`` method when the metric raises an error."""
         # Setup
