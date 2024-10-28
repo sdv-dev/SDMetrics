@@ -36,8 +36,7 @@ class TestCategoryAdherence:
         assert result == {'score': 0.9}
 
     @patch(
-        'sdmetrics.single_column.statistical.category_adherence.'
-        'CategoryAdherence.compute_breakdown'
+        'sdmetrics.single_column.statistical.category_adherence.CategoryAdherence.compute_breakdown'
     )
     def test_compute(self, compute_breakdown_mock):
         """Test the ``compute`` method."""

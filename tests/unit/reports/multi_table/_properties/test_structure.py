@@ -52,7 +52,7 @@ def test_get_visualization(mock_px):
         'x': 'Table',
         'y': 'Score',
         'title': (
-            'Data Diagnostic: Structure (Average ' f'Score={mock__compute_average.return_value})'
+            f'Data Diagnostic: Structure (Average Score={mock__compute_average.return_value})'
         ),
         'category_orders': {'group': mock_df['Table'].tolist()},
         'color': 'Metric',

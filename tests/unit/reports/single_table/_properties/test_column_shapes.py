@@ -147,8 +147,7 @@ class TestColumnShapes:
             'x': 'Column',
             'y': 'Score',
             'title': (
-                'Data Quality: Column Shapes (Average '
-                f'Score={mock__compute_average.return_value})'
+                f'Data Quality: Column Shapes (Average Score={mock__compute_average.return_value})'
             ),
             'category_orders': {'group': mock_df['Column'].tolist()},
             'color': 'Metric',

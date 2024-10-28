@@ -76,7 +76,7 @@ dev = [
     'watchdog>=1.0.1,<5',
 
     # style check
-    'ruff>=0.3.2,<1',
+    'ruff>=0.3.2,<0.7.2',
 
     # distribute on PyPI
     'twine>=1.10.0,<6',
@@ -186,7 +186,7 @@ exclude = [
     ".git",
     "__pycache__",
     ".ipynb_checkpoints",
-    ".ipynb",
+    "*.ipynb",
     "tasks.py",
 ]
 
@@ -204,10 +204,11 @@ select = [
     # print statements
     "T201",
     # pandas-vet
-    "PD"
+    "PD",
+    # numpy 2.0
+    "NPY201"
 ]
 ignore = [
-    "E501",
     # pydocstyle
     "D107",  # Missing docstring in __init__
     "D417",   # Missing argument descriptions in the docstring, this is a bug from pydocstyle: https://github.com/PyCQA/pydocstyle/issues/449
@@ -229,7 +230,7 @@ lines-between-types = 0
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "E402", "F403", "F405", "E501", "I001"]
 "errors.py" = ["D105"]
-"tests/**.py" = ["D", "W505"]
+"tests/**.py" = ["D"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
