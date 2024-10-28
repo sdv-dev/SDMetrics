@@ -554,8 +554,9 @@ def get_column_plot(real_data, synthetic_data, column_name, plot_type=None):
             plot_type = 'bar'
     elif plot_type == 'distplot' and column_is_constant:
         raise ValueError(
-            f"Plot type 'distplot' cannot be created because column '{column_name}' has a constant value inside"
-            " the real or synthetic data. To render a visualization, please update the plot_type to 'bar'."
+            f"Plot type 'distplot' cannot be created because column '{column_name}'"
+            ' has a constant value inside the real or synthetic data. To render a'
+            " visualization, please update the plot_type to 'bar'."
         )
 
     fig = _generate_column_plot(real_column, synthetic_column, plot_type)

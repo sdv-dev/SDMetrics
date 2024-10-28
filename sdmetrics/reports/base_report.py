@@ -145,7 +145,8 @@ class BaseReport:
         if not isinstance(metadata, dict):
             raise TypeError(
                 f"Expected a dictionary but received a '{type(metadata).__name__}' instead."
-                " For SDV metadata objects, please use the 'to_dict' function to convert it to a dictionary."
+                " For SDV metadata objects, please use the 'to_dict' function to convert it"
+                ' to a dictionary.'
             )
 
         self._validate(real_data, synthetic_data, metadata)
