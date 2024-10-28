@@ -20,7 +20,7 @@ class SequenceLengthSimilarity:
             Maximum value or values that this metric can take.
     """
 
-    name = 'BayesianNetwork Likelihood'
+    name = 'Sequence Length Similarity'
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
@@ -48,9 +48,6 @@ class SequenceLengthSimilarity:
 
         Returns:
             float:
-                Mean of the log probabilities returned by the Bayesian Network.
+                The score.
         """
-        real_lengths = real_data.value_counts().to_numpy()
-        synthetic_lengths = synthetic_data.value_counts().to_numpy()
-
-        return KSComplement.compute(real_lengths, synthetic_lengths)
+        return KSComplement.compute(real_data.value_counts(), synthetic_data.value_counts())
