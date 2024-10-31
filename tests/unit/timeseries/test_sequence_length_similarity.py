@@ -4,6 +4,18 @@ from sdmetrics.timeseries.sequence_length_similarity import SequenceLengthSimila
 
 
 class TestSequenceLengthSimilarity:
+    def test_compute(self):
+        """Test it runs."""
+        # Setup
+        real_data = pd.Series(['id1', 'id2', 'id2', 'id3'])
+        synthetic_data = pd.Series(['id4', 'id5', 'id6'])
+
+        # Run
+        score = SequenceLengthSimilarity.compute(real_data, synthetic_data)
+
+        # Assert
+        assert score == 0.6666666666666667
+
     def test_compute_one(self):
         """Test it returns 1 when real and synthetic data have the same distribution."""
         # Setup
