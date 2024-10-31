@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from sdmetrics.timeseries.inter_row import InterRowMSAS
 
@@ -71,3 +72,69 @@ class TestInterRowMSAS:
 
         # Assert
         assert score == 1
+
+    def test_compute_invalid_real_data(self):
+        """Test that it raises ValueError when real_data is invalid."""
+        # Setup
+        real_data = [[1, 2, 3], [4, 5, 6]]  # Not a tuple of pandas Series
+        synthetic_keys = pd.Series(['id1', 'id1', 'id2', 'id2'])
+        synthetic_values = pd.Series([1, 2, 3, 4])
+
+        # Run and Assert
+        with pytest.raises(ValueError, match='The data must be a tuple of two pandas series.'):
+            InterRowMSAS.compute(
+                real_data=real_data,
+                synthetic_data=(synthetic_keys, synthetic_values),
+                n_rows_diff=1,
+                apply_log=False,
+            )
+
+    def test_compute_invalid_synthetic_data(self):
+        """Test that it raises ValueError when synthetic_data is invalid."""
+        # Setup
+        real_keys = pd.Series(['id1', 'id1', 'id2', 'id2'])
+        real_values = pd.Series([1, 2, 3, 4])
+        synthetic_data = [[1, 2, 3], [4, 5, 6]]  # Not a tuple of pandas Series
+
+        # Run and Assert
+        with pytest.raises(ValueError, match='The data must be a tuple of two pandas series.'):
+            InterRowMSAS.compute(
+                real_data=(real_keys, real_values),
+                synthetic_data=synthetic_data,
+                n_rows_diff=1,
+                apply_log=False,
+            )
+
+    def test_compute_invalid_n_rows_diff(self):
+        """Test that it raises ValueError when n_rows_diff is invalid."""
+        # Setup
+        real_keys = pd.Series(['id1', 'id1', 'id2', 'id2'])
+        real_values = pd.Series([1, 2, 3, 4])
+        synthetic_keys = pd.Series(['id3', 'id3', 'id4', 'id4'])
+        synthetic_values = pd.Series([1, 2, 3, 4])
+
+        # Run and Assert
+        with pytest.raises(ValueError, match="'n_rows_diff' must be an integer greater than zero."):
+            InterRowMSAS.compute(
+                real_data=(real_keys, real_values),
+                synthetic_data=(synthetic_keys, synthetic_values),
+                n_rows_diff=0,
+                apply_log=False,
+            )
+
+    def test_compute_invalid_apply_log(self):
+        """Test that it raises ValueError when apply_log is invalid."""
+        # Setup
+        real_keys = pd.Series(['id1', 'id1', 'id2', 'id2'])
+        real_values = pd.Series([1, 2, 3, 4])
+        synthetic_keys = pd.Series(['id1', 'id1', 'id2', 'id2'])
+        synthetic_values = pd.Series([1, 2, 3, 4])
+
+        # Run and Assert
+        with pytest.raises(ValueError, match="'apply_log' must be a boolean."):
+            InterRowMSAS.compute(
+                real_data=(real_keys, real_values),
+                synthetic_data=(synthetic_keys, synthetic_values),
+                n_rows_diff=1,
+                apply_log='True',  # Should be a boolean, not a string
+            )

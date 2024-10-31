@@ -56,6 +56,20 @@ class InterRowMSAS:
             float:
                 The similarity score between the real and synthetic data distributions.
         """
+        for data in [real_data, synthetic_data]:
+            if (
+                not isinstance(data, tuple)
+                or len(data) != 2
+                or (not (isinstance(data[0], pd.Series) and isinstance(data[1], pd.Series)))
+            ):
+                raise ValueError('The data must be a tuple of two pandas series.')
+
+        if not isinstance(n_rows_diff, int) or n_rows_diff < 1:
+            raise ValueError("'n_rows_diff' must be an integer greater than zero.")
+
+        if not isinstance(apply_log, bool):
+            raise ValueError("'apply_log' must be a boolean.")
+
         real_keys, real_values = real_data
         synthetic_keys, synthetic_values = synthetic_data
 
