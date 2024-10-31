@@ -27,7 +27,6 @@ class TestStatisticMSAS:
     def test_compute_different_sequences(self):
         """Test it for distinct distributions."""
         # Setup
-        # Setup
         real_keys = pd.Series(['id1', 'id1', 'id1', 'id2', 'id2', 'id2'])
         real_values = pd.Series([1, 2, 3, 4, 5, 6])
         synthetic_keys = pd.Series(['id3', 'id3', 'id3', 'id4', 'id4', 'id4'])
@@ -95,4 +94,32 @@ class TestStatisticMSAS:
                 real_data=(real_keys, real_values),
                 synthetic_data=(synthetic_keys, synthetic_values),
                 statistic='invalid',
+            )
+
+    def test_compute_invalid_real_data(self):
+        """Test that it raises ValueError when real_data is invalid."""
+        # Setup
+        real_data = [[1, 2, 3], [4, 5, 6]]  # Not a tuple of pandas Series
+        synthetic_keys = pd.Series(['id1', 'id1', 'id2', 'id2'])
+        synthetic_values = pd.Series([1, 2, 3, 4])
+
+        # Run and Assert
+        with pytest.raises(ValueError, match='The data must be a tuple of two pandas series.'):
+            StatisticMSAS.compute(
+                real_data=real_data,
+                synthetic_data=(synthetic_keys, synthetic_values),
+            )
+
+    def test_compute_invalid_synthetic_data(self):
+        """Test that it raises ValueError when synthetic_data is invalid."""
+        # Setup
+        real_keys = pd.Series(['id1', 'id1', 'id2', 'id2'])
+        real_values = pd.Series([1, 2, 3, 4])
+        synthetic_data = [[1, 2, 3], [4, 5, 6]]  # Not a tuple of pandas Series
+
+        # Run and Assert
+        with pytest.raises(ValueError, match='The data must be a tuple of two pandas series.'):
+            StatisticMSAS.compute(
+                real_data=(real_keys, real_values),
+                synthetic_data=synthetic_data,
             )
