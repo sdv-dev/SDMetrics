@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from sdmetrics.timeseries.inter_row import InterRowMSAS
+from sdmetrics.timeseries.inter_row_msas import InterRowMSAS
 
 
 class TestInterRowMSAS:
