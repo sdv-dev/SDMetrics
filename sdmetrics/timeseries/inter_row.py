@@ -77,16 +77,17 @@ class InterRowMSAS:
             real_values = np.log(real_values)
             synthetic_values = np.log(synthetic_values)
 
-        def calculate_differences(keys, values):
-            differences = []
-            for key in keys.unique():
-                group_values = values[keys == key].to_numpy()
-                if len(group_values) > n_rows_diff:
-                    diff = group_values[n_rows_diff:] - group_values[:-n_rows_diff]
-                    differences.append(np.mean(diff))
+        def calculate_differences(keys, values, n_rows_diff):
+            differences = values.groupby(keys).apply(
+                lambda group: np.mean(
+                    group.to_numpy()[n_rows_diff:] - group.to_numpy()[:-n_rows_diff]
+                )
+                if len(group) > n_rows_diff
+                else np.nan
+            )
             return pd.Series(differences)
 
-        real_diff = calculate_differences(real_keys, real_values)
-        synthetic_diff = calculate_differences(synthetic_keys, synthetic_values)
+        real_diff = calculate_differences(real_keys, real_values, n_rows_diff)
+        synthetic_diff = calculate_differences(synthetic_keys, synthetic_values, n_rows_diff)
 
         return KSComplement.compute(real_diff, synthetic_diff)

@@ -5,6 +5,22 @@ from sdmetrics.timeseries.inter_row import InterRowMSAS
 
 
 class TestInterRowMSAS:
+    def test_compute(self):
+        """Test it runs."""
+        # Setup
+        real_keys = pd.Series(['id1', 'id1', 'id1', 'id2', 'id2', 'id2'])
+        real_values = pd.Series([1, 2, 3, 4, 5, 6])
+        synthetic_keys = pd.Series(['id3', 'id3', 'id3', 'id4', 'id4', 'id4'])
+        synthetic_values = pd.Series([1, 10, 3, 7, 5, 1])
+
+        # Run
+        score = InterRowMSAS.compute(
+            real_data=(real_keys, real_values), synthetic_data=(synthetic_keys, synthetic_values)
+        )
+
+        # Assert
+        assert score == 0.5
+
     def test_compute_identical_sequences(self):
         """Test it returns 1 when real and synthetic data are identical."""
         # Setup
