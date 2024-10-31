@@ -74,16 +74,21 @@ class StatisticMSAS:
                 f' Choose from [{", ".join(statistic_functions.keys())}].'
             )
 
+        for data in [real_data, synthetic_data]:
+            if (
+                not isinstance(data, tuple)
+                or len(data) != 2
+                or (not (isinstance(data[0], pd.Series) and isinstance(data[1], pd.Series)))
+            ):
+                raise ValueError('The data must be a tuple of two pandas series.')
+
         real_keys, real_values = real_data
         synthetic_keys, synthetic_values = synthetic_data
         stat_func = statistic_functions[statistic]
 
         def calculate_statistics(keys, values):
-            statistics = []
-            for key in keys.unique():
-                group_values = values[keys == key].to_numpy()
-                statistics.append(stat_func(group_values))
-            return pd.Series(statistics)
+            df = pd.DataFrame({'keys': keys, 'values': values})
+            return df.groupby('keys')['values'].agg(stat_func)
 
         real_stats = calculate_statistics(real_keys, real_values)
         synthetic_stats = calculate_statistics(synthetic_keys, synthetic_values)
