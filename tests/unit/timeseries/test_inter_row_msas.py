@@ -154,3 +154,23 @@ class TestInterRowMSAS:
                 n_rows_diff=1,
                 apply_log='True',  # Should be a boolean, not a string
             )
+
+    def test_compute_warning(self):
+        """Test a warning is raised when n_rows_diff is greater than sequence values size."""
+        # Setup
+        real_keys = pd.Series(['id1', 'id1', 'id1', 'id2', 'id2', 'id2'])
+        real_values = pd.Series([1, 2, 3, 4, 5, 6])
+        synthetic_keys = pd.Series(['id3', 'id3', 'id3', 'id4', 'id4', 'id4'])
+        synthetic_values = pd.Series([1, 10, 3, 7, 5, 1])
+
+        # Run and Assert
+        warn_msg = "n_rows_diff '10' is greater than the size of 2 sequence keys in real_data."
+        with pytest.warns(UserWarning, match=warn_msg):
+            score = InterRowMSAS.compute(
+                real_data=(real_keys, real_values),
+                synthetic_data=(synthetic_keys, synthetic_values),
+                n_rows_diff=10,
+            )
+
+        # Assert
+        assert pd.isna(score)

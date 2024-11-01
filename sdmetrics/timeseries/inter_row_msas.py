@@ -1,5 +1,7 @@
 """InterRowMSAS module."""
 
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -77,7 +79,15 @@ class InterRowMSAS:
             real_values = np.log(real_values)
             synthetic_values = np.log(synthetic_values)
 
-        def calculate_differences(keys, values, n_rows_diff):
+        def calculate_differences(keys, values, n_rows_diff, data_name):
+            group_sizes = values.groupby(keys).size()
+            num_invalid_groups = group_sizes[group_sizes <= n_rows_diff].count()
+            if num_invalid_groups > 0:
+                warnings.warn(
+                    f"n_rows_diff '{n_rows_diff}' is greater than the "
+                    f'size of {num_invalid_groups} sequence keys in {data_name}.'
+                )
+
             differences = values.groupby(keys).apply(
                 lambda group: np.mean(
                     group.to_numpy()[n_rows_diff:] - group.to_numpy()[:-n_rows_diff]
@@ -85,9 +95,12 @@ class InterRowMSAS:
                 if len(group) > n_rows_diff
                 else np.nan
             )
+
             return pd.Series(differences)
 
-        real_diff = calculate_differences(real_keys, real_values, n_rows_diff)
-        synthetic_diff = calculate_differences(synthetic_keys, synthetic_values, n_rows_diff)
+        real_diff = calculate_differences(real_keys, real_values, n_rows_diff, 'real_data')
+        synthetic_diff = calculate_differences(
+            synthetic_keys, synthetic_values, n_rows_diff, 'synthetic_data'
+        )
 
         return KSComplement.compute(real_diff, synthetic_diff)
