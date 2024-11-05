@@ -5,6 +5,7 @@ from sdmetrics.timeseries.base import TimeSeriesMetric
 from sdmetrics.timeseries.detection import LSTMDetection, TimeSeriesDetectionMetric
 from sdmetrics.timeseries.efficacy import TimeSeriesEfficacyMetric
 from sdmetrics.timeseries.efficacy.classification import LSTMClassifierEfficacy
+from sdmetrics.timeseries.inter_row_msas import InterRowMSAS
 from sdmetrics.timeseries.sequence_length_similarity import SequenceLengthSimilarity
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     'LSTMDetection',
     'TimeSeriesEfficacyMetric',
     'LSTMClassifierEfficacy',
+    'InterRowMSAS',
     'SequenceLengthSimilarity',
 ]
