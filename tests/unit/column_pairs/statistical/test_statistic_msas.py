@@ -3,7 +3,7 @@ import re
 import pandas as pd
 import pytest
 
-from sdmetrics.timeseries import StatisticMSAS
+from sdmetrics.column_pairs import StatisticMSAS
 
 
 class TestStatisticMSAS:
