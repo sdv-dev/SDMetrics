@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import pandas as pd
+import pytest
 
 from sdmetrics.column_pairs.statistical import ContingencySimilarity
 
@@ -53,3 +54,15 @@ class TestContingencySimilarity:
         # Assert
         normalize_mock.assert_called_once_with(raw_score)
         assert result == normalize_mock.return_value
+
+    @pytest.mark.filterwarnings('error:.*The values in the array are unorderable.*:RuntimeWarning')
+    def test_no_runtime_warning_raised(self):
+        """Test that no RuntimeWarning warning is raised when the metric is computed."""
+        # Setup
+        real_data = pd.DataFrame(data={'A': ['value'] * 4, 'B': ['1', '2', '3', pd.NA]})
+        synthetic_data = pd.DataFrame(data={'A': ['value'] * 3, 'B': ['1', '2', pd.NA]})
+
+        # Run and Assert
+        ContingencySimilarity.compute(
+            real_data=real_data[['A', 'B']], synthetic_data=synthetic_data[['A', 'B']]
+        )
