@@ -1,5 +1,21 @@
 # History
 
+## v0.17.0 - 2024-11-14
+
+This release adds a number of Multi-Sequence Aggregate Similarity (MSAS) metrics!
+
+### Bugs Fixed
+
+* Relocate timeseries metrics modules - Issue [#661](https://github.com/sdv-dev/SDMetrics/issues/661) by @fealho
+* Fix `SequenceLengthSimilarity` docstrings - Issue [#660](https://github.com/sdv-dev/SDMetrics/issues/660) by @fealho
+* When running Quality Report, ContingencySimilarity produces a RuntimeWarning (`The values in the array are unorderable.`) - Issue [#656](https://github.com/sdv-dev/SDMetrics/issues/656) by @R-Palazzo
+
+### New Features
+
+* Add metric for inter-row MSAS - Issue [#640](https://github.com/sdv-dev/SDMetrics/issues/640) by @fealho
+* Add metric for general MSAS statistics - Issue [#639](https://github.com/sdv-dev/SDMetrics/issues/639) by @fealho
+* Add metric for sequence length similarity - Issue [#638](https://github.com/sdv-dev/SDMetrics/issues/638) by @fealho
+
 ## v0.16.0 - 2024-09-25
 
 This release improves the performance of the `contingency_similarity` metric. It also factors dtypes into the score of the `TableStructure` metric.
