@@ -342,7 +342,7 @@ def test_quality_report_with_errors():
             None,
         ],
     })
-    assert score == 0.7249603174603174
+    assert score == 0.7249603174603175
     pd.testing.assert_frame_equal(properties, expected_properties)
     pd.testing.assert_frame_equal(details_column_shapes, expected_details)
 
