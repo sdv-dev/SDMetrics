@@ -1,6 +1,6 @@
 import pandas as pd
 
-from sdmetrics.timeseries.sequence_length_similarity import SequenceLengthSimilarity
+from sdmetrics.single_column import SequenceLengthSimilarity
 
 
 class TestSequenceLengthSimilarity:
