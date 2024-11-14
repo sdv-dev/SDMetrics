@@ -41,9 +41,9 @@ class SequenceLengthSimilarity:
             - Return this score
 
         Args:
-            real_data (Union[numpy.ndarray, pandas.DataFrame]):
+            real_data (pd.Series):
                 The values from the real dataset.
-            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
+            synthetic_data (pd.Series):
                 The values from the synthetic dataset.
 
         Returns:
