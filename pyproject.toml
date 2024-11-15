@@ -134,7 +134,7 @@ convention = 'google'
 add-ignore = ['D107', 'D407', 'D417']
 
 [tool.bumpversion]
-current_version = "0.16.0"
+current_version = "0.17.0.dev1"
 parse = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(\.(?P<release>[a-z]+)(?P<candidate>\d+))?'
 serialize = [
     '{major}.{minor}.{patch}.{release}{candidate}',
@@ -186,7 +186,7 @@ exclude = [
     ".git",
     "__pycache__",
     ".ipynb_checkpoints",
-    ".ipynb",
+    "*.ipynb",
     "tasks.py",
 ]
 
@@ -204,10 +204,11 @@ select = [
     # print statements
     "T201",
     # pandas-vet
-    "PD"
+    "PD",
+    # numpy 2.0
+    "NPY201"
 ]
 ignore = [
-    "E501",
     # pydocstyle
     "D107",  # Missing docstring in __init__
     "D417",   # Missing argument descriptions in the docstring, this is a bug from pydocstyle: https://github.com/PyCQA/pydocstyle/issues/449
@@ -229,7 +230,7 @@ lines-between-types = 0
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "E402", "F403", "F405", "E501", "I001"]
 "errors.py" = ["D105"]
-"tests/**.py" = ["D", "W505"]
+"tests/**.py" = ["D"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

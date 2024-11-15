@@ -10,6 +10,8 @@ from sdmetrics.column_pairs.statistical.kl_divergence import (
     DiscreteKLDivergence,
 )
 from sdmetrics.column_pairs.statistical.referential_integrity import ReferentialIntegrity
+from sdmetrics.column_pairs.statistical.inter_row_msas import InterRowMSAS
+from sdmetrics.column_pairs.statistical.statistic_msas import StatisticMSAS
 
 __all__ = [
     'CardinalityBoundaryAdherence',
@@ -18,4 +20,6 @@ __all__ = [
     'CorrelationSimilarity',
     'DiscreteKLDivergence',
     'ReferentialIntegrity',
+    'InterRowMSAS',
+    'StatisticMSAS',
 ]

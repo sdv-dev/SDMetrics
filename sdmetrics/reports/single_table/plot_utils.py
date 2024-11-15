@@ -313,7 +313,7 @@ def get_column_pairs_plot(score_breakdowns, average_score=None):
             xaxis='x',
             yaxis='y',
             hovertemplate=(
-                '<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: ' '%{z}<extra></extra>'
+                '<b>Column Pair</b><br>(%{x},%{y})<br><br>Similarity: %{z}<extra></extra>'
             ),
         ),
         1,

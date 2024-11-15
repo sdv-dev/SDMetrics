@@ -12,6 +12,7 @@ from sdmetrics.single_column.statistical.missing_value_similarity import Missing
 from sdmetrics.single_column.statistical.range_coverage import RangeCoverage
 from sdmetrics.single_column.statistical.statistic_similarity import StatisticSimilarity
 from sdmetrics.single_column.statistical.tv_complement import TVComplement
+from sdmetrics.single_column.statistical.sequence_length_similarity import SequenceLengthSimilarity
 
 __all__ = [
     'base',
@@ -26,4 +27,5 @@ __all__ = [
     'RangeCoverage',
     'StatisticSimilarity',
     'TVComplement',
+    'SequenceLengthSimilarity',
 ]
