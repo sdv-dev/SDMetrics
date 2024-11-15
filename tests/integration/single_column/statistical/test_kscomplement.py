@@ -46,3 +46,10 @@ def test_bad(array_like):
 
     assert 0.0 <= output < 0.5
     assert 0.0 <= normalized < 0.5
+
+
+def test_one_float_value():
+    real = pd.Series([0.3 - 0.2])
+    synth = pd.Series([0.2 - 0.1])
+    output = KSComplement.compute(real, synth)
+    assert output == 1

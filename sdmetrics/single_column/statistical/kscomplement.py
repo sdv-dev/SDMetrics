@@ -1,5 +1,7 @@
 """Kolmogorov-Smirnov test based Metric."""
 
+import sys
+
 import numpy as np
 import pandas as pd
 from scipy.stats import ks_2samp
@@ -56,6 +58,13 @@ class KSComplement(SingleColumnMetric):
         if is_datetime(real_data):
             real_data = pd.to_numeric(real_data)
             synthetic_data = pd.to_numeric(synthetic_data)
+
+        try:
+            max_decimals = sys.float_info.dig - 1
+            real_data = real_data.round(max_decimals)
+            synthetic_data = synthetic_data.round(max_decimals)
+        except TypeError:
+            pass
 
         try:
             statistic, _ = ks_2samp(real_data, synthetic_data)
