@@ -109,3 +109,5 @@ ENV/
 # OS Files
 .DS_Store
 
+# Codecov
+*_cov.xml
