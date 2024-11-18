@@ -35,5 +35,6 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         flags: unit
-        file: './unit_cov.xml'
+        file: ${{ github.workspace }}/unit_cov.xml
+        fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
