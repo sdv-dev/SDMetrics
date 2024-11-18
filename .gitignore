@@ -46,6 +46,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+*_cov.xml
 
 # Translations
 *.mo
@@ -108,6 +109,3 @@ ENV/
 
 # OS Files
 .DS_Store
-
-# Codecov
-*_cov.xml
