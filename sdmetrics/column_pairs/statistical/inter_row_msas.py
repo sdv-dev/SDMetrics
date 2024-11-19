@@ -76,8 +76,17 @@ class InterRowMSAS:
         synthetic_keys, synthetic_values = synthetic_data
 
         if apply_log:
-            real_values = np.log(real_values)
-            synthetic_values = np.log(synthetic_values)
+            num_invalid = sum(x <= 0 for x in pd.concat((real_values, synthetic_values)))
+            if num_invalid:
+                warnings.warn(
+                    f'There are {num_invalid} non-positive values in your data, which cannot be '
+                    "used with log. Consider changing 'apply_log' to False for a better result."
+                )
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', message='divide by zero encountered in log')
+                warnings.filterwarnings('ignore', message='invalid value encountered in log')
+                real_values = np.log(real_values)
+                synthetic_values = np.log(synthetic_values)
 
         def calculate_differences(keys, values, n_rows_diff, data_name):
             group_sizes = values.groupby(keys).size()
@@ -88,13 +97,16 @@ class InterRowMSAS:
                     f'size of {num_invalid_groups} sequence keys in {data_name}.'
                 )
 
-            differences = values.groupby(keys).apply(
-                lambda group: np.mean(
-                    group.to_numpy()[n_rows_diff:] - group.to_numpy()[:-n_rows_diff]
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', message='invalid value encountered in subtract')
+                warnings.filterwarnings('ignore', message='invalid value encountered in reduce')
+                differences = values.groupby(keys).apply(
+                    lambda group: np.mean(
+                        group.to_numpy()[n_rows_diff:] - group.to_numpy()[:-n_rows_diff]
+                    )
+                    if len(group) > n_rows_diff
+                    else np.nan
                 )
-                if len(group) > n_rows_diff
-                else np.nan
-            )
 
             return pd.Series(differences)
 
