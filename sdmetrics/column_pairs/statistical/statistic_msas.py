@@ -1,6 +1,5 @@
 """StatisticMSAS module."""
 
-import numpy as np
 import pandas as pd
 
 from sdmetrics.goal import Goal
@@ -61,18 +60,9 @@ class StatisticMSAS:
             float:
                 The similarity score between the real and synthetic data distributions.
         """
-        statistic_functions = {
-            'mean': np.mean,
-            'median': np.median,
-            'std': np.std,
-            'min': np.min,
-            'max': np.max,
-        }
-        if statistic not in statistic_functions:
-            raise ValueError(
-                f'Invalid statistic: {statistic}.'
-                f' Choose from [{", ".join(statistic_functions.keys())}].'
-            )
+        valid_statistics = ['mean', 'median', 'std', 'min', 'max']
+        if statistic not in valid_statistics:
+            raise ValueError(f'Invalid statistic: {statistic}. Choose from {valid_statistics}.')
 
         for data in [real_data, synthetic_data]:
             if (
@@ -84,11 +74,10 @@ class StatisticMSAS:
 
         real_keys, real_values = real_data
         synthetic_keys, synthetic_values = synthetic_data
-        stat_func = statistic_functions[statistic]
 
         def calculate_statistics(keys, values):
             df = pd.DataFrame({'keys': keys, 'values': values})
-            return df.groupby('keys')['values'].agg(stat_func)
+            return df.groupby('keys')['values'].agg(statistic)
 
         real_stats = calculate_statistics(real_keys, real_values)
         synthetic_stats = calculate_statistics(synthetic_keys, synthetic_values)
