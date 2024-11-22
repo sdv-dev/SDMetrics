@@ -71,6 +71,31 @@ class TestInterRowMSAS:
         # Assert
         assert score == 1
 
+    def test_compute_with_log_warning(self):
+        """Test it warns when negative values are present and apply_log is True."""
+        # Setup
+        real_keys = pd.Series(['id1', 'id1', 'id1', 'id2', 'id2', 'id2'])
+        real_values = pd.Series([1, 1.4, 4, -1, 16, -10])
+        synthetic_keys = pd.Series(['id1', 'id1', 'id1', 'id2', 'id2', 'id2'])
+        synthetic_values = pd.Series([1, 2, -4, 8, 16, 30])
+
+        # Run
+        with pytest.warns(UserWarning) as warning_info:
+            score = InterRowMSAS.compute(
+                real_data=(real_keys, real_values),
+                synthetic_data=(synthetic_keys, synthetic_values),
+                apply_log=True,
+            )
+
+        # Assert
+        expected_message = (
+            'There are 3 non-positive values in your data, which cannot be used with log. '
+            "Consider changing 'apply_log' to False for a better result."
+        )
+        assert len(warning_info) == 1
+        assert str(warning_info[0].message) == expected_message
+        assert score == 0
+
     def test_compute_different_n_rows_diff(self):
         """Test it with different n_rows_diff."""
         # Setup
