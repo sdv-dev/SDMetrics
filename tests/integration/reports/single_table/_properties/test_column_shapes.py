@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from packaging import version
 
@@ -89,8 +88,8 @@ class TestColumnShapes:
         score = column_shape_property.get_score(real_data, synthetic_data, metadata)
 
         # Assert
-        numpy_version = version.parse(np.__version__)
-        if numpy_version >= version.parse('1.19.0'):
+        pandas_version = version.parse(pd.__version__)
+        if pandas_version >= version.parse('2.2.0'):
             expected_message_1 = (
                 "TypeError: '<' not supported between instances of 'Timestamp' and 'int'"
             )

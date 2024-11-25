@@ -301,8 +301,8 @@ def test_quality_report_with_errors():
         'Score': [0.8165079365079364, 0.55, 0.95, 0.5833333333333334],
     })
 
-    numpy_version = version.parse(np.__version__)
-    if numpy_version >= version.parse('1.19.0'):
+    pandas_version = version.parse(pd.__version__)
+    if pandas_version >= version.parse('2.2.0'):
         err1 = "TypeError: '<' not supported between instances of 'int' and 'str'"
         err2 = "TypeError: '<' not supported between instances of 'Timestamp' and 'str'"
         err3 = "TypeError: '<' not supported between instances of 'float' and 'str'"

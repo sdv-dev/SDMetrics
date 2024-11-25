@@ -109,9 +109,8 @@ class TestColumnShapes:
         result = column_shape_property._generate_details(real_data, synthetic_data, metadata)
 
         # Assert
-        numpy_version = version.parse(np.__version__)
-        print(numpy_version)
-        if numpy_version >= version.parse('1.19.0'):
+        pandas_version = version.parse(pd.__version__)
+        if pandas_version >= version.parse('2.2.0'):
             expected_message = "TypeError: '<' not supported between instances of 'str' and 'int'"
         else:
             expected_message = "TypeError: can't multiply sequence by non-int of type 'float'"
