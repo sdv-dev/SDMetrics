@@ -49,6 +49,7 @@ def test_bad(array_like):
 
 
 def test_one_float_value():
+    """Test KSComplement.compute when both data have the same float values GH#652."""
     # Setup
     real = pd.Series([0.3 - 0.2])
     synth = pd.Series([0.2 - 0.1])
