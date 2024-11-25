@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 import pytest
 
@@ -95,6 +97,26 @@ class TestInterRowMSAS:
         assert len(warning_info) == 1
         assert str(warning_info[0].message) == expected_message
         assert score == 0
+
+    def test_compute_with_log_datetime(self):
+        """Test it crashes for logs of datetime values."""
+        # Setup
+        real_keys = pd.Series(['id1', 'id1'])
+        real_values = pd.Series([datetime(2020, 10, 1), datetime(2020, 10, 1)])
+        synthetic_keys = pd.Series(['id2', 'id2'])
+        synthetic_values = pd.Series([datetime(2020, 10, 1), datetime(2020, 10, 1)])
+
+        # Run and Assert
+        err_msg = (
+            'Cannot compute log for datetime columns. '
+            "Please set 'apply_log' to False to use this metric."
+        )
+        with pytest.raises(TypeError, match=err_msg):
+            InterRowMSAS.compute(
+                real_data=(real_keys, real_values),
+                synthetic_data=(synthetic_keys, synthetic_values),
+                apply_log=True,
+            )
 
     def test_compute_different_n_rows_diff(self):
         """Test it with different n_rows_diff."""

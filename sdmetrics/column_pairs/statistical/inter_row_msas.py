@@ -47,6 +47,14 @@ class InterRowMSAS:
     @staticmethod
     def _apply_log(real_values, synthetic_values, apply_log):
         if apply_log:
+            if pd.api.types.is_datetime64_any_dtype(
+                real_values
+            ) or pd.api.types.is_datetime64_any_dtype(synthetic_values):
+                raise TypeError(
+                    'Cannot compute log for datetime columns. '
+                    "Please set 'apply_log' to False to use this metric."
+                )
+
             num_invalid = sum(x <= 0 for x in pd.concat((real_values, synthetic_values)))
             if num_invalid:
                 warnings.warn(
