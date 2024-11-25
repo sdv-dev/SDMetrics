@@ -49,7 +49,12 @@ def test_bad(array_like):
 
 
 def test_one_float_value():
+    # Setup
     real = pd.Series([0.3 - 0.2])
     synth = pd.Series([0.2 - 0.1])
+
+    # Run
     output = KSComplement.compute(real, synth)
+
+    # Assert
     assert output == 1

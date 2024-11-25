@@ -10,6 +10,8 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
 from sdmetrics.utils import is_datetime
 
+MAX_DECIMALS = sys.float_info.dig - 1
+
 
 class KSComplement(SingleColumnMetric):
     """Kolmogorov-Smirnov statistic based metric.
@@ -59,9 +61,8 @@ class KSComplement(SingleColumnMetric):
             real_data = pd.to_numeric(real_data)
             synthetic_data = pd.to_numeric(synthetic_data)
 
-        max_decimals = sys.float_info.dig - 1
-        real_data = real_data.round(max_decimals)
-        synthetic_data = synthetic_data.round(max_decimals)
+        real_data = real_data.round(MAX_DECIMALS)
+        synthetic_data = synthetic_data.round(MAX_DECIMALS)
 
         try:
             statistic, _ = ks_2samp(real_data, synthetic_data)
