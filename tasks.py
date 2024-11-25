@@ -26,12 +26,12 @@ def check_dependencies(c):
 
 @task
 def unit(c):
-    c.run('python -m pytest ./tests/unit --cov=sdmetrics --cov-report=xml')
+    c.run('python -m pytest ./tests/unit --cov=sdmetrics --cov-report=xml:./unit_cov.xml')
 
 
 @task
 def integration(c):
-    c.run('python -m pytest ./tests/integration --reruns 5 --disable-warnings')
+    c.run('python -m pytest ./tests/integration --reruns 5 --disable-warnings --cov=sdmetrics --cov-report=xml:./integration_cov.xml')
 
 
 def _get_minimum_versions(dependencies, python_version):
