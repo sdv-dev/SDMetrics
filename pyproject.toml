@@ -188,7 +188,6 @@ exclude = [
     ".ipynb_checkpoints",
     "*.ipynb",
     "tasks.py",
-    "scripts/**.py",
 ]
 
 [tool.ruff.lint]

@@ -2,8 +2,8 @@
 import argparse
 import os
 from collections import defaultdict
-import requests
 
+import requests
 
 LABEL_TO_HEADER = {
     'feature request': 'New Features',
