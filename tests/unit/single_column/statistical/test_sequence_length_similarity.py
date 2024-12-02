@@ -4,6 +4,20 @@ from sdmetrics.single_column import SequenceLengthSimilarity
 
 
 class TestSequenceLengthSimilarity:
+    def test_compute_breakdown(self):
+        """Test `compute_breakdown` works."""
+        # Setup
+        real_data = pd.Series([1, 1, 2, 2, 2])
+        synthetic_data = pd.Series([3, 4, 5, 6, 6])
+
+        metric = SequenceLengthSimilarity()
+
+        # Run
+        result = metric.compute_breakdown(real_data, synthetic_data)
+
+        # Assert
+        assert result == {'score': 0.25}
+
     def test_compute(self):
         """Test it runs."""
         # Setup

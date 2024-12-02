@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -7,6 +8,24 @@ from sdmetrics.column_pairs import InterRowMSAS
 
 
 class TestInterRowMSAS:
+    def test_compute_breakdown(self):
+        """Test `compute_breakdown` works."""
+        # Setup
+        real_keys = pd.Series(['id1', 'id1', 'id1', 'id2', 'id2', 'id2'])
+        real_values = pd.Series([1, 2, 3, 4, 5, 6])
+        synthetic_keys = pd.Series(['id3', 'id3', 'id3', 'id4', 'id4', 'id4'])
+        synthetic_values = pd.Series([1, 10, 3, 7, 5, 1])
+
+        metric = InterRowMSAS()
+
+        # Run
+        result = metric.compute_breakdown(
+            real_data=(real_keys, real_values), synthetic_data=(synthetic_keys, synthetic_values)
+        )
+
+        # Assert
+        assert result == {'score': 0.5}
+
     def test_compute(self):
         """Test it runs."""
         # Setup
@@ -14,6 +33,22 @@ class TestInterRowMSAS:
         real_values = pd.Series([1, 2, 3, 4, 5, 6])
         synthetic_keys = pd.Series(['id3', 'id3', 'id3', 'id4', 'id4', 'id4'])
         synthetic_values = pd.Series([1, 10, 3, 7, 5, 1])
+
+        # Run
+        score = InterRowMSAS.compute(
+            real_data=(real_keys, real_values), synthetic_data=(synthetic_keys, synthetic_values)
+        )
+
+        # Assert
+        assert score == 0.5
+
+    def test_compute_nans(self):
+        """Test it runs with nans."""
+        # Setup
+        real_keys = pd.Series(['id1', 'id1', 'id1', 'id2', 'id2', 'id2'])
+        real_values = pd.Series([1, 2, np.nan, 4, 5, 8])
+        synthetic_keys = pd.Series(['id3', 'id3', 'id3', 'id4', 'id4', 'id4'])
+        synthetic_values = pd.Series([1, 10, 4, 7, np.nan, np.nan])
 
         # Run
         score = InterRowMSAS.compute(
