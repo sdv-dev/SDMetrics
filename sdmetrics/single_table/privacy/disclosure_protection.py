@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 
+from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.cap import (
     CategoricalCAP,
@@ -19,6 +20,10 @@ CAP_METHODS = {
 
 class DisclosureProtection(SingleTableMetric):
     """The DisclosureProtection metric."""
+
+    goal = Goal.MAXIMIZE
+    min_value = 0
+    max_value = 1
 
     @classmethod
     def _validate_inputs(

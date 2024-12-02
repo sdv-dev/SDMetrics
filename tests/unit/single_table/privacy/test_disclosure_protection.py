@@ -1,4 +1,4 @@
-"""Test for the disclosure protection metrics."""
+"""Test for the disclosure metrics."""
 
 import re
 from unittest.mock import Mock, patch
@@ -128,11 +128,9 @@ class TestDisclosureProtection:
 
         # Assert
         expected_real = pd.Series(pd.Categorical(['0', '0', '2', '3', '4']))
-        pd.testing.assert_series_equal(binned_real, expected_real, check_categorical=False)
+        np.testing.assert_array_equal(binned_real, expected_real)
         expected_synthetic = pd.Series(pd.Categorical(['0', '0', '1', '2', '3', '4', '4']))
-        pd.testing.assert_series_equal(
-            binned_synthetic, expected_synthetic, check_categorical=False
-        )
+        np.testing.assert_array_equal(binned_synthetic, expected_synthetic)
 
     def test__compute_baseline(self):
         """Test computing the baseline score for random data."""
