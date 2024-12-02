@@ -11,9 +11,9 @@ from sdmetrics.single_table.privacy.cap import (
 )
 
 CAP_METHODS = {
-    'cap': CategoricalCAP,
-    'zero_cap': CategoricalZeroCAP,
-    'generalized_cap': CategoricalGeneralizedCAP,
+    'CAP': CategoricalCAP,
+    'ZERO_CAP': CategoricalZeroCAP,
+    'GENERALIZED_CAP': CategoricalGeneralizedCAP,
 }
 
 
@@ -31,15 +31,37 @@ class DisclosureProtection(SingleTableMetric):
         continuous_column_names,
         num_discrete_bins,
     ):
-        assert isinstance(real_data, pd.DataFrame)
-        assert isinstance(synthetic_data, pd.DataFrame)
-        assert set(synthetic_data.columns).issuperset(set(real_data.columns))
-        assert all(col in real_data.columns for col in known_column_names)
-        assert all(col in real_data.columns for col in sensitive_column_names)
-        assert computation_method in CAP_METHODS.keys()
-        if continuous_column_names is not None:
-            assert all(col in real_data.columns for col in continuous_column_names)
-        assert isinstance(num_discrete_bins, int)
+        if not isinstance(real_data, pd.DataFrame) or not isinstance(real_data, pd.DataFrame):
+            raise ValueError('Real and synthetic data must be pandas DataFrames.')
+
+        if len(known_column_names) == 0:
+            raise ValueError('Must provide at least 1 known column name.')
+        elif not set(real_data.columns).issuperset(set(known_column_names)):
+            missing = "', '".join(set(known_column_names) - set(real_data.columns))
+            raise ValueError(f"Known column(s) '{missing}' are missing from the real data.")
+
+        if len(sensitive_column_names) == 0:
+            raise ValueError('Must provide at least 1 sensitive column name.')
+        elif not set(real_data.columns).issuperset(set(sensitive_column_names)):
+            missing = "', '".join(set(sensitive_column_names) - set(real_data.columns))
+            raise ValueError(f"Sensitive column(s) '{missing}' are missing from the real data.")
+
+        if computation_method.upper() not in CAP_METHODS.keys():
+            raise ValueError(
+                f"Unknown computation method '{computation_method}'. "
+                f"Please use one of 'cap', 'zero_cap', or 'generalized_cap'."
+            )
+
+        if continuous_column_names is not None and not set(real_data.columns).issuperset(
+            set(continuous_column_names)
+        ):
+            missing = "', '".join(set(continuous_column_names) - set(real_data.columns))
+            raise ValueError(f"Continous column(s) '{missing}' are missing from the real data.")
+
+        if not isinstance(num_discrete_bins, int) or num_discrete_bins <= 0:
+            raise ValueError('`num_discrete_bins` must be an integer greater than zero.')
+
+        super()._validate_inputs(real_data, synthetic_data)
 
     @classmethod
     def _get_null_categories(cls, real_data, synthetic_data, columns):
@@ -62,10 +84,10 @@ class DisclosureProtection(SingleTableMetric):
         bins[0], bins[-1] = -np.inf, np.inf
         synthetic_binned = pd.cut(synthetic_column, bins, labels=bin_labels)
 
-        return real_binned, synthetic_binned
+        return real_binned.to_numpy(), synthetic_binned.to_numpy()
 
     @classmethod
-    def _compute_baseline(cls, real_data, synthetic_data, sensitive_column_names):
+    def _compute_baseline(cls, real_data, sensitive_column_names):
         unique_categories_prod = np.prod([
             real_data[col].nunique(dropna=False) for col in sensitive_column_names
         ])
@@ -119,6 +141,7 @@ class DisclosureProtection(SingleTableMetric):
             continuous_column_names,
             num_discrete_bins,
         )
+        computation_method = computation_method.upper()
         real_data = real_data.copy()
         synthetic_data = synthetic_data.copy()
 
@@ -137,9 +160,7 @@ class DisclosureProtection(SingleTableMetric):
         synthetic_data = synthetic_data.fillna(null_category_map)
 
         # Compute baseline
-        baseline_protection = cls._compute_baseline(
-            real_data, synthetic_data, sensitive_column_names
-        )
+        baseline_protection = cls._compute_baseline(real_data, sensitive_column_names)
 
         # Compute CAP metric
         cap_metric = CAP_METHODS.get(computation_method)
@@ -150,7 +171,10 @@ class DisclosureProtection(SingleTableMetric):
             sensitive_fields=sensitive_column_names,
         )
 
-        score = min(cap_protection / baseline_protection, 1)
+        if baseline_protection == 0:
+            score = 0 if cap_protection == 0 else 1
+        else:
+            score = min(cap_protection / baseline_protection, 1)
 
         return {
             'score': score,
