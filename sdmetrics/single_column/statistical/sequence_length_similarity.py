@@ -3,10 +3,11 @@
 import pandas as pd
 
 from sdmetrics.goal import Goal
+from sdmetrics.single_column.base import SingleColumnMetric
 from sdmetrics.single_column.statistical.kscomplement import KSComplement
 
 
-class SequenceLengthSimilarity:
+class SequenceLengthSimilarity(SingleColumnMetric):
     """Sequence Length Similarity metric.
 
     Attributes:

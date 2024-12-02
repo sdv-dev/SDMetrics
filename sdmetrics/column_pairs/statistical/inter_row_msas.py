@@ -5,11 +5,12 @@ import warnings
 import numpy as np
 import pandas as pd
 
+from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.statistical.kscomplement import KSComplement
 
 
-class InterRowMSAS:
+class InterRowMSAS(ColumnPairsMetric):
     """Inter-Row Multi-Sequence Aggregate Similarity (MSAS) metric.
 
     Attributes:
@@ -76,7 +77,7 @@ class InterRowMSAS:
         num_invalid_groups = len(group_sizes[group_sizes <= n_rows_diff])
         if num_invalid_groups > 0:
             warnings.warn(
-                f"n_rows_diff '{n_rows_diff}' is greater than the "
+                f"n_rows_diff '{n_rows_diff}' is greater or equal to the "
                 f'size of {num_invalid_groups} sequence keys in {data_name}.'
             )
 
@@ -84,7 +85,9 @@ class InterRowMSAS:
             if len(group) <= n_rows_diff:
                 return np.nan
             group = group.to_numpy()
-            return np.mean(group[n_rows_diff:] - group[:-n_rows_diff])
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', message='Mean of empty slice')
+                return np.nanmean(group[n_rows_diff:] - group[:-n_rows_diff])
 
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', message='invalid value encountered in.*')

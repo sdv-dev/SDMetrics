@@ -2,11 +2,12 @@
 
 import pandas as pd
 
+from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.statistical.kscomplement import KSComplement
 
 
-class StatisticMSAS:
+class StatisticMSAS(ColumnPairsMetric):
     """Statistic Multi-Sequence Aggregate Similarity (MSAS) metric.
 
     Attributes:
