@@ -1,4 +1,4 @@
-"""DisclosureProtection metrics."""
+"""Disclosure protection metrics."""
 
 import numpy as np
 import pandas as pd
@@ -135,7 +135,10 @@ class DisclosureProtection(SingleTableMetric):
 
         Returns:
             dict
-                Mapping of the metric output. Must include the key 'score'.
+                Mapping of the metric output with the keys:
+                    - 'score': The overall score for the metric.
+                    - 'cap_protection': The protection score from the selected computation method.
+                    - 'baseline_protection': The baseline protection for the columns.
         """
         cls._validate_inputs(
             real_data,
