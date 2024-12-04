@@ -1,6 +1,120 @@
-Run started:2024-11-15 03:09:38.348077
+Run started:2024-12-04 02:40:08.683516
 
 Test results:
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   Location: ./build/lib/sdmetrics/multi_table/multi_single_table.py:187:8
+186	        """
+187	        assert cls.min_value == 0.0
+188	        return super().normalize(raw_score)
+
+--------------------------------------------------
+>> Issue: [B403:blacklist] Consider possible security implications associated with pickle module.
+   Severity: Low   Confidence: High
+   CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/blacklists/blacklist_imports.html#b403-import-pickle
+   Location: ./build/lib/sdmetrics/reports/base_report.py:4:0
+3	import importlib.metadata
+4	import pickle
+5	import sys
+
+--------------------------------------------------
+>> Issue: [B112:try_except_continue] Try, Except, Continue detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b112_try_except_continue.html
+   Location: ./build/lib/sdmetrics/reports/base_report.py:116:16
+115	                    real_data[column], synthetic_data[column] = converted_cols
+116	                except Exception:
+117	                    continue
+118	
+
+--------------------------------------------------
+>> Issue: [B301:blacklist] Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
+   Severity: Medium   Confidence: High
+   CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/blacklists/blacklist_calls.html#b301-pickle
+   Location: ./build/lib/sdmetrics/reports/base_report.py:310:21
+309	        with open(filepath, 'rb') as f:
+310	            report = pickle.load(f)
+311	            if current_version != report._package_version:
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   Location: ./build/lib/sdmetrics/reports/multi_table/_properties/base.py:67:8
+66	
+67	        assert is_dataframe, assert_message
+68	        if not has_score_column:
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   Location: ./build/lib/sdmetrics/single_table/multi_column_pairs.py:146:8
+145	        """
+146	        assert cls.min_value == 0.0
+147	        return super().normalize(raw_score)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   Location: ./build/lib/sdmetrics/single_table/multi_single_column.py:163:8
+162	        """
+163	        assert cls.min_value == 0.0
+164	        return super().normalize(raw_score)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   Location: ./build/lib/sdmetrics/single_table/privacy/loss.py:80:8
+79	        """
+80	        assert len(pred) == len(real)
+81	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   Location: ./build/lib/sdmetrics/single_table/privacy/util.py:72:4
+71	    dist = 0
+72	    assert len(target) == len(test), (
+73	        'Tuples must have the same length in thecalculation of hamming distance!'
+74	    )
+75	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   Location: ./build/lib/sdmetrics/timeseries/detection.py:104:8
+103	        """
+104	        assert cls.min_value == 0.0
+105	        return super().normalize(raw_score)
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b110_try_except_pass.html
+   Location: ./build/lib/sdmetrics/visualization.py:37:8
+36	
+37	        except Exception:
+38	            pass
+39	
+
+--------------------------------------------------
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
@@ -117,19 +231,19 @@ Test results:
 --------------------------------------------------
 
 Code scanned:
-	Total lines of code: 9453
+	Total lines of code: 18840
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 
 Run metrics:
 	Total issues (by severity):
 		Undefined: 0
-		Low: 10
-		Medium: 1
+		Low: 20
+		Medium: 2
 		High: 0
 	Total issues (by confidence):
 		Undefined: 0
 		Low: 0
 		Medium: 0
-		High: 11
+		High: 22
 Files skipped (0):
