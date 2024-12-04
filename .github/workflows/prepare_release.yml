@@ -45,8 +45,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-        run: >
-          python -m scripts.bandit.bandit_report_generator
+        run: bandit -r . -x ./tests,./scripts -f txt -o static_code_analysis.txt --exit-zero
 
       - name: Create pull request
         id: cpr
