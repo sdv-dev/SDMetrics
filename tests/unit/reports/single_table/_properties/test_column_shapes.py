@@ -2,6 +2,7 @@ from unittest.mock import Mock, call, patch
 
 import numpy as np
 import pandas as pd
+from packaging import version
 
 from sdmetrics.reports.single_table._properties.column_shapes import ColumnShapes
 
@@ -108,7 +109,12 @@ class TestColumnShapes:
         result = column_shape_property._generate_details(real_data, synthetic_data, metadata)
 
         # Assert
-        expected_message = "TypeError: '<' not supported between instances of 'str' and 'int'"
+        pandas_version = version.parse(pd.__version__)
+        if pandas_version >= version.parse('2.2.0'):
+            expected_message = "TypeError: '<' not supported between instances of 'str' and 'int'"
+        else:
+            expected_message = "TypeError: can't multiply sequence by non-int of type 'float'"
+
         result_nan = result.loc[pd.isna(result['Score'])]
         column_names_nan = result_nan['Column'].tolist()
         error_message = result_nan['Error'].tolist()

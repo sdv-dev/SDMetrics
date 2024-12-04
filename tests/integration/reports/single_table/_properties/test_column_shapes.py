@@ -1,4 +1,5 @@
 import pandas as pd
+from packaging import version
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties import ColumnShapes
@@ -84,15 +85,22 @@ class TestColumnShapes:
 
         # Run
         column_shape_property = ColumnShapes()
-
-        expected_message_1 = (
-            "TypeError: '<' not supported between instances of 'Timestamp' and 'int'"
-        )
-        expected_message_2 = "TypeError: '<' not supported between instances of 'str' and 'float'"
-
         score = column_shape_property.get_score(real_data, synthetic_data, metadata)
 
         # Assert
+        pandas_version = version.parse(pd.__version__)
+        if pandas_version >= version.parse('2.2.0'):
+            expected_message_1 = (
+                "TypeError: '<' not supported between instances of 'Timestamp' and 'int'"
+            )
+            expected_message_2 = (
+                "TypeError: '<' not supported between instances of 'str' and 'float'"
+            )
+        else:
+            expected_message_1 = (
+                "TypeError: unsupported operand type(s) for *: 'Timestamp' and 'float'"
+            )
+            expected_message_2 = "TypeError: can't multiply sequence by non-int of type 'float'"
 
         details = column_shape_property.details
         details_nan = details.loc[pd.isna(details['Score'])]

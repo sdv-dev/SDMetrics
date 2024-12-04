@@ -1,5 +1,7 @@
 """Kolmogorov-Smirnov test based Metric."""
 
+import sys
+
 import numpy as np
 import pandas as pd
 from scipy.stats import ks_2samp
@@ -7,6 +9,8 @@ from scipy.stats import ks_2samp
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
 from sdmetrics.utils import is_datetime
+
+MAX_DECIMALS = sys.float_info.dig - 1
 
 
 class KSComplement(SingleColumnMetric):
@@ -56,6 +60,9 @@ class KSComplement(SingleColumnMetric):
         if is_datetime(real_data):
             real_data = pd.to_numeric(real_data)
             synthetic_data = pd.to_numeric(synthetic_data)
+
+        real_data = real_data.round(MAX_DECIMALS)
+        synthetic_data = synthetic_data.round(MAX_DECIMALS)
 
         try:
             statistic, _ = ks_2samp(real_data, synthetic_data)
