@@ -1,5 +1,20 @@
 # History
 
+## v0.17.1 - 2024-12-04
+
+### Maintenance
+
+* Create Prepare Release workflow - Issue [#674](https://github.com/sdv-dev/SDMetrics/issues/674) by @amontanez24
+* Update codecov and add flag for integration tests - Issue [#644](https://github.com/sdv-dev/SDMetrics/issues/644) by @pvk-developer
+
+### Bugs Fixed
+
+* `InterRowMSAS` ignores sequences with missing values - Issue [#679](https://github.com/sdv-dev/SDMetrics/issues/679) by @fealho
+* Improve error handling for datetime values when `apply_log = True` for `InterRowMSAS` - Issue [#672](https://github.com/sdv-dev/SDMetrics/issues/672) by @fealho
+* Improve warning handling for non-positive values when `apply_log = True` for `InterRowMSAS` - Issue [#670](https://github.com/sdv-dev/SDMetrics/issues/670) by @fealho
+* `StatisticMSAS` raises undesirable `FutureWarning` - Issue [#665](https://github.com/sdv-dev/SDMetrics/issues/665) by @fealho
+* `KSComplement` can be unstable for constant float values - Issue [#652](https://github.com/sdv-dev/SDMetrics/issues/652) by @fealho
+
 ## v0.17.0 - 2024-11-14
 
 This release adds a number of Multi-Sequence Aggregate Similarity (MSAS) metrics!
