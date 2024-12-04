@@ -1,5 +1,11 @@
 # History
 
+## v0.17.1 - 2024-12-04
+
+### Maintenance
+
+* Patch release: Bump required version for `SDMetrics` - Issue [#1010](https://github.com/sdv-dev/SDV/issues/1010)
+
 ## v0.17.0 - 2024-11-14
 
 This release adds a number of Multi-Sequence Aggregate Similarity (MSAS) metrics!
