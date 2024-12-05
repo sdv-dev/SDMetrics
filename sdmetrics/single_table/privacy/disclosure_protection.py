@@ -339,15 +339,18 @@ class DisclosureProtectionEstimate(DisclosureProtection):
 
         cap_metric = CAP_METHODS.get(computation_method)
         estimated_score_sum = 0
-        for iter in estimation_iterator:
+        for i in estimation_iterator:
+            real_data_samp = real_data.sample(min(num_rows_subsample, len(real_data)))
+            synth_data_samp = synthetic_data.sample(min(num_rows_subsample, len(synthetic_data)))
+
             estimated_cap_protection = cap_metric.compute(
-                real_data.sample(min(num_rows_subsample, len(real_data))),
-                synthetic_data.sample(min(num_rows_subsample, len(synthetic_data))),
+                real_data_samp,
+                synth_data_samp,
                 key_fields=known_column_names,
                 sensitive_fields=sensitive_column_names,
             )
             estimated_score_sum += estimated_cap_protection
-            average_computed_score = estimated_score_sum / (iter + 1.0)
+            average_computed_score = estimated_score_sum / (i + 1.0)
             if baseline_protection == 0:
                 average_score = 0 if average_computed_score == 0 else 1
             else:
@@ -438,13 +441,13 @@ class DisclosureProtectionEstimate(DisclosureProtection):
         average_score, average_computed_score = cls._compute_estimated_cap_metric(
             real_data,
             synthetic_data,
-            baseline_protection,
-            known_column_names,
-            sensitive_column_names,
-            computation_method,
-            num_rows_subsample,
-            num_iterations,
-            verbose,
+            baseline_protection=baseline_protection,
+            known_column_names=known_column_names,
+            sensitive_column_names=sensitive_column_names,
+            computation_method=computation_method,
+            num_rows_subsample=num_rows_subsample,
+            num_iterations=num_iterations,
+            verbose=verbose,
         )
 
         return {
