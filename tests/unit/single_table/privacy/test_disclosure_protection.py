@@ -115,11 +115,12 @@ class TestDisclosureProtection:
         # Assert
         assert null_category_map == {'col1': '__NULL_VALUE___', 'col2': '__NULL_VALUE___'}
 
-    def test__discreteize_column(self):
+    @pytest.mark.parametrize('dtype', ['int32', 'int64', 'Int32', 'Int64'])
+    def test__discretize_column_int_dtypes(self, dtype):
         """Test discretizing a continous column"""
         # Setup
-        real_column = pd.Series([0, 2, 6, 8, 10])
-        synthetic_column = pd.Series([-10, 1, 3, 5, 7, 9, 20])
+        real_column = pd.Series([0, 2, 6, 8, 10], dtype=dtype)
+        synthetic_column = pd.Series([-10, 1, 3, 5, 7, 9, 20], dtype=dtype)
 
         # Run
         binned_real, binned_synthetic = DisclosureProtection._discretize_column(
@@ -131,6 +132,40 @@ class TestDisclosureProtection:
         np.testing.assert_array_equal(binned_real, expected_real)
         expected_synthetic = pd.Series(pd.Categorical(['0', '0', '1', '2', '3', '4', '4']))
         np.testing.assert_array_equal(binned_synthetic, expected_synthetic)
+
+    @pytest.mark.parametrize('dtype', ['float32', 'float64', 'Float32', 'Float64'])
+    def test__discretize_column_float_dtypes(self, dtype):
+        """Test discretizing a continous column"""
+        # Setup
+        real_column = pd.Series([0, 0.2, 6.99, np.nan, 10.02], dtype=dtype)
+        synthetic_column = pd.Series([-10.0, 0.1, 3.77, np.nan, 7.89, np.nan, 20.99], dtype=dtype)
+
+        # Run
+        binned_real, binned_synthetic = DisclosureProtection._discretize_column(
+            real_column, synthetic_column, 5
+        )
+
+        # Assert
+        expected_real = np.array(['0', '0', '3', np.nan, '4'], dtype='object')
+        assert list(binned_real) == list(expected_real)
+        expected_synthetic = np.array(['0', '0', '1', np.nan, '3', np.nan, '4'], dtype='object')
+        assert list(binned_synthetic) == list(expected_synthetic)
+
+    def test__compute_baseline(self):
+        """Test computing the baseline score for random data."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': ['A', 'A', 'A', 'A', 'A'],
+            'col2': ['A', 'B', 'A', 'B', 'A'],
+            'col3': range(5),
+        })
+        sensitive_column_names = ['col1', 'col2']
+
+        # Run
+        baseline_score = DisclosureProtection._compute_baseline(real_data, sensitive_column_names)
+
+        # Assert
+        assert baseline_score == 0.5
 
     def test__compute_baseline(self):
         """Test computing the baseline score for random data."""

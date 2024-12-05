@@ -85,9 +85,13 @@ class DisclosureProtection(SingleTableMetric):
     @classmethod
     def _discretize_column(cls, real_column, synthetic_column, num_bins):
         bin_labels = [str(x) for x in range(num_bins)]
-        real_binned, bins = pd.cut(real_column, num_bins, labels=bin_labels, retbins=True)
+        real_binned, bins = pd.cut(
+            pd.to_numeric(real_column.to_numpy()), num_bins, labels=bin_labels, retbins=True
+        )
         bins[0], bins[-1] = -np.inf, np.inf
-        synthetic_binned = pd.cut(synthetic_column, bins, labels=bin_labels)
+        synthetic_binned = pd.cut(
+            pd.to_numeric(synthetic_column.to_numpy()), bins, labels=bin_labels
+        )
 
         return real_binned.to_numpy(), synthetic_binned.to_numpy()
 
