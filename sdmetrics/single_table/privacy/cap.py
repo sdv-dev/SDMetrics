@@ -1,7 +1,15 @@
 """CAP modules and their attackers."""
 
+import warnings
+
 from sdmetrics.single_table.privacy.base import CategoricalPrivacyMetric, PrivacyAttackerModel
 from sdmetrics.single_table.privacy.util import closest_neighbors, count_frequency, majority
+
+DEPRECATION_MSG = (
+    'Computing CAP metrics directly is deprecated. For improved privacy metrics, '
+    "please use the 'DisclosureProtection' and 'DisclosureProtectionEstimate' "
+    'metrics instead.'
+)
 
 
 class CAPAttacker(PrivacyAttackerModel):
@@ -78,6 +86,78 @@ class CategoricalCAP(CategoricalPrivacyMetric):
     MODEL = CAPAttacker
     ACCURACY_BASE = False
 
+    @classmethod
+    def _compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        key_fields=None,
+        sensitive_fields=None,
+        model_kwargs=None,
+    ):
+        return super().compute(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            key_fields=key_fields,
+            sensitive_fields=sensitive_fields,
+            model_kwargs=model_kwargs,
+        )
+
+    @classmethod
+    def compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        key_fields=None,
+        sensitive_fields=None,
+        model_kwargs=None,
+    ):
+        """Compute this metric.
+
+        This fits an adversial attacker model on the synthetic data and
+        then evaluates it making predictions on the real data.
+
+        A ``key_fields`` column(s) name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the key column(s) for the
+        attack.
+
+        A ``sensitive_fields`` column(s) name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the sensitive_fields column(s)
+        for the attack.
+
+        Args:
+            real_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the real dataset.
+            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
+            key_fields (list(str)):
+                Name of the column(s) to use as the key attributes.
+            sensitive_fields (list(str)):
+                Name of the column(s) to use as the sensitive attributes.
+            model_kwargs (dict):
+                Key word arguments of the attacker model. cls.MODEL_KWARGS will be used
+                if none is provided.
+
+        Returns:
+            union[float, tuple[float]]:
+                Scores obtained by the attackers when evaluated on the real data.
+        """
+        warnings.warn(DEPRECATION_MSG, DeprecationWarning)
+        return cls._compute(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            key_fields=key_fields,
+            sensitive_fields=sensitive_fields,
+            model_kwargs=model_kwargs,
+        )
+
 
 class ZeroCAPAttacker(CAPAttacker):
     """The 0CAP privacy attacker, which operates in the same way as CAP does.
@@ -112,6 +192,78 @@ class CategoricalZeroCAP(CategoricalPrivacyMetric):
     name = '0CAP'
     MODEL = ZeroCAPAttacker
     ACCURACY_BASE = False
+
+    @classmethod
+    def _compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        key_fields=None,
+        sensitive_fields=None,
+        model_kwargs=None,
+    ):
+        return super().compute(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            key_fields=key_fields,
+            sensitive_fields=sensitive_fields,
+            model_kwargs=model_kwargs,
+        )
+
+    @classmethod
+    def compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        key_fields=None,
+        sensitive_fields=None,
+        model_kwargs=None,
+    ):
+        """Compute this metric.
+
+        This fits an adversial attacker model on the synthetic data and
+        then evaluates it making predictions on the real data.
+
+        A ``key_fields`` column(s) name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the key column(s) for the
+        attack.
+
+        A ``sensitive_fields`` column(s) name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the sensitive_fields column(s)
+        for the attack.
+
+        Args:
+            real_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the real dataset.
+            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
+            key_fields (list(str)):
+                Name of the column(s) to use as the key attributes.
+            sensitive_fields (list(str)):
+                Name of the column(s) to use as the sensitive attributes.
+            model_kwargs (dict):
+                Key word arguments of the attacker model. cls.MODEL_KWARGS will be used
+                if none is provided.
+
+        Returns:
+            union[float, tuple[float]]:
+                Scores obtained by the attackers when evaluated on the real data.
+        """
+        warnings.warn(DEPRECATION_MSG, DeprecationWarning)
+        return cls._compute(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            key_fields=key_fields,
+            sensitive_fields=sensitive_fields,
+            model_kwargs=model_kwargs,
+        )
 
 
 class GeneralizedCAPAttacker(CAPAttacker):
@@ -169,3 +321,75 @@ class CategoricalGeneralizedCAP(CategoricalPrivacyMetric):
     name = 'Categorical GeneralizedCAP'
     MODEL = GeneralizedCAPAttacker
     ACCURACY_BASE = False
+
+    @classmethod
+    def _compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        key_fields=None,
+        sensitive_fields=None,
+        model_kwargs=None,
+    ):
+        return super().compute(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            key_fields=key_fields,
+            sensitive_fields=sensitive_fields,
+            model_kwargs=model_kwargs,
+        )
+
+    @classmethod
+    def compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        key_fields=None,
+        sensitive_fields=None,
+        model_kwargs=None,
+    ):
+        """Compute this metric.
+
+        This fits an adversial attacker model on the synthetic data and
+        then evaluates it making predictions on the real data.
+
+        A ``key_fields`` column(s) name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the key column(s) for the
+        attack.
+
+        A ``sensitive_fields`` column(s) name must be given, either directly or as a first level
+        entry in the ``metadata`` dict, which will be used as the sensitive_fields column(s)
+        for the attack.
+
+        Args:
+            real_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the real dataset.
+            synthetic_data (Union[numpy.ndarray, pandas.DataFrame]):
+                The values from the synthetic dataset.
+            metadata (dict):
+                Table metadata dict. If not passed, it is build based on the
+                real_data fields and dtypes.
+            key_fields (list(str)):
+                Name of the column(s) to use as the key attributes.
+            sensitive_fields (list(str)):
+                Name of the column(s) to use as the sensitive attributes.
+            model_kwargs (dict):
+                Key word arguments of the attacker model. cls.MODEL_KWARGS will be used
+                if none is provided.
+
+        Returns:
+            union[float, tuple[float]]:
+                Scores obtained by the attackers when evaluated on the real data.
+        """
+        warnings.warn(DEPRECATION_MSG, DeprecationWarning)
+        return cls._compute(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            key_fields=key_fields,
+            sensitive_fields=sensitive_fields,
+            model_kwargs=model_kwargs,
+        )
