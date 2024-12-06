@@ -1,5 +1,7 @@
 """Disclosure protection metrics."""
 
+import warnings
+
 import numpy as np
 import pandas as pd
 import tqdm
@@ -11,6 +13,8 @@ from sdmetrics.single_table.privacy.cap import (
     CategoricalGeneralizedCAP,
     CategoricalZeroCAP,
 )
+
+MAX_NUM_ROWS = 50000
 
 CAP_METHODS = {
     'CAP': CategoricalCAP,
@@ -204,7 +208,14 @@ class DisclosureProtection(SingleTableMetric):
             continuous_column_names,
             num_discrete_bins,
         )
+
         computation_method = computation_method.upper()
+        if len(real_data) > MAX_NUM_ROWS or len(synthetic_data) > MAX_NUM_ROWS:
+            warnings.warn(
+                f'Data exceeds {MAX_NUM_ROWS} rows, perfomance may be slow.'
+                'Consider using the `DisclosureProtectionEstimate` for faster computation.'
+            )
+
         real_data, synthetic_data = cls._discretize_and_fillna(
             real_data,
             synthetic_data,
@@ -219,7 +230,7 @@ class DisclosureProtection(SingleTableMetric):
 
         # Compute CAP metric
         cap_metric = CAP_METHODS.get(computation_method)
-        cap_protection = cap_metric.compute(
+        cap_protection = cap_metric._compute(
             real_data,
             synthetic_data,
             key_fields=known_column_names,
@@ -343,7 +354,7 @@ class DisclosureProtectionEstimate(DisclosureProtection):
             real_data_samp = real_data.sample(min(num_rows_subsample, len(real_data)))
             synth_data_samp = synthetic_data.sample(min(num_rows_subsample, len(synthetic_data)))
 
-            estimated_cap_protection = cap_metric.compute(
+            estimated_cap_protection = cap_metric._compute(
                 real_data_samp,
                 synth_data_samp,
                 key_fields=known_column_names,

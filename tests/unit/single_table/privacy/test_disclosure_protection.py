@@ -232,7 +232,7 @@ class TestDisclosureProtection:
             'col3': range(-2, 8),
         })
         CAPMock = Mock()
-        CAPMock.compute.return_value = 0.9
+        CAPMock._compute.return_value = 0.9
         CAPMethodsMock.keys.return_value = ['CAP', 'ZERO_CAP', 'GENERALIZED_CAP']
         CAPMethodsMock.get.return_value = CAPMock
 
@@ -266,7 +266,7 @@ class TestDisclosureProtection:
             'col2': ['A'] * 10,
         })
         CAPMock = Mock()
-        CAPMock.compute.return_value = 0.5
+        CAPMock._compute.return_value = 0.5
         CAPMethodsMock.keys.return_value = ['CAP', 'ZERO_CAP', 'GENERALIZED_CAP']
         CAPMethodsMock.get.return_value = CAPMock
 
@@ -278,7 +278,7 @@ class TestDisclosureProtection:
             sensitive_column_names=['col2'],
         )
 
-        CAPMock.compute.return_value = 0
+        CAPMock._compute.return_value = 0
         score_breakdown_no_cap = DisclosureProtection.compute_breakdown(
             real_data=real_data,
             synthetic_data=synthetic_data,
@@ -293,6 +293,53 @@ class TestDisclosureProtection:
             'cap_protection': 0.5,
         }
         assert score_breakdown_no_cap == {'score': 0, 'baseline_protection': 0, 'cap_protection': 0}
+
+    @patch('sdmetrics.single_table.privacy.disclosure_protection.CAP_METHODS')
+    @patch(
+        'sdmetrics.single_table.privacy.disclosure_protection.DisclosureProtection._compute_baseline'
+    )
+    @patch(
+        'sdmetrics.single_table.privacy.disclosure_protection.DisclosureProtection._discretize_and_fillna'
+    )
+    def test_compute_breakdown_warns_too_large(
+        self, mock_discretize_and_fillna, mock_compute_baseline, CAPMethodsMock
+    ):
+        """Test the ``compute_breakdown`` warns if the data is too large."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=50001),
+            'col2': range(50001),
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=50001),
+            'col2': range(50001),
+        })
+        CAPMock = Mock()
+        CAPMock._compute.return_value = 0.5
+        CAPMethodsMock.keys.return_value = ['CAP', 'ZERO_CAP', 'GENERALIZED_CAP']
+        CAPMethodsMock.get.return_value = CAPMock
+        mock_compute_baseline.return_value = 0.5
+        mock_discretize_and_fillna.return_value = (real_data, synthetic_data)
+
+        # Run
+        expected_warning = re.escape(
+            'Data exceeds 50000 rows, perfomance may be slow.'
+            'Consider using the `DisclosureProtectionEstimate` for faster computation.'
+        )
+        with pytest.warns(UserWarning, match=expected_warning):
+            score_breakdown = DisclosureProtection.compute_breakdown(
+                real_data=real_data,
+                synthetic_data=synthetic_data,
+                known_column_names=['col1'],
+                sensitive_column_names=['col2'],
+            )
+
+        # Assert
+        assert score_breakdown == {
+            'score': 1,
+            'baseline_protection': 0.5,
+            'cap_protection': 0.5,
+        }
 
     @patch(
         'sdmetrics.single_table.privacy.disclosure_protection.DisclosureProtection.compute_breakdown'
@@ -376,7 +423,7 @@ class TestDisclosureProtectionEstimate:
             'col2': np.random.choice(['X', 'Y'], size=100),
         })
         CAPMock = Mock()
-        CAPMock.compute.side_effect = [0.4, 0.5, 0.2, 0.6, 0.2]
+        CAPMock._compute.side_effect = [0.4, 0.5, 0.2, 0.6, 0.2]
         CAPMethodsMock.keys.return_value = ['CAP', 'ZERO_CAP', 'GENERALIZED_CAP']
         CAPMethodsMock.get.return_value = CAPMock
         progress_bar = MagicMock()
@@ -421,7 +468,7 @@ class TestDisclosureProtectionEstimate:
             'col2': ['A'] * 100,
         })
         CAPMock = Mock()
-        CAPMock.compute.side_effect = [0.4, 0.5, 0.2, 0.6, 0.2]
+        CAPMock._compute.side_effect = [0.4, 0.5, 0.2, 0.6, 0.2]
         CAPMethodsMock.keys.return_value = ['CAP', 'ZERO_CAP', 'GENERALIZED_CAP']
         CAPMethodsMock.get.return_value = CAPMock
 
