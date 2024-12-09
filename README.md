@@ -11,6 +11,7 @@
 [![Coverage Status](https://codecov.io/gh/sdv-dev/SDMetrics/branch/main/graph/badge.svg)](https://codecov.io/gh/sdv-dev/SDMetrics)
 [![Slack](https://img.shields.io/badge/Community-Slack-blue?style=plastic&logo=slack)](https://bit.ly/sdv-slack-invite)
 [![Tutorial](https://img.shields.io/badge/Demo-Get%20started-orange?style=plastic&logo=googlecolab)](https://bit.ly/sdmetrics-demo)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14279167.svg)](https://doi.org/10.5281/zenodo.14279167)
 
 <div align="left">
 <br/>
