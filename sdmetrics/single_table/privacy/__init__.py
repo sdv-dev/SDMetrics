@@ -12,7 +12,10 @@ from sdmetrics.single_table.privacy.categorical_sklearn import (
     CategoricalRF,
     CategoricalSVM,
 )
-from sdmetrics.single_table.privacy.disclosure_protection import DisclosureProtection
+from sdmetrics.single_table.privacy.disclosure_protection import (
+    DisclosureProtection,
+    DisclosureProtectionEstimate,
+)
 from sdmetrics.single_table.privacy.ensemble import CategoricalEnsemble
 from sdmetrics.single_table.privacy.numerical_sklearn import NumericalLR, NumericalMLP, NumericalSVR
 from sdmetrics.single_table.privacy.radius_nearest_neighbor import NumericalRadiusNearestNeighbor
@@ -28,6 +31,7 @@ __all__ = [
     'CategoricalSVM',
     'CategoricalZeroCAP',
     'DisclosureProtection',
+    'DisclosureProtectionEstimate',
     'NumericalLR',
     'NumericalMLP',
     'NumericalPrivacyMetric',

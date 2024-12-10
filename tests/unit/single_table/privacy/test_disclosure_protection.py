@@ -1,13 +1,17 @@
 """Test for the disclosure metrics."""
 
 import re
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, call, patch
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from sdmetrics.single_table.privacy.disclosure_protection import DisclosureProtection
+from sdmetrics.single_table.privacy.disclosure_protection import (
+    DisclosureProtection,
+    DisclosureProtectionEstimate,
+)
+from tests.utils import DataFrameMatcher
 
 
 class TestDisclosureProtection:
@@ -151,21 +155,51 @@ class TestDisclosureProtection:
         expected_synthetic = np.array(['0', '0', '1', np.nan, '3', np.nan, '4'], dtype='object')
         assert list(binned_synthetic) == list(expected_synthetic)
 
-    def test__compute_baseline(self):
-        """Test computing the baseline score for random data."""
+    def test__discretize_and_fillna(self):
+        """Test helper method to discretize continous columns and fill nan values."""
         # Setup
         real_data = pd.DataFrame({
-            'col1': ['A', 'A', 'A', 'A', 'A'],
-            'col2': ['A', 'B', 'A', 'B', 'A'],
-            'col3': range(5),
+            'known': ['A', 'A', pd.NA, 'B', 'B'],
+            'continous': [0, 1, 3, 8, 10],
+            'continous_nan': [0, 7, 2, np.nan, 10],
+            'extra': [None, pd.NA, 0, 10, 100],
         })
-        sensitive_column_names = ['col1', 'col2']
+        synthetic_data = pd.DataFrame({
+            'known': ['A', 'A', 'B', 'B', None],
+            'continous': [-1, 0, 3, 5, 11],
+            'continous_nan': [0, 1, 2, np.nan, 100],
+            'extra': [None, pd.NA, 0, 10, 100],
+        })
+        known_column_names = ['known']
+        sensitive_column_names = ['continous', 'continous_nan']
+        continuous_column_names = ['continous', 'continous_nan']
+        num_discrete_bins = 5
 
         # Run
-        baseline_score = DisclosureProtection._compute_baseline(real_data, sensitive_column_names)
+        processed_real, processed_synthetic = DisclosureProtection._discretize_and_fillna(
+            real_data,
+            synthetic_data,
+            known_column_names,
+            sensitive_column_names,
+            continuous_column_names,
+            num_discrete_bins,
+        )
 
         # Assert
-        assert baseline_score == 0.5
+        expected_real = pd.DataFrame({
+            'known': ['A', 'A', '__NULL_VALUE__', 'B', 'B'],
+            'continous': ['0', '0', '1', '3', '4'],
+            'continous_nan': ['0', '3', '0', '__NULL_VALUE__', '4'],
+            'extra': real_data['extra'],
+        })
+        expected_synthetic = pd.DataFrame({
+            'known': ['A', 'A', 'B', 'B', '__NULL_VALUE__'],
+            'continous': ['0', '0', '1', '2', '4'],
+            'continous_nan': ['0', '0', '0', '__NULL_VALUE__', '4'],
+            'extra': synthetic_data['extra'],
+        })
+        pd.testing.assert_frame_equal(expected_real, processed_real)
+        pd.testing.assert_frame_equal(expected_synthetic, processed_synthetic)
 
     def test__compute_baseline(self):
         """Test computing the baseline score for random data."""
@@ -198,7 +232,7 @@ class TestDisclosureProtection:
             'col3': range(-2, 8),
         })
         CAPMock = Mock()
-        CAPMock.compute.return_value = 0.9
+        CAPMock._compute.return_value = 0.9
         CAPMethodsMock.keys.return_value = ['CAP', 'ZERO_CAP', 'GENERALIZED_CAP']
         CAPMethodsMock.get.return_value = CAPMock
 
@@ -232,7 +266,7 @@ class TestDisclosureProtection:
             'col2': ['A'] * 10,
         })
         CAPMock = Mock()
-        CAPMock.compute.return_value = 0.5
+        CAPMock._compute.return_value = 0.5
         CAPMethodsMock.keys.return_value = ['CAP', 'ZERO_CAP', 'GENERALIZED_CAP']
         CAPMethodsMock.get.return_value = CAPMock
 
@@ -244,7 +278,7 @@ class TestDisclosureProtection:
             sensitive_column_names=['col2'],
         )
 
-        CAPMock.compute.return_value = 0
+        CAPMock._compute.return_value = 0
         score_breakdown_no_cap = DisclosureProtection.compute_breakdown(
             real_data=real_data,
             synthetic_data=synthetic_data,
@@ -259,6 +293,53 @@ class TestDisclosureProtection:
             'cap_protection': 0.5,
         }
         assert score_breakdown_no_cap == {'score': 0, 'baseline_protection': 0, 'cap_protection': 0}
+
+    @patch('sdmetrics.single_table.privacy.disclosure_protection.CAP_METHODS')
+    @patch(
+        'sdmetrics.single_table.privacy.disclosure_protection.DisclosureProtection._compute_baseline'
+    )
+    @patch(
+        'sdmetrics.single_table.privacy.disclosure_protection.DisclosureProtection._discretize_and_fillna'
+    )
+    def test_compute_breakdown_warns_too_large(
+        self, mock_discretize_and_fillna, mock_compute_baseline, CAPMethodsMock
+    ):
+        """Test the ``compute_breakdown`` warns if the data is too large."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=50001),
+            'col2': range(50001),
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=50001),
+            'col2': range(50001),
+        })
+        CAPMock = Mock()
+        CAPMock._compute.return_value = 0.5
+        CAPMethodsMock.keys.return_value = ['CAP', 'ZERO_CAP', 'GENERALIZED_CAP']
+        CAPMethodsMock.get.return_value = CAPMock
+        mock_compute_baseline.return_value = 0.5
+        mock_discretize_and_fillna.return_value = (real_data, synthetic_data)
+
+        # Run
+        expected_warning = re.escape(
+            'Data exceeds 50000 rows, perfomance may be slow.'
+            'Consider using the `DisclosureProtectionEstimate` for faster computation.'
+        )
+        with pytest.warns(UserWarning, match=expected_warning):
+            score_breakdown = DisclosureProtection.compute_breakdown(
+                real_data=real_data,
+                synthetic_data=synthetic_data,
+                known_column_names=['col1'],
+                sensitive_column_names=['col2'],
+            )
+
+        # Assert
+        assert score_breakdown == {
+            'score': 1,
+            'baseline_protection': 0.5,
+            'cap_protection': 0.5,
+        }
 
     @patch(
         'sdmetrics.single_table.privacy.disclosure_protection.DisclosureProtection.compute_breakdown'
@@ -282,6 +363,199 @@ class TestDisclosureProtection:
 
         # Run
         score = DisclosureProtection.compute(
+            real_data, synthetic_data, known_column_names=['col1'], sensitive_column_names=['col2']
+        )
+
+        # Assert
+        assert score == 0.8
+
+
+class TestDisclosureProtectionEstimate:
+    def test__validate_inputs(self):
+        """Test input validation."""
+        # Setup
+        default_kwargs = {
+            'real_data': pd.DataFrame({'col1': range(5), 'col2': range(5)}),
+            'synthetic_data': pd.DataFrame({'col1': range(10), 'col2': range(10)}),
+            'known_column_names': ['col1'],
+            'sensitive_column_names': ['col2'],
+            'computation_method': 'cap',
+            'continuous_column_names': ['col2'],
+            'num_discrete_bins': 10,
+            'num_rows_subsample': 1000,
+            'num_iterations': 10,
+        }
+        bad_rows_subsample = 0
+        bad_num_iterations = 0
+
+        # Run and Assert
+        DisclosureProtectionEstimate._validate_inputs(**default_kwargs)
+
+        bad_rows_subsample_error = re.escape(
+            '`num_rows_subsample` must be an integer greater than zero.'
+        )
+        with pytest.raises(ValueError, match=bad_rows_subsample_error):
+            DisclosureProtectionEstimate._validate_inputs(**{
+                **default_kwargs,
+                'num_rows_subsample': bad_rows_subsample,
+            })
+
+        bad_num_iterations_error = re.escape(
+            '`num_iterations` must be an integer greater than zero.'
+        )
+        with pytest.raises(ValueError, match=bad_num_iterations_error):
+            DisclosureProtectionEstimate._validate_inputs(**{
+                **default_kwargs,
+                'num_iterations': bad_num_iterations,
+            })
+
+    @patch('sdmetrics.single_table.privacy.disclosure_protection.tqdm')
+    @patch('sdmetrics.single_table.privacy.disclosure_protection.CAP_METHODS')
+    def test__compute_estimated_cap_metric(self, CAPMethodsMock, mock_tqdm):
+        """Test the ``_compute_estimated_cap_metric`` method."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=5),
+            'col2': np.random.choice(['X', 'Y'], size=5),
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=100),
+            'col2': np.random.choice(['X', 'Y'], size=100),
+        })
+        CAPMock = Mock()
+        CAPMock._compute.side_effect = [0.4, 0.5, 0.2, 0.6, 0.2]
+        CAPMethodsMock.keys.return_value = ['CAP', 'ZERO_CAP', 'GENERALIZED_CAP']
+        CAPMethodsMock.get.return_value = CAPMock
+        progress_bar = MagicMock()
+        progress_bar.__iter__.return_value = range(5)
+        mock_tqdm.tqdm.return_value = progress_bar
+
+        # Run
+        avg_score, avg_computed_score = DisclosureProtectionEstimate._compute_estimated_cap_metric(
+            real_data,
+            synthetic_data,
+            baseline_protection=0.5,
+            known_column_names=['col1'],
+            sensitive_column_names=['col2'],
+            computation_method='CAP',
+            num_rows_subsample=10,
+            num_iterations=5,
+            verbose=True,
+        )
+
+        # Assert
+        assert avg_score == 0.76
+        assert avg_computed_score == 0.38
+        progress_bar.set_description.assert_has_calls([
+            call('Estimating Disclosure Protection (Score=0.000)'),
+            call('Estimating Disclosure Protection (Score=0.800)'),
+            call('Estimating Disclosure Protection (Score=0.900)'),
+            call('Estimating Disclosure Protection (Score=0.733)'),
+            call('Estimating Disclosure Protection (Score=0.850)'),
+            call('Estimating Disclosure Protection (Score=0.760)'),
+        ])
+
+    @patch('sdmetrics.single_table.privacy.disclosure_protection.CAP_METHODS')
+    def test__compute_estimated_cap_metric_zero_baseline(self, CAPMethodsMock):
+        """Test the ``_compute_estimated_cap_metric`` method with a zero baseline."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=5),
+            'col2': ['A'] * 5,
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=100),
+            'col2': ['A'] * 100,
+        })
+        CAPMock = Mock()
+        CAPMock._compute.side_effect = [0.4, 0.5, 0.2, 0.6, 0.2]
+        CAPMethodsMock.keys.return_value = ['CAP', 'ZERO_CAP', 'GENERALIZED_CAP']
+        CAPMethodsMock.get.return_value = CAPMock
+
+        # Run
+        avg_score, avg_computed_score = DisclosureProtectionEstimate._compute_estimated_cap_metric(
+            real_data,
+            synthetic_data,
+            baseline_protection=0,
+            known_column_names=['col1'],
+            sensitive_column_names=['col2'],
+            computation_method='CAP',
+            num_rows_subsample=10,
+            num_iterations=5,
+            verbose=False,
+        )
+
+        # Assert
+        assert avg_score == 1
+        assert avg_computed_score == 0.38
+
+    @patch(
+        'sdmetrics.single_table.privacy.disclosure_protection.DisclosureProtectionEstimate._compute_estimated_cap_metric'
+    )
+    def test_compute_breakdown(self, mock__compute_estimated_cap_metric):
+        """Test computing the breakdown."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=10),
+            'col2': ['X', 'Y', 'Z', 'Y', 'X', 'X', 'Y', 'Z', 'X', 'A'],
+            'col3': ['A', 'B'] * 5,
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=10),
+            'col2': np.random.choice(['X', 'Y', 'Z', 'X', 'X'], size=10),
+            'col3': ['A'] * 10,
+        })
+        mock__compute_estimated_cap_metric.return_value = (0.8, 0.6)
+
+        # Run
+        score_breakdown = DisclosureProtectionEstimate.compute_breakdown(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            known_column_names=['col1'],
+            sensitive_column_names=['col2', 'col3'],
+            num_discrete_bins=2,
+        )
+
+        # Assert
+        assert score_breakdown == {
+            'score': 0.8,
+            'baseline_protection': 0.875,
+            'cap_protection': 0.6,
+        }
+        mock__compute_estimated_cap_metric.assert_called_once_with(
+            DataFrameMatcher(real_data),
+            DataFrameMatcher(synthetic_data),
+            baseline_protection=0.875,
+            known_column_names=['col1'],
+            sensitive_column_names=['col2', 'col3'],
+            computation_method='CAP',
+            num_rows_subsample=1000,
+            num_iterations=10,
+            verbose=True,
+        )
+
+    @patch(
+        'sdmetrics.single_table.privacy.disclosure_protection.DisclosureProtectionEstimate.compute_breakdown'
+    )
+    def test_compute(self, compute_breakdown_mock):
+        """Test the ``compute`` method."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=10),
+            'col2': ['A'] * 10,
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C', 'D'], size=10),
+            'col2': ['A'] * 10,
+        })
+        compute_breakdown_mock.return_value = {
+            'score': 0.8,
+            'baseline_protection': 0.6,
+            'cap_protection': 0.64,
+        }
+
+        # Run
+        score = DisclosureProtectionEstimate.compute(
             real_data, synthetic_data, known_column_names=['col1'], sensitive_column_names=['col2']
         )
 
