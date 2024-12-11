@@ -271,15 +271,7 @@ class TestDisclosureProtection:
         CAPMethodsMock.get.return_value = CAPMock
 
         # Run
-        score_breakdown_with_cap = DisclosureProtection.compute_breakdown(
-            real_data=real_data,
-            synthetic_data=synthetic_data,
-            known_column_names=['col1'],
-            sensitive_column_names=['col2'],
-        )
-
-        CAPMock._compute.return_value = 0
-        score_breakdown_no_cap = DisclosureProtection.compute_breakdown(
+        score_breakdown = DisclosureProtection.compute_breakdown(
             real_data=real_data,
             synthetic_data=synthetic_data,
             known_column_names=['col1'],
@@ -287,12 +279,11 @@ class TestDisclosureProtection:
         )
 
         # Assert
-        assert score_breakdown_with_cap == {
-            'score': 1,
+        assert score_breakdown == {
+            'score': np.nan,
             'baseline_protection': 0,
             'cap_protection': 0.5,
         }
-        assert score_breakdown_no_cap == {'score': 0, 'baseline_protection': 0, 'cap_protection': 0}
 
     @patch('sdmetrics.single_table.privacy.disclosure_protection.CAP_METHODS')
     @patch(
@@ -323,7 +314,7 @@ class TestDisclosureProtection:
 
         # Run
         expected_warning = re.escape(
-            'Data exceeds 50000 rows, perfomance may be slow.'
+            'Data exceeds 10000 rows, perfomance may be slow. '
             'Consider using the `DisclosureProtectionEstimate` for faster computation.'
         )
         with pytest.warns(UserWarning, match=expected_warning):
@@ -486,7 +477,7 @@ class TestDisclosureProtectionEstimate:
         )
 
         # Assert
-        assert avg_score == 1
+        assert np.isnan(avg_score)
         assert avg_computed_score == 0.38
 
     @patch(

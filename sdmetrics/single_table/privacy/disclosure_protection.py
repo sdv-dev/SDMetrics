@@ -14,7 +14,7 @@ from sdmetrics.single_table.privacy.cap import (
     CategoricalZeroCAP,
 )
 
-MAX_NUM_ROWS = 50000
+MAX_NUM_ROWS = 10000
 
 CAP_METHODS = {
     'CAP': CategoricalCAP,
@@ -212,7 +212,7 @@ class DisclosureProtection(SingleTableMetric):
         computation_method = computation_method.upper()
         if len(real_data) > MAX_NUM_ROWS or len(synthetic_data) > MAX_NUM_ROWS:
             warnings.warn(
-                f'Data exceeds {MAX_NUM_ROWS} rows, perfomance may be slow.'
+                f'Data exceeds {MAX_NUM_ROWS} rows, perfomance may be slow. '
                 'Consider using the `DisclosureProtectionEstimate` for faster computation.'
             )
 
@@ -238,7 +238,7 @@ class DisclosureProtection(SingleTableMetric):
         )
 
         if baseline_protection == 0:
-            score = 0 if cap_protection == 0 else 1
+            score = np.nan
         else:
             score = min(cap_protection / baseline_protection, 1)
 
@@ -363,7 +363,7 @@ class DisclosureProtectionEstimate(DisclosureProtection):
             estimated_score_sum += estimated_cap_protection
             average_computed_score = estimated_score_sum / (i + 1.0)
             if baseline_protection == 0:
-                average_score = 0 if average_computed_score == 0 else 1
+                average_score = np.nan
             else:
                 average_score = min(average_computed_score / baseline_protection, 1)
 
