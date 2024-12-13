@@ -4,7 +4,7 @@
 
 __author__ = 'MIT Data To AI Lab'
 __email__ = 'dailabmit@gmail.com'
-__version__ = '0.18.0'
+__version__ = '0.18.1.dev0'
 
 import sys
 import warnings as python_warnings
