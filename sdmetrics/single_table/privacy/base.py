@@ -166,7 +166,7 @@ class CategoricalPrivacyMetric(SingleTableMetric):
                     score += row_score
 
             if count == 0:
-                return 0
+                return np.nan
 
             return 1.0 - score / count
 

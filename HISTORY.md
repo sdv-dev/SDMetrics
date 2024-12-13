@@ -1,5 +1,18 @@
 # History
 
+## v0.18.0 - 2024-12-13
+
+### Bugs Fixed
+
+* Missing whitespace in `DisclosureProtection` warning - Issue [#694](https://github.com/sdv-dev/SDMetrics/issues/694) by @frances-h
+* `DisclosureProtection` should be NaN if baseline score is zero - Issue [#693](https://github.com/sdv-dev/SDMetrics/issues/693) by @frances-h
+* `CategoricalCAP` metric returns 0 if no overlap in known fields - Issue [#692](https://github.com/sdv-dev/SDMetrics/issues/692) by @frances-h
+
+### New Features
+
+* Add `DisclosureProtectionEstimate` metric - Issue [#676](https://github.com/sdv-dev/SDMetrics/issues/676) by @frances-h
+* Add `DisclosureProtection` metric - Issue [#675](https://github.com/sdv-dev/SDMetrics/issues/675) by @frances-h
+
 ## v0.17.1 - 2024-12-04
 
 ### Maintenance
