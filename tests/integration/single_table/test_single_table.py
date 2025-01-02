@@ -7,6 +7,7 @@ from sdmetrics.demos import load_single_table_demo
 from sdmetrics.goal import Goal
 from sdmetrics.single_table import NewRowSynthesis
 from sdmetrics.single_table.base import SingleTableMetric
+from sdmetrics.single_table.bayesian_network import BNLikelihood, BNLogLikelihood
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
 from sdmetrics.single_table.multi_column_pairs import (
     ContingencySimilarity,
@@ -23,6 +24,8 @@ from sdmetrics.single_table.multi_single_column import (
 )
 
 METRICS = [
+    BNLikelihood,
+    BNLogLikelihood,
     CSTest,
     KSComplement,
     LogisticDetection,
