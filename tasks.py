@@ -77,14 +77,16 @@ def install_minimum(c):
     dependencies = project_data.get('dependencies', [])
     optional_dependencies = project_data.get('optional-dependencies', {})
     pomegranate_dependencies = optional_dependencies.get('pomegranate', [])
-    dependencies.extend(pomegranate_dependencies)
 
     python_version = '.'.join(map(str, sys.version_info[:2]))
     minimum_versions = _get_minimum_versions(dependencies, python_version)
+    minimum_pomegranate_versions = _get_minimum_versions(pomegranate_dependencies, python_version)
 
     if minimum_versions:
         install_deps = ' '.join(minimum_versions)
-        c.run(f'python -m pip install --force-reinstall --no-cache-dir {install_deps}')
+        pomegranate_deps = ' '.join(minimum_pomegranate_versions)
+        c.run(f'python -m pip install {install_deps}')
+        c.run(f'python -m pip install --force-reinstall --no-cache-dir {pomegranate_deps}')
 
 
 @task
