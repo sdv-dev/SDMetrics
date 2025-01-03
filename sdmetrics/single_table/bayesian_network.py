@@ -20,8 +20,7 @@ class BNLikelihoodBase(SingleTableMetric):
             from pomegranate import BayesianNetwork
         except ImportError:
             raise ImportError(
-                'Please install pomegranate with `pip install pomegranate` on a version of python '
-                '< 3.11. This metric is not supported on python versions >= 3.11.'
+                'Please install pomegranate with `pip install sdmetrics[pomegranate]`'
             )
 
         real_data, synthetic_data, metadata = cls._validate_inputs(
