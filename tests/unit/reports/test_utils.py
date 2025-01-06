@@ -119,18 +119,18 @@ def test_discretize_table_data():
 
     # Assert
     expected_real = pd.DataFrame({
-        'col1': [1, 6, 11],
+        'col1': [1, 6, 10],
         'col2': ['a', 'b', 'c'],
-        'col3': [2, 1, 11],
+        'col3': [2, 1, 10],
         'col4': [True, False, True],
-        'col5': [10, 1, 11],
+        'col5': [10, 1, 10],
     })
     expected_synth = pd.DataFrame({
-        'col1': [11, 1, 11],
+        'col1': [10, 1, 10],
         'col2': ['c', 'a', 'c'],
-        'col3': [11, 0, 5],
+        'col3': [10, 1, 5],
         'col4': [False, False, True],
-        'col5': [10, 5, 11],
+        'col5': [10, 5, 10],
     })
 
     pd.testing.assert_frame_equal(discretized_real, expected_real)
@@ -193,18 +193,18 @@ def test_discretize_table_data_new_metadata():
 
     # Assert
     expected_real = pd.DataFrame({
-        'col1': [1, 6, 11],
+        'col1': [1, 6, 10],
         'col2': ['a', 'b', 'c'],
-        'col3': [2, 1, 11],
+        'col3': [2, 1, 10],
         'col4': [True, False, True],
-        'col5': [10, 1, 11],
+        'col5': [10, 1, 10],
     })
     expected_synth = pd.DataFrame({
-        'col1': [11, 1, 11],
+        'col1': [10, 1, 10],
         'col2': ['c', 'a', 'c'],
-        'col3': [11, 0, 5],
+        'col3': [10, 1, 5],
         'col4': [False, False, True],
-        'col5': [10, 5, 11],
+        'col5': [10, 5, 10],
     })
 
     pd.testing.assert_frame_equal(discretized_real, expected_real)

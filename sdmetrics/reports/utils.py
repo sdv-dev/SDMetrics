@@ -9,6 +9,7 @@ import pandas as pd
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
 from sdmetrics.utils import (
+    discretize_column,
     get_alternate_keys,
     get_columns_from_metadata,
     get_type_from_column_meta,
@@ -116,9 +117,7 @@ def discretize_table_data(real_data, synthetic_data, metadata):
                 real_col = pd.to_numeric(real_col)
                 synthetic_col = pd.to_numeric(synthetic_col)
 
-            bin_edges = np.histogram_bin_edges(real_col.dropna())
-            binned_real_col = np.digitize(real_col, bins=bin_edges)
-            binned_synthetic_col = np.digitize(synthetic_col, bins=bin_edges)
+            binned_real_col, binned_synthetic_col = discretize_column(real_col, synthetic_col)
 
             binned_real[column_name] = binned_real_col
             binned_synthetic[column_name] = binned_synthetic_col
