@@ -84,9 +84,11 @@ def install_minimum(c):
 
     if minimum_versions:
         install_deps = ' '.join(minimum_versions)
-        pomegranate_deps = ' '.join(minimum_pomegranate_versions)
         c.run(f'python -m pip install {install_deps}')
-        c.run(f'python -m pip install --force-reinstall --no-cache-dir {pomegranate_deps}')
+
+        if minimum_pomegranate_versions:
+            pomegranate_deps = ' '.join(minimum_pomegranate_versions)
+            c.run(f'python -m pip install --force-reinstall --no-cache-dir {install_deps} {pomegranate_deps}')
 
 
 @task
