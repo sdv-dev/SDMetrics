@@ -92,6 +92,8 @@ def bad_data():
 
 @pytest.mark.parametrize('metric', METRICS)
 def test_rank(metric, ones, zeros, real_data, good_data, bad_data):
+    if metric in (BNLikelihood, BNLogLikelihood):
+        pytest.importorskip('pomegranate')
     worst = metric.compute(ones, zeros)
     normalized_worst = metric.normalize(worst)
     best = metric.compute(ones, ones)
