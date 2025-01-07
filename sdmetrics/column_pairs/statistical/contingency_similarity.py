@@ -69,8 +69,8 @@ class ContingencySimilarity(ColumnPairsMetric):
         """
         cls._validate_inputs(real_data, synthetic_data, continuous_column_names, num_discrete_bins)
         columns = real_data.columns[:2]
-        real = real_data[columns].copy()
-        synthetic = synthetic_data[columns].copy()
+        real = real_data[columns]
+        synthetic = synthetic_data[columns]
         if continuous_column_names is not None:
             for column in continuous_column_names:
                 real[column], synthetic[column] = discretize_column(
