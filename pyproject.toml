@@ -54,7 +54,7 @@ torch = [
     "torch>=2.0.0;python_version>='3.10' and python_version<'3.12'",
     "torch>=2.2.0;python_version>='3.12'",
 ]
-pomegranate = ['pomegranate>=0.14.1,<0.14.7']
+pomegranate = ['pomegranate>=0.15,<1.0']
 test = [
     'sdmetrics[torch]',
     'pytest>=6.2.5,<7',
