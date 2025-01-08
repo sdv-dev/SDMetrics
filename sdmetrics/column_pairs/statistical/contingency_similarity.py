@@ -53,9 +53,9 @@ class ContingencySimilarity(ColumnPairsMetric):
 
         Args:
             real_data (pd.DataFrame):
-                The target columns the real dataset.
+                The values from the real dataset.
             synthetic_data (pd.DataFrame):
-                The target columns the synthetic dataset.
+                The values from the synthetic dataset.
             continuous_column_names (list[str], optional):
                 The list of columns to discretize before running the metric. The column names in
                 this list should match the column names in the real and synthetic data. Defaults
