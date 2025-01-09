@@ -1,7 +1,10 @@
 """Contingency Similarity Metric."""
 
+import pandas as pd
+
 from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
+from sdmetrics.utils import discretize_column
 
 
 class ContingencySimilarity(ColumnPairsMetric):
@@ -23,23 +26,57 @@ class ContingencySimilarity(ColumnPairsMetric):
     min_value = 0.0
     max_value = 1.0
 
+    @staticmethod
+    def _validate_inputs(real_data, synthetic_data, continuous_column_names, num_discrete_bins):
+        for data in [real_data, synthetic_data]:
+            if not isinstance(data, pd.DataFrame) or len(data.columns) != 2:
+                raise ValueError('The data must be a pandas DataFrame with two columns.')
+
+        if set(real_data.columns) != set(synthetic_data.columns):
+            raise ValueError('The columns in the real and synthetic data must match.')
+
+        if continuous_column_names is not None:
+            bad_continuous_columns = "' ,'".join([
+                column for column in continuous_column_names if column not in real_data.columns
+            ])
+            if bad_continuous_columns:
+                raise ValueError(
+                    f"Continuous column(s) '{bad_continuous_columns}' not found in the data."
+                )
+
+        if not isinstance(num_discrete_bins, int) or num_discrete_bins <= 0:
+            raise ValueError('`num_discrete_bins` must be an integer greater than zero.')
+
     @classmethod
-    def compute(cls, real_data, synthetic_data):
+    def compute(cls, real_data, synthetic_data, continuous_column_names=None, num_discrete_bins=10):
         """Compare the contingency similarity of two discrete columns.
 
         Args:
-            real_data (Union[numpy.ndarray, pandas.Series]):
+            real_data (pd.DataFrame):
                 The values from the real dataset.
-            synthetic_data (Union[numpy.ndarray, pandas.Series]):
+            synthetic_data (pd.DataFrame):
                 The values from the synthetic dataset.
+            continuous_column_names (list[str], optional):
+                The list of columns to discretize before running the metric. The column names in
+                this list should match the column names in the real and synthetic data. Defaults
+                to ``None``.
+            num_discrete_bins (int, optional):
+                The number of bins to create for the continuous columns. Defaults to 10.
 
         Returns:
             float:
                 The contingency similarity of the two columns.
         """
+        cls._validate_inputs(real_data, synthetic_data, continuous_column_names, num_discrete_bins)
         columns = real_data.columns[:2]
         real = real_data[columns]
         synthetic = synthetic_data[columns]
+        if continuous_column_names is not None:
+            for column in continuous_column_names:
+                real[column], synthetic[column] = discretize_column(
+                    real[column], synthetic[column], num_discrete_bins=num_discrete_bins
+                )
+
         contingency_real = real.groupby(list(columns), dropna=False).size() / len(real)
         contingency_synthetic = synthetic.groupby(list(columns), dropna=False).size() / len(
             synthetic
