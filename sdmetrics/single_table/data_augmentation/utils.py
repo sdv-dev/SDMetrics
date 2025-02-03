@@ -51,7 +51,7 @@ def _validate_data_and_metadata(
     minority_class_label,
 ):
     """Validate the data and metadata of the Data Augmentation metrics."""
-    if metadata['columns'][prediction_column_name]['stype'] not in ('categorical', 'boolean'):
+    if metadata['columns'][prediction_column_name]['sdtype'] not in ('categorical', 'boolean'):
         raise ValueError(
             f'The column `{prediction_column_name}` must be either categorical or boolean.'
             'Please update your metadata.'
