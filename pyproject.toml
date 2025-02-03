@@ -36,6 +36,7 @@ dependencies = [
     'copulas>=0.11.0',
     'tqdm>=4.29',
     'plotly>=5.19.0',
+    'xgboost>=1.1.0'
 ]
 
 [project.urls]
