@@ -38,7 +38,7 @@ def test__validate_parameters():
         'real_training_data': pd.DataFrame({'target': [1, 0, 0]}),
         'synthetic_data': pd.DataFrame({'target': [1, 0, 0]}),
         'real_validation_data': pd.DataFrame({'target': [1, 0, 0]}),
-        'metadata': {'columns': {'target': {'stype': 'categorical'}}},
+        'metadata': {'columns': {'target': {'sdtype': 'categorical'}}},
         'prediction_column_name': 'target',
         'classifier': 'XGBoost',
         'fixed_recall_value': 0.9,
@@ -89,11 +89,11 @@ def test__validate_data_and_metadata():
         'real_training_data': pd.DataFrame({'target': [1, 0, 0]}),
         'synthetic_data': pd.DataFrame({'target': [1, 0, 0]}),
         'real_validation_data': pd.DataFrame({'target': [1, 0, 0]}),
-        'metadata': {'columns': {'target': {'stype': 'categorical'}}},
+        'metadata': {'columns': {'target': {'sdtype': 'categorical'}}},
         'prediction_column_name': 'target',
         'minority_class_label': 1,
     }
-    expected_message_stype = re.escape(
+    expected_message_sdtype = re.escape(
         'The column `target` must be either categorical or boolean.Please update your metadata.'
     )
     expected_message_column_missmatch = re.escape(
@@ -109,13 +109,13 @@ def test__validate_data_and_metadata():
 
     # Run and Assert
     _validate_data_and_metadata(**inputs)
-    wrong_inputs_stype = deepcopy(inputs)
-    wrong_inputs_stype['metadata']['columns']['target']['stype'] = 'numerical'
-    with pytest.raises(ValueError, match=expected_message_stype):
-        _validate_data_and_metadata(**wrong_inputs_stype)
+    wrong_inputs_sdtype = deepcopy(inputs)
+    wrong_inputs_sdtype['metadata']['columns']['target']['sdtype'] = 'numerical'
+    with pytest.raises(ValueError, match=expected_message_sdtype):
+        _validate_data_and_metadata(**wrong_inputs_sdtype)
 
     wrong_column_metadata = deepcopy(inputs)
-    wrong_column_metadata['metadata']['columns'].update({'new_column': {'stype': 'categorical'}})
+    wrong_column_metadata['metadata']['columns'].update({'new_column': {'sdtype': 'categorical'}})
     with pytest.raises(ValueError, match=expected_message_column_missmatch):
         _validate_data_and_metadata(**wrong_column_metadata)
 
@@ -130,9 +130,12 @@ def test__validate_data_and_metadata():
         _validate_data_and_metadata(**missing_minority_class_label)
 
     missing_minority_class_label_validation = deepcopy(inputs)
-    missing_minority_class_label_validation['real_validation_data'] = pd.DataFrame({'target': [0, 0, 0]})
+    missing_minority_class_label_validation['real_validation_data'] = pd.DataFrame({
+        'target': [0, 0, 0]
+    })
     with pytest.warns(UserWarning, match=expected_warning):
         _validate_data_and_metadata(**missing_minority_class_label_validation)
+
 
 @patch('sdmetrics.single_table.data_augmentation.utils._validate_parameters')
 @patch('sdmetrics.single_table.data_augmentation.utils._validate_data_and_metadata')
@@ -142,7 +145,7 @@ def test__validate_inputs_mock(mock_validate_data_and_metadata, mock_validate_pa
     real_training_data = pd.DataFrame({'target': [1, 0, 0]})
     synthetic_data = pd.DataFrame({'target': [1, 0, 0]})
     real_validation_data = pd.DataFrame({'target': [1, 0, 0]})
-    metadata = {'columns': {'target': {'stype': 'categorical'}}}
+    metadata = {'columns': {'target': {'sdtype': 'categorical'}}}
     prediction_column_name = 'target'
     minority_class_label = 1
     classifier = 'XGBoost'
