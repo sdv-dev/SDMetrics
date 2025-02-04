@@ -1,5 +1,7 @@
 """Base class for Efficacy metrics for single table datasets."""
 
+from copy import deepcopy
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, precision_recall_curve, precision_score, recall_score
@@ -44,7 +46,9 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         self.prediction_column_name = prediction_column_name
         self.minority_class_label = minority_class_label
         self.fixed_value = fixed_value
-        self._metric_method = METRIC_NAME_TO_METHOD[self.metric_name]
+        # To assess the preicision efficacy, we have to fix the recall and reciprocally
+        self._metric_to_fix = 'recall' if self.metric_name == 'precision' else 'precision'
+        self._metric_method = METRIC_NAME_TO_METHOD[self._metric_to_fix]
         self._classifier_name = classifier
         self._classifier = XGBClassifier(enable_categorical=True)
 
@@ -78,7 +82,8 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         """Find the best threshold for the classifier model."""
         target_probabilities = self._classifier.predict_proba(train_data)[:, 1]
         precision, recall, thresholds = precision_recall_curve(train_target, target_probabilities)
-        metric = recall if self.metric_name == 'recall' else precision
+        # To assess the preicision efficacy, we have to fix the recall and reciprocally
+        metric = precision if self.metric_name == 'recall' else recall
         best_threshold = 0.0
         valid_idx = np.where(metric >= self.fixed_value)[0]
         if valid_idx.size:
@@ -111,21 +116,24 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         precision = precision_score(real_validation_target, predictions)
         conf_matrix = confusion_matrix(real_validation_target, predictions)
         prediction_counts_validation = {
-            'true_positive': conf_matrix[1, 1],
-            'false_positive': conf_matrix[0, 1],
-            'true_negative': conf_matrix[0, 0],
-            'false_negative': conf_matrix[1, 0],
+            'true_positive': int(conf_matrix[1, 1]),
+            'false_positive': int(conf_matrix[0, 1]),
+            'true_negative': int(conf_matrix[0, 0]),
+            'false_negative': int(conf_matrix[1, 0]),
         }
 
         return recall, precision, prediction_counts_validation
 
     def _get_scores(self, training_table, validation_table):
+        """Get the scores of the metric."""
+        training_table = deepcopy(training_table)
+        validation_table = deepcopy(validation_table)
         training_score = self._train_model(training_table)
         recall, precision, prediction_counts_validation = self._compute_validation_scores(
             validation_table
         )
         scores = {
-            f'{self.metric_name}_score_training': training_score,
+            f'{self._metric_to_fix}_score_training': training_score,
             'recall_score_validation': recall,
             'precision_score_validation': precision,
             'prediction_counts_validation': prediction_counts_validation,

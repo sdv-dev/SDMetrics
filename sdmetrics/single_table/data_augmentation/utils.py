@@ -1,7 +1,5 @@
 """Utils method for data augmentation metrics."""
 
-import warnings
-
 import pandas as pd
 
 
@@ -51,10 +49,16 @@ def _validate_data_and_metadata(
     minority_class_label,
 ):
     """Validate the data and metadata of the Data Augmentation metrics."""
+    if prediction_column_name not in metadata['columns']:
+        raise ValueError(
+            f'The column `{prediction_column_name}` is not described in the metadata.'
+            'Please update your metadata.'
+        )
+
     if metadata['columns'][prediction_column_name]['sdtype'] not in ('categorical', 'boolean'):
         raise ValueError(
             f'The column `{prediction_column_name}` must be either categorical or boolean.'
-            'Please update your metadata.'
+            ' Please update your metadata.'
         )
 
     columns_match = (
@@ -76,9 +80,19 @@ def _validate_data_and_metadata(
         )
 
     if minority_class_label not in real_validation_data[prediction_column_name].unique():
-        warnings.warn(
-            f'The value `{minority_class_label}` is not present in the column '
-            f'`{prediction_column_name}` for the real validation data.'
+        raise ValueError(
+            f"The metric can't be computed because the value `{minority_class_label}` "
+            f'is not present in the column `{prediction_column_name}` for the real validation data.'
+            'The `precision`and `recall` are undefined for this case.'
+        )
+
+    synthetic_labels = set(synthetic_data[prediction_column_name].unique())
+    real_labels = set(real_training_data[prediction_column_name].unique())
+    if not synthetic_labels.issubset(real_labels):
+        raise ValueError(
+            f'The ``{prediction_column_name}`` column must have the same values in the real '
+            'and synthetic data. The synthetic data has the following unseen values: '
+            f'{sorted(synthetic_labels - real_labels)}'
         )
 
 

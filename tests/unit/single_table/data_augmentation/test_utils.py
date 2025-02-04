@@ -93,8 +93,11 @@ def test__validate_data_and_metadata():
         'prediction_column_name': 'target',
         'minority_class_label': 1,
     }
+    expected_message_missing_prediction_column = re.escape(
+        'The column `target` is not described in the metadata. Please update your metadata.'
+    )
     expected_message_sdtype = re.escape(
-        'The column `target` must be either categorical or boolean.Please update your metadata.'
+        'The column `target` must be either categorical or boolean. Please update your metadata.'
     )
     expected_message_column_missmatch = re.escape(
         '`real_training_data`, `synthetic_data` and `real_validation_data` must have the '
@@ -109,6 +112,11 @@ def test__validate_data_and_metadata():
 
     # Run and Assert
     _validate_data_and_metadata(**inputs)
+    missing_prediction_column = deepcopy(inputs)
+    missing_prediction_column['metadata']['columns'].pop('target')
+    with pytest.raises(ValueError, match=expected_message_missing_prediction_column):
+        _validate_data_and_metadata(**missing_prediction_column)
+
     wrong_inputs_sdtype = deepcopy(inputs)
     wrong_inputs_sdtype['metadata']['columns']['target']['sdtype'] = 'numerical'
     with pytest.raises(ValueError, match=expected_message_sdtype):
