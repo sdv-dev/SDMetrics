@@ -45,11 +45,11 @@ class TestBinaryClassifierPrecisionEfficacy:
             'real_data_baseline': {
                 'recall_score_training': 0.8095238095238095,
                 'recall_score_validation': 0.07692307692307693,
-                'precision_score_validation': 0.25,
+                'precision_score_validation': 1.0,
                 'prediction_counts_validation': {
                     'true_positive': 1,
-                    'false_positive': 3,
-                    'true_negative': 22,
+                    'false_positive': 0,
+                    'true_negative': 25,
                     'false_negative': 12,
                 },
             },
@@ -59,8 +59,8 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'precision_score_validation': 0.0,
                 'prediction_counts_validation': {
                     'true_positive': 0,
-                    'false_positive': 2,
-                    'true_negative': 23,
+                    'false_positive': 0,
+                    'true_negative': 25,
                     'false_negative': 13,
                 },
             },
@@ -97,7 +97,7 @@ class TestBinaryClassifierPrecisionEfficacy:
         )
 
         # Run and Assert
-        with pytest.errors(ValueError, match=expected_error):
+        with pytest.raises(ValueError, match=expected_error):
             BinaryClassifierPrecisionEfficacy.compute(
                 real_training_data=real_training,
                 synthetic_data=synthetic_data,

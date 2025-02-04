@@ -106,8 +106,10 @@ def test__validate_data_and_metadata():
     expected_message_value = re.escape(
         'The value `1` is not present in the column `target` for the real training data.'
     )
-    expected_warning = re.escape(
-        'The value `1` is not present in the column `target` for the real validation data.'
+    expected_error_missing_minority = re.escape(
+        "The metric can't be computed because the value `1` is not present in "
+        'the column `target` for the real validation data. The `precision`and `recall`'
+        ' are undefined for this case.'
     )
 
     # Run and Assert
@@ -141,7 +143,7 @@ def test__validate_data_and_metadata():
     missing_minority_class_label_validation['real_validation_data'] = pd.DataFrame({
         'target': [0, 0, 0]
     })
-    with pytest.warns(UserWarning, match=expected_warning):
+    with pytest.raises(ValueError, match=expected_error_missing_minority):
         _validate_data_and_metadata(**missing_minority_class_label_validation)
 
 

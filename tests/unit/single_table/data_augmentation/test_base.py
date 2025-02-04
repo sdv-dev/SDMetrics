@@ -5,7 +5,7 @@ from unittest.mock import ANY, Mock, patch
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.metrics import precision_score
+from sklearn.metrics import precision_score, recall_score
 
 from sdmetrics.single_table.data_augmentation.base import BaseDataAugmentationMetric
 
@@ -101,7 +101,7 @@ class TestBaseDataAugmentationMetric:
         assert metric.prediction_column_name == prediction_column_name
         assert metric.minority_class_label == minority_class_label
         assert metric.fixed_value == fixed_recall_value
-        assert metric._metric_method == precision_score
+        assert metric._metric_method == recall_score
         assert metric._classifier_name == classifier
         # assert metric._classifier == 'XGBClassifier()'
 
@@ -119,7 +119,7 @@ class TestBaseDataAugmentationMetric:
             np.array([0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0]),
             np.array([0.02, 0.15, 0.25, 0.35, 0.42, 0.51, 0.63, 0.77, 0.82, 0.93, 0.97]),
         ]
-        metric.metric_name = 'precision'
+        metric.metric_name = 'recall'
         metric.fixed_value = 0.69
         train_data = real_training_data[['numerical']]
         train_target = real_training_data['target']
@@ -188,6 +188,7 @@ class TestBaseDataAugmentationMetric:
         metric = BaseDataAugmentationMetric()
         metric.metric_name = 'precision'
         metric._train_model = Mock(return_value=0.78)
+        metric._metric_to_fix = 'recall'
         metric._compute_validation_scores = Mock(
             return_value=(
                 1.0,
@@ -206,7 +207,7 @@ class TestBaseDataAugmentationMetric:
 
         # Assert
         assert scores == {
-            'precision_score_training': 0.78,
+            'recall_score_training': 0.78,
             'recall_score_validation': 1.0,
             'precision_score_validation': 0.5,
             'prediction_counts_validation': {

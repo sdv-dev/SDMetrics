@@ -52,7 +52,7 @@ def _validate_data_and_metadata(
     if prediction_column_name not in metadata['columns']:
         raise ValueError(
             f'The column `{prediction_column_name}` is not described in the metadata.'
-            'Please update your metadata.'
+            ' Please update your metadata.'
         )
 
     if metadata['columns'][prediction_column_name]['sdtype'] not in ('categorical', 'boolean'):
@@ -83,7 +83,7 @@ def _validate_data_and_metadata(
         raise ValueError(
             f"The metric can't be computed because the value `{minority_class_label}` "
             f'is not present in the column `{prediction_column_name}` for the real validation data.'
-            'The `precision`and `recall` are undefined for this case.'
+            ' The `precision`and `recall` are undefined for this case.'
         )
 
     synthetic_labels = set(synthetic_data[prediction_column_name].unique())
