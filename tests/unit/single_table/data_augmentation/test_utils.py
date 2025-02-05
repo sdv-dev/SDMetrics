@@ -111,6 +111,11 @@ def test__validate_data_and_metadata():
         'the column `target` for the real validation data. The `precision`and `recall`'
         ' are undefined for this case.'
     )
+    expected_error_synthetic_wrong_label = re.escape(
+        'The ``target`` column must have the same values in the real and synthetic data. '
+        'The following values are present in the synthetic data and not the real'
+        " data: 'wrong_1', 'wrong_2'"
+    )
 
     # Run and Assert
     _validate_data_and_metadata(**inputs)
@@ -145,6 +150,11 @@ def test__validate_data_and_metadata():
     })
     with pytest.raises(ValueError, match=expected_error_missing_minority):
         _validate_data_and_metadata(**missing_minority_class_label_validation)
+
+    wrong_synthetic_label = deepcopy(inputs)
+    wrong_synthetic_label['synthetic_data'] = pd.DataFrame({'target': [0, 1, 'wrong_1', 'wrong_2']})
+    with pytest.raises(ValueError, match=expected_error_synthetic_wrong_label):
+        _validate_data_and_metadata(**wrong_synthetic_label)
 
 
 @patch('sdmetrics.single_table.data_augmentation.utils._validate_parameters')

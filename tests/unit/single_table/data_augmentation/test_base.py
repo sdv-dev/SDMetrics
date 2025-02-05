@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.metrics import precision_score, recall_score
+from xgboost import XGBClassifier
 
 from sdmetrics.single_table.data_augmentation.base import BaseDataAugmentationMetric
 
@@ -103,7 +104,7 @@ class TestBaseDataAugmentationMetric:
         assert metric.fixed_value == fixed_recall_value
         assert metric._metric_method == recall_score
         assert metric._classifier_name == classifier
-        # assert metric._classifier == 'XGBClassifier()'
+        assert isinstance(metric._classifier, XGBClassifier)
 
     @patch('sdmetrics.single_table.data_augmentation.base.precision_recall_curve')
     def test__get_best_threshold(self, mock_precision_recall_curve, real_training_data):
@@ -120,6 +121,7 @@ class TestBaseDataAugmentationMetric:
             np.array([0.02, 0.15, 0.25, 0.35, 0.42, 0.51, 0.63, 0.77, 0.82, 0.93, 0.97]),
         ]
         metric.metric_name = 'recall'
+        metric._metric_to_fix = 'precision'
         metric.fixed_value = 0.69
         train_data = real_training_data[['numerical']]
         train_target = real_training_data['target']

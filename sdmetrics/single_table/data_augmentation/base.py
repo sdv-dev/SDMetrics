@@ -62,7 +62,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
 
         Args:
             tables (dict[str, pandas.DataFrame]):
-                The tables to transform.
+                Dict containing `real_training_data`, `synthetic_data` and `real_validation_data`.
         """
         tables_result = {}
         for table_name, table in tables.items():
@@ -82,8 +82,8 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         """Find the best threshold for the classifier model."""
         target_probabilities = self._classifier.predict_proba(train_data)[:, 1]
         precision, recall, thresholds = precision_recall_curve(train_target, target_probabilities)
-        # To assess the preicision efficacy, we have to fix the recall and reciprocally
-        metric = precision if self.metric_name == 'recall' else recall
+        metric_map = {'precision': precision, 'recall': recall}
+        metric = metric_map[self._metric_to_fix]
         best_threshold = 0.0
         valid_idx = np.where(metric >= self.fixed_value)[0]
         if valid_idx.size:
