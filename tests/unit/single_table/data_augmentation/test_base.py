@@ -1,14 +1,17 @@
 """Test for the base BaseDataAugmentationMetric metrics."""
 
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.metrics import precision_score, recall_score
+from sklearn.metrics import precision_score
 from xgboost import XGBClassifier
 
-from sdmetrics.single_table.data_augmentation.base import BaseDataAugmentationMetric
+from sdmetrics.single_table.data_augmentation.base import (
+    BaseDataAugmentationMetric,
+    ClassifierTrainer,
+)
 
 
 @pytest.fixture
@@ -57,62 +60,29 @@ def metadata():
     }
 
 
-class TestBaseDataAugmentationMetric:
-    """Test the BaseDataAugmentationMetric class."""
-
-    @patch('sdmetrics.single_table.data_augmentation.base.OrdinalEncoder')
-    def test__fit_preprocess(self, mock_ordinal_encoder, real_training_data, metadata):
-        """Test the ``_fit_preprocess`` method."""
-        # Setup
-        metric = BaseDataAugmentationMetric()
-        metric.prediction_column_name = 'target'
-        mock_ordinal_encoder.fit = Mock()
-
+class TestClassifierTrainer:
+    def test__init__(self):
+        """Test the ``__init__`` method."""
         # Run
-        metric._fit_preprocess(real_training_data, metadata)
+        trainer = ClassifierTrainer('target', 1, 'XGBoost', 0.69, 'recall')
 
         # Assert
-        assert metric._discrete_columns == ['categorical', 'boolean']
-        assert metric._datetime_columns == ['datetime']
-        assert isinstance(metric._ordinal_encoder, Mock)
-        args, _ = metric._ordinal_encoder.fit.call_args
-        assert args[0].equals(real_training_data[['categorical', 'boolean']])
-
-    def test__fit(self, real_training_data, metadata):
-        """Test the ``_fit`` method."""
-        # Setup
-        metric = BaseDataAugmentationMetric()
-        metric.metric_name = 'precision'
-        prediction_column_name = 'target'
-        minority_class_label = 1
-        classifier = 'XGBoost'
-        fixed_recall_value = 0.7
-
-        # Run
-        metric._fit(
-            real_training_data,
-            metadata,
-            prediction_column_name,
-            minority_class_label,
-            classifier,
-            fixed_recall_value,
-        )
-
-        # Assert
-        assert metric.prediction_column_name == prediction_column_name
-        assert metric.minority_class_label == minority_class_label
-        assert metric.fixed_value == fixed_recall_value
-        assert metric._metric_method == recall_score
-        assert metric._classifier_name == classifier
-        assert isinstance(metric._classifier, XGBClassifier)
+        assert trainer.prediction_column_name == 'target'
+        assert trainer.minority_class_label == 1
+        assert trainer._classifier_name == 'XGBoost'
+        assert trainer.fixed_value == 0.69
+        assert trainer.metric_name == 'recall'
+        assert trainer._metric_to_fix == 'precision'
+        assert trainer._metric_method == precision_score
+        assert isinstance(trainer._classifier, XGBClassifier)
 
     @patch('sdmetrics.single_table.data_augmentation.base.precision_recall_curve')
-    def test__get_best_threshold(self, mock_precision_recall_curve, real_training_data):
-        """Test the ``_get_best_threshold`` method."""
+    def test_get_best_threshold(self, mock_precision_recall_curve, real_training_data):
+        """Test the ``get_best_threshold`` method."""
         # Setup
-        metric = BaseDataAugmentationMetric()
-        metric._classifier = Mock()
-        metric._classifier.predict_proba = Mock(
+        trainer = ClassifierTrainer('target', 1, 'XGBoost', 0.69, 'recall')
+        trainer._classifier = Mock()
+        trainer._classifier.predict_proba = Mock(
             return_value=np.array([[0.1, 0.9], [0.9, 0.1], [0.9, 0.1]])
         )
         mock_precision_recall_curve.return_value = [
@@ -120,57 +90,50 @@ class TestBaseDataAugmentationMetric:
             np.array([0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0]),
             np.array([0.02, 0.15, 0.25, 0.35, 0.42, 0.51, 0.63, 0.77, 0.82, 0.93, 0.97]),
         ]
-        metric.metric_name = 'recall'
-        metric._metric_to_fix = 'precision'
-        metric.fixed_value = 0.69
         train_data = real_training_data[['numerical']]
         train_target = real_training_data['target']
 
         # Run
-        best_threshold = metric._get_best_threshold(train_data, train_target)
+        best_threshold = trainer.get_best_threshold(train_data, train_target)
 
         # Assert
         assert best_threshold == 0.63
 
-    def test__train_model(self, real_training_data):
-        """Test the ``_train_model`` method.
+    def test_train_model(self, real_training_data):
+        """Test the ``train_model`` method.
 
         Here the true target values are [1, 0, 0] and the predicted ones based on the
         best threshold are [1, 0, 1]. So the precision score should be 0.5.
         """
         # Setup
-        metric = BaseDataAugmentationMetric()
-        metric.prediction_column_name = 'target'
-        metric._classifier = Mock()
-        metric.metric_name = 'precision'
-        metric.fixed_value = 0.69
-        metric._get_best_threshold = Mock(return_value=0.63)
-        metric._classifier.predict_proba = Mock(
+        trainer = ClassifierTrainer('target', 1, 'XGBoost', 0.69, 'recall')
+        trainer.get_best_threshold = Mock(return_value=0.63)
+        trainer._classifier = Mock()
+        trainer._classifier.predict_proba = Mock(
             return_value=np.array([[0.3, 0.7], [0.4, 0.6], [0.3, 0.7]])
         )
-        metric._metric_method = precision_score
+        trainer._metric_method = precision_score
         real_training_data_copy = real_training_data.copy()
 
         # Run
-        score = metric._train_model(real_training_data_copy)
+        score = trainer.train_model(real_training_data_copy)
 
         # Assert
         assert score == 0.5
-        assert metric._best_threshold == 0.63
+        assert trainer._best_threshold == 0.63
 
-    def test__compute_validation_scores(self, real_validation_data):
-        """Test the ``_compute_validation_scores`` method."""
+    def test_compute_validation_scores(self, real_validation_data):
+        """Test the ``compute_validation_scores`` method."""
         # Setup
-        metric = BaseDataAugmentationMetric()
-        metric.prediction_column_name = 'target'
-        metric._best_threshold = 0.63
-        metric._classifier = Mock()
-        metric._classifier.predict_proba = Mock(
+        trainer = ClassifierTrainer('target', 1, 'XGBoost', 0.69, 'recall')
+        trainer._best_threshold = 0.63
+        trainer._classifier = Mock()
+        trainer._classifier.predict_proba = Mock(
             return_value=np.array([[0.3, 0.7], [0.4, 0.6], [0.3, 0.7]])
         )
 
         # Run
-        recall, precision, prediction_counts_validation = metric._compute_validation_scores(
+        recall, precision, prediction_counts_validation = trainer.compute_validation_scores(
             real_validation_data
         )
 
@@ -184,14 +147,12 @@ class TestBaseDataAugmentationMetric:
             'false_negative': 0,
         }
 
-    def test__get_scores(self, real_training_data, real_validation_data):
-        """Test the ``_get_scores`` method."""
+    def test_get_scores(self, real_training_data, real_validation_data):
+        """Test the ``get_scores`` method."""
         # Setup
-        metric = BaseDataAugmentationMetric()
-        metric.metric_name = 'precision'
-        metric._train_model = Mock(return_value=0.78)
-        metric._metric_to_fix = 'recall'
-        metric._compute_validation_scores = Mock(
+        trainer = ClassifierTrainer('target', 1, 'XGBoost', 0.69, 'precision')
+        trainer.train_model = Mock(return_value=0.78)
+        trainer.compute_validation_scores = Mock(
             return_value=(
                 1.0,
                 0.5,
@@ -205,7 +166,7 @@ class TestBaseDataAugmentationMetric:
         )
 
         # Run
-        scores = metric._get_scores(real_training_data, real_validation_data)
+        scores = trainer.get_scores(real_training_data, real_validation_data)
 
         # Assert
         assert scores == {
@@ -220,25 +181,135 @@ class TestBaseDataAugmentationMetric:
             },
         }
 
+
+class TestBaseDataAugmentationMetric:
+    """Test the BaseDataAugmentationMetric class."""
+
+    @patch('sdmetrics.single_table.data_augmentation.base.OrdinalEncoder')
+    def test__fit_preprocess(self, mock_ordinal_encoder, real_training_data, metadata):
+        """Test the ``_fit_preprocess`` method."""
+        # Setup
+        metric = BaseDataAugmentationMetric()
+        mock_ordinal_encoder.fit = Mock()
+
+        # Run
+        discrete_columns, datetime_columns, ordinal_encoder = metric._fit_preprocess(
+            real_training_data, metadata, 'target'
+        )
+
+        # Assert
+        assert discrete_columns == ['categorical', 'boolean']
+        assert datetime_columns == ['datetime']
+        assert isinstance(ordinal_encoder, Mock)
+        args, _ = ordinal_encoder.fit.call_args
+        assert args[0].equals(real_training_data[['categorical', 'boolean']])
+
+    def test__transform_preprocess(self, real_training_data, metadata):
+        """Test the ``_transform_preprocess`` method."""
+        # Setup
+        metric = BaseDataAugmentationMetric()
+        discrete_columns = ['categorical', 'boolean']
+        datetime_columns = ['datetime']
+        ordinal_encoder = Mock()
+        ordinal_encoder.transform = Mock(
+            return_value=pd.DataFrame({
+                'categorical': [0, 1, 1],
+                'boolean': [1, 0, 1],
+            })
+        )
+        tables = {
+            'real_training_data': real_training_data,
+            'synthetic_data': real_training_data,
+            'real_validation_data': real_training_data,
+        }
+
+        # Run
+        transformed = metric._transform_preprocess(
+            tables, discrete_columns, datetime_columns, ordinal_encoder, 'target', 1
+        )
+
+        # Assert
+        expected_transformed = {
+            'real_training_data': pd.DataFrame({
+                'target': [1, 0, 0],
+                'numerical': [1, 2, 3],
+                'categorical': [0, 1, 1],
+                'boolean': [1, 0, 1],
+                'datetime': pd.to_numeric(
+                    pd.to_datetime(['2021-01-01', '2021-01-02', '2021-01-03'])
+                ),
+            }),
+            'synthetic_data': pd.DataFrame({
+                'target': [1, 0, 0],
+                'numerical': [1, 2, 3],
+                'categorical': [0, 1, 1],
+                'boolean': [1, 0, 1],
+                'datetime': pd.to_numeric(
+                    pd.to_datetime(['2021-01-01', '2021-01-02', '2021-01-03'])
+                ),
+            }),
+            'real_validation_data': pd.DataFrame({
+                'target': [1, 0, 0],
+                'numerical': [1, 2, 3],
+                'categorical': [0, 1, 1],
+                'boolean': [1, 0, 1],
+                'datetime': pd.to_numeric(
+                    pd.to_datetime(['2021-01-01', '2021-01-02', '2021-01-03'])
+                ),
+            }),
+        }
+        for table_name, table in transformed.items():
+            assert table.equals(expected_transformed[table_name])
+
+    def test__fit_transform(
+        self, real_training_data, synthetic_data, real_validation_data, metadata
+    ):
+        """Test the ``_fit_transform`` method."""
+        # Setup
+        metric = BaseDataAugmentationMetric()
+        BaseDataAugmentationMetric._fit_preprocess = Mock()
+        ordinal_encoder = Mock()
+        discrete_columns = ['categorical', 'boolean']
+        datetime_columns = ['datetime']
+        BaseDataAugmentationMetric._fit_preprocess.return_value = (
+            discrete_columns,
+            datetime_columns,
+            ordinal_encoder,
+        )
+        tables = {
+            'real_training_data': real_training_data,
+            'synthetic_data': synthetic_data,
+            'real_validation_data': real_validation_data,
+        }
+        BaseDataAugmentationMetric._transform_preprocess = Mock(return_value=tables)
+
+        # Run
+        transformed = metric._fit_transform(
+            real_training_data, synthetic_data, real_validation_data, metadata, 'target', 1
+        )
+
+        # Assert
+        BaseDataAugmentationMetric._fit_preprocess.assert_called_once_with(
+            real_training_data, metadata, 'target'
+        )
+        BaseDataAugmentationMetric._transform_preprocess.assert_called_once_with(
+            tables, discrete_columns, datetime_columns, ordinal_encoder, 'target', 1
+        )
+        for table_name, table in transformed.items():
+            assert table.equals(tables[table_name])
+
     @patch('sdmetrics.single_table.data_augmentation.base._validate_inputs')
     @patch(
-        'sdmetrics.single_table.data_augmentation.base.BaseDataAugmentationMetric._fit',
-        autospec=True,
+        'sdmetrics.single_table.data_augmentation.base.BaseDataAugmentationMetric._fit_transform'
     )
     @patch(
-        'sdmetrics.single_table.data_augmentation.base.BaseDataAugmentationMetric'
-        '._transform_preprocess',
-        autospec=True,
+        'sdmetrics.single_table.data_augmentation.base.ClassifierTrainer',
     )
-    @patch(
-        'sdmetrics.single_table.data_augmentation.base.BaseDataAugmentationMetric._get_scores',
-        autospec=True,
-    )
+    @patch.object(BaseDataAugmentationMetric, 'metric_name', 'precision')
     def test_compute_breakdown(
         self,
-        mock_get_scores,
-        mock_transform_preprocess,
-        mock_fit,
+        mock_classifier_trainer,
+        mock_fit_transfrom,
         mock_validate_inputs,
         real_training_data,
         synthetic_data,
@@ -252,28 +323,6 @@ class TestBaseDataAugmentationMetric:
         classifier = 'XGBoost'
         fixed_recall_value = 0.9
 
-        def expected_assignments_fit(
-            metric,
-            data,
-            metadata,
-            prediction_column_name,
-            minority_class_label,
-            classifier,
-            fixed_value,
-        ):
-            metric.metric_name = 'precision'
-            metric.prediction_column_name = prediction_column_name
-            metric.minority_class_label = minority_class_label
-            metric._classifier_name = classifier
-            metric._classifier = 'XGBClassifier()'
-            metric.fixed_value = fixed_value
-
-        mock_fit.side_effect = expected_assignments_fit
-        mock_transform_preprocess.return_value = {
-            'real_training_data': real_training_data,
-            'synthetic_data': synthetic_data,
-            'real_validation_data': real_validation_data,
-        }
         real_data_baseline = {
             'precision_score_training': 0.43,
             'recall_score_validation': 0.7,
@@ -296,7 +345,19 @@ class TestBaseDataAugmentationMetric:
                 'false_negative': 0,
             },
         }
-        mock_get_scores.side_effect = [real_data_baseline, augmented_table_result]
+        mock_fit_transfrom.return_value = {
+            'real_training_data': real_training_data,
+            'synthetic_data': synthetic_data,
+            'real_validation_data': real_validation_data,
+        }
+        mock_classifier_trainer.return_value.get_scores.side_effect = [
+            real_data_baseline,
+            augmented_table_result,
+        ]
+        mock_classifier_trainer.return_value.prediction_column_name = prediction_column_name
+        mock_classifier_trainer.return_value.minority_class_label = minority_class_label
+        mock_classifier_trainer.return_value._classifier_name = classifier
+        mock_classifier_trainer.return_value.fixed_value = fixed_recall_value
 
         # Run
         score_breakdown = BaseDataAugmentationMetric.compute_breakdown(
@@ -333,22 +394,13 @@ class TestBaseDataAugmentationMetric:
             classifier,
             fixed_recall_value,
         )
-        mock_fit.assert_called_once_with(
-            ANY,
+        mock_fit_transfrom.assert_called_once_with(
             real_training_data,
+            synthetic_data,
+            real_validation_data,
             metadata,
             prediction_column_name,
             minority_class_label,
-            classifier,
-            fixed_recall_value,
-        )
-        mock_transform_preprocess.assert_called_once_with(
-            ANY,
-            {
-                'real_training_data': real_training_data,
-                'synthetic_data': synthetic_data,
-                'real_validation_data': real_validation_data,
-            },
         )
 
     @patch(
