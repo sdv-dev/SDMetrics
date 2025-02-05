@@ -231,28 +231,28 @@ class TestBaseDataAugmentationMetric:
         # Assert
         expected_transformed = {
             'real_training_data': pd.DataFrame({
-                'target': [1, 0, 0],
-                'numerical': [1, 2, 3],
-                'categorical': [0, 1, 1],
-                'boolean': [1, 0, 1],
+                'target': pd.Series([1, 0, 0], dtype='int64'),
+                'numerical': pd.Series([1, 2, 3], dtype='int64'),
+                'categorical': pd.Series([0, 1, 1], dtype='int64'),
+                'boolean': pd.Series([1, 0, 1], dtype='int64'),
                 'datetime': pd.to_numeric(
                     pd.to_datetime(['2021-01-01', '2021-01-02', '2021-01-03'])
                 ),
             }),
             'synthetic_data': pd.DataFrame({
-                'target': [1, 0, 0],
-                'numerical': [1, 2, 3],
-                'categorical': [0, 1, 1],
-                'boolean': [1, 0, 1],
+                'target': pd.Series([1, 0, 0], dtype='int64'),
+                'numerical': pd.Series([1, 2, 3], dtype='int64'),
+                'categorical': pd.Series([0, 1, 1], dtype='int64'),
+                'boolean': pd.Series([1, 0, 1], dtype='int64'),
                 'datetime': pd.to_numeric(
                     pd.to_datetime(['2021-01-01', '2021-01-02', '2021-01-03'])
                 ),
             }),
             'real_validation_data': pd.DataFrame({
-                'target': [1, 0, 0],
-                'numerical': [1, 2, 3],
-                'categorical': [0, 1, 1],
-                'boolean': [1, 0, 1],
+                'target': pd.Series([1, 0, 0], dtype='int64'),
+                'numerical': pd.Series([1, 2, 3], dtype='int64'),
+                'categorical': pd.Series([0, 1, 1], dtype='int64'),
+                'boolean': pd.Series([1, 0, 1], dtype='int64'),
                 'datetime': pd.to_numeric(
                     pd.to_datetime(['2021-01-01', '2021-01-02', '2021-01-03'])
                 ),
