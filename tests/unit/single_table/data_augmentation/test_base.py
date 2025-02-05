@@ -259,7 +259,7 @@ class TestBaseDataAugmentationMetric:
             }),
         }
         for table_name, table in transformed.items():
-            assert table.equals(expected_transformed[table_name])
+            pd.testing.assert_frame_equal(table, expected_transformed[table_name])
 
     def test__fit_transform(
         self, real_training_data, synthetic_data, real_validation_data, metadata
