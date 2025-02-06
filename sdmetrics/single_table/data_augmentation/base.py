@@ -5,7 +5,6 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, precision_recall_curve, precision_score, recall_score
-from sklearn.preprocessing import OrdinalEncoder
 from xgboost import XGBClassifier
 
 from sdmetrics.goal import Goal
@@ -103,20 +102,17 @@ class BaseDataAugmentationMetric(SingleTableMetric):
     @classmethod
     def _fit_preprocess(cls, data, metadata, prediction_column_name):
         """Fit preprocessing parameters."""
-        _discrete_columns = []
-        _datetime_columns = []
+        discrete_columns = []
+        datetime_columns = []
         for column, column_meta in metadata['columns'].items():
             if (column_meta['sdtype'] in ['categorical', 'boolean']) and (
                 column != prediction_column_name
             ):
-                _discrete_columns.append(column)
+                discrete_columns.append(column)
             elif column_meta['sdtype'] == 'datetime':
-                _datetime_columns.append(column)
+                datetime_columns.append(column)
 
-        _ordinal_encoder = OrdinalEncoder()
-        _ordinal_encoder.fit(data[_discrete_columns])
-
-        return _discrete_columns, _datetime_columns, _ordinal_encoder
+        return discrete_columns, datetime_columns
 
     @classmethod
     def _transform_preprocess(
@@ -124,7 +120,6 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         tables,
         discrete_columns,
         datetime_columns,
-        ordinal_encoder,
         prediction_column_name,
         minority_class_label,
     ):
@@ -137,7 +132,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         tables_result = {}
         for table_name, table in tables.items():
             table = table.copy()
-            table[discrete_columns] = ordinal_encoder.transform(table[discrete_columns])
+            table[discrete_columns] = table[discrete_columns].astype('category')
             table[datetime_columns] = table[datetime_columns].apply(pd.to_numeric)
             table[prediction_column_name] = (
                 table[prediction_column_name] == minority_class_label
@@ -157,7 +152,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         minority_class_label,
     ):
         """Fit and transform the metric."""
-        discrete_columns, datetime_columns, ordinal_encoder = cls._fit_preprocess(
+        discrete_columns, datetime_columns = cls._fit_preprocess(
             real_training_data, metadata, prediction_column_name
         )
         tables = {
@@ -170,7 +165,6 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             tables,
             discrete_columns,
             datetime_columns,
-            ordinal_encoder,
             prediction_column_name,
             minority_class_label,
         )

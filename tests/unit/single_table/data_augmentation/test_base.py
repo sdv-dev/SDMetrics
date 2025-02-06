@@ -30,8 +30,8 @@ def synthetic_data():
     return pd.DataFrame({
         'target': [0, 1, 0],
         'numerical': [2, 2, 3],
-        'categorical': ['a', 'b', 'b'],
-        'boolean': [True, False, False],
+        'categorical': ['b', 'a', 'b'],
+        'boolean': [False, True, False],
         'datetime': pd.to_datetime(['2021-01-25', '2021-01-02', '2021-01-03']),
     })
 
@@ -185,76 +185,64 @@ class TestClassifierTrainer:
 class TestBaseDataAugmentationMetric:
     """Test the BaseDataAugmentationMetric class."""
 
-    @patch('sdmetrics.single_table.data_augmentation.base.OrdinalEncoder')
-    def test__fit_preprocess(self, mock_ordinal_encoder, real_training_data, metadata):
+    def test__fit_preprocess(self, real_training_data, metadata):
         """Test the ``_fit_preprocess`` method."""
         # Setup
         metric = BaseDataAugmentationMetric()
-        mock_ordinal_encoder.fit = Mock()
 
         # Run
-        discrete_columns, datetime_columns, ordinal_encoder = metric._fit_preprocess(
+        discrete_columns, datetime_columns = metric._fit_preprocess(
             real_training_data, metadata, 'target'
         )
 
         # Assert
         assert discrete_columns == ['categorical', 'boolean']
         assert datetime_columns == ['datetime']
-        assert isinstance(ordinal_encoder, Mock)
-        args, _ = ordinal_encoder.fit.call_args
-        assert args[0].equals(real_training_data[['categorical', 'boolean']])
 
-    def test__transform_preprocess(self, real_training_data, metadata):
+    def test__transform_preprocess(self, real_training_data, synthetic_data, real_validation_data):
         """Test the ``_transform_preprocess`` method."""
         # Setup
         metric = BaseDataAugmentationMetric()
         discrete_columns = ['categorical', 'boolean']
         datetime_columns = ['datetime']
-        ordinal_encoder = Mock()
-        ordinal_encoder.transform = Mock(
-            return_value=pd.DataFrame({
-                'categorical': [0, 1, 1],
-                'boolean': [1, 0, 1],
-            })
-        )
         tables = {
             'real_training_data': real_training_data,
-            'synthetic_data': real_training_data,
-            'real_validation_data': real_training_data,
+            'synthetic_data': synthetic_data,
+            'real_validation_data': real_validation_data,
         }
 
         # Run
         transformed = metric._transform_preprocess(
-            tables, discrete_columns, datetime_columns, ordinal_encoder, 'target', 1
+            tables, discrete_columns, datetime_columns, 'target', 1
         )
 
         # Assert
         expected_transformed = {
             'real_training_data': pd.DataFrame({
-                'target': pd.Series([1, 0, 0], dtype='int64'),
-                'numerical': pd.Series([1, 2, 3], dtype='int64'),
-                'categorical': pd.Series([0, 1, 1], dtype='int64'),
-                'boolean': pd.Series([1, 0, 1], dtype='int64'),
+                'target': [1, 0, 0],
+                'numerical': [1, 2, 3],
+                'categorical': pd.Categorical(['a', 'b', 'b']),
+                'boolean': pd.Categorical([True, False, True]),
                 'datetime': pd.to_numeric(
                     pd.to_datetime(['2021-01-01', '2021-01-02', '2021-01-03'])
                 ),
             }),
             'synthetic_data': pd.DataFrame({
-                'target': pd.Series([1, 0, 0], dtype='int64'),
-                'numerical': pd.Series([1, 2, 3], dtype='int64'),
-                'categorical': pd.Series([0, 1, 1], dtype='int64'),
-                'boolean': pd.Series([1, 0, 1], dtype='int64'),
+                'target': [0, 1, 0],
+                'numerical': [2, 2, 3],
+                'categorical': pd.Categorical(['b', 'a', 'b']),
+                'boolean': pd.Categorical([False, True, False]),
                 'datetime': pd.to_numeric(
-                    pd.to_datetime(['2021-01-01', '2021-01-02', '2021-01-03'])
+                    pd.to_datetime(['2021-01-25', '2021-01-02', '2021-01-03'])
                 ),
             }),
             'real_validation_data': pd.DataFrame({
-                'target': pd.Series([1, 0, 0], dtype='int64'),
-                'numerical': pd.Series([1, 2, 3], dtype='int64'),
-                'categorical': pd.Series([0, 1, 1], dtype='int64'),
-                'boolean': pd.Series([1, 0, 1], dtype='int64'),
+                'target': [1, 0, 0],
+                'numerical': [3, 3, 3],
+                'categorical': pd.Categorical(['a', 'b', 'b']),
+                'boolean': pd.Categorical([True, False, True]),
                 'datetime': pd.to_numeric(
-                    pd.to_datetime(['2021-01-01', '2021-01-02', '2021-01-03'])
+                    pd.to_datetime(['2021-01-01', '2021-01-12', '2021-01-03'])
                 ),
             }),
         }
@@ -268,13 +256,11 @@ class TestBaseDataAugmentationMetric:
         # Setup
         metric = BaseDataAugmentationMetric()
         BaseDataAugmentationMetric._fit_preprocess = Mock()
-        ordinal_encoder = Mock()
         discrete_columns = ['categorical', 'boolean']
         datetime_columns = ['datetime']
         BaseDataAugmentationMetric._fit_preprocess.return_value = (
             discrete_columns,
             datetime_columns,
-            ordinal_encoder,
         )
         tables = {
             'real_training_data': real_training_data,
@@ -293,7 +279,7 @@ class TestBaseDataAugmentationMetric:
             real_training_data, metadata, 'target'
         )
         BaseDataAugmentationMetric._transform_preprocess.assert_called_once_with(
-            tables, discrete_columns, datetime_columns, ordinal_encoder, 'target', 1
+            tables, discrete_columns, datetime_columns, 'target', 1
         )
         for table_name, table in transformed.items():
             assert table.equals(tables[table_name])

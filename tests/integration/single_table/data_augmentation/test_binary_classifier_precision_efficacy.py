@@ -59,8 +59,8 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'precision_score_validation': 0.0,
                 'prediction_counts_validation': {
                     'true_positive': 0,
-                    'false_positive': 0,
-                    'true_negative': 25,
+                    'false_positive': 2,
+                    'true_negative': 23,
                     'false_negative': 13,
                 },
             },
@@ -147,13 +147,13 @@ class TestBinaryClassifierPrecisionEfficacy:
             },
             'augmented_data': {
                 'recall_score_training': 0.8,
-                'recall_score_validation': 0.07692307692307693,
-                'precision_score_validation': 0.25,
+                'recall_score_validation': 0.15384615384615385,
+                'precision_score_validation': 0.4,
                 'prediction_counts_validation': {
-                    'true_positive': 1,
+                    'true_positive': 2,
                     'false_positive': 3,
                     'true_negative': 30,
-                    'false_negative': 12,
+                    'false_negative': 11,
                 },
             },
             'parameters': {
@@ -229,13 +229,13 @@ class TestBinaryClassifierPrecisionEfficacy:
             },
             'augmented_data': {
                 'recall_score_training': 0.8035714285714286,
-                'recall_score_validation': 0.5384615384615384,
-                'precision_score_validation': 0.875,
+                'recall_score_validation': 0.6153846153846154,
+                'precision_score_validation': 0.8888888888888888,
                 'prediction_counts_validation': {
-                    'true_positive': 7,
+                    'true_positive': 8,
                     'false_positive': 1,
                     'true_negative': 24,
-                    'false_negative': 6,
+                    'false_negative': 5,
                 },
             },
             'parameters': {
