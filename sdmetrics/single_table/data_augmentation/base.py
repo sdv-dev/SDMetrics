@@ -207,6 +207,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             fixed_recall_value,
             cls.metric_name,
         )
+        metric_to_fix = 'recall' if cls.metric_name == 'precision' else 'precision'
         result = {
             'real_data_baseline': trainer.get_scores(
                 preprocessed_tables['real_training_data'],
@@ -223,7 +224,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
                 'prediction_column_name': trainer.prediction_column_name,
                 'minority_class_label': trainer.minority_class_label,
                 'classifier': trainer._classifier_name,
-                'fixed_recall_value': trainer.fixed_value,
+                f'fixed_{metric_to_fix}_value': trainer.fixed_value,
             },
         }
         result['score'] = max(
