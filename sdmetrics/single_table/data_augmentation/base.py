@@ -100,7 +100,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
     max_value = 1.0
 
     @classmethod
-    def _fit_preprocess(cls, data, metadata, prediction_column_name):
+    def _fit(cls, data, metadata, prediction_column_name):
         """Fit preprocessing parameters."""
         discrete_columns = []
         datetime_columns = []
@@ -115,7 +115,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         return discrete_columns, datetime_columns
 
     @classmethod
-    def _transform_preprocess(
+    def _transform(
         cls,
         tables,
         discrete_columns,
@@ -152,7 +152,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         minority_class_label,
     ):
         """Fit and transform the metric."""
-        discrete_columns, datetime_columns = cls._fit_preprocess(
+        discrete_columns, datetime_columns = cls._fit(
             real_training_data, metadata, prediction_column_name
         )
         tables = {
@@ -161,7 +161,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             'real_validation_data': real_validation_data,
         }
 
-        return cls._transform_preprocess(
+        return cls._transform(
             tables,
             discrete_columns,
             datetime_columns,

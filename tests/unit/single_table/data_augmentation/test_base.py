@@ -185,22 +185,20 @@ class TestClassifierTrainer:
 class TestBaseDataAugmentationMetric:
     """Test the BaseDataAugmentationMetric class."""
 
-    def test__fit_preprocess(self, real_training_data, metadata):
-        """Test the ``_fit_preprocess`` method."""
+    def test__fit(self, real_training_data, metadata):
+        """Test the ``_fit`` method."""
         # Setup
         metric = BaseDataAugmentationMetric()
 
         # Run
-        discrete_columns, datetime_columns = metric._fit_preprocess(
-            real_training_data, metadata, 'target'
-        )
+        discrete_columns, datetime_columns = metric._fit(real_training_data, metadata, 'target')
 
         # Assert
         assert discrete_columns == ['categorical', 'boolean']
         assert datetime_columns == ['datetime']
 
-    def test__transform_preprocess(self, real_training_data, synthetic_data, real_validation_data):
-        """Test the ``_transform_preprocess`` method."""
+    def test__transform(self, real_training_data, synthetic_data, real_validation_data):
+        """Test the ``_transform`` method."""
         # Setup
         metric = BaseDataAugmentationMetric()
         discrete_columns = ['categorical', 'boolean']
@@ -212,9 +210,7 @@ class TestBaseDataAugmentationMetric:
         }
 
         # Run
-        transformed = metric._transform_preprocess(
-            tables, discrete_columns, datetime_columns, 'target', 1
-        )
+        transformed = metric._transform(tables, discrete_columns, datetime_columns, 'target', 1)
 
         # Assert
         expected_transformed = {
@@ -257,10 +253,10 @@ class TestBaseDataAugmentationMetric:
         """Test the ``_fit_transform`` method."""
         # Setup
         metric = BaseDataAugmentationMetric()
-        BaseDataAugmentationMetric._fit_preprocess = Mock()
+        BaseDataAugmentationMetric._fit = Mock()
         discrete_columns = ['categorical', 'boolean']
         datetime_columns = ['datetime']
-        BaseDataAugmentationMetric._fit_preprocess.return_value = (
+        BaseDataAugmentationMetric._fit.return_value = (
             discrete_columns,
             datetime_columns,
         )
@@ -269,7 +265,7 @@ class TestBaseDataAugmentationMetric:
             'synthetic_data': synthetic_data,
             'real_validation_data': real_validation_data,
         }
-        BaseDataAugmentationMetric._transform_preprocess = Mock(return_value=tables)
+        BaseDataAugmentationMetric._transform = Mock(return_value=tables)
 
         # Run
         transformed = metric._fit_transform(
@@ -277,10 +273,10 @@ class TestBaseDataAugmentationMetric:
         )
 
         # Assert
-        BaseDataAugmentationMetric._fit_preprocess.assert_called_once_with(
+        BaseDataAugmentationMetric._fit.assert_called_once_with(
             real_training_data, metadata, 'target'
         )
-        BaseDataAugmentationMetric._transform_preprocess.assert_called_once_with(
+        BaseDataAugmentationMetric._transform.assert_called_once_with(
             tables, discrete_columns, datetime_columns, 'target', 1
         )
         for table_name, table in transformed.items():
