@@ -55,13 +55,13 @@ class TestBinaryClassifierRecallEfficacy:
             },
             'augmented_data': {
                 'precision_score_training': 0.8034682080924855,
-                'recall_score_validation': 0.8461538461538461,
-                'precision_score_validation': 0.44,
+                'recall_score_validation': 0.7692307692307693,
+                'precision_score_validation': 0.4,
                 'prediction_counts_validation': {
-                    'true_positive': 11,
-                    'false_positive': 14,
-                    'true_negative': 11,
-                    'false_negative': 2,
+                    'true_positive': 10,
+                    'false_positive': 15,
+                    'true_negative': 10,
+                    'false_negative': 3,
                 },
             },
             'parameters': {
@@ -136,23 +136,23 @@ class TestBinaryClassifierRecallEfficacy:
         expected_result = {
             'real_data_baseline': {
                 'precision_score_training': 0.8082191780821918,
-                'recall_score_validation': 0.6153846153846154,
-                'precision_score_validation': 0.38095238095238093,
+                'recall_score_validation': 0.6923076923076923,
+                'precision_score_validation': 0.391304347826087,
                 'prediction_counts_validation': {
-                    'true_positive': 8,
-                    'false_positive': 13,
-                    'true_negative': 20,
-                    'false_negative': 5,
+                    'true_positive': 9,
+                    'false_positive': 14,
+                    'true_negative': 19,
+                    'false_negative': 4,
                 },
             },
             'augmented_data': {
                 'precision_score_training': 0.8035714285714286,
                 'recall_score_validation': 0.7692307692307693,
-                'precision_score_validation': 0.4,
+                'precision_score_validation': 0.38461538461538464,
                 'prediction_counts_validation': {
                     'true_positive': 10,
-                    'false_positive': 15,
-                    'true_negative': 18,
+                    'false_positive': 16,
+                    'true_negative': 17,
                     'false_negative': 3,
                 },
             },
@@ -162,7 +162,7 @@ class TestBinaryClassifierRecallEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0.15384615384615385,
+            'score': 0.07692307692307698,
         }
         assert result_breakdown == expected_result
 
@@ -230,11 +230,11 @@ class TestBinaryClassifierRecallEfficacy:
             'augmented_data': {
                 'precision_score_training': 0.8,
                 'recall_score_validation': 1.0,
-                'precision_score_validation': 0.4642857142857143,
+                'precision_score_validation': 0.4482758620689655,
                 'prediction_counts_validation': {
                     'true_positive': 13,
-                    'false_positive': 15,
-                    'true_negative': 10,
+                    'false_positive': 16,
+                    'true_negative': 9,
                     'false_negative': 0,
                 },
             },
