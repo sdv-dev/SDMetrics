@@ -26,7 +26,7 @@ class TestBinaryClassifierRecallEfficacy:
             prediction_column_name='gender',
             minority_class_label='F',
             classifier='XGBoost',
-            fixed_recall_value=0.8,
+            fixed_precision_value=0.8,
         )
 
         score = BinaryClassifierRecallEfficacy.compute(
@@ -37,7 +37,7 @@ class TestBinaryClassifierRecallEfficacy:
             prediction_column_name='gender',
             minority_class_label='F',
             classifier='XGBoost',
-            fixed_recall_value=0.8,
+            fixed_precision_value=0.8,
         )
 
         # Assert
@@ -68,7 +68,7 @@ class TestBinaryClassifierRecallEfficacy:
                 'prediction_column_name': 'gender',
                 'minority_class_label': 'F',
                 'classifier': 'XGBoost',
-                'fixed_recall_value': 0.8,
+                'fixed_precision_value': 0.8,
             },
             'score': 0,
         }
@@ -106,7 +106,7 @@ class TestBinaryClassifierRecallEfficacy:
                 prediction_column_name='gender',
                 minority_class_label='F',
                 classifier='XGBoost',
-                fixed_recall_value=0.8,
+                fixed_precision_value=0.8,
             )
 
     def test_with_nan_target_column(self):
@@ -129,7 +129,7 @@ class TestBinaryClassifierRecallEfficacy:
             prediction_column_name='gender',
             minority_class_label='F',
             classifier='XGBoost',
-            fixed_recall_value=0.8,
+            fixed_precision_value=0.8,
         )
 
         # Assert
@@ -160,7 +160,7 @@ class TestBinaryClassifierRecallEfficacy:
                 'prediction_column_name': 'gender',
                 'minority_class_label': 'F',
                 'classifier': 'XGBoost',
-                'fixed_recall_value': 0.8,
+                'fixed_precision_value': 0.8,
             },
             'score': 0.07692307692307698,
         }
@@ -184,7 +184,7 @@ class TestBinaryClassifierRecallEfficacy:
             prediction_column_name='gender',
             minority_class_label='F',
             classifier='XGBoost',
-            fixed_recall_value=0.8,
+            fixed_precision_value=0.8,
         )
 
         # Assert
@@ -211,7 +211,7 @@ class TestBinaryClassifierRecallEfficacy:
             prediction_column_name='high_spec',
             minority_class_label='Science',
             classifier='XGBoost',
-            fixed_recall_value=0.8,
+            fixed_precision_value=0.8,
         )
 
         # Assert
@@ -242,7 +242,7 @@ class TestBinaryClassifierRecallEfficacy:
                 'prediction_column_name': 'high_spec',
                 'minority_class_label': 'Science',
                 'classifier': 'XGBoost',
-                'fixed_recall_value': 0.8,
+                'fixed_precision_value': 0.8,
             },
             'score': 0.07692307692307687,
         }
