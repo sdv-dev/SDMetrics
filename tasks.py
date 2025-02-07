@@ -30,8 +30,14 @@ def unit(c):
 
 
 @task
-def integration(c):
-    c.run('python -m pytest ./tests/integration --reruns 5 --disable-warnings --cov=sdmetrics --cov-report=xml:./integration_cov.xml')
+def integration(c, env=None):
+    env = env or {}
+    env.update({"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"})
+    
+    c.run(
+        'python -m pytest ./tests/integration --reruns 5 --disable-warnings --cov=sdmetrics --cov-report=xml:./integration_cov.xml',
+        env=env
+    )
 
 
 def _get_minimum_versions(dependencies, python_version):
@@ -88,8 +94,7 @@ def minimum(c):
     install_minimum(c)
     check_dependencies(c)
     unit(c)
-    integration(c)
-
+    integration(c, env={"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"})
 
 @task
 def readme(c):

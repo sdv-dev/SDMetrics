@@ -32,7 +32,7 @@ def set_plotly_config(function):
             ipython_interpreter = str(get_ipython())
             if 'ZMQInteractiveShell' in ipython_interpreter and 'iframe' in renderers:
                 # This means we are using jupyter notebook
-                pio.renderers.default = 'vscode'
+                pio.renderers.default = 'iframe'
 
         except Exception:
             pass
