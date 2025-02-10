@@ -13,27 +13,32 @@ classifiers = [
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
 ]
 keywords = ['sdmetrics', 'sdmetrics', 'SDMetrics']
 dynamic = ['version']
 license = { text = 'MIT license' }
-requires-python = ">=3.8,<3.13"
+requires-python = ">=3.8,<3.14"
 readme = 'README.md'
 dependencies = [
     "numpy>=1.21.0;python_version<'3.10'",
     "numpy>=1.23.3;python_version>='3.10' and python_version<'3.12'",
-    "numpy>=1.26.0;python_version>='3.12'",
+    "numpy>=1.26.0;python_version>='3.12' and python_version<'3.13'",
+    "numpy>=2.1.0;python_version>='3.13'",
     "pandas>=1.4.0;python_version<'3.11'",
     "pandas>=1.5.0;python_version>='3.11' and python_version<'3.12'",
-    "pandas>=2.1.1;python_version>='3.12'",
+    "pandas>=2.1.1;python_version>='3.12' and python_version<'3.13'",
+    "pandas>=2.2.3;python_version>='3.13'",
     "scikit-learn>=1.0.2;python_version<'3.10'",
     "scikit-learn>=1.1.0;python_version>='3.10' and python_version<'3.11'",
     "scikit-learn>=1.1.3;python_version>='3.11' and python_version<'3.12'",
-    "scikit-learn>=1.3.1;python_version>='3.12'",
+    "scikit-learn>=1.3.1;python_version>='3.12' and python_version<'3.13'",
+    "scikit-learn>=1.5.2;python_version>='3.13'",
     "scipy>=1.7.3;python_version<'3.10'",
     "scipy>=1.9.2;python_version>='3.10' and python_version<'3.12'",
-    "scipy>=1.12.0;python_version>='3.12'",
-    'copulas>=0.11.0',
+    "scipy>=1.12.0;python_version>='3.12' and python_version<'3.13'",
+    "scipy>=1.14.1;python_version>='3.13'",
+    'copulas>=0.12.1',
     'tqdm>=4.29',
     'plotly>=5.19.0',
 ]
@@ -52,7 +57,8 @@ sdmetrics = { main = 'sdmetrics.cli.__main__:main' }
 torch = [
     "torch>=1.8.0;python_version<'3.10'",
     "torch>=2.0.0;python_version>='3.10' and python_version<'3.12'",
-    "torch>=2.2.0;python_version>='3.12'",
+    "torch>=2.2.0;python_version>='3.12' and python_version<'3.13'",
+    "torch>=2.6.0;python_version>='3.13'",
 ]
 pomegranate = ['pomegranate>=0.15,<1.0']
 xgboost = ['xgboost>=2.1.3']
