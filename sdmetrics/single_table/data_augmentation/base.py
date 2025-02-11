@@ -245,8 +245,8 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         metadata,
         prediction_column_name,
         minority_class_label,
-        classifier=None,
-        fixed_value=0.9,
+        classifier,
+        fixed_value,
     ):
         """Compute the score of the metric.
 
@@ -265,10 +265,10 @@ class BaseDataAugmentationMetric(SingleTableMetric):
                 The minority class label.
             classifier (str):
                 The ML algorithm to use when building a Binary Classfication.
-                Supported options are ``XGBoost``. Defaults to ``XGBoost``.
+                Supported options are ``XGBoost``.
             fixed_value (float):
-                A float in the range (0, 1.0) describing the value to fix for the metric to fix
-                when building the Binary Classification model. Defaults to ``0.9``.
+                A float value in the range (0, 1.0) that specifies the metric value
+                to fix when building the Binary Classification model.
 
         Returns:
             float:

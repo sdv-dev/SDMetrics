@@ -83,7 +83,7 @@ class TestBinaryClassifierRecallEfficacy:
         real_validation['gender'] = 'M'
         expected_error = re.escape(
             "The metric can't be computed because the value `F` is not present in the column "
-            '`gender` for the real validation data. The `precision`and `recall` are undefined'
+            '`gender` for the real validation data. The `precision` and `recall` are undefined'
             ' for this case.'
         )
 

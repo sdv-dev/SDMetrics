@@ -18,8 +18,8 @@ class BinaryClassifierRecallEfficacy(BaseDataAugmentationMetric):
         metadata,
         prediction_column_name,
         minority_class_label,
-        classifier,
-        fixed_precision_value,
+        classifier='XGBoost',
+        fixed_precision_value=0.9,
     ):
         """Compute the score breakdown of the metric."""
         return super().compute_breakdown(
@@ -42,8 +42,8 @@ class BinaryClassifierRecallEfficacy(BaseDataAugmentationMetric):
         metadata,
         prediction_column_name,
         minority_class_label,
-        classifier,
-        fixed_precision_value,
+        classifier='XGBoost',
+        fixed_precision_value=0.9,
     ):
         """Compute the score of the metric.
 
@@ -65,6 +65,7 @@ class BinaryClassifierRecallEfficacy(BaseDataAugmentationMetric):
                 Supported options are ``XGBoost``. Defaults to ``XGBoost``.
             fixed_precision_value (float):
                 The fixed precision value to be used when calculating the recall score.
+                Defaults to 0.9.
 
         Returns:
             float:
