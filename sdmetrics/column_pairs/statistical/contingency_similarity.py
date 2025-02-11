@@ -98,7 +98,7 @@ class ContingencySimilarity(ColumnPairsMetric):
 
         real = real_data[columns]
         synthetic = synthetic_data[columns]
-        if continuous_column_names is not None:
+        if continuous_column_names:
             for column in continuous_column_names:
                 real[column], synthetic[column] = discretize_column(
                     real[column], synthetic[column], num_discrete_bins=num_discrete_bins
