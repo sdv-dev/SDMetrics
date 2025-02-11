@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import pandas as pd
 
-from sdmetrics.single_table.data_augmentation.binary_classifier_precision_efficacy import (
-    BinaryClassifierPrecisionEfficacy,
+from sdmetrics.single_table.data_augmentation.binary_classifier_recall_efficacy import (
+    BinaryClassifierRecallEfficacy,
 )
 
 
@@ -13,12 +13,12 @@ class TestBinaryClassifierPrecisionEfficacy:
     def test_class_attributes(self):
         """Test the class attributes."""
         # Setup
-        expected_name = 'Binary Classifier Precision Efficacy'
-        expected_metric_name = 'precision'
+        expected_name = 'Binary Classifier Recall Efficacy'
+        expected_metric_name = 'recall'
 
         # Run and Assert
-        assert BinaryClassifierPrecisionEfficacy.name == expected_name
-        assert BinaryClassifierPrecisionEfficacy.metric_name == expected_metric_name
+        assert BinaryClassifierRecallEfficacy.name == expected_name
+        assert BinaryClassifierRecallEfficacy.metric_name == expected_metric_name
 
     @patch(
         'sdmetrics.single_table.data_augmentation.base.BaseDataAugmentationMetric.compute_breakdown'
@@ -33,10 +33,10 @@ class TestBinaryClassifierPrecisionEfficacy:
         prediction_column_name = 'prediction_column_name'
         minority_class_label = 'minority_class_label'
         classifier = 'XGBoost'
-        fixed_recall_value = 0.8
+        fixed_precision_value = 0.8
 
         # Run
-        BinaryClassifierPrecisionEfficacy.compute_breakdown(
+        BinaryClassifierRecallEfficacy.compute_breakdown(
             real_training_data=real_training_data,
             synthetic_data=synthetic_data,
             real_validation_data=real_validation_data,
@@ -44,7 +44,7 @@ class TestBinaryClassifierPrecisionEfficacy:
             prediction_column_name=prediction_column_name,
             minority_class_label=minority_class_label,
             classifier=classifier,
-            fixed_recall_value=fixed_recall_value,
+            fixed_precision_value=fixed_precision_value,
         )
 
         # Assert
@@ -56,7 +56,7 @@ class TestBinaryClassifierPrecisionEfficacy:
             prediction_column_name,
             minority_class_label,
             classifier,
-            fixed_recall_value,
+            fixed_precision_value,
         )
 
     @patch('sdmetrics.single_table.data_augmentation.base.BaseDataAugmentationMetric.compute')
@@ -70,10 +70,10 @@ class TestBinaryClassifierPrecisionEfficacy:
         prediction_column_name = 'prediction_column_name'
         minority_class_label = 'minority_class_label'
         classifier = 'XGBoost'
-        fixed_recall_value = 0.8
+        fixed_precision_value = 0.8
 
         # Run
-        BinaryClassifierPrecisionEfficacy.compute(
+        BinaryClassifierRecallEfficacy.compute(
             real_training_data=real_training_data,
             synthetic_data=synthetic_data,
             real_validation_data=real_validation_data,
@@ -81,7 +81,7 @@ class TestBinaryClassifierPrecisionEfficacy:
             prediction_column_name=prediction_column_name,
             minority_class_label=minority_class_label,
             classifier=classifier,
-            fixed_recall_value=fixed_recall_value,
+            fixed_precision_value=fixed_precision_value,
         )
 
         # Assert
@@ -93,5 +93,5 @@ class TestBinaryClassifierPrecisionEfficacy:
             prediction_column_name,
             minority_class_label,
             classifier,
-            fixed_recall_value,
+            fixed_precision_value,
         )

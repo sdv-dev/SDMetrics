@@ -179,7 +179,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         prediction_column_name,
         minority_class_label,
         classifier,
-        fixed_recall_value,
+        fixed_value,
     ):
         """Compute the score breakdown of the metric."""
         _validate_inputs(
@@ -190,7 +190,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             prediction_column_name,
             minority_class_label,
             classifier,
-            fixed_recall_value,
+            fixed_value,
         )
         preprocessed_tables = cls._fit_transform(
             real_training_data,
@@ -204,7 +204,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             prediction_column_name,
             minority_class_label,
             classifier,
-            fixed_recall_value,
+            fixed_value,
             cls.metric_name,
         )
         metric_to_fix = 'recall' if cls.metric_name == 'precision' else 'precision'
@@ -245,8 +245,8 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         metadata,
         prediction_column_name,
         minority_class_label,
-        classifier=None,
-        fixed_recall_value=0.9,
+        classifier,
+        fixed_value,
     ):
         """Compute the score of the metric.
 
@@ -265,10 +265,10 @@ class BaseDataAugmentationMetric(SingleTableMetric):
                 The minority class label.
             classifier (str):
                 The ML algorithm to use when building a Binary Classfication.
-                Supported options are ``XGBoost``. Defaults to ``XGBoost``.
-            fixed_recall_value (float):
-                A float in the range (0, 1.0) describing the value to fix for the recall when
-                building the Binary Classification model. Defaults to ``0.9``.
+                Supported options are ``XGBoost``.
+            fixed_value (float):
+                A float value in the range (0, 1.0) that specifies the metric value
+                to fix when building the Binary Classification model.
 
         Returns:
             float:
@@ -282,7 +282,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             prediction_column_name,
             minority_class_label,
             classifier,
-            fixed_recall_value,
+            fixed_value,
         )
 
         return breakdown['score']

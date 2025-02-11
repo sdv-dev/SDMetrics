@@ -1,13 +1,13 @@
-"""Binary classifier precision efficacy metric."""
+"""Binary classifier recall efficacy metric."""
 
 from sdmetrics.single_table.data_augmentation.base import BaseDataAugmentationMetric
 
 
-class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
-    """Binary classifier precision efficacy metric."""
+class BinaryClassifierRecallEfficacy(BaseDataAugmentationMetric):
+    """Binary classifier recall efficacy metric."""
 
-    name = 'Binary Classifier Precision Efficacy'
-    metric_name = 'precision'
+    name = 'Binary Classifier Recall Efficacy'
+    metric_name = 'recall'
 
     @classmethod
     def compute_breakdown(
@@ -18,8 +18,8 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
         metadata,
         prediction_column_name,
         minority_class_label,
-        classifier,
-        fixed_recall_value,
+        classifier='XGBoost',
+        fixed_precision_value=0.9,
     ):
         """Compute the score breakdown of the metric."""
         return super().compute_breakdown(
@@ -30,7 +30,7 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
             prediction_column_name,
             minority_class_label,
             classifier,
-            fixed_recall_value,
+            fixed_precision_value,
         )
 
     @classmethod
@@ -42,8 +42,8 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
         metadata,
         prediction_column_name,
         minority_class_label,
-        classifier,
-        fixed_recall_value,
+        classifier='XGBoost',
+        fixed_precision_value=0.9,
     ):
         """Compute the score of the metric.
 
@@ -63,8 +63,9 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
             classifier (str):
                 The ML algorithm to use when building a Binary Classfication.
                 Supported options are ``XGBoost``. Defaults to ``XGBoost``.
-            fixed_recall_value (float):
-                The fixed recall value to be used when calculating the precision score.
+            fixed_precision_value (float):
+                The fixed precision value to be used when calculating the recall score.
+                Defaults to 0.9.
 
         Returns:
             float:
@@ -78,5 +79,5 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
             prediction_column_name,
             minority_class_label,
             classifier,
-            fixed_recall_value,
+            fixed_precision_value,
         )

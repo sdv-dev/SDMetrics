@@ -108,7 +108,7 @@ def test__validate_data_and_metadata():
     )
     expected_error_missing_minority = re.escape(
         "The metric can't be computed because the value `1` is not present in "
-        'the column `target` for the real validation data. The `precision`and `recall`'
+        'the column `target` for the real validation data. The `precision` and `recall`'
         ' are undefined for this case.'
     )
     expected_error_synthetic_wrong_label = re.escape(
