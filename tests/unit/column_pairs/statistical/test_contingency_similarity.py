@@ -86,9 +86,26 @@ class TestContingencySimilarity:
             )
 
     @patch(
+        'sdmetrics.column_pairs.statistical.contingency_similarity.ContingencySimilarity.compute_breakdown'
+    )
+    def test_compute_mock(self, compute_breakdown_mock):
+        """Test that the ``compute`` method calls the ``compute_breakdown`` method."""
+        # Setup
+        real_data = pd.DataFrame({'col1': [1.0, 2.4, 2.6, 0.8], 'col2': [1, 2, 3, 4]})
+        synthetic_data = pd.DataFrame({'col1': [1.0, 1.8, 2.6, 1.0], 'col2': [2, 3, 7, -10]})
+        compute_breakdown_mock.return_value = {'score': 0.25}
+
+        # Run
+        score = ContingencySimilarity.compute(real_data, synthetic_data)
+
+        # Assert
+        compute_breakdown_mock.assert_called_once_with(real_data, synthetic_data, None, 10, None)
+        assert score == 0.25
+
+    @patch(
         'sdmetrics.column_pairs.statistical.contingency_similarity.ContingencySimilarity._validate_inputs'
     )
-    def test_compute(self, validate_inputs_mock):
+    def test_compute_breakdown(self, validate_inputs_mock):
         """Test the ``compute`` method.
 
         Expect that the total variation distance of the two contingency matricies
@@ -108,7 +125,7 @@ class TestContingencySimilarity:
 
         # Run
         metric = ContingencySimilarity()
-        result = metric.compute(real_data, synthetic_data)
+        result = metric.compute_breakdown(real_data, synthetic_data)
 
         # Assert
         validate_inputs_mock.assert_called_once_with(
@@ -118,7 +135,7 @@ class TestContingencySimilarity:
             10,
             None,
         )
-        assert result == expected_score
+        assert result == {'score': expected_score}
 
     @patch('sdmetrics.column_pairs.statistical.contingency_similarity.discretize_column')
     def test_compute_with_num_rows_subsample(self, discretize_column_mock):

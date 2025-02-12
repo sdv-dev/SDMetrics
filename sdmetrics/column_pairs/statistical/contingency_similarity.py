@@ -54,7 +54,7 @@ class ContingencySimilarity(ColumnPairsMetric):
                 raise ValueError('`num_rows_subsample` must be an integer greater than zero.')
 
     @classmethod
-    def compute(
+    def compute_breakdown(
         cls,
         real_data,
         synthetic_data,
@@ -62,27 +62,7 @@ class ContingencySimilarity(ColumnPairsMetric):
         num_discrete_bins=10,
         num_rows_subsample=None,
     ):
-        """Compare the contingency similarity of two discrete columns.
-
-        Args:
-            real_data (pd.DataFrame):
-                The values from the real dataset.
-            synthetic_data (pd.DataFrame):
-                The values from the synthetic dataset.
-            continuous_column_names (list[str], optional):
-                The list of columns to discretize before running the metric. The column names in
-                this list should match the column names in the real and synthetic data. Defaults
-                to ``None``.
-            num_discrete_bins (int, optional):
-                The number of bins to create for the continuous columns. Defaults to 10.
-            num_rows_subsample (int, optional):
-                The number of rows to subsample from the real and synthetic data before computing
-                the metric. Defaults to ``None``.
-
-        Returns:
-            float:
-                The contingency similarity of the two columns.
-        """
+        """Compute the breakdown of this metric."""
         cls._validate_inputs(
             real_data,
             synthetic_data,
@@ -113,7 +93,45 @@ class ContingencySimilarity(ColumnPairsMetric):
         contingency_real = contingency_real.reindex(combined_index, fill_value=0)
         diff = abs(contingency_real - contingency_synthetic).fillna(0)
         variation = diff / 2
-        return 1 - variation.sum()
+        return {'score': 1 - variation.sum()}
+
+    @classmethod
+    def compute(
+        cls,
+        real_data,
+        synthetic_data,
+        continuous_column_names=None,
+        num_discrete_bins=10,
+        num_rows_subsample=None,
+    ):
+        """Compare the contingency similarity of two discrete columns.
+
+        Args:
+            real_data (pd.DataFrame):
+                The values from the real dataset.
+            synthetic_data (pd.DataFrame):
+                The values from the synthetic dataset.
+            continuous_column_names (list[str], optional):
+                The list of columns to discretize before running the metric. The column names in
+                this list should match the column names in the real and synthetic data. Defaults
+                to ``None``.
+            num_discrete_bins (int, optional):
+                The number of bins to create for the continuous columns. Defaults to 10.
+            num_rows_subsample (int, optional):
+                The number of rows to subsample from the real and synthetic data before computing
+                the metric. Defaults to ``None``.
+
+        Returns:
+            float:
+                The contingency similarity of the two columns.
+        """
+        return cls.compute_breakdown(
+            real_data,
+            synthetic_data,
+            continuous_column_names,
+            num_discrete_bins,
+            num_rows_subsample,
+        )['score']
 
     @classmethod
     def normalize(cls, raw_score):
