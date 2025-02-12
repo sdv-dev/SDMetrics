@@ -271,7 +271,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
                 continue
 
-            columns_real, columns_synthetic, metric, metric_params = self._get_columns_data_and_metric(
+            col_real, col_synthetic, metric, metric_params = self._get_columns_data_and_metric(
                 column_name_1,
                 column_name_2,
                 processed_real_data,
@@ -289,7 +289,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
                     raise Exception('Preprocessing failed')
 
                 score_breakdown = metric.compute_breakdown(
-                    real_data=columns_real, synthetic_data=columns_synthetic, **metric_params
+                    real_data=col_real, synthetic_data=col_synthetic, **metric_params
                 )
                 pair_score = score_breakdown['score']
                 if metric.__name__ == 'CorrelationSimilarity':
