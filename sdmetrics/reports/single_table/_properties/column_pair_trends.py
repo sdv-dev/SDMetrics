@@ -188,7 +188,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         metric_parameters = {}
         if (metric == ContingencySimilarity) and (
-            min(len(data_real), len(data_synthetic)) > DEFAULT_NUM_ROWS_SUBSAMPLE
+            max(len(data_real), len(data_synthetic)) > DEFAULT_NUM_ROWS_SUBSAMPLE
         ):
             metric_parameters['num_rows_subsample'] = DEFAULT_NUM_ROWS_SUBSAMPLE
 
