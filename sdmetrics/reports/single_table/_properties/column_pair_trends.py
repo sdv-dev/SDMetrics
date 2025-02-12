@@ -184,7 +184,11 @@ class ColumnPairTrends(BaseSingleTableProperty):
             data_real = real_data[[column_name_1, column_name_2]]
             data_synthetic = synthetic_data[[column_name_1, column_name_2]]
 
-        return data_real, data_synthetic, metric
+        metric_parameters = {}
+        if metric == ContingencySimilarity and min(len(data_real), len(data_synthetic)) > 50000:
+            metric_parameters['num_rows_subsample'] = 50000
+
+        return data_real, data_synthetic, metric, metric_parameters
 
     def _preprocessing_failed(self, column_name_1, column_name_2, sdtype_col_1, sdtype_col_2):
         """Check if a processing of one of the columns has failed.
@@ -267,7 +271,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
                 continue
 
-            columns_real, columns_synthetic, metric = self._get_columns_data_and_metric(
+            columns_real, columns_synthetic, metric, metric_params = self._get_columns_data_and_metric(
                 column_name_1,
                 column_name_2,
                 processed_real_data,
@@ -285,7 +289,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
                     raise Exception('Preprocessing failed')
 
                 score_breakdown = metric.compute_breakdown(
-                    real_data=columns_real, synthetic_data=columns_synthetic
+                    real_data=columns_real, synthetic_data=columns_synthetic, **metric_params
                 )
                 pair_score = score_breakdown['score']
                 if metric.__name__ == 'CorrelationSimilarity':
