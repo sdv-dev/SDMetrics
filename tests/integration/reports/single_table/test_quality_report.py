@@ -159,6 +159,35 @@ class TestQualityReport:
         assert report_info['num_rows_synthetic_data'] == 215
         assert report_info['generation_time'] <= generate_end_time - generate_start_time
 
+    def test_with_large_dataset(self):
+        """Test the quality report with a large dataset (>50000 rows).
+
+        The `real_data` and `synthetic_data` in the demo have 215 rows.
+        So we augment them to be larger than 50000 rows.
+        """
+        # Setup
+        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data = pd.concat([real_data] * 1000, ignore_index=True)
+        synthetic_data = pd.concat([synthetic_data] * 1000, ignore_index=True)
+
+        report_1 = QualityReport()
+        report_2 = QualityReport()
+
+        # Run
+        report_1.generate(real_data, synthetic_data, metadata, verbose=False)
+        score_1_run_1 = report_1.get_score()
+        report_1.generate(real_data, synthetic_data, metadata, verbose=False)
+        score_1_run_2 = report_1.get_score()
+        report_2.generate(real_data, synthetic_data, metadata, verbose=False)
+
+        # Assert
+        cpt_report_1 = report_1.get_properties().iloc[1]['Score']
+        cpt_report_2 = report_2.get_properties().iloc[1]['Score']
+        assert score_1_run_1 != score_1_run_2
+        assert np.isclose(score_1_run_1, score_1_run_2, atol=0.001)
+        assert np.isclose(report_2.get_score(), score_1_run_1, atol=0.001)
+        assert np.isclose(cpt_report_1, cpt_report_2, atol=0.001)
+
     def test_quality_report_with_object_datetimes(self):
         """Test the quality report with object datetimes.
 
