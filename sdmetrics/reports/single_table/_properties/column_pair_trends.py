@@ -10,6 +10,8 @@ from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.utils import is_datetime
 
+DEFAULT_NUM_ROWS_SUBSAMPLE = 50000
+
 
 class ColumnPairTrends(BaseSingleTableProperty):
     """Column pair trends property.
@@ -185,8 +187,10 @@ class ColumnPairTrends(BaseSingleTableProperty):
             data_synthetic = synthetic_data[[column_name_1, column_name_2]]
 
         metric_parameters = {}
-        if metric == ContingencySimilarity and min(len(data_real), len(data_synthetic)) > 50000:
-            metric_parameters['num_rows_subsample'] = 50000
+        if (metric == ContingencySimilarity) and (
+            min(len(data_real), len(data_synthetic)) > DEFAULT_NUM_ROWS_SUBSAMPLE
+        ):
+            metric_parameters['num_rows_subsample'] = DEFAULT_NUM_ROWS_SUBSAMPLE
 
         return data_real, data_synthetic, metric, metric_parameters
 
