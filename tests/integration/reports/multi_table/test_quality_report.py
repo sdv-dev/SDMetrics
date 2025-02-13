@@ -384,6 +384,7 @@ def test_with_large_dataset():
     The tables of the demo dataset have 10 rows each. We will replicate the rows 10000 times.
     """
     # Setup
+    np.random.seed(42)
     real_data, synthetic_data, metadata = load_demo(modality='multi_table')
     real_data['users'] = pd.concat([real_data['users']] * 10000, ignore_index=True)
     synthetic_data['users'] = pd.concat([synthetic_data['users']] * 10000, ignore_index=True)
