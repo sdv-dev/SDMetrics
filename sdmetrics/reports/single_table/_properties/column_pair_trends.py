@@ -10,6 +10,8 @@ from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.utils import is_datetime
 
+DEFAULT_NUM_ROWS_SUBSAMPLE = 50000
+
 
 class ColumnPairTrends(BaseSingleTableProperty):
     """Column pair trends property.
@@ -267,7 +269,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
                 continue
 
-            columns_real, columns_synthetic, metric = self._get_columns_data_and_metric(
+            col_real, col_synthetic, metric = self._get_columns_data_and_metric(
                 column_name_1,
                 column_name_2,
                 processed_real_data,
@@ -277,6 +279,12 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 metadata,
             )
 
+            metric_params = {}
+            if (metric == ContingencySimilarity) and (
+                max(len(col_real), len(col_synthetic)) > DEFAULT_NUM_ROWS_SUBSAMPLE
+            ):
+                metric_params['num_rows_subsample'] = DEFAULT_NUM_ROWS_SUBSAMPLE
+
             try:
                 error = self._preprocessing_failed(
                     column_name_1, column_name_2, sdtype_col_1, sdtype_col_2
@@ -285,7 +293,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
                     raise Exception('Preprocessing failed')
 
                 score_breakdown = metric.compute_breakdown(
-                    real_data=columns_real, synthetic_data=columns_synthetic
+                    real_data=col_real, synthetic_data=col_synthetic, **metric_params
                 )
                 pair_score = score_breakdown['score']
                 if metric.__name__ == 'CorrelationSimilarity':

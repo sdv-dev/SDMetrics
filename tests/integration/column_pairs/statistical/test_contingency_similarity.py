@@ -10,6 +10,7 @@ def test_with_num_rows_subsample():
     Here the `real_data` and `syntehtic_data` have 218 rows.
     """
     # Setup
+    np.random.seed(42)
     real_data, synthetic_data, _ = load_demo('single_table')
     real_data = real_data[['degree_type', 'high_spec']]
     synthetic_data = synthetic_data[['degree_type', 'high_spec']]
