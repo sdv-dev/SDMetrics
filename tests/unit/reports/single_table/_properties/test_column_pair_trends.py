@@ -231,42 +231,12 @@ class TestColumnPairTrends:
             'ContingencySimilarity',
         ]
         for idx, (col1, col2) in enumerate(itertools.combinations(metadata['columns'], 2)):
-            cols_real, cols_synthetic, metric, params = cpt_property._get_columns_data_and_metric(
+            cols_real, cols_synthetic, metric = cpt_property._get_columns_data_and_metric(
                 col1, col2, real_data, discrete_real, synthetic_data, discrete_synthetic, metadata
             )
             pd.testing.assert_frame_equal(cols_real, expected_real_data_return[idx])
             pd.testing.assert_frame_equal(cols_synthetic, expected_synthetic_data_return[idx])
             assert metric.__name__ == expected_metric_return[idx]
-            assert params == {}
-
-    def test__get_columns_data_and_metric_big_dataset(self):
-        """Test the ``_get_columns_data_and_metric`` for data with more than 50000 rows."""
-        # Setup
-        real_data = pd.DataFrame({
-            'col1': ['a', 'b', 'c'] * 20000,
-            'col2': [False, True, True] * 20000,
-        })
-        synthetic_data = pd.DataFrame({
-            'col1': ['c', 'a', 'b'] * 20000,
-            'col2': [False, False, True] * 20000,
-        })
-
-        metadata = {
-            'columns': {
-                'col1': {'sdtype': 'categorical'},
-                'col2': {'sdtype': 'boolean'},
-            }
-        }
-        cpt_property = ColumnPairTrends()
-
-        # Run
-        _, _, metric, params = cpt_property._get_columns_data_and_metric(
-            'col1', 'col2', real_data, None, synthetic_data, None, metadata
-        )
-
-        # Assert
-        assert params == {'num_rows_subsample': 50000}
-        assert metric.__name__ == 'ContingencySimilarity'
 
     def test_preprocessing_failed(self):
         """Test the ``_preprocessing_failed`` method."""

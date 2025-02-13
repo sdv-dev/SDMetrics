@@ -186,13 +186,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             data_real = real_data[[column_name_1, column_name_2]]
             data_synthetic = synthetic_data[[column_name_1, column_name_2]]
 
-        metric_parameters = {}
-        if (metric == ContingencySimilarity) and (
-            max(len(data_real), len(data_synthetic)) > DEFAULT_NUM_ROWS_SUBSAMPLE
-        ):
-            metric_parameters['num_rows_subsample'] = DEFAULT_NUM_ROWS_SUBSAMPLE
-
-        return data_real, data_synthetic, metric, metric_parameters
+        return data_real, data_synthetic, metric
 
     def _preprocessing_failed(self, column_name_1, column_name_2, sdtype_col_1, sdtype_col_2):
         """Check if a processing of one of the columns has failed.
@@ -275,7 +269,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
                 continue
 
-            col_real, col_synthetic, metric, metric_params = self._get_columns_data_and_metric(
+            col_real, col_synthetic, metric = self._get_columns_data_and_metric(
                 column_name_1,
                 column_name_2,
                 processed_real_data,
@@ -284,6 +278,12 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 discrete_synthetic,
                 metadata,
             )
+
+            metric_params = {}
+            if (metric == ContingencySimilarity) and (
+                max(len(col_real), len(col_synthetic)) > DEFAULT_NUM_ROWS_SUBSAMPLE
+            ):
+                metric_params['num_rows_subsample'] = DEFAULT_NUM_ROWS_SUBSAMPLE
 
             try:
                 error = self._preprocessing_failed(
