@@ -124,7 +124,7 @@ class TestBinaryClassifierRecallEfficacy:
         )
 
         # Assert
-        assert result_breakdown['score'] in (0.46153846153846156, 0.5384615384615385)
+        assert result_breakdown['score'] in (0.5, 0.5384615384615385)
 
     def test_with_minority_being_majority(self):
         """Test the metric when the minority class is the majority class."""
