@@ -162,7 +162,7 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0,
+            'score': 0.48571428571428577,
         }
         assert result_breakdown == expected_result
 
@@ -244,6 +244,6 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0,
+            'score': 0.4944444444444444,
         }
         assert score_breakdown == expected_score_breakdown

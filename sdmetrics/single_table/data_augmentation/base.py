@@ -227,13 +227,9 @@ class BaseDataAugmentationMetric(SingleTableMetric):
                 f'fixed_{metric_to_fix}_value': trainer.fixed_value,
             },
         }
-        result['score'] = max(
-            0,
-            (
-                result['augmented_data'][f'{cls.metric_name}_score_validation']
-                - result['real_data_baseline'][f'{cls.metric_name}_score_validation']
-            ),
-        )
+        augmented_score = result['augmented_data'][f'{cls.metric_name}_score_validation']
+        baseline_score = result['real_data_baseline'][f'{cls.metric_name}_score_validation']
+        result['score'] = (augmented_score - baseline_score) / 2 + 0.5
         return result
 
     @classmethod
