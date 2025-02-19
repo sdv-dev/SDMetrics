@@ -1,3 +1,4 @@
+import random
 import re
 from datetime import datetime
 
@@ -320,3 +321,17 @@ def test_calculate_dcr_bad_col(test_metadata):
         calculate_dcr(
             synthetic_data=fake_dataframe, comparison_data=fake_dataframe, metadata=test_metadata
         )
+
+
+def test_calculate_dcr_with_shuffled_data():
+    # Setup
+    data = [random.randint(1, 100) for _ in range(20)]
+    train_data = pd.DataFrame({'num_col': random.sample(data, len(data))})
+    synthetic_data = pd.DataFrame({'num_col': random.sample(data, len(data))})
+    metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
+
+    # Run
+    result = calculate_dcr(synthetic_data, train_data, metadata)
+
+    # Assert
+    assert result.eq(0).all().all()
