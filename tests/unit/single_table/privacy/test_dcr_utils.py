@@ -1,3 +1,4 @@
+import random
 import re
 from datetime import datetime
 
@@ -322,82 +323,15 @@ def test_calculate_dcr_bad_col(test_metadata):
             synthetic_data=fake_dataframe, comparison_data=fake_dataframe, metadata=test_metadata
         )
 
+def test_calculate_dcr_with_shuffled_data():
+    # Setup
+    data = [random.randint(1, 100) for _ in range(20)]
+    train_data = pd.DataFrame({'num_col': random.sample(data, len(data))})
+    synthetic_data = pd.DataFrame({'num_col': random.sample(data, len(data))})
+    metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
 
-# TODO Debug
-def test_debug():
-    data_train = pd.DataFrame({
-        'num_col': [10, 20, np.nan, 40, 50, 60],
-        'cat_col': ['A', 'B', 'A', None, 'B', 'C'],
-        'bool_col': [True, False, True, False, None, False],
-        'datetime_str_col': [
-            '2025-01-01',
-            '2025-01-31',
-            '2025-01-10',
-            '2025-01-21',
-            None,
-            '2025-01-12',
-        ],
-        'datetime_col': [
-            datetime(2025, 1, 1),
-            datetime(2025, 1, 31),
-            datetime(2025, 1, 10),
-            datetime(2025, 1, 21),
-            pd.NaT,
-            datetime(2025, 1, 12),
-        ],
-        'id_col': [6, 5, 4, 3, 2, 1]
-    })
+    # Run
+    result = calculate_dcr(synthetic_data, train_data, metadata)
 
-    data_synth = pd.DataFrame({
-        'num_col': [10, 25, 30, 21, 7, np.nan],
-        'cat_col': ['C', None, 'A', None, 'B', 'C'],
-        'bool_col': [False, True, True, False, True, None],
-        'datetime_str_col': [
-            '2025-01-10',
-            '2025-01-22',
-            None,
-            '2025-01-02',
-            '2025-01-30',
-            '2025-01-06',
-        ],
-        'datetime_col': [
-            datetime(2025, 1, 10),
-            datetime(2025, 1, 22),
-            pd.NaT,
-            datetime(2025, 1, 2),
-            datetime(2025, 1, 30),
-            datetime(2025, 1, 6),
-        ],
-        'id_col': [1, 2, 3, 4, 5, 6]
-    })
-
-    custom_metadata = {
-        'primary_key': 'student_id',
-        'columns': {
-            'num_col': {
-                'sdtype': 'numerical',
-            },
-            'cat_col': {
-                'sdtype': 'categorical',
-            },
-            'bool_col': {
-                'sdtype': 'boolean',
-            },
-            'datetime_str_col': {
-                'sdtype': 'datetime',
-                'datetime_format': '%Y-%m-%d',
-            },
-            'datetime_col': {
-                'sdtype': 'datetime',
-            },
-            'id_col': {
-                'sdtype': 'id',
-            }
-        },
-    }
-
-    dcr_baseline_protection = DCRBaselineProtection()
-    print(f'Debug: {type(train_data)}')
-    result = dcr_baseline_protection.compute_breakdown(data_train, data_synth, data_synth, custom_metadata, 10, 5)
-    print(result)
-    assert False
+    # Assert
+    assert result.eq(0).all().all()
