@@ -6,9 +6,9 @@ import pandas as pd
 import pytest
 
 from sdmetrics.single_table.privacy.dcr_utils import (
-    _calculate_dcr_dist,
-    _calculate_dcr_dist_between_rows,
-    _calculate_dist_between_row_and_data,
+    _calculate_dcr_between_row_and_data,
+    _calculate_dcr_between_rows,
+    _calculate_dcr_value,
     calculate_dcr,
 )
 
@@ -191,17 +191,17 @@ def check_if_value_in_threshold(value, expected_value, threshold=ACCURACY_THRESH
         (datetime(2025, 10, 10), datetime(2025, 1, 1), SECONDS_IN_DAY, 'datetime_col', 1.0),
     ],
 )
-def test__calculate_dcr_dist(s_value, d_value, range, col_name, expected_dist, test_metadata):
-    """Test _calculate_dcr_dist with different types of values."""
+def test__calculate_dcr_value(s_value, d_value, range, col_name, expected_dist, test_metadata):
+    """Test _calculate_dcr_value with different types of values."""
     # Run
-    dist = _calculate_dcr_dist(s_value, d_value, col_name, test_metadata, range)
+    dist = _calculate_dcr_value(s_value, d_value, col_name, test_metadata, range)
 
     # Assert
     assert dist == expected_dist
 
 
-def test__calculate_dcr_dist_missing_range(test_metadata):
-    """Test _calculate_dcr_dist with missing range for numerical values."""
+def test__calculate_dcr_value_missing_range(test_metadata):
+    """Test _calculate_dcr_value with missing range for numerical values."""
     # Setup
     col_name = 'num_col'
     error_message = (
@@ -211,33 +211,31 @@ def test__calculate_dcr_dist_missing_range(test_metadata):
 
     # Assert
     with pytest.raises(ValueError, match=error_message):
-        _calculate_dcr_dist(1, 1, col_name, test_metadata, None)
+        _calculate_dcr_value(1, 1, col_name, test_metadata, None)
 
 
-def test__calculate_dcr_dist_missing_column(test_metadata):
-    """Test _calculate_dcr_dist with a missing column."""
+def test__calculate_dcr_value_missing_column(test_metadata):
+    """Test _calculate_dcr_value with a missing column."""
     # Setup
     col_name = 'bad_col'
     error_message = f'Column {col_name} was not found in the metadata.'
 
     # Assert
     with pytest.raises(ValueError, match=error_message):
-        _calculate_dcr_dist(1, 1, col_name, test_metadata, 1)
+        _calculate_dcr_value(1, 1, col_name, test_metadata, 1)
 
 
-def test__calculate_dcr_dist_between_rows(
+def test__calculate_dcr_between_rows(
     synthetic_data, train_data, test_metadata, column_ranges, expected_row_comparisons
 ):
-    """Test _calculate_dcr_dist_between_rows for all row combinations"""
+    """Test _calculate_dcr_between_rows for all row combinations"""
     # Setup
     result = []
 
     # Run
     for _, s_row_obj in synthetic_data.iterrows():
         for _, t_row_obj in train_data.iterrows():
-            dist = _calculate_dcr_dist_between_rows(
-                s_row_obj, t_row_obj, column_ranges, test_metadata
-            )
+            dist = _calculate_dcr_between_rows(s_row_obj, t_row_obj, column_ranges, test_metadata)
             result.append(dist)
 
     # Assert
@@ -246,8 +244,8 @@ def test__calculate_dcr_dist_between_rows(
         check_if_value_in_threshold(result[i], expected_dist)
 
 
-def test__calculate_dcr_dist_between_rows_bad_index():
-    """Run _calculate_dcr_dist_between_rows with an index that does not exist in comparison row."""
+def test__calculate_dcr_between_rows_bad_index():
+    """Run _calculate_dcr_between_rows with an index that does not exist in comparison row."""
     # Setup
     synth_dataframe = pd.DataFrame({
         'A': [0.0, 0.0, 0.0],
@@ -263,21 +261,21 @@ def test__calculate_dcr_dist_between_rows_bad_index():
 
     # Assert
     with pytest.raises(ValueError, match=error_msg):
-        _calculate_dcr_dist_between_rows(
+        _calculate_dcr_between_rows(
             synth_dataframe.iloc[0], train_dataframe.iloc[0], test_range, metadata
         )
 
 
-def test__calculate_dist_between_row_and_data(
+def test__calculate_dcr_between_row_and_data(
     synthetic_data, train_data, column_ranges, test_metadata, expected_dcr_result
 ):
-    """Test _calculate_dist_between_row_and_data for all row combinations"""
+    """Test _calculate_dcr_between_row_and_data for all rows."""
     # Setup
     result = []
 
     # Run
     for _, s_row_obj in synthetic_data.iterrows():
-        dist = _calculate_dist_between_row_and_data(
+        dist = _calculate_dcr_between_row_and_data(
             s_row_obj, train_data, column_ranges, test_metadata
         )
         result.append(dist)

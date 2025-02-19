@@ -5,7 +5,7 @@ import pandas as pd
 from sdmetrics.utils import is_datetime
 
 
-def _calculate_dcr_dist(s_value, d_value, col_name, metadata, range=None):
+def _calculate_dcr_value(s_value, d_value, col_name, metadata, range=None):
     """Calculate the Distance to Closest Record between two different values.
 
     Arguments:
@@ -53,7 +53,7 @@ def _calculate_dcr_dist(s_value, d_value, col_name, metadata, range=None):
             return 1.0
 
 
-def _calculate_dcr_dist_between_rows(synthetic_row, comparison_row, column_ranges, metadata):
+def _calculate_dcr_between_rows(synthetic_row, comparison_row, column_ranges, metadata):
     """Calculate the Distance to Closest Record between two rows.
 
     Arguments:
@@ -78,13 +78,13 @@ def _calculate_dcr_dist_between_rows(synthetic_row, comparison_row, column_range
             )
         d_value = comparison_row.loc[s_col]
         s_value = synthetic_row.loc[s_col]
-        dist = _calculate_dcr_dist(s_value, d_value, s_col, metadata, column_ranges.get(s_col))
+        dist = _calculate_dcr_value(s_value, d_value, s_col, metadata, column_ranges.get(s_col))
         dcr_list_of_dist.append(dist)
 
     return sum(dcr_list_of_dist) / len(dcr_list_of_dist)
 
 
-def _calculate_dist_between_row_and_data(synthetic_row, comparison_data, column_ranges, metadata):
+def _calculate_dcr_between_row_and_data(synthetic_row, comparison_data, column_ranges, metadata):
     """Calculate the DCR between a single row in the synthetic data and another dataset.
 
     Arguments:
@@ -103,7 +103,7 @@ def _calculate_dist_between_row_and_data(synthetic_row, comparison_data, column_
             synthetic row and the reference dataset.
     """
     dist_srow_to_all_rows = comparison_data.apply(
-        lambda d_row_obj: _calculate_dcr_dist_between_rows(
+        lambda d_row_obj: _calculate_dcr_between_rows(
             synthetic_row, d_row_obj, column_ranges, metadata
         ),
         axis=1,
@@ -153,7 +153,7 @@ def calculate_dcr(synthetic_data, comparison_data, metadata):
         column_ranges[column] = col_range
 
     dcr_dist_dict = synthetic_data.apply(
-        lambda synth_row: _calculate_dist_between_row_and_data(
+        lambda synth_row: _calculate_dcr_between_row_and_data(
             synth_row, comparison_data, column_ranges, metadata
         ),
         axis=1,
