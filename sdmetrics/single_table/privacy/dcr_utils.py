@@ -133,6 +133,7 @@ def calculate_dcr(synthetic_data, comparison_data, metadata):
         if column not in metadata['columns']:
             raise ValueError(f'Column {column} was not found in the metadata.')
         sdtype = metadata['columns'][column]['sdtype']
+        col_range = None
         if sdtype == 'numerical':
             col_range = comparison_data[column].max() - comparison_data[column].min()
         elif sdtype == 'datetime':
