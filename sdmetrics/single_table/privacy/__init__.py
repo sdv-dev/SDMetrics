@@ -16,6 +16,7 @@ from sdmetrics.single_table.privacy.disclosure_protection import (
     DisclosureProtection,
     DisclosureProtectionEstimate,
 )
+from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
 from sdmetrics.single_table.privacy.ensemble import CategoricalEnsemble
 from sdmetrics.single_table.privacy.numerical_sklearn import NumericalLR, NumericalMLP, NumericalSVR
 from sdmetrics.single_table.privacy.radius_nearest_neighbor import NumericalRadiusNearestNeighbor
@@ -37,4 +38,5 @@ __all__ = [
     'NumericalPrivacyMetric',
     'NumericalRadiusNearestNeighbor',
     'NumericalSVR',
+    'DCRBaselineProtection',
 ]

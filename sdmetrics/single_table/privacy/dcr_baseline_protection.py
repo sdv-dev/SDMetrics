@@ -1,5 +1,6 @@
 """DCR Basleine Protection metrics."""
 
+from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
 from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
@@ -7,6 +8,11 @@ from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
 
 class DCRBaselineProtection(SingleTableMetric):
     """DCR Baseline Protection metric."""
+
+    name = 'DCRBaselineProtection'
+    goal = Goal.IGNORE
+    min_value = 0.0
+    max_value = 1.0
 
     @classmethod
     def _validate_inputs(
