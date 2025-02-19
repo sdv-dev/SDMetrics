@@ -16,14 +16,15 @@ class DCRBaselineProtection(SingleTableMetric):
         real_validation_data,
         metadata,
         num_rows_subsample,
-        num_iterations
+        num_iterations,
     ):
-
         if num_rows_subsample is not None:
             if not isinstance(num_rows_subsample, int):
                 raise ValueError('num_rows_subsample must be an integer.')
             if num_rows_subsample < 1:
-                raise ValueError(f'num_rows_subsample ({num_rows_subsample}) must be greater than 1.')
+                raise ValueError(
+                    f'num_rows_subsample ({num_rows_subsample}) must be greater than 1.'
+                )
 
         if not isinstance(num_iterations, int):
             raise ValueError('num_iterations must be an integer.')
@@ -50,16 +51,19 @@ class DCRBaselineProtection(SingleTableMetric):
         sanitized_real_validation_data = real_validation_data.drop(columns=drop_columns)
 
         if (
-            sanitized_real_training_data.empty or
-            sanitized_synthetic_data.empty or
-            sanitized_real_validation_data.empty
+            sanitized_real_training_data.empty
+            or sanitized_synthetic_data.empty
+            or sanitized_real_validation_data.empty
         ):
-            raise ValueError('There are no valid sdtypes in the dataframes to run the DCRBaselineProtection metric.')
+            raise ValueError(
+                'There are no valid sdtypes in the dataframes to run the '
+                'DCRBaselineProtection metric.'
+            )
 
         return (
             sanitized_real_training_data,
             sanitized_synthetic_data,
-            sanitized_real_validation_data
+            sanitized_real_validation_data,
         )
 
     @classmethod
@@ -70,7 +74,7 @@ class DCRBaselineProtection(SingleTableMetric):
         real_validation_data,
         metadata,
         num_rows_subsample=None,
-        num_iterations=1
+        num_iterations=1,
     ):
         """Compute the DCRBaselineProtection metric.
 
@@ -78,7 +82,8 @@ class DCRBaselineProtection(SingleTableMetric):
             real_training_data (pd.DataFrame):
                 A pd.DataFrame object containing the real data used for training the synthesizer.
             synthetic_data (pd.DataFrame):
-                A pandas.DataFrame object containing the synthetic data sampled from the synthesizer.
+                A pandas.DataFrame object containing the synthetic data sampled
+                from the synthesizer.
             real_validation_data (pd.DataFrame):
                 A pandas.DataFrame object containing a holdout set of real data.
                 This data should not have been used to train the synthesizer.
@@ -117,13 +122,9 @@ class DCRBaselineProtection(SingleTableMetric):
             synthetic_sample = sanitized_synthetic_data
             if num_rows_subsample is not None:
                 synthetic_sample = sanitized_synthetic_data.sample(n=num_rows_subsample)
-                print(f'Sample is: {synthetic_sample}\n d')
 
             dcr_real = calculate_dcr(synthetic_sample, training_data, metadata)
             dcr_random = calculate_dcr(synthetic_sample, validation_data, metadata)
-            print(f'Real: {dcr_real}')
-            print(f'Random: {dcr_random}')
-            print('\n\n')
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()
             score = min((synthetic_data_median / random_data_median), 1.0)
@@ -135,8 +136,8 @@ class DCRBaselineProtection(SingleTableMetric):
             'score': sum(scores) / len(scores),
             'median_DCR_to_real_data': {
                 'synthetic_data': sum(synthetic_medians) / len(synthetic_medians),
-                'random_data_baseline': sum(random_medians) / len(random_medians)
-            }
+                'random_data_baseline': sum(random_medians) / len(random_medians),
+            },
         }
 
         return result
@@ -149,7 +150,7 @@ class DCRBaselineProtection(SingleTableMetric):
         real_validation_data,
         metadata,
         num_rows_subsample=None,
-        num_iterations=1
+        num_iterations=1,
     ):
         """Compute the DCRBaselineProtection metric.
 
@@ -157,7 +158,8 @@ class DCRBaselineProtection(SingleTableMetric):
             real_training_data (pd.DataFrame):
                 A pd.DataFrame object containing the real data used for training the synthesizer.
             synthetic_data (pd.DataFrame):
-                A pandas.DataFrame object containing the synthetic data sampled from the synthesizer.
+                A pandas.DataFrame object containing the synthetic data sampled
+                from the synthesizer.
             real_validation_data (pd.DataFrame):
                 A pandas.DataFrame object containing a holdout set of real data.
                 This data should not have been used to train the synthesizer.
@@ -181,7 +183,7 @@ class DCRBaselineProtection(SingleTableMetric):
             real_validation_data,
             metadata,
             num_rows_subsample,
-            num_iterations
+            num_iterations,
         )
 
         return result.get('score')
