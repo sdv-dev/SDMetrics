@@ -70,18 +70,17 @@ def _calculate_dcr_between_rows(synthetic_row, comparison_row, column_ranges, me
         float:
             Returns DCR value (the average value of DCR values we computed across the row).
     """
-    dcr_list_of_dist = []
-    for s_col in synthetic_row.index:
-        if s_col not in comparison_row.index:
-            raise ValueError(
-                f'Column name ({s_col}) was not found when calculating DCR between two rows.'
-            )
-        d_value = comparison_row.loc[s_col]
-        s_value = synthetic_row.loc[s_col]
-        dist = _calculate_dcr_value(s_value, d_value, s_col, metadata, column_ranges.get(s_col))
-        dcr_list_of_dist.append(dist)
+    if not synthetic_row.index.equals(comparison_row.index):
+        missing_cols = set(synthetic_row.index) - set(comparison_row.index)
+        raise ValueError(f'Missing columns in comparison_row: {missing_cols}')
 
-    return sum(dcr_list_of_dist) / len(dcr_list_of_dist)
+    dcr_values = synthetic_row.index.to_series().apply(
+        lambda s_col: _calculate_dcr_value(
+            synthetic_row[s_col], comparison_row[s_col], s_col, metadata, column_ranges.get(s_col)
+        )
+    )
+
+    return dcr_values.mean()
 
 
 def _calculate_dcr_between_row_and_data(synthetic_row, comparison_data, column_ranges, metadata):

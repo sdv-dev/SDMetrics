@@ -255,7 +255,7 @@ def test__calculate_dcr_between_rows_bad_index():
     })
     metadata = {'columns': {'A': {'sdtype': 'numerical'}, 'B': {'sdtype': 'numerical'}}}
     test_range = {'A': 1.0, 'C': 1.0}
-    error_msg = re.escape('Column name (B) was not found when calculating DCR between two rows.')
+    error_msg = re.escape("Missing columns in comparison_row: {'B'}")
 
     # Assert
     with pytest.raises(ValueError, match=error_msg):
@@ -280,7 +280,7 @@ def test__calculate_dcr_between_row_and_data(
 
     # Assert
     for i in range(len(expected_dcr_result)):
-        check_if_value_in_threshold(result[i], expected_dcr_result[i])
+        check_if_value_in_threshold(result[i], expected_dcr_result[i], ACCURACY_THRESHOLD)
 
 
 def test_calculate_dcr(
