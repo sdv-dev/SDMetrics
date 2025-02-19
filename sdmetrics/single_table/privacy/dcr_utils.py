@@ -151,7 +151,6 @@ def calculate_dcr(synthetic_data, comparison_data, metadata):
                 )
 
             col_range = datetime_to_timestamp_col.max() - datetime_to_timestamp_col.min()
-        print(f'Column is : {column}')
         column_ranges[column] = col_range
 
     dcr_dist_dict = synthetic_data.apply(

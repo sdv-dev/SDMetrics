@@ -345,7 +345,7 @@ def test_debug():
             pd.NaT,
             datetime(2025, 1, 12),
         ],
-        'id_col': [6,5,4,3,2,1]
+        'id_col': [6, 5, 4, 3, 2, 1]
     })
 
     data_synth = pd.DataFrame({
@@ -368,7 +368,7 @@ def test_debug():
             datetime(2025, 1, 30),
             datetime(2025, 1, 6),
         ],
-        'id_col': [1,2,3,4,5,6]
+        'id_col': [1, 2, 3, 4, 5, 6]
     })
 
     custom_metadata = {

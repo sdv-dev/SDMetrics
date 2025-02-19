@@ -22,6 +22,8 @@ class DCRBaselineProtection(SingleTableMetric):
         if num_rows_subsample is not None:
             if not isinstance(num_rows_subsample, int):
                 raise ValueError('num_rows_subsample must be an integer.')
+            if num_rows_subsample < 1:
+                raise ValueError(f'num_rows_subsample ({num_rows_subsample}) must be greater than 1.')
 
         if not isinstance(num_iterations, int):
             raise ValueError('num_iterations must be an integer.')
@@ -46,6 +48,13 @@ class DCRBaselineProtection(SingleTableMetric):
         sanitized_real_training_data = real_training_data.drop(columns=drop_columns)
         sanitized_synthetic_data = synthetic_data.drop(columns=drop_columns)
         sanitized_real_validation_data = real_validation_data.drop(columns=drop_columns)
+
+        if (
+            sanitized_real_training_data.empty or
+            sanitized_synthetic_data.empty or
+            sanitized_real_validation_data.empty
+        ):
+            raise ValueError('There are no valid sdtypes in the dataframes to run the DCRBaselineProtection metric.')
 
         return (
             sanitized_real_training_data,
@@ -106,11 +115,15 @@ class DCRBaselineProtection(SingleTableMetric):
 
         for i in range(num_iterations):
             synthetic_sample = sanitized_synthetic_data
-            if not num_rows_subsample:
+            if num_rows_subsample is not None:
                 synthetic_sample = sanitized_synthetic_data.sample(n=num_rows_subsample)
+                print(f'Sample is: {synthetic_sample}\n d')
 
             dcr_real = calculate_dcr(synthetic_sample, training_data, metadata)
             dcr_random = calculate_dcr(synthetic_sample, validation_data, metadata)
+            print(f'Real: {dcr_real}')
+            print(f'Random: {dcr_random}')
+            print('\n\n')
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()
             score = min((synthetic_data_median / random_data_median), 1.0)
@@ -118,8 +131,6 @@ class DCRBaselineProtection(SingleTableMetric):
             random_medians.append(random_data_median)
             scores.append(score)
 
-        # TODO Remove
-        print(f'Scores: {scores}')
         result = {
             'score': sum(scores) / len(scores),
             'median_DCR_to_real_data': {
@@ -130,6 +141,7 @@ class DCRBaselineProtection(SingleTableMetric):
 
         return result
 
+    @classmethod
     def compute(
         cls,
         real_training_data,
