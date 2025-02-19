@@ -70,8 +70,8 @@ def _calculate_dcr_between_rows(synthetic_row, comparison_row, column_ranges, me
         float:
             Returns DCR value (the average value of DCR values we computed across the row).
     """
-    if not synthetic_row.index.equals(comparison_row.index):
-        missing_cols = set(synthetic_row.index) - set(comparison_row.index)
+    missing_cols = set(synthetic_row.index) - set(comparison_row.index)
+    if missing_cols:
         raise ValueError(f'Missing columns in comparison_row: {missing_cols}')
 
     dcr_values = synthetic_row.index.to_series().apply(
@@ -152,11 +152,11 @@ def calculate_dcr(synthetic_data, comparison_data, metadata):
             col_range = datetime_to_timestamp_col.max() - datetime_to_timestamp_col.min()
         column_ranges[column] = col_range
 
-    dcr_dist_dict = synthetic_data.apply(
+    dcr_dist_df = synthetic_data.apply(
         lambda synth_row: _calculate_dcr_between_row_and_data(
             synth_row, comparison_data, column_ranges, metadata
         ),
         axis=1,
     )
 
-    return dcr_dist_dict
+    return dcr_dist_df
