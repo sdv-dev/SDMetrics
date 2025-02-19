@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
 from sdmetrics.single_table.privacy.dcr_utils import (
     _calculate_dcr_between_row_and_data,
     _calculate_dcr_between_rows,
@@ -320,3 +321,11 @@ def test_calculate_dcr_bad_col(test_metadata):
         calculate_dcr(
             synthetic_data=fake_dataframe, comparison_data=fake_dataframe, metadata=test_metadata
         )
+
+# TODO Debug
+def test_debug(synthetic_data, train_data, test_metadata):
+    dcr_baseline_protection = DCRBaselineProtection()
+    print(f'Debug: {type(train_data)}')
+    result = dcr_baseline_protection.compute_breakdown(train_data, synthetic_data, synthetic_data, test_metadata, 10, 5)
+    print(result)
+    assert False
