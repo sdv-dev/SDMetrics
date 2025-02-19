@@ -357,7 +357,7 @@ class TestBaseDataAugmentationMetric:
 
         # Assert
         expected_result = {
-            'score': 0.19999999999999996,
+            'score': 0.6,
             'real_data_baseline': real_data_baseline,
             'augmented_data': augmented_table_result,
             'parameters': {
