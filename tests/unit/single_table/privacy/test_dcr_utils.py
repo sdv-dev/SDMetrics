@@ -12,6 +12,7 @@ from sdmetrics.single_table.privacy.dcr_utils import (
     _calculate_dcr_value,
     calculate_dcr,
 )
+from tests.utils import check_if_value_in_threshold
 
 
 @pytest.fixture()
@@ -156,10 +157,6 @@ SECONDS_IN_DAY = 86400
 ACCURACY_THRESHOLD = 0.000001
 
 
-def check_if_value_in_threshold(value, expected_value, threshold=ACCURACY_THRESHOLD):
-    assert abs(value - expected_value) < threshold
-
-
 @pytest.mark.parametrize(
     's_value, d_value, range, col_name, expected_dist',
     [
@@ -242,7 +239,7 @@ def test__calculate_dcr_between_rows(
     # Assert
     for i in range(len(expected_row_comparisons)):
         expected_dist = sum(expected_row_comparisons[i]) / len(expected_row_comparisons[i])
-        check_if_value_in_threshold(result[i], expected_dist)
+        check_if_value_in_threshold(result[i], expected_dist, ACCURACY_THRESHOLD)
 
 
 def test__calculate_dcr_between_rows_bad_index():

@@ -25,6 +25,10 @@ class DCRBaselineProtection(SingleTableMetric):
                 raise ValueError(
                     f'num_rows_subsample ({num_rows_subsample}) must be greater than 1.'
                 )
+        elif num_rows_subsample is None and num_iterations > 1:
+            raise ValueError(
+                'num_iterations should not be greater than 1 if there is not subsampling.'
+            )
 
         if not isinstance(num_iterations, int):
             raise ValueError('num_iterations must be an integer.')
