@@ -132,9 +132,8 @@ class TestDCRBaselineProtection:
         """Test end to end for DCRBaslineProtection metric against the demo dataset.
 
         In this end to end test, test against demo dataset. Use subsampling to speed
-        up the test.
-        Make sure that if hold two datasets to be the same we get expected v
-        alues even with subsampling.
+        up the test. Make sure that if hold two datasets to be the same we get expected
+        values even with subsampling.
         """
         # Setup
         real_data, synthetic_data, metadata = load_single_table_demo()
