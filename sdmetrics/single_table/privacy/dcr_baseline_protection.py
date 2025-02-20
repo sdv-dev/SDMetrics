@@ -124,9 +124,9 @@ class DCRBaselineProtection(SingleTableMetric):
         )
         training_data, sanitized_synthetic_data, validation_data = sanitized_data
 
-        synthetic_medians = []
-        random_medians = []
-        scores = []
+        sum_synthetic_median = 0
+        sum_random_median = 0
+        sum_score = 0
 
         for _ in range(num_iterations):
             synthetic_sample = sanitized_synthetic_data
@@ -138,15 +138,15 @@ class DCRBaselineProtection(SingleTableMetric):
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()
             score = min((synthetic_data_median / random_data_median), 1.0)
-            synthetic_medians.append(synthetic_data_median)
-            random_medians.append(random_data_median)
-            scores.append(score)
+            sum_synthetic_median += synthetic_data_median
+            sum_random_median += random_data_median
+            sum_score += score
 
         result = {
-            'score': sum(scores) / len(scores),
+            'score': sum_score / num_iterations,
             'median_DCR_to_real_data': {
-                'synthetic_data': sum(synthetic_medians) / len(synthetic_medians),
-                'random_data_baseline': sum(random_medians) / len(random_medians),
+                'synthetic_data': sum_synthetic_median / num_iterations,
+                'random_data_baseline': sum_random_median / num_iterations,
             },
         }
 
