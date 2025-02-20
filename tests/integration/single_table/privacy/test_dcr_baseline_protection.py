@@ -97,7 +97,7 @@ def expected_scores():
     }
 
 
-class TestDisclosureProtection:
+class TestDCRBaselineProtection:
     def test_end_to_end(
         self, synthetic_data, training_data, validation_data, test_metadata, expected_scores
     ):
