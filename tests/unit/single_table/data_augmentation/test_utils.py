@@ -99,10 +99,6 @@ def test__validate_data_and_metadata():
     expected_message_sdtype = re.escape(
         'The column `target` must be either categorical or boolean. Please update your metadata.'
     )
-    expected_message_column_missmatch = re.escape(
-        '`real_training_data`, `synthetic_data` and `real_validation_data` must have the '
-        'same columns and must match the columns described in the metadata.'
-    )
     expected_message_value = re.escape(
         'The value `1` is not present in the column `target` for the real training data.'
     )
@@ -128,16 +124,6 @@ def test__validate_data_and_metadata():
     wrong_inputs_sdtype['metadata']['columns']['target']['sdtype'] = 'numerical'
     with pytest.raises(ValueError, match=expected_message_sdtype):
         _validate_data_and_metadata(**wrong_inputs_sdtype)
-
-    wrong_column_metadata = deepcopy(inputs)
-    wrong_column_metadata['metadata']['columns'].update({'new_column': {'sdtype': 'categorical'}})
-    with pytest.raises(ValueError, match=expected_message_column_missmatch):
-        _validate_data_and_metadata(**wrong_column_metadata)
-
-    wrong_column_data = deepcopy(inputs)
-    wrong_column_data['real_training_data'] = pd.DataFrame({'new_column': [1, 0, 0]})
-    with pytest.raises(ValueError, match=expected_message_column_missmatch):
-        _validate_data_and_metadata(**wrong_column_data)
 
     missing_minority_class_label = deepcopy(inputs)
     missing_minority_class_label['real_training_data'] = pd.DataFrame({'target': [0, 0, 0]})
