@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.metrics import confusion_matrix, precision_recall_curve, precision_score, recall_score
 from xgboost import XGBClassifier
 
+from sdmetrics._utils_metadata import _process_data_with_metadata_ml_efficacy_metrics
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.data_augmentation.utils import _validate_inputs
@@ -104,7 +105,11 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         """Fit preprocessing parameters."""
         discrete_columns = []
         datetime_columns = []
-        for column, column_meta in metadata['columns'].items():
+        data_columns = data.columns
+        metadata_columns = metadata['columns'].keys()
+        common_columns = set(data_columns).intersection(metadata_columns)
+        for column in sorted(common_columns):
+            column_meta = metadata['columns'][column]
             if (column_meta['sdtype'] in ['categorical', 'boolean']) and (
                 column != prediction_column_name
             ):
@@ -191,6 +196,11 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             minority_class_label,
             classifier,
             fixed_value,
+        )
+        (real_training_data, synthetic_data, real_validation_data) = (
+            _process_data_with_metadata_ml_efficacy_metrics(
+                real_training_data, synthetic_data, real_validation_data, metadata
+            )
         )
         preprocessed_tables = cls._fit_transform(
             real_training_data,

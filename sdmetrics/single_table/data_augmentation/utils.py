@@ -82,18 +82,6 @@ def _validate_data_and_metadata(
             ' Please update your metadata.'
         )
 
-    columns_match = (
-        set(real_training_data.columns)
-        == set(synthetic_data.columns)
-        == set(real_validation_data.columns)
-    )
-    data_metadata_mismatch = set(metadata['columns'].keys()) != set(real_training_data.columns)
-    if not columns_match or data_metadata_mismatch:
-        raise ValueError(
-            '`real_training_data`, `synthetic_data` and `real_validation_data` must have '
-            'the same columns and must match the columns described in the metadata.'
-        )
-
     if minority_class_label not in real_training_data[prediction_column_name].unique():
         raise ValueError(
             f'The value `{minority_class_label}` is not present in the column '
