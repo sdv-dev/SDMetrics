@@ -1,4 +1,4 @@
-"""DCR Basleine Protection metrics."""
+"""DCR Baseline Protection metrics."""
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
