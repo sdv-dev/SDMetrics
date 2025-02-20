@@ -184,8 +184,7 @@ class TestDisclosureProtection:
         bad_metadata = {'columns': {'bad_col': {'sdtype': 'unknown'}}}
 
         error_msg = (
-            'There are no valid sdtypes in the dataframes to run the '
-            'DCRBaselineProtection metric.'
+            'There are no valid sdtypes in the dataframes to run the DCRBaselineProtection metric.'
         )
         with pytest.raises(ValueError, match=error_msg):
             DCRBaselineProtection.compute_breakdown(
