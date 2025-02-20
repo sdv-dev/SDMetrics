@@ -69,7 +69,6 @@ def synthetic_data():
 @pytest.fixture()
 def test_metadata():
     return {
-        'primary_key': 'student_id',
         'columns': {
             'num_col': {
                 'sdtype': 'numerical',

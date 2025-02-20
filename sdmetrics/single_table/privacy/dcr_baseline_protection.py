@@ -128,7 +128,7 @@ class DCRBaselineProtection(SingleTableMetric):
         random_medians = []
         scores = []
 
-        for i in range(num_iterations):
+        for _ in range(num_iterations):
             synthetic_sample = sanitized_synthetic_data
             if num_rows_subsample is not None:
                 synthetic_sample = sanitized_synthetic_data.sample(n=num_rows_subsample)
