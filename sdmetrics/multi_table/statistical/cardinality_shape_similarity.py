@@ -6,6 +6,7 @@ from scipy.stats import ks_2samp
 from sdmetrics.goal import Goal
 from sdmetrics.multi_table.base import MultiTableMetric
 from sdmetrics.utils import get_cardinality_distribution
+from sdmetrics._utils_metadata import _validate_metadata, _validate_metadata_dict, _validate_single_table_metadata
 
 
 class CardinalityShapeSimilarity(MultiTableMetric):
@@ -53,9 +54,8 @@ class CardinalityShapeSimilarity(MultiTableMetric):
         """
         if set(real_data.keys()) != set(synthetic_data.keys()):
             raise ValueError('`real_data` and `synthetic_data` must have the same tables.')
-        if not isinstance(metadata, dict):
-            metadata = metadata.to_dict()
 
+        _validate_metadata_dict(metadata)
         score_breakdowns = {}
         for rel in metadata.get('relationships', []):
             cardinality_real = get_cardinality_distribution(
