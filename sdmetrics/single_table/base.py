@@ -5,6 +5,7 @@ from operator import attrgetter
 
 import pandas as pd
 
+from sdmetrics._utils_metadata import _validate_single_table_metadata
 from sdmetrics.base import BaseMetric
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.utils import get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta
@@ -92,7 +93,7 @@ class SingleTableMetric(BaseMetric):
                 The real data.
             synthetic_data(pandas.DataFrame):
                 The synthetic data.
-            metadata (dict or Metadata or None):
+            metadata (dict):
                 The metadata, if any.
 
         Returns:
@@ -108,9 +109,7 @@ class SingleTableMetric(BaseMetric):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 
         if metadata is not None:
-            if not isinstance(metadata, dict):
-                metadata = metadata.to_dict()
-
+            _validate_single_table_metadata(metadata)
             fields = get_columns_from_metadata(metadata)
             for column in real_data.columns:
                 if column not in fields:

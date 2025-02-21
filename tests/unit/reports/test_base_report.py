@@ -31,38 +31,6 @@ class TestBaseReport:
         with pytest.raises(ValueError, match=expected_message):
             base_report._validate_data_format(real_data, synthetic_data)
 
-    def test__validate_metadata_format(self):
-        """Test the ``_validate_metadata_format`` method.
-
-        This test checks that the method raises an error when the metadata is not a dictionary.
-        """
-        # Setup
-        base_report = BaseReport()
-        metadata = 'metadata'
-
-        # Run and Assert
-        expected_message = 'The provided metadata is not a dictionary.'
-        with pytest.raises(TypeError, match=expected_message):
-            base_report._validate_metadata_format(metadata)
-
-    def test__validate_metadata_format_no_columns(self):
-        """Test the ``_validate_metadata_format`` method.
-
-        This test checks that the method raises an error when the metadata does not contain a
-        'columns' key.
-        """
-        # Setup
-        base_report = BaseReport()
-        metadata = {}
-
-        # Run and Assert
-        expected_message = (
-            'Single table reports expect metadata to contain a "columns" key with a mapping'
-            ' from column names to column informations.'
-        )
-        with pytest.raises(ValueError, match=expected_message):
-            base_report._validate_metadata_format(metadata)
-
     def test__validate_metadata_matches_data(self):
         """Test the ``_validate_metadata_matches_data`` method.
 
@@ -137,7 +105,8 @@ class TestBaseReport:
         # Run and Assert
         base_report._validate_metadata_matches_data(real_data, synthetic_data, metadata)
 
-    def test__validate(self):
+    @patch('sdmetrics.reports.base_report._validate_metadata')
+    def test__validate(self, mock__validate_metadata):
         """Test the ``_validate`` method."""
         # Setup
         base_report = BaseReport()
@@ -165,6 +134,7 @@ class TestBaseReport:
         base_report._validate(real_data, synthetic_data, metadata)
 
         # Assert
+        mock__validate_metadata.assert_called_once_with(metadata)
         mock__validate_metadata_matches_data.assert_called_once_with(
             real_data, synthetic_data, metadata
         )

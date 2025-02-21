@@ -2,6 +2,8 @@
 
 import pandas as pd
 
+from sdmetrics._utils_metadata import _validate_single_table_metadata
+
 
 def _validate_tables(real_training_data, synthetic_data, real_validation_data):
     """Validate the tables of the Data Augmentation metrics."""
@@ -10,16 +12,6 @@ def _validate_tables(real_training_data, synthetic_data, real_validation_data):
         raise ValueError(
             '`real_training_data`, `synthetic_data` and `real_validation_data` must be '
             'pandas DataFrames.'
-        )
-
-
-def _validate_metadata(metadata):
-    """Validate the metadata of the Data Augmentation metrics."""
-    if not isinstance(metadata, dict):
-        raise TypeError(
-            f"Expected a dictionary but received a '{type(metadata).__name__}' instead."
-            " For SDV metadata objects, please use the 'to_dict' function to convert it"
-            ' to a dictionary.'
         )
 
 
@@ -55,7 +47,7 @@ def _validate_parameters(
 ):
     """Validate the parameters of the Data Augmentation metrics."""
     _validate_tables(real_training_data, synthetic_data, real_validation_data)
-    _validate_metadata(metadata)
+    _validate_single_table_metadata(metadata)
     _validate_prediction_column_name(prediction_column_name)
     _validate_classifier(classifier)
     _validate_fixed_recall_value(fixed_recall_value)

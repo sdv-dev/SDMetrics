@@ -40,22 +40,6 @@ class BaseMultiTableReport(BaseReport):
 
         raise ValueError(error_message)
 
-    def _validate_metadata_format(self, metadata):
-        """Validate the metadata."""
-        if not isinstance(metadata, dict):
-            raise TypeError('The provided metadata is not a dictionary.')
-
-        if 'tables' not in metadata:
-            raise ValueError(
-                'Multi table reports expect metadata to contain a "tables" key with a mapping'
-                ' from table names to metadata for each table.'
-            )
-        for table_name, table_metadata in metadata['tables'].items():
-            if 'columns' not in table_metadata:
-                raise ValueError(
-                    f'The metadata for table "{table_name}" is missing a "columns" key.'
-                )
-
     def _validate_relationships(self, real_data, synthetic_data, metadata):
         """Validate that the relationships are valid."""
         for rel in metadata.get('relationships', []):

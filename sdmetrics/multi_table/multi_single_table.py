@@ -6,6 +6,7 @@ from collections import defaultdict
 import numpy as np
 
 from sdmetrics import single_table
+from sdmetrics._utils_metadata import _validate_multi_table_metadata
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.multi_table.base import MultiTableMetric
 from sdmetrics.utils import nested_attrs_meta
@@ -77,9 +78,8 @@ class MultiSingleTableMetric(MultiTableMetric, metaclass=nested_attrs_meta('sing
 
         if metadata is None:
             metadata = {'tables': defaultdict(type(None))}
-        elif not isinstance(metadata, dict):
-            metadata = metadata.to_dict()
 
+        _validate_multi_table_metadata(metadata)
         scores = {}
         errors = {}
         for table_name, real_table in real_data.items():

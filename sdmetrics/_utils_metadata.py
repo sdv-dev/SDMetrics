@@ -15,6 +15,37 @@ def _validate_metadata_dict(metadata):
         )
 
 
+def _validate_single_table_metadata(metadata):
+    """Validate the metadata for a single table."""
+    _validate_metadata_dict(metadata)
+    if 'columns' not in metadata:
+        raise ValueError(
+            'Single table reports expect metadata to contain a "columns" key with a mapping'
+            ' from column names to column informations.'
+        )
+
+
+def _validate_multi_table_metadata(metadata):
+    """Validate the metadata for multiple tables."""
+    _validate_metadata_dict(metadata)
+    if 'tables' not in metadata:
+        raise ValueError(
+            'Multi table reports expect metadata to contain a "tables" key with a mapping'
+            ' from table names to metadata for each table.'
+        )
+    for table_name, table_metadata in metadata['tables'].items():
+        _validate_single_table_metadata(table_metadata)
+
+
+def _validate_metadata(metadata):
+    """Validate the metadata."""
+    _validate_metadata_dict(metadata)
+    if 'tables' in metadata:
+        _validate_multi_table_metadata(metadata)
+    else:
+        _validate_single_table_metadata(metadata)
+
+
 def handle_single_and_multi_table(single_table_func):
     """Decorator to handle both single and multi table functions."""
 
