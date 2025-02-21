@@ -4,9 +4,9 @@ from operator import attrgetter
 
 import pandas as pd
 
+from sdmetrics._utils_metadata import _validate_metadata_dict
 from sdmetrics.base import BaseMetric
 from sdmetrics.utils import get_columns_from_metadata
-from sdmetrics._utils_metadata import _validate_metadata_dict
 
 
 class TimeSeriesMetric(BaseMetric):

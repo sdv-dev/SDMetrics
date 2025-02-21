@@ -4,11 +4,11 @@ import warnings
 
 import numpy as np
 
+from sdmetrics._utils_metadata import _validate_metadata_dict
 from sdmetrics.goal import Goal
 from sdmetrics.multi_table.base import MultiTableMetric
 from sdmetrics.utils import get_cardinality_distribution
 from sdmetrics.warnings import ConstantInputWarning
-from sdmetrics._utils_metadata import _validate_metadata_dict
 
 
 class CardinalityStatisticSimilarity(MultiTableMetric):
