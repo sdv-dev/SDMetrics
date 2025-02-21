@@ -6,7 +6,7 @@ MODELABLE_SDTYPES = ('numerical', 'datetime', 'categorical', 'boolean')
 
 
 def _validate_metadata_dict(metadata):
-    """Validate the metadata of the Data Augmentation metrics."""
+    """Validate the metadata type."""
     if not isinstance(metadata, dict):
         raise TypeError(
             f"Expected a dictionary but received a '{type(metadata).__name__}' instead."

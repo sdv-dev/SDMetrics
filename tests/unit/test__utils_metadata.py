@@ -216,7 +216,7 @@ def test__process_data_with_metadata(
 def test__process_data_with_metadata_ml_efficacy_metrics(mock_process_data_with_metadata):
     """Test the ``_process_data_with_metadata_ml_efficacy_metrics`` method."""
     # Setup
-    mock_process_data_with_metadata.side_effect = lambda data, metadata: data
+    mock_process_data_with_metadata.side_effect = lambda data, metadata, x: data
     real_training_data = pd.DataFrame({
         'numerical': [1, 2, 3],
         'categorical': ['a', 'b', 'c'],
@@ -246,7 +246,7 @@ def test__process_data_with_metadata_ml_efficacy_metrics(mock_process_data_with_
     pd.testing.assert_frame_equal(result[1], synthetic_data)
     pd.testing.assert_frame_equal(result[2], real_validation_data)
     mock_process_data_with_metadata.assert_has_calls([
-        call(real_training_data, metadata),
-        call(synthetic_data, metadata),
-        call(real_validation_data, metadata),
+        call(real_training_data, metadata, True),
+        call(synthetic_data, metadata, True),
+        call(real_validation_data, metadata, True),
     ])

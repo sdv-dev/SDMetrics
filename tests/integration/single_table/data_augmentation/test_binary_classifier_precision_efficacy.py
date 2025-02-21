@@ -44,13 +44,13 @@ class TestBinaryClassifierPrecisionEfficacy:
         expected_score_breakdown = {
             'real_data_baseline': {
                 'recall_score_training': 0.8095238095238095,
-                'recall_score_validation': 0.07692307692307693,
-                'precision_score_validation': 1.0,
+                'recall_score_validation': 0.15384615384615385,
+                'precision_score_validation': 0.4,
                 'prediction_counts_validation': {
-                    'true_positive': 1,
-                    'false_positive': 0,
-                    'true_negative': 25,
-                    'false_negative': 12,
+                    'true_positive': 2,
+                    'false_positive': 3,
+                    'true_negative': 22,
+                    'false_negative': 11,
                 },
             },
             'augmented_data': {
@@ -59,8 +59,8 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'precision_score_validation': 0.0,
                 'prediction_counts_validation': {
                     'true_positive': 0,
-                    'false_positive': 2,
-                    'true_negative': 23,
+                    'false_positive': 1,
+                    'true_negative': 24,
                     'false_negative': 13,
                 },
             },
@@ -70,7 +70,7 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0,
+            'score': 0.3,
         }
         assert np.isclose(
             score_breakdown['real_data_baseline']['recall_score_training'], 0.8, atol=0.1
@@ -147,13 +147,13 @@ class TestBinaryClassifierPrecisionEfficacy:
             },
             'augmented_data': {
                 'recall_score_training': 0.8,
-                'recall_score_validation': 0.15384615384615385,
-                'precision_score_validation': 0.4,
+                'recall_score_validation': 0.23076923076923078,
+                'precision_score_validation': 0.6,
                 'prediction_counts_validation': {
-                    'true_positive': 2,
-                    'false_positive': 3,
-                    'true_negative': 30,
-                    'false_negative': 11,
+                    'true_positive': 3,
+                    'false_positive': 2,
+                    'true_negative': 31,
+                    'false_negative': 10,
                 },
             },
             'parameters': {
@@ -162,7 +162,7 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0.48571428571428577,
+            'score': 0.5857142857142857,
         }
         assert result_breakdown == expected_result
 
@@ -188,7 +188,7 @@ class TestBinaryClassifierPrecisionEfficacy:
         )
 
         # Assert
-        assert score == 0
+        assert score == 0.3
 
     def test_with_multi_class(self):
         """Test the metric with multi-class classification.
@@ -229,13 +229,13 @@ class TestBinaryClassifierPrecisionEfficacy:
             },
             'augmented_data': {
                 'recall_score_training': 0.8035714285714286,
-                'recall_score_validation': 0.6153846153846154,
-                'precision_score_validation': 0.8888888888888888,
+                'recall_score_validation': 0.46153846153846156,
+                'precision_score_validation': 1.0,
                 'prediction_counts_validation': {
-                    'true_positive': 8,
-                    'false_positive': 1,
-                    'true_negative': 24,
-                    'false_negative': 5,
+                    'true_positive': 6,
+                    'false_positive': 0,
+                    'true_negative': 25,
+                    'false_negative': 7,
                 },
             },
             'parameters': {
@@ -244,6 +244,6 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0.4944444444444444,
+            'score': 0.55,
         }
         assert score_breakdown == expected_score_breakdown

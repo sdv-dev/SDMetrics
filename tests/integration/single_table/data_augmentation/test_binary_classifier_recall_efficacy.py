@@ -182,12 +182,14 @@ class TestBinaryClassifierRecallEfficacy:
 
         in this test:
         - The `start_date` column is an object datetime column.
-        - The data has an extra column compared to the metadata (`extra_column`).
+        - The synthetic data has an extra column compared to the metadata (`extra_column`).
         - The metadata has an extra column compared to the data (`extra_metadata_column`).
         """
         # Setup
         np.random.seed(0)
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        metadata['columns']['extra_metadata_column'] = {'sdtype': 'categorical'}
+        synthetic_data['extra_column'] = 'extra'
         real_data['start_date'] = real_data['start_date'].astype(str)
         synthetic_data['start_date'] = synthetic_data['start_date'].astype(str)
         mask_validation = np.random.rand(len(real_data)) < 0.8
