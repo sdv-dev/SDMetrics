@@ -1,5 +1,26 @@
 # History
 
+## v0.19.0 - 2025-02-25
+
+### New Features
+
+* Use metadata to validate inputs to `BinaryClassifierEfficacy` precision and recall metrics - Issue [#727](https://github.com/sdv-dev/SDMetrics/issues/727) by @R-Palazzo
+* Speed up calculation of the QualityReport - Issue [#718](https://github.com/sdv-dev/SDMetrics/issues/718) by @R-Palazzo
+* Allow subsampling when computing the `ContingencySimilarity` metric - Issue [#716](https://github.com/sdv-dev/SDMetrics/issues/716) by @R-Palazzo
+* Add `BinaryClassifierRecallEfficacy` metric - Issue [#712](https://github.com/sdv-dev/SDMetrics/issues/712) by @R-Palazzo
+* Add `BinaryClassifierPrecisionEfficacy` metric - Issue [#711](https://github.com/sdv-dev/SDMetrics/issues/711) by @R-Palazzo
+* The `ContingencySimilarity` metric should be able to discretize continuous columns - Issue [#700](https://github.com/sdv-dev/SDMetrics/issues/700)
+
+### Maintenance
+
+* Delete conda folder - Issue [#708](https://github.com/sdv-dev/SDMetrics/issues/708) by @amontanez24
+* Cancel previous workflow runs on a new push - Issue [#705](https://github.com/sdv-dev/SDMetrics/issues/705) by @R-Palazzo
+* Support Python 3.13 (excluding `pomegranate`) - Issue [#645](https://github.com/sdv-dev/SDMetrics/issues/645) by @rwedge
+
+### Miscellaneous
+
+* BNLikelihood - Issue [#630](https://github.com/sdv-dev/SDMetrics/issues/630)
+
 ## v0.18.0 - 2024-12-13
 
 ### Bugs Fixed
