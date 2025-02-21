@@ -4,6 +4,7 @@ import warnings
 
 import numpy as np
 
+from sdmetrics._utils_metadata import _validate_metadata_dict
 from sdmetrics.goal import Goal
 from sdmetrics.multi_table.base import MultiTableMetric
 from sdmetrics.utils import get_cardinality_distribution
@@ -107,9 +108,8 @@ class CardinalityStatisticSimilarity(MultiTableMetric):
             raise ValueError('`real_data` and `synthetic_data` must have the same tables.')
         if metadata is None:
             raise ValueError('`metadata` cannot be ``None``.')
-        if not isinstance(metadata, dict):
-            metadata = metadata.to_dict()
 
+        _validate_metadata_dict(metadata)
         score_breakdowns = {}
         for rel in metadata.get('relationships', []):
             cardinality_real = get_cardinality_distribution(
