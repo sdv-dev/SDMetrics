@@ -151,7 +151,7 @@ class DCROverfittingProtection(SingleTableMetric):
             'score': sum_of_scores / num_iterations,
             'synthetic_data_percentages': {
                 'closer_to_training': sum_of_p_close_to_real / num_iterations,
-                'closert_to_holdout': sum_of_p_close_to_random / num_iterations,
+                'closer_to_holdout': sum_of_p_close_to_random / num_iterations,
             }
         }
 
