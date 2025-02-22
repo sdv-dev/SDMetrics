@@ -1,6 +1,7 @@
 """DCR Overfitting Protection metrics."""
 
 import numpy as np
+
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
@@ -15,7 +16,6 @@ class DCROverfittingProtection(SingleTableMetric):
     min_value = 0.0
     max_value = 1.0
 
-    # TODO This is the same for DCRBaselineProtection
     @classmethod
     def _validate_inputs(
         cls,
@@ -69,7 +69,7 @@ class DCROverfittingProtection(SingleTableMetric):
         ):
             raise ValueError(
                 'There are no valid sdtypes in the dataframes to run the '
-                'DCRBaselineProtection metric.'
+                'DCROverfittingProtection metric.'
             )
 
         return (
@@ -116,7 +116,6 @@ class DCROverfittingProtection(SingleTableMetric):
                 closer to the real dataset. Averages of the medians are returned in the case of
                 multiple iterations.
         """
-
         sanitized_data = cls._validate_inputs(
             real_training_data,
             synthetic_data,
