@@ -1,5 +1,7 @@
 """Distance to closest record measurement functions."""
 
+import warnings
+
 import pandas as pd
 
 from sdmetrics.utils import is_datetime
@@ -110,6 +112,8 @@ def _covert_datetime_cols_unix_timestamp(data, metadata):
             sdtype = metadata['columns'][column]['sdtype']
             if sdtype == 'datetime' and not is_datetime(data[column]):
                 datetime_format = metadata['columns'][column].get('datetime_format')
+                if not datetime_format:
+                    warnings.warn('No datetime format was specified.')
                 datetime_to_timestamp_col = pd.to_datetime(
                     data[column], format=datetime_format, errors='coerce'
                 ).apply(_to_unix_timestamp)
