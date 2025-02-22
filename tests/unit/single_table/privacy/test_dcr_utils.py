@@ -321,8 +321,24 @@ def test_calculate_dcr(
     pd.testing.assert_series_equal(result_same_dcr, expected_same_dcr_result)
 
 
+def test_calculate_dcr_missing_cols():
+    """Test calculate_dcr with a missing column in synthetic data"""
+    missing_col = 'missing_col'
+    synthetic_df = pd.DataFrame({
+        'col1': [0.0],
+    })
+    real_df = pd.DataFrame({'col1': [0.0], missing_col: [0.0]})
+    metadata = {'columns': {'col1': {'sdtype': 'numerical'}, missing_col: {'sdtype': 'numerical'}}}
+
+    error_message = "Different columns detected: {'missing_col'}"
+
+    # Assert
+    with pytest.raises(ValueError, match=error_message):
+        calculate_dcr(synthetic_data=synthetic_df, real_data=real_df, metadata=metadata)
+
+
 def test_calculate_dcr_bad_col(test_metadata):
-    """Test calculate_dcr with a missing column."""
+    """Test calculate_dcr with a column not in metadata."""
     # Setup
     col_name = 'bad_col'
     fake_dataframe = pd.DataFrame({
@@ -338,17 +354,25 @@ def test_calculate_dcr_bad_col(test_metadata):
 
 
 def test_calculate_dcr_with_shuffled_data():
+    """Test calculate_dcr with even scores are unaffected by rows being shuffled."""
     # Setup
-    data = [random.randint(1, 100) for _ in range(20)]
-    real_data = pd.DataFrame({'num_col': random.sample(data, len(data))})
-    synthetic_data = pd.DataFrame({'num_col': random.sample(data, len(data))})
+    real_data = [random.randint(1, 100) for _ in range(20)]
+    synthetic_data = [random.randint(1, 100) for _ in range(20)]
+    real_df = pd.DataFrame({'num_col': real_data})
+    synthetic_df = pd.DataFrame({'num_col': synthetic_data})
+    real_df_shuffled = pd.DataFrame({'num_col': random.sample(real_data, len(real_data))})
+    synthetic_df_shuffled = pd.DataFrame({
+        'num_col': random.sample(synthetic_data, len(synthetic_data))
+    })
+
     metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
 
     # Run
-    result = calculate_dcr(synthetic_data, real_data, metadata)
+    result = calculate_dcr(synthetic_df, real_df, metadata)
+    result_shuffled = calculate_dcr(synthetic_df_shuffled, real_df_shuffled, metadata)
 
     # Assert
-    assert result.eq(0).all().all()
+    check_if_value_in_threshold(result.sum(), result_shuffled.sum(), 0.000001)
 
 
 def test__to_unix_timestamp():
@@ -369,6 +393,7 @@ def test__to_unix_timestamp():
 
 
 def test__covert_datetime_cols_unix_timestamp():
+    """Test _covert_datetime_cols_unix_timestamp to see if datetimes are converted."""
     # Setup
     int_cols = [1.0, 1.0, 2.0]
     datetime_cols = [
@@ -394,8 +419,20 @@ def test__covert_datetime_cols_unix_timestamp():
         'columns': {
             'str_datetime_col': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
             'datetime_col': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-            'integers': {
-                'sdtype': 'datetime',
+            'int_col': {
+                'sdtype': 'numerical',
+            },
+            'str_col': {
+                'sdtype': 'str',
+            },
+        },
+    }
+    missing_format_metadata = {
+        'columns': {
+            'str_datetime_col': {'sdtype': 'datetime'},
+            'datetime_col': {'sdtype': 'datetime'},
+            'int_col': {
+                'sdtype': 'numerical',
             },
             'str_col': {
                 'sdtype': 'str',
@@ -403,5 +440,10 @@ def test__covert_datetime_cols_unix_timestamp():
         },
     }
 
+    # Run
     _covert_datetime_cols_unix_timestamp(data, metadata)
+
+    # Assert
     pd.testing.assert_frame_equal(data, expected_data)
+    with pytest.warns(UserWarning, match='No datetime format was specified.'):
+        _covert_datetime_cols_unix_timestamp(data, missing_format_metadata)
