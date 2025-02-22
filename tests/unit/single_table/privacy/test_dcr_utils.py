@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
 from sdmetrics.single_table.privacy.dcr_utils import (
     _calculate_dcr_between_row_and_data,
     _calculate_dcr_between_rows,
