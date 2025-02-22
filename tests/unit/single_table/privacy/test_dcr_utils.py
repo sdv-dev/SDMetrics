@@ -1,6 +1,5 @@
 import random
-import re
-from datetime import datetime
+from datetime import datetime, timezone
 
 import numpy as np
 import pandas as pd
@@ -10,13 +9,15 @@ from sdmetrics.single_table.privacy.dcr_utils import (
     _calculate_dcr_between_row_and_data,
     _calculate_dcr_between_rows,
     _calculate_dcr_value,
+    _covert_datetime_cols_unix_timestamp,
+    _to_unix_timestamp,
     calculate_dcr,
 )
 from tests.utils import check_if_value_in_threshold
 
 
 @pytest.fixture()
-def train_data():
+def real_data():
     return pd.DataFrame({
         'num_col': [10, 20, np.nan, 40, 50, 60],
         'cat_col': ['A', 'B', 'A', None, 'B', 'C'],
@@ -131,7 +132,6 @@ def expected_dcr_result():
 @pytest.fixture()
 def test_metadata():
     return {
-        'primary_key': 'student_id',
         'columns': {
             'num_col': {
                 'sdtype': 'numerical',
@@ -153,86 +153,106 @@ def test_metadata():
     }
 
 
+@pytest.fixture()
+def converted_datetimes_data(real_data, synthetic_data):
+    # Convert to timestamps, this conversion happens in
+    # calculate_dcr so transforming now for test.
+    def convert_to_timestamp(val): return val.timestamp() if pd.notna(val) else pd.NaT
+
+    d_str_col = 'datetime_str_col'
+    d_col = 'datetime_col'
+
+    synthetic_data[d_str_col] = pd.to_datetime(
+        synthetic_data[d_str_col], errors='coerce').apply(convert_to_timestamp)
+    synthetic_data[d_col] = pd.to_datetime(
+        synthetic_data[d_col], errors='coerce').apply(convert_to_timestamp)
+    real_data[d_str_col] = pd.to_datetime(
+        real_data[d_str_col], errors='coerce').apply(convert_to_timestamp)
+    real_data[d_col] = pd.to_datetime(
+        real_data[d_col], errors='coerce').apply(convert_to_timestamp)
+
+    return real_data, synthetic_data
+
+
 SECONDS_IN_DAY = 86400
 ACCURACY_THRESHOLD = 0.000001
 
 
 @pytest.mark.parametrize(
-    's_value, d_value, range, col_name, expected_dist',
+    's_value, d_value, col_range, sdtype, expected_dist',
     [
-        (2.0, 2.0, 10.0, 'num_col', 0.0),
-        (1.0, 2.0, 10.0, 'num_col', 0.1),
-        (2.0, 1.0, 10.0, 'num_col', 0.1),
-        (100.0, 1.0, 10.0, 'num_col', 1.0),
-        (None, 1.0, 10.0, 'num_col', 1.0),
-        (1.0, np.nan, 10.0, 'num_col', 1.0),
-        (np.nan, None, 10.0, 'num_col', 0.0),
-        ('A', 'B', None, 'cat_col', 1.0),
-        ('B', 'B', None, 'cat_col', 0.0),
-        ('B', 'A', None, 'cat_col', 1.0),
-        (None, 'B', None, 'cat_col', 1.0),
-        ('A', None, None, 'cat_col', 1.0),
-        (None, None, None, 'cat_col', 0.0),
-        (True, False, None, 'bool_col', 1.0),
-        (True, True, None, 'bool_col', 0.0),
-        (False, True, None, 'bool_col', 1.0),
-        (True, None, None, 'bool_col', 1.0),
-        ('2025-01-10', None, SECONDS_IN_DAY, 'datetime_str_col', 1.0),
-        (None, '2025-01-10', SECONDS_IN_DAY, 'datetime_str_col', 1.0),
-        ('2025-01-10', '2025-01-10', SECONDS_IN_DAY, 'datetime_str_col', 0.0),
-        ('2025-01-11', '2025-01-10', 2 * SECONDS_IN_DAY, 'datetime_str_col', 0.5),
-        ('2025-02-11', '2025-01-10', SECONDS_IN_DAY, 'datetime_str_col', 1.0),
-        (datetime(2025, 1, 1), None, SECONDS_IN_DAY, 'datetime_col', 1.0),
-        (None, datetime(2025, 1, 1), SECONDS_IN_DAY, 'datetime_col', 1.0),
-        (datetime(2025, 1, 1), datetime(2025, 1, 1), SECONDS_IN_DAY, 'datetime_col', 0.0),
-        (datetime(2025, 1, 2), datetime(2025, 1, 1), 2 * SECONDS_IN_DAY, 'datetime_col', 0.5),
-        (datetime(2025, 10, 10), datetime(2025, 1, 1), SECONDS_IN_DAY, 'datetime_col', 1.0),
+        (2.0, 2.0, 10.0, 'numerical', 0.0),
+        (1.0, 2.0, 10.0, 'numerical', 0.1),
+        (2.0, 1.0, 10.0, 'numerical', 0.1),
+        (100.0, 1.0, 10.0, 'numerical', 1.0),
+        (None, 1.0, 10.0, 'numerical', 1.0),
+        (1.0, np.nan, 10.0, 'numerical', 1.0),
+        (np.nan, None, 10.0, 'numerical', 0.0),
+        ('A', 'B', None, 'categorical', 1.0),
+        ('B', 'B', None, 'categorical', 0.0),
+        ('B', 'A', None, 'categorical', 1.0),
+        (None, 'B', None, 'categorical', 1.0),
+        ('A', None, None, 'categorical', 1.0),
+        (None, None, None, 'categorical', 0.0),
+        (True, False, None, 'boolean', 1.0),
+        (True, True, None, 'boolean', 0.0),
+        (False, True, None, 'boolean', 1.0),
+        (True, None, None, 'boolean', 1.0),
+        (datetime(2025, 1, 1).timestamp(), None, SECONDS_IN_DAY, 'datetime', 1.0),
+        (None, datetime(2025, 1, 1).timestamp(), SECONDS_IN_DAY, 'datetime', 1.0),
+        (datetime(2025, 1, 1).timestamp(), datetime(
+            2025, 1, 1).timestamp(), SECONDS_IN_DAY, 'datetime', 0.0),
+        (datetime(2025, 1, 2).timestamp(), datetime(
+            2025, 1, 1).timestamp(), 2 * SECONDS_IN_DAY, 'datetime', 0.5),
+        (datetime(2025, 10, 10).timestamp(), datetime(
+            2025, 1, 1).timestamp(), SECONDS_IN_DAY, 'datetime', 1.0),
     ],
 )
-def test__calculate_dcr_value(s_value, d_value, range, col_name, expected_dist, test_metadata):
+def test__calculate_dcr_value(s_value, d_value, col_range, sdtype, expected_dist):
     """Test _calculate_dcr_value with different types of values."""
     # Run
-    dist = _calculate_dcr_value(s_value, d_value, col_name, test_metadata, range)
+    dist = _calculate_dcr_value(s_value, d_value, sdtype, col_range)
 
     # Assert
     assert dist == expected_dist
 
 
-def test__calculate_dcr_value_missing_range(test_metadata):
+def test__calculate_dcr_value_missing_range():
     """Test _calculate_dcr_value with missing range for numerical values."""
     # Setup
-    col_name = 'num_col'
     error_message = (
-        f'The numerical column: {col_name} did not produce a range. '
-        'Check that column has sdtype=numerical and that it exists in training data.'
+        'No col_range was provided. The col_range is required '
+        'for numerical and datetime sdtype DCR calculation.'
     )
 
     # Assert
     with pytest.raises(ValueError, match=error_message):
-        _calculate_dcr_value(1, 1, col_name, test_metadata, None)
+        _calculate_dcr_value(1, 1, 'numerical', None)
 
 
-def test__calculate_dcr_value_missing_column(test_metadata):
+def test__calculate_dcr_missing_column(test_metadata):
     """Test _calculate_dcr_value with a missing column."""
     # Setup
-    col_name = 'bad_col'
-    error_message = f'Column {col_name} was not found in the metadata.'
+    bad_col_name = 'col1'
+    test_data = pd.DataFrame({bad_col_name: [1.0]})
+    error_message = f'Column {bad_col_name} was not found in the metadata.'
 
     # Assert
     with pytest.raises(ValueError, match=error_message):
-        _calculate_dcr_value(1, 1, col_name, test_metadata, 1)
+        calculate_dcr(test_data, test_data, test_metadata)
 
 
 def test__calculate_dcr_between_rows(
-    synthetic_data, train_data, test_metadata, column_ranges, expected_row_comparisons
+    converted_datetimes_data, test_metadata, column_ranges, expected_row_comparisons
 ):
     """Test _calculate_dcr_between_rows for all row combinations"""
     # Setup
     result = []
+    real_data, synthetic_data = converted_datetimes_data
 
     # Run
     for _, s_row_obj in synthetic_data.iterrows():
-        for _, t_row_obj in train_data.iterrows():
+        for _, t_row_obj in real_data.iterrows():
             dist = _calculate_dcr_between_rows(s_row_obj, t_row_obj, column_ranges, test_metadata)
             result.append(dist)
 
@@ -242,39 +262,18 @@ def test__calculate_dcr_between_rows(
         check_if_value_in_threshold(result[i], expected_dist, ACCURACY_THRESHOLD)
 
 
-def test__calculate_dcr_between_rows_bad_index():
-    """Run _calculate_dcr_between_rows with an index that does not exist in comparison row."""
-    # Setup
-    synth_dataframe = pd.DataFrame({
-        'A': [0.0, 0.0, 0.0],
-        'B': [0.0, 0.0, 0.0],
-    })
-    train_dataframe = pd.DataFrame({
-        'A': [0.0, 1.0, 1.0],
-        'C': [1.0, 0.0, 1.0],
-    })
-    metadata = {'columns': {'A': {'sdtype': 'numerical'}, 'B': {'sdtype': 'numerical'}}}
-    test_range = {'A': 1.0, 'C': 1.0}
-    error_msg = re.escape("Missing columns in comparison_row: {'B'}")
-
-    # Assert
-    with pytest.raises(ValueError, match=error_msg):
-        _calculate_dcr_between_rows(
-            synth_dataframe.iloc[0], train_dataframe.iloc[0], test_range, metadata
-        )
-
-
 def test__calculate_dcr_between_row_and_data(
-    synthetic_data, train_data, column_ranges, test_metadata, expected_dcr_result
+    converted_datetimes_data, column_ranges, test_metadata, expected_dcr_result
 ):
     """Test _calculate_dcr_between_row_and_data for all rows."""
     # Setup
     result = []
+    real_data, synthetic_data = converted_datetimes_data
 
     # Run
     for _, s_row_obj in synthetic_data.iterrows():
         dist = _calculate_dcr_between_row_and_data(
-            s_row_obj, train_data, column_ranges, test_metadata
+            s_row_obj, real_data, column_ranges, test_metadata
         )
         result.append(dist)
 
@@ -284,7 +283,7 @@ def test__calculate_dcr_between_row_and_data(
 
 
 def test_calculate_dcr(
-    train_data,
+    real_data,
     synthetic_data,
     test_metadata,
     expected_dcr_result,
@@ -293,10 +292,10 @@ def test_calculate_dcr(
     """Calculate the DCR for all rows in a dataset against a traning dataset."""
     # Setup
     result_dcr = calculate_dcr(
-        synthetic_data=synthetic_data, comparison_data=train_data, metadata=test_metadata
+        synthetic_data=synthetic_data, real_data=real_data, metadata=test_metadata
     )
     result_same_dcr = calculate_dcr(
-        synthetic_data=synthetic_data, comparison_data=synthetic_data, metadata=test_metadata
+        synthetic_data=synthetic_data, real_data=synthetic_data, metadata=test_metadata
     )
 
     # Assert
@@ -316,19 +315,81 @@ def test_calculate_dcr_bad_col(test_metadata):
     # Assert
     with pytest.raises(ValueError, match=error_message):
         calculate_dcr(
-            synthetic_data=fake_dataframe, comparison_data=fake_dataframe, metadata=test_metadata
+            synthetic_data=fake_dataframe, real_data=fake_dataframe, metadata=test_metadata
         )
 
 
 def test_calculate_dcr_with_shuffled_data():
     # Setup
     data = [random.randint(1, 100) for _ in range(20)]
-    train_data = pd.DataFrame({'num_col': random.sample(data, len(data))})
+    real_data = pd.DataFrame({'num_col': random.sample(data, len(data))})
     synthetic_data = pd.DataFrame({'num_col': random.sample(data, len(data))})
     metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
 
     # Run
-    result = calculate_dcr(synthetic_data, train_data, metadata)
+    result = calculate_dcr(synthetic_data, real_data, metadata)
 
     # Assert
     assert result.eq(0).all().all()
+
+
+def test__to_unix_timestamp():
+    # Setup
+    not_datetime = 1
+    actual_datetime = datetime(2025, 1, 1)
+    timestamp = actual_datetime.timestamp()
+    bad_type_msg = 'Value is not of type pandas datetime.'
+
+    # Run
+    with pytest.raises(ValueError, match=bad_type_msg):
+        _to_unix_timestamp(not_datetime)
+
+    with pytest.raises(ValueError, match=bad_type_msg):
+        _to_unix_timestamp(timestamp)
+    result = _to_unix_timestamp(actual_datetime)
+    assert result == timestamp
+
+
+def test__covert_datetime_cols_unix_timestamp():
+    # Setup
+    int_cols = [1.0, 1.0, 2.0]
+    datetime_cols = [
+        datetime(2025, 1, 1, tzinfo=timezone.utc),
+        datetime(2025, 1, 2, tzinfo=timezone.utc),
+        datetime(2025, 1, 3, tzinfo=timezone.utc)
+    ]
+    timestamps = [val.timestamp() for val in datetime_cols]
+
+    data = pd.DataFrame({
+        'str_datetime_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
+        'datetime_col': datetime_cols,
+        'int_col': int_cols,
+        'str_col':  ['2025-01-01', '2025-01-02', '2025-01-03']
+    })
+    expected_data = pd.DataFrame({
+        'str_datetime_col': timestamps,
+        'datetime_col': datetime_cols,
+        'int_col': int_cols,
+        'str_col':  ['2025-01-01', '2025-01-02', '2025-01-03']
+    })
+    metadata = {
+        'columns': {
+            'str_datetime_col': {
+                'sdtype': 'datetime',
+                'datetime_format': '%Y-%m-%d'
+            },
+            'datetime_col': {
+                'sdtype': 'datetime',
+                'datetime_format': '%Y-%m-%d'
+            },
+            'integers': {
+                'sdtype': 'datetime',
+            },
+            'str_col': {
+                'sdtype': 'str',
+            },
+        },
+    }
+
+    _covert_datetime_cols_unix_timestamp(data, metadata)
+    pd.testing.assert_frame_equal(data, expected_data)
