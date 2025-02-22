@@ -64,7 +64,7 @@ def _calculate_dcr_between_rows(synthetic_row, comparison_row, column_ranges, me
             synthetic_row[s_col],
             comparison_row[s_col],
             metadata['columns'][s_col]['sdtype'],
-            column_ranges.get(s_col)
+            column_ranges.get(s_col),
         )
     )
 
@@ -111,7 +111,8 @@ def _covert_datetime_cols_unix_timestamp(data, metadata):
             if sdtype == 'datetime' and not is_datetime(data[column]):
                 datetime_format = metadata['columns'][column].get('datetime_format')
                 datetime_to_timestamp_col = pd.to_datetime(
-                    data[column], format=datetime_format, errors='coerce').apply(_to_unix_timestamp)
+                    data[column], format=datetime_format, errors='coerce'
+                ).apply(_to_unix_timestamp)
                 data[column] = datetime_to_timestamp_col
 
 

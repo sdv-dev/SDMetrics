@@ -157,19 +157,22 @@ def test_metadata():
 def converted_datetimes_data(real_data, synthetic_data):
     # Convert to timestamps, this conversion happens in
     # calculate_dcr so transforming now for test.
-    def convert_to_timestamp(val): return val.timestamp() if pd.notna(val) else pd.NaT
+    def convert_to_timestamp(val):
+        return val.timestamp() if pd.notna(val) else pd.NaT
 
     d_str_col = 'datetime_str_col'
     d_col = 'datetime_col'
 
-    synthetic_data[d_str_col] = pd.to_datetime(
-        synthetic_data[d_str_col], errors='coerce').apply(convert_to_timestamp)
-    synthetic_data[d_col] = pd.to_datetime(
-        synthetic_data[d_col], errors='coerce').apply(convert_to_timestamp)
-    real_data[d_str_col] = pd.to_datetime(
-        real_data[d_str_col], errors='coerce').apply(convert_to_timestamp)
-    real_data[d_col] = pd.to_datetime(
-        real_data[d_col], errors='coerce').apply(convert_to_timestamp)
+    synthetic_data[d_str_col] = pd.to_datetime(synthetic_data[d_str_col], errors='coerce').apply(
+        convert_to_timestamp
+    )
+    synthetic_data[d_col] = pd.to_datetime(synthetic_data[d_col], errors='coerce').apply(
+        convert_to_timestamp
+    )
+    real_data[d_str_col] = pd.to_datetime(real_data[d_str_col], errors='coerce').apply(
+        convert_to_timestamp
+    )
+    real_data[d_col] = pd.to_datetime(real_data[d_col], errors='coerce').apply(convert_to_timestamp)
 
     return real_data, synthetic_data
 
@@ -200,12 +203,27 @@ ACCURACY_THRESHOLD = 0.000001
         (True, None, None, 'boolean', 1.0),
         (datetime(2025, 1, 1).timestamp(), None, SECONDS_IN_DAY, 'datetime', 1.0),
         (None, datetime(2025, 1, 1).timestamp(), SECONDS_IN_DAY, 'datetime', 1.0),
-        (datetime(2025, 1, 1).timestamp(), datetime(
-            2025, 1, 1).timestamp(), SECONDS_IN_DAY, 'datetime', 0.0),
-        (datetime(2025, 1, 2).timestamp(), datetime(
-            2025, 1, 1).timestamp(), 2 * SECONDS_IN_DAY, 'datetime', 0.5),
-        (datetime(2025, 10, 10).timestamp(), datetime(
-            2025, 1, 1).timestamp(), SECONDS_IN_DAY, 'datetime', 1.0),
+        (
+            datetime(2025, 1, 1).timestamp(),
+            datetime(2025, 1, 1).timestamp(),
+            SECONDS_IN_DAY,
+            'datetime',
+            0.0,
+        ),
+        (
+            datetime(2025, 1, 2).timestamp(),
+            datetime(2025, 1, 1).timestamp(),
+            2 * SECONDS_IN_DAY,
+            'datetime',
+            0.5,
+        ),
+        (
+            datetime(2025, 10, 10).timestamp(),
+            datetime(2025, 1, 1).timestamp(),
+            SECONDS_IN_DAY,
+            'datetime',
+            1.0,
+        ),
     ],
 )
 def test__calculate_dcr_value(s_value, d_value, col_range, sdtype, expected_dist):
@@ -356,7 +374,7 @@ def test__covert_datetime_cols_unix_timestamp():
     datetime_cols = [
         datetime(2025, 1, 1, tzinfo=timezone.utc),
         datetime(2025, 1, 2, tzinfo=timezone.utc),
-        datetime(2025, 1, 3, tzinfo=timezone.utc)
+        datetime(2025, 1, 3, tzinfo=timezone.utc),
     ]
     timestamps = [val.timestamp() for val in datetime_cols]
 
@@ -364,24 +382,18 @@ def test__covert_datetime_cols_unix_timestamp():
         'str_datetime_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
         'datetime_col': datetime_cols,
         'int_col': int_cols,
-        'str_col':  ['2025-01-01', '2025-01-02', '2025-01-03']
+        'str_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
     })
     expected_data = pd.DataFrame({
         'str_datetime_col': timestamps,
         'datetime_col': datetime_cols,
         'int_col': int_cols,
-        'str_col':  ['2025-01-01', '2025-01-02', '2025-01-03']
+        'str_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
     })
     metadata = {
         'columns': {
-            'str_datetime_col': {
-                'sdtype': 'datetime',
-                'datetime_format': '%Y-%m-%d'
-            },
-            'datetime_col': {
-                'sdtype': 'datetime',
-                'datetime_format': '%Y-%m-%d'
-            },
+            'str_datetime_col': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+            'datetime_col': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
             'integers': {
                 'sdtype': 'datetime',
             },
