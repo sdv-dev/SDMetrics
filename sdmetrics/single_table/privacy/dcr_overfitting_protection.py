@@ -1,4 +1,5 @@
 """DCR Overfitting Protection metrics."""
+
 import numpy as np
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
@@ -142,7 +143,7 @@ class DCROverfittingProtection(SingleTableMetric):
             total_rows = dcr_real.size
             percentage_close_to_real = num_rows_closer_to_real / total_rows
             percentage_close_to_random = 1 - percentage_close_to_real
-            score = min((1.0 - percentage_close_to_real)*2, 1.0)
+            score = min((1.0 - percentage_close_to_real) * 2, 1.0)
             sum_of_scores += score
             sum_of_p_close_to_real += percentage_close_to_real
             sum_of_p_close_to_random += percentage_close_to_random
@@ -152,11 +153,10 @@ class DCROverfittingProtection(SingleTableMetric):
             'synthetic_data_percentages': {
                 'closer_to_training': sum_of_p_close_to_real / num_iterations,
                 'closer_to_holdout': sum_of_p_close_to_random / num_iterations,
-            }
+            },
         }
 
         return result
-
 
     @classmethod
     def compute(
