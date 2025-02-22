@@ -70,7 +70,7 @@ def hamming_distance(target, test):
     """
     dist = 0
     assert len(target) == len(test), (
-        'Tuples must have the same length in thecalculation of hamming distance!'
+        'Tuples must have the same length in the calculation of hamming distance!'
     )
 
     for target_entry, test_entry in zip(target, test):
