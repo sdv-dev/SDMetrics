@@ -138,7 +138,7 @@ def calculate_dcr(synthetic_data, real_data, metadata):
             Returns a dataframe that shows the DCR value for all synthetic data.
     """
     column_ranges = {}
-    missing_cols = set(synthetic_data.index) - set(real_data.index)
+    missing_cols = set(real_data.columns) - set(synthetic_data.columns)
     if missing_cols:
         raise ValueError(f'Different columns detected: {missing_cols}')
 
