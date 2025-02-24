@@ -1,6 +1,7 @@
 """DCR Overfitting Protection metrics."""
 
 import numpy as np
+import warnings
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
@@ -72,6 +73,15 @@ class DCROverfittingProtection(SingleTableMetric):
                 'DCROverfittingProtection metric.'
             )
 
+        if (
+            len(sanitized_real_training_data) * 0.5 > len(sanitized_real_validation_data)
+        ):
+            warnings.warn(
+                f'Your real_validation_data contains {len(sanitized_real_validation_data)} rows while your '
+                f'real_training_data contains {len(sanitized_real_training_data)} rows. For most accurate '
+                'results, we recommend that the validation data at least half the size of the training data.'
+            )
+
         return (
             sanitized_real_training_data,
             sanitized_synthetic_data,
@@ -97,7 +107,7 @@ class DCROverfittingProtection(SingleTableMetric):
                 A pandas.DataFrame object containing the synthetic data sampled
                 from the synthesizer.
             real_validation_data (pd.DataFrame):
-                A pandas.DataFrame object containing a holdout set of real data.
+                A pandas.DataFrame object containing a validation set of real data.
                 This data should not have been used to train the synthesizer.
             metadata (dict):
                 A metadata dictionary that describes the table of data.
@@ -135,10 +145,10 @@ class DCROverfittingProtection(SingleTableMetric):
             if num_rows_subsample is not None:
                 synthetic_sample = sanitized_synthetic_data.sample(n=num_rows_subsample)
 
-            dcr_real = calculate_dcr(synthetic_sample, training_data, metadata)
-            dcr_random = calculate_dcr(synthetic_sample, validation_data, metadata)
+            dcr_real = calculate_dcr(training_data, synthetic_sample, metadata)
+            dcr_holdout = calculate_dcr(validation_data, synthetic_sample, metadata)
 
-            num_rows_closer_to_real = np.where(dcr_real < dcr_random, 1, 0).sum()
+            num_rows_closer_to_real = np.where(dcr_real < dcr_holdout, 1.0, 0.0).sum()
             total_rows = dcr_real.size
             percentage_close_to_real = num_rows_closer_to_real / total_rows
             percentage_close_to_random = 1 - percentage_close_to_real
@@ -176,7 +186,7 @@ class DCROverfittingProtection(SingleTableMetric):
                 A pandas.DataFrame object containing the synthetic data sampled
                 from the synthesizer.
             real_validation_data (pd.DataFrame):
-                A pandas.DataFrame object containing a holdout set of real data.
+                A pandas.DataFrame object containing a validation set of real data.
                 This data should not have been used to train the synthesizer.
             metadata (dict):
                 A metadata dictionary that describes the table of data.
