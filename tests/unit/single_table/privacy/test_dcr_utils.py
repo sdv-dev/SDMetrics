@@ -1,16 +1,15 @@
 import random
-from datetime import datetime, timezone
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from sdmetrics._utils_metadata import _convert_datetime_columns
 from sdmetrics.single_table.privacy.dcr_utils import (
     _calculate_dcr_between_row_and_data,
     _calculate_dcr_between_rows,
     _calculate_dcr_value,
-    _convert_datetime_cols_unix_timestamp_seconds,
-    _to_unix_timestamp,
     calculate_dcr,
 )
 from tests.utils import check_if_value_in_threshold
@@ -231,26 +230,14 @@ def test__calculate_dcr_value_missing_range():
         _calculate_dcr_value(1, 1, 'numerical', None)
 
 
-def test__calculate_dcr_missing_column(test_metadata):
-    """Test _calculate_dcr_value with a missing column."""
-    # Setup
-    bad_col_name = 'col1'
-    test_data = pd.DataFrame({bad_col_name: [1.0]})
-    error_message = f'Column {bad_col_name} was not found in the metadata.'
-
-    # Assert
-    with pytest.raises(ValueError, match=error_message):
-        calculate_dcr(test_data, test_data, test_metadata)
-
-
 def test__calculate_dcr_between_rows(
     real_data, synthetic_data, test_metadata, column_ranges, expected_row_comparisons
 ):
     """Test _calculate_dcr_between_rows for all row combinations"""
     # Setup
     result = []
-    _convert_datetime_cols_unix_timestamp_seconds(real_data, test_metadata)
-    _convert_datetime_cols_unix_timestamp_seconds(synthetic_data, test_metadata)
+    real_data = _convert_datetime_columns(real_data, test_metadata)
+    synthetic_data = _convert_datetime_columns(synthetic_data, test_metadata)
 
     # Run
     for _, s_row_obj in synthetic_data.iterrows():
@@ -269,8 +256,8 @@ def test__calculate_dcr_between_row_and_data(
     """Test _calculate_dcr_between_row_and_data for all rows."""
     # Setup
     result = []
-    _convert_datetime_cols_unix_timestamp_seconds(real_data, test_metadata)
-    _convert_datetime_cols_unix_timestamp_seconds(synthetic_data, test_metadata)
+    real_data = _convert_datetime_columns(real_data, test_metadata)
+    synthetic_data = _convert_datetime_columns(synthetic_data, test_metadata)
 
     # Run
     for _, s_row_obj in synthetic_data.iterrows():
@@ -305,36 +292,30 @@ def test_calculate_dcr(
     pd.testing.assert_series_equal(result_same_dcr, expected_same_dcr_result)
 
 
-def test_calculate_dcr_missing_cols():
-    """Test calculate_dcr with a missing column in synthetic data"""
-    missing_col = 'missing_col'
-    synthetic_df = pd.DataFrame({
-        'col1': [0.0],
-    })
-    real_df = pd.DataFrame({'col1': [0.0], missing_col: [0.0]})
-    metadata = {'columns': {'col1': {'sdtype': 'numerical'}, missing_col: {'sdtype': 'numerical'}}}
-
-    error_message = "Different columns detected: {'missing_col'}"
-
-    # Assert
-    with pytest.raises(ValueError, match=error_message):
-        calculate_dcr(synthetic_data=synthetic_df, real_data=real_df, metadata=metadata)
-
-
-def test_calculate_dcr_bad_col(test_metadata):
-    """Test calculate_dcr with a column not in metadata."""
+def test_calculate_dcr_different_cols_in_metadata(real_data, synthetic_data, test_metadata):
+    """Test that only intersecting columns of metadata, synthetic data and real data are measured."""
     # Setup
-    col_name = 'bad_col'
-    fake_dataframe = pd.DataFrame({
-        col_name: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-    })
-    error_message = f'Column {col_name} was not found in the metadata.'
+    metadata_drop_columns = ['bool_col', 'datetime_col', 'cat_int_col', 'datetime_str_col']
+    for col in metadata_drop_columns:
+        test_metadata['columns'].pop(col)
+    synthetic_data_drop_columns = ['cat_col', 'datetime_str_col']
+    synthetic_data = synthetic_data.drop(columns=synthetic_data_drop_columns)
+    real_data_drop_columns = ['bool_col', 'datetime_col']
+    real_data = real_data.drop(columns=real_data_drop_columns)
+
+    # Run
+    result = calculate_dcr(
+        synthetic_data=synthetic_data, real_data=real_data, metadata=test_metadata
+    )
+    expected_result = pd.Series([0.0, 0.1, 0.2, 0.02, 0.06, 0.0])
 
     # Assert
-    with pytest.raises(ValueError, match=error_message):
-        calculate_dcr(
-            synthetic_data=fake_dataframe, real_data=fake_dataframe, metadata=test_metadata
-        )
+    pd.testing.assert_series_equal(result, expected_result)
+
+    test_metadata['columns'].pop('num_col')
+    error_msg = 'There are no overlapping statistical columns to measure.'
+    with pytest.raises(ValueError, match=error_msg):
+        calculate_dcr(synthetic_data=synthetic_data, real_data=real_data, metadata=test_metadata)
 
 
 def test_calculate_dcr_with_shuffled_data():
@@ -357,77 +338,3 @@ def test_calculate_dcr_with_shuffled_data():
 
     # Assert
     check_if_value_in_threshold(result.sum(), result_shuffled.sum(), 0.000001)
-
-
-def test__to_unix_timestamp():
-    # Setup
-    not_datetime = 1
-    actual_datetime = datetime(2025, 1, 1)
-    timestamp = actual_datetime.timestamp()
-    bad_type_msg = 'Value is not of type pandas datetime.'
-
-    # Run
-    with pytest.raises(ValueError, match=bad_type_msg):
-        _to_unix_timestamp(not_datetime)
-
-    with pytest.raises(ValueError, match=bad_type_msg):
-        _to_unix_timestamp(timestamp)
-    result = _to_unix_timestamp(actual_datetime)
-    assert result == timestamp
-
-
-def test__convert_datetime_cols_unix_timestamp_seconds():
-    """Test _convert_datetime_cols_unix_timestamp_seconds to see if datetimes are converted."""
-    # Setup
-    int_cols = [1.0, 1.0, 2.0]
-    datetime_cols = [
-        datetime(2025, 1, 1, tzinfo=timezone.utc),
-        datetime(2025, 1, 2, tzinfo=timezone.utc),
-        datetime(2025, 1, 3, tzinfo=timezone.utc),
-    ]
-    timestamps = [val.timestamp() for val in datetime_cols]
-
-    data = pd.DataFrame({
-        'str_datetime_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
-        'datetime_col': datetime_cols,
-        'int_col': int_cols,
-        'str_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
-    })
-    expected_data = pd.DataFrame({
-        'str_datetime_col': timestamps,
-        'datetime_col': timestamps,
-        'int_col': int_cols,
-        'str_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
-    })
-    metadata = {
-        'columns': {
-            'str_datetime_col': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-            'datetime_col': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-            'int_col': {
-                'sdtype': 'numerical',
-            },
-            'str_col': {
-                'sdtype': 'str',
-            },
-        },
-    }
-    missing_format_metadata = {
-        'columns': {
-            'str_datetime_col': {'sdtype': 'datetime'},
-            'datetime_col': {'sdtype': 'datetime'},
-            'int_col': {
-                'sdtype': 'numerical',
-            },
-            'str_col': {
-                'sdtype': 'str',
-            },
-        },
-    }
-
-    # Run
-    _convert_datetime_cols_unix_timestamp_seconds(data, metadata)
-
-    # Assert
-    pd.testing.assert_frame_equal(data, expected_data)
-    with pytest.warns(UserWarning, match='No datetime format was specified.'):
-        _convert_datetime_cols_unix_timestamp_seconds(data, missing_format_metadata)

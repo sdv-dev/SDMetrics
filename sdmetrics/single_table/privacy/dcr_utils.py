@@ -1,10 +1,9 @@
 """Distance to closest record measurement functions."""
 
-import warnings
-
 import pandas as pd
 
-from sdmetrics.utils import is_datetime
+from sdmetrics._utils_metadata import _process_data_with_metadata
+from sdmetrics.utils import get_columns_from_metadata
 
 
 def _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range=None):
@@ -37,7 +36,11 @@ def _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range=None):
                 'for numerical and datetime sdtype DCR calculation.'
             )
 
-        distance = abs(synthetic_value - real_value) / (col_range)
+        difference = abs(synthetic_value - real_value)
+        if isinstance(difference, pd.Timedelta):
+            difference = difference.total_seconds()
+
+        distance = difference / col_range
         return min(distance, 1.0)
 
     else:
@@ -103,26 +106,6 @@ def _calculate_dcr_between_row_and_data(synthetic_row, real_data, column_ranges,
     return dist_srow_to_all_rows.min()
 
 
-def _to_unix_timestamp(datetime_value):
-    if not is_datetime(datetime_value):
-        raise ValueError('Value is not of type pandas datetime.')
-    return datetime_value.timestamp() if pd.notna(datetime_value) else pd.NaT
-
-
-def _convert_datetime_cols_unix_timestamp_seconds(data, metadata):
-    for column in data.columns:
-        if column in metadata['columns']:
-            sdtype = metadata['columns'][column]['sdtype']
-            if sdtype == 'datetime' and not isinstance(data[column], float):
-                datetime_format = metadata['columns'][column].get('datetime_format')
-                if not datetime_format:
-                    warnings.warn('No datetime format was specified.')
-                datetime_to_timestamp_col = pd.to_datetime(
-                    data[column], format=datetime_format, errors='coerce'
-                ).apply(_to_unix_timestamp)
-                data[column] = datetime_to_timestamp_col
-
-
 def calculate_dcr(real_data, synthetic_data, metadata):
     """Calculate the Distance to Closest Record for all rows in the synthetic data.
 
@@ -141,25 +124,25 @@ def calculate_dcr(real_data, synthetic_data, metadata):
             Returns a dataframe that shows the DCR value for all synthetic data.
     """
     column_ranges = {}
-    missing_cols = set(real_data.columns) - set(synthetic_data.columns)
-    if missing_cols:
-        raise ValueError(f'Different columns detected: {missing_cols}')
 
     real_data_copy = real_data.copy()
     synthetic_data_copy = synthetic_data.copy()
-    _convert_datetime_cols_unix_timestamp_seconds(real_data_copy, metadata)
-    _convert_datetime_cols_unix_timestamp_seconds(synthetic_data_copy, metadata)
+    real_data_copy = _process_data_with_metadata(real_data_copy, metadata, True)
+    synthetic_data_copy = _process_data_with_metadata(synthetic_data_copy, metadata, True)
 
-    for column in real_data_copy.columns:
-        if column not in metadata['columns']:
-            raise ValueError(f'Column {column} was not found in the metadata.')
+    overlapping_columns = set(real_data_copy.columns) & set(synthetic_data_copy.columns)
+    if not overlapping_columns:
+        raise ValueError('There are no overlapping statistical columns to measure.')
 
-        sdtype = metadata['columns'][column]['sdtype']
+    for col_name, column in get_columns_from_metadata(metadata).items():
+        sdtype = column['sdtype']
         col_range = None
         if sdtype == 'numerical' or sdtype == 'datetime':
-            col_range = real_data_copy[column].max() - real_data_copy[column].min()
+            col_range = real_data_copy[col_name].max() - real_data_copy[col_name].min()
+            if isinstance(col_range, pd.Timedelta):
+                col_range = col_range.total_seconds()
 
-        column_ranges[column] = col_range
+        column_ranges[col_name] = col_range
 
     dcr_dist_df = synthetic_data_copy.apply(
         lambda synth_row: _calculate_dcr_between_row_and_data(

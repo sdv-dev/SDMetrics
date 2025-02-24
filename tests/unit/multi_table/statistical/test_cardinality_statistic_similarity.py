@@ -158,14 +158,14 @@ class TestCardinalityStatisticSimilarity:
         # Setup
         metadata = {
             'tables': {
-                'tableA': {'fields': {'col1': {}}},
+                'tableA': {'columns': {'col1': {}}},
                 'tableB': {
-                    'fields': {
+                    'columns': {
                         'col1': {},
                         'col2': {},
                     },
                 },
-                'tableC': {'fields': {'col2': {}}},
+                'tableC': {'columns': {'col2': {}}},
             },
             'relationships': [
                 {
@@ -230,9 +230,9 @@ class TestCardinalityStatisticSimilarity:
         # Setup
         metadata = {
             'tables': {
-                'tableA': {'fields': {'col1': {}}},
-                'tableB': {'fields': {'col1': {}, 'col2': {}}},
-                'tableC': {'fields': {'col2': {}}},
+                'tableA': {'columns': {'col1': {}}},
+                'tableB': {'columns': {'col1': {}, 'col2': {}}},
+                'tableC': {'columns': {'col2': {}}},
             },
         }
         real_data = {
