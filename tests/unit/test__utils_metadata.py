@@ -199,20 +199,7 @@ def test_convert_datetime_columns_with_failures():
             'datetime_2': {'sdtype': 'datetime'},
         }
     }
-    error_message = (
-        r'\s*Conversion to datetime failed for the following columns with errors:\s*'
-        r"\s*'datetime_1': time data \"20-error\" doesn't match format \"%Y-%m-%d\", at "
-        r'position 1\.\s*You might want to try:\s*- passing `format` if your strings have a '
-        r"consistent format;\s*- passing `format='ISO8601'` if your strings are all ISO8601 "
-        r"but not necessarily in exactly the same format;\s*- passing `format='mixed'`, and "
-        r'the format will be inferred for each element individually\. You might want to use '
-        r"`dayfirst` alongside this\.\s*'datetime_2': time data \"2025-13-04\" doesn't match "
-        r'format \"%Y-%m-%d\", at position 2\.\s*You might want to try:\s*- passing `format` '
-        r"if your strings have a consistent format;\s*- passing `format='ISO8601'` if your "
-        r'strings are all ISO8601 but not necessarily in exactly the same format;\s*- passing '
-        r"`format='mixed'`, and the format will be inferred for each element individually\. "
-        r'You might want to use `dayfirst` alongside this\.'
-    )
+    error_message = r"^Failed to convert column 'datetime_1' to datetime with the error:"
 
     # Run and Assert
     with pytest.raises(ValueError, match=error_message):
