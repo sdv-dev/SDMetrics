@@ -213,6 +213,8 @@ def test_convert_datetime_columns_with_failures():
         r"`format='mixed'`, and the format will be inferred for each element individually\. "
         r'You might want to use `dayfirst` alongside this\.'
     )
+
+    # Run and Assert
     with pytest.raises(ValueError, match=error_message):
         _convert_datetime_columns(wrong_data, metadata)
 
