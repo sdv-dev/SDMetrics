@@ -194,7 +194,7 @@ class TestBaseDataAugmentationMetric:
         discrete_columns, datetime_columns = metric._fit(real_training_data, metadata, 'target')
 
         # Assert
-        assert discrete_columns == ['categorical', 'boolean']
+        assert discrete_columns == ['boolean', 'categorical']
         assert datetime_columns == ['datetime']
 
     def test__transform(self, real_training_data, synthetic_data, real_validation_data):
@@ -282,6 +282,9 @@ class TestBaseDataAugmentationMetric:
         for table_name, table in transformed.items():
             assert table.equals(tables[table_name])
 
+    @patch(
+        'sdmetrics.single_table.data_augmentation.base._process_data_with_metadata_ml_efficacy_metrics'
+    )
     @patch('sdmetrics.single_table.data_augmentation.base._validate_inputs')
     @patch(
         'sdmetrics.single_table.data_augmentation.base.BaseDataAugmentationMetric._fit_transform'
@@ -295,6 +298,7 @@ class TestBaseDataAugmentationMetric:
         mock_classifier_trainer,
         mock_fit_transfrom,
         mock_validate_inputs,
+        mock_process_data_with_metadata,
         real_training_data,
         synthetic_data,
         real_validation_data,
@@ -306,7 +310,7 @@ class TestBaseDataAugmentationMetric:
         minority_class_label = 1
         classifier = 'XGBoost'
         fixed_recall_value = 0.9
-
+        mock_process_data_with_metadata.side_effect = lambda x, y, z, t: (x, y, z)
         real_data_baseline = {
             'precision_score_training': 0.43,
             'recall_score_validation': 0.7,
@@ -377,6 +381,9 @@ class TestBaseDataAugmentationMetric:
             minority_class_label,
             classifier,
             fixed_recall_value,
+        )
+        mock_process_data_with_metadata.assert_called_once_with(
+            real_training_data, synthetic_data, real_validation_data, metadata
         )
         mock_fit_transfrom.assert_called_once_with(
             real_training_data,

@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from sdmetrics._utils_metadata import _validate_multi_table_metadata
 from sdmetrics.multi_table.detection.base import DetectionMetric
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
 from sdmetrics.utils import get_columns_from_metadata, nested_attrs_meta
@@ -37,9 +38,7 @@ class ParentChildDetectionMetric(
 
     @staticmethod
     def _extract_foreign_keys(metadata):
-        if not isinstance(metadata, dict):
-            metadata = metadata.to_dict()
-
+        _validate_multi_table_metadata(metadata)
         foreign_keys = []
         for child_table, child_meta in metadata['tables'].items():
             for child_key, field_meta in get_columns_from_metadata(child_meta).items():
