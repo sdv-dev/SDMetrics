@@ -9,7 +9,7 @@ from sdmetrics.single_table.privacy.dcr_utils import (
     _calculate_dcr_between_row_and_data,
     _calculate_dcr_between_rows,
     _calculate_dcr_value,
-    _covert_datetime_cols_unix_timestamp,
+    _convert_datetime_cols_unix_timestamp_seconds,
     _to_unix_timestamp,
     calculate_dcr,
 )
@@ -21,6 +21,7 @@ def real_data():
     return pd.DataFrame({
         'num_col': [10, 20, np.nan, 40, 50, 60],
         'cat_col': ['A', 'B', 'A', None, 'B', 'C'],
+        'cat_int_col': [1, 2, 1, None, 2, 3],
         'bool_col': [True, False, True, False, None, False],
         'datetime_str_col': [
             '2025-01-01',
@@ -46,6 +47,7 @@ def synthetic_data():
     return pd.DataFrame({
         'num_col': [10, 25, 30, 21, 7, np.nan],
         'cat_col': ['C', None, 'A', None, 'B', 'C'],
+        'cat_int_col': [3, None, 1, None, 2, 3],
         'bool_col': [False, True, True, False, True, None],
         'datetime_str_col': [
             '2025-01-10',
@@ -70,8 +72,6 @@ def synthetic_data():
 def column_ranges():
     return {
         'num_col': 50.0,
-        'cat_col': 50.0,
-        'bool_col': 50.0,
         'datetime_str_col': 30 * SECONDS_IN_DAY,
         'datetime_col': 30 * SECONDS_IN_DAY,
     }
@@ -80,42 +80,42 @@ def column_ranges():
 @pytest.fixture()
 def expected_row_comparisons():
     return [
-        [0.0, 1.0, 1.0, 0.3, 0.3],
-        [0.2, 1.0, 0.0, 0.7, 0.7],
-        [1.0, 1.0, 1.0, 0.0, 0.0],
-        [0.6, 1.0, 0.0, 0.366667, 0.366667],
-        [0.8, 1.0, 1.0, 1.0, 1.0],
-        [1.0, 0.0, 0.0, 0.066667, 0.066667],
-        [0.3, 1.0, 0.0, 0.7, 0.7],
-        [0.1, 1.0, 1.0, 0.3, 0.3],
-        [1.0, 1.0, 0.0, 0.4, 0.4],
-        [0.3, 0.0, 1.0, 0.033333, 0.033333],
-        [0.5, 1.0, 1.0, 1.0, 1.0],
-        [0.7, 1.0, 1.0, 0.333333, 0.333333],
-        [0.4, 0.0, 0.0, 1.0, 1.0],
-        [0.2, 1.0, 1.0, 1.0, 1.0],
-        [1.0, 0.0, 0.0, 1.0, 1.0],
-        [0.2, 1.0, 1.0, 1.0, 1.0],
-        [0.4, 1.0, 1.0, 0.0, 0.0],
-        [0.6, 1.0, 1.0, 1.0, 1.0],
-        [0.22, 1.0, 1.0, 0.033333, 0.033333],
-        [0.02, 1.0, 0.0, 0.966667, 0.966667],
-        [1.0, 1.0, 1.0, 0.266667, 0.266667],
-        [0.38, 0.0, 0.0, 0.633333, 0.633333],
-        [0.58, 1.0, 1.0, 1.0, 1.0],
-        [0.78, 1.0, 0.0, 0.333333, 0.333333],
-        [0.06, 1.0, 0.0, 0.966667, 0.966667],
-        [0.26, 0.0, 1.0, 0.033333, 0.033333],
-        [1.0, 1.0, 0.0, 0.666667, 0.666667],
-        [0.66, 1.0, 1.0, 0.3, 0.3],
-        [0.86, 0.0, 1.0, 1.0, 1.0],
-        [1.0, 1.0, 1.0, 0.6, 0.6],
-        [1.0, 1.0, 1.0, 0.166667, 0.166667],
-        [1.0, 1.0, 1.0, 0.833333, 0.833333],
-        [0.0, 1.0, 1.0, 0.133333, 0.133333],
-        [1.0, 1.0, 1.0, 0.5, 0.5],
-        [1.0, 1.0, 0.0, 1.0, 1.0],
-        [1.0, 0.0, 1.0, 0.2, 0.2],
+        0.6,
+        0.6,
+        0.666666,
+        0.555555,
+        0.966666,
+        0.188888,
+        0.616666,
+        0.616666,
+        0.633333,
+        0.227777,
+        0.916666,
+        0.727777,
+        0.399999,
+        0.866666,
+        0.5,
+        0.866667,
+        0.566667,
+        0.933333,
+        0.547777,
+        0.658888,
+        0.755555,
+        0.274444,
+        0.93,
+        0.574444,
+        0.665555,
+        0.221111,
+        0.722222,
+        0.71,
+        0.643333,
+        0.866666,
+        0.7222222,
+        0.944444,
+        0.544444,
+        0.833333,
+        0.833333,
+        0.4,
     ]
 
 
@@ -126,7 +126,7 @@ def expected_same_dcr_result():
 
 @pytest.fixture()
 def expected_dcr_result():
-    return pd.Series([0.226666, 0.273333, 0.48, 0.329333, 0.265333, 0.453333])
+    return pd.Series([0.188888, 0.2277777, 0.4, 0.274444, 0.221111, 0.4])
 
 
 @pytest.fixture()
@@ -139,6 +139,9 @@ def test_metadata():
             'cat_col': {
                 'sdtype': 'categorical',
             },
+            'cat_int_col': {
+                'sdtype': 'categorical',
+            },
             'bool_col': {
                 'sdtype': 'boolean',
             },
@@ -148,33 +151,10 @@ def test_metadata():
             },
             'datetime_col': {
                 'sdtype': 'datetime',
+                'datetime_format': '%Y-%m-%d',
             },
         },
     }
-
-
-@pytest.fixture()
-def converted_datetimes_data(real_data, synthetic_data):
-    # Convert to timestamps, this conversion happens in
-    # calculate_dcr so transforming now for test.
-    def convert_to_timestamp(val):
-        return val.timestamp() if pd.notna(val) else pd.NaT
-
-    d_str_col = 'datetime_str_col'
-    d_col = 'datetime_col'
-
-    synthetic_data[d_str_col] = pd.to_datetime(synthetic_data[d_str_col], errors='coerce').apply(
-        convert_to_timestamp
-    )
-    synthetic_data[d_col] = pd.to_datetime(synthetic_data[d_col], errors='coerce').apply(
-        convert_to_timestamp
-    )
-    real_data[d_str_col] = pd.to_datetime(real_data[d_str_col], errors='coerce').apply(
-        convert_to_timestamp
-    )
-    real_data[d_col] = pd.to_datetime(real_data[d_col], errors='coerce').apply(convert_to_timestamp)
-
-    return real_data, synthetic_data
 
 
 SECONDS_IN_DAY = 86400
@@ -182,7 +162,7 @@ ACCURACY_THRESHOLD = 0.000001
 
 
 @pytest.mark.parametrize(
-    's_value, d_value, col_range, sdtype, expected_dist',
+    'synthetic_value, real_value, col_range, sdtype, expected_dist',
     [
         (2.0, 2.0, 10.0, 'numerical', 0.0),
         (1.0, 2.0, 10.0, 'numerical', 0.1),
@@ -226,10 +206,10 @@ ACCURACY_THRESHOLD = 0.000001
         ),
     ],
 )
-def test__calculate_dcr_value(s_value, d_value, col_range, sdtype, expected_dist):
+def test__calculate_dcr_value(synthetic_value, real_value, col_range, sdtype, expected_dist):
     """Test _calculate_dcr_value with different types of values."""
     # Run
-    dist = _calculate_dcr_value(s_value, d_value, sdtype, col_range)
+    dist = _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range)
 
     # Assert
     assert dist == expected_dist
@@ -261,12 +241,13 @@ def test__calculate_dcr_missing_column(test_metadata):
 
 
 def test__calculate_dcr_between_rows(
-    converted_datetimes_data, test_metadata, column_ranges, expected_row_comparisons
+    real_data, synthetic_data, test_metadata, column_ranges, expected_row_comparisons
 ):
     """Test _calculate_dcr_between_rows for all row combinations"""
     # Setup
     result = []
-    real_data, synthetic_data = converted_datetimes_data
+    _convert_datetime_cols_unix_timestamp_seconds(real_data, test_metadata)
+    _convert_datetime_cols_unix_timestamp_seconds(synthetic_data, test_metadata)
 
     # Run
     for _, s_row_obj in synthetic_data.iterrows():
@@ -276,17 +257,17 @@ def test__calculate_dcr_between_rows(
 
     # Assert
     for i in range(len(expected_row_comparisons)):
-        expected_dist = sum(expected_row_comparisons[i]) / len(expected_row_comparisons[i])
-        check_if_value_in_threshold(result[i], expected_dist, ACCURACY_THRESHOLD)
+        check_if_value_in_threshold(result[i], expected_row_comparisons[i], ACCURACY_THRESHOLD)
 
 
 def test__calculate_dcr_between_row_and_data(
-    converted_datetimes_data, column_ranges, test_metadata, expected_dcr_result
+    real_data, synthetic_data, column_ranges, test_metadata, expected_dcr_result
 ):
     """Test _calculate_dcr_between_row_and_data for all rows."""
     # Setup
     result = []
-    real_data, synthetic_data = converted_datetimes_data
+    _convert_datetime_cols_unix_timestamp_seconds(real_data, test_metadata)
+    _convert_datetime_cols_unix_timestamp_seconds(synthetic_data, test_metadata)
 
     # Run
     for _, s_row_obj in synthetic_data.iterrows():
@@ -308,7 +289,7 @@ def test_calculate_dcr(
     expected_same_dcr_result,
 ):
     """Calculate the DCR for all rows in a dataset against a traning dataset."""
-    # Setup
+    # Run
     result_dcr = calculate_dcr(
         synthetic_data=synthetic_data, real_data=real_data, metadata=test_metadata
     )
@@ -392,8 +373,8 @@ def test__to_unix_timestamp():
     assert result == timestamp
 
 
-def test__covert_datetime_cols_unix_timestamp():
-    """Test _covert_datetime_cols_unix_timestamp to see if datetimes are converted."""
+def test__convert_datetime_cols_unix_timestamp_seconds():
+    """Test _convert_datetime_cols_unix_timestamp_seconds to see if datetimes are converted."""
     # Setup
     int_cols = [1.0, 1.0, 2.0]
     datetime_cols = [
@@ -411,7 +392,7 @@ def test__covert_datetime_cols_unix_timestamp():
     })
     expected_data = pd.DataFrame({
         'str_datetime_col': timestamps,
-        'datetime_col': datetime_cols,
+        'datetime_col': timestamps,
         'int_col': int_cols,
         'str_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
     })
@@ -441,9 +422,9 @@ def test__covert_datetime_cols_unix_timestamp():
     }
 
     # Run
-    _covert_datetime_cols_unix_timestamp(data, metadata)
+    _convert_datetime_cols_unix_timestamp_seconds(data, metadata)
 
     # Assert
     pd.testing.assert_frame_equal(data, expected_data)
     with pytest.warns(UserWarning, match='No datetime format was specified.'):
-        _covert_datetime_cols_unix_timestamp(data, missing_format_metadata)
+        _convert_datetime_cols_unix_timestamp_seconds(data, missing_format_metadata)
