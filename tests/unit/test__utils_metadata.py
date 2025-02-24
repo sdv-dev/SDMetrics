@@ -182,6 +182,41 @@ def test__convert_datetime_columns(data, metadata):
     pd.testing.assert_frame_equal(result_single_table, expected_df_single_table)
 
 
+def test_convert_datetime_columns_with_failures():
+    """Test the ``_convert_datetime_columns`` when pandas can't convert to datetime."""
+    # Setup
+    wrong_data = pd.DataFrame({
+        'numerical': [1, 2, 3],
+        'categorical': ['a', 'b', 'c'],
+        'datetime_1': ['2021-01-01', '20-error', '2021-01-03'],
+        'datetime_2': ['2025-01-01', '2025-01-24', '2025-13-04'],
+    })
+    metadata = {
+        'columns': {
+            'numerical': {'sdtype': 'numerical'},
+            'categorical': {'sdtype': 'categorical'},
+            'datetime_1': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+            'datetime_2': {'sdtype': 'datetime'},
+        }
+    }
+    error_message = (
+        r'\s*Conversion to datetime failed for the following columns with errors:\s*'
+        r"\s*'datetime_1': time data \"20-error\" doesn't match format \"%Y-%m-%d\", at "
+        r'position 1\.\s*You might want to try:\s*- passing `format` if your strings have a '
+        r"consistent format;\s*- passing `format='ISO8601'` if your strings are all ISO8601 "
+        r"but not necessarily in exactly the same format;\s*- passing `format='mixed'`, and "
+        r'the format will be inferred for each element individually\. You might want to use '
+        r"`dayfirst` alongside this\.\s*'datetime_2': time data \"2025-13-04\" doesn't match "
+        r'format \"%Y-%m-%d\", at position 2\.\s*You might want to try:\s*- passing `format` '
+        r"if your strings have a consistent format;\s*- passing `format='ISO8601'` if your "
+        r'strings are all ISO8601 but not necessarily in exactly the same format;\s*- passing '
+        r"`format='mixed'`, and the format will be inferred for each element individually\. "
+        r'You might want to use `dayfirst` alongside this\.'
+    )
+    with pytest.raises(ValueError, match=error_message):
+        _convert_datetime_columns(wrong_data, metadata)
+
+
 def test__remove_missing_columns_metadata(data, metadata):
     """Test the ``_remove_missing_columns_metadata`` method."""
     # Setup

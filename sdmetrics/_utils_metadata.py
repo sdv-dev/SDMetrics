@@ -73,16 +73,28 @@ def handle_single_and_multi_table(single_table_func):
 def _convert_datetime_columns(data, metadata):
     """Convert datetime columns to datetime type."""
     columns_missing_datetime_format = []
+    message_conversion_failed = (
+        'Conversion to datetime failed for the following columns with errors: \n {}'
+    )
+    columns_with_conversion_issues = []
     for column in metadata['columns']:
         if metadata['columns'][column]['sdtype'] == 'datetime':
             is_datetime = pd.api.types.is_datetime64_any_dtype(data[column])
             if not is_datetime:
                 datetime_format = metadata['columns'][column].get('format')
-                if datetime_format:
-                    data[column] = pd.to_datetime(data[column], format=datetime_format)
-                else:
-                    columns_missing_datetime_format.append(column)
-                    data[column] = pd.to_datetime(data[column])
+                try:
+                    if datetime_format:
+                        data[column] = pd.to_datetime(data[column], format=datetime_format)
+                    else:
+                        columns_missing_datetime_format.append(column)
+                        data[column] = pd.to_datetime(data[column])
+                except Exception as e:
+                    columns_with_conversion_issues.append(f"'{column}': {str(e)}")
+
+    if columns_with_conversion_issues:
+        raise ValueError(
+            message_conversion_failed.format('\n'.join(columns_with_conversion_issues))
+        )
 
     if columns_missing_datetime_format:
         columns_to_print = "', '".join(columns_missing_datetime_format)
