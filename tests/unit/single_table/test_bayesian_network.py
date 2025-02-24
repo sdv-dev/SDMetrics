@@ -24,7 +24,10 @@ class TestBNLikelihood:
         metric = BNLikelihood()
 
         # Act and Assert
-        expected_message = r'Please install pomegranate with `pip install sdmetrics\[pomegranate\]`\. Python 3\.13 is not supported\.'
+        expected_message = (
+            r'Please install pomegranate with `pip install sdmetrics[pomegranate]`.'
+            r' Python 3.13 is not supported.'
+        )
         with pytest.raises(ImportError, match=expected_message):
             metric.compute(Mock(), Mock())
 
@@ -36,6 +39,9 @@ class TestBNLogLikelihood:
         metric = BNLogLikelihood()
 
         # Act and Assert
-        expected_message = r'Please install pomegranate with `pip install sdmetrics\[pomegranate\]`\. Python 3\.13 is not supported\.'
+        expected_message = (
+            r'Please install pomegranate with `pip install sdmetrics\[pomegranate\]`\. '
+            r'Python 3\.13 is not supported\.'
+        )
         with pytest.raises(ImportError, match=expected_message):
             metric.compute(Mock(), Mock())

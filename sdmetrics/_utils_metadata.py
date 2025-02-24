@@ -34,7 +34,10 @@ def _validate_multi_table_metadata(metadata):
             ' to their respective metadata.'
         )
     for table_name, table_metadata in metadata['tables'].items():
-        _validate_single_table_metadata(table_metadata)
+        try:
+            _validate_single_table_metadata(table_metadata)
+        except ValueError as e:
+            raise ValueError(f"Error in table '{table_name}': {str(e)}")
 
 
 def _validate_metadata(metadata):
