@@ -2,6 +2,8 @@
 
 import pandas as pd
 
+from sdmetrics._utils_metadata import _process_data_with_metadata, _validate_single_table_metadata
+
 
 def _validate_tables(real_training_data, synthetic_data, real_validation_data):
     """Validate the tables of the Data Augmentation metrics."""
@@ -10,16 +12,6 @@ def _validate_tables(real_training_data, synthetic_data, real_validation_data):
         raise ValueError(
             '`real_training_data`, `synthetic_data` and `real_validation_data` must be '
             'pandas DataFrames.'
-        )
-
-
-def _validate_metadata(metadata):
-    """Validate the metadata of the Data Augmentation metrics."""
-    if not isinstance(metadata, dict):
-        raise TypeError(
-            f"Expected a dictionary but received a '{type(metadata).__name__}' instead."
-            " For SDV metadata objects, please use the 'to_dict' function to convert it"
-            ' to a dictionary.'
         )
 
 
@@ -55,7 +47,7 @@ def _validate_parameters(
 ):
     """Validate the parameters of the Data Augmentation metrics."""
     _validate_tables(real_training_data, synthetic_data, real_validation_data)
-    _validate_metadata(metadata)
+    _validate_single_table_metadata(metadata)
     _validate_prediction_column_name(prediction_column_name)
     _validate_classifier(classifier)
     _validate_fixed_recall_value(fixed_recall_value)
@@ -80,18 +72,6 @@ def _validate_data_and_metadata(
         raise ValueError(
             f'The column `{prediction_column_name}` must be either categorical or boolean.'
             ' Please update your metadata.'
-        )
-
-    columns_match = (
-        set(real_training_data.columns)
-        == set(synthetic_data.columns)
-        == set(real_validation_data.columns)
-    )
-    data_metadata_mismatch = set(metadata['columns'].keys()) != set(real_training_data.columns)
-    if not columns_match or data_metadata_mismatch:
-        raise ValueError(
-            '`real_training_data`, `synthetic_data` and `real_validation_data` must have '
-            'the same columns and must match the columns described in the metadata.'
         )
 
     if minority_class_label not in real_training_data[prediction_column_name].unique():
@@ -146,3 +126,14 @@ def _validate_inputs(
         prediction_column_name,
         minority_class_label,
     )
+
+
+def _process_data_with_metadata_ml_efficacy_metrics(
+    real_training_data, synthetic_data, real_validation_data, metadata
+):
+    """Process the data for ML efficacy metrics according to the metadata."""
+    real_training_data = _process_data_with_metadata(real_training_data, metadata, True)
+    synthetic_data = _process_data_with_metadata(synthetic_data, metadata, True)
+    real_validation_data = _process_data_with_metadata(real_validation_data, metadata, True)
+
+    return real_training_data, synthetic_data, real_validation_data

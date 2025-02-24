@@ -41,53 +41,6 @@ class TestBaseReport:
         with pytest.raises(ValueError, match=expected_message):
             base_report._validate_data_format(real_data, synthetic_data)
 
-    def test__validate_metadata_format(self):
-        """Test the ``_validate_metadata_format`` method.
-
-        This test checks that the method raises an error when the metadata is not a dictionnary.
-        """
-        # Setup
-        base_report = BaseMultiTableReport()
-        metadata = []
-
-        # Run and Assert
-        expected_message = 'The provided metadata is not a dictionary.'
-        with pytest.raises(TypeError, match=expected_message):
-            base_report._validate_metadata_format(metadata)
-
-    def test__validate_metadata_format_with_no_tables(self):
-        """Test the ``_validate_metadata_format`` method.
-
-        This test checks that the method raises an error when the metadata does not contain a
-        'tables' key.
-        """
-        # Setup
-        base_report = BaseMultiTableReport()
-        metadata = {}
-
-        # Run and Assert
-        expected_message = (
-            'Multi table reports expect metadata to contain a "tables" key with a mapping from '
-            'table names to metadata for each table.'
-        )
-        with pytest.raises(ValueError, match=expected_message):
-            base_report._validate_metadata_format(metadata)
-
-    def test__validate_metadata_format_with_no_columns(self):
-        """Test the ``_validate_metadata_format`` method.
-
-        This test checks that the method raises an error when the metadata does not contain a
-        'columns' key.
-        """
-        # Setup
-        base_report = BaseMultiTableReport()
-        metadata = {'tables': {'Table_1': {}}}
-
-        # Run and Assert
-        expected_message = 'The metadata for table "Table_1" is missing a "columns" key.'
-        with pytest.raises(ValueError, match=expected_message):
-            base_report._validate_metadata_format(metadata)
-
     def test__validate_relationships(self):
         """Test the ``_validate_relationships`` method."""
         # Setup
