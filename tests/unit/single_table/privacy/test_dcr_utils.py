@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timezone
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -9,8 +9,7 @@ from sdmetrics.single_table.privacy.dcr_utils import (
     _calculate_dcr_between_row_and_data,
     _calculate_dcr_between_rows,
     _calculate_dcr_value,
-    _convert_datetime_cols_unix_timestamp_seconds,
-    _to_unix_timestamp,
+    _convert_datetime,
     calculate_dcr,
 )
 from tests.utils import check_if_value_in_threshold
@@ -249,8 +248,8 @@ def test__calculate_dcr_between_rows(
     """Test _calculate_dcr_between_rows for all row combinations"""
     # Setup
     result = []
-    _convert_datetime_cols_unix_timestamp_seconds(real_data, test_metadata)
-    _convert_datetime_cols_unix_timestamp_seconds(synthetic_data, test_metadata)
+    _convert_datetime(real_data, test_metadata)
+    _convert_datetime(synthetic_data, test_metadata)
 
     # Run
     for _, s_row_obj in synthetic_data.iterrows():
@@ -269,8 +268,8 @@ def test__calculate_dcr_between_row_and_data(
     """Test _calculate_dcr_between_row_and_data for all rows."""
     # Setup
     result = []
-    _convert_datetime_cols_unix_timestamp_seconds(real_data, test_metadata)
-    _convert_datetime_cols_unix_timestamp_seconds(synthetic_data, test_metadata)
+    _convert_datetime(real_data, test_metadata)
+    _convert_datetime(synthetic_data, test_metadata)
 
     # Run
     for _, s_row_obj in synthetic_data.iterrows():
@@ -359,33 +358,15 @@ def test_calculate_dcr_with_shuffled_data():
     check_if_value_in_threshold(result.sum(), result_shuffled.sum(), 0.000001)
 
 
-def test__to_unix_timestamp():
-    # Setup
-    not_datetime = 1
-    actual_datetime = datetime(2025, 1, 1)
-    timestamp = actual_datetime.timestamp()
-    bad_type_msg = 'Value is not of type pandas datetime.'
-
-    # Run
-    with pytest.raises(ValueError, match=bad_type_msg):
-        _to_unix_timestamp(not_datetime)
-
-    with pytest.raises(ValueError, match=bad_type_msg):
-        _to_unix_timestamp(timestamp)
-    result = _to_unix_timestamp(actual_datetime)
-    assert result == timestamp
-
-
-def test__convert_datetime_cols_unix_timestamp_seconds():
-    """Test _convert_datetime_cols_unix_timestamp_seconds to see if datetimes are converted."""
+def test__convert_datetime():
+    """Test _convert_datetime to see if datetimes are converted."""
     # Setup
     int_cols = [1.0, 1.0, 2.0]
     datetime_cols = [
-        datetime(2025, 1, 1, tzinfo=timezone.utc),
-        datetime(2025, 1, 2, tzinfo=timezone.utc),
-        datetime(2025, 1, 3, tzinfo=timezone.utc),
+        datetime(2025, 1, 1),
+        datetime(2025, 1, 2),
+        datetime(2025, 1, 3),
     ]
-    timestamps = [val.timestamp() for val in datetime_cols]
 
     data = pd.DataFrame({
         'str_datetime_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
@@ -393,9 +374,10 @@ def test__convert_datetime_cols_unix_timestamp_seconds():
         'int_col': int_cols,
         'str_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
     })
+    data_no_format = data.copy()
     expected_data = pd.DataFrame({
-        'str_datetime_col': timestamps,
-        'datetime_col': timestamps,
+        'str_datetime_col': datetime_cols,
+        'datetime_col': datetime_cols,
         'int_col': int_cols,
         'str_col': ['2025-01-01', '2025-01-02', '2025-01-03'],
     })
@@ -425,9 +407,9 @@ def test__convert_datetime_cols_unix_timestamp_seconds():
     }
 
     # Run
-    _convert_datetime_cols_unix_timestamp_seconds(data, metadata)
+    _convert_datetime(data, metadata)
 
     # Assert
     pd.testing.assert_frame_equal(data, expected_data)
     with pytest.warns(UserWarning, match='No datetime format was specified.'):
-        _convert_datetime_cols_unix_timestamp_seconds(data, missing_format_metadata)
+        _convert_datetime(data_no_format, missing_format_metadata)

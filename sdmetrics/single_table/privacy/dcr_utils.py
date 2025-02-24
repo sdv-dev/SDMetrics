@@ -36,7 +36,12 @@ def _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range=None):
                 'No col_range was provided. The col_range is required '
                 'for numerical and datetime sdtype DCR calculation.'
             )
-        distance = abs(synthetic_value - real_value) / (col_range)
+
+        difference = abs(synthetic_value - real_value)
+        if isinstance(difference, pd.Timedelta):
+            difference = difference.total_seconds()
+
+        distance = difference / col_range
         return min(distance, 1.0)
 
     else:
@@ -102,23 +107,18 @@ def _calculate_dcr_between_row_and_data(synthetic_row, real_data, column_ranges,
     return dist_srow_to_all_rows.min()
 
 
-def _to_unix_timestamp(datetime_value):
-    if not is_datetime(datetime_value):
-        raise ValueError('Value is not of type pandas datetime.')
-    return datetime_value.timestamp() if pd.notna(datetime_value) else pd.NaT
-
-
-def _convert_datetime_cols_unix_timestamp_seconds(data, metadata):
+def _convert_datetime(data, metadata):
     for column in data.columns:
         if column in metadata['columns']:
             sdtype = metadata['columns'][column]['sdtype']
-            if sdtype == 'datetime' and not isinstance(data[column], float):
+            if sdtype == 'datetime' and not is_datetime(data[column]):
                 datetime_format = metadata['columns'][column].get('datetime_format')
+                print(f'Datetime format: {datetime_format}')
                 if not datetime_format:
                     warnings.warn('No datetime format was specified.')
                 datetime_to_timestamp_col = pd.to_datetime(
                     data[column], format=datetime_format, errors='coerce'
-                ).apply(_to_unix_timestamp)
+                )
                 data[column] = datetime_to_timestamp_col
 
 
@@ -146,8 +146,8 @@ def calculate_dcr(real_data, synthetic_data, metadata):
 
     real_data_copy = real_data.copy()
     synthetic_data_copy = synthetic_data.copy()
-    _convert_datetime_cols_unix_timestamp_seconds(real_data_copy, metadata)
-    _convert_datetime_cols_unix_timestamp_seconds(synthetic_data_copy, metadata)
+    _convert_datetime(real_data_copy, metadata)
+    _convert_datetime(synthetic_data_copy, metadata)
 
     for column in real_data_copy.columns:
         if column not in metadata['columns']:
@@ -157,6 +157,8 @@ def calculate_dcr(real_data, synthetic_data, metadata):
         col_range = None
         if sdtype == 'numerical' or sdtype == 'datetime':
             col_range = real_data_copy[column].max() - real_data_copy[column].min()
+            if isinstance(col_range, pd.Timedelta):
+                col_range = col_range.total_seconds()
 
         column_ranges[column] = col_range
 
