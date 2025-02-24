@@ -1,11 +1,12 @@
 import re
 from copy import deepcopy
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pandas as pd
 import pytest
 
 from sdmetrics.single_table.data_augmentation.utils import (
+    _process_data_with_metadata_ml_efficacy_metrics,
     _validate_data_and_metadata,
     _validate_inputs,
     _validate_parameters,
@@ -187,3 +188,43 @@ def test__validate_inputs_mock(mock_validate_data_and_metadata, mock_validate_pa
         classifier,
         fixed_recall_value,
     )
+
+
+@patch('sdmetrics.single_table.data_augmentation.utils._process_data_with_metadata')
+def test__process_data_with_metadata_ml_efficacy_metrics(mock_process_data_with_metadata):
+    """Test the ``_process_data_with_metadata_ml_efficacy_metrics`` method."""
+    # Setup
+    mock_process_data_with_metadata.side_effect = lambda data, metadata, x: data
+    real_training_data = pd.DataFrame({
+        'numerical': [1, 2, 3],
+        'categorical': ['a', 'b', 'c'],
+    })
+    synthetic_data = pd.DataFrame({
+        'numerical': [4, 5, 6],
+        'categorical': ['a', 'b', 'c'],
+    })
+    real_validation_data = pd.DataFrame({
+        'numerical': [7, 8, 9],
+        'categorical': ['a', 'b', 'c'],
+    })
+    metadata = {
+        'columns': {
+            'numerical': {'sdtype': 'numerical'},
+            'categorical': {'sdtype': 'categorical'},
+        }
+    }
+
+    # Run
+    result = _process_data_with_metadata_ml_efficacy_metrics(
+        real_training_data, synthetic_data, real_validation_data, metadata
+    )
+
+    # Assert
+    pd.testing.assert_frame_equal(result[0], real_training_data)
+    pd.testing.assert_frame_equal(result[1], synthetic_data)
+    pd.testing.assert_frame_equal(result[2], real_validation_data)
+    mock_process_data_with_metadata.assert_has_calls([
+        call(real_training_data, metadata, True),
+        call(synthetic_data, metadata, True),
+        call(real_validation_data, metadata, True),
+    ])

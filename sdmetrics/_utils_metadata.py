@@ -106,14 +106,14 @@ def _remove_missing_columns_metadata(data, metadata):
     if columns_to_remove:
         columns_to_print = "', '".join(sorted(columns_to_remove))
         warnings.warn(
-            f"Some columns ('{columns_to_print}') are not present in the metadata."
+            f"The columns ('{columns_to_print}') are not present in the metadata."
             'They will not be included for further evaluation.',
             UserWarning,
         )
     elif extra_metadata_columns:
         columns_to_print = "', '".join(sorted(extra_metadata_columns))
         warnings.warn(
-            f"Some columns ('{columns_to_print}') are in the metadata but they are not "
+            f"The columns ('{columns_to_print}') are in the metadata but they are not "
             'present in the data.',
             UserWarning,
         )
@@ -148,14 +148,3 @@ def _process_data_with_metadata(data, metadata, keep_modelable_columns_only=Fals
         data = _remove_non_modelable_columns(data, metadata)
 
     return data
-
-
-def _process_data_with_metadata_ml_efficacy_metrics(
-    real_training_data, synthetic_data, real_validation_data, metadata
-):
-    """Process the data for ML efficacy metrics according to the metadata."""
-    real_training_data = _process_data_with_metadata(real_training_data, metadata, True)
-    synthetic_data = _process_data_with_metadata(synthetic_data, metadata, True)
-    real_validation_data = _process_data_with_metadata(real_validation_data, metadata, True)
-
-    return real_training_data, synthetic_data, real_validation_data

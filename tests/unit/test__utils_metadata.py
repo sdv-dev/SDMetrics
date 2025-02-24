@@ -1,6 +1,6 @@
 import re
 from copy import deepcopy
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -8,7 +8,6 @@ import pytest
 from sdmetrics._utils_metadata import (
     _convert_datetime_columns,
     _process_data_with_metadata,
-    _process_data_with_metadata_ml_efficacy_metrics,
     _remove_missing_columns_metadata,
     _remove_non_modelable_columns,
     _validate_metadata,
@@ -187,11 +186,11 @@ def test__remove_missing_columns_metadata(data, metadata):
     """Test the ``_remove_missing_columns_metadata`` method."""
     # Setup
     expected_warning_missing_column_metadata = re.escape(
-        "Some columns ('extra_column_1', 'extra_column_2') are not present in the metadata."
+        "The columns ('extra_column_1', 'extra_column_2') are not present in the metadata."
         'They will not be included for further evaluation.'
     )
     expected_warning_extra_metadata_column = re.escape(
-        "Some columns ('numerical') are in the metadata but they are not present in the data."
+        "The columns ('numerical') are in the metadata but they are not present in the data."
     )
     data['table1'] = data['table1'].drop(columns=['numerical'])
 
@@ -299,43 +298,3 @@ def test__process_data_with_metadata(
 
     _process_data_with_metadata(data, metadata, keep_modelable_columns_only=True)
     mock_remove_non_modelable_columns.assert_called_once_with(data, metadata)
-
-
-@patch('sdmetrics._utils_metadata._process_data_with_metadata')
-def test__process_data_with_metadata_ml_efficacy_metrics(mock_process_data_with_metadata):
-    """Test the ``_process_data_with_metadata_ml_efficacy_metrics`` method."""
-    # Setup
-    mock_process_data_with_metadata.side_effect = lambda data, metadata, x: data
-    real_training_data = pd.DataFrame({
-        'numerical': [1, 2, 3],
-        'categorical': ['a', 'b', 'c'],
-    })
-    synthetic_data = pd.DataFrame({
-        'numerical': [4, 5, 6],
-        'categorical': ['a', 'b', 'c'],
-    })
-    real_validation_data = pd.DataFrame({
-        'numerical': [7, 8, 9],
-        'categorical': ['a', 'b', 'c'],
-    })
-    metadata = {
-        'columns': {
-            'numerical': {'sdtype': 'numerical'},
-            'categorical': {'sdtype': 'categorical'},
-        }
-    }
-
-    # Run
-    result = _process_data_with_metadata_ml_efficacy_metrics(
-        real_training_data, synthetic_data, real_validation_data, metadata
-    )
-
-    # Assert
-    pd.testing.assert_frame_equal(result[0], real_training_data)
-    pd.testing.assert_frame_equal(result[1], synthetic_data)
-    pd.testing.assert_frame_equal(result[2], real_validation_data)
-    mock_process_data_with_metadata.assert_has_calls([
-        call(real_training_data, metadata, True),
-        call(synthetic_data, metadata, True),
-        call(real_validation_data, metadata, True),
-    ])

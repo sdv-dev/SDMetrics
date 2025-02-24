@@ -7,10 +7,12 @@ import pandas as pd
 from sklearn.metrics import confusion_matrix, precision_recall_curve, precision_score, recall_score
 from xgboost import XGBClassifier
 
-from sdmetrics._utils_metadata import _process_data_with_metadata_ml_efficacy_metrics
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.single_table.data_augmentation.utils import _validate_inputs
+from sdmetrics.single_table.data_augmentation.utils import (
+    _process_data_with_metadata_ml_efficacy_metrics,
+    _validate_inputs,
+)
 
 METRIC_NAME_TO_METHOD = {'recall': recall_score, 'precision': precision_score}
 
