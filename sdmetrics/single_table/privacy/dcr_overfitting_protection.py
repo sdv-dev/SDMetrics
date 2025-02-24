@@ -1,7 +1,8 @@
 """DCR Overfitting Protection metrics."""
 
-import numpy as np
 import warnings
+
+import numpy as np
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
@@ -13,7 +14,7 @@ class DCROverfittingProtection(SingleTableMetric):
     """DCR Overfitting Protection metric."""
 
     name = 'DCROverfittingProtection'
-    goal = Goal.IGNORE
+    goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
 
@@ -28,22 +29,19 @@ class DCROverfittingProtection(SingleTableMetric):
         num_iterations,
     ):
         if num_rows_subsample is not None:
-            if not isinstance(num_rows_subsample, int):
-                raise ValueError('num_rows_subsample must be an integer.')
-            if num_rows_subsample < 1:
+            if not isinstance(num_rows_subsample, int) or num_rows_subsample < 1:
                 raise ValueError(
-                    f'num_rows_subsample ({num_rows_subsample}) must be greater than 1.'
+                    f'num_rows_subsample ({num_rows_subsample}) must be an integer greater than 1.'
                 )
         elif num_rows_subsample is None and num_iterations > 1:
             raise ValueError(
-                'num_iterations should not be greater than 1 if there is not subsampling.'
+                'num_iterations should not be greater than 1 if there is no subsampling.'
             )
 
-        if not isinstance(num_iterations, int):
-            raise ValueError('num_iterations must be an integer.')
-
-        if num_iterations < 1:
-            raise ValueError(f'num_iterations ({num_iterations}) must be greater than 1.')
+        if not isinstance(num_iterations, int) or num_iterations:
+            raise ValueError(
+                f'num_iterations ({num_iterations}) must be an integer greater than 1.'
+            )
 
         if metadata is not None:
             if not isinstance(metadata, dict):
@@ -73,9 +71,7 @@ class DCROverfittingProtection(SingleTableMetric):
                 'DCROverfittingProtection metric.'
             )
 
-        if (
-            len(sanitized_real_training_data) * 0.5 > len(sanitized_real_validation_data)
-        ):
+        if len(sanitized_real_training_data) * 0.5 > len(sanitized_real_validation_data):
             warnings.warn(
                 f'Your real_validation_data contains {len(sanitized_real_validation_data)} rows while your '
                 f'real_training_data contains {len(sanitized_real_training_data)} rows. For most accurate '

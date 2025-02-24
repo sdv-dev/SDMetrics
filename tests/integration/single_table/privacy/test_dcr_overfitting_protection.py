@@ -168,7 +168,8 @@ class TestDCROverfittingProtection:
         small_validation_msg = re.escape(
             f'Your real_validation_data contains {len(small_holdout_data)} rows while your '
             f'real_training_data contains {len(holdout_data)} rows. For most accurate '
-            'results, we recommend that the validation data at least half the size of the training data.')
+            'results, we recommend that the validation data at least half the size of the training data.'
+        )
         with pytest.warns(UserWarning, match=small_validation_msg):
             DCROverfittingProtection.compute_breakdown(
                 train_data, synthetic_data, small_holdout_data, metadata
