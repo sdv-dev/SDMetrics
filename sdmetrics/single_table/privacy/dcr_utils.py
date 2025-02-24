@@ -19,21 +19,23 @@ def _calculate_dcr_value(s_value, d_value, sdtype, col_range=None):
             The sdtype of the column values.
         col_range (float):
             The range of values for a column used for numerical values to calculate DCR.
+            Defaults to None.
 
     Returns:
-        pandas.Dataframe:
-            Returns a dataframe that shows the DCR value for all synthetic data.
+       float:
+            Returns dcr value between two given values.
     """
+    if pd.isna(s_value) and pd.isna(d_value):
+        return 0.0
+    elif pd.isna(s_value) or pd.isna(d_value):
+        return 1.0
+
     if sdtype == 'numerical' or sdtype == 'datetime':
         if col_range is None:
             raise ValueError(
                 'No col_range was provided. The col_range is required '
                 'for numerical and datetime sdtype DCR calculation.'
             )
-        if pd.isna(s_value) and pd.isna(d_value):
-            return 0.0
-        elif pd.isna(s_value) or pd.isna(d_value):
-            return 1.0
         else:
             distance = abs(s_value - d_value) / (col_range)
             return min(distance, 1.0)
@@ -106,11 +108,11 @@ def _to_unix_timestamp(datetime_value):
     return datetime_value.timestamp() if pd.notna(datetime_value) else pd.NaT
 
 
-def _covert_datetime_cols_unix_timestamp(data, metadata):
+def _convert_datetime_cols_unix_timestamp_seconds(data, metadata):
     for column in data.columns:
         if column in metadata['columns']:
             sdtype = metadata['columns'][column]['sdtype']
-            if sdtype == 'datetime' and not is_datetime(data[column]):
+            if sdtype == 'datetime' and not isinstance(data[column], float):
                 datetime_format = metadata['columns'][column].get('datetime_format')
                 if not datetime_format:
                     warnings.warn('No datetime format was specified.')
@@ -120,16 +122,16 @@ def _covert_datetime_cols_unix_timestamp(data, metadata):
                 data[column] = datetime_to_timestamp_col
 
 
-def calculate_dcr(synthetic_data, real_data, metadata):
+def calculate_dcr(real_data, synthetic_data, metadata):
     """Calculate the Distance to Closest Record for all rows in the synthetic data.
 
     Arguments:
-        synthetic_data (pandas.Dataframe):
-            The synthetic data that we are calculating DCR values for. Every row will be measured
-            against the comparison data.
         real_data (pandas.Dataframe):
             The dataset that acts as the reference for DCR calculations. Ranges are determined from
             this dataset.
+        synthetic_data (pandas.Dataframe):
+            The synthetic data that we are calculating DCR values for. Every row will be measured
+            against the comparison data.
         metadata (dict):
             The metadata dict.
 
@@ -144,8 +146,8 @@ def calculate_dcr(synthetic_data, real_data, metadata):
 
     r_data = real_data.copy()
     s_data = synthetic_data.copy()
-    _covert_datetime_cols_unix_timestamp(r_data, metadata)
-    _covert_datetime_cols_unix_timestamp(s_data, metadata)
+    _convert_datetime_cols_unix_timestamp_seconds(r_data, metadata)
+    _convert_datetime_cols_unix_timestamp_seconds(s_data, metadata)
 
     for column in r_data.columns:
         if column not in metadata['columns']:
