@@ -162,7 +162,7 @@ ACCURACY_THRESHOLD = 0.000001
 
 
 @pytest.mark.parametrize(
-    's_value, d_value, col_range, sdtype, expected_dist',
+    'synthetic_value, real_value, col_range, sdtype, expected_dist',
     [
         (2.0, 2.0, 10.0, 'numerical', 0.0),
         (1.0, 2.0, 10.0, 'numerical', 0.1),
@@ -206,10 +206,10 @@ ACCURACY_THRESHOLD = 0.000001
         ),
     ],
 )
-def test__calculate_dcr_value(s_value, d_value, col_range, sdtype, expected_dist):
+def test__calculate_dcr_value(synthetic_value, real_value, col_range, sdtype, expected_dist):
     """Test _calculate_dcr_value with different types of values."""
     # Run
-    dist = _calculate_dcr_value(s_value, d_value, sdtype, col_range)
+    dist = _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range)
 
     # Assert
     assert dist == expected_dist

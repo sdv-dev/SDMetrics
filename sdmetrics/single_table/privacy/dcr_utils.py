@@ -7,7 +7,7 @@ import pandas as pd
 from sdmetrics.utils import is_datetime
 
 
-def _calculate_dcr_value(s_value, d_value, sdtype, col_range=None):
+def _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range=None):
     """Calculate the Distance to Closest Record between two different values.
 
     Arguments:
@@ -25,9 +25,9 @@ def _calculate_dcr_value(s_value, d_value, sdtype, col_range=None):
        float:
             Returns dcr value between two given values.
     """
-    if pd.isna(s_value) and pd.isna(d_value):
+    if pd.isna(synthetic_value) and pd.isna(real_value):
         return 0.0
-    elif pd.isna(s_value) or pd.isna(d_value):
+    elif pd.isna(synthetic_value) or pd.isna(real_value):
         return 1.0
 
     if sdtype == 'numerical' or sdtype == 'datetime':
@@ -37,10 +37,10 @@ def _calculate_dcr_value(s_value, d_value, sdtype, col_range=None):
                 'for numerical and datetime sdtype DCR calculation.'
             )
         else:
-            distance = abs(s_value - d_value) / (col_range)
+            distance = abs(synthetic_value - real_value) / (col_range)
             return min(distance, 1.0)
     else:
-        if s_value == d_value:
+        if synthetic_value == real_value:
             return 0.0
         else:
             return 1.0
@@ -64,11 +64,11 @@ def _calculate_dcr_between_rows(synthetic_row, comparison_row, column_ranges, me
             Returns DCR value (the average value of DCR values we computed across the row).
     """
     dcr_values = synthetic_row.index.to_series().apply(
-        lambda s_col: _calculate_dcr_value(
-            synthetic_row[s_col],
-            comparison_row[s_col],
-            metadata['columns'][s_col]['sdtype'],
-            column_ranges.get(s_col),
+        lambda synthetic_column_nam: _calculate_dcr_value(
+            synthetic_row[synthetic_column_nam],
+            comparison_row[synthetic_column_nam],
+            metadata['columns'][synthetic_column_nam]['sdtype'],
+            column_ranges.get(synthetic_column_nam),
         )
     )
 
@@ -144,25 +144,25 @@ def calculate_dcr(real_data, synthetic_data, metadata):
     if missing_cols:
         raise ValueError(f'Different columns detected: {missing_cols}')
 
-    r_data = real_data.copy()
-    s_data = synthetic_data.copy()
-    _convert_datetime_cols_unix_timestamp_seconds(r_data, metadata)
-    _convert_datetime_cols_unix_timestamp_seconds(s_data, metadata)
+    real_data_copy = real_data.copy()
+    synthetic_data_copy = synthetic_data.copy()
+    _convert_datetime_cols_unix_timestamp_seconds(real_data_copy, metadata)
+    _convert_datetime_cols_unix_timestamp_seconds(synthetic_data_copy, metadata)
 
-    for column in r_data.columns:
+    for column in real_data_copy.columns:
         if column not in metadata['columns']:
             raise ValueError(f'Column {column} was not found in the metadata.')
 
         sdtype = metadata['columns'][column]['sdtype']
         col_range = None
         if sdtype == 'numerical' or sdtype == 'datetime':
-            col_range = r_data[column].max() - r_data[column].min()
+            col_range = real_data_copy[column].max() - real_data_copy[column].min()
 
         column_ranges[column] = col_range
 
-    dcr_dist_df = s_data.apply(
+    dcr_dist_df = synthetic_data_copy.apply(
         lambda synth_row: _calculate_dcr_between_row_and_data(
-            synth_row, r_data, column_ranges, metadata
+            synth_row, real_data_copy, column_ranges, metadata
         ),
         axis=1,
     )
