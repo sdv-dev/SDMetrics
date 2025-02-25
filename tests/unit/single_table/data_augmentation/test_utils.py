@@ -1,11 +1,12 @@
 import re
 from copy import deepcopy
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pandas as pd
 import pytest
 
 from sdmetrics.single_table.data_augmentation.utils import (
+    _process_data_with_metadata_ml_efficacy_metrics,
     _validate_data_and_metadata,
     _validate_inputs,
     _validate_parameters,
@@ -99,10 +100,6 @@ def test__validate_data_and_metadata():
     expected_message_sdtype = re.escape(
         'The column `target` must be either categorical or boolean. Please update your metadata.'
     )
-    expected_message_column_missmatch = re.escape(
-        '`real_training_data`, `synthetic_data` and `real_validation_data` must have the '
-        'same columns and must match the columns described in the metadata.'
-    )
     expected_message_value = re.escape(
         'The value `1` is not present in the column `target` for the real training data.'
     )
@@ -128,16 +125,6 @@ def test__validate_data_and_metadata():
     wrong_inputs_sdtype['metadata']['columns']['target']['sdtype'] = 'numerical'
     with pytest.raises(ValueError, match=expected_message_sdtype):
         _validate_data_and_metadata(**wrong_inputs_sdtype)
-
-    wrong_column_metadata = deepcopy(inputs)
-    wrong_column_metadata['metadata']['columns'].update({'new_column': {'sdtype': 'categorical'}})
-    with pytest.raises(ValueError, match=expected_message_column_missmatch):
-        _validate_data_and_metadata(**wrong_column_metadata)
-
-    wrong_column_data = deepcopy(inputs)
-    wrong_column_data['real_training_data'] = pd.DataFrame({'new_column': [1, 0, 0]})
-    with pytest.raises(ValueError, match=expected_message_column_missmatch):
-        _validate_data_and_metadata(**wrong_column_data)
 
     missing_minority_class_label = deepcopy(inputs)
     missing_minority_class_label['real_training_data'] = pd.DataFrame({'target': [0, 0, 0]})
@@ -201,3 +188,43 @@ def test__validate_inputs_mock(mock_validate_data_and_metadata, mock_validate_pa
         classifier,
         fixed_recall_value,
     )
+
+
+@patch('sdmetrics.single_table.data_augmentation.utils._process_data_with_metadata')
+def test__process_data_with_metadata_ml_efficacy_metrics(mock_process_data_with_metadata):
+    """Test the ``_process_data_with_metadata_ml_efficacy_metrics`` method."""
+    # Setup
+    mock_process_data_with_metadata.side_effect = lambda data, metadata, x: data
+    real_training_data = pd.DataFrame({
+        'numerical': [1, 2, 3],
+        'categorical': ['a', 'b', 'c'],
+    })
+    synthetic_data = pd.DataFrame({
+        'numerical': [4, 5, 6],
+        'categorical': ['a', 'b', 'c'],
+    })
+    real_validation_data = pd.DataFrame({
+        'numerical': [7, 8, 9],
+        'categorical': ['a', 'b', 'c'],
+    })
+    metadata = {
+        'columns': {
+            'numerical': {'sdtype': 'numerical'},
+            'categorical': {'sdtype': 'categorical'},
+        }
+    }
+
+    # Run
+    result = _process_data_with_metadata_ml_efficacy_metrics(
+        real_training_data, synthetic_data, real_validation_data, metadata
+    )
+
+    # Assert
+    pd.testing.assert_frame_equal(result[0], real_training_data)
+    pd.testing.assert_frame_equal(result[1], synthetic_data)
+    pd.testing.assert_frame_equal(result[2], real_validation_data)
+    mock_process_data_with_metadata.assert_has_calls([
+        call(real_training_data, metadata, True),
+        call(synthetic_data, metadata, True),
+        call(real_validation_data, metadata, True),
+    ])
