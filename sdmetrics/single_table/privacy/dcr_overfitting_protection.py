@@ -11,7 +11,11 @@ from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
 
 
 class DCROverfittingProtection(SingleTableMetric):
-    """DCR Overfitting Protection metric."""
+    """DCR Overfitting Protection metric.
+
+    This metric uses a DCR (distance to closest record) computation to measure whether the
+    synthetic data has been overfit to the real data, as compared to a holdout set.
+    """
 
     name = 'DCROverfittingProtection'
     goal = Goal.MAXIMIZE
