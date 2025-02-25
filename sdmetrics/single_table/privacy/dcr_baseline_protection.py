@@ -1,16 +1,19 @@
 """DCR Baseline Protection metrics."""
 
+import numpy as np
+import pandas as pd
+
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
-from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
+from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta, is_datetime
 
 
 class DCRBaselineProtection(SingleTableMetric):
     """DCR Baseline Protection metric."""
 
     name = 'DCRBaselineProtection'
-    goal = Goal.IGNORE
+    goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
 
@@ -25,22 +28,19 @@ class DCRBaselineProtection(SingleTableMetric):
         num_iterations,
     ):
         if num_rows_subsample is not None:
-            if not isinstance(num_rows_subsample, int):
-                raise ValueError('num_rows_subsample must be an integer.')
-            if num_rows_subsample < 1:
+            if not isinstance(num_rows_subsample, int) or num_rows_subsample < 1:
                 raise ValueError(
-                    f'num_rows_subsample ({num_rows_subsample}) must be greater than 1.'
+                    f'num_rows_subsample ({num_rows_subsample}) must be an integer greater than 1.'
                 )
         elif num_rows_subsample is None and num_iterations > 1:
             raise ValueError(
-                'num_iterations should not be greater than 1 if there is not subsampling.'
+                'num_iterations should not be greater than 1 if there is no subsampling.'
             )
 
-        if not isinstance(num_iterations, int):
-            raise ValueError('num_iterations must be an integer.')
-
-        if num_iterations < 1:
-            raise ValueError(f'num_iterations ({num_iterations}) must be greater than 1.')
+        if not isinstance(num_iterations, int) or num_iterations < 1:
+            raise ValueError(
+                f'num_iterations ({num_iterations}) must be an integer greater than 1.'
+            )
 
         if metadata is not None:
             if not isinstance(metadata, dict):
@@ -197,3 +197,41 @@ class DCRBaselineProtection(SingleTableMetric):
         )
 
         return result.get('score')
+
+    @classmethod
+    def _generate_random_data(cls, real_data):
+        random_data = {}
+        num_samples = len(real_data)
+
+        for col in real_data.columns:
+            nan_ratio = real_data[col].isna().mean()
+
+            if real_data[col].dtype in ["int64", "int32"]:
+                random_values = np.random.randint(real_data[col].min(), real_data[col].max() + 1, num_samples)
+
+            elif real_data[col].dtype in ["float64", "float32"]:
+                random_values = np.random.normal(real_data[col].mean(), real_data[col].std(), num_samples)
+
+            elif real_data[col].dtype == "object":
+                random_values = np.random.choice(real_data[col].dropna().unique(), num_samples)
+
+            elif is_datetime(real_data[col]):
+                min_date, max_date = real_data[col].min(), real_data[col].max()
+                total_seconds = (max_date - min_date).total_seconds()
+                random_values = min_date + pd.to_timedelta(
+                    np.random.uniform(0, total_seconds, num_samples), unit="s"
+                )
+
+            else:
+                random_values = real_data[col].sample(num_samples, replace=True).values
+
+            nan_mask = np.random.rand(num_samples) < nan_ratio
+            random_values = pd.Series(random_values)
+            if is_datetime(real_data[col]):
+                random_values[nan_mask] = pd.NaT
+            else:
+                random_values[nan_mask] = np.nan
+
+            random_data[col] = random_values
+
+        return pd.DataFrame(random_data)

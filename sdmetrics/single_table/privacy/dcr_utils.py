@@ -1,9 +1,10 @@
 """Distance to closest record measurement functions."""
 
+import numpy as np
 import pandas as pd
 
 from sdmetrics._utils_metadata import _process_data_with_metadata
-from sdmetrics.utils import get_columns_from_metadata
+from sdmetrics.utils import get_columns_from_metadata, is_datetime
 
 
 def _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range=None):
