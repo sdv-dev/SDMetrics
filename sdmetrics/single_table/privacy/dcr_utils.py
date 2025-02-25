@@ -10,9 +10,9 @@ def _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range=None):
     """Calculate the Distance to Closest Record between two different values.
 
     Arguments:
-        s_value (int, float, datetime, boolean, string, or None):
+        synthetic_value (int, float, datetime, boolean, string, or None):
             The synthetic value that we are calculating DCR value for
-        d_value (int, float, datetime, boolean, string, or None):
+        real_value (int, float, datetime, boolean, string, or None):
             The data value that we are referencing for measuring DCR.
         sdtype (string):
             The sdtype of the column values.
@@ -43,11 +43,10 @@ def _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range=None):
         distance = difference / col_range
         return min(distance, 1.0)
 
+    if synthetic_value == real_value:
+        return 0.0
     else:
-        if synthetic_value == real_value:
-            return 0.0
-        else:
-            return 1.0
+        return 1.0
 
 
 def _calculate_dcr_between_rows(synthetic_row, comparison_row, column_ranges, metadata):
@@ -68,11 +67,11 @@ def _calculate_dcr_between_rows(synthetic_row, comparison_row, column_ranges, me
             Returns DCR value (the average value of DCR values we computed across the row).
     """
     dcr_values = synthetic_row.index.to_series().apply(
-        lambda synthetic_column_nam: _calculate_dcr_value(
-            synthetic_row[synthetic_column_nam],
-            comparison_row[synthetic_column_nam],
-            metadata['columns'][synthetic_column_nam]['sdtype'],
-            column_ranges.get(synthetic_column_nam),
+        lambda synthetic_column_name: _calculate_dcr_value(
+            synthetic_row[synthetic_column_name],
+            comparison_row[synthetic_column_name],
+            metadata['columns'][synthetic_column_name]['sdtype'],
+            column_ranges.get(synthetic_column_name),
         )
     )
 
@@ -97,13 +96,13 @@ def _calculate_dcr_between_row_and_data(synthetic_row, real_data, column_ranges,
             Returns the minimum distance to closest record computed between the
             synthetic row and the reference dataset.
     """
-    dist_srow_to_all_rows = real_data.apply(
-        lambda d_row_obj: _calculate_dcr_between_rows(
-            synthetic_row, d_row_obj, column_ranges, metadata
+    synthetic_distance_to_all_real = real_data.apply(
+        lambda real_row: _calculate_dcr_between_rows(
+            synthetic_row, real_row, column_ranges, metadata
         ),
         axis=1,
     )
-    return dist_srow_to_all_rows.min()
+    return synthetic_distance_to_all_real.min()
 
 
 def calculate_dcr(real_data, synthetic_data, metadata):
