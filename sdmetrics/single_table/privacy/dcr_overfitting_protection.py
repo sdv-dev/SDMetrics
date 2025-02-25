@@ -4,10 +4,10 @@ import warnings
 
 import numpy as np
 
+from sdmetrics._utils_metadata import _process_data_with_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
-from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta
 
 
 class DCROverfittingProtection(SingleTableMetric):
@@ -38,51 +38,31 @@ class DCROverfittingProtection(SingleTableMetric):
                 'num_iterations should not be greater than 1 if there is no subsampling.'
             )
 
-        if not isinstance(num_iterations, int) or num_iterations:
+        if not isinstance(num_iterations, int) or num_iterations < 1:
             raise ValueError(
                 f'num_iterations ({num_iterations}) must be an integer greater than 1.'
             )
 
-        if metadata is not None:
-            if not isinstance(metadata, dict):
-                metadata = metadata.to_dict()
-
-        valid_sdtypes = {'numerical', 'categorical', 'boolean', 'datetime'}
-        drop_columns = []
-        for column, column_meta in get_columns_from_metadata(metadata).items():
-            sdtype = get_type_from_column_meta(column_meta)
-            if sdtype not in valid_sdtypes:
-                drop_columns.append(column)
-
-        super()._validate_inputs(real_training_data, synthetic_data, metadata)
-        super()._validate_inputs(real_validation_data, synthetic_data, metadata)
-
-        sanitized_real_training_data = real_training_data.drop(columns=drop_columns)
-        sanitized_synthetic_data = synthetic_data.drop(columns=drop_columns)
-        sanitized_real_validation_data = real_validation_data.drop(columns=drop_columns)
-
-        if (
-            sanitized_real_training_data.empty
-            or sanitized_synthetic_data.empty
-            or sanitized_real_validation_data.empty
-        ):
-            raise ValueError(
-                'There are no valid sdtypes in the dataframes to run the '
-                'DCROverfittingProtection metric.'
-            )
-
-        if len(sanitized_real_training_data) * 0.5 > len(sanitized_real_validation_data):
+        if len(real_training_data) * 0.5 > len(real_validation_data):
             warnings.warn(
-                f'Your real_validation_data contains {len(sanitized_real_validation_data)} rows while your '
-                f'real_training_data contains {len(sanitized_real_training_data)} rows. For most accurate '
+                f'Your real_validation_data contains {len(real_validation_data)} rows while your '
+                f'real_training_data contains {len(real_training_data)} rows. For most accurate '
                 'results, we recommend that the validation data at least half the size of the training data.'
             )
 
+        real_data_copy = real_training_data.copy()
+        synthetic_data_copy = synthetic_data.copy()
+        real_validation_copy = real_validation_data.copy()
+        real_data_copy = _process_data_with_metadata(real_data_copy, metadata, True)
+        synthetic_data_copy = _process_data_with_metadata(synthetic_data_copy, metadata, True)
+        real_validation_copy = _process_data_with_metadata(real_validation_copy, metadata, True)
+
         return (
-            sanitized_real_training_data,
-            sanitized_synthetic_data,
-            sanitized_real_validation_data,
+            real_data_copy,
+            synthetic_data_copy,
+            real_validation_copy
         )
+
 
     @classmethod
     def compute_breakdown(

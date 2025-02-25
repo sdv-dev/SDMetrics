@@ -135,21 +135,21 @@ class TestDCROverfittingProtection:
         synthetic_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(50)]})
         metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
 
-        zero_subsample_msg = re.escape('num_rows_subsample (0) must be greater than 1.')
+        zero_subsample_msg = re.escape('num_rows_subsample (0) must be an integer greater than 1.')
         with pytest.raises(ValueError, match=zero_subsample_msg):
             DCROverfittingProtection.compute_breakdown(
                 train_data, synthetic_data, holdout_data, metadata, 0
             )
 
         subsample_none_msg = re.escape(
-            'num_iterations should not be greater than 1 if there is not subsampling.'
+            'num_iterations should not be greater than 1 if there is no subsampling.'
         )
         with pytest.raises(ValueError, match=subsample_none_msg):
             DCROverfittingProtection.compute_breakdown(
                 train_data, synthetic_data, holdout_data, metadata, None, 10
             )
 
-        zero_iteration_msg = re.escape('num_iterations (0) must be greater than 1.')
+        zero_iteration_msg = re.escape('num_iterations (0) must be an integer greater than 1.')
         with pytest.raises(ValueError, match=zero_iteration_msg):
             DCROverfittingProtection.compute_breakdown(
                 train_data, synthetic_data, holdout_data, metadata, 1, 0
@@ -158,14 +158,14 @@ class TestDCROverfittingProtection:
         no_dcr_metadata = {'columns': {'bad_col': {'sdtype': 'unknown'}}}
         no_dcr_data = pd.DataFrame({'bad_col': [1.0]})
 
-        missing_metric = 'There are no valid sdtypes in the dataframes to run the DCROverfittingProtection metric.'
+        missing_metric = 'There are no overlapping statistical columns to measure.'
         with pytest.raises(ValueError, match=missing_metric):
             DCROverfittingProtection.compute_breakdown(
                 no_dcr_data, no_dcr_data, no_dcr_data, no_dcr_metadata
             )
 
         small_holdout_data = holdout_data.sample(frac=0.2)
-        small_validation_msg = re.escape(
+        small_validation_msg = (
             f'Your real_validation_data contains {len(small_holdout_data)} rows while your '
             f'real_training_data contains {len(holdout_data)} rows. For most accurate '
             'results, we recommend that the validation data at least half the size of the training data.'
