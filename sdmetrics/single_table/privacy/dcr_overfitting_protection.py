@@ -57,12 +57,7 @@ class DCROverfittingProtection(SingleTableMetric):
         synthetic_data_copy = _process_data_with_metadata(synthetic_data_copy, metadata, True)
         real_validation_copy = _process_data_with_metadata(real_validation_copy, metadata, True)
 
-        return (
-            real_data_copy,
-            synthetic_data_copy,
-            real_validation_copy
-        )
-
+        return (real_data_copy, synthetic_data_copy, real_validation_copy)
 
     @classmethod
     def compute_breakdown(
