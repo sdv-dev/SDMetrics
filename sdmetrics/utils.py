@@ -123,6 +123,28 @@ def is_datetime(data):
     )
 
 
+def discretize_column(real_column, synthetic_column, num_discrete_bins=10):
+    """Discretize a real and synthetic column.
+
+    Args:
+        real_column (pd.Series):
+            The real column.
+        synthetic_column (pd.Series):
+            The synthetic column.
+        num_discrete_bins (int, optional):
+            The number of bins to create. Defaults to 10.
+
+    Returns:
+        tuple(pd.Series, pd.Series):
+            The discretized real and synthetic columns.
+    """
+    bin_edges = np.histogram_bin_edges(real_column.dropna(), bins=num_discrete_bins)
+    bin_edges[0], bin_edges[-1] = -np.inf, np.inf
+    binned_real_column = np.digitize(real_column, bins=bin_edges)
+    binned_synthetic_column = np.digitize(synthetic_column, bins=bin_edges)
+    return binned_real_column, binned_synthetic_column
+
+
 class HyperTransformer:
     """HyperTransformer class.
 

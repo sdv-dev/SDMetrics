@@ -30,8 +30,14 @@ def unit(c):
 
 
 @task
-def integration(c):
-    c.run('python -m pytest ./tests/integration --reruns 5 --disable-warnings --cov=sdmetrics --cov-report=xml:./integration_cov.xml')
+def integration(c, env=None):
+    env = env or {}
+    env.update({"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"})
+    
+    c.run(
+        'python -m pytest ./tests/integration --reruns 5 --disable-warnings --cov=sdmetrics --cov-report=xml:./integration_cov.xml',
+        env=env
+    )
 
 
 def _get_minimum_versions(dependencies, python_version):
@@ -73,7 +79,8 @@ def install_minimum(c):
     with open('pyproject.toml', 'rb') as pyproject_file:
         pyproject_data = tomli.load(pyproject_file)
 
-    dependencies = pyproject_data.get('project', {}).get('dependencies', [])
+    project_data = pyproject_data.get('project', {})
+    dependencies = project_data.get('dependencies', [])
     python_version = '.'.join(map(str, sys.version_info[:2]))
     minimum_versions = _get_minimum_versions(dependencies, python_version)
 
@@ -87,8 +94,7 @@ def minimum(c):
     install_minimum(c)
     check_dependencies(c)
     unit(c)
-    integration(c)
-
+    integration(c, env={"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"})
 
 @task
 def readme(c):

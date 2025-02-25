@@ -6,6 +6,7 @@ import pandas as pd
 
 from sdmetrics.utils import (
     HyperTransformer,
+    discretize_column,
     get_alternate_keys,
     get_cardinality_distribution,
     get_columns_from_metadata,
@@ -52,6 +53,21 @@ def test_get_missing_percentage():
 
     # Assert
     assert percentage_nan == 28.57
+
+
+def test_discretize_column():
+    """Test the ``discretize_column`` method."""
+    # Setup
+    real = pd.Series(range(10))
+    synthetic = pd.Series([-10] + list(range(1, 9)) + [20])
+    num_bins = 5
+
+    # Run
+    binned_real, binned_synthetic = discretize_column(real, synthetic, num_discrete_bins=num_bins)
+
+    # Assert
+    np.testing.assert_array_equal([1, 1, 2, 2, 3, 3, 4, 4, 5, 5], binned_real)
+    np.testing.assert_array_equal([1, 1, 2, 2, 3, 3, 4, 4, 5, 5], binned_synthetic)
 
 
 def test_get_columns_from_metadata():

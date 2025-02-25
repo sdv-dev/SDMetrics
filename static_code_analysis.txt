@@ -1,4 +1,4 @@
-Run started:2024-12-04 17:12:40.891444
+Run started:2025-02-21 20:33:08.028276
 
 Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -117,7 +117,7 @@ Test results:
 --------------------------------------------------
 
 Code scanned:
-	Total lines of code: 9475
+	Total lines of code: 10792
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 

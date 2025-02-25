@@ -3,7 +3,9 @@ import pandas as pd
 import pytest
 
 from sdmetrics.single_table.privacy import (
+    CategoricalCAP,
     CategoricalEnsemble,
+    CategoricalGeneralizedCAP,
     CategoricalPrivacyMetric,
     NumericalPrivacyMetric,
 )
@@ -53,6 +55,15 @@ def cat_bad_synthetic_data():
     })
 
 
+def cat_disjoint_synthetic_data():
+    return pd.DataFrame({
+        'key1': ['v', 'w', 'x', 'y', 'z'] * 20,
+        'key2': [5, 6, 7, 8, 9] * 20,
+        'sensitive1': ['a', 'b', 'c', 'e', 'd'] * 20,
+        'sensitive2': [0, 1, 2, 3, 4] * 20,
+    })
+
+
 @pytest.mark.parametrize('metric', categorical_metrics.values())  # noqa: PD011
 def test_categoricals_non_ens(metric):
     if metric != CategoricalEnsemble:  # Ensemble needs additional args to work
@@ -84,7 +95,18 @@ def test_categoricals_non_ens(metric):
             sensitive_fields=['sensitive1', 'sensitive2'],
         )
 
+        disjoint = metric.compute(
+            cat_real_data(),
+            cat_disjoint_synthetic_data(),
+            key_fields=['key1', 'key2'],
+            sensitive_fields=['sensitive1', 'sensitive2'],
+        )
+
         assert metric.min_value <= horrible <= bad <= good <= perfect <= metric.max_value
+        if metric == CategoricalCAP or metric == CategoricalEnsemble:
+            assert np.isnan(disjoint)
+        elif metric != CategoricalGeneralizedCAP:
+            assert disjoint == metric.max_value
 
 
 def test_categorical_ens():

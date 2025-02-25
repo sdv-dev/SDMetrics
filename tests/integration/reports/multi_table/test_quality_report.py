@@ -376,3 +376,39 @@ def test_quality_report_with_no_relationships():
     properties = report.get_properties()
     pd.testing.assert_frame_equal(properties, expected_properties)
     assert score == 0.6271818780763356
+
+
+def test_with_large_dataset():
+    """Test the quality report for large multi-table datasets.
+
+    The tables of the demo dataset have 10 rows each. We will replicate the rows 10000 times.
+    """
+    # Setup
+    np.random.seed(42)
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    real_data['users'] = pd.concat([real_data['users']] * 10000, ignore_index=True)
+    synthetic_data['users'] = pd.concat([synthetic_data['users']] * 10000, ignore_index=True)
+    real_data['transactions'] = pd.concat([real_data['transactions']] * 10000, ignore_index=True)
+    synthetic_data['transactions'] = pd.concat(
+        [synthetic_data['transactions']] * 10000, ignore_index=True
+    )
+    report_1 = QualityReport()
+    report_2 = QualityReport()
+
+    # Run
+    report_1.generate(real_data, synthetic_data, metadata, verbose=False)
+    score_1_run_1 = report_1.get_score()
+    report_1.generate(real_data, synthetic_data, metadata, verbose=False)
+    score_1_run_2 = report_1.get_score()
+    report_2.generate(real_data, synthetic_data, metadata, verbose=False)
+
+    # Assert
+    cpt_report_1 = report_1.get_properties().iloc[1]['Score']
+    cpt_report_2 = report_2.get_properties().iloc[1]['Score']
+    intertable_trends_1 = report_1.get_properties().iloc[3]['Score']
+    intertable_trends_2 = report_2.get_properties().iloc[3]['Score']
+    assert score_1_run_1 != score_1_run_2
+    assert np.isclose(score_1_run_1, score_1_run_2, atol=0.001)
+    assert np.isclose(report_2.get_score(), score_1_run_1, atol=0.001)
+    assert np.isclose(cpt_report_1, cpt_report_2, atol=0.001)
+    assert np.isclose(intertable_trends_1, intertable_trends_2, atol=0.001)
