@@ -119,8 +119,8 @@ def calculate_dcr(real_data, synthetic_data, metadata):
             The metadata dict.
 
     Returns:
-        pandas.Dataframe:
-            Returns a dataframe that shows the DCR value for all synthetic data.
+        pandas.Series:
+            Returns a Series that shows the DCR value for every row of synthetic data.
     """
     column_ranges = {}
 
