@@ -33,7 +33,7 @@ class DCROverfittingProtection(SingleTableMetric):
         num_rows_subsample,
         num_iterations,
     ):
-        validate_num_samples_num_iteration(num_rows_subsample, num_iterations)
+        validate_num_samples_num_iteration(num_rows_subsample, num_iterations, len(synthetic_data))
 
         if len(real_training_data) * 0.5 > len(real_validation_data):
             warnings.warn(
@@ -101,8 +101,8 @@ class DCROverfittingProtection(SingleTableMetric):
         training_data, sanitized_synthetic_data, validation_data = sanitized_data
 
         sum_of_scores = 0
-        sum_of_p_close_to_real = 0
-        sum_of_p_close_to_random = 0
+        sum_percent_close_to_real = 0
+        sum_percent_close_to_random = 0
         for _ in range(num_iterations):
             synthetic_sample = sanitized_synthetic_data
             if num_rows_subsample is not None:
@@ -117,14 +117,14 @@ class DCROverfittingProtection(SingleTableMetric):
             percentage_close_to_random = 1 - percentage_close_to_real
             score = min((1.0 - percentage_close_to_real) * 2, 1.0)
             sum_of_scores += score
-            sum_of_p_close_to_real += percentage_close_to_real
-            sum_of_p_close_to_random += percentage_close_to_random
+            sum_percent_close_to_real += percentage_close_to_real
+            sum_percent_close_to_random += percentage_close_to_random
 
         result = {
             'score': sum_of_scores / num_iterations,
             'synthetic_data_percentages': {
-                'closer_to_training': sum_of_p_close_to_real / num_iterations,
-                'closer_to_holdout': sum_of_p_close_to_random / num_iterations,
+                'closer_to_training': sum_percent_close_to_real / num_iterations,
+                'closer_to_holdout': sum_percent_close_to_random / num_iterations,
             },
         }
 

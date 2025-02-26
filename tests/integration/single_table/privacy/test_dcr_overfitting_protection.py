@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from sdmetrics.demos import load_single_table_demo
-from sdmetrics.single_table.privacy.dcr_overfitting_protection import DCROverfittingProtection
+from sdmetrics.single_table.privacy import DCROverfittingProtection
 
 
 class TestDCROverfittingProtection:
