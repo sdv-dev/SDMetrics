@@ -148,3 +148,17 @@ def allow_nan_array(attributes):
             ret.append(entry)
 
     return ret
+
+
+def validate_num_samples_num_iteration(num_rows_subsample, num_iterations):
+    if num_rows_subsample is not None:
+        if not isinstance(num_rows_subsample, int) or num_rows_subsample < 1:
+            raise ValueError(
+                f'num_rows_subsample ({num_rows_subsample}) must be an integer greater than 1.'
+            )
+
+    elif num_rows_subsample is None and num_iterations > 1:
+        raise ValueError('num_iterations should not be greater than 1 if there is no subsampling.')
+
+    if not isinstance(num_iterations, int) or num_iterations < 1:
+        raise ValueError(f'num_iterations ({num_iterations}) must be an integer greater than 1.')
