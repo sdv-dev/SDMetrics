@@ -156,6 +156,7 @@ def validate_num_samples_num_iteration(num_rows_subsample, num_iterations):
             raise ValueError(
                 f'num_rows_subsample ({num_rows_subsample}) must be an integer greater than 1.'
             )
+
     elif num_rows_subsample is None and num_iterations > 1:
         raise ValueError('num_iterations should not be greater than 1 if there is no subsampling.')
 
