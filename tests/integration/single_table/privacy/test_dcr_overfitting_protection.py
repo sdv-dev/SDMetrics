@@ -112,7 +112,7 @@ class TestDCROverfittingProtection:
             train_data, synthetic_data, holdout_data, metadata
         )
 
-        # Assert that subsampling provides different values.
+        # Assert that subsampling provides different values if smaller than data length.
         assert compute_subsample != compute_full_1
         assert compute_full_1 == compute_full_2
         assert compute_large_subsample == compute_full_1
