@@ -1,6 +1,8 @@
 import random
+import re
 
 import pandas as pd
+import pytest
 from sklearn.model_selection import train_test_split
 
 from sdmetrics.demos import load_single_table_demo
@@ -90,11 +92,18 @@ class TestDCROverfittingProtection:
         synthetic_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(50)]})
         metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
         num_rows_subsample = 4
+        large_num_subsample = len(synthetic_data) * 2
 
         # Run
         compute_subsample = DCROverfittingProtection.compute_breakdown(
             train_data, synthetic_data, holdout_data, metadata, num_rows_subsample
         )
+
+        large_subsample_msg = re.escape('Ignoring the num_rows_subsample and num_iterations args.')
+        with pytest.warns(UserWarning, match=large_subsample_msg):
+            compute_large_subsample = DCROverfittingProtection.compute_breakdown(
+                train_data, synthetic_data, holdout_data, metadata, large_num_subsample
+            )
 
         compute_full_1 = DCROverfittingProtection.compute_breakdown(
             train_data, synthetic_data, holdout_data, metadata
@@ -106,6 +115,7 @@ class TestDCROverfittingProtection:
         # Assert that subsampling provides different values.
         assert compute_subsample != compute_full_1
         assert compute_full_1 == compute_full_2
+        assert compute_large_subsample == compute_full_1
 
     def test_compute_breakdown_iterations(self):
         """Test that number iterations for subsampling works as expected."""

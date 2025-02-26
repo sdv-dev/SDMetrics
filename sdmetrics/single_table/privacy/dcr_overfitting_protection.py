@@ -33,7 +33,16 @@ class DCROverfittingProtection(SingleTableMetric):
         num_rows_subsample,
         num_iterations,
     ):
-        validate_num_samples_num_iteration(num_rows_subsample, num_iterations, len(synthetic_data))
+        validate_num_samples_num_iteration(num_rows_subsample, num_iterations)
+
+        if num_rows_subsample and num_rows_subsample > len(synthetic_data):
+            warnings.warn(
+                f'num_rows_subsample ({num_rows_subsample}) is greater than the length of the '
+                f'synthetic data ({len(synthetic_data)}). Ignoring the num_rows_subsample and '
+                'num_iterations args.',
+            )
+            num_rows_subsample = None
+            num_iterations = 1
 
         if len(real_training_data) * 0.5 > len(real_validation_data):
             warnings.warn(
@@ -49,7 +58,13 @@ class DCROverfittingProtection(SingleTableMetric):
         synthetic_data_copy = _process_data_with_metadata(synthetic_data_copy, metadata, True)
         real_validation_copy = _process_data_with_metadata(real_validation_copy, metadata, True)
 
-        return (real_data_copy, synthetic_data_copy, real_validation_copy)
+        return (
+            real_data_copy,
+            synthetic_data_copy,
+            real_validation_copy,
+            num_rows_subsample,
+            num_iterations,
+        )
 
     @classmethod
     def compute_breakdown(
@@ -98,7 +113,11 @@ class DCROverfittingProtection(SingleTableMetric):
             num_iterations,
         )
 
-        training_data, sanitized_synthetic_data, validation_data = sanitized_data
+        training_data = sanitized_data[0]
+        sanitized_synthetic_data = sanitized_data[1]
+        validation_data = sanitized_data[2]
+        num_rows_subsample = sanitized_data[3]
+        num_iterations = sanitized_data[4]
 
         sum_of_scores = 0
         sum_percent_close_to_real = 0

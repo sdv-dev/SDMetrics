@@ -150,16 +150,11 @@ def allow_nan_array(attributes):
     return ret
 
 
-def validate_num_samples_num_iteration(num_rows_subsample, num_iterations, len_of_data):
+def validate_num_samples_num_iteration(num_rows_subsample, num_iterations):
     if num_rows_subsample is not None:
-        if (
-            not isinstance(num_rows_subsample, int)
-            or num_rows_subsample < 1
-            or num_rows_subsample > len_of_data
-        ):
+        if not isinstance(num_rows_subsample, int) or num_rows_subsample < 1:
             raise ValueError(
-                f'num_rows_subsample ({num_rows_subsample}) must be an integer greater than 1 '
-                f'and less than num of rows in the data ({len_of_data}).'
+                f'num_rows_subsample ({num_rows_subsample}) must be an integer greater than 1.'
             )
 
     elif num_rows_subsample is None and num_iterations > 1:

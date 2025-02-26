@@ -25,15 +25,14 @@ class TestDCROverfittingProtection:
         train_data, holdout_data, synthetic_data, metadata = test_data
 
         # Run and Assert
-        num_subsample_error_post = re.escape(
-            f'must be an integer greater than 1 and less than num of rows in the data ({len(synthetic_data)}).'
-        )
-        with pytest.raises(ValueError, match=num_subsample_error_post):
+        zero_subsample_msg = re.escape('num_rows_subsample (0) must be an integer greater than 1.')
+        with pytest.raises(ValueError, match=zero_subsample_msg):
             DCROverfittingProtection.compute_breakdown(
                 train_data, synthetic_data, holdout_data, metadata, 0
             )
 
-        with pytest.raises(ValueError, match=num_subsample_error_post):
+        large_subsample_msg = re.escape('Ignoring the num_rows_subsample and num_iterations args.')
+        with pytest.warns(UserWarning, match=large_subsample_msg):
             DCROverfittingProtection.compute_breakdown(
                 train_data, synthetic_data, holdout_data, metadata, len(synthetic_data) * 2
             )
