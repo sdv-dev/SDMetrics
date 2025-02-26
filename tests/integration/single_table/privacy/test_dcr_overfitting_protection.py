@@ -61,6 +61,7 @@ class TestDCROverfittingProtection:
 
     def test_compute_breakdown_drop_all_columns(self):
         """Testing invalid sdtypes and ensure only appropriate columns are measured."""
+        # Setup
         train_data = pd.DataFrame({'bad_col': [10.0, 15.0], 'num_col': [1.0, 2.0]})
         synth_data = pd.DataFrame({'bad_col': [2.0, 1.0], 'num_col': [1.0, 2.0]})
         holdout_data = pd.DataFrame({'bad_col': [2.0, 1.0], 'num_col': [3.0, 4.0]})
@@ -71,9 +72,12 @@ class TestDCROverfittingProtection:
             }
         }
 
+        # Run
         result = DCROverfittingProtection.compute_breakdown(
             train_data, synth_data, holdout_data, metadata
         )
+
+        # Assert
         assert result['score'] == 0.0
         assert result['synthetic_data_percentages']['closer_to_training'] == 1.0
         assert result['synthetic_data_percentages']['closer_to_holdout'] == 0.0
@@ -104,24 +108,31 @@ class TestDCROverfittingProtection:
         assert compute_full_1 == compute_full_2
 
     def test_compute_breakdown_iterations(self):
-        """Test that number iterations for subsampling affect results."""
+        """Test that number iterations for subsampling works as expected."""
         # Setup
         train_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(10)]})
         holdout_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(10)]})
         synthetic_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(10)]})
         metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
         num_rows_subsample = 3
+        num_iterations = 1000
 
         # Run
         compute_num_iteration_1 = DCROverfittingProtection.compute_breakdown(
             train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, 1
         )
         compute_num_iteration_1000 = DCROverfittingProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, 1000
+            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, num_iterations
         )
         compute_train_same = DCROverfittingProtection.compute_breakdown(
-            synthetic_data, synthetic_data, holdout_data, metadata, num_rows_subsample, 1000
+            synthetic_data,
+            synthetic_data,
+            holdout_data,
+            metadata,
+            num_rows_subsample,
+            num_iterations,
         )
 
+        # Assert
         assert compute_num_iteration_1 != compute_num_iteration_1000
         assert compute_train_same['score'] == 0.0
