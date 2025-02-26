@@ -7,7 +7,7 @@ from sdmetrics._utils_metadata import _process_data_with_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
-from sdmetrics.utils import get_columns_from_metadata, get_type_from_column_meta, is_datetime
+from sdmetrics.utils import is_datetime
 
 
 class DCRBaselineProtection(SingleTableMetric):
@@ -107,6 +107,7 @@ class DCRBaselineProtection(SingleTableMetric):
             dcr_random = calculate_dcr(synthetic_sample, random_data, metadata)
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()
+            print(f'1: {synthetic_data_median}, 2: {random_data_median}')
             score = min((synthetic_data_median / random_data_median), 1.0)
             sum_synthetic_median += synthetic_data_median
             sum_random_median += random_data_median

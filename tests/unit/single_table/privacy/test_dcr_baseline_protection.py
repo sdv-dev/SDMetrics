@@ -1,12 +1,68 @@
 from datetime import datetime
-import pytest
+import random
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
+import pytest
+
 from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
 from sdmetrics.utils import is_datetime
 
 
+@pytest.fixture()
+def test_data():
+    real_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(50)]})
+    synthetic_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(50)]})
+    metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
+    return (real_data, synthetic_data, metadata)
+
+
 class TestDCRBaselineProtection:
+    @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.DCRBaselineProtection._generate_random_data')
+    @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr')
+    def test_compute_breakdown(self, mock_calculate_dcr, mock_random_data, test_data):
+        """Test that compute breakdown correctly measures the fraction of data overfitted."""
+        # Setup
+        real_data, synthetic_data, metadata = test_data
+        num_iterations = 2
+        num_rows_subsample = 5
+        mock_value = 10.0
+        mock_calculate_dcr_array = np.array([mock_value] * len(real_data))
+        mock_calculate_dcr.return_value = pd.DataFrame(mock_calculate_dcr_array, columns=['dcr'])
+
+        # Run
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data, synthetic_data, metadata, num_rows_subsample, num_iterations
+        )
+
+        # Assert
+        mock_random_data.assert_called_once()
+        assert mock_calculate_dcr.call_count == 2 * num_iterations
+        assert result['score'] == 1.0
+        assert result['median_DCR_to_real_data']['synthetic_data'] == mock_value / num_iterations
+        assert result['median_DCR_to_real_data']['random_data_baseline'] == mock_value / num_iterations
+
+    @patch(
+        'sdmetrics.single_table.privacy.dcr_overfitting_protection.DCROverfittingProtection.compute_breakdown'
+    )
+    def test_compute(self, mock_compute_breakdown, test_data):
+        """Test that compute makes a call to compute_breakdown."""
+        # Setup
+        train_data, holdout_data, synthetic_data, metadata = test_data
+        num_iterations = 2
+        num_rows_subsample = 2
+
+        # Run
+        DCROverfittingProtection.compute(
+            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, num_iterations
+        )
+
+        # Assert
+        mock_compute_breakdown.assert_called_once_with(
+            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, num_iterations
+        )
+
     def test__generate_random_data_check_type_and_range(self):
         """Test generated random data contains the same value types and respect ranges."""
         # Setup
