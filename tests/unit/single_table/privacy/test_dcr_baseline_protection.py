@@ -1,5 +1,6 @@
-from datetime import datetime
 import random
+import re
+from datetime import datetime
 from unittest.mock import patch
 
 import numpy as np
@@ -19,7 +20,36 @@ def test_data():
 
 
 class TestDCRBaselineProtection:
-    @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.DCRBaselineProtection._generate_random_data')
+    def test__validate_inputs(self, test_data):
+        """Test that we properly validate inputs to our DCRBaselineProtection."""
+        # Setup
+        real_data, synthetic_data, metadata = test_data
+
+        # Run and Assert
+        zero_subsample_msg = re.escape('num_rows_subsample (0) must be an integer greater than 1.')
+        with pytest.raises(ValueError, match=zero_subsample_msg):
+            DCRBaselineProtection.compute_breakdown(real_data, synthetic_data, metadata, 0)
+
+        subsample_none_msg = re.escape(
+            'num_iterations should not be greater than 1 if there is no subsampling.'
+        )
+        with pytest.raises(ValueError, match=subsample_none_msg):
+            DCRBaselineProtection.compute_breakdown(real_data, synthetic_data, metadata, None, 10)
+
+        zero_iteration_msg = re.escape('num_iterations (0) must be an integer greater than 1.')
+        with pytest.raises(ValueError, match=zero_iteration_msg):
+            DCRBaselineProtection.compute_breakdown(real_data, synthetic_data, metadata, 1, 0)
+
+        no_dcr_metadata = {'columns': {'bad_col': {'sdtype': 'unknown'}}}
+        no_dcr_data = pd.DataFrame({'bad_col': [1.0]})
+
+        missing_metric = 'There are no overlapping statistical columns to measure.'
+        with pytest.raises(ValueError, match=missing_metric):
+            DCRBaselineProtection.compute_breakdown(no_dcr_data, no_dcr_data, no_dcr_metadata)
+
+    @patch(
+        'sdmetrics.single_table.privacy.dcr_baseline_protection.DCRBaselineProtection._generate_random_data'
+    )
     @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr')
     def test_compute_breakdown(self, mock_calculate_dcr, mock_random_data, test_data):
         """Test that compute breakdown correctly measures the fraction of data overfitted."""
@@ -29,7 +59,7 @@ class TestDCRBaselineProtection:
         num_rows_subsample = 5
         mock_value = 10.0
         mock_calculate_dcr_array = np.array([mock_value] * len(real_data))
-        mock_calculate_dcr.return_value = pd.DataFrame(mock_calculate_dcr_array, columns=['dcr'])
+        mock_calculate_dcr.return_value = pd.Series(mock_calculate_dcr_array)
 
         # Run
         result = DCRBaselineProtection.compute_breakdown(
@@ -40,27 +70,27 @@ class TestDCRBaselineProtection:
         mock_random_data.assert_called_once()
         assert mock_calculate_dcr.call_count == 2 * num_iterations
         assert result['score'] == 1.0
-        assert result['median_DCR_to_real_data']['synthetic_data'] == mock_value / num_iterations
-        assert result['median_DCR_to_real_data']['random_data_baseline'] == mock_value / num_iterations
+        assert result['median_DCR_to_real_data']['synthetic_data'] == mock_value
+        assert result['median_DCR_to_real_data']['random_data_baseline'] == mock_value
 
     @patch(
-        'sdmetrics.single_table.privacy.dcr_overfitting_protection.DCROverfittingProtection.compute_breakdown'
+        'sdmetrics.single_table.privacy.dcr_baseline_protection.DCRBaselineProtection.compute_breakdown'
     )
     def test_compute(self, mock_compute_breakdown, test_data):
         """Test that compute makes a call to compute_breakdown."""
         # Setup
-        train_data, holdout_data, synthetic_data, metadata = test_data
+        real_data, synthetic_data, metadata = test_data
         num_iterations = 2
         num_rows_subsample = 2
 
         # Run
-        DCROverfittingProtection.compute(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, num_iterations
+        DCRBaselineProtection.compute(
+            real_data, synthetic_data, metadata, num_rows_subsample, num_iterations
         )
 
         # Assert
         mock_compute_breakdown.assert_called_once_with(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, num_iterations
+            real_data, synthetic_data, metadata, num_rows_subsample, num_iterations
         )
 
     def test__generate_random_data_check_type_and_range(self):
