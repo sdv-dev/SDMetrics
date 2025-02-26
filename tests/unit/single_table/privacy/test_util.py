@@ -1,4 +1,11 @@
-from sdmetrics.single_table.privacy.util import closest_neighbors
+import re
+
+import pytest
+
+from sdmetrics.single_table.privacy.util import (
+    closest_neighbors,
+    validate_num_samples_num_iteration,
+)
 
 
 def test_closest_neighbors_exact():
@@ -30,3 +37,25 @@ def test_closest_neighbors_non_exact():
     assert ('a', '1') in results
     assert ('a', '3') in results
     assert ('b', '2') in results
+
+
+def test_validate_num_samples_num_iteration():
+    # Run and Assert
+    num_subsample_error_post = re.escape('must be an integer greater than 1.')
+
+    with pytest.raises(ValueError, match=num_subsample_error_post):
+        validate_num_samples_num_iteration(0, 1)
+
+    with pytest.raises(ValueError, match=num_subsample_error_post):
+        validate_num_samples_num_iteration('X', 1)
+
+    subsample_none_msg = re.escape(
+        'num_iterations should not be greater than 1 if there is no subsampling.'
+    )
+    num_iterations = 3
+    with pytest.raises(ValueError, match=subsample_none_msg):
+        validate_num_samples_num_iteration(None, num_iterations)
+
+    zero_iteration_msg = re.escape('num_iterations (0) must be an integer greater than 1.')
+    with pytest.raises(ValueError, match=zero_iteration_msg):
+        validate_num_samples_num_iteration(1, 0)
