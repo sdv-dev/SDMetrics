@@ -73,9 +73,9 @@ class TestDCROverfittingProtection:
         train_data, holdout_data, synthetic_data, metadata = test_data
         num_iterations = 2
         num_rows_subsample = 2
-        mock_calculate_dcr_array = np.array([0.0] * 50)
-        mock_calculate_dcr.return_value = pd.DataFrame(mock_calculate_dcr_array, columns=['dcr'])
-        data = np.array([1] * 25 + [0] * 25)
+        mock_calculate_dcr_array = np.array([0.0] * len(train_data))
+        mock_calculate_dcr.return_value = pd.Series(mock_calculate_dcr_array)
+        data = np.array([1] * (len(train_data) // 2) + [0] * (len(train_data) // 2))
         mock_numpy_where.return_value = pd.Series(data)
 
         # Run
