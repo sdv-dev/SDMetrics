@@ -1,5 +1,7 @@
 """DCR Baseline Protection metrics."""
 
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -34,12 +36,21 @@ class DCRBaselineProtection(SingleTableMetric):
     ):
         validate_num_samples_num_iteration(num_rows_subsample, num_iterations)
 
+        if num_rows_subsample and num_rows_subsample > len(synthetic_data):
+            warnings.warn(
+                f'num_rows_subsample ({num_rows_subsample}) is greater than the length of the '
+                f'synthetic data ({len(synthetic_data)}). Ignoring the num_rows_subsample and '
+                'num_iterations args.',
+            )
+            num_rows_subsample = None
+            num_iterations = 1
+
         real_data_copy = real_data.copy()
         synthetic_data_copy = synthetic_data.copy()
         real_data_copy = _process_data_with_metadata(real_data_copy, metadata, True)
         synthetic_data_copy = _process_data_with_metadata(synthetic_data_copy, metadata, True)
 
-        return real_data_copy, synthetic_data_copy
+        return real_data_copy, synthetic_data_copy, num_rows_subsample, num_iterations
 
     @classmethod
     def compute_breakdown(
@@ -83,7 +94,11 @@ class DCRBaselineProtection(SingleTableMetric):
             num_iterations,
         )
 
-        sanitized_real_data, sanitized_synthetic_data = sanitized_data
+        sanitized_real_data = sanitized_data[0]
+        sanitized_synthetic_data = sanitized_data[1]
+        num_rows_subsample = sanitized_data[2]
+        num_iterations = sanitized_data[3]
+
         random_data = cls._generate_random_data(sanitized_real_data)
 
         sum_synthetic_median = 0
@@ -133,7 +148,6 @@ class DCRBaselineProtection(SingleTableMetric):
                 from the synthesizer.
             real_validation_data (pd.DataFrame):
                 A pandas.DataFrame object containing a holdout set of real data.
-                This data should not have been used to train the synthesizer.
             metadata (dict):
                 A metadata dictionary that describes the table of data.
             num_rows_subsample (int or None):
@@ -166,18 +180,15 @@ class DCRBaselineProtection(SingleTableMetric):
         for col in real_data.columns:
             nan_ratio = real_data[col].isna().mean()
 
-            if real_data[col].dtype in ['int64', 'int32']:
+            if pd.api.types.is_integer_dtype(real_data[col]):
                 random_values = np.random.randint(
                     real_data[col].min(), real_data[col].max() + 1, num_samples
                 )
 
-            elif real_data[col].dtype in ['float64', 'float32']:
+            elif pd.api.types.is_float_dtype(real_data[col]):
                 random_values = np.random.uniform(
                     real_data[col].min(), real_data[col].max(), num_samples
                 )
-
-            elif real_data[col].dtype == 'object':
-                random_values = np.random.choice(real_data[col].dropna().unique(), num_samples)
 
             elif is_datetime(real_data[col]):
                 min_date, max_date = real_data[col].min(), real_data[col].max()
@@ -187,7 +198,7 @@ class DCRBaselineProtection(SingleTableMetric):
                 )
 
             else:
-                random_values = real_data[col].sample(num_samples, replace=True).values
+                random_values = np.random.choice(real_data[col].dropna().unique(), num_samples)
 
             nan_mask = np.random.rand(num_samples) < nan_ratio
             random_values = pd.Series(random_values)

@@ -36,6 +36,12 @@ class TestDCRBaselineProtection:
         with pytest.raises(ValueError, match=subsample_none_msg):
             DCRBaselineProtection.compute_breakdown(real_data, synthetic_data, metadata, None, 10)
 
+        large_subsample_msg = re.escape('Ignoring the num_rows_subsample and num_iterations args.')
+        with pytest.warns(UserWarning, match=large_subsample_msg):
+            DCRBaselineProtection.compute_breakdown(
+                real_data, synthetic_data, metadata, len(synthetic_data) * 2
+            )
+
         zero_iteration_msg = re.escape('num_iterations (0) must be an integer greater than 1.')
         with pytest.raises(ValueError, match=zero_iteration_msg):
             DCRBaselineProtection.compute_breakdown(real_data, synthetic_data, metadata, 1, 0)
@@ -117,7 +123,7 @@ class TestDCRBaselineProtection:
         # Assert
         pd.testing.assert_series_equal(random_data.dtypes, real_data.dtypes)
         for col_name, col_data in random_data.items():
-            if col_data.dtype in ['int64', 'int32', 'float64', 'float32'] or is_datetime(col_data):
+            if pd.api.types.is_numeric_dtype(col_data) or is_datetime(col_data):
                 assert col_data.min() >= real_data[col_name].min()
                 assert col_data.max() <= real_data[col_name].max()
 
@@ -139,7 +145,7 @@ class TestDCRBaselineProtection:
 
     def test__generate_random_data_single_value(self):
         """Test that random generated data for a single value should be the original data."""
-        # Setip
+        # Setup
         real_data = pd.DataFrame({
             'float_col': [1.0],
         })
@@ -152,6 +158,7 @@ class TestDCRBaselineProtection:
 
     def test_generate_random_data_different(self):
         """Test that generated data is differente everytime."""
+        # Setup
         real_data = pd.DataFrame({'float_col': [1.0, 1000.0, 500.0], 'cat_col': ['A', 'B', 'C']})
 
         # Run

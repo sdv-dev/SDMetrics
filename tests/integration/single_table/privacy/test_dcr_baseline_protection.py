@@ -1,6 +1,8 @@
 import random
+import re
 
 import pandas as pd
+import pytest
 
 from sdmetrics.demos import load_single_table_demo
 from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
@@ -57,7 +59,7 @@ class TestDCRBaselineProtection:
         real_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(20)]})
         synthetic_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(20)]})
         metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
-
+        large_num_subsample = len(synthetic_data) * 2
         num_rows_subsample = 4
 
         # Run
@@ -71,6 +73,12 @@ class TestDCRBaselineProtection:
             real_data, synthetic_data, metadata
         )
 
+        large_subsample_msg = re.escape('Ignoring the num_rows_subsample and num_iterations args.')
+        with pytest.warns(UserWarning, match=large_subsample_msg):
+            compute_large_subsample = DCRBaselineProtection.compute_breakdown(
+                real_data, synthetic_data, metadata, large_num_subsample
+            )
+
         # Assert that subsampling provides different values.
         assert (
             compute_subsample['median_DCR_to_real_data']['synthetic_data']
@@ -78,6 +86,11 @@ class TestDCRBaselineProtection:
         )
         assert (
             compute_full_1['median_DCR_to_real_data']['synthetic_data']
+            == compute_full_2['median_DCR_to_real_data']['synthetic_data']
+        )
+
+        assert (
+            compute_large_subsample['median_DCR_to_real_data']['synthetic_data']
             == compute_full_2['median_DCR_to_real_data']['synthetic_data']
         )
 
