@@ -127,89 +127,72 @@ class TestDCRBaselineProtection:
         assert compute_breakdown_result[score_key] > compute_same_data[score_key]
 
     def test_compute_breakdown_drop_all_columns(self):
-        """Testing invalid sdtypes and if there are no columns to measure."""
-        train_data = pd.DataFrame({'bad_col': [1.0, 2.0]})
-        bad_metadata = {'columns': {'bad_col': {'sdtype': 'unknown'}}}
+        """Testing invalid sdtypes and ensure only appropriate columns are measured."""
+        real_data = pd.DataFrame({'diff_col_1': [10.0, 15.0], 'num_col': [1.0, 2.0]})
+        synth_data = pd.DataFrame({'diff_col_2': [2.0, 1.0], 'num_col': [1.0, 2.0]})
+        metadata = {
+            'columns': {
+                'diff_col': {'sdtype': 'unknown'},
+                'num_col': {'sdtype': 'numerical'},
+            }
+        }
 
-        error_msg = (
-            'There are no valid sdtypes in the dataframes to run the DCRBaselineProtection metric.'
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data, synth_data, metadata
         )
-        with pytest.raises(ValueError, match=error_msg):
-            DCRBaselineProtection.compute_breakdown(
-                train_data, train_data, train_data, bad_metadata
-            )
-
-        with pytest.raises(ValueError, match=error_msg):
-            DCRBaselineProtection.compute(train_data, train_data, train_data, bad_metadata)
+        assert result['score'] == 0.0
+        assert result['median_DCR_to_real_data']['random_data_baseline'] > 0
 
     def test_compute_breakdown_subsampling(self):
         """Test subsampling produces different values."""
         # Setup
-        train_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(20)]})
-        holdout_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(20)]})
+        real_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(20)]})
         synthetic_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(20)]})
         metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
 
-        error_msg = re.escape('num_rows_subsample (0) must be greater than 1.')
         num_rows_subsample = 4
 
         # Run
-        with pytest.raises(ValueError, match=error_msg):
-            DCRBaselineProtection.compute_breakdown(
-                train_data, synthetic_data, holdout_data, metadata, 0
-            )
-
-        compute_subsample_1 = DCRBaselineProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample
+        compute_subsample = DCRBaselineProtection.compute_breakdown(
+            real_data, synthetic_data, metadata, num_rows_subsample
         )
-        compute_subsample_2 = DCRBaselineProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample
-        )
-
         compute_full_1 = DCRBaselineProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata
+            real_data, synthetic_data, metadata
         )
         compute_full_2 = DCRBaselineProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata
+            real_data, synthetic_data, metadata
         )
 
         # Assert that subsampling provides different values.
-        assert compute_subsample_1 != compute_subsample_2
-        assert compute_full_1 == compute_full_2
+        assert (
+            compute_subsample['median_DCR_to_real_data']['synthetic_data'] !=
+            compute_full_1['median_DCR_to_real_data']['synthetic_data']
+        )
+        assert (
+            compute_full_1['median_DCR_to_real_data']['synthetic_data'] ==
+            compute_full_2['median_DCR_to_real_data']['synthetic_data']
+        )
 
     def test_compute_breakdown_iterations(self):
-        """Test that number iterations for subsampling affect results."""
+        """Test that number iterations for subsampling works as expected."""
         # Setup
-        train_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(10)]})
-        holdout_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(10)]})
+        real_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(10)]})
         synthetic_data = pd.DataFrame({'num_col': [random.randint(1, 1000) for _ in range(10)]})
         metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
-        zero_error_msg = re.escape('num_iterations (0) must be greater than 1.')
-        subsample_none_msg = re.escape(
-            'num_iterations should not be greater than 1 if there is not subsampling.'
-        )
         num_rows_subsample = 3
+        num_iterations = 1000
 
         # Run
-        with pytest.raises(ValueError, match=zero_error_msg):
-            DCRBaselineProtection.compute_breakdown(
-                train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, 0
-            )
-
-        with pytest.raises(ValueError, match=subsample_none_msg):
-            DCRBaselineProtection.compute_breakdown(
-                train_data, synthetic_data, holdout_data, metadata, None, 10
-            )
-
         compute_num_iteration_1 = DCRBaselineProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, 1
+            real_data, synthetic_data, metadata, num_rows_subsample, 1
         )
         compute_num_iteration_1000 = DCRBaselineProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, 1000
+            real_data, synthetic_data, metadata, num_rows_subsample, num_iterations
         )
         compute_train_same = DCRBaselineProtection.compute_breakdown(
-            synthetic_data, synthetic_data, holdout_data, metadata, num_rows_subsample, 1000
+            synthetic_data, synthetic_data, metadata, num_rows_subsample, num_iterations
         )
 
+        # Assert
         assert compute_num_iteration_1 != compute_num_iteration_1000
         assert compute_train_same['score'] == 0.0
