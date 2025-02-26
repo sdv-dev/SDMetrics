@@ -60,7 +60,7 @@ class TestDCROverfittingProtection:
         assert compute_all_same[synth_percentages_key][synth_holdout_key] == 1.0
 
     def test_compute_breakdown_drop_all_columns(self):
-        """Testing invalid sdtypes and if there onlys appropriate columns are measured."""
+        """Testing invalid sdtypes and ensure only appropriate columns are measured."""
         train_data = pd.DataFrame({'bad_col': [10.0, 15.0], 'num_col': [1.0, 2.0]})
         synth_data = pd.DataFrame({'bad_col': [2.0, 1.0], 'num_col': [1.0, 2.0]})
         holdout_data = pd.DataFrame({'bad_col': [2.0, 1.0], 'num_col': [3.0, 4.0]})
