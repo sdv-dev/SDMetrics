@@ -12,7 +12,11 @@ from sdmetrics.utils import is_datetime
 
 
 class DCRBaselineProtection(SingleTableMetric):
-    """DCR Baseline Protection metric."""
+    """DCR Baseline Protection metric
+
+    This metric uses a DCR (distance to closest record) computation to measure how close the
+    synthetic data is to the real data as opposed to a baseline of random data.
+    """
 
     name = 'DCRBaselineProtection'
     goal = Goal.MAXIMIZE
