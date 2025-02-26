@@ -47,3 +47,7 @@ def get_error_type(error):
         colon_index = error.find(':')
         return error[:colon_index]
     return None
+
+
+def check_if_value_in_threshold(value, expected_value, threshold):
+    assert abs(value - expected_value) < threshold
