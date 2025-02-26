@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 
 from sdmetrics.demos import load_single_table_demo
 from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
+from sdmetrics.utils import is_datetime
 from tests.utils import check_if_value_in_threshold
 
 
@@ -263,59 +264,3 @@ class TestDCRBaselineProtection:
 
         assert compute_num_iteration_1 != compute_num_iteration_1000
         assert compute_train_same['score'] == 0.0
-
-    def test__generate_random_data(self):
-        real_data = pd.DataFrame({
-            'num_col': [0, 0, np.nan, np.nan, 10, 10],
-            'cat_col': ['A', 'B', 'A', None, 'B', None],
-            'bool_col': [True, False, True, False, None, False],
-            'unknown_column': [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-            'datetime_col': [
-                datetime(2025, 1, 1),
-                datetime(2025, 1, 1),
-                datetime(2025, 1, 11),
-                datetime(2025, 1, 10),
-                pd.NaT,
-                datetime(2025, 1, 11),
-            ],
-        })
-
-        random_data = DCRBaselineProtection._generate_random_data(real_data)
-        pd.testing.assert_series_equal(random_data.dtypes, real_data.dtypes)
-        for col_name, col_data in random_data.items():
-            print(f"Column: {col_name}, {col_data.dtype}")
-
-        assert False
-
-
-    # def test_value_range():
-    #     df = pd.DataFrame({"dates": pd.date_range("2024-01-01", periods=100, freq="H")})
-    #     result = generate_random_datetimes(df, "dates")
-
-    #     assert result.min() >= df["dates"].min(), "Generated dates should not be before min_date"
-    #     assert result.max() <= df["dates"].max(), "Generated dates should not be after max_date"
-
-
-    # def test_randomness():
-    #     df = pd.DataFrame({"dates": pd.date_range("2024-01-01", periods=100, freq="H")})
-    #     result1 = generate_random_datetimes(df, "dates")
-    #     result2 = generate_random_datetimes(df, "dates")
-
-    #     assert not result1.equals(result2), "Generated values should be different each time"
-
-
-    # def test_nan_handling():
-    #     df = pd.DataFrame({"dates": [pd.Timestamp("2024-01-01"),
-    #                     None, pd.Timestamp("2024-01-03"), None]})
-    #     result = generate_random_datetimes(df, "dates")
-
-    #     assert pd.isna(result.iloc[1]), "NaN values should be preserved"
-    #     assert pd.isna(result.iloc[3]), "NaN values should be preserved"
-
-
-    # def test_single_value():
-    #     df = pd.DataFrame({"dates": [pd.Timestamp("2024-01-01")]})
-    #     result = generate_random_datetimes(df, "dates")
-
-    #     assert result.iloc[0] == pd.Timestamp(
-    #         "2024-01-01"), "If only one value exists, output should be the same"

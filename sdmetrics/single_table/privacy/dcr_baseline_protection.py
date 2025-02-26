@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 
+from sdmetrics._utils_metadata import _process_data_with_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
@@ -20,9 +21,8 @@ class DCRBaselineProtection(SingleTableMetric):
     @classmethod
     def _validate_inputs(
         cls,
-        real_training_data,
+        real_data,
         synthetic_data,
-        real_validation_data,
         metadata,
         num_rows_subsample,
         num_iterations,
@@ -42,44 +42,18 @@ class DCRBaselineProtection(SingleTableMetric):
                 f'num_iterations ({num_iterations}) must be an integer greater than 1.'
             )
 
-        if metadata is not None:
-            if not isinstance(metadata, dict):
-                metadata = metadata.to_dict()
+        real_data_copy = real_data.copy()
+        synthetic_data_copy = synthetic_data.copy()
+        real_data_copy = _process_data_with_metadata(real_data_copy, metadata, True)
+        synthetic_data_copy = _process_data_with_metadata(synthetic_data_copy, metadata, True)
 
-        valid_sdtypes = {'numerical', 'categorical', 'boolean', 'datetime'}
-        drop_columns = []
-        for column, column_meta in get_columns_from_metadata(metadata).items():
-            sdtype = get_type_from_column_meta(column_meta)
-            if sdtype not in valid_sdtypes:
-                drop_columns.append(column)
+        return real_data_copy, synthetic_data_copy
 
-        super()._validate_inputs(real_training_data, synthetic_data, metadata)
-        super()._validate_inputs(real_validation_data, synthetic_data, metadata)
-
-        sanitized_real_training_data = real_training_data.drop(columns=drop_columns)
-        sanitized_synthetic_data = synthetic_data.drop(columns=drop_columns)
-        sanitized_real_validation_data = real_validation_data.drop(columns=drop_columns)
-
-        if (
-            sanitized_real_training_data.empty
-            or sanitized_synthetic_data.empty
-            or sanitized_real_validation_data.empty
-        ):
-            raise ValueError(
-                'There are no valid sdtypes in the dataframes to run the '
-                'DCRBaselineProtection metric.'
-            )
-
-        return (
-            sanitized_real_training_data,
-            sanitized_synthetic_data,
-            sanitized_real_validation_data,
-        )
 
     @classmethod
     def compute_breakdown(
         cls,
-        real_training_data,
+        real_data,
         synthetic_data,
         real_validation_data,
         metadata,
@@ -89,14 +63,11 @@ class DCRBaselineProtection(SingleTableMetric):
         """Compute the DCRBaselineProtection metric.
 
         Args:
-            real_training_data (pd.DataFrame):
+            real_data (pd.DataFrame):
                 A pd.DataFrame object containing the real data used for training the synthesizer.
             synthetic_data (pd.DataFrame):
                 A pandas.DataFrame object containing the synthetic data sampled
                 from the synthesizer.
-            real_validation_data (pd.DataFrame):
-                A pandas.DataFrame object containing a holdout set of real data.
-                This data should not have been used to train the synthesizer.
             metadata (dict):
                 A metadata dictionary that describes the table of data.
             num_rows_subsample (int or None):
@@ -115,14 +86,16 @@ class DCRBaselineProtection(SingleTableMetric):
                 Averages of the medians are returned in the case of multiple iterations.
         """
         sanitized_data = cls._validate_inputs(
-            real_training_data,
+            real_data,
             synthetic_data,
             real_validation_data,
             metadata,
             num_rows_subsample,
             num_iterations,
         )
-        training_data, sanitized_synthetic_data, validation_data = sanitized_data
+
+        sanitized_real_data, sanitized_synthetic_data = sanitized_data
+        random_data = cls._generate_random_data(sanitized_real_data)
 
         sum_synthetic_median = 0
         sum_random_median = 0
@@ -133,8 +106,8 @@ class DCRBaselineProtection(SingleTableMetric):
             if num_rows_subsample is not None:
                 synthetic_sample = sanitized_synthetic_data.sample(n=num_rows_subsample)
 
-            dcr_real = calculate_dcr(synthetic_sample, training_data, metadata)
-            dcr_random = calculate_dcr(synthetic_sample, validation_data, metadata)
+            dcr_real = calculate_dcr(synthetic_sample, sanitized_real_data, metadata)
+            dcr_random = calculate_dcr(synthetic_sample, random_data, metadata)
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()
             score = min((synthetic_data_median / random_data_median), 1.0)
@@ -210,7 +183,7 @@ class DCRBaselineProtection(SingleTableMetric):
                 random_values = np.random.randint(real_data[col].min(), real_data[col].max() + 1, num_samples)
 
             elif real_data[col].dtype in ["float64", "float32"]:
-                random_values = np.random.normal(real_data[col].mean(), real_data[col].std(), num_samples)
+                random_values = np.random.uniform(real_data[col].min(), real_data[col].max(), num_samples)
 
             elif real_data[col].dtype == "object":
                 random_values = np.random.choice(real_data[col].dropna().unique(), num_samples)
