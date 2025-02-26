@@ -5,6 +5,7 @@ import pandas as pd
 from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
 from sdmetrics.utils import is_datetime
 
+
 class TestDCRBaselineProtection:
     def test__generate_random_data_check_type_and_range(self):
         """Test generated random data contains the same value types and respect ranges."""
@@ -30,7 +31,7 @@ class TestDCRBaselineProtection:
         # Assert
         pd.testing.assert_series_equal(random_data.dtypes, real_data.dtypes)
         for col_name, col_data in random_data.items():
-            if col_data.dtype in ["int64", "int32", "float64", "float32"] or is_datetime(col_data):
+            if col_data.dtype in ['int64', 'int32', 'float64', 'float32'] or is_datetime(col_data):
                 assert col_data.min() >= real_data[col_name].min()
                 assert col_data.max() <= real_data[col_name].max()
 
@@ -39,7 +40,7 @@ class TestDCRBaselineProtection:
         # Setup
         real_data = pd.DataFrame({
             'float_col': np.repeat([1, 10, np.nan], 20),
-            'cat_col': np.repeat(['A', 'B', None], 20)
+            'cat_col': np.repeat(['A', 'B', None], 20),
         })
 
         # Run
@@ -65,10 +66,7 @@ class TestDCRBaselineProtection:
 
     def test_generate_random_data_different(self):
         """Test that generated data is differente everytime."""
-        real_data = pd.DataFrame({
-            'float_col': [1.0, 1000.0, 500.0],
-            'cat_col': ['A', 'B', 'C']
-        })
+        real_data = pd.DataFrame({'float_col': [1.0, 1000.0, 500.0], 'cat_col': ['A', 'B', 'C']})
 
         # Run
         random_data_1 = DCRBaselineProtection._generate_random_data(real_data)

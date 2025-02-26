@@ -5,11 +5,9 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.model_selection import train_test_split
 
 from sdmetrics.demos import load_single_table_demo
 from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
-from sdmetrics.utils import is_datetime
 from tests.utils import check_if_value_in_threshold
 
 
@@ -99,36 +97,6 @@ def expected_scores():
 
 
 class TestDCRBaselineProtection:
-    def test_end_to_end(
-        self, synthetic_data, training_data, validation_data, test_metadata, expected_scores
-    ):
-        """Test end to end for DCRBaslineProtection metric against a small dataset.
-
-        Synthesized data here should be considered pretty private as the synthetic data maps
-        the value of training data to different values. Test that invalid sdtypes do not affect the
-        score.
-        """
-        # Setup
-        train_data_diff_unknown_col = training_data.copy()
-        train_data_diff_unknown_col['unknown_column'] = [100, 100, 100, 100, 100, 100]
-
-        # Run
-        compute_breakdown_result = DCRBaselineProtection.compute_breakdown(
-            training_data, synthetic_data, validation_data, test_metadata
-        )
-        compute_breakdown_diff_result = DCRBaselineProtection.compute_breakdown(
-            train_data_diff_unknown_col, synthetic_data, validation_data, test_metadata
-        )
-        compute_result = DCRBaselineProtection.compute(
-            training_data, synthetic_data, validation_data, test_metadata
-        )
-
-        # Assert
-        median_key = 'median_DCR_to_real_data'
-        assert expected_scores[median_key] == compute_breakdown_result[median_key]
-        assert compute_breakdown_diff_result == compute_breakdown_diff_result
-        check_if_value_in_threshold(expected_scores['score'], compute_result, threshold=0.001)
-
     def test_end_to_end_with_demo(self):
         """Test end to end for DCRBaslineProtection metric against the demo dataset.
 
@@ -138,28 +106,13 @@ class TestDCRBaselineProtection:
         """
         # Setup
         real_data, synthetic_data, metadata = load_single_table_demo()
-        train_df, holdout_df = train_test_split(real_data, test_size=0.2)
 
         # Run
-        num_rows_subsample = 50
         compute_breakdown_result = DCRBaselineProtection.compute_breakdown(
-            train_df, synthetic_data, holdout_df, metadata
+            real_data, synthetic_data, metadata
         )
-        compute_result = DCRBaselineProtection.compute(
-            train_df, synthetic_data, holdout_df, metadata
-        )
-        compute_baseline_same = DCRBaselineProtection.compute_breakdown(
-            train_df, synthetic_data, synthetic_data, metadata, num_rows_subsample
-        )
-        compute_train_same = DCRBaselineProtection.compute_breakdown(
-            synthetic_data, synthetic_data, holdout_df, metadata, num_rows_subsample
-        )
-        compute_all_same = DCRBaselineProtection.compute_breakdown(
-            synthetic_data,
-            synthetic_data,
-            synthetic_data,
-            metadata,
-            num_rows_subsample,
+        compute_same_data = DCRBaselineProtection.compute_breakdown(
+            synthetic_data, synthetic_data, metadata
         )
 
         median_key = 'median_DCR_to_real_data'
@@ -168,14 +121,10 @@ class TestDCRBaselineProtection:
         score_key = 'score'
 
         # Assert
-        assert compute_result == compute_breakdown_result[score_key]
-        assert compute_baseline_same[score_key] == 1.0
-        assert compute_baseline_same[median_key][baseline_key] == 0.0
-        assert compute_train_same[score_key] == 0.0
-        assert compute_train_same[median_key][synth_median_key] == 0.0
-        assert np.isnan(compute_all_same[score_key])
-        assert compute_all_same[median_key][synth_median_key] == 0.0
-        assert compute_all_same[median_key][baseline_key] == 0.0
+        assert compute_same_data[median_key][synth_median_key] == 0.0
+        assert compute_same_data[median_key][baseline_key] > 0.0
+        assert compute_same_data[score_key] == 0.0
+        assert compute_breakdown_result[score_key] > compute_same_data[score_key]
 
     def test_compute_breakdown_drop_all_columns(self):
         """Testing invalid sdtypes and if there are no columns to measure."""

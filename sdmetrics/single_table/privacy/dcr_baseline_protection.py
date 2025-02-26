@@ -49,13 +49,11 @@ class DCRBaselineProtection(SingleTableMetric):
 
         return real_data_copy, synthetic_data_copy
 
-
     @classmethod
     def compute_breakdown(
         cls,
         real_data,
         synthetic_data,
-        real_validation_data,
         metadata,
         num_rows_subsample=None,
         num_iterations=1,
@@ -88,7 +86,6 @@ class DCRBaselineProtection(SingleTableMetric):
         sanitized_data = cls._validate_inputs(
             real_data,
             synthetic_data,
-            real_validation_data,
             metadata,
             num_rows_subsample,
             num_iterations,
@@ -128,9 +125,8 @@ class DCRBaselineProtection(SingleTableMetric):
     @classmethod
     def compute(
         cls,
-        real_training_data,
+        real_data,
         synthetic_data,
-        real_validation_data,
         metadata,
         num_rows_subsample=None,
         num_iterations=1,
@@ -138,7 +134,7 @@ class DCRBaselineProtection(SingleTableMetric):
         """Compute the DCRBaselineProtection metric.
 
         Args:
-            real_training_data (pd.DataFrame):
+            real_data (pd.DataFrame):
                 A pd.DataFrame object containing the real data used for training the synthesizer.
             synthetic_data (pd.DataFrame):
                 A pandas.DataFrame object containing the synthetic data sampled
@@ -161,9 +157,8 @@ class DCRBaselineProtection(SingleTableMetric):
                 The score for the DCRBaselineProtection metric.
         """
         result = cls.compute_breakdown(
-            real_training_data,
+            real_data,
             synthetic_data,
-            real_validation_data,
             metadata,
             num_rows_subsample,
             num_iterations,
@@ -179,20 +174,24 @@ class DCRBaselineProtection(SingleTableMetric):
         for col in real_data.columns:
             nan_ratio = real_data[col].isna().mean()
 
-            if real_data[col].dtype in ["int64", "int32"]:
-                random_values = np.random.randint(real_data[col].min(), real_data[col].max() + 1, num_samples)
+            if real_data[col].dtype in ['int64', 'int32']:
+                random_values = np.random.randint(
+                    real_data[col].min(), real_data[col].max() + 1, num_samples
+                )
 
-            elif real_data[col].dtype in ["float64", "float32"]:
-                random_values = np.random.uniform(real_data[col].min(), real_data[col].max(), num_samples)
+            elif real_data[col].dtype in ['float64', 'float32']:
+                random_values = np.random.uniform(
+                    real_data[col].min(), real_data[col].max(), num_samples
+                )
 
-            elif real_data[col].dtype == "object":
+            elif real_data[col].dtype == 'object':
                 random_values = np.random.choice(real_data[col].dropna().unique(), num_samples)
 
             elif is_datetime(real_data[col]):
                 min_date, max_date = real_data[col].min(), real_data[col].max()
                 total_seconds = (max_date - min_date).total_seconds()
                 random_values = min_date + pd.to_timedelta(
-                    np.random.uniform(0, total_seconds, num_samples), unit="s"
+                    np.random.uniform(0, total_seconds, num_samples), unit='s'
                 )
 
             else:
