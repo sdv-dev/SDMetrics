@@ -49,9 +49,9 @@ class BNLikelihoodBase(SingleTableMetric):
         probabilities = []
         for _, row in synthetic_data[fields].iterrows():
             try:
-                probabilities.append(bn.probability([row.to_numpy()]))
+                probabilities.append(torch.tensor(bn.probability([row.to_numpy()])))
             except ValueError:
-                probabilities.append(0)
+                probabilities.append(torch.tensor(0))
 
         return np.asarray(probabilities)
 
@@ -125,7 +125,7 @@ class BNLikelihood(BNLikelihoodBase):
             float:
                 Mean of the probabilities returned by the Bayesian Network.
         """
-        return np.mean(cls._likelihoods(real_data, synthetic_data, metadata, structure))
+        return np.mean(cls._likelihoods(real_data, synthetic_data, metadata, structure)).item()
 
 
 class BNLogLikelihood(BNLikelihoodBase):
@@ -199,7 +199,7 @@ class BNLogLikelihood(BNLikelihoodBase):
         """
         likelihoods = cls._likelihoods(real_data, synthetic_data, metadata, structure)
         likelihoods[np.where(likelihoods == 0)] = 1e-8
-        return np.mean(np.log(likelihoods))
+        return np.mean(np.log(likelihoods)).item()
 
     @classmethod
     def normalize(cls, raw_score):
