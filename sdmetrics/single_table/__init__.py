@@ -71,6 +71,7 @@ from sdmetrics.single_table.privacy.disclosure_protection import (
     DisclosureProtection,
     DisclosureProtectionEstimate,
 )
+from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
 from sdmetrics.single_table.privacy.dcr_overfitting_protection import DCROverfittingProtection
 from sdmetrics.single_table.privacy.ensemble import CategoricalEnsemble
 from sdmetrics.single_table.privacy.numerical_sklearn import NumericalLR, NumericalMLP, NumericalSVR
@@ -137,5 +138,6 @@ __all__ = [
     'RangeCoverage',
     'NewRowSynthesis',
     'TableStructure',
+    'DCRBaselineProtection',
     'DCROverfittingProtection',
 ]
