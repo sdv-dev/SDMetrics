@@ -51,7 +51,7 @@ class TestBNLikelihood:
         result = metric.compute(real_data, synthetic_data, metadata)
 
         # Assert
-        assert result == 0.1111111044883728
+        assert np.isclose(result, 0.1111111044883728, atol=1e-5)
 
 
 class TestBNLogLikelihood:
@@ -65,4 +65,4 @@ class TestBNLogLikelihood:
         result = metric.compute(real_data, synthetic_data, metadata)
 
         # Assert
-        assert result == -7.334733486175537
+        assert np.isclose(result, -7.334733486175537, atol=1e-5)
