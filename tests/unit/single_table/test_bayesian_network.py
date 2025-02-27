@@ -42,7 +42,7 @@ def metadata():
 
 class TestBNLikelihood:
     def test_compute(self, real_data, synthetic_data, metadata):
-        """Test the metric end to end."""
+        """Test the ``compute``method."""
         # Setup
         np.random.seed(42)
         metric = BNLikelihood()
