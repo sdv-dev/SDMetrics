@@ -60,7 +60,7 @@ torch = [
     "torch>=2.2.0;python_version>='3.12' and python_version<'3.13'",
     "torch>=2.6.0;python_version>='3.13'",
 ]
-pomegranate = ['pomegranate>=1.0,<2.0']
+pomegranate = ['pomegranate>=1.1.1,<2.0']
 xgboost = ['xgboost>=2.1.3']
 test = [
     'sdmetrics[torch]',
