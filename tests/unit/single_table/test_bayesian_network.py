@@ -1,43 +1,68 @@
-import sys
-from unittest.mock import Mock
-
+import numpy as np
+import pandas as pd
 import pytest
 
 from sdmetrics.single_table import BNLikelihood, BNLogLikelihood
 
 
 @pytest.fixture
-def bad_pomegranate():
-    old_pomegranate = getattr(sys.modules, 'pomegranate', None)
-    sys.modules['pomegranate'] = pytest
-    yield
-    if old_pomegranate is not None:
-        sys.modules['pomegranate'] = old_pomegranate
-    else:
-        del sys.modules['pomegranate']
+def real_data():
+    return pd.DataFrame({
+        'a': ['a', 'b', 'a', 'b', 'a', 'b'],
+        'b': ['c', 'd', 'c', 'd', 'c', 'd'],
+        'c': [True, False, True, False, True, False],
+        'd': [1, 2, 3, 4, 5, 6],
+        'e': [10, 2, 3, 4, 5, 6],
+    })
+
+
+@pytest.fixture
+def synthetic_data():
+    return pd.DataFrame({
+        'a': ['a', 'b', 'b', 'b', 'a', 'b'],
+        'b': ['d', 'd', 'c', 'd', 'c', 'd'],
+        'c': [False, False, True, False, True, False],
+        'd': [4, 2, 3, 4, 5, 6],
+        'e': [12, 2, 3, 4, 5, 6],
+    })
+
+
+@pytest.fixture
+def metadata():
+    return {
+        'columns': {
+            'a': {'sdtype': 'categorical'},
+            'b': {'sdtype': 'categorical'},
+            'c': {'sdtype': 'boolean'},
+            'd': {'sdtype': 'categorical'},
+            'e': {'sdtype': 'numerical'},
+        }
+    }
 
 
 class TestBNLikelihood:
-    def test_compute(self, bad_pomegranate):
-        """Test that an ``ImportError`` is raised."""
+    def test_compute(self, real_data, synthetic_data, metadata):
+        """Test the metric end to end."""
         # Setup
+        np.random.seed(42)
         metric = BNLikelihood()
 
-        # Act and Assert
-        expected_message = r'Please install pomegranate with `pip install sdmetrics\[pomegranate\]`\. Python 3\.13 is not supported\.'  # noqa: E501
-        with pytest.raises(ImportError, match=expected_message):
-            metric.compute(Mock(), Mock())
+        # Run
+        result = metric.compute(real_data, synthetic_data, metadata)
+
+        # Assert
+        assert result == 0.111111104
 
 
 class TestBNLogLikelihood:
-    def test_compute(self, bad_pomegranate):
-        """Test that an ``ImportError`` is raised."""
+    def test_compute(self, real_data, synthetic_data, metadata):
+        """Test the ``compute``method."""
         # Setup
+        np.random.seed(42)
         metric = BNLogLikelihood()
 
-        # Act and Assert
-        expected_message = expected_message = (
-            r'Please install pomegranate with `pip install sdmetrics\[pomegranate\]`\. Python 3\.13 is not supported\.'  # noqa: E501
-        )
-        with pytest.raises(ImportError, match=expected_message):
-            metric.compute(Mock(), Mock())
+        # Run
+        result = metric.compute(real_data, synthetic_data, metadata)
+
+        # Assert
+        assert result == -7.3347335
