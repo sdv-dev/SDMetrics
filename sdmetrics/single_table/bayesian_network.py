@@ -39,7 +39,7 @@ class BNLikelihoodBase(SingleTableMetric):
             for column in fields
         }
         for column in fields:
-            real_data[column] = real_data[column].map(category_to_integer[column]).astype(int)
+            real_data[column] = real_data[column].map(category_to_integer[column]).astype('int64')
             synthetic_data[column] = (
                 synthetic_data[column].map(category_to_integer[column]).astype(int)
             )
