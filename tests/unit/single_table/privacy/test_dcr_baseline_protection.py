@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
+from sdmetrics.single_table.privacy import DCRBaselineProtection
 from sdmetrics.utils import is_datetime
 
 

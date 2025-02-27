@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from sdmetrics.demos import load_single_table_demo
-from sdmetrics.single_table.privacy.dcr_baseline_protection import DCRBaselineProtection
+from sdmetrics.single_table.privacy import DCRBaselineProtection
 
 
 class TestDCRBaselineProtection:
