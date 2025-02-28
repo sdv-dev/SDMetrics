@@ -1,3 +1,6 @@
+import re
+from unittest.mock import Mock, patch
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -41,6 +44,19 @@ def metadata():
 
 
 class TestBNLikelihood:
+    @patch.dict('sys.modules', {'pomegranate.bayesian_network': None})
+    def test_compute_error(self):
+        """Test that an `ImportError` is raised."""
+        # Setup
+        metric = BNLikelihood()
+
+        # Run and Assert
+        expected_message = re.escape(
+            'Please install pomegranate with `pip install sdmetrics[pomegranate]`.'
+        )
+        with pytest.raises(ImportError, match=expected_message):
+            metric.compute(Mock(), Mock())
+
     def test_compute(self, real_data, synthetic_data, metadata):
         """Test the ``compute``method."""
         # Setup
@@ -55,6 +71,19 @@ class TestBNLikelihood:
 
 
 class TestBNLogLikelihood:
+    @patch.dict('sys.modules', {'pomegranate.bayesian_network': None})
+    def test_compute_error(self):
+        """Test that an `ImportError` is raised."""
+        # Setup
+        metric = BNLogLikelihood()
+
+        # Run and Assert
+        expected_message = re.escape(
+            'Please install pomegranate with `pip install sdmetrics[pomegranate]`.'
+        )
+        with pytest.raises(ImportError, match=expected_message):
+            metric.compute(Mock(), Mock())
+
     def test_compute(self, real_data, synthetic_data, metadata):
         """Test the ``compute``method."""
         # Setup
