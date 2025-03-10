@@ -1,9 +1,10 @@
 """BayesianNetwork based metrics for single table."""
 
-import json
 import logging
 
 import numpy as np
+import pandas as pd
+import torch
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
@@ -17,11 +18,10 @@ class BNLikelihoodBase(SingleTableMetric):
     @classmethod
     def _likelihoods(cls, real_data, synthetic_data, metadata=None, structure=None):
         try:
-            from pomegranate import BayesianNetwork
+            from pomegranate.bayesian_network import BayesianNetwork
         except ImportError:
             raise ImportError(
-                'Please install pomegranate with `pip install sdmetrics[pomegranate]`. '
-                'Python 3.13 is not supported.'
+                'Please install pomegranate with `pip install sdmetrics[pomegranate]`.'
             )
 
         real_data, synthetic_data, metadata = cls._validate_inputs(
@@ -34,19 +34,25 @@ class BNLikelihoodBase(SingleTableMetric):
             return np.full(len(real_data), np.nan)
 
         LOGGER.debug('Fitting the BayesianNetwork to the real data')
-        if structure:
-            if isinstance(structure, dict):
-                structure = BayesianNetwork.from_json(json.dumps(structure)).structure
+        bn = BayesianNetwork(structure=structure if structure else None, algorithm='chow-liu')
+        category_to_integer = {
+            column: {
+                category: i
+                for i, category in enumerate(
+                    pd.concat([real_data[column], synthetic_data[column]]).unique()
+                )
+            }
+            for column in fields
+        }
+        real_data[fields] = real_data[fields].replace(category_to_integer).astype('int64')
+        synthetic_data[fields] = synthetic_data[fields].replace(category_to_integer).astype('int64')
 
-            bn = BayesianNetwork.from_structure(real_data[fields].to_numpy(), structure)
-        else:
-            bn = BayesianNetwork.from_samples(real_data[fields].to_numpy(), algorithm='chow-liu')
-
+        bn.fit(torch.tensor(real_data[fields].to_numpy()))
         LOGGER.debug('Evaluating likelihood of the synthetic data')
         probabilities = []
         for _, row in synthetic_data[fields].iterrows():
             try:
-                probabilities.append(bn.probability([row.to_numpy()]))
+                probabilities.append(bn.probability([row.to_numpy()]).item())
             except ValueError:
                 probabilities.append(0)
 
