@@ -44,11 +44,8 @@ class BNLikelihoodBase(SingleTableMetric):
             }
             for column in fields
         }
-        for column in fields:
-            real_data[column] = real_data[column].map(category_to_integer[column]).astype('int64')
-            synthetic_data[column] = (
-                synthetic_data[column].map(category_to_integer[column]).astype(int)
-            )
+        real_data[fields] = real_data[fields].replace(category_to_integer).astype('int64')
+        synthetic_data[fields] = synthetic_data[fields].replace(category_to_integer).astype('int64')
 
         bn.fit(torch.tensor(real_data[fields].to_numpy()))
         LOGGER.debug('Evaluating likelihood of the synthetic data')
