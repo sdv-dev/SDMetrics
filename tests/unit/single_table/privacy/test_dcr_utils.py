@@ -333,8 +333,44 @@ def test_calculate_dcr_with_shuffled_data():
     metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
 
     # Run
-    result = calculate_dcr(synthetic_df, real_df, metadata)
-    result_shuffled = calculate_dcr(synthetic_df_shuffled, real_df_shuffled, metadata)
+    result = calculate_dcr(synthetic_data=synthetic_df, real_data=real_df, metadata=metadata)
+    result_shuffled = calculate_dcr(
+        synthetic_data=synthetic_df_shuffled, real_data=real_df_shuffled, metadata=metadata
+    )
 
     # Assert
     check_if_value_in_threshold(result.sum(), result_shuffled.sum(), 0.000001)
+
+
+@pytest.mark.filterwarnings('error')
+def test_calculate_dcr_with_zero_range():
+    """Test calculate_dcr with a range of zero."""
+    # Setup
+    real_data_num = [5.0]
+    real_data_date = datetime(2025, 1, 1)
+    synthetic_data_num_diff = [3.0]
+    synthetic_data_date_diff = datetime(2025, 1, 2)
+    synthetic_data_num_same = [5.0]
+    synthetic_data_date_same = datetime(2025, 1, 1)
+    real_df = pd.DataFrame({'num_col': real_data_num, 'date_col': real_data_date})
+    synthetic_df_diff = pd.DataFrame({
+        'num_col': synthetic_data_num_diff,
+        'date_col': synthetic_data_date_diff,
+    })
+    synthetic_df_same = pd.DataFrame({
+        'num_col': synthetic_data_num_same,
+        'date_col': synthetic_data_date_same,
+    })
+    synthetic_df_half = pd.DataFrame({
+        'num_col': synthetic_data_num_diff,
+        'date_col': synthetic_data_date_same,
+    })
+    metadata = {'columns': {'num_col': {'sdtype': 'numerical'}, 'date_col': {'sdtype': 'datetime'}}}
+
+    # Run
+    result = calculate_dcr(real_data=real_df, synthetic_data=synthetic_df_diff, metadata=metadata)
+    assert result[0] == 1.0
+    result = calculate_dcr(real_data=real_df, synthetic_data=synthetic_df_same, metadata=metadata)
+    assert result[0] == 0.0
+    result = calculate_dcr(real_data=real_df, synthetic_data=synthetic_df_half, metadata=metadata)
+    assert result[0] == 0.5
