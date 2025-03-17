@@ -43,6 +43,7 @@ def _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range=None):
         distance = 0.0 if synthetic_value == real_value else 1.0
         if col_range != 0:
             distance = difference / col_range
+
         return min(distance, 1.0)
 
     if synthetic_value == real_value:

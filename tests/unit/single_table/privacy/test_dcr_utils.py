@@ -367,7 +367,7 @@ def test_calculate_dcr_with_zero_range():
     })
     metadata = {'columns': {'num_col': {'sdtype': 'numerical'}, 'date_col': {'sdtype': 'datetime'}}}
 
-    # Run
+    # Run and Assert
     result = calculate_dcr(real_data=real_df, synthetic_data=synthetic_df_diff, metadata=metadata)
     assert result[0] == 1.0
     result = calculate_dcr(real_data=real_df, synthetic_data=synthetic_df_same, metadata=metadata)
