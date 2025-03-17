@@ -168,3 +168,43 @@ class TestDCRBaselineProtection:
         # Assert
         with pytest.raises(AssertionError):
             pd.testing.assert_frame_equal(random_data_1, random_data_2)
+
+    @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr')
+    def test_compute_breakdown_with_dcr_random_median_zero(self, mock_calculate_dcr, test_data):
+        """Test compute_breakdown when random median dcr score is 0."""
+        # Setup
+        real_data, synthetic_data, metadata = test_data
+        num_iterations = 2
+        num_rows_subsample = 5
+        mock_value = 0.0
+        mock_calculate_dcr_array = np.array([mock_value] * len(real_data))
+        mock_calculate_dcr.return_value = pd.Series(mock_calculate_dcr_array)
+
+        # Run
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data, synthetic_data, metadata, num_rows_subsample, num_iterations
+        )
+
+        # Assert
+        assert result['median_DCR_to_real_data']['random_data_baseline'] == 0.0
+        assert np.isnan(result['score'])
+
+    @patch(
+        'sdmetrics.single_table.privacy.dcr_baseline_protection.DCRBaselineProtection._generate_random_data'
+    )
+    def test_compute_breakdown_with_dcr_random_same_real(self, mock_generate_random, test_data):
+        """Test compute breakdown if random data is the same as real data."""
+        # Setup
+        real_data, synthetic_data, metadata = test_data
+        num_rows_subsample = 10
+        mock_generate_random.return_value = real_data.copy()
+
+        # Run
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data, synthetic_data, metadata, num_rows_subsample
+        )
+
+        # Assert
+        assert result['median_DCR_to_real_data']['random_data_baseline'] == 0.0
+        assert np.isnan(result['score'])
+        mock_generate_random.assert_called_once_with(real_data, num_rows_subsample)
