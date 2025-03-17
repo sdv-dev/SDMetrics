@@ -99,7 +99,7 @@ class DCRBaselineProtection(SingleTableMetric):
         num_rows_subsample = sanitized_data[2]
         num_iterations = sanitized_data[3]
 
-        random_data = cls._generate_random_data(sanitized_real_data)
+        random_data = cls._generate_random_data(real_data, len(sanitized_synthetic_data))
 
         sum_synthetic_median = 0
         sum_random_median = 0
@@ -107,11 +107,15 @@ class DCRBaselineProtection(SingleTableMetric):
 
         for _ in range(num_iterations):
             synthetic_sample = sanitized_synthetic_data
+            random_sample = random_data
             if num_rows_subsample is not None:
                 synthetic_sample = sanitized_synthetic_data.sample(n=num_rows_subsample)
+                random_sample = random_data.sample(n=num_rows_subsample)
 
-            dcr_real = calculate_dcr(synthetic_sample, sanitized_real_data, metadata)
-            dcr_random = calculate_dcr(synthetic_sample, random_data, metadata)
+            dcr_real = calculate_dcr(
+                real_data=sanitized_real_data, synthetic_data=synthetic_sample, metadata=metadata)
+            dcr_random = calculate_dcr(
+                real_data=sanitized_real_data, synthetic_data=random_sample, metadata=metadata)
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()
             score = min((synthetic_data_median / random_data_median), 1.0)
@@ -173,9 +177,9 @@ class DCRBaselineProtection(SingleTableMetric):
         return result.get('score')
 
     @classmethod
-    def _generate_random_data(cls, real_data):
+    def _generate_random_data(cls, real_data, num_samples=None):
         random_data = {}
-        num_samples = len(real_data)
+        num_samples = len(real_data) if num_samples is None else num_samples
 
         for col in real_data.columns:
             nan_ratio = real_data[col].isna().mean()

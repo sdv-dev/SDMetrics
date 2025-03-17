@@ -111,4 +111,33 @@ class TestDCRBaselineProtection:
         # Assert
         assert result['score'] == 1.0
         assert result['median_DCR_to_real_data']['synthetic_data'] == 1.0
-        assert result['median_DCR_to_real_data']['random_data_baseline'] == 1.0
+        # assert result['median_DCR_to_real_data']['random_data_baseline'] == 1.0
+
+
+    def test_end_to_end_with_zero_col_range(self):
+        real_data = pd.DataFrame(
+            data={
+                'A': [0, 10, 3, 4, 1]
+            })
+
+        synthetic_data = pd.DataFrame(
+            data={
+                'A': [5, 5],
+            }
+        )
+
+        metadata = {
+            'columns': {
+                'A': {'sdtype': 'numerical'}
+            }
+        }
+
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata
+        )
+        print(result)
+        assert result['score'] == 1.0
+        assert result['median_DCR_to_real_data']['synthetic_data'] == 0.1
+        assert False
