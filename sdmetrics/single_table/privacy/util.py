@@ -130,7 +130,7 @@ def allow_nan(df):
 
 
 def allow_nan_array(attributes):
-    """Replace all invalid (`nan` and `None`) entries in an array with valid placeholders.
+    """Replace all invalid (`nan` and `None`) entries in an array with valid placeholders .
 
     Arguments:
         attributes (tuple):
