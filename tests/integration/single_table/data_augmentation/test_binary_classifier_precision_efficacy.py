@@ -25,6 +25,7 @@ class TestBinaryClassifierPrecisionEfficacy:
             metadata=metadata,
             prediction_column_name='gender',
             minority_class_label='F',
+            fixed_recall_value=0.8,
         )
 
         score = BinaryClassifierPrecisionEfficacy.compute(

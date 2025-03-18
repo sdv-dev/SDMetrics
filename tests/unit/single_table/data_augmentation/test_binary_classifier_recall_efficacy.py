@@ -52,7 +52,7 @@ class TestBinaryClassifierPrecisionEfficacy:
             prediction_column_name,
             minority_class_label,
             'XGBoost',
-            0.8,
+            0.9,
         )
 
     @patch('sdmetrics.single_table.data_augmentation.base.BaseDataAugmentationMetric.compute')
