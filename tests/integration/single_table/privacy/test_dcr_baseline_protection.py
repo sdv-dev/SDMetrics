@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from datetime import datetime
+
 from sdmetrics.demos import load_single_table_demo
 from sdmetrics.single_table.privacy import DCRBaselineProtection
 
@@ -166,6 +168,34 @@ class TestDCRBaselineProtection:
         """Test end to end with a simple single synthetic value."""
         # Setup
         real_data = pd.DataFrame(data={'A': [2, 6, 3, 4, 1]})
+        synthetic_data = pd.DataFrame(data={'A': [5, 5, 5, 5, 5]})
+        metadata = {'columns': {'A': {'sdtype': 'numerical'}}}
+        num_rows_sample = 1
+        num_iterations = 5
+
+        # Run
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            num_rows_subsample=num_rows_sample,
+            num_iterations=num_iterations,
+        )
+
+        # Assert
+        assert result['median_DCR_to_real_data']['synthetic_data'] == 0.2
+        if result['median_DCR_to_real_data']['random_data_baseline'] == 0.0:
+            assert np.isnan(result['score'])
+
+    def test_end_to_end_with_datetimes(self):
+        """Test end to end with a simple single synthetic value."""
+        # Setup
+        real_data = pd.DataFrame(
+            data={
+                'datetime': [datetime(2025, 1, 1), datetime(2025, 1, 1)],
+                'datetime_str': ['2025-01-01', '2025-01-02'],
+                'datetime_str_no_fmt': ['2025-01-01', '2025-01-02']
+            })
         synthetic_data = pd.DataFrame(data={'A': [5, 5, 5, 5, 5]})
         metadata = {'columns': {'A': {'sdtype': 'numerical'}}}
         num_rows_sample = 1

@@ -62,8 +62,7 @@ def handle_single_and_multi_table(single_table_func):
 
         result = {}
         for table_name in data:
-            result[table_name] = single_table_func(
-                data[table_name], metadata['tables'][table_name])
+            result[table_name] = single_table_func(data[table_name], metadata['tables'][table_name])
 
         return result
 
@@ -82,8 +81,8 @@ def _convert_datetime_columns(data, metadata):
                     data[column] = pd.to_datetime(data[column], format=datetime_format)
                 else:
                     raise ValueError(
-                        f"No 'datetime_format' was described in metadata for {column}. "
-                        "Cannot convert objects into datetime formats."
+                        f"No 'datetime_format' was described in metadata for '{column}'. "
+                        'Cannot convert objects into datetime formats.'
                     )
 
     return data
@@ -99,7 +98,7 @@ def _remove_missing_columns_metadata(data, metadata):
     if columns_to_remove:
         columns_to_print = "', '".join(sorted(columns_to_remove))
         warnings.warn(
-            f"The columns ('{columns_to_print}') are not present in the metadata."
+            f"The columns ('{columns_to_print}') are not present in the metadata. "
             'They will not be included for further evaluation.',
             UserWarning,
         )

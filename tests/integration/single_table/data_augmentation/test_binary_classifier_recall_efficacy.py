@@ -195,13 +195,13 @@ class TestBinaryClassifierRecallEfficacy:
         mask_validation = np.random.rand(len(real_data)) < 0.8
         real_training = real_data[mask_validation]
         real_validation = real_data[~mask_validation]
-        warning_datetime = re.escape(
-            'No `datetime_format` provided in the metadata when trying to convert the columns'
-            " 'start_date' to datetime. The format will be inferred, but it may not be accurate."
+        warning_extra_col = re.escape(
+            "The columns ('extra_column') are not present in the metadata. "
+            'They will not be included for further evaluation.'
         )
 
         # Run
-        with pytest.warns(UserWarning, match=warning_datetime):
+        with pytest.warns(UserWarning, match=warning_extra_col):
             score = BinaryClassifierRecallEfficacy.compute(
                 real_training_data=real_training,
                 synthetic_data=synthetic_data,
