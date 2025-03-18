@@ -62,7 +62,8 @@ def handle_single_and_multi_table(single_table_func):
 
         result = {}
         for table_name in data:
-            result[table_name] = single_table_func(data[table_name], metadata['tables'][table_name])
+            result[table_name] = single_table_func(
+                data[table_name], metadata['tables'][table_name])
 
         return result
 
@@ -72,31 +73,18 @@ def handle_single_and_multi_table(single_table_func):
 @handle_single_and_multi_table
 def _convert_datetime_columns(data, metadata):
     """Convert datetime columns to datetime type."""
-    columns_missing_datetime_format = []
     for column in metadata['columns']:
         if metadata['columns'][column]['sdtype'] == 'datetime':
             is_datetime = pd.api.types.is_datetime64_any_dtype(data[column])
             if not is_datetime:
-                datetime_format = metadata['columns'][column].get('format')
-                try:
-                    if datetime_format:
-                        data[column] = pd.to_datetime(data[column], format=datetime_format)
-                    else:
-                        columns_missing_datetime_format.append(column)
-                        data[column] = pd.to_datetime(data[column])
-                except Exception as e:
+                datetime_format = metadata['columns'][column].get('datetime_format')
+                if datetime_format:
+                    data[column] = pd.to_datetime(data[column], format=datetime_format)
+                else:
                     raise ValueError(
-                        f"Failed to convert column '{column}' to datetime with the error: {str(e)}"
-                    ) from e
-
-    if columns_missing_datetime_format:
-        columns_to_print = "', '".join(columns_missing_datetime_format)
-        warnings.warn(
-            f'No `datetime_format` provided in the metadata when trying to convert the columns'
-            f" '{columns_to_print}' to datetime. The format will be inferred, but it may not"
-            ' be accurate.',
-            UserWarning,
-        )
+                        f"No 'datetime_format' was described in metadata for {column}. "
+                        "Cannot convert objects into datetime formats."
+                    )
 
     return data
 
