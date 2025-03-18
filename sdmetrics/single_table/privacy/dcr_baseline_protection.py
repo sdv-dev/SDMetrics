@@ -99,9 +99,7 @@ class DCRBaselineProtection(SingleTableMetric):
         num_rows_subsample = sanitized_data[2]
         num_iterations = sanitized_data[3]
 
-        size_of_random_data = (
-            len(sanitized_synthetic_data) if num_rows_subsample is None else num_rows_subsample
-        )
+        size_of_random_data = len(sanitized_synthetic_data)
         random_data = cls._generate_random_data(real_data, size_of_random_data)
 
         sum_synthetic_median = 0

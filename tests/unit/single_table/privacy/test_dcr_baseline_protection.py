@@ -207,4 +207,4 @@ class TestDCRBaselineProtection:
         # Assert
         assert result['median_DCR_to_real_data']['random_data_baseline'] == 0.0
         assert np.isnan(result['score'])
-        mock_generate_random.assert_called_once_with(real_data, num_rows_subsample)
+        mock_generate_random.assert_called_once_with(real_data, len(synthetic_data))
