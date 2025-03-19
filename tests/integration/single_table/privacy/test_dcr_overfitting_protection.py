@@ -1,5 +1,6 @@
 import random
 import re
+from datetime import datetime
 
 import pandas as pd
 import pytest
@@ -146,3 +147,66 @@ class TestDCROverfittingProtection:
         # Assert
         assert compute_num_iteration_1 != compute_num_iteration_1000
         assert compute_train_same['score'] == 0.0
+
+    def test_end_to_end_with_datetimes(self):
+        """Test end to end with datetime synthetic values."""
+        # Setup
+        train_data = pd.DataFrame(
+            data={
+                'datetime': [datetime(2025, 1, 1), datetime(2025, 1, 6)],
+                'datetime_s': [datetime(2025, 1, 1, second=25), datetime(2025, 1, 1, second=20)],
+                'datetime_str': ['2025-01-01', '2025-01-06'],
+                'datetime_str_no_fmt': ['Jan 1 2025', 'Jan 6 2025'],
+            }
+        )
+        synthetic_data = pd.DataFrame(
+            data={
+                'datetime': [datetime(2025, 1, 2), datetime(2025, 1, 12)],
+                'datetime_s': [datetime(2025, 1, 1, second=24), datetime(2025, 1, 1, second=36)],
+                'datetime_str': ['2025-01-02', '2025-01-12'],
+                'datetime_str_no_fmt': ['Jan 2 2025', 'Jan 12 2025'],
+            }
+        )
+        holdout_data = pd.DataFrame(
+            data={
+                'datetime': [datetime(2025, 1, 10), datetime(2025, 1, 16)],
+                'datetime_s': [datetime(2025, 1, 1, second=35), datetime(2025, 1, 1, second=40)],
+                'datetime_str': ['2025-01-11', '2025-01-16'],
+                'datetime_str_no_fmt': ['Jan 11 2025', 'Jan 16 2025'],
+            }
+        )
+
+        metadata = {
+            'columns': {
+                'datetime': {'sdtype': 'datetime'},
+                'datetime_s': {'sdtype': 'datetime'},
+                'datetime_str': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                'datetime_str_no_fmt': {'sdtype': 'datetime'},
+            }
+        }
+
+        # Run
+        error_fmt_msg = (
+            "No 'datetime_format' was described in metadata for 'datetime_str_no_fmt'. "
+            'Cannot convert objects into datetime formats.'
+        )
+        with pytest.raises(ValueError, match=error_fmt_msg):
+            DCROverfittingProtection.compute_breakdown(
+                real_training_data=train_data,
+                synthetic_data=synthetic_data,
+                real_validation_data=holdout_data,
+                metadata=metadata,
+            )
+
+        metadata['columns']['datetime_str_no_fmt']['datetime_format'] = '%b %d %Y'
+        result = DCROverfittingProtection.compute_breakdown(
+            real_training_data=train_data,
+            synthetic_data=synthetic_data,
+            real_validation_data=holdout_data,
+            metadata=metadata,
+        )
+
+        # Assert
+        assert result['score'] == 1.0
+        assert result['synthetic_data_percentages']['closer_to_training'] == 0.5
+        assert result['synthetic_data_percentages']['closer_to_holdout'] == 0.5

@@ -187,7 +187,7 @@ class TestDCRBaselineProtection:
             assert np.isnan(result['score'])
 
     def test_end_to_end_with_datetimes(self):
-        """Test end to end with a simple single synthetic value."""
+        """Test end to end with a single datetime synthetic value."""
         # Setup
         real_data = pd.DataFrame(
             data={
