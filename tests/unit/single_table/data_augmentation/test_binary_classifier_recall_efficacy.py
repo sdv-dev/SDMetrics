@@ -32,8 +32,6 @@ class TestBinaryClassifierPrecisionEfficacy:
         metadata = {}
         prediction_column_name = 'prediction_column_name'
         minority_class_label = 'minority_class_label'
-        classifier = 'XGBoost'
-        fixed_precision_value = 0.8
 
         # Run
         BinaryClassifierRecallEfficacy.compute_breakdown(
@@ -43,8 +41,6 @@ class TestBinaryClassifierPrecisionEfficacy:
             metadata=metadata,
             prediction_column_name=prediction_column_name,
             minority_class_label=minority_class_label,
-            classifier=classifier,
-            fixed_precision_value=fixed_precision_value,
         )
 
         # Assert
@@ -55,8 +51,8 @@ class TestBinaryClassifierPrecisionEfficacy:
             metadata,
             prediction_column_name,
             minority_class_label,
-            classifier,
-            fixed_precision_value,
+            'XGBoost',
+            0.9,
         )
 
     @patch('sdmetrics.single_table.data_augmentation.base.BaseDataAugmentationMetric.compute')
