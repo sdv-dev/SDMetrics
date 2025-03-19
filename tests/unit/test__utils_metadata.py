@@ -211,7 +211,7 @@ def test_convert_datetime_columns_with_failures():
     }
 
     # Run and Assert
-    error_msg_bad_format = 'time data "20-error"'
+    error_msg_bad_format = 'match format'
     with pytest.raises(ValueError, match=error_msg_bad_format):
         _convert_datetime_columns(data, metadata)
 

@@ -9,10 +9,7 @@ from sdmetrics._utils_metadata import _process_data_with_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
-from sdmetrics.single_table.privacy.util import (
-    detect_time_granularity,
-    validate_num_samples_num_iteration,
-)
+from sdmetrics.single_table.privacy.util import validate_num_samples_num_iteration
 from sdmetrics.utils import is_datetime
 
 
@@ -208,10 +205,9 @@ class DCRBaselineProtection(SingleTableMetric):
 
             elif is_datetime(real_data[col]):
                 min_date, max_date = real_data[col].min(), real_data[col].max()
-                time_unit = detect_time_granularity(real_data[col])
-                time_range = (max_date - min_date) / pd.to_timedelta(1, unit=time_unit)
+                total_seconds = (max_date - min_date).total_seconds()
                 random_values = min_date + pd.to_timedelta(
-                    np.random.randint(0, time_range + 1, num_samples), unit=time_unit
+                    np.random.uniform(0, total_seconds, num_samples), unit='s'
                 )
 
             else:

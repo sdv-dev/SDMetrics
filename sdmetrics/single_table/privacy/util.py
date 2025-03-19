@@ -162,19 +162,3 @@ def validate_num_samples_num_iteration(num_rows_subsample, num_iterations):
 
     if not isinstance(num_iterations, int) or num_iterations < 1:
         raise ValueError(f'num_iterations ({num_iterations}) must be an integer greater than 1.')
-
-
-def detect_time_granularity(series):
-    """Detects the most appropriate granularity for a datetime series."""
-    if series.dt.microsecond.nunique() > 1:
-        return 'us'
-    elif series.dt.second.nunique() > 1:
-        return 's'
-    elif series.dt.minute.nunique() > 1:
-        return 'm'
-    elif series.dt.hour.nunique() > 1:
-        return 'h'
-    elif series.dt.day.nunique() > 1:
-        return 'D'
-    else:
-        return 'D'
