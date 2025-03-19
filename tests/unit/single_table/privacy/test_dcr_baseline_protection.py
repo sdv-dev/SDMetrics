@@ -157,7 +157,7 @@ class TestDCRBaselineProtection:
         pd.testing.assert_frame_equal(real_data, random_data)
 
     def test_generate_random_data_different(self):
-        """Test that generated data is differente everytime."""
+        """Test that generated data is different everytime."""
         # Setup
         real_data = pd.DataFrame({'float_col': [1.0, 1000.0, 500.0], 'cat_col': ['A', 'B', 'C']})
 
@@ -168,6 +168,30 @@ class TestDCRBaselineProtection:
         # Assert
         with pytest.raises(AssertionError):
             pd.testing.assert_frame_equal(random_data_1, random_data_2)
+
+    def test_generate_random_data_datetime(self):
+        """Test that generated data takes into account time granularity."""
+        # Setup
+        real_data = pd.DataFrame({
+            'datetime': [
+                datetime(2025, 1, 1, 5, 10, 0),
+                datetime(2025, 1, 1, 5, 13, 0),
+                datetime(2025, 1, 1, 5, 15, 0),
+            ],
+        })
+
+        # Run
+        random_data = DCRBaselineProtection._generate_random_data(real_data)
+
+        # Assert
+        assert (random_data["datetime"].dt.second == 0).all()
+        assert (random_data["datetime"].dt.microsecond == 0).all()
+        assert (random_data["datetime"].dt.year == 2025).all()
+        assert (random_data["datetime"].dt.month == 1).all()
+        assert (random_data["datetime"].dt.day == 1).all()
+        assert (random_data["datetime"].dt.hour == 5).all()
+        min_dt, max_dt = real_data["datetime"].min(), real_data["datetime"].max()
+        assert random_data["datetime"].between(min_dt, max_dt).all()
 
     @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr')
     def test_compute_breakdown_with_dcr_random_median_zero(self, mock_calculate_dcr, test_data):
@@ -207,4 +231,6 @@ class TestDCRBaselineProtection:
         # Assert
         assert result['median_DCR_to_real_data']['random_data_baseline'] == 0.0
         assert np.isnan(result['score'])
-        mock_generate_random.assert_called_once_with(real_data, len(synthetic_data))
+        args = mock_generate_random.call_args[0]
+        assert args[1] == len(synthetic_data)
+        pd.testing.assert_frame_equal(args[0], real_data)

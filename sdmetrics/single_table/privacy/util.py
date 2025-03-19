@@ -164,7 +164,6 @@ def validate_num_samples_num_iteration(num_rows_subsample, num_iterations):
         raise ValueError(f'num_iterations ({num_iterations}) must be an integer greater than 1.')
 
 
-# TODO
 def detect_time_granularity(series):
     """Detects the most appropriate granularity for a datetime series."""
     if series.dt.microsecond.nunique() > 1:
