@@ -1,11 +1,10 @@
 import random
 import re
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
 import pytest
-
-from datetime import datetime
 
 from sdmetrics.demos import load_single_table_demo
 from sdmetrics.single_table.privacy import DCRBaselineProtection
@@ -192,22 +191,47 @@ class TestDCRBaselineProtection:
         # Setup
         real_data = pd.DataFrame(
             data={
-                'datetime': [datetime(2025, 1, 1), datetime(2025, 1, 1)],
-                'datetime_str': ['2025-01-01', '2025-01-02'],
-                'datetime_str_no_fmt': ['2025-01-01', '2025-01-02']
-            })
-        synthetic_data = pd.DataFrame(data={'A': [5, 5, 5, 5, 5]})
-        metadata = {'columns': {'A': {'sdtype': 'numerical'}}}
-        num_rows_sample = 1
-        num_iterations = 5
+                'datetime': [datetime(2025, 1, 1), datetime(2025, 1, 6)],
+                'datetime_s': [datetime(2025, 1, 1, second=25), datetime(2025, 1, 1, second=20)],
+                'datetime_str': ['2025-01-01', '2025-01-06'],
+                'datetime_str_no_fmt': ['Jan 1 2025', 'Jan 6 2025'],
+            }
+        )
+        synthetic_data = pd.DataFrame(
+            data={
+                'datetime': [datetime(2025, 1, 2)],
+                'datetime_s': [datetime(2025, 1, 1, second=24)],
+                'datetime_str': ['2025-01-02'],
+                'datetime_str_no_fmt': ['Jan 2 2025'],
+            }
+        )
+
+        metadata = {
+            'columns': {
+                'datetime': {'sdtype': 'datetime'},
+                'datetime_s': {'sdtype': 'datetime'},
+                'datetime_str': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                'datetime_str_no_fmt': {'sdtype': 'datetime'},
+            }
+        }
 
         # Run
+        error_fmt_msg = (
+            "No 'datetime_format' was described in metadata for 'datetime_str_no_fmt'. "
+            'Cannot convert objects into datetime formats.'
+        )
+        with pytest.raises(ValueError, match=error_fmt_msg):
+            DCRBaselineProtection.compute_breakdown(
+                real_data=real_data,
+                synthetic_data=synthetic_data,
+                metadata=metadata,
+            )
+
+        metadata['columns']['datetime_str_no_fmt']['datetime_format'] = '%b %d %Y'
         result = DCRBaselineProtection.compute_breakdown(
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
-            num_rows_subsample=num_rows_sample,
-            num_iterations=num_iterations,
         )
 
         # Assert
