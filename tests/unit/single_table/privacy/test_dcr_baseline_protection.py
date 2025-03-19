@@ -184,14 +184,15 @@ class TestDCRBaselineProtection:
         random_data = DCRBaselineProtection._generate_random_data(real_data)
 
         # Assert
-        assert (random_data["datetime"].dt.second == 0).all()
-        assert (random_data["datetime"].dt.microsecond == 0).all()
-        assert (random_data["datetime"].dt.year == 2025).all()
-        assert (random_data["datetime"].dt.month == 1).all()
-        assert (random_data["datetime"].dt.day == 1).all()
-        assert (random_data["datetime"].dt.hour == 5).all()
-        min_dt, max_dt = real_data["datetime"].min(), real_data["datetime"].max()
-        assert random_data["datetime"].between(min_dt, max_dt).all()
+        assert (random_data['datetime'].dt.second == 0).all()
+        assert (random_data['datetime'].dt.microsecond == 0).all()
+        assert (random_data['datetime'].dt.year == 2025).all()
+        assert (random_data['datetime'].dt.month == 1).all()
+        assert (random_data['datetime'].dt.day == 1).all()
+        assert (random_data['datetime'].dt.hour == 5).all()
+
+        min_dt, max_dt = real_data['datetime'].min(), real_data['datetime'].max()
+        assert random_data['datetime'].between(min_dt, max_dt).all()
 
     @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr')
     def test_compute_breakdown_with_dcr_random_median_zero(self, mock_calculate_dcr, test_data):
