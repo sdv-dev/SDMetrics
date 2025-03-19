@@ -18,7 +18,7 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
         metadata,
         prediction_column_name,
         minority_class_label,
-        classifier='xgboost',
+        classifier='XGBoost',
         fixed_recall_value=0.9,
     ):
         """Compute the score breakdown of the metric."""

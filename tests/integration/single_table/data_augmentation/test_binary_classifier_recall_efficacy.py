@@ -43,7 +43,6 @@ class TestBinaryClassifierRecallEfficacy:
             metadata=metadata,
             prediction_column_name='gender',
             minority_class_label='F',
-            classifier='XGBoost',
             fixed_precision_value=0.8,
         )
 
