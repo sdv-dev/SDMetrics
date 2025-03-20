@@ -173,8 +173,9 @@ def test__convert_datetime_columns(data, metadata):
 
     # Run
     error_msg = (
-        "No 'datetime_format' was described in metadata for 'datetime_missing_format'. "
-        'Cannot convert objects into datetime formats.'
+        "Datetime column 'datetime_missing_format' does not have a specified 'datetime_format'. "
+        'Please add a the required datetime_format to the metadata or convert this column '
+        "to 'pd.datetime' to bypass this requirement."
     )
     with pytest.raises(ValueError, match=error_msg):
         _convert_datetime_columns(data, metadata)
