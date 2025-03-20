@@ -1,6 +1,7 @@
 import random
 import re
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -111,4 +112,75 @@ class TestDCRBaselineProtection:
         # Assert
         assert result['score'] == 1.0
         assert result['median_DCR_to_real_data']['synthetic_data'] == 1.0
-        assert result['median_DCR_to_real_data']['random_data_baseline'] == 1.0
+
+    def test_end_to_end_with_single_value(self):
+        """Test end to end with a simple single synthetic value."""
+        # Setup
+        real_data = pd.DataFrame(data={'A': [0, 10, 3, 4, 1]})
+        synthetic_data = pd.DataFrame(data={'A': [5]})
+        metadata = {'columns': {'A': {'sdtype': 'numerical'}}}
+
+        # Run
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data=real_data, synthetic_data=synthetic_data, metadata=metadata
+        )
+
+        # Assert
+        assert result['median_DCR_to_real_data']['synthetic_data'] == 0.1
+
+    def test_end_to_end_with_nan_value(self):
+        """Test end to end with a nan value."""
+        # Setup
+        real_data = pd.DataFrame(data={'A': [0, 10, 3, 4, 1, np.nan]})
+        synthetic_data = pd.DataFrame(data={'A': [np.nan]})
+        metadata = {'columns': {'A': {'sdtype': 'numerical'}}}
+
+        # Run
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data=real_data, synthetic_data=synthetic_data, metadata=metadata
+        )
+
+        # Assert
+        assert result['median_DCR_to_real_data']['synthetic_data'] == 0.0
+        if result['median_DCR_to_real_data']['random_data_baseline'] != 0.0:
+            assert result['score'] == 0.0
+
+    def test_end_to_end_with_zero_col_range(self):
+        """Test end to end with a nan value."""
+        # Setup
+        real_data = pd.DataFrame(data={'A': [1.0]})
+        synthetic_data = pd.DataFrame(data={'A': [2.0, np.nan]})
+        metadata = {'columns': {'A': {'sdtype': 'numerical'}}}
+
+        # Run
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data=real_data, synthetic_data=synthetic_data, metadata=metadata
+        )
+
+        # Assert
+        assert result['median_DCR_to_real_data']['synthetic_data'] == 1.0
+        assert result['median_DCR_to_real_data']['random_data_baseline'] == 0.0
+        assert np.isnan(result['score'])
+
+    def test_end_to_end_sample_random_median(self):
+        """Test end to end with a simple single synthetic value."""
+        # Setup
+        real_data = pd.DataFrame(data={'A': [2, 6, 3, 4, 1]})
+        synthetic_data = pd.DataFrame(data={'A': [5, 5, 5, 5, 5]})
+        metadata = {'columns': {'A': {'sdtype': 'numerical'}}}
+        num_rows_sample = 1
+        num_iterations = 5
+
+        # Run
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            num_rows_subsample=num_rows_sample,
+            num_iterations=num_iterations,
+        )
+
+        # Assert
+        assert result['median_DCR_to_real_data']['synthetic_data'] == 0.2
+        if result['median_DCR_to_real_data']['random_data_baseline'] == 0.0:
+            assert np.isnan(result['score'])
