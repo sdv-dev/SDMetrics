@@ -182,9 +182,11 @@ class TestDCRBaselineProtection:
         )
 
         # Assert
+        print(result)
         assert result['median_DCR_to_real_data']['synthetic_data'] == 0.2
         if result['median_DCR_to_real_data']['random_data_baseline'] == 0.0:
             assert np.isnan(result['score'])
+        assert False
 
     def test_end_to_end_with_datetimes(self):
         """Test end to end with a single datetime synthetic value."""
@@ -217,8 +219,9 @@ class TestDCRBaselineProtection:
 
         # Run
         error_fmt_msg = (
-            "No 'datetime_format' was described in metadata for 'datetime_str_no_fmt'. "
-            'Cannot convert objects into datetime formats.'
+            "Datetime column 'datetime_str_no_fmt' does not have a specified 'datetime_format'. "
+            "Please add a the required datetime_format to the metadata or convert this column "
+            "to 'pd.datetime' to bypass this requirement."
         )
         with pytest.raises(ValueError, match=error_fmt_msg):
             DCRBaselineProtection.compute_breakdown(

@@ -81,8 +81,9 @@ def _convert_datetime_columns(data, metadata):
                     data[column] = pd.to_datetime(data[column], format=datetime_format)
                 else:
                     raise ValueError(
-                        f"No 'datetime_format' was described in metadata for '{column}'. "
-                        'Cannot convert objects into datetime formats.'
+                        f"Datetime column '{column}' does not have a specified 'datetime_format'. "
+                        "Please add a the required datetime_format to the metadata or convert this column "
+                        "to 'pd.datetime' to bypass this requirement."
                     )
 
     return data

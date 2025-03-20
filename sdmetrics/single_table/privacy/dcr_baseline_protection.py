@@ -101,6 +101,7 @@ class DCRBaselineProtection(SingleTableMetric):
 
         size_of_random_data = len(sanitized_synthetic_data)
         random_data = cls._generate_random_data(sanitized_real_data, size_of_random_data)
+        print(f'The random data: {random_data}')
 
         sum_synthetic_median = 0
         sum_random_median = 0
@@ -189,6 +190,9 @@ class DCRBaselineProtection(SingleTableMetric):
     def _generate_random_data(cls, real_data, num_samples=None):
         random_data = {}
         num_samples = len(real_data) if num_samples is None else num_samples
+        np.random.seed(None)
+        rng = np.random.default_rng(42)  # Independent Generator
+
 
         for col in real_data.columns:
             nan_ratio = real_data[col].isna().mean()
