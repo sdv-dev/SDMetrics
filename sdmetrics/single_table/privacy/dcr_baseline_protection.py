@@ -101,7 +101,6 @@ class DCRBaselineProtection(SingleTableMetric):
 
         size_of_random_data = len(sanitized_synthetic_data)
         random_data = cls._generate_random_data(sanitized_real_data, size_of_random_data)
-        print(f'The random data: {random_data}')
 
         sum_synthetic_median = 0
         sum_random_median = 0

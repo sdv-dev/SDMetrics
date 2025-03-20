@@ -182,11 +182,9 @@ class TestDCRBaselineProtection:
         )
 
         # Assert
-        print(result)
         assert result['median_DCR_to_real_data']['synthetic_data'] == 0.2
         if result['median_DCR_to_real_data']['random_data_baseline'] == 0.0:
             assert np.isnan(result['score'])
-        assert False
 
     def test_end_to_end_with_datetimes(self):
         """Test end to end with a single datetime synthetic value."""
