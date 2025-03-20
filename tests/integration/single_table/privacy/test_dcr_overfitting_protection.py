@@ -188,7 +188,7 @@ class TestDCROverfittingProtection:
         # Run
         error_fmt_msg = (
             "Datetime column 'datetime_str_no_fmt' does not have a specified 'datetime_format'. "
-            "Please add a the required datetime_format to the metadata or convert this column "
+            'Please add a the required datetime_format to the metadata or convert this column '
             "to 'pd.datetime' to bypass this requirement."
         )
         with pytest.raises(ValueError, match=error_fmt_msg):

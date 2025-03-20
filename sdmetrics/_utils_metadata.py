@@ -82,7 +82,7 @@ def _convert_datetime_columns(data, metadata):
                 else:
                     raise ValueError(
                         f"Datetime column '{column}' does not have a specified 'datetime_format'. "
-                        "Please add a the required datetime_format to the metadata or convert this column "
+                        'Please add a the required datetime_format to the metadata or convert this column '
                         "to 'pd.datetime' to bypass this requirement."
                     )
 
