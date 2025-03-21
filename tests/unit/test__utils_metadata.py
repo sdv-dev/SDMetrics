@@ -172,6 +172,16 @@ def test__convert_datetime_columns(data, metadata):
     }
 
     # Run
+    error_msg = (
+        "Datetime column 'datetime_missing_format' does not have a specified 'datetime_format'. "
+        'Please add a the required datetime_format to the metadata or convert this column '
+        "to 'pd.datetime' to bypass this requirement."
+    )
+    with pytest.raises(ValueError, match=error_msg):
+        _convert_datetime_columns(data, metadata)
+
+    table2_columns = metadata['tables']['table2']['columns']
+    table2_columns['datetime_missing_format']['datetime_format'] = '%Y-%m-%d'
     result_multi_table = _convert_datetime_columns(data, metadata)
     result_single_table = _convert_datetime_columns(data['table1'], metadata['tables']['table1'])
 
@@ -185,12 +195,13 @@ def test__convert_datetime_columns(data, metadata):
 def test_convert_datetime_columns_with_failures():
     """Test the ``_convert_datetime_columns`` when pandas can't convert to datetime."""
     # Setup
-    wrong_data = pd.DataFrame({
+    data = pd.DataFrame({
         'numerical': [1, 2, 3],
         'categorical': ['a', 'b', 'c'],
         'datetime_1': ['2021-01-01', '20-error', '2021-01-03'],
-        'datetime_2': ['2025-01-01', '2025-01-24', '2025-13-04'],
+        'datetime_2': ['2025-01-01', '2025-01-24', '2025-01-04'],
     })
+
     metadata = {
         'columns': {
             'numerical': {'sdtype': 'numerical'},
@@ -199,18 +210,30 @@ def test_convert_datetime_columns_with_failures():
             'datetime_2': {'sdtype': 'datetime'},
         }
     }
-    error_message = r"^Failed to convert column 'datetime_1' to datetime with the error:"
 
     # Run and Assert
-    with pytest.raises(ValueError, match=error_message):
-        _convert_datetime_columns(wrong_data, metadata)
+    error_msg_bad_format = 'match format'
+    with pytest.raises(ValueError, match=error_msg_bad_format):
+        _convert_datetime_columns(data, metadata)
+
+    data['datetime_1'] = ['2021-01-01', '2021-01-02', '2021-01-03']
+
+    error_msg_missing_format = "does not have a specified 'datetime_format'"
+    with pytest.raises(ValueError, match=error_msg_missing_format):
+        _convert_datetime_columns(data, metadata)
+
+    metadata['columns']['datetime_2']['datetime_format'] = '%Y-%m-%d'
+
+    result = _convert_datetime_columns(data, metadata)
+    assert pd.api.types.is_datetime64_any_dtype(result['datetime_1'].dtype)
+    assert pd.api.types.is_datetime64_any_dtype(result['datetime_2'].dtype)
 
 
 def test__remove_missing_columns_metadata(data, metadata):
     """Test the ``_remove_missing_columns_metadata`` method."""
     # Setup
     expected_warning_missing_column_metadata = re.escape(
-        "The columns ('extra_column_1', 'extra_column_2') are not present in the metadata."
+        "The columns ('extra_column_1', 'extra_column_2') are not present in the metadata. "
         'They will not be included for further evaluation.'
     )
     expected_warning_extra_metadata_column = re.escape(
