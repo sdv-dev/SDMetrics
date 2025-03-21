@@ -239,3 +239,23 @@ class TestDCRBaselineProtection:
         assert result['median_DCR_to_real_data']['synthetic_data'] == 0.2
         if result['median_DCR_to_real_data']['random_data_baseline'] == 0.0:
             assert np.isnan(result['score'])
+
+    def test_end_to_end_with_seed(self):
+        """Test end to end with a simple single synthetic value."""
+        # Setup
+        real_data = pd.DataFrame(data={'A': [2, 10, 3, 4, 1, 0]})
+        synthetic_data = pd.DataFrame(data={'A': [12, 32, 42, 15, 19]})
+        metadata = {'columns': {'A': {'sdtype': 'numerical'}}}
+        DCRBaselineProtection._seed = 123
+
+        # Run
+        result = DCRBaselineProtection.compute_breakdown(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+        )
+
+        # Assert
+        assert result['median_DCR_to_real_data']['synthetic_data'] == 0.9
+        assert result['median_DCR_to_real_data']['random_data_baseline'] == 0.1
+        assert result['score'] == 1.0
