@@ -157,7 +157,7 @@ class TestDCRBaselineProtection:
         pd.testing.assert_frame_equal(real_data, random_data)
 
     def test_generate_random_data_different(self):
-        """Test that generated data is differente everytime."""
+        """Test that generated data is different everytime."""
         # Setup
         real_data = pd.DataFrame({'float_col': [1.0, 1000.0, 500.0], 'cat_col': ['A', 'B', 'C']})
 
@@ -207,4 +207,6 @@ class TestDCRBaselineProtection:
         # Assert
         assert result['median_DCR_to_real_data']['random_data_baseline'] == 0.0
         assert np.isnan(result['score'])
-        mock_generate_random.assert_called_once_with(real_data, len(synthetic_data))
+        args = mock_generate_random.call_args[0]
+        assert args[1] == len(synthetic_data)
+        pd.testing.assert_frame_equal(args[0], real_data)
