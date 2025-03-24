@@ -199,7 +199,6 @@ class TestDCRBaselineProtection:
         )
 
         # Assert
-        print(result)
         assert result['median_DCR_to_real_data']['random_data_baseline'] == 0.0
         assert np.isnan(result['score'])
 
