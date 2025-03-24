@@ -159,6 +159,7 @@ class TestDCRBaselineProtection:
         )
 
         # Assert
+        print(result)
         assert result['median_DCR_to_real_data']['synthetic_data'] == 1.0
         assert result['median_DCR_to_real_data']['random_data_baseline'] == 0.0
         assert np.isnan(result['score'])
@@ -167,7 +168,7 @@ class TestDCRBaselineProtection:
         """Test end to end with a simple single synthetic value."""
         # Setup
         real_data = pd.DataFrame(data={'A': [2, 6, 3, 4, 1]})
-        synthetic_data = pd.DataFrame(data={'A': [5, 5, 5, 5, 5]})
+        synthetic_data = pd.DataFrame(data={'A': [5, 7, 5, 7, 5]})
         metadata = {'columns': {'A': {'sdtype': 'numerical'}}}
         num_rows_sample = 1
         num_iterations = 5
