@@ -193,6 +193,9 @@ def calculate_dcr_optimized(dataset, reference_dataset, metadata):
                     col_range = col_range.total_seconds()
                 ranges[col_name] = col_range
 
+    if not cols_to_keep:
+        raise ValueError('There are no overlapping statistical columns to measure.')
+
     # perform a full cross join on the data we want to compute
     dataset_copy = dataset_copy[cols_to_keep]
     dataset_copy['index'] = [i for i in range(len(dataset_copy))]
@@ -204,34 +207,39 @@ def calculate_dcr_optimized(dataset, reference_dataset, metadata):
 
     # on the full dataset, we can now perform column-wise operations to compute differences
     # these are vectorized so they will be much faster
-    print(cols_to_keep)
     for col_name in cols_to_keep:
         sdtype = metadata['columns'][col_name]['sdtype']
         if sdtype == 'numerical' or sdtype == 'datetime':
-            diff = (full_dataset[col_name+'_ref'] - full_dataset[col_name+'_data']).abs()
-            if (ranges[col_name] == 0):
-                print(f'Column Range is 0 for : {col_name}')
+            diff = (full_dataset[col_name + '_ref'] - full_dataset[col_name + '_data']).abs()
             if isinstance(diff.iloc[0], pd.Timedelta):
                 diff = diff.dt.total_seconds()
 
-            full_dataset[col_name+'_diff'] = np.where(
+            full_dataset[col_name + '_diff'] = np.where(
                 ranges[col_name] == 0,
-                (diff > 0).astype(int),  # If values are different, assign 1; otherwise, 0
-                np.minimum(diff / ranges[col_name], 1.0)  # Normalized difference when range > 0
+                np.where(
+                    (
+                        full_dataset[col_name + '_ref'].isna()
+                        & ~full_dataset[col_name + '_data'].isna()
+                    )
+                    | (
+                        ~full_dataset[col_name + '_ref'].isna()
+                        & full_dataset[col_name + '_data'].isna()
+                    ),
+                    1,
+                    (diff > 0).astype(int),
+                ),
+                np.minimum(diff / ranges[col_name], 1.0),
             )
-            print('Diff')
-            print(diff)
 
         elif sdtype == 'categorical' or sdtype == 'boolean':
-            equals_cat = ((full_dataset[col_name+'_ref'] == full_dataset[col_name+'_data']) |
-                          (full_dataset[col_name+'_ref'].isna() & full_dataset[col_name+'_data'].isna()))
-            full_dataset[col_name+'_diff'] = (~(equals_cat)).astype(int)
+            equals_cat = (full_dataset[col_name + '_ref'] == full_dataset[col_name + '_data']) | (
+                full_dataset[col_name + '_ref'].isna() & full_dataset[col_name + '_data'].isna()
+            )
+            full_dataset[col_name + '_diff'] = (~(equals_cat)).astype(int)
 
-        full_dataset.drop(columns=[col_name+'_ref', col_name+'_data'], inplace=True)
+        full_dataset.drop(columns=[col_name + '_ref', col_name + '_data'], inplace=True)
 
-    # the average distance is the overall distance
     full_dataset['diff'] = full_dataset.iloc[:, 2:].sum(axis=1) / len(cols_to_keep)
 
-    # find the min distance for each of the data rows
     out = full_dataset[['index_data', 'diff']].groupby('index_data').min().reset_index(drop=True)
     return out['diff']

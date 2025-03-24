@@ -8,7 +8,7 @@ import pandas as pd
 from sdmetrics._utils_metadata import _process_data_with_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr, calculate_dcr_optimized
+from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr_optimized
 from sdmetrics.single_table.privacy.util import validate_num_samples_num_iteration
 from sdmetrics.utils import is_datetime
 
@@ -119,12 +119,6 @@ class DCRBaselineProtection(SingleTableMetric):
             dcr_random = calculate_dcr_optimized(
                 reference_dataset=sanitized_real_data, dataset=random_sample, metadata=metadata
             )
-            print('DCR Random')
-            print(type(dcr_random))
-            print(dcr_random)
-            print(dcr_random.median())
-            print(f'DCR REAL')
-            print(dcr_real.median())
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()
             score = np.nan
