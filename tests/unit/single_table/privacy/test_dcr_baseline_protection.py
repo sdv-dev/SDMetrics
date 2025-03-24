@@ -56,7 +56,7 @@ class TestDCRBaselineProtection:
     @patch(
         'sdmetrics.single_table.privacy.dcr_baseline_protection.DCRBaselineProtection._generate_random_data'
     )
-    @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr_optimized')
+    @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr')
     def test_compute_breakdown(self, mock_calculate_dcr, mock_random_data, test_data):
         """Test that compute breakdown correctly measures the fraction of data overfitted."""
         # Setup
@@ -182,7 +182,7 @@ class TestDCRBaselineProtection:
         # Assert
         pd.testing.assert_frame_equal(random_data_1, random_data_2)
 
-    @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr_optimized')
+    @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr')
     def test_compute_breakdown_with_dcr_random_median_zero(self, mock_calculate_dcr, test_data):
         """Test compute_breakdown when random median dcr score is 0."""
         # Setup

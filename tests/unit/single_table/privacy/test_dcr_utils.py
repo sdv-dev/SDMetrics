@@ -5,11 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sdmetrics._utils_metadata import _convert_datetime_columns
 from sdmetrics.single_table.privacy.dcr_utils import (
-    _calculate_dcr_between_row_and_data,
-    _calculate_dcr_between_rows,
-    _calculate_dcr_value,
     calculate_dcr,
 )
 from tests.utils import check_if_value_in_threshold
@@ -160,117 +156,6 @@ SECONDS_IN_DAY = 86400
 ACCURACY_THRESHOLD = 0.000001
 
 
-@pytest.mark.parametrize(
-    'synthetic_value, real_value, col_range, sdtype, expected_dist',
-    [
-        (2.0, 2.0, 10.0, 'numerical', 0.0),
-        (1.0, 2.0, 10.0, 'numerical', 0.1),
-        (2.0, 1.0, 10.0, 'numerical', 0.1),
-        (100.0, 1.0, 10.0, 'numerical', 1.0),
-        (None, 1.0, 10.0, 'numerical', 1.0),
-        (1.0, np.nan, 10.0, 'numerical', 1.0),
-        (np.nan, None, 10.0, 'numerical', 0.0),
-        ('A', 'B', None, 'categorical', 1.0),
-        ('B', 'B', None, 'categorical', 0.0),
-        ('B', 'A', None, 'categorical', 1.0),
-        (None, 'B', None, 'categorical', 1.0),
-        ('A', None, None, 'categorical', 1.0),
-        (None, None, None, 'categorical', 0.0),
-        (0, None, None, 'categorical', 1.0),
-        (np.nan, None, None, 'categorical', 0.0),
-        (np.nan, np.nan, None, 'categorical', 0.0),
-        (True, False, None, 'boolean', 1.0),
-        (True, True, None, 'boolean', 0.0),
-        (False, True, None, 'boolean', 1.0),
-        (True, None, None, 'boolean', 1.0),
-        (datetime(2025, 1, 1).timestamp(), None, SECONDS_IN_DAY, 'datetime', 1.0),
-        (None, datetime(2025, 1, 1).timestamp(), SECONDS_IN_DAY, 'datetime', 1.0),
-        (
-            datetime(2025, 1, 1).timestamp(),
-            datetime(2025, 1, 1).timestamp(),
-            SECONDS_IN_DAY,
-            'datetime',
-            0.0,
-        ),
-        (
-            datetime(2025, 1, 2).timestamp(),
-            datetime(2025, 1, 1).timestamp(),
-            2 * SECONDS_IN_DAY,
-            'datetime',
-            0.5,
-        ),
-        (
-            datetime(2025, 10, 10).timestamp(),
-            datetime(2025, 1, 1).timestamp(),
-            SECONDS_IN_DAY,
-            'datetime',
-            1.0,
-        ),
-    ],
-)
-def test__calculate_dcr_value(synthetic_value, real_value, col_range, sdtype, expected_dist):
-    """Test _calculate_dcr_value with different types of values."""
-    # Run
-    dist = _calculate_dcr_value(synthetic_value, real_value, sdtype, col_range)
-
-    # Assert
-    assert dist == expected_dist
-
-
-def test__calculate_dcr_value_missing_range():
-    """Test _calculate_dcr_value with missing range for numerical values."""
-    # Setup
-    error_message = (
-        'No col_range was provided. The col_range is required '
-        'for numerical and datetime sdtype DCR calculation.'
-    )
-
-    # Assert
-    with pytest.raises(ValueError, match=error_message):
-        _calculate_dcr_value(1, 1, 'numerical', None)
-
-
-def test__calculate_dcr_between_rows(
-    real_data, synthetic_data, test_metadata, column_ranges, expected_row_comparisons
-):
-    """Test _calculate_dcr_between_rows for all row combinations"""
-    # Setup
-    result = []
-    real_data = _convert_datetime_columns(real_data, test_metadata)
-    synthetic_data = _convert_datetime_columns(synthetic_data, test_metadata)
-
-    # Run
-    for _, s_row_obj in synthetic_data.iterrows():
-        for _, t_row_obj in real_data.iterrows():
-            dist = _calculate_dcr_between_rows(s_row_obj, t_row_obj, column_ranges, test_metadata)
-            result.append(dist)
-
-    # Assert
-    for i in range(len(expected_row_comparisons)):
-        check_if_value_in_threshold(result[i], expected_row_comparisons[i], ACCURACY_THRESHOLD)
-
-
-def test__calculate_dcr_between_row_and_data(
-    real_data, synthetic_data, column_ranges, test_metadata, expected_dcr_result
-):
-    """Test _calculate_dcr_between_row_and_data for all rows."""
-    # Setup
-    result = []
-    real_data = _convert_datetime_columns(real_data, test_metadata)
-    synthetic_data = _convert_datetime_columns(synthetic_data, test_metadata)
-
-    # Run
-    for _, s_row_obj in synthetic_data.iterrows():
-        dist = _calculate_dcr_between_row_and_data(
-            s_row_obj, real_data, column_ranges, test_metadata
-        )
-        result.append(dist)
-
-    # Assert
-    for i in range(len(expected_dcr_result)):
-        check_if_value_in_threshold(result[i], expected_dcr_result[i], ACCURACY_THRESHOLD)
-
-
 def test_calculate_dcr(
     real_data,
     synthetic_data,
@@ -281,10 +166,10 @@ def test_calculate_dcr(
     """Calculate the DCR for all rows in a dataset against a traning dataset."""
     # Run
     result_dcr = calculate_dcr(
-        synthetic_data=synthetic_data, real_data=real_data, metadata=test_metadata
+        dataset=synthetic_data, reference_dataset=real_data, metadata=test_metadata
     )
     result_same_dcr = calculate_dcr(
-        synthetic_data=synthetic_data, real_data=synthetic_data, metadata=test_metadata
+        dataset=synthetic_data, reference_dataset=synthetic_data, metadata=test_metadata
     )
 
     # Assert
@@ -305,7 +190,7 @@ def test_calculate_dcr_different_cols_in_metadata(real_data, synthetic_data, tes
 
     # Run
     result = calculate_dcr(
-        synthetic_data=synthetic_data, real_data=real_data, metadata=test_metadata
+        dataset=synthetic_data, reference_dataset=real_data, metadata=test_metadata
     )
     expected_result = pd.Series([0.0, 0.1, 0.2, 0.02, 0.06, 0.0])
 
@@ -315,7 +200,7 @@ def test_calculate_dcr_different_cols_in_metadata(real_data, synthetic_data, tes
     test_metadata['columns'].pop('num_col')
     error_msg = 'There are no overlapping statistical columns to measure.'
     with pytest.raises(ValueError, match=error_msg):
-        calculate_dcr(synthetic_data=synthetic_data, real_data=real_data, metadata=test_metadata)
+        calculate_dcr(dataset=synthetic_data, reference_dataset=real_data, metadata=test_metadata)
 
 
 def test_calculate_dcr_with_shuffled_data():
@@ -333,9 +218,9 @@ def test_calculate_dcr_with_shuffled_data():
     metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
 
     # Run
-    result = calculate_dcr(synthetic_data=synthetic_df, real_data=real_df, metadata=metadata)
+    result = calculate_dcr(dataset=synthetic_df, reference_dataset=real_df, metadata=metadata)
     result_shuffled = calculate_dcr(
-        synthetic_data=synthetic_df_shuffled, real_data=real_df_shuffled, metadata=metadata
+        dataset=synthetic_df_shuffled, reference_dataset=real_df_shuffled, metadata=metadata
     )
 
     # Assert
@@ -368,9 +253,9 @@ def test_calculate_dcr_with_zero_range():
     metadata = {'columns': {'num_col': {'sdtype': 'numerical'}, 'date_col': {'sdtype': 'datetime'}}}
 
     # Run and Assert
-    result = calculate_dcr(real_data=real_df, synthetic_data=synthetic_df_diff, metadata=metadata)
+    result = calculate_dcr(reference_dataset=real_df, dataset=synthetic_df_diff, metadata=metadata)
     assert result[0] == 1.0
-    result = calculate_dcr(real_data=real_df, synthetic_data=synthetic_df_same, metadata=metadata)
+    result = calculate_dcr(reference_dataset=real_df, dataset=synthetic_df_same, metadata=metadata)
     assert result[0] == 0.0
-    result = calculate_dcr(real_data=real_df, synthetic_data=synthetic_df_half, metadata=metadata)
+    result = calculate_dcr(reference_dataset=real_df, dataset=synthetic_df_half, metadata=metadata)
     assert result[0] == 0.5
