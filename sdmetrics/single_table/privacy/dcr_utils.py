@@ -56,14 +56,10 @@ def calculate_dcr(dataset, reference_dataset, metadata):
 
     reference_copy = reference_copy[cols_to_keep]
     reference_copy['index'] = range(len(reference_copy))
-
     results = []
 
     for chunk_start in range(0, len(dataset_copy), CHUNK_SIZE):
-        chunk = dataset_copy.iloc[chunk_start: chunk_start + CHUNK_SIZE].copy()
-        chunk['index'] = range(chunk_start, chunk_start + len(chunk))
-
-        reference_copy['index'] = range(len(reference_copy))
+        chunk = dataset_copy.iloc[chunk_start : chunk_start + CHUNK_SIZE].copy()
         full_dataset = chunk.merge(reference_copy, how='cross', suffixes=('_data', '_ref'))
 
         for col_name in cols_to_keep:
