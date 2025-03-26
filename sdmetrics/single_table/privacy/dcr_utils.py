@@ -6,6 +6,8 @@ import pandas as pd
 from sdmetrics._utils_metadata import _process_data_with_metadata
 from sdmetrics.utils import get_columns_from_metadata
 
+CHUNK_SIZE = 1000
+
 
 def calculate_dcr(dataset, reference_dataset, metadata):
     """Calculate the Distance to Closest Record for all rows in the synthetic data.
@@ -42,6 +44,7 @@ def calculate_dcr(dataset, reference_dataset, metadata):
                 col_range = reference_copy[col_name].max() - reference_copy[col_name].min()
                 if isinstance(col_range, pd.Timedelta):
                     col_range = col_range.total_seconds()
+
                 ranges[col_name] = col_range
 
     if not cols_to_keep:
@@ -49,16 +52,15 @@ def calculate_dcr(dataset, reference_dataset, metadata):
 
     # perform a full cross join on the data we want to compute
     dataset_copy = dataset_copy[cols_to_keep]
-    dataset_copy['index'] = [i for i in range(len(dataset_copy))]
+    dataset_copy['index'] = range(len(dataset_copy))
 
     reference_copy = reference_copy[cols_to_keep]
-    reference_copy['index'] = [i for i in range(len(reference_copy))]
+    reference_copy['index'] = range(len(reference_copy))
 
     results = []
-    chunk_size = 1000
 
-    for chunk_start in range(0, len(dataset_copy), chunk_size):
-        chunk = dataset_copy.iloc[chunk_start : chunk_start + chunk_size].copy()
+    for chunk_start in range(0, len(dataset_copy), CHUNK_SIZE):
+        chunk = dataset_copy.iloc[chunk_start: chunk_start + CHUNK_SIZE].copy()
         chunk['index'] = range(chunk_start, chunk_start + len(chunk))
 
         reference_copy['index'] = range(len(reference_copy))
@@ -104,4 +106,5 @@ def calculate_dcr(dataset, reference_dataset, metadata):
 
     result = pd.concat(results, ignore_index=True)
     result.name = None
+
     return result
