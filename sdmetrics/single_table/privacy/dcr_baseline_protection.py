@@ -24,6 +24,7 @@ class DCRBaselineProtection(SingleTableMetric):
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
+    _seed = None
 
     @classmethod
     def _validate_inputs(
@@ -189,29 +190,33 @@ class DCRBaselineProtection(SingleTableMetric):
     def _generate_random_data(cls, real_data, num_samples=None):
         random_data = {}
         num_samples = len(real_data) if num_samples is None else num_samples
+        seed = getattr(cls, '_seed', None)
+        randomizer = np.random.default_rng(seed)
 
         for col in real_data.columns:
             nan_ratio = real_data[col].isna().mean()
 
             if pd.api.types.is_integer_dtype(real_data[col]):
-                random_values = np.random.randint(
-                    real_data[col].min(), real_data[col].max() + 1, num_samples
+                random_values = randomizer.integers(
+                    low=real_data[col].min(), high=real_data[col].max() + 1, size=num_samples
                 )
 
             elif pd.api.types.is_float_dtype(real_data[col]):
-                random_values = np.random.uniform(
-                    real_data[col].min(), real_data[col].max(), num_samples
+                random_values = randomizer.uniform(
+                    low=real_data[col].min(), high=real_data[col].max(), size=num_samples
                 )
 
             elif is_datetime(real_data[col]):
                 min_date, max_date = real_data[col].min(), real_data[col].max()
                 total_seconds = (max_date - min_date).total_seconds()
                 random_values = min_date + pd.to_timedelta(
-                    np.random.uniform(0, total_seconds, num_samples), unit='s'
+                    randomizer.uniform(low=0, high=total_seconds, size=num_samples), unit='s'
                 )
 
             else:
-                random_values = np.random.choice(real_data[col].dropna().unique(), num_samples)
+                random_values = randomizer.choice(
+                    real_data[col].dropna().unique(), size=num_samples
+                )
 
             nan_mask = np.random.rand(num_samples) < nan_ratio
             random_values = pd.Series(random_values)
