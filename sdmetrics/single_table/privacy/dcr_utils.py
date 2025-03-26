@@ -66,8 +66,11 @@ def calculate_dcr(dataset, reference_dataset, metadata):
 
         for col_name in cols_to_keep:
             sdtype = metadata['columns'][col_name]['sdtype']
+            ref_column = full_dataset[col_name + '_ref']
+            data_column = full_dataset[col_name + '_data']
+            diff_col_name = col_name + '_diff'
             if sdtype in ['numerical', 'datetime']:
-                diff = (full_dataset[col_name + '_ref'] - full_dataset[col_name + '_data']).abs()
+                diff = (ref_column - data_column).abs()
                 if pd.api.types.is_timedelta64_dtype(diff):
                     diff = diff.dt.total_seconds()
 
@@ -77,29 +80,19 @@ def calculate_dcr(dataset, reference_dataset, metadata):
                     np.minimum(diff / ranges[col_name], 1.0),
                 )
 
-                xor_condition = (
-                    full_dataset[col_name + '_ref'].isna()
-                    & ~full_dataset[col_name + '_data'].isna()
-                ) | (
-                    ~full_dataset[col_name + '_ref'].isna()
-                    & full_dataset[col_name + '_data'].isna()
+                xor_condition = (ref_column.isna() & ~data_column.isna()) | (
+                    ~ref_column.isna() & data_column.isna()
                 )
 
-                full_dataset.loc[xor_condition, col_name + '_diff'] = 1
+                full_dataset.loc[xor_condition, diff_col_name] = 1
 
-                both_nan_condition = (
-                    full_dataset[col_name + '_ref'].isna() & full_dataset[col_name + '_data'].isna()
-                )
+                both_nan_condition = ref_column.isna() & data_column.isna()
 
-                full_dataset.loc[both_nan_condition, col_name + '_diff'] = 0
+                full_dataset.loc[both_nan_condition, diff_col_name] = 0
 
             elif sdtype in ['categorical', 'boolean']:
-                equals_cat = (
-                    full_dataset[col_name + '_ref'] == full_dataset[col_name + '_data']
-                ) | (
-                    full_dataset[col_name + '_ref'].isna() & full_dataset[col_name + '_data'].isna()
-                )
-                full_dataset[col_name + '_diff'] = (~equals_cat).astype(int)
+                equals_cat = (ref_column == data_column) | (ref_column.isna() & data_column.isna())
+                full_dataset[diff_col_name] = (~equals_cat).astype(int)
 
             full_dataset.drop(columns=[col_name + '_ref', col_name + '_data'], inplace=True)
 
