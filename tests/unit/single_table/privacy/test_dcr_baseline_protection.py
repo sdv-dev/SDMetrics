@@ -173,14 +173,14 @@ class TestDCRBaselineProtection:
         """Test the generated data with a seed is the same every run."""
         # Setup
         real_data = pd.DataFrame({'float_col': [1.0, 1000.0, 500.0], 'cat_col': ['A', 'B', 'C']})
-        DCRBaselineProtection._seed = 5
 
         # Run
-        random_data_1 = DCRBaselineProtection._generate_random_data(real_data)
-        random_data_2 = DCRBaselineProtection._generate_random_data(real_data)
+        with patch.object(DCRBaselineProtection, '_seed', new=5):
+            random_data_1 = DCRBaselineProtection._generate_random_data(real_data)
+            random_data_2 = DCRBaselineProtection._generate_random_data(real_data)
 
-        # Assert
-        pd.testing.assert_frame_equal(random_data_1, random_data_2)
+            # Assert
+            pd.testing.assert_frame_equal(random_data_1, random_data_2)
 
     @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr')
     def test_compute_breakdown_with_dcr_random_median_zero(self, mock_calculate_dcr, test_data):
