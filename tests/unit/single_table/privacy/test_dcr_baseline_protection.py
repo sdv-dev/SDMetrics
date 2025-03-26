@@ -156,7 +156,7 @@ class TestDCRBaselineProtection:
         # Assert
         pd.testing.assert_frame_equal(real_data, random_data)
 
-    def test_generate_random_data_different(self):
+    def test__generate_random_data_no_seed(self):
         """Test that generated data is different everytime."""
         # Setup
         real_data = pd.DataFrame({'float_col': [1.0, 1000.0, 500.0], 'cat_col': ['A', 'B', 'C']})
@@ -167,6 +167,19 @@ class TestDCRBaselineProtection:
 
         # Assert
         with pytest.raises(AssertionError):
+            pd.testing.assert_frame_equal(random_data_1, random_data_2)
+
+    def test__generate_random_data_with_seed(self):
+        """Test the generated data with a seed is the same every run."""
+        # Setup
+        real_data = pd.DataFrame({'float_col': [1.0, 1000.0, 500.0], 'cat_col': ['A', 'B', 'C']})
+
+        # Run
+        with patch.object(DCRBaselineProtection, '_seed', new=5):
+            random_data_1 = DCRBaselineProtection._generate_random_data(real_data)
+            random_data_2 = DCRBaselineProtection._generate_random_data(real_data)
+
+            # Assert
             pd.testing.assert_frame_equal(random_data_1, random_data_2)
 
     @patch('sdmetrics.single_table.privacy.dcr_baseline_protection.calculate_dcr')
