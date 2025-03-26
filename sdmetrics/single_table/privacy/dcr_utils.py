@@ -92,7 +92,6 @@ def calculate_dcr(dataset, reference_dataset, metadata):
     if not cols_to_keep:
         raise ValueError('There are no overlapping statistical columns to measure.')
 
-    # perform a full cross join on the data we want to compute
     dataset_copy = dataset_copy[cols_to_keep]
     dataset_copy['index'] = range(len(dataset_copy))
 
