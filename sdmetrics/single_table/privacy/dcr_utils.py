@@ -9,6 +9,48 @@ from sdmetrics.utils import get_columns_from_metadata
 CHUNK_SIZE = 1000
 
 
+def _process_dcr_chunk(chunk, reference_copy, cols_to_keep, metadata, ranges):
+    full_dataset = chunk.merge(reference_copy, how='cross', suffixes=('_data', '_ref'))
+
+    for col_name in cols_to_keep:
+        sdtype = metadata['columns'][col_name]['sdtype']
+        ref_column = full_dataset[col_name + '_ref']
+        data_column = full_dataset[col_name + '_data']
+        diff_col_name = col_name + '_diff'
+        if sdtype in ['numerical', 'datetime']:
+            diff = (ref_column - data_column).abs()
+            if pd.api.types.is_timedelta64_dtype(diff):
+                diff = diff.dt.total_seconds()
+
+            full_dataset[col_name + '_diff'] = np.where(
+                ranges[col_name] == 0,
+                (diff > 0).astype(int),
+                np.minimum(diff / ranges[col_name], 1.0),
+            )
+
+            xor_condition = (ref_column.isna() & ~data_column.isna()) | (
+                ~ref_column.isna() & data_column.isna()
+            )
+
+            full_dataset.loc[xor_condition, diff_col_name] = 1
+
+            both_nan_condition = ref_column.isna() & data_column.isna()
+
+            full_dataset.loc[both_nan_condition, diff_col_name] = 0
+
+        elif sdtype in ['categorical', 'boolean']:
+            equals_cat = (ref_column == data_column) | (ref_column.isna() & data_column.isna())
+            full_dataset[diff_col_name] = (~equals_cat).astype(int)
+
+        full_dataset.drop(columns=[col_name + '_ref', col_name + '_data'], inplace=True)
+
+    full_dataset['diff'] = full_dataset.iloc[:, 2:].sum(axis=1) / len(cols_to_keep)
+    chunk_result = (
+        full_dataset[['index_data', 'diff']].groupby('index_data').min().reset_index(drop=True)
+    )
+    return chunk_result['diff']
+
+
 def calculate_dcr(dataset, reference_dataset, metadata):
     """Calculate the Distance to Closest Record for all rows in the synthetic data.
 
@@ -60,45 +102,14 @@ def calculate_dcr(dataset, reference_dataset, metadata):
 
     for chunk_start in range(0, len(dataset_copy), CHUNK_SIZE):
         chunk = dataset_copy.iloc[chunk_start : chunk_start + CHUNK_SIZE].copy()
-        full_dataset = chunk.merge(reference_copy, how='cross', suffixes=('_data', '_ref'))
-
-        for col_name in cols_to_keep:
-            sdtype = metadata['columns'][col_name]['sdtype']
-            ref_column = full_dataset[col_name + '_ref']
-            data_column = full_dataset[col_name + '_data']
-            diff_col_name = col_name + '_diff'
-            if sdtype in ['numerical', 'datetime']:
-                diff = (ref_column - data_column).abs()
-                if pd.api.types.is_timedelta64_dtype(diff):
-                    diff = diff.dt.total_seconds()
-
-                full_dataset[col_name + '_diff'] = np.where(
-                    ranges[col_name] == 0,
-                    (diff > 0).astype(int),
-                    np.minimum(diff / ranges[col_name], 1.0),
-                )
-
-                xor_condition = (ref_column.isna() & ~data_column.isna()) | (
-                    ~ref_column.isna() & data_column.isna()
-                )
-
-                full_dataset.loc[xor_condition, diff_col_name] = 1
-
-                both_nan_condition = ref_column.isna() & data_column.isna()
-
-                full_dataset.loc[both_nan_condition, diff_col_name] = 0
-
-            elif sdtype in ['categorical', 'boolean']:
-                equals_cat = (ref_column == data_column) | (ref_column.isna() & data_column.isna())
-                full_dataset[diff_col_name] = (~equals_cat).astype(int)
-
-            full_dataset.drop(columns=[col_name + '_ref', col_name + '_data'], inplace=True)
-
-        full_dataset['diff'] = full_dataset.iloc[:, 2:].sum(axis=1) / len(cols_to_keep)
-        chunk_result = (
-            full_dataset[['index_data', 'diff']].groupby('index_data').min().reset_index(drop=True)
+        chunk_result = _process_dcr_chunk(
+            chunk=chunk,
+            reference_copy=reference_copy,
+            cols_to_keep=cols_to_keep,
+            metadata=metadata,
+            ranges=ranges,
         )
-        results.append(chunk_result['diff'])
+        results.append(chunk_result)
 
     result = pd.concat(results, ignore_index=True)
     result.name = None

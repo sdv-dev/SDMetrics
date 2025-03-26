@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from sdmetrics.single_table.privacy.dcr_utils import (
+    _process_dcr_chunk,
     calculate_dcr,
 )
 from tests.utils import check_if_value_in_threshold
@@ -70,48 +71,6 @@ def column_ranges():
         'datetime_str_col': 30 * SECONDS_IN_DAY,
         'datetime_col': 30 * SECONDS_IN_DAY,
     }
-
-
-@pytest.fixture()
-def expected_row_comparisons():
-    return [
-        0.6,
-        0.6,
-        0.666666,
-        0.555555,
-        0.966666,
-        0.188888,
-        0.616666,
-        0.616666,
-        0.633333,
-        0.227777,
-        0.916666,
-        0.727777,
-        0.399999,
-        0.866666,
-        0.5,
-        0.866667,
-        0.566667,
-        0.933333,
-        0.547777,
-        0.658888,
-        0.755555,
-        0.274444,
-        0.93,
-        0.574444,
-        0.665555,
-        0.221111,
-        0.722222,
-        0.71,
-        0.643333,
-        0.866666,
-        0.7222222,
-        0.944444,
-        0.544444,
-        0.833333,
-        0.833333,
-        0.4,
-    ]
 
 
 @pytest.fixture()
@@ -259,3 +218,32 @@ def test_calculate_dcr_with_zero_range():
     assert result[0] == 0.0
     result = calculate_dcr(reference_dataset=real_df, dataset=synthetic_df_half, metadata=metadata)
     assert result[0] == 0.5
+
+
+def test__process_dcr_chunk(real_data, synthetic_data, test_metadata, column_ranges):
+    """Test '_process_dcr_chunk' to see if subset is properly dropped."""
+    # Setup
+    real_data = real_data.drop(columns=['datetime_str_col'])
+    synthetic_data = synthetic_data.drop(columns=['datetime_str_col'])
+    del test_metadata['columns']['datetime_str_col']
+    cols_to_keep = real_data.columns
+
+    synthetic_data['index'] = range(len(synthetic_data))
+    real_data['index'] = range(len(real_data))
+    rows_to_keep = 2
+    chunk = synthetic_data.iloc[0:rows_to_keep].copy()
+
+    # Run
+    result = _process_dcr_chunk(
+        chunk=chunk,
+        reference_copy=real_data,
+        cols_to_keep=cols_to_keep,
+        metadata=test_metadata,
+        ranges=column_ranges,
+    )
+
+    # Assert
+    assert isinstance(result, pd.Series)
+    expected_result_first = 0.213333
+    check_if_value_in_threshold(result[0], expected_result_first, 0.000001)
+    assert len(result) == rows_to_keep
