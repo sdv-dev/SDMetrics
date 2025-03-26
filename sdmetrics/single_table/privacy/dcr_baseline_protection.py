@@ -24,6 +24,7 @@ class DCRBaselineProtection(SingleTableMetric):
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
+    _seed = None
 
     @classmethod
     def _validate_inputs(
