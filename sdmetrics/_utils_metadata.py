@@ -91,7 +91,9 @@ def _convert_datetime_columns(data, metadata):
     """Convert datetime columns to datetime type."""
     for column in metadata['columns']:
         if metadata['columns'][column]['sdtype'] == 'datetime':
-            data[column] = _convert_datetime_column(column, data[column], metadata['columns'][column])
+            data[column] = _convert_datetime_column(
+                column, data[column], metadata['columns'][column]
+            )
 
     return data
 

@@ -211,7 +211,7 @@ class TestBaseReport:
                 'table1': {
                     'columns': {
                         'col1': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-                        'col2': {'sdtype': 'datetime'}
+                        'col2': {'sdtype': 'datetime'},
                     },
                 },
             },

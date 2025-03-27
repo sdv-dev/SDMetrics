@@ -51,7 +51,9 @@ class ColumnPairTrends(BaseSingleTableProperty):
             col_sdtype = column_meta['sdtype']
             try:
                 if col_sdtype == 'datetime':
-                    data[column_name] = _convert_datetime_column(column_name, data[column_name], column_meta)
+                    data[column_name] = _convert_datetime_column(
+                        column_name, data[column_name], column_meta
+                    )
                     nan_mask = pd.isna(data[column_name])
                     data[column_name] = pd.to_numeric(data[column_name])
                     if nan_mask.any():
