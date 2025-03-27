@@ -5,10 +5,10 @@ import pandas as pd
 from plotly import graph_objects as go
 from plotly.subplots import make_subplots
 
+from sdmetrics._utils_metadata import _convert_datetime_column
 from sdmetrics.column_pairs.statistical import ContingencySimilarity, CorrelationSimilarity
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
-from sdmetrics.utils import is_datetime
 
 DEFAULT_NUM_ROWS_SUBSAMPLE = 50000
 
@@ -51,13 +51,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             col_sdtype = column_meta['sdtype']
             try:
                 if col_sdtype == 'datetime':
-                    if not is_datetime(data[column_name]):
-                        datetime_format = column_meta.get(
-                            'datetime_format', column_meta.get('format')
-                        )
-                        data[column_name] = pd.to_datetime(
-                            data[column_name], format=datetime_format
-                        )
+                    data[column_name] = _convert_datetime_column(column_name, data[column_name], column_meta)
                     nan_mask = pd.isna(data[column_name])
                     data[column_name] = pd.to_numeric(data[column_name])
                     if nan_mask.any():

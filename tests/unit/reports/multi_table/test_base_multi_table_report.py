@@ -209,7 +209,10 @@ class TestBaseReport:
         metadata = {
             'tables': {
                 'table1': {
-                    'columns': {'col1': {'sdtype': 'datetime'}, 'col2': {'sdtype': 'datetime'}},
+                    'columns': {
+                        'col1': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                        'col2': {'sdtype': 'datetime'}
+                    },
                 },
             },
         }

@@ -2,6 +2,8 @@ import warnings
 
 import pandas as pd
 
+from sdmetrics.utils import is_datetime
+
 MODELABLE_SDTYPES = ('numerical', 'datetime', 'categorical', 'boolean')
 
 
@@ -69,22 +71,27 @@ def handle_single_and_multi_table(single_table_func):
     return wrapper
 
 
+def _convert_datetime_column(column_name, column_data, column_metadata):
+    if is_datetime(column_data):
+        return column_data
+
+    datetime_format = column_metadata.get('datetime_format')
+    if datetime_format is None:
+        raise ValueError(
+            f"Datetime column '{column_name}' does not have a specified 'datetime_format'. "
+            'Please add a the required datetime_format to the metadata or convert this column '
+            "to 'pd.datetime' to bypass this requirement."
+        )
+
+    return pd.to_datetime(column_data, format=datetime_format)
+
+
 @handle_single_and_multi_table
 def _convert_datetime_columns(data, metadata):
     """Convert datetime columns to datetime type."""
     for column in metadata['columns']:
         if metadata['columns'][column]['sdtype'] == 'datetime':
-            is_datetime = pd.api.types.is_datetime64_any_dtype(data[column])
-            if not is_datetime:
-                datetime_format = metadata['columns'][column].get('datetime_format')
-                if datetime_format:
-                    data[column] = pd.to_datetime(data[column], format=datetime_format)
-                else:
-                    raise ValueError(
-                        f"Datetime column '{column}' does not have a specified 'datetime_format'. "
-                        'Please add a the required datetime_format to the metadata or convert this column '
-                        "to 'pd.datetime' to bypass this requirement."
-                    )
+            data[column] = _convert_datetime_column(column, data[column], metadata['columns'][column])
 
     return data
 
