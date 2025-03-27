@@ -115,10 +115,10 @@ class DCRBaselineProtection(SingleTableMetric):
                 random_sample = random_data.sample(n=num_rows_subsample)
 
             dcr_real = calculate_dcr(
-                real_data=sanitized_real_data, synthetic_data=synthetic_sample, metadata=metadata
+                reference_dataset=sanitized_real_data, dataset=synthetic_sample, metadata=metadata
             )
             dcr_random = calculate_dcr(
-                real_data=sanitized_real_data, synthetic_data=random_sample, metadata=metadata
+                reference_dataset=sanitized_real_data, dataset=random_sample, metadata=metadata
             )
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()
