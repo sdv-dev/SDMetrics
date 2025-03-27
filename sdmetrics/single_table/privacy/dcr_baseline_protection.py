@@ -5,7 +5,6 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from sdmetrics._utils_metadata import _process_data_with_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
@@ -48,8 +47,6 @@ class DCRBaselineProtection(SingleTableMetric):
 
         real_data_copy = real_data.copy()
         synthetic_data_copy = synthetic_data.copy()
-        real_data_copy = _process_data_with_metadata(real_data_copy, metadata, True)
-        synthetic_data_copy = _process_data_with_metadata(synthetic_data_copy, metadata, True)
 
         return real_data_copy, synthetic_data_copy, num_rows_subsample, num_iterations
 
