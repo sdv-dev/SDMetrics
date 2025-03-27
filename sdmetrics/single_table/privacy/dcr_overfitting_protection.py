@@ -128,10 +128,10 @@ class DCROverfittingProtection(SingleTableMetric):
                 synthetic_sample = sanitized_synthetic_data.sample(n=num_rows_subsample)
 
             dcr_real = calculate_dcr(
-                real_data=training_data, synthetic_data=synthetic_sample, metadata=metadata
+                reference_dataset=training_data, dataset=synthetic_sample, metadata=metadata
             )
             dcr_holdout = calculate_dcr(
-                real_data=validation_data, synthetic_data=synthetic_sample, metadata=metadata
+                reference_dataset=validation_data, dataset=synthetic_sample, metadata=metadata
             )
 
             num_rows_closer_to_real = np.where(dcr_real < dcr_holdout, 1.0, 0.0).sum()

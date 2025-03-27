@@ -20,7 +20,7 @@ def test_calculate_dcr():
     metadata = {'columns': {'num_col': {'sdtype': 'numerical'}}}
 
     # Run
-    result = calculate_dcr(real_data=real_df, synthetic_data=synthetic_df_diff, metadata=metadata)
+    result = calculate_dcr(reference_dataset=real_df, dataset=synthetic_df_diff, metadata=metadata)
 
     # Assert
     expected_result = pd.Series([0.2, 0.0])
@@ -49,7 +49,7 @@ def test_calculate_dcr_with_zero_col_range():
     metadata = {'columns': {'num_col': {'sdtype': 'numerical'}, 'date_col': {'sdtype': 'datetime'}}}
 
     # Run
-    result = calculate_dcr(real_data=real_df, synthetic_data=synthetic_df_diff, metadata=metadata)
+    result = calculate_dcr(reference_dataset=real_df, dataset=synthetic_df_diff, metadata=metadata)
 
     # Assert
     expected_result = pd.Series([1.0, 1.0, 1.0, 0.5, 0.0])
