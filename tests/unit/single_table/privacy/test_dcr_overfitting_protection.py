@@ -71,6 +71,14 @@ class TestDCROverfittingProtection:
                 train_data, synthetic_data, small_holdout_data, metadata
             )
 
+        no_df_msg = re.escape(
+            f'All of real_training_data ({type(None)}), synthetic_data '
+            f'({type({})}), and real_validation_data ({type({})}) '
+            'must be of type pandas.DataFrame.'
+        )
+        with pytest.raises(TypeError, match=no_df_msg):
+            DCROverfittingProtection.compute_breakdown(None, {}, {}, metadata)
+
     @patch('numpy.where')
     @patch('sdmetrics.single_table.privacy.dcr_overfitting_protection.calculate_dcr')
     def test_compute_breakdown(self, mock_calculate_dcr, mock_numpy_where, test_data):

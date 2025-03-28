@@ -11,6 +11,7 @@ from sdmetrics.single_table.privacy import DCROverfittingProtection
 
 
 class TestDCROverfittingProtection:
+    @pytest.mark.filterwarnings('error')
     def test_end_to_end_with_demo(self):
         """Test end to end for DCROverfittingProtection metric against the demo dataset.
 
@@ -21,7 +22,7 @@ class TestDCROverfittingProtection:
         """
         # Setup
         real_data, synthetic_data, metadata = load_single_table_demo()
-        train_df, holdout_df = train_test_split(real_data, test_size=0.2)
+        train_df, holdout_df = train_test_split(real_data, test_size=0.5)
 
         # Run
         num_rows_subsample = 50
