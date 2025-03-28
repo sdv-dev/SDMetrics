@@ -63,14 +63,13 @@ def test_compute_lstmdetection_multiple_categorical_columns():
 def test_compute_lstmdetection_mismatching_datetime_columns():
     """Test LSTMDetection metric with mismatching datetime columns.
 
-    Test it when the real data has a date column and the synthetic data has a string column.
+    Test it when the real data has a datetime column and the synthetic data has a string column.
     """
     # Setup
     df1 = pd.DataFrame({
         's_key': [1, 2, 3, 4, 5],
         'visits': pd.to_datetime(['1/1/2019', '1/2/2019', '1/3/2019', '1/4/2019', '1/5/2019']),
     })
-    df1['visits'] = df1['visits'].dt.date
     df2 = pd.DataFrame({
         's_key': [1, 2, 3, 4, 5],
         'visits': ['1/2/2019', '1/2/2019', '1/3/2019', '1/4/2019', '1/5/2019'],
