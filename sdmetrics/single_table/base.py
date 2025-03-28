@@ -3,9 +3,7 @@
 import copy
 from operator import attrgetter
 
-import pandas as pd
-
-from sdmetrics._utils_metadata import _validate_single_table_metadata
+from sdmetrics._utils_metadata import _convert_datetime_column, _validate_single_table_metadata
 from sdmetrics.base import BaseMetric
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.utils import get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta
@@ -119,14 +117,12 @@ class SingleTableMetric(BaseMetric):
                 field_type = get_type_from_column_meta(field_meta)
                 if field not in real_data.columns:
                     raise ValueError(f'Field {field} not found in data')
-                if (
-                    field_type == 'datetime'
-                    and 'datetime_format' in field_meta
-                    and real_data[field].dtype == 'O'
-                ):
-                    dt_format = field_meta['datetime_format']
-                    real_data[field] = pd.to_datetime(real_data[field], format=dt_format)
-                    synthetic_data[field] = pd.to_datetime(synthetic_data[field], format=dt_format)
+
+                if field_type == 'datetime':
+                    real_data[field] = _convert_datetime_column(field, real_data[field], field_meta)
+                    synthetic_data[field] = _convert_datetime_column(
+                        field, synthetic_data[field], field_meta
+                    )
 
             return real_data, synthetic_data, metadata
 

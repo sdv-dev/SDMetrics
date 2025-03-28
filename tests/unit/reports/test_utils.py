@@ -47,7 +47,7 @@ def test_discretize_table_data():
             'col2': {'sdtype': 'categorical'},
             'col3': {'sdtype': 'datetime'},
             'col4': {'sdtype': 'boolean'},
-            'col5': {'sdtype': 'datetime', 'format': '%Y-%m-%d'},
+            'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
         },
     }
 

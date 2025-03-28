@@ -83,6 +83,11 @@ def _convert_datetime_column(column_name, column_data, column_metadata):
             "to 'pd.datetime' to bypass this requirement."
         )
 
+    try:
+        pd.to_datetime(column_data, format=datetime_format)
+    except Exception as e:
+        raise ValueError(f"Error converting column '{column_name}' to timestamp: {e}")
+
     return pd.to_datetime(column_data, format=datetime_format)
 
 

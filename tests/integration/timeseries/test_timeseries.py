@@ -76,7 +76,10 @@ def test_compute_lstmdetection_mismatching_datetime_columns():
         'visits': ['1/2/2019', '1/2/2019', '1/3/2019', '1/4/2019', '1/5/2019'],
     })
     metadata = {
-        'columns': {'s_key': {'sdtype': 'numerical'}, 'visits': {'sdtype': 'datetime'}},
+        'columns': {
+            's_key': {'sdtype': 'numerical'},
+            'visits': {'sdtype': 'datetime', 'datetime_format': '%m/%d/%Y'},
+        },
         'sequence_key': 's_key',
     }
 

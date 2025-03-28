@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from sdmetrics._utils_metadata import (
+    _convert_datetime_column,
     _convert_datetime_columns,
     _process_data_with_metadata,
     _remove_missing_columns_metadata,
@@ -155,6 +156,46 @@ def test__validate_metadata(mock_validate_multi_table_metadata, metadata):
 
     # Assert
     mock_validate_multi_table_metadata.assert_called_once_with(metadata)
+
+
+def test__convert_datetime_column(data, metadata):
+    """Test the ``_convert_datetime_column`` method."""
+    # Setup
+    column_metadata = {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'}
+    str_col = pd.Series(['2021-01-01', '2021-01-02', '2021-01-03'])
+    datetime = pd.Series([
+        pd.Timestamp('2021-01-01'),
+        pd.Timestamp('2021-01-02'),
+        pd.Timestamp('2021-01-03'),
+    ])
+
+    # Run
+    expected_msg = re.escape(
+        "Datetime column 'datetime_no_format' does not have a specified 'datetime_format'. "
+        'Please add a the required datetime_format to the metadata or convert this column '
+        "to 'pd.datetime' to bypass this requirement."
+    )
+    with pytest.raises(ValueError, match=expected_msg):
+        _convert_datetime_column('datetime_no_format', str_col, {'sdtype': 'datetime'})
+
+    datetime_result = _convert_datetime_column('datetime', datetime, column_metadata)
+    str_result = _convert_datetime_column('datetime_str', str_col, column_metadata)
+
+    # Assert
+    pd.testing.assert_series_equal(datetime, datetime_result)
+    pd.testing.assert_series_equal(datetime, str_result)
+
+
+def test__convert_datetime_column_bad_format(data, metadata):
+    """Test the ``_convert_datetime_columns`` method when the provided format fails."""
+    # Setup
+    column_metadata = {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'}
+    bad_col = pd.Series(['bad', 'datetime', 'values'])
+
+    # Run and assert
+    expected_msg = re.escape("Error converting column 'datetime' to timestamp: ")
+    with pytest.raises(ValueError, match=expected_msg):
+        _convert_datetime_column('datetime', bad_col, column_metadata)
 
 
 def test__convert_datetime_columns(data, metadata):

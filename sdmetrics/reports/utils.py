@@ -7,6 +7,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
+from sdmetrics._utils_metadata import _convert_datetime_column
 from sdmetrics.utils import (
     discretize_column,
     get_alternate_keys,
@@ -62,10 +63,8 @@ def discretize_table_data(real_data, synthetic_data, metadata):
             real_col = real_data[column_name]
             synthetic_col = synthetic_data[column_name]
             if sdtype == 'datetime':
-                datetime_format = column_meta.get('format') or column_meta.get('datetime_format')
-                if real_col.dtype == 'O' and datetime_format:
-                    real_col = pd.to_datetime(real_col, format=datetime_format)
-                    synthetic_col = pd.to_datetime(synthetic_col, format=datetime_format)
+                real_col = _convert_datetime_column(column_name, real_col, column_meta)
+                synthetic_col = _convert_datetime_column(column_name, synthetic_col, column_meta)
 
                 real_col = pd.to_numeric(real_col)
                 synthetic_col = pd.to_numeric(synthetic_col)

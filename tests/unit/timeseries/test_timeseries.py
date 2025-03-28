@@ -1,3 +1,5 @@
+import re
+
 import pandas as pd
 import pytest
 
@@ -25,7 +27,8 @@ def test__validate_inputs_for_TimeSeriesMetric():
     }
 
     # Run and Assert
-    with pytest.raises(ValueError, match="Column 'visits' is not a valid datetime"):
+    expected_msg = re.escape("Error converting column 'visits' to timestamp: ")
+    with pytest.raises(ValueError, match=expected_msg):
         TimeSeriesMetric._validate_inputs(
             real_data=df1, synthetic_data=df2, sequence_key=['s_key'], metadata=metadata
         )
