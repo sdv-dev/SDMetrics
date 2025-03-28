@@ -12,6 +12,7 @@ from sdmetrics.single_table.privacy import DCRBaselineProtection
 
 
 class TestDCRBaselineProtection:
+    @pytest.mark.filterwarnings('error')
     def test_end_to_end_with_demo(self):
         """Test end to end for DCRBaslineProtection metric against the demo dataset.
 

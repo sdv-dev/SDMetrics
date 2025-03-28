@@ -53,6 +53,13 @@ class TestDCRBaselineProtection:
         with pytest.raises(ValueError, match=missing_metric):
             DCRBaselineProtection.compute_breakdown(no_dcr_data, no_dcr_data, no_dcr_metadata)
 
+        no_df_msg = re.escape(
+            f'Both real_data ({type(None)}) and synthetic_data ({type({})}) '
+            'must be of type pandas.DataFrame.'
+        )
+        with pytest.raises(TypeError, match=no_df_msg):
+            DCRBaselineProtection.compute_breakdown(None, {}, metadata)
+
     @patch(
         'sdmetrics.single_table.privacy.dcr_baseline_protection.DCRBaselineProtection._generate_random_data'
     )
