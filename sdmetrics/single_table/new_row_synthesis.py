@@ -4,6 +4,7 @@ import warnings
 
 import pandas as pd
 
+from sdmetrics._utils_metadata import _convert_datetime_column
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
@@ -83,9 +84,10 @@ class NewRowSynthesis(SingleTableMetric):
 
         for field, field_meta in get_columns_from_metadata(metadata).items():
             if get_type_from_column_meta(field_meta) == 'datetime':
-                if len(real_data[field]) > 0 and isinstance(real_data[field][0], str):
-                    real_data[field] = pd.to_datetime(real_data[field])
-                    synthetic_data[field] = pd.to_datetime(synthetic_data[field])
+                real_data[field] = _convert_datetime_column(field, real_data[field], field_meta)
+                synthetic_data[field] = _convert_datetime_column(
+                    field, synthetic_data[field], field_meta
+                )
 
                 real_data[field] = pd.to_numeric(real_data[field])
                 synthetic_data[field] = pd.to_numeric(synthetic_data[field])

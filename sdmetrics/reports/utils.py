@@ -6,14 +6,13 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
+from sdmetrics._utils_metadata import _convert_datetime_column
 from sdmetrics.utils import (
     discretize_column,
     get_alternate_keys,
     get_columns_from_metadata,
     get_type_from_column_meta,
-    is_datetime,
 )
 
 CONTINUOUS_SDTYPES = ['numerical', 'datetime']
@@ -33,51 +32,6 @@ class PlotConfig:
     DATACEBO_DARK_TRANSPARENT = 'rgba(0, 0, 54, 0.25)'
     DATACEBO_GREEN_TRANSPARENT = 'rgba(1, 224, 201, 0.25)'
     FONT_SIZE = 18
-
-
-def convert_to_datetime(column_data, datetime_format=None):
-    """Convert a column data to pandas datetime.
-
-    Args:
-        column_data (pandas.Series):
-            The column data
-        format (str):
-            Optional string format of datetime. If ``None``, will attempt to infer the datetime
-            format from the column data. Defaults to ``None``.
-
-    Returns:
-        pandas.Series:
-            The converted column data.
-    """
-    if is_datetime(column_data):
-        return column_data
-
-    if datetime_format is None:
-        datetime_format = _guess_datetime_format_for_array(column_data.astype(str).to_numpy())
-
-    return pd.to_datetime(column_data, format=datetime_format)
-
-
-def convert_datetime_columns(real_column, synthetic_column, col_metadata):
-    """Convert a real and a synthetic column to pandas datetime.
-
-    Args:
-        real_data (pandas.Series):
-            The real column data
-        synthetic_column (pandas.Series):
-            The synthetic column data
-        col_metadata:
-            The metadata associated with the column
-
-    Returns:
-        (pandas.Series, pandas.Series):
-            The converted real and synthetic column data.
-    """
-    datetime_format = col_metadata.get('format') or col_metadata.get('datetime_format')
-    return (
-        convert_to_datetime(real_column, datetime_format),
-        convert_to_datetime(synthetic_column, datetime_format),
-    )
 
 
 def discretize_table_data(real_data, synthetic_data, metadata):
@@ -109,10 +63,8 @@ def discretize_table_data(real_data, synthetic_data, metadata):
             real_col = real_data[column_name]
             synthetic_col = synthetic_data[column_name]
             if sdtype == 'datetime':
-                datetime_format = column_meta.get('format') or column_meta.get('datetime_format')
-                if real_col.dtype == 'O' and datetime_format:
-                    real_col = pd.to_datetime(real_col, format=datetime_format)
-                    synthetic_col = pd.to_datetime(synthetic_col, format=datetime_format)
+                real_col = _convert_datetime_column(column_name, real_col, column_meta)
+                synthetic_col = _convert_datetime_column(column_name, synthetic_col, column_meta)
 
                 real_col = pd.to_numeric(real_col)
                 synthetic_col = pd.to_numeric(synthetic_col)
