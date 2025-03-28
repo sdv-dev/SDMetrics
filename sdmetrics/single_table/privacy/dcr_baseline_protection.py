@@ -30,7 +30,6 @@ class DCRBaselineProtection(SingleTableMetric):
         cls,
         real_data,
         synthetic_data,
-        metadata,
         num_rows_subsample,
         num_iterations,
     ):
@@ -45,10 +44,13 @@ class DCRBaselineProtection(SingleTableMetric):
             num_rows_subsample = None
             num_iterations = 1
 
-        real_data_copy = real_data.copy()
-        synthetic_data_copy = synthetic_data.copy()
+        if not (isinstance(real_data, pd.DataFrame) and isinstance(synthetic_data, pd.DataFrame)):
+            raise TypeError(
+                f'Both real_data ({type(real_data)}) and synthetic_data ({type(synthetic_data)}) '
+                'must be of type pandas.DataFrame.'
+            )
 
-        return real_data_copy, synthetic_data_copy, num_rows_subsample, num_iterations
+        return num_rows_subsample, num_iterations
 
     @classmethod
     def compute_breakdown(
@@ -84,38 +86,32 @@ class DCRBaselineProtection(SingleTableMetric):
                 and the median DCR score between the random data and real data.
                 Averages of the medians are returned in the case of multiple iterations.
         """
-        sanitized_data = cls._validate_inputs(
+        num_rows_subsample, num_iterations = cls._validate_inputs(
             real_data,
             synthetic_data,
-            metadata,
             num_rows_subsample,
             num_iterations,
         )
 
-        sanitized_real_data = sanitized_data[0]
-        sanitized_synthetic_data = sanitized_data[1]
-        num_rows_subsample = sanitized_data[2]
-        num_iterations = sanitized_data[3]
-
-        size_of_random_data = len(sanitized_synthetic_data)
-        random_data = cls._generate_random_data(sanitized_real_data, size_of_random_data)
+        size_of_random_data = len(synthetic_data)
+        random_data = cls._generate_random_data(real_data, size_of_random_data)
 
         sum_synthetic_median = 0
         sum_random_median = 0
         sum_score = 0
 
         for _ in range(num_iterations):
-            synthetic_sample = sanitized_synthetic_data
+            synthetic_sample = synthetic_data
             random_sample = random_data
             if num_rows_subsample is not None:
-                synthetic_sample = sanitized_synthetic_data.sample(n=num_rows_subsample)
+                synthetic_sample = synthetic_data.sample(n=num_rows_subsample)
                 random_sample = random_data.sample(n=num_rows_subsample)
 
             dcr_real = calculate_dcr(
-                reference_dataset=sanitized_real_data, dataset=synthetic_sample, metadata=metadata
+                reference_dataset=real_data, dataset=synthetic_sample, metadata=metadata
             )
             dcr_random = calculate_dcr(
-                reference_dataset=sanitized_real_data, dataset=random_sample, metadata=metadata
+                reference_dataset=real_data, dataset=random_sample, metadata=metadata
             )
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()

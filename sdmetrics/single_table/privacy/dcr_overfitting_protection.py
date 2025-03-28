@@ -3,6 +3,7 @@
 import warnings
 
 import numpy as np
+import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
@@ -28,7 +29,6 @@ class DCROverfittingProtection(SingleTableMetric):
         real_training_data,
         synthetic_data,
         real_validation_data,
-        metadata,
         num_rows_subsample,
         num_iterations,
     ):
@@ -43,6 +43,17 @@ class DCROverfittingProtection(SingleTableMetric):
             num_rows_subsample = None
             num_iterations = 1
 
+        if not (
+            isinstance(real_training_data, pd.DataFrame)
+            and isinstance(synthetic_data, pd.DataFrame)
+            and isinstance(real_validation_data, pd.DataFrame)
+        ):
+            raise TypeError(
+                f'All of real_training_data ({type(real_training_data)}), synthetic_data '
+                f'({type(synthetic_data)}), and real_validation_data ({type(real_validation_data)}) '
+                'must be of type pandas.DataFrame.'
+            )
+
         if len(real_training_data) * 0.5 > len(real_validation_data):
             warnings.warn(
                 f'Your real_validation_data contains {len(real_validation_data)} rows while your '
@@ -50,17 +61,7 @@ class DCROverfittingProtection(SingleTableMetric):
                 'results, we recommend that the validation data at least half the size of the training data.'
             )
 
-        real_data_copy = real_training_data.copy()
-        synthetic_data_copy = synthetic_data.copy()
-        real_validation_copy = real_validation_data.copy()
-
-        return (
-            real_data_copy,
-            synthetic_data_copy,
-            real_validation_copy,
-            num_rows_subsample,
-            num_iterations,
-        )
+        return num_rows_subsample, num_iterations
 
     @classmethod
     def compute_breakdown(
@@ -100,34 +101,27 @@ class DCROverfittingProtection(SingleTableMetric):
                 closer to the real dataset. Averages of the medians are returned in the case of
                 multiple iterations.
         """
-        sanitized_data = cls._validate_inputs(
+        num_rows_subsample, num_iterations = cls._validate_inputs(
             real_training_data,
             synthetic_data,
             real_validation_data,
-            metadata,
             num_rows_subsample,
             num_iterations,
         )
-
-        training_data = sanitized_data[0]
-        sanitized_synthetic_data = sanitized_data[1]
-        validation_data = sanitized_data[2]
-        num_rows_subsample = sanitized_data[3]
-        num_iterations = sanitized_data[4]
 
         sum_of_scores = 0
         sum_percent_close_to_real = 0
         sum_percent_close_to_random = 0
         for _ in range(num_iterations):
-            synthetic_sample = sanitized_synthetic_data
+            synthetic_sample = synthetic_data
             if num_rows_subsample is not None:
-                synthetic_sample = sanitized_synthetic_data.sample(n=num_rows_subsample)
+                synthetic_sample = synthetic_data.sample(n=num_rows_subsample)
 
             dcr_real = calculate_dcr(
-                reference_dataset=training_data, dataset=synthetic_sample, metadata=metadata
+                reference_dataset=real_training_data, dataset=synthetic_sample, metadata=metadata
             )
             dcr_holdout = calculate_dcr(
-                reference_dataset=validation_data, dataset=synthetic_sample, metadata=metadata
+                reference_dataset=real_validation_data, dataset=synthetic_sample, metadata=metadata
             )
 
             num_rows_closer_to_real = np.where(dcr_real < dcr_holdout, 1.0, 0.0).sum()
