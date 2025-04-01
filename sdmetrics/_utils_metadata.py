@@ -2,6 +2,8 @@ import warnings
 
 import pandas as pd
 
+from sdmetrics.utils import is_datetime
+
 MODELABLE_SDTYPES = ('numerical', 'datetime', 'categorical', 'boolean')
 
 
@@ -69,34 +71,34 @@ def handle_single_and_multi_table(single_table_func):
     return wrapper
 
 
+def _convert_datetime_column(column_name, column_data, column_metadata):
+    if is_datetime(column_data):
+        return column_data
+
+    datetime_format = column_metadata.get('datetime_format')
+    if datetime_format is None:
+        raise ValueError(
+            f"Datetime column '{column_name}' does not have a specified 'datetime_format'. "
+            'Please add a the required datetime_format to the metadata or convert this column '
+            "to 'pd.datetime' to bypass this requirement."
+        )
+
+    try:
+        pd.to_datetime(column_data, format=datetime_format)
+    except Exception as e:
+        raise ValueError(f"Error converting column '{column_name}' to timestamp: {e}")
+
+    return pd.to_datetime(column_data, format=datetime_format)
+
+
 @handle_single_and_multi_table
 def _convert_datetime_columns(data, metadata):
     """Convert datetime columns to datetime type."""
-    columns_missing_datetime_format = []
     for column in metadata['columns']:
         if metadata['columns'][column]['sdtype'] == 'datetime':
-            is_datetime = pd.api.types.is_datetime64_any_dtype(data[column])
-            if not is_datetime:
-                datetime_format = metadata['columns'][column].get('format')
-                try:
-                    if datetime_format:
-                        data[column] = pd.to_datetime(data[column], format=datetime_format)
-                    else:
-                        columns_missing_datetime_format.append(column)
-                        data[column] = pd.to_datetime(data[column])
-                except Exception as e:
-                    raise ValueError(
-                        f"Failed to convert column '{column}' to datetime with the error: {str(e)}"
-                    ) from e
-
-    if columns_missing_datetime_format:
-        columns_to_print = "', '".join(columns_missing_datetime_format)
-        warnings.warn(
-            f'No `datetime_format` provided in the metadata when trying to convert the columns'
-            f" '{columns_to_print}' to datetime. The format will be inferred, but it may not"
-            ' be accurate.',
-            UserWarning,
-        )
+            data[column] = _convert_datetime_column(
+                column, data[column], metadata['columns'][column]
+            )
 
     return data
 
@@ -111,7 +113,7 @@ def _remove_missing_columns_metadata(data, metadata):
     if columns_to_remove:
         columns_to_print = "', '".join(sorted(columns_to_remove))
         warnings.warn(
-            f"The columns ('{columns_to_print}') are not present in the metadata."
+            f"The columns ('{columns_to_print}') are not present in the metadata. "
             'They will not be included for further evaluation.',
             UserWarning,
         )

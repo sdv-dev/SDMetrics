@@ -13,8 +13,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
-from sdmetrics._utils_metadata import _validate_metadata
-from sdmetrics.reports.utils import convert_datetime_columns
+from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata
 from sdmetrics.visualization import set_plotly_config
 
 
@@ -101,8 +100,8 @@ class BaseReport:
                 real_col = real_data[column]
                 synth_col = synthetic_data[column]
                 try:
-                    converted_cols = convert_datetime_columns(real_col, synth_col, col_meta)
-                    real_data[column], synthetic_data[column] = converted_cols
+                    real_data[column] = _convert_datetime_column(column, real_col, col_meta)
+                    synthetic_data[column] = _convert_datetime_column(column, synth_col, col_meta)
                 except Exception:
                     continue
 
