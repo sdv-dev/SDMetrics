@@ -1,6 +1,7 @@
 import re
 from unittest.mock import ANY, Mock, call, patch
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -366,6 +367,28 @@ def test_get_column_plot_column_not_found():
     match = re.escape("Column 'start_date' not found in synthetic table data.")
     with pytest.raises(ValueError, match=match):
         get_column_plot(pd.DataFrame({'start_date': []}), synthetic_data, 'start_date')
+
+
+def test_get_column_plot_nan_data():
+    """Test the ``get_column_plot`` method when data is all nans."""
+    # Setup
+    real_data = pd.DataFrame({'values': [np.nan] * 5})
+    synthetic_data = pd.DataFrame({'values': [np.nan] * 5})
+
+    # Run
+    fig_bar = get_column_plot(real_data, synthetic_data, 'values', plot_type='bar')
+    fig_distplot = get_column_plot(real_data, synthetic_data, 'values', plot_type='distplot')
+
+    # Assert
+    annotation_bar = fig_bar.layout.annotations[0]
+    assert annotation_bar.text == 'No data to visualize'
+    assert annotation_bar.x == 0.5
+    assert annotation_bar.y == 0.5
+
+    annotation_distplot = fig_distplot.layout.annotations[0]
+    assert annotation_distplot.text == 'No data to visualize'
+    assert annotation_distplot.x == 0.5
+    assert annotation_distplot.y == 0.5
 
 
 def test_get_column_plot_bad_plot_type():

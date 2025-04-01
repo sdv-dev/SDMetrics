@@ -227,11 +227,16 @@ def _generate_column_distplot(real_data, synthetic_data, plot_kwargs={}):
         'colors': colors,
     }
 
-    fig = ff.create_distplot(
-        hist_data,
-        col_names,
-        **{**default_distplot_kwargs, **plot_kwargs},
-    )
+    has_data = any(len(data) > 0 for data in hist_data)
+
+    if has_data:
+        fig = ff.create_distplot(
+            hist_data,
+            col_names,
+            **{**default_distplot_kwargs, **plot_kwargs},
+        )
+    else:
+        fig = go.Figure()
 
     return fig
 
@@ -317,13 +322,24 @@ def _generate_column_plot(
         fig = _generate_column_distplot(real_data, synthetic_data, plot_kwargs)
         trace_args = {'fill': 'tozeroy'}
 
-    for i, name in enumerate(col_names):
-        fig.update_traces(
-            x=pd.to_datetime(fig.data[i].x) if is_datetime_sdtype else fig.data[i].x,
-            hovertemplate=f'<b>{name}</b><br>Frequency: %{{y}}<extra></extra>',
-            selector={'name': name},
-            **trace_args,
-        )
+    annotations = []
+    if fig.data:
+        for i, name in enumerate(col_names):
+            fig.update_traces(
+                x=pd.to_datetime(fig.data[i].x) if is_datetime_sdtype else fig.data[i].x,
+                hovertemplate=f'<b>{name}</b><br>Frequency: %{{y}}<extra></extra>',
+                selector={'name': name},
+                **trace_args,
+            )
+    else:
+        annotations.append({
+            'xref': 'paper',
+            'yref': 'paper',
+            'x': 0.5,
+            'y': 0.5,
+            'showarrow': False,
+            'text': 'No data to visualize',
+        })
 
     show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
     text = '*Missing Values:'
@@ -334,20 +350,15 @@ def _generate_column_plot(
 
     text = text[:-2]
 
-    annotations = (
-        []
-        if not show_missing_values
-        else [
-            {
-                'xref': 'paper',
-                'yref': 'paper',
-                'x': 1.0,
-                'y': 1.05,
-                'showarrow': False,
-                'text': text,
-            },
-        ]
-    )
+    if show_missing_values:
+        annotations.append({
+            'xref': 'paper',
+            'yref': 'paper',
+            'x': 1.0,
+            'y': 1.05,
+            'showarrow': False,
+            'text': text,
+        })
 
     if not plot_title:
         plot_title = title
