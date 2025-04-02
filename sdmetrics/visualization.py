@@ -230,15 +230,13 @@ def _generate_column_distplot(real_data, synthetic_data, plot_kwargs={}):
     has_data = any(len(data) > 0 for data in hist_data)
 
     if has_data:
-        fig = ff.create_distplot(
+        return ff.create_distplot(
             hist_data,
             col_names,
             **{**default_distplot_kwargs, **plot_kwargs},
         )
-    else:
-        fig = go.Figure()
 
-    return fig
+    return go.Figure()
 
 
 def _generate_column_plot(
@@ -324,9 +322,9 @@ def _generate_column_plot(
 
     annotations = []
     if fig.data:
-        for i, name in enumerate(col_names):
+        for idx, name in enumerate(col_names):
             fig.update_traces(
-                x=pd.to_datetime(fig.data[i].x) if is_datetime_sdtype else fig.data[i].x,
+                x=pd.to_datetime(fig.data[idx].x) if is_datetime_sdtype else fig.data[idx].x,
                 hovertemplate=f'<b>{name}</b><br>Frequency: %{{y}}<extra></extra>',
                 selector={'name': name},
                 **trace_args,
