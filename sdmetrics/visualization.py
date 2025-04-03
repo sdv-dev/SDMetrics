@@ -337,6 +337,7 @@ def _generate_column_plot(
             'y': 0.5,
             'showarrow': False,
             'text': 'No data to visualize',
+            'font': {'size': PlotConfig.FONT_SIZE * 2},
         })
 
     show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
