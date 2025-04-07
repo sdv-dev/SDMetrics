@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 
+from sdmetrics.demos import load_single_table_demo
 from sdmetrics.single_table.privacy.dcr_utils import (
     calculate_dcr,
 )
@@ -54,3 +55,27 @@ def test_calculate_dcr_with_zero_col_range():
     # Assert
     expected_result = pd.Series([1.0, 1.0, 1.0, 0.5, 0.0])
     pd.testing.assert_series_equal(result, expected_result)
+
+
+def test_calculate_dcr_chunked():
+    """Test calculate_dcr with chunking calculations."""
+    # Setup
+    real_data, synthetic_data, metadata = load_single_table_demo()
+
+    # Run
+    result = calculate_dcr(
+        reference_dataset=real_data,
+        dataset=synthetic_data,
+        metadata=metadata,
+        chunk_size=1000,
+    )
+    chunked_result = calculate_dcr(
+        reference_dataset=real_data,
+        dataset=synthetic_data,
+        metadata=metadata,
+        chunk_size=50,
+    )
+
+    # Assert
+    assert len(result) == len(real_data)
+    pd.testing.assert_series_equal(result, chunked_result)

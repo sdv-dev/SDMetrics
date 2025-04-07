@@ -117,7 +117,7 @@ def calculate_dcr(dataset, reference_dataset, metadata, chunk_size=1000):
                 minimum_chunk_distance = chunk_result
             else:
                 minimum_chunk_distance = pd.Series.min(
-                    pd.concat(minimum_chunk_distance, chunk_result, axis=1), axis=1
+                    pd.concat([minimum_chunk_distance, chunk_result], axis=1), axis=1
                 )
 
         results.append(minimum_chunk_distance)
