@@ -1,7 +1,7 @@
 import random
 import re
 from datetime import datetime
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pandas as pd

@@ -114,13 +114,13 @@ class DCRBaselineProtection(SingleTableMetric):
                 reference_dataset=real_sample,
                 dataset=synthetic_sample,
                 metadata=metadata,
-                chunk_size=cls.CHUNK_SIZE
+                chunk_size=cls.CHUNK_SIZE,
             )
             dcr_random = calculate_dcr(
                 reference_dataset=real_sample,
                 dataset=random_sample,
                 metadata=metadata,
-                chunk_size=cls.CHUNK_SIZE
+                chunk_size=cls.CHUNK_SIZE,
             )
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()

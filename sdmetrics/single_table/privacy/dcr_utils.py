@@ -103,7 +103,9 @@ def calculate_dcr(dataset, reference_dataset, metadata, chunk_size=1000):
         dataset_chunk = dataset.iloc[dataset_chunk_start : dataset_chunk_start + chunk_size]
         minimum_chunk_distance = None
         for reference_chunk_start in range(0, len(reference), chunk_size):
-            reference_chunk = reference.iloc[reference_chunk_start : reference_chunk_start + chunk_size]
+            reference_chunk = reference.iloc[
+                reference_chunk_start : reference_chunk_start + chunk_size
+            ]
             chunk_result = _process_dcr_chunk(
                 dataset_chunk=dataset_chunk,
                 reference_chunk=reference_chunk,
