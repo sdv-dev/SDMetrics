@@ -22,6 +22,7 @@ class DCROverfittingProtection(SingleTableMetric):
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
+    CHUNK_SIZE = 1000
 
     @classmethod
     def _validate_inputs(
@@ -114,14 +115,24 @@ class DCROverfittingProtection(SingleTableMetric):
         sum_percent_close_to_random = 0
         for _ in range(num_iterations):
             synthetic_sample = synthetic_data
+            real_training_sample = real_training_data
+            real_validation_sample = real_validation_data
             if num_rows_subsample is not None:
                 synthetic_sample = synthetic_data.sample(n=num_rows_subsample)
+                real_training_sample = real_training_data.sample(n=num_rows_subsample)
+                real_validation_sample = real_validation_data.sample(n=num_rows_subsample)
 
             dcr_real = calculate_dcr(
-                reference_dataset=real_training_data, dataset=synthetic_sample, metadata=metadata
+                reference_dataset=real_training_sample,
+                dataset=synthetic_sample,
+                metadata=metadata,
+                chunk_size=cls.CHUNK_SIZE,
             )
             dcr_holdout = calculate_dcr(
-                reference_dataset=real_validation_data, dataset=synthetic_sample, metadata=metadata
+                reference_dataset=real_validation_sample,
+                dataset=synthetic_sample,
+                metadata=metadata,
+                chunk_size=cls.CHUNK_SIZE,
             )
 
             num_rows_closer_to_real = np.where(dcr_real < dcr_holdout, 1.0, 0.0).sum()

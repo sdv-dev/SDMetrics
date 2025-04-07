@@ -171,16 +171,12 @@ class TestDCRBaselineProtection:
         real_data = pd.DataFrame(data={'A': [2, 6, 3, 4, 1]})
         synthetic_data = pd.DataFrame(data={'A': [5, 5, 5, 5, 5]})
         metadata = {'columns': {'A': {'sdtype': 'numerical'}}}
-        num_rows_sample = 1
-        num_iterations = 5
 
         # Run
         result = DCRBaselineProtection.compute_breakdown(
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
-            num_rows_subsample=num_rows_sample,
-            num_iterations=num_iterations,
         )
 
         # Assert

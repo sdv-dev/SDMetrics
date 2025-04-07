@@ -23,6 +23,7 @@ class DCRBaselineProtection(SingleTableMetric):
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
+    CHUNK_SIZE = 1000
     _seed = None
 
     @classmethod
@@ -103,15 +104,23 @@ class DCRBaselineProtection(SingleTableMetric):
         for _ in range(num_iterations):
             synthetic_sample = synthetic_data
             random_sample = random_data
+            real_sample = real_data
             if num_rows_subsample is not None:
                 synthetic_sample = synthetic_data.sample(n=num_rows_subsample)
                 random_sample = random_data.sample(n=num_rows_subsample)
+                real_sample = real_data.sample(n=num_rows_subsample)
 
             dcr_real = calculate_dcr(
-                reference_dataset=real_data, dataset=synthetic_sample, metadata=metadata
+                reference_dataset=real_sample,
+                dataset=synthetic_sample,
+                metadata=metadata,
+                chunk_size=cls.CHUNK_SIZE
             )
             dcr_random = calculate_dcr(
-                reference_dataset=real_data, dataset=random_sample, metadata=metadata
+                reference_dataset=real_sample,
+                dataset=random_sample,
+                metadata=metadata,
+                chunk_size=cls.CHUNK_SIZE
             )
             synthetic_data_median = dcr_real.median()
             random_data_median = dcr_random.median()
