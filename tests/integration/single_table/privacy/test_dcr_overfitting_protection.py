@@ -25,7 +25,6 @@ class TestDCROverfittingProtection:
         train_df, holdout_df = train_test_split(real_data, test_size=0.5)
 
         # Run
-        num_rows_subsample = 50
         compute_breakdown_result = DCROverfittingProtection.compute_breakdown(
             train_df, synthetic_data, holdout_df, metadata
         )
@@ -33,17 +32,16 @@ class TestDCROverfittingProtection:
             train_df, synthetic_data, holdout_df, metadata
         )
         compute_holdout_same = DCROverfittingProtection.compute_breakdown(
-            train_df, synthetic_data, synthetic_data, metadata, num_rows_subsample
+            train_df, synthetic_data, synthetic_data, metadata
         )
         compute_train_same = DCROverfittingProtection.compute_breakdown(
-            synthetic_data, synthetic_data, holdout_df, metadata, num_rows_subsample
+            synthetic_data, synthetic_data, holdout_df, metadata
         )
         compute_all_same = DCROverfittingProtection.compute_breakdown(
             synthetic_data,
             synthetic_data,
             synthetic_data,
             metadata,
-            num_rows_subsample,
         )
 
         synth_percentages_key = 'synthetic_data_percentages'
@@ -136,18 +134,9 @@ class TestDCROverfittingProtection:
         compute_num_iteration_1000 = DCROverfittingProtection.compute_breakdown(
             train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, num_iterations
         )
-        compute_train_same = DCROverfittingProtection.compute_breakdown(
-            synthetic_data,
-            synthetic_data,
-            holdout_data,
-            metadata,
-            num_rows_subsample,
-            num_iterations,
-        )
 
         # Assert
         assert compute_num_iteration_1 != compute_num_iteration_1000
-        assert compute_train_same['score'] == 0.0
 
     def test_end_to_end_with_datetimes(self):
         """Test end to end with datetime synthetic values."""

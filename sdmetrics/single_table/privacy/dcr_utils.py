@@ -9,8 +9,8 @@ from sdmetrics.utils import get_columns_from_metadata
 CHUNK_SIZE = 1000
 
 
-def _process_dcr_chunk(chunk, reference_copy, cols_to_keep, metadata, ranges):
-    full_dataset = chunk.merge(reference_copy, how='cross', suffixes=('_data', '_ref'))
+def _process_dcr_chunk(dataset_chunk, reference_chunk, cols_to_keep, metadata, ranges):
+    full_dataset = dataset_chunk.merge(reference_chunk, how='cross', suffixes=('_data', '_ref'))
 
     for col_name in cols_to_keep:
         sdtype = metadata['columns'][col_name]['sdtype']
@@ -51,7 +51,7 @@ def _process_dcr_chunk(chunk, reference_copy, cols_to_keep, metadata, ranges):
     return chunk_result['diff']
 
 
-def calculate_dcr(dataset, reference_dataset, metadata):
+def calculate_dcr(dataset, reference_dataset, metadata, chunk_size=1000):
     """Calculate the Distance to Closest Record for all rows in the synthetic data.
 
     Arguments:
@@ -66,10 +66,10 @@ def calculate_dcr(dataset, reference_dataset, metadata):
         pandas.Series:
             Returns a Series that shows the DCR value for every row of dataset
     """
-    dataset_copy = _process_data_with_metadata(dataset.copy(), metadata, True)
-    reference_copy = _process_data_with_metadata(reference_dataset.copy(), metadata, True)
+    dataset = _process_data_with_metadata(dataset.copy(), metadata, True)
+    reference = _process_data_with_metadata(reference_dataset.copy(), metadata, True)
 
-    common_cols = set(dataset_copy.columns) & set(reference_copy.columns)
+    common_cols = set(dataset.columns) & set(reference.columns)
     cols_to_keep = []
     ranges = {}
 
@@ -83,7 +83,7 @@ def calculate_dcr(dataset, reference_dataset, metadata):
             cols_to_keep.append(col_name)
 
             if sdtype in ['numerical', 'datetime']:
-                col_range = reference_copy[col_name].max() - reference_copy[col_name].min()
+                col_range = reference[col_name].max() - reference[col_name].min()
                 if isinstance(col_range, pd.Timedelta):
                     col_range = col_range.total_seconds()
 
@@ -92,23 +92,35 @@ def calculate_dcr(dataset, reference_dataset, metadata):
     if not cols_to_keep:
         raise ValueError('There are no overlapping statistical columns to measure.')
 
-    dataset_copy = dataset_copy[cols_to_keep]
-    dataset_copy['index'] = range(len(dataset_copy))
+    dataset = dataset[cols_to_keep]
+    dataset['index'] = range(len(dataset))
 
-    reference_copy = reference_copy[cols_to_keep]
-    reference_copy['index'] = range(len(reference_copy))
+    reference = reference[cols_to_keep]
+    reference['index'] = range(len(reference))
     results = []
 
-    for chunk_start in range(0, len(dataset_copy), CHUNK_SIZE):
-        chunk = dataset_copy.iloc[chunk_start : chunk_start + CHUNK_SIZE].copy()
-        chunk_result = _process_dcr_chunk(
-            chunk=chunk,
-            reference_copy=reference_copy,
-            cols_to_keep=cols_to_keep,
-            metadata=metadata,
-            ranges=ranges,
-        )
-        results.append(chunk_result)
+    for dataset_chunk_start in range(0, len(dataset), chunk_size):
+        dataset_chunk = dataset.iloc[dataset_chunk_start : dataset_chunk_start + chunk_size]
+        minimum_chunk_distance = None
+        for reference_chunk_start in range(0, len(reference), chunk_size):
+            reference_chunk = reference.iloc[
+                reference_chunk_start : reference_chunk_start + chunk_size
+            ]
+            chunk_result = _process_dcr_chunk(
+                dataset_chunk=dataset_chunk,
+                reference_chunk=reference_chunk,
+                cols_to_keep=cols_to_keep,
+                metadata=metadata,
+                ranges=ranges,
+            )
+            if minimum_chunk_distance is None:
+                minimum_chunk_distance = chunk_result
+            else:
+                minimum_chunk_distance = pd.Series.min(
+                    pd.concat([minimum_chunk_distance, chunk_result], axis=1), axis=1
+                )
+
+        results.append(minimum_chunk_distance)
 
     result = pd.concat(results, ignore_index=True)
     result.name = None

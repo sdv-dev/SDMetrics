@@ -235,8 +235,8 @@ def test__process_dcr_chunk(real_data, synthetic_data, test_metadata, column_ran
 
     # Run
     result = _process_dcr_chunk(
-        chunk=chunk,
-        reference_copy=real_data,
+        dataset_chunk=chunk,
+        reference_chunk=real_data,
         cols_to_keep=cols_to_keep,
         metadata=test_metadata,
         ranges=column_ranges,

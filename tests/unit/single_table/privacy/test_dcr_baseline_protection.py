@@ -1,7 +1,7 @@
 import random
 import re
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pandas as pd
@@ -217,7 +217,9 @@ class TestDCRBaselineProtection:
         # Setup
         real_data, synthetic_data, metadata = test_data
         num_rows_subsample = 10
-        mock_generate_random.return_value = real_data.copy()
+        real_data.sample = Mock()
+        real_data.sample.return_value = real_data.iloc[:10]
+        mock_generate_random.return_value = real_data.iloc[:10]
 
         # Run
         result = DCRBaselineProtection.compute_breakdown(
