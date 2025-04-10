@@ -68,17 +68,17 @@ test = [
     'pytest-cov>=2.6.0,<3',
     'pytest-rerunfailures>=10.3,<15',
     'jupyter>=1.0.0,<2',
-    'rundoc>=0.4.3,<0.5',
     'tomli>=2.0.0,<3',
     'invoke',
     'pytest-runner>=2.11.1',
 ]
+readme = ['rundoc>=0.4.3,<0.5',]
 dev = [
     'sdmetrics[test, torch]',
 
     # general
     'build>=1.0.0,<2',
-    'bump-my-version>=0.18.3,<1',
+    'bump-my-version>=0.18.3',
     'pip>=9.0.1',
     'watchdog>=1.0.1,<5',
 
@@ -86,7 +86,7 @@ dev = [
     'ruff>=0.3.2,<1',
 
     # distribute on PyPI
-    'twine>=1.10.0,<6',
+    'twine>=1.10.0',
     'wheel>=0.30.0',
     'packaging>=20,<25',
 
