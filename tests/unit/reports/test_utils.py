@@ -5,71 +5,10 @@ import pandas as pd
 
 from sdmetrics.reports.utils import (
     aggregate_metric_results,
-    convert_to_datetime,
     discretize_and_apply_metric,
     discretize_table_data,
 )
 from tests.utils import DataFrameMatcher
-
-
-def test_convert_to_datetime():
-    """Test the ``convert_to_datetime`` method with a datetime column.
-
-    Expect no conversion to happen since the input is already a pandas datetime type.
-
-    Inputs:
-    - datetime column
-
-    Output:
-    - datetime column
-    """
-    # Setup
-    column_data = pd.Series([datetime(2020, 1, 2), datetime(2021, 1, 2)])
-
-    # Run
-    out = convert_to_datetime(column_data)
-
-    # Assert
-    pd.testing.assert_series_equal(out, column_data)
-
-
-def test_convert_to_datetime_date_column():
-    """Test the ``convert_to_datetime`` method with a date column.
-
-    Expect the date column to be converted to a datetime column.
-
-    Inputs:
-    - date column
-
-    Output:
-    - datetime column
-    """
-    # Setup
-    column_data = pd.Series([date(2020, 1, 2), date(2021, 1, 2)])
-
-    # Run
-    out = convert_to_datetime(column_data)
-
-    # Assert
-    expected = pd.Series([datetime(2020, 1, 2), datetime(2021, 1, 2)])
-    pd.testing.assert_series_equal(out, expected)
-
-
-def test_convert_to_datetime_str_format():
-    """Test the ``convert_to_datetime`` method with a string column.
-
-    Expect the string date column to be converted to a datetime column
-    using the provided format.
-    """
-    # Setup
-    column_data = pd.Series(['2020-01-02', '2021-01-02'])
-
-    # Run
-    out = convert_to_datetime(column_data)
-
-    # Assert
-    expected = pd.Series([datetime(2020, 1, 2), datetime(2021, 1, 2)])
-    pd.testing.assert_series_equal(out, expected)
 
 
 def test_discretize_table_data():
@@ -108,7 +47,7 @@ def test_discretize_table_data():
             'col2': {'sdtype': 'categorical'},
             'col3': {'sdtype': 'datetime'},
             'col4': {'sdtype': 'boolean'},
-            'col5': {'sdtype': 'datetime', 'format': '%Y-%m-%d'},
+            'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
         },
     }
 

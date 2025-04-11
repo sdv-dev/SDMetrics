@@ -1,4 +1,4 @@
-Run started:2025-02-21 20:33:08.028276
+Run started:2025-04-10 20:35:13.475556
 
 Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -25,21 +25,21 @@ Test results:
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
    More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b112_try_except_continue.html
-   Location: ./sdmetrics/reports/base_report.py:116:16
-115	                    real_data[column], synthetic_data[column] = converted_cols
-116	                except Exception:
-117	                    continue
-118	
+   Location: ./sdmetrics/reports/base_report.py:105:16
+104	                    synthetic_data[column] = _convert_datetime_column(column, synth_col, col_meta)
+105	                except Exception:
+106	                    continue
+107	
 
 --------------------------------------------------
 >> Issue: [B301:blacklist] Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
    Severity: Medium   Confidence: High
    CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
    More Info: https://bandit.readthedocs.io/en/1.7.7/blacklists/blacklist_calls.html#b301-pickle
-   Location: ./sdmetrics/reports/base_report.py:310:21
-309	        with open(filepath, 'rb') as f:
-310	            report = pickle.load(f)
-311	            if current_version != report._package_version:
+   Location: ./sdmetrics/reports/base_report.py:292:21
+291	        with open(filepath, 'rb') as f:
+292	            report = pickle.load(f)
+293	            if current_version != report._package_version:
 
 --------------------------------------------------
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -89,7 +89,7 @@ Test results:
    Location: ./sdmetrics/single_table/privacy/util.py:72:4
 71	    dist = 0
 72	    assert len(target) == len(test), (
-73	        'Tuples must have the same length in thecalculation of hamming distance!'
+73	        'Tuples must have the same length in the calculation of hamming distance!'
 74	    )
 75	
 
@@ -117,7 +117,7 @@ Test results:
 --------------------------------------------------
 
 Code scanned:
-	Total lines of code: 10792
+	Total lines of code: 11344
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 

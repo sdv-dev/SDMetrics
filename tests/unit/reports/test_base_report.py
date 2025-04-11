@@ -174,7 +174,10 @@ class TestBaseReport:
         real_data = pd.DataFrame({'col1': ['2020-01-02', '2021-01-02'], 'col2': ['a', 'b']})
         synthetic_data = pd.DataFrame({'col1': ['2022-01-03', '2023-04-05'], 'col2': ['b', 'a']})
         metadata = {
-            'columns': {'col1': {'sdtype': 'datetime'}, 'col2': {'sdtype': 'datetime'}},
+            'columns': {
+                'col1': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                'col2': {'sdtype': 'datetime'},
+            },
         }
 
         # Run
