@@ -1,5 +1,28 @@
 # History
 
+## v0.20.0 - 2025-04-11
+
+### New Features
+
+* Consolidate handling of datetime columns - Issue [#741](https://github.com/sdv-dev/SDMetrics/issues/741) by @frances-h
+* Improve handling of datetime columns for metrics - Issue [#740](https://github.com/sdv-dev/SDMetrics/issues/740) by @lajohn4747
+* DCR metrics should allow the possibility of constant numerical columns - Issue [#739](https://github.com/sdv-dev/SDMetrics/issues/739) by @lajohn4747
+* Add `DCRBaselineProtection` metric - Issue [#720](https://github.com/sdv-dev/SDMetrics/issues/720)
+* Add `DCROverfittingProtection` metric - Issue [#719](https://github.com/sdv-dev/SDMetrics/issues/719) by @lajohn4747
+
+### Bugs Fixed
+
+* Visualization `get_column_plot` crashes if I have a column of all null values - Issue [#757](https://github.com/sdv-dev/SDMetrics/issues/757) by @npatki
+* The `DCRBaselineProtection` metric is not creating the correct size of random data - Issue [#743](https://github.com/sdv-dev/SDMetrics/issues/743) by @lajohn4747
+* The `DCRBaselineProtection` metric is not producing the expected score - Issue [#742](https://github.com/sdv-dev/SDMetrics/issues/742) by @lajohn4747
+* The DCRBaselineProtection metric crashes when the distance between random data and real data is 0 - Issue [#738](https://github.com/sdv-dev/SDMetrics/issues/738) by @npatki
+* DCROverfitting and DCRBaseline metrics produce too many warnings about missing columns. - Issue [#737](https://github.com/sdv-dev/SDMetrics/issues/737) by @lajohn4747
+* Wrong default values for the `classifier` parameter of the `BinaryClassifierPrecisionEfficacy` - Issue [#734](https://github.com/sdv-dev/SDMetrics/issues/734) by @R-Palazzo
+
+### Maintenance
+
+* Upgrade `pomegranate` dependency to Python 3.13 - Issue [#717](https://github.com/sdv-dev/SDMetrics/issues/717) by @R-Palazzo
+
 ## v0.19.0 - 2025-02-24
 
 ### New Features
