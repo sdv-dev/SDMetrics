@@ -23,6 +23,7 @@ class BNLikelihoodBase(SingleTableMetric):
     def _likelihoods(cls, real_data, synthetic_data, metadata=None, structure=None):
         try:
             from pomegranate.bayesian_network import BayesianNetwork
+
             if torch is None:
                 raise ImportError
         except ImportError:
