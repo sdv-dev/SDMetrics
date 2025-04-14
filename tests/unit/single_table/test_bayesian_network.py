@@ -44,7 +44,7 @@ def metadata():
 
 
 class TestBNLikelihood:
-    @patch.dict('sys.modules', {'pomegranate.bayesian_network': None})
+    @patch.dict('sys.modules', {'pomegranate.bayesian_network': None, 'torch': None})
     def test_compute_error(self):
         """Test that an `ImportError` is raised."""
         # Setup
@@ -71,7 +71,7 @@ class TestBNLikelihood:
 
 
 class TestBNLogLikelihood:
-    @patch.dict('sys.modules', {'pomegranate.bayesian_network': None})
+    @patch.dict('sys.modules', {'pomegranate.bayesian_network': None, 'torch': None})
     def test_compute_error(self):
         """Test that an `ImportError` is raised."""
         # Setup

@@ -4,7 +4,6 @@ import logging
 
 import numpy as np
 import pandas as pd
-import torch
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
@@ -18,6 +17,7 @@ class BNLikelihoodBase(SingleTableMetric):
     @classmethod
     def _likelihoods(cls, real_data, synthetic_data, metadata=None, structure=None):
         try:
+            import torch
             from pomegranate.bayesian_network import BayesianNetwork
         except ImportError:
             raise ImportError(
