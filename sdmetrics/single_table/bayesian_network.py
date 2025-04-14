@@ -8,6 +8,11 @@ import pandas as pd
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 
+try:
+    import torch
+except ModuleNotFoundError:
+    torch = None
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -17,8 +22,9 @@ class BNLikelihoodBase(SingleTableMetric):
     @classmethod
     def _likelihoods(cls, real_data, synthetic_data, metadata=None, structure=None):
         try:
-            import torch
             from pomegranate.bayesian_network import BayesianNetwork
+            if torch is None:
+                raise ImportError
         except ImportError:
             raise ImportError(
                 'Please install pomegranate with `pip install sdmetrics[pomegranate]`.'
