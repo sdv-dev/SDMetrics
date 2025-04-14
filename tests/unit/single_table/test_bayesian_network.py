@@ -46,7 +46,20 @@ def metadata():
 class TestBNLikelihood:
     @patch.dict('sys.modules', {'pomegranate.bayesian_network': None})
     def test_compute_error(self):
-        """Test that an `ImportError` is raised."""
+        """Test that an `ImportError` is raised when pomegranate isn't installed."""
+        # Setup
+        metric = BNLikelihood()
+
+        # Run and Assert
+        expected_message = re.escape(
+            'Please install pomegranate with `pip install sdmetrics[pomegranate]`.'
+        )
+        with pytest.raises(ImportError, match=expected_message):
+            metric.compute(Mock(), Mock())
+
+    @patch.dict('sys.modules', {'torch': None})
+    def test_compute_error_torch_is_none(self):
+        """Test that an `ImportError` is raised when torch isn't installed."""
         # Setup
         metric = BNLikelihood()
 

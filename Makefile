@@ -232,3 +232,23 @@ release-minor: check-release bumpversion-minor release
 
 .PHONY: release-major
 release-major: check-release bumpversion-major release
+
+# Packaging Targets
+.PHONY: upgradepip
+upgradepip:
+	python -m pip install --upgrade pip
+
+.PHONY: upgradebuild
+upgradebuild:
+	python -m pip install --upgrade build
+
+.PHONY: upgradesetuptools
+upgradesetuptools:
+	python -m pip install --upgrade setuptools
+
+.PHONY: package
+package: upgradepip upgradebuild upgradesetuptools
+	python -m build ; \
+	$(eval VERSION=$(shell python -c 'import setuptools; setuptools.setup()' --version))
+	tar -zxvf "dist/sdmetrics-${VERSION}.tar.gz"
+	mv "sdmetrics-${VERSION}" unpacked_sdist
