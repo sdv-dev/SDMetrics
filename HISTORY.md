@@ -1,5 +1,11 @@
 # History
 
+## v0.20.1 - 2025-04-14
+
+### Bugs Fixed
+
+* Importing sdmetrics crashes because of torch dependency - Issue [#764](https://github.com/sdv-dev/SDMetrics/issues/764) by @amontanez24
+
 ## v0.20.0 - 2025-04-11
 
 ### New Features
