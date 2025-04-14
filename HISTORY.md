@@ -18,10 +18,10 @@
 
 ### Bugs Fixed
 
-* Visualization `get_column_plot` crashes if I have a column of all null values - Issue [#757](https://github.com/sdv-dev/SDMetrics/issues/757) by @npatki
+* Visualization `get_column_plot` crashes if I have a column of all null values - Issue [#757](https://github.com/sdv-dev/SDMetrics/issues/757) by @lajohn4747
 * The `DCRBaselineProtection` metric is not creating the correct size of random data - Issue [#743](https://github.com/sdv-dev/SDMetrics/issues/743) by @lajohn4747
 * The `DCRBaselineProtection` metric is not producing the expected score - Issue [#742](https://github.com/sdv-dev/SDMetrics/issues/742) by @lajohn4747
-* The DCRBaselineProtection metric crashes when the distance between random data and real data is 0 - Issue [#738](https://github.com/sdv-dev/SDMetrics/issues/738) by @npatki
+* The DCRBaselineProtection metric crashes when the distance between random data and real data is 0 - Issue [#738](https://github.com/sdv-dev/SDMetrics/issues/738) by @lajohn4747
 * DCROverfitting and DCRBaseline metrics produce too many warnings about missing columns. - Issue [#737](https://github.com/sdv-dev/SDMetrics/issues/737) by @lajohn4747
 * Wrong default values for the `classifier` parameter of the `BinaryClassifierPrecisionEfficacy` - Issue [#734](https://github.com/sdv-dev/SDMetrics/issues/734) by @R-Palazzo
 
