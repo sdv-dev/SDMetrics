@@ -154,7 +154,7 @@ def _generate_box_plot(all_data, columns):
 
 
 def _generate_violin_plot(data, columns):
-    """Return a violin plot of the real and synthetic data for a given column pair."""
+    """Return a violin plot for a given column pair."""
     fig = px.violin(
         data,
         x=columns[0],
