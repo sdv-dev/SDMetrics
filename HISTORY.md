@@ -1,5 +1,11 @@
 # History
 
+## v0.21.0 - 2025-05-29
+
+### New Features
+
+* Add a violin plot visualizations to compare a pair of columns - Issue [#759](https://github.com/sdv-dev/SDMetrics/issues/759) by @R-Palazzo
+
 ## v0.20.1 - 2025-04-14
 
 ### Bugs Fixed
