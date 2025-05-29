@@ -153,6 +153,33 @@ def _generate_box_plot(all_data, columns):
     return fig
 
 
+def _generate_violin_plot(data, columns):
+    """Return a violin plot for a given column pair."""
+    fig = px.violin(
+        data,
+        x=columns[0],
+        y=columns[1],
+        box=False,
+        violinmode='overlay',
+        color='Data',
+        color_discrete_map={
+            'Real': PlotConfig.DATACEBO_DARK,
+            'Synthetic': PlotConfig.DATACEBO_GREEN,
+        },
+    )
+
+    unique_values = data['Data'].unique()
+    title = ' vs. '.join(unique_values)
+    title += f" Data for columns '{columns[0]}' and '{columns[1]}'"
+    fig.update_layout(
+        title=title,
+        plot_bgcolor=PlotConfig.BACKGROUND_COLOR,
+        font={'size': PlotConfig.FONT_SIZE},
+    )
+
+    return fig
+
+
 def _generate_scatter_plot(all_data, columns):
     """Generate a scatter plot for column pair plot.
 
@@ -615,10 +642,10 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
             )
         synthetic_data = synthetic_data[column_names]
 
-    if plot_type not in ['box', 'heatmap', 'scatter', None]:
+    if plot_type not in ['box', 'heatmap', 'scatter', 'violin', None]:
         raise ValueError(
             f"Invalid plot_type '{plot_type}'. Please use one of "
-            "['box', 'heatmap', 'scatter', None]."
+            "['box', 'heatmap', 'scatter', 'violin', None]."
         )
 
     if plot_type is None:
@@ -654,6 +681,8 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, plot_type=None
         return _generate_scatter_plot(all_data, column_names)
     elif plot_type == 'heatmap':
         return _generate_heatmap_plot(all_data, column_names)
+    elif plot_type == 'violin':
+        return _generate_violin_plot(all_data, column_names)
 
     return _generate_box_plot(all_data, column_names)
 
