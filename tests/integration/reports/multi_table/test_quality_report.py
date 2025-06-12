@@ -302,7 +302,9 @@ def test_quality_report_with_errors():
     })
 
     pandas_version = version.parse(pd.__version__)
-    if pandas_version >= version.parse('2.2.0'):
+    if pandas_version >= version.parse('2.3.0'):
+        err1 = err2 = err3 = 'TypeError: Expected numeric dtype, got object instead.'
+    elif pandas_version >= version.parse('2.2.0'):
         err1 = "TypeError: '<' not supported between instances of 'int' and 'str'"
         err2 = "TypeError: '<' not supported between instances of 'Timestamp' and 'str'"
         err3 = "TypeError: '<' not supported between instances of 'float' and 'str'"

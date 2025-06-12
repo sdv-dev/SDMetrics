@@ -110,7 +110,9 @@ class TestColumnShapes:
 
         # Assert
         pandas_version = version.parse(pd.__version__)
-        if pandas_version >= version.parse('2.2.0'):
+        if pandas_version >= version.parse('2.3.0'):
+            expected_message = 'TypeError: Expected numeric dtype, got object instead.'
+        elif pandas_version >= version.parse('2.2.0'):
             expected_message = "TypeError: '<' not supported between instances of 'str' and 'int'"
         else:
             expected_message = "TypeError: can't multiply sequence by non-int of type 'float'"
