@@ -77,6 +77,7 @@ from sdmetrics.single_table.privacy.ensemble import CategoricalEnsemble
 from sdmetrics.single_table.privacy.numerical_sklearn import NumericalLR, NumericalMLP, NumericalSVR
 from sdmetrics.single_table.privacy.radius_nearest_neighbor import NumericalRadiusNearestNeighbor
 from sdmetrics.single_table.table_structure import TableStructure
+from sdmetrics.single_table.equalized_odds import EqualizedOddsImprovement
 
 __all__ = [
     'bayesian_network',
@@ -140,4 +141,5 @@ __all__ = [
     'TableStructure',
     'DCRBaselineProtection',
     'DCROverfittingProtection',
+    'EqualizedOddsImprovement',
 ]
