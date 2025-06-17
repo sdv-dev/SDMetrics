@@ -151,6 +151,15 @@ def allow_nan_array(attributes):
 
 
 def validate_num_samples_num_iteration(num_rows_subsample, num_iterations):
+    """Validate the number of samples and iterations for privacy metrics.
+
+    Args:
+        num_rows_subsample: Number of rows to subsample
+        num_iterations: Number of iterations to run
+
+    Raises:
+        ValueError: If parameters are invalid
+    """
     if num_rows_subsample is not None:
         if not isinstance(num_rows_subsample, int) or num_rows_subsample < 1:
             raise ValueError(
