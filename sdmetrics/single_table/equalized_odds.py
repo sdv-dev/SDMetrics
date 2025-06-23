@@ -15,12 +15,8 @@ from sdmetrics.single_table.utils import (
     _validate_required_columns,
     _validate_sensitive_column_name,
     _validate_tables,
-)
-from sdmetrics.single_table.data_augmentation.utils import (
     _process_data_with_metadata_ml_efficacy_metrics,
 )
-
-from xgboost import XGBClassifier
 
 
 class EqualizedOddsImprovement(SingleTableMetric):
@@ -112,6 +108,13 @@ class EqualizedOddsImprovement(SingleTableMetric):
         """Train the XGBoost classifier."""
         train_data = train_data.copy()
         train_target = train_data.pop(prediction_column_name)
+
+        try:
+            from xgboost import XGBClassifier
+        except ImportError:
+            raise ImportError(
+                'XGBoost is required but not installed. Install with: pip install sdmetrics[xgboost]'
+            )
 
         classifier = XGBClassifier(enable_categorical=True)
         classifier.fit(train_data, train_target)

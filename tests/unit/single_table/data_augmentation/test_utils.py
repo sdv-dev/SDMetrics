@@ -6,11 +6,11 @@ import pandas as pd
 import pytest
 
 from sdmetrics.single_table.data_augmentation.utils import (
-    _process_data_with_metadata_ml_efficacy_metrics,
     _validate_data_and_metadata,
     _validate_inputs,
     _validate_parameters,
 )
+from sdmetrics.single_table.utils import _process_data_with_metadata_ml_efficacy_metrics
 
 
 def test__validate_parameters():
@@ -198,7 +198,7 @@ def test__validate_inputs_mock(mock_validate_data_and_metadata, mock_validate_pa
         )
 
 
-@patch('sdmetrics.single_table.data_augmentation.utils._process_data_with_metadata')
+@patch('sdmetrics.single_table.utils._process_data_with_metadata')
 def test__process_data_with_metadata_ml_efficacy_metrics(mock_process_data_with_metadata):
     """Test the ``_process_data_with_metadata_ml_efficacy_metrics`` method."""
     # Setup

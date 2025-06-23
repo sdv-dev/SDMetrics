@@ -9,10 +9,8 @@ from xgboost import XGBClassifier
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.single_table.data_augmentation.utils import (
-    _process_data_with_metadata_ml_efficacy_metrics,
-    _validate_inputs,
-)
+from sdmetrics.single_table.data_augmentation.utils import _validate_inputs
+from sdmetrics.single_table.utils import _process_data_with_metadata_ml_efficacy_metrics
 
 METRIC_NAME_TO_METHOD = {'recall': recall_score, 'precision': precision_score}
 

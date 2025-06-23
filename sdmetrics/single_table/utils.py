@@ -2,6 +2,8 @@
 
 import pandas as pd
 
+from sdmetrics._utils_metadata import _process_data_with_metadata
+
 
 def _validate_tables(real_training_data, synthetic_data, real_validation_data):
     """Validate the tables of the single table metrics."""
@@ -138,3 +140,14 @@ def _validate_data_and_metadata(
             f'is not present in the column `{prediction_column_name}` for the real validation data.'
             ' The `precision` and `recall` are undefined for this case.'
         )
+
+
+def _process_data_with_metadata_ml_efficacy_metrics(
+    real_training_data, synthetic_data, real_validation_data, metadata
+):
+    """Process the data for ML efficacy metrics according to the metadata."""
+    real_training_data = _process_data_with_metadata(real_training_data, metadata, True)
+    synthetic_data = _process_data_with_metadata(synthetic_data, metadata, True)
+    real_validation_data = _process_data_with_metadata(real_validation_data, metadata, True)
+
+    return real_training_data, synthetic_data, real_validation_data

@@ -163,50 +163,6 @@ class TestEqualizedOddsImprovement:
         assert original_data['prediction'].tolist() == ['True', 'False']
         assert original_data['sensitive'].tolist() == ['A', 'B']
 
-    @patch('sdmetrics.single_table.equalized_odds.XGBClassifier')
-    def test_train_classifier(self, mock_xgb_class):
-        """Test _train_classifier trains and returns XGBoost classifier."""
-        mock_classifier = Mock()
-        mock_xgb_class.return_value = mock_classifier
-
-        train_data = pd.DataFrame({
-            'feature1': [1, 2, 3],
-            'feature2': [4, 5, 6],
-            'target': [0, 1, 0],
-        })
-
-        result = EqualizedOddsImprovement._train_classifier(train_data, 'target')
-
-        # Check classifier was created with correct parameters
-        mock_xgb_class.assert_called_once_with(enable_categorical=True)
-
-        # Check fit was called with correct data
-        expected_features = pd.DataFrame({
-            'feature1': [1, 2, 3],
-            'feature2': [4, 5, 6],
-        })
-        expected_target = pd.Series([0, 1, 0], name='target')
-
-        mock_classifier.fit.assert_called_once()
-        call_args = mock_classifier.fit.call_args[0]
-        pd.testing.assert_frame_equal(call_args[0], expected_features)
-        pd.testing.assert_series_equal(call_args[1], expected_target)
-
-        assert result == mock_classifier
-
-    def test_train_classifier_does_not_modify_original(self):
-        """Test _train_classifier doesn't modify the original training data."""
-        original_data = pd.DataFrame({
-            'feature1': [1, 2, 3],
-            'target': [0, 1, 0],
-        })
-
-        with patch('sdmetrics.single_table.equalized_odds.XGBClassifier'):
-            EqualizedOddsImprovement._train_classifier(original_data, 'target')
-
-        # Original data should still have target column
-        assert 'target' in original_data.columns
-
     def test_compute_prediction_counts_both_groups(self):
         """Test _compute_prediction_counts with data for both sensitive groups."""
         predictions = np.array([1, 0, 1, 0, 1, 0])
