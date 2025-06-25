@@ -85,9 +85,12 @@ class EqualizedOddsImprovement(SingleTableMetric):
         ).astype(int)
 
         # Convert sensitive column to binary
-        data[sensitive_column_name] = (
-            data[sensitive_column_name] == sensitive_column_value
-        ).astype(int)
+        if pd.isna(sensitive_column_value):
+            data[sensitive_column_name] = data[sensitive_column_name].isna().astype(int)
+        else:
+            data[sensitive_column_name] = (
+                data[sensitive_column_name] == sensitive_column_value
+            ).astype(int)
 
         # Handle categorical columns for XGBoost
         for column, column_meta in metadata['columns'].items():
@@ -162,32 +165,32 @@ class EqualizedOddsImprovement(SingleTableMetric):
         true_group = prediction_counts['True']
         false_group = prediction_counts['False']
 
-        # Compute TPR for each group
-        tpr_true = true_group['true_positive'] / max(
-            1, true_group['true_positive'] + true_group['false_negative']
-        )
-        tpr_false = false_group['true_positive'] / max(
-            1, false_group['true_positive'] + false_group['false_negative']
-        )
-
-        # Compute FPR for each group
-        fpr_true = true_group['false_positive'] / max(
-            1, true_group['false_positive'] + true_group['true_negative']
-        )
-        fpr_false = false_group['false_positive'] / max(
-            1, false_group['false_positive'] + false_group['true_negative']
-        )
+        # Compute TPR and FPR for each group using a loop
+        tpr = {}
+        fpr = {}
+        for group_name, group in [('True', true_group), ('False', false_group)]:
+            tpr[group_name] = group['true_positive'] / max(
+                1, group['true_positive'] + group['false_negative']
+            )
+            fpr[group_name] = group['false_positive'] / max(
+                1, group['false_positive'] + group['true_negative']
+            )
 
         # Compute fairness scores
-        tpr_fairness = 1 - abs(tpr_true - tpr_false)
-        fpr_fairness = 1 - abs(fpr_true - fpr_false)
+        tpr_fairness = 1 - abs(tpr['True'] - tpr['False'])
+        fpr_fairness = 1 - abs(fpr['True'] - fpr['False'])
 
         # Final equalized odds score is minimum of the two fairness scores
         return min(tpr_fairness, fpr_fairness)
 
     @classmethod
     def _evaluate_dataset(
-        cls, train_data, validation_data, prediction_column_name, sensitive_column_name
+        cls,
+        train_data,
+        validation_data,
+        prediction_column_name,
+        sensitive_column_name,
+        sensitive_column_value,
     ):
         """Evaluate equalized odds for a single dataset."""
         # Train classifier
@@ -202,12 +205,21 @@ class EqualizedOddsImprovement(SingleTableMetric):
         # Compute prediction counts
         prediction_counts = cls._compute_prediction_counts(predictions, actuals, sensitive_values)
 
+        # Format the keys to include sensitive column value as in the spec
+        formatted_counts = {}
+        for key, counts in prediction_counts.items():
+            if key == 'True':
+                formatted_key = f'{sensitive_column_value}=True'
+            else:
+                formatted_key = f'{sensitive_column_value}=False'
+            formatted_counts[formatted_key] = counts
+
         # Compute equalized odds score
         equalized_odds_score = cls._compute_equalized_odds_score(prediction_counts)
 
         return {
             'equalized_odds': equalized_odds_score,
-            'prediction_counts_validation': prediction_counts,
+            'prediction_counts_validation': formatted_counts,
         }
 
     @classmethod
@@ -341,74 +353,49 @@ class EqualizedOddsImprovement(SingleTableMetric):
             )
         )
 
-        real_training_processed = cls._preprocess_data(
-            real_training_data,
-            prediction_column_name,
-            positive_class_label,
-            sensitive_column_name,
-            sensitive_column_value,
-            metadata,
-        )
+        processed_data = []
+        for data in [real_training_data, synthetic_data, real_validation_data]:
+            processed_data.append(
+                cls._preprocess_data(
+                    data,
+                    prediction_column_name,
+                    positive_class_label,
+                    sensitive_column_name,
+                    sensitive_column_value,
+                    metadata,
+                )
+            )
 
-        synthetic_processed = cls._preprocess_data(
-            synthetic_data,
-            prediction_column_name,
-            positive_class_label,
-            sensitive_column_name,
-            sensitive_column_value,
-            metadata,
-        )
+        real_training_processed, synthetic_processed, real_validation_processed = processed_data
+        results = []
+        for data in [real_training_processed, synthetic_processed]:
+            cls._validate_data_sufficiency(
+                data,
+                prediction_column_name,
+                sensitive_column_name,
+                1,
+                1,  # Using 1 since we converted to binary
+            )
 
-        real_validation_processed = cls._preprocess_data(
-            real_validation_data,
-            prediction_column_name,
-            positive_class_label,
-            sensitive_column_name,
-            sensitive_column_value,
-            metadata,
-        )
-
-        # Validate data sufficiency for training sets
-        cls._validate_data_sufficiency(
-            real_training_processed,
-            prediction_column_name,
-            sensitive_column_name,
-            1,
-            1,  # Using 1 since we converted to binary
-        )
-
-        cls._validate_data_sufficiency(
-            synthetic_processed,
-            prediction_column_name,
-            sensitive_column_name,
-            1,
-            1,  # Using 1 since we converted to binary
-        )
-
-        # Evaluate both datasets
-        real_results = cls._evaluate_dataset(
-            real_training_processed,
-            real_validation_processed,
-            prediction_column_name,
-            sensitive_column_name,
-        )
-
-        synthetic_results = cls._evaluate_dataset(
-            synthetic_processed,
-            real_validation_processed,
-            prediction_column_name,
-            sensitive_column_name,
-        )
+            results.append(
+                cls._evaluate_dataset(
+                    data,
+                    real_validation_processed,
+                    prediction_column_name,
+                    sensitive_column_name,
+                    sensitive_column_value,
+                )
+            )
 
         # Compute final improvement score
-        real_score = real_results['equalized_odds']
-        synthetic_score = synthetic_results['equalized_odds']
+        real_score = results[0]['equalized_odds']
+        synthetic_score = results[1]['equalized_odds']
         improvement_score = (synthetic_score - real_score) / 2 + 0.5
 
         return {
             'score': improvement_score,
-            'real_training_data': real_score,
-            'synthetic_data': synthetic_score,
+            'real_training_data': results[0],
+            'synthetic_data': results[1],
         }
 
     @classmethod

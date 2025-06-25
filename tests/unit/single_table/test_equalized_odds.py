@@ -14,6 +14,7 @@ class TestEqualizedOddsImprovement:
 
     def test_class_attributes(self):
         """Test that class attributes are set correctly."""
+        # Assert
         assert EqualizedOddsImprovement.name == 'EqualizedOddsImprovement'
         assert EqualizedOddsImprovement.goal.name == 'MAXIMIZE'
         assert EqualizedOddsImprovement.min_value == 0.0
@@ -21,21 +22,26 @@ class TestEqualizedOddsImprovement:
 
     def test_validate_data_sufficiency_valid_data(self):
         """Test _validate_data_sufficiency with sufficient data."""
+        # Setup
         data = pd.DataFrame({
             'prediction': ['A'] * 5 + ['B'] * 5 + ['A'] * 5 + ['B'] * 5,  # 5+5 for each group
             'sensitive': [1] * 10 + [0] * 10,  # 10 sensitive, 10 non-sensitive
         })
 
-        # Should not raise any exception
+        # Run
         EqualizedOddsImprovement._validate_data_sufficiency(data, 'prediction', 'sensitive', 'A', 1)
+
+        # Assert
 
     def test_validate_data_sufficiency_no_data_for_group(self):
         """Test _validate_data_sufficiency when no data exists for a group."""
+        # Setup
         data = pd.DataFrame({
             'prediction': ['A'] * 5 + ['B'] * 5,
             'sensitive': [0] * 10,  # Only non-sensitive group, no sensitive
         })
 
+        # Run & Assert
         with pytest.raises(ValueError, match='No data found for sensitive group'):
             EqualizedOddsImprovement._validate_data_sufficiency(
                 data, 'prediction', 'sensitive', 'A', 1
@@ -43,11 +49,13 @@ class TestEqualizedOddsImprovement:
 
     def test_validate_data_sufficiency_insufficient_positive_examples(self):
         """Test _validate_data_sufficiency with insufficient positive examples."""
+        # Setup
         data = pd.DataFrame({
             'prediction': ['A'] * 3 + ['B'] * 10,  # Only 3 positive examples
             'sensitive': [1] * 13,
         })
 
+        # Run & Assert
         with pytest.raises(ValueError, match='Insufficient data for sensitive group: 3 positive'):
             EqualizedOddsImprovement._validate_data_sufficiency(
                 data, 'prediction', 'sensitive', 'A', 1
@@ -55,11 +63,13 @@ class TestEqualizedOddsImprovement:
 
     def test_validate_data_sufficiency_insufficient_negative_examples(self):
         """Test _validate_data_sufficiency with insufficient negative examples."""
+        # Setup
         data = pd.DataFrame({
             'prediction': ['A'] * 10 + ['B'] * 3,  # Only 3 negative examples
             'sensitive': [1] * 13,
         })
 
+        # Run & Assert
         with pytest.raises(ValueError, match='Insufficient data for sensitive group.*3 negative'):
             EqualizedOddsImprovement._validate_data_sufficiency(
                 data, 'prediction', 'sensitive', 'A', 1
@@ -67,6 +77,7 @@ class TestEqualizedOddsImprovement:
 
     def test_preprocess_data_binary_conversion(self):
         """Test _preprocess_data converts columns to binary correctly."""
+        # Setup
         data = pd.DataFrame({
             'prediction': ['True', 'False', 'True'],
             'sensitive': ['A', 'B', 'A'],
@@ -81,10 +92,12 @@ class TestEqualizedOddsImprovement:
             }
         }
 
+        # Run
         result = EqualizedOddsImprovement._preprocess_data(
             data, 'prediction', 'True', 'sensitive', 'A', metadata
         )
 
+        # Assert
         expected_prediction = [1, 0, 1]
         expected_sensitive = [1, 0, 1]
 
@@ -94,6 +107,7 @@ class TestEqualizedOddsImprovement:
 
     def test_preprocess_data_categorical_handling(self):
         """Test _preprocess_data handles categorical columns correctly."""
+        # Setup
         data = pd.DataFrame({
             'prediction': [1, 0, 1],
             'sensitive': [1, 0, 1],
@@ -110,16 +124,18 @@ class TestEqualizedOddsImprovement:
             }
         }
 
+        # Run
         result = EqualizedOddsImprovement._preprocess_data(
             data, 'prediction', 1, 'sensitive', 1, metadata
         )
 
-        # Categorical and boolean columns should be converted to category type
+        # Assert
         assert result['cat_feature'].dtype.name == 'category'
         assert result['bool_feature'].dtype.name == 'category'
 
     def test_preprocess_data_datetime_handling(self):
         """Test _preprocess_data handles datetime columns correctly."""
+        # Setup
         data = pd.DataFrame({
             'prediction': [1, 0, 1],
             'sensitive': [1, 0, 1],
@@ -134,15 +150,17 @@ class TestEqualizedOddsImprovement:
             }
         }
 
+        # Run
         result = EqualizedOddsImprovement._preprocess_data(
             data, 'prediction', 1, 'sensitive', 1, metadata
         )
 
-        # Datetime columns should be converted to numeric
+        # Assert
         assert pd.api.types.is_numeric_dtype(result['datetime_feature'])
 
     def test_preprocess_data_does_not_modify_original(self):
         """Test _preprocess_data doesn't modify the original data."""
+        # Setup
         original_data = pd.DataFrame({
             'prediction': ['True', 'False'],
             'sensitive': ['A', 'B'],
@@ -155,26 +173,28 @@ class TestEqualizedOddsImprovement:
             }
         }
 
+        # Run
         EqualizedOddsImprovement._preprocess_data(
             original_data, 'prediction', 'True', 'sensitive', 'A', metadata
         )
 
-        # Original data should be unchanged
+        # Assert
         assert original_data['prediction'].tolist() == ['True', 'False']
         assert original_data['sensitive'].tolist() == ['A', 'B']
 
     def test_compute_prediction_counts_both_groups(self):
         """Test _compute_prediction_counts with data for both sensitive groups."""
+        # Setup
         predictions = np.array([1, 0, 1, 0, 1, 0])
         actuals = np.array([1, 0, 0, 1, 1, 0])
         sensitive_values = np.array([True, True, True, False, False, False])
 
+        # Run
         result = EqualizedOddsImprovement._compute_prediction_counts(
             predictions, actuals, sensitive_values
         )
 
-        # For sensitive=True group: predictions=[1,0,1], actuals=[1,0,0]
-        # TP=1 (pred=1, actual=1), FP=1 (pred=1, actual=0), TN=1 (pred=0, actual=0), FN=0
+        # Assert
         expected_true = {
             'true_positive': 1,
             'false_positive': 1,
@@ -182,8 +202,6 @@ class TestEqualizedOddsImprovement:
             'false_negative': 0,
         }
 
-        # For sensitive=False group: predictions=[0,1,0], actuals=[1,1,0]
-        # TP=1 (pred=1, actual=1), FP=0, TN=1 (pred=0, actual=0), FN=1 (pred=0, actual=1)
         expected_false = {
             'true_positive': 1,
             'false_positive': 0,
@@ -196,14 +214,17 @@ class TestEqualizedOddsImprovement:
 
     def test_compute_prediction_counts_missing_group(self):
         """Test _compute_prediction_counts when one group has no data."""
+        # Setup
         predictions = np.array([1, 0, 1])
         actuals = np.array([1, 0, 0])
         sensitive_values = np.array([True, True, True])
 
+        # Run
         result = EqualizedOddsImprovement._compute_prediction_counts(
             predictions, actuals, sensitive_values
         )
 
+        # Assert
         assert result['True'] == {
             'true_positive': 1,
             'false_positive': 1,
@@ -219,7 +240,7 @@ class TestEqualizedOddsImprovement:
 
     def test_compute_equalized_odds_score_perfect_fairness(self):
         """Test _compute_equalized_odds_score with perfect fairness."""
-        # Both groups have identical TPR and FPR
+        # Setup
         prediction_counts = {
             'True': {
                 'true_positive': 10,
@@ -235,14 +256,15 @@ class TestEqualizedOddsImprovement:
             },
         }
 
+        # Run
         score = EqualizedOddsImprovement._compute_equalized_odds_score(prediction_counts)
 
-        # With identical rates, fairness should be 1.0
+        # Assert
         assert score == 1.0
 
     def test_compute_equalized_odds_score_maximum_unfairness(self):
         """Test _compute_equalized_odds_score with maximum unfairness."""
-        # Groups have completely opposite TPR and FPR
+        # Setup
         prediction_counts = {
             'True': {
                 'true_positive': 10,  # TPR = 10/10 = 1.0
@@ -258,14 +280,15 @@ class TestEqualizedOddsImprovement:
             },
         }
 
+        # Run
         score = EqualizedOddsImprovement._compute_equalized_odds_score(prediction_counts)
 
-        # With maximum difference in both TPR and FPR, score should be 0.0
+        # Assert
         assert score == 0.0
 
     def test_compute_equalized_odds_score_handles_division_by_zero(self):
         """Test _compute_equalized_odds_score handles division by zero gracefully."""
-        # One group has no positive or negative cases
+        # Setup
         prediction_counts = {
             'True': {
                 'true_positive': 0,
@@ -281,8 +304,10 @@ class TestEqualizedOddsImprovement:
             },
         }
 
-        # Should not raise an exception
+        # Run
         score = EqualizedOddsImprovement._compute_equalized_odds_score(prediction_counts)
+
+        # Assert
         assert isinstance(score, float)
         assert 0.0 <= score <= 1.0
 
@@ -291,7 +316,7 @@ class TestEqualizedOddsImprovement:
     @patch.object(EqualizedOddsImprovement, '_compute_equalized_odds_score')
     def test_evaluate_dataset(self, mock_compute_score, mock_compute_counts, mock_train):
         """Test _evaluate_dataset integrates all components correctly."""
-        # Setup mocks
+        # Setup
         mock_classifier = Mock()
         mock_classifier.predict.return_value = np.array([1, 0, 1])
         mock_train.return_value = mock_classifier
@@ -301,7 +326,6 @@ class TestEqualizedOddsImprovement:
 
         mock_compute_score.return_value = 0.8
 
-        # Test data
         train_data = pd.DataFrame({
             'feature': [1, 2, 3],
             'target': [0, 1, 0],
@@ -314,11 +338,12 @@ class TestEqualizedOddsImprovement:
             'sensitive': [1, 1, 0],
         })
 
+        # Run
         result = EqualizedOddsImprovement._evaluate_dataset(
-            train_data, validation_data, 'target', 'sensitive'
+            train_data, validation_data, 'target', 'sensitive', 'sensitive_value'
         )
 
-        # Verify method calls
+        # Assert
         mock_train.assert_called_once_with(train_data, 'target')
 
         expected_features = pd.DataFrame({'feature': [4, 5, 6], 'sensitive': [1, 1, 0]})
@@ -326,7 +351,6 @@ class TestEqualizedOddsImprovement:
         call_features = mock_classifier.predict.call_args[0][0]
         pd.testing.assert_frame_equal(call_features, expected_features)
 
-        # Verify compute_counts was called with correct arguments
         mock_compute_counts.assert_called_once()
         call_args = mock_compute_counts.call_args[0]
         np.testing.assert_array_equal(call_args[0], np.array([1, 0, 1]))  # predictions
@@ -335,12 +359,17 @@ class TestEqualizedOddsImprovement:
 
         mock_compute_score.assert_called_once_with(mock_prediction_counts)
 
-        # Verify result
         expected_result = {
             'equalized_odds': 0.8,
-            'prediction_counts_validation': mock_prediction_counts,
+            'prediction_counts_validation': {
+                'sensitive_value=True': {},
+                'sensitive_value=False': {},
+            },
         }
-        assert result == expected_result
+        assert result['equalized_odds'] == expected_result['equalized_odds']
+        assert list(result['prediction_counts_validation'].keys()) == list(
+            expected_result['prediction_counts_validation'].keys()
+        )
 
     @patch('sdmetrics.single_table.equalized_odds._validate_tables')
     @patch('sdmetrics.single_table.equalized_odds._validate_prediction_column_name')
@@ -364,15 +393,15 @@ class TestEqualizedOddsImprovement:
         mock_validate_tables,
     ):
         """Test _validate_parameters calls all validation functions."""
-        # Setup mock return values
+        # Setup
         mock_validate_inputs.return_value = (pd.DataFrame(), pd.DataFrame(), {'columns': {}})
 
-        # Test data
         real_training = pd.DataFrame({'col': [1, 2]})
         synthetic = pd.DataFrame({'col': [3, 4]})
         validation = pd.DataFrame({'col': [5, 6]})
         metadata = {'columns': {}}
 
+        # Run
         EqualizedOddsImprovement._validate_parameters(
             real_training,
             synthetic,
@@ -385,7 +414,7 @@ class TestEqualizedOddsImprovement:
             'XGBoost',
         )
 
-        # Verify all validators were called
+        # Assert
         mock_validate_tables.assert_called_once()
         mock_validate_prediction.assert_called_once_with('pred_col')
         mock_validate_sensitive.assert_called_once_with('sens_col')
@@ -410,7 +439,7 @@ class TestEqualizedOddsImprovement:
         mock_validate,
     ):
         """Test compute_breakdown integrates all components correctly."""
-        # Setup mocks
+        # Setup
         mock_process_data.return_value = (
             pd.DataFrame({'feature': [1, 2], 'target': [0, 1], 'sensitive': [0, 1]}),
             pd.DataFrame({'feature': [3, 4], 'target': [1, 0], 'sensitive': [1, 0]}),
@@ -428,7 +457,6 @@ class TestEqualizedOddsImprovement:
             {'equalized_odds': 0.8, 'prediction_counts_validation': {}},  # synthetic results
         ]
 
-        # Test data
         real_training = pd.DataFrame({
             'feature': [1, 2],
             'target': ['A', 'B'],
@@ -442,31 +470,26 @@ class TestEqualizedOddsImprovement:
         })
         metadata = {'columns': {}}
 
+        # Run
         result = EqualizedOddsImprovement.compute_breakdown(
             real_training, synthetic, validation, metadata, 'target', 'A', 'sensitive', 'X'
         )
 
-        # Verify validation was called
+        # Assert
         mock_validate.assert_called_once()
 
-        # Verify data processing was called
         mock_process_data.assert_called_once()
 
-        # Verify preprocessing was called 3 times
         assert mock_preprocess.call_count == 3
 
-        # Verify data sufficiency validation was called twice
         assert mock_validate_sufficiency.call_count == 2
 
-        # Verify evaluation was called twice
         assert mock_evaluate.call_count == 2
 
-        # Verify final score calculation
-        # improvement_score = (0.8 - 0.6) / 2 + 0.5 = 0.1 + 0.5 = 0.6
         expected_result = {
             'score': 0.6,
-            'real_training_data': 0.6,
-            'synthetic_data': 0.8,
+            'real_training_data': {'equalized_odds': 0.6, 'prediction_counts_validation': {}},
+            'synthetic_data': {'equalized_odds': 0.8, 'prediction_counts_validation': {}},
         }
         assert abs(result['score'] - expected_result['score']) < 1e-10
         assert result['real_training_data'] == expected_result['real_training_data']
@@ -475,15 +498,18 @@ class TestEqualizedOddsImprovement:
     @patch.object(EqualizedOddsImprovement, 'compute_breakdown')
     def test_compute_returns_score_from_breakdown(self, mock_compute_breakdown):
         """Test compute method returns just the score from compute_breakdown."""
+        # Setup
         mock_compute_breakdown.return_value = {
             'score': 0.75,
             'real_training_data': 0.6,
             'synthetic_data': 0.9,
         }
 
+        # Run
         result = EqualizedOddsImprovement.compute(
             pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), {}, 'pred', 'pos', 'sens', 'val'
         )
 
+        # Assert
         assert result == 0.75
         mock_compute_breakdown.assert_called_once()

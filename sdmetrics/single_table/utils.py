@@ -64,7 +64,11 @@ def _validate_column_values_exist(dataframes_dict, column_value_pairs):
     """
     for df_name, df in dataframes_dict.items():
         for column_name, value in column_value_pairs:
-            if value not in df[column_name].to_numpy():
+            column_values = df[column_name]
+            value_exists = (pd.isna(value) and column_values.isna().any()) or (
+                value in column_values.to_numpy()
+            )
+            if not value_exists:
                 raise ValueError(f"Value '{value}' not found in {df_name}['{column_name}']")
 
 

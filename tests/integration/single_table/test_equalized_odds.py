@@ -54,7 +54,10 @@ class TestEqualizedOddsImprovement:
 
     def test_compute_breakdown_basic(self, get_data_metadata):
         """Test basic functionality of compute_breakdown."""
+        # Setup
         real_training, synthetic, validation, metadata = get_data_metadata
+
+        # Run
         result = EqualizedOddsImprovement.compute_breakdown(
             real_training_data=real_training,
             synthetic_data=synthetic,
@@ -67,13 +70,15 @@ class TestEqualizedOddsImprovement:
             classifier='XGBoost',
         )
 
+        # Assert
         # Verify all scores are in valid range
         assert 0.0 <= result['score'] <= 1.0
-        assert 0.0 <= result['real_training_data'] <= 1.0
-        assert 0.0 <= result['synthetic_data'] <= 1.0
+        assert 0.0 <= result['real_training_data']['equalized_odds'] <= 1.0
+        assert 0.0 <= result['synthetic_data']['equalized_odds'] <= 1.0
 
     def test_compute_breakdown_biased_real(self, get_data_metadata):
         """Test with heavily biased real data and balanced synthetic data."""
+        # Setup
         np.random.seed(42)
         real_training, synthetic, validation, metadata = get_data_metadata
 
@@ -88,6 +93,7 @@ class TestEqualizedOddsImprovement:
             ['True', 'False'], sum(group_b_mask), p=[0.9, 0.1]
         )
 
+        # Run
         result = EqualizedOddsImprovement.compute_breakdown(
             real_training_data=real_training,
             synthetic_data=synthetic,
@@ -100,13 +106,15 @@ class TestEqualizedOddsImprovement:
             classifier='XGBoost',
         )
 
+        # Assert
         # Verify all scores are in valid range
         assert result['score'] > 0.5
-        assert result['real_training_data'] < 0.5
-        assert result['synthetic_data'] > 0.5
+        assert result['real_training_data']['equalized_odds'] < 0.5
+        assert result['synthetic_data']['equalized_odds'] > 0.5
 
     def test_compute_breakdown_biased_synthetic(self, get_data_metadata):
         """Test with heavily biased synthetic data and balanced real data."""
+        # Setup
         np.random.seed(42)
         real_training, synthetic, validation, metadata = get_data_metadata
 
@@ -121,6 +129,7 @@ class TestEqualizedOddsImprovement:
             ['True', 'False'], sum(group_b_mask), p=[0.1, 0.9]
         )
 
+        # Run
         result = EqualizedOddsImprovement.compute_breakdown(
             real_training_data=real_training,
             synthetic_data=synthetic,
@@ -133,14 +142,73 @@ class TestEqualizedOddsImprovement:
             classifier='XGBoost',
         )
 
+        # Assert
         # Verify all scores are in valid range
         assert result['score'] < 0.5
-        assert result['real_training_data'] > 0.5
-        assert result['synthetic_data'] < 0.5
+        assert result['real_training_data']['equalized_odds'] > 0.5
+        assert result['synthetic_data']['equalized_odds'] < 0.5
+
+    def test_compute_breakdown_output_format(self, get_data_metadata):
+        """Test that compute_breakdown produces the expected output format."""
+        # Setup
+        real_training, synthetic, validation, metadata = get_data_metadata
+
+        # Run
+        result = EqualizedOddsImprovement.compute_breakdown(
+            real_training_data=real_training,
+            synthetic_data=synthetic,
+            real_validation_data=validation,
+            metadata=metadata,
+            prediction_column_name='loan_approved',
+            positive_class_label='True',
+            sensitive_column_name='race',
+            sensitive_column_value='A',
+            classifier='XGBoost',
+        )
+
+        # Assert
+        assert isinstance(result, dict)
+        expected_top_keys = {'score', 'real_training_data', 'synthetic_data'}
+        assert set(result.keys()) == expected_top_keys
+
+        assert isinstance(result['score'], float)
+        assert 0.0 <= result['score'] <= 1.0
+
+        for data in [result['real_training_data'], result['synthetic_data']]:
+            assert isinstance(data, dict)
+            expected_data_keys = {'equalized_odds', 'prediction_counts_validation'}
+            assert set(data.keys()) == expected_data_keys
+
+            assert isinstance(data['equalized_odds'], float)
+            assert 0.0 <= data['equalized_odds'] <= 1.0
+
+            pred_counts = data['prediction_counts_validation']
+            assert isinstance(pred_counts, dict)
+            expected_group_keys = {'A=True', 'A=False'}
+            assert set(pred_counts.keys()) == expected_group_keys
+
+            expected_confusion_keys = {
+                'true_positive',
+                'false_positive',
+                'true_negative',
+                'false_negative',
+            }
+            for group_key in expected_group_keys:
+                group_counts = pred_counts[group_key]
+                assert isinstance(group_counts, dict)
+                assert set(group_counts.keys()) == expected_confusion_keys
+
+                for count_key in expected_confusion_keys:
+                    count_value = group_counts[count_key]
+                    assert isinstance(count_value, int)
+                    assert count_value >= 0
 
     def test_compute_basic(self, get_data_metadata):
         """Test basic functionality of compute method."""
+        # Setup
         real_training, synthetic, validation, metadata = get_data_metadata
+
+        # Run
         score = EqualizedOddsImprovement.compute(
             real_training_data=real_training,
             synthetic_data=synthetic,
@@ -153,44 +221,54 @@ class TestEqualizedOddsImprovement:
             classifier='XGBoost',
         )
 
+        # Assert
         assert 0.0 <= score <= 1.0
 
     def test_insufficient_data_error(self, get_data_metadata):
         """Test that insufficient data raises appropriate error."""
+        # Setup
         real_training, synthetic, validation, metadata = get_data_metadata
 
         for data in [real_training, synthetic]:
             group_a_mask = data['race'] == 'A'
             data.loc[group_a_mask, 'loan_approved'] = 'True'
-            with pytest.raises(ValueError, match='Insufficient .* examples'):
-                EqualizedOddsImprovement.compute_breakdown(
-                    real_training_data=real_training,
-                    synthetic_data=synthetic,
-                    real_validation_data=validation,
-                    metadata=metadata,
-                    prediction_column_name='loan_approved',
-                    positive_class_label='True',
-                    sensitive_column_name='race',
-                    sensitive_column_value='A',
-                    classifier='XGBoost',
-                )
 
+        # Run & Assert
+        with pytest.raises(ValueError, match='Insufficient .* examples'):
+            EqualizedOddsImprovement.compute_breakdown(
+                real_training_data=real_training,
+                synthetic_data=synthetic,
+                real_validation_data=validation,
+                metadata=metadata,
+                prediction_column_name='loan_approved',
+                positive_class_label='True',
+                sensitive_column_name='race',
+                sensitive_column_value='A',
+                classifier='XGBoost',
+            )
+
+        # Setup
+        for data in [real_training, synthetic]:
+            group_a_mask = data['race'] == 'A'
             data.loc[group_a_mask, 'loan_approved'] = 'False'
-            with pytest.raises(ValueError, match='Insufficient .* examples'):
-                EqualizedOddsImprovement.compute_breakdown(
-                    real_training_data=real_training,
-                    synthetic_data=synthetic,
-                    real_validation_data=validation,
-                    metadata=metadata,
-                    prediction_column_name='loan_approved',
-                    positive_class_label='True',
-                    sensitive_column_name='race',
-                    sensitive_column_value='A',
-                    classifier='XGBoost',
-                )
+
+        # Run & Assert
+        with pytest.raises(ValueError, match='Insufficient .* examples'):
+            EqualizedOddsImprovement.compute_breakdown(
+                real_training_data=real_training,
+                synthetic_data=synthetic,
+                real_validation_data=validation,
+                metadata=metadata,
+                prediction_column_name='loan_approved',
+                positive_class_label='True',
+                sensitive_column_name='race',
+                sensitive_column_value='A',
+                classifier='XGBoost',
+            )
 
     def test_missing_columns_error(self):
         """Test that missing required columns raise appropriate error."""
+        # Setup
         real_training = pd.DataFrame({
             'feature1': np.random.normal(0, 1, 100),
             'target': np.random.choice([0, 1], 100),
@@ -217,6 +295,7 @@ class TestEqualizedOddsImprovement:
             }
         }
 
+        # Run & Assert
         with pytest.raises(ValueError, match='Missing columns in real_training_data'):
             EqualizedOddsImprovement.compute_breakdown(
                 real_training_data=real_training,
@@ -232,6 +311,7 @@ class TestEqualizedOddsImprovement:
 
     def test_unsupported_classifier_error(self):
         """Test that unsupported classifier raises appropriate error."""
+        # Setup
         real_training = pd.DataFrame({
             'feature1': np.random.normal(0, 1, 100),
             'sensitive': np.random.choice([0, 1], 100),
@@ -258,6 +338,7 @@ class TestEqualizedOddsImprovement:
             }
         }
 
+        # Run & Assert
         with pytest.raises(ValueError, match='Currently only `XGBoost` is supported as classifier'):
             EqualizedOddsImprovement.compute_breakdown(
                 real_training_data=real_training,
@@ -273,6 +354,7 @@ class TestEqualizedOddsImprovement:
 
     def test_three_classes(self):
         """Test the metric with three classes."""
+        # Setup
         real_training = pd.DataFrame({
             'feature1': np.random.normal(0, 1, 100),
             'feature2': np.random.normal(0, 1, 100),
@@ -303,6 +385,7 @@ class TestEqualizedOddsImprovement:
             }
         }
 
+        # Run
         result = EqualizedOddsImprovement.compute_breakdown(
             real_training_data=real_training,
             synthetic_data=synthetic,
@@ -315,13 +398,16 @@ class TestEqualizedOddsImprovement:
             classifier='XGBoost',
         )
 
+        # Assert
+        # Verify all scores are in valid range
         assert 0.0 <= result['score'] <= 1.0
-        assert 0.0 <= result['real_training_data'] <= 1.0
-        assert 0.0 <= result['synthetic_data'] <= 1.0
+        assert 0.0 <= result['real_training_data']['equalized_odds'] <= 1.0
+        assert 0.0 <= result['synthetic_data']['equalized_odds'] <= 1.0
 
     def test_perfect_fairness_case(self):
         """Test case where both datasets have perfect fairness."""
 
+        # Setup
         # Create perfectly fair datasets
         def create_fair_data(n):
             data = pd.DataFrame({
@@ -351,6 +437,7 @@ class TestEqualizedOddsImprovement:
             }
         }
 
+        # Run
         result = EqualizedOddsImprovement.compute_breakdown(
             real_training_data=real_training,
             synthetic_data=synthetic,
@@ -363,15 +450,18 @@ class TestEqualizedOddsImprovement:
             classifier='XGBoost',
         )
 
+        # Assert
         # Both should have high equalized odds scores
         assert 0.0 <= result['score'] <= 1.0
-        assert 0.0 <= result['real_training_data'] <= 1.0
-        assert 0.0 <= result['synthetic_data'] <= 1.0
+        assert 0.0 <= result['real_training_data']['equalized_odds'] <= 1.0
+        assert 0.0 <= result['synthetic_data']['equalized_odds'] <= 1.0
 
     def test_parameter_validation_type_errors(self, get_data_metadata):
         """Test that parameter validation catches type errors."""
+        # Setup
         real_training, synthetic, validation, metadata = get_data_metadata
 
+        # Run & Assert
         # Test non-string column names
         with pytest.raises(TypeError, match='`prediction_column_name` must be a string'):
             EqualizedOddsImprovement.compute_breakdown(
@@ -419,8 +509,10 @@ class TestEqualizedOddsImprovement:
 
     def test_parameter_validation_value_errors(self, get_data_metadata):
         """Test that parameter validation catches value errors."""
+        # Setup
         real_training, synthetic, validation, metadata = get_data_metadata
 
+        # Run & Assert
         # Test positive_class_label not found
         with pytest.raises(
             ValueError,
@@ -457,6 +549,7 @@ class TestEqualizedOddsImprovement:
 
     def test_validation_data_column_mismatch(self):
         """Test that validation data with different columns raises error."""
+        # Setup
         real_training = pd.DataFrame({
             'feature1': np.random.normal(0, 1, 100),
             'sensitive': np.random.choice([0, 1], 100),
@@ -483,6 +576,7 @@ class TestEqualizedOddsImprovement:
             }
         }
 
+        # Run & Assert
         with pytest.raises(ValueError, match='real_validation_data must have the same columns'):
             EqualizedOddsImprovement.compute_breakdown(
                 real_training_data=real_training,
@@ -495,3 +589,123 @@ class TestEqualizedOddsImprovement:
                 sensitive_column_value=1,
                 classifier='XGBoost',
             )
+
+    def test_sensitive_column_nan(self):
+        """Test that the metric handles NaN values in the sensitive column."""
+        # Setup
+        n = 1000
+
+        # Create data with NaN values in sensitive column
+        data = pd.DataFrame({
+            'feature1': np.random.normal(0, 1, n),
+            'feature2': np.random.normal(0, 1, n),
+            'sensitive': np.random.choice(['A', 'B', np.nan], n),
+            'target': np.random.choice(['True', 'False'], n),
+        })
+
+        real_training = data.iloc[: int(0.4 * n)].reset_index(drop=True)
+        synthetic = data.iloc[int(0.4 * n) : int(0.8 * n)].reset_index(drop=True)
+        validation = data.iloc[int(0.8 * n) :].reset_index(drop=True)
+
+        metadata = {
+            'columns': {
+                'feature1': {'sdtype': 'numerical'},
+                'feature2': {'sdtype': 'numerical'},
+                'sensitive': {'sdtype': 'categorical'},
+                'target': {'sdtype': 'categorical'},
+            }
+        }
+
+        # Run
+        result = EqualizedOddsImprovement.compute_breakdown(
+            real_training_data=real_training,
+            synthetic_data=synthetic,
+            real_validation_data=validation,
+            metadata=metadata,
+            prediction_column_name='target',
+            positive_class_label='True',
+            sensitive_column_name='sensitive',
+            sensitive_column_value='A',
+        )
+
+        # Assert
+        assert 0.0 <= result['score'] <= 1.0
+        assert 0.0 <= result['real_training_data']['equalized_odds'] <= 1.0
+        assert 0.0 <= result['synthetic_data']['equalized_odds'] <= 1.0
+
+        # Run
+        result = EqualizedOddsImprovement.compute_breakdown(
+            real_training_data=real_training,
+            synthetic_data=synthetic,
+            real_validation_data=validation,
+            metadata=metadata,
+            prediction_column_name='target',
+            positive_class_label='True',
+            sensitive_column_name='sensitive',
+            sensitive_column_value=str(np.nan),  # NaN value in sensitive column
+        )
+
+        # Assert
+        assert 0.0 <= result['score'] <= 1.0
+        assert 0.0 <= result['real_training_data']['equalized_odds'] <= 1.0
+        assert 0.0 <= result['synthetic_data']['equalized_odds'] <= 1.0
+
+    def test_sensitive_column_nan_integers(self):
+        """Test that the metric handles NaN values in the sensitive column."""
+        # Setup
+        n = 1000
+
+        # Create data with NaN values in sensitive column
+        data = pd.DataFrame({
+            'feature1': np.random.normal(0, 1, n),
+            'feature2': np.random.normal(0, 1, n),
+            'sensitive': np.random.choice([0, 1, np.nan], n),
+            'target': np.random.choice(['True', 'False'], n),
+        })
+
+        real_training = data.iloc[: int(0.4 * n)].reset_index(drop=True)
+        synthetic = data.iloc[int(0.4 * n) : int(0.8 * n)].reset_index(drop=True)
+        validation = data.iloc[int(0.8 * n) :].reset_index(drop=True)
+
+        metadata = {
+            'columns': {
+                'feature1': {'sdtype': 'numerical'},
+                'feature2': {'sdtype': 'numerical'},
+                'sensitive': {'sdtype': 'categorical'},
+                'target': {'sdtype': 'categorical'},
+            }
+        }
+
+        # Run
+        result = EqualizedOddsImprovement.compute_breakdown(
+            real_training_data=real_training,
+            synthetic_data=synthetic,
+            real_validation_data=validation,
+            metadata=metadata,
+            prediction_column_name='target',
+            positive_class_label='True',
+            sensitive_column_name='sensitive',
+            sensitive_column_value=1,
+        )
+
+        # Assert
+        assert 0.0 <= result['score'] <= 1.0
+        assert 0.0 <= result['real_training_data']['equalized_odds'] <= 1.0
+        assert 0.0 <= result['synthetic_data']['equalized_odds'] <= 1.0
+
+        # Run
+        result = EqualizedOddsImprovement.compute_breakdown(
+            real_training_data=real_training,
+            synthetic_data=synthetic,
+            real_validation_data=validation,
+            metadata=metadata,
+            prediction_column_name='target',
+            positive_class_label='True',
+            sensitive_column_name='sensitive',
+            sensitive_column_value=np.nan,  # NaN value in sensitive column
+        )
+
+        # Assert
+        assert 0.0 <= result['score'] <= 1.0
+        assert 0.0 <= result['real_training_data']['equalized_odds'] <= 1.0
+        assert 0.0 <= result['synthetic_data']['equalized_odds'] <= 1.0
