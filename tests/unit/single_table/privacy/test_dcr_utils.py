@@ -137,7 +137,7 @@ def test_calculate_dcr(
 
 
 def test_calculate_dcr_different_cols_in_metadata(real_data, synthetic_data, test_metadata):
-    """Test that only intersecting columns of metadata, synthetic data and real data are measured."""
+    """Test that only intersecting columns of metadata, synthetic and real data are measured."""
     # Setup
     metadata_drop_columns = ['bool_col', 'datetime_col', 'cat_int_col', 'datetime_str_col']
     for col in metadata_drop_columns:

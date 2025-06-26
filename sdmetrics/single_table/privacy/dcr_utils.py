@@ -42,7 +42,7 @@ def _process_dcr_chunk(dataset_chunk, reference_chunk, cols_to_keep, metadata, r
             equals_cat = (ref_column == data_column) | (ref_column.isna() & data_column.isna())
             full_dataset[diff_col_name] = (~equals_cat).astype(int)
 
-        full_dataset.drop(columns=[col_name + '_ref', col_name + '_data'], inplace=True)
+        full_dataset = full_dataset.drop(columns=[col_name + '_ref', col_name + '_data'])
 
     full_dataset['diff'] = full_dataset.iloc[:, 2:].sum(axis=1) / len(cols_to_keep)
     chunk_result = (
