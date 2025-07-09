@@ -24,7 +24,7 @@ The process of releasing a new version involves several steps:
 
 ## Install SDMetrics from source
 
-Clone the project and install the development requirements before start the release process. Alternatively, with your virtualenv activated.
+Clone the project and install the development requirements before starting the release process. Alternatively, with your virtualenv activated:
 
 ```bash
 git clone https://github.com/sdv-dev/SDMetrics.git
