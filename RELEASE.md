@@ -105,7 +105,7 @@ You neet to check that:
   be released anyway, move them to the next milestone.
 - All the issues in the milestone are assigned to at least one person.
 - All the pull requests closed since the latest release are associated to an issue. If necessary, create issues
-  and assign them to the milestone. Also assign the person who opened the issue to them.
+  and assign them to the milestone. Also assign the person who opened the pull request to the issue.
 
 ## Update HISTORY
 Run the [Release Prep](https://github.com/sdv-dev/SDMetrics/actions/workflows/prepare_release.yml) workflow. This workflow will create a pull request with updates to HISTORY.md
