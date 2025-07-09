@@ -149,7 +149,7 @@ Depending on the type of release, run one of the following:
 
 * `make release`: This will release a patch, which is the most common type of release. Use this when the changes are bugfixes or enhancements that do not modify the existing user API. Changes that modify the user API to add new features but that do not modify the usage of the previous features can also be released as a patch.
 * `make release-minor`: This will release the next minor version. Use this if the changes modify the existing user API in any way, even if it is backwards compatible. Minor backwards incompatible changes can also be released as minor versions while the library is still in beta state. After the major version 1 has been released, minor version can only be used to add backwards compatible API changes.
-* `make release-major`: This will release the next major version. Use this to if the changes modify the user API in a backwards incompatible way after the major version 1 has been released.
+* `make release-major`: This will release the next major version. Use this if the changes modify the user API in a backwards incompatible way after the major version 1 has been released.
 
 Running one of these will **push commits directly** to `main`.
 At the end, you should see the 3 commits on `main` (from oldest to newest):
