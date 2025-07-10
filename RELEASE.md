@@ -1,135 +1,121 @@
 # Release workflow
 
-This document describes the steps required to perform a full release of **SDMetrics**.
+The process of releasing a new version involves several steps:
 
-## Pre-requisites
+1. [Install SDMetrics from source](#install-sdmetrics-from-source)
 
-Before starting to prepare an **SDMetrics** release make sure of the following points:
+2. [Linting and tests](#linting-and-tests)
 
-1. All the changes that need to be included in the current release have been added to
-   the [sdv-dev/SDMetrics repository](https://github.com/sdv-dev/SDMetrics) `main`
-   branch.
-2. All the issues related to code changes which were closed after the latest release
-   have been assigned to the current milestone, given a `bug` or `enhancement` tag
-   and assigned to the developer or developers who contributed in resolving it.
-3. All the Pull Requests that have been merged since the latest release are
-   directly related to one of the issues assigned to the Milestone. If there is a
-   Pull Requests for which no issue exist, you can treat the Pull Request itself as
-   an issue and assign a developer, a tag and a milestone to it directly.
-4. The Milestone that corresponds to the release does not have any issue that is still open.
-   If there is any, either close it (if possible), or deassign it from the Milestone.
-5. The latest build for the `main` branch performed by the CI systems (Github Actions
-   and Travis) was successful. If the builds are more than a couple of days old, re-trigger
-   them and wait for them to finish successfully.
+3. [Make a release candidate](#make-a-release-candidate)
 
-## Clone the latest version of **SDMetrics** and test it
+4. [Integration with SDV](#integration-with-sdv)
 
-1. Clone the repository from scratch in a new folder:
+5. [Milestone](#milestone)
 
-```bash
-git clone git@github.com:sdv-dev/SDMetrics SDMetrics.release
-```
+6. [Update HISTORY](#update-history)
 
-2. Create a fresh `virtualenv`, activate it and run `make install-develop` inside the repository
-   folder (Note: the example uses plain `virtualenv`, but `virtualenvwrapper` or `conda` are
-   valid alternatives:
+7. [Check the release](#check-the-release)
+
+8. [Update stable branch and bump version](#update-stable-branch-and-bump-version)
+
+9. [Create the Release on GitHub](#create-the-release-on-github)
+
+10. [Close milestone and create new milestone](#close-milestone-and-create-new-milestone)
+
+## Install SDMetrics from source
+
+Clone the project and install the development requirements before starting the release process. Alternatively, with your virtualenv activated:
 
 ```bash
-cd SDMetrics.release
-virtualenv venv
-source venv/bin/activate
+git clone https://github.com/sdv-dev/SDMetrics.git
+cd SDMetrics
+git checkout main
 make install-develop
 ```
 
-3. Test everything locally
+## Linting and tests
+
+Execute the tests and linting. The tests must end with no errors:
 
 ```bash
-make test-all
+make test && make lint
 ```
 
-## (Optional) Bump version
+And you will see something like this:
 
-If the release that you are about to make contained any API or relevant dependency changes,
-you will need to bump the `minor` or `major` version of **SDMetrics**, and now would be the
-right moment to do so.
-
-For this, execute the `bumpversion-minor` or `bumpversion-major` make target:
-
-```bash
-make bumpversion-minor
 ```
+Coverage XML written to file ./integration_cov.xml
+================ 272 passed, 7254 warnings in 71.94s (0:01:11) =================
+....
+invoke lint
+No broken requirements found.
+275 files already formatted
+```
+
+The execution has finished with no errors, 0 test skipped and 166 warnings.
 
 ## Make a release candidate
 
-Before making the actual release, we will make a `release-candidate` which we will use to
-test other libraries that depend on **SDMetrics**.
+1. On the SDMetrics GitHub page, navigate to the [Actions][actions] tab.
+2. Select the `Release` action.
+3. Run it on the main branch. Make sure `Release candidate` is checked and `Test PyPI` is not.
+4. Check on [PyPI][sdmetrics-pypi] to assure the release candidate was successfully uploaded.
+  - You should see X.Y.ZdevN PRE-RELEASE
 
-To do so, run:
+[actions]: https://github.com/sdv-dev/SDMetrics/actions
+[sdmetrics-pypi]: https://pypi.org/project/SDMetrics/#history
 
-```bash
-make release-candidate
-```
+## Integration with SDV
 
-When asked to do so, type `confirm` and press enter, and also type your PyPI username and
-password if requested.
+### Create a branch on SDV to test the candidate
 
-If the process succeeds, do not forget to push back to GitHub afterwards:
+Before doing the actual release, we need to test that the candidate works with SDV. To do this, we can create a branch on SDV that points to the release candidate we just created using the following steps:
 
-```bash
-git push
-```
-
-## Test the libraries that depend on **SDMetrics** using the release candidate
-
-At this point you should test any known dependant libraries, like **SDV**, using the release
-candidate that we just uploaded to PyPI.
-
-For this, install the development version of SDV (or the library that you will test) inside a
-new `virtualenv` and run its tests.
+1. Create a new branch on the SDV repository.
 
 ```bash
-git clone git@github.com:sdv-dev/SDV SDV.SDMetrics
-cd SDV.SDMetrics
-virtualenv venv
-source bin/activate
-make install-develop
-pip install --pre sdmetrics
-make test-all
+git checkout -b test-sdmetrics-X.Y.Z
 ```
 
-## Write the release notes inside `HISTORY.md`
+2. Update the pyproject.toml to set the minimum version of SDMetrics to be the same as the version of the release. For example,
 
-If everything succeeded, you are ready to do the final release, which need to include its
-corresponding release notes.
+```toml
+'sdmetrics>=X.Y.Z.dev0'
+```
 
-For this, go to the [SDMetrics Milestones page](https://github.com/sdv-dev/SDMetrics/milestones)
-and click on the milestone that corresponds to the version that you are about to release to
-get the list of all the Issues and Pull Requests that have been assigned to it, which you can
-select and copy to use as a template for the release notes.
+3. Push this branch. This should trigger all the tests to run.
 
-Now open the `HISTORY.md` file, create a new release section at the top with a second level
-title which equals to `## <release-version> - <release-date>`, and then paste the issues list
-that you just copied below and edit it to add:
+```bash
+git push --set-upstream origin test-sdmetrics-X.Y.Z
+```
 
-* A short comprehensive summary of what's included on this release.
-* A gratitude note to the developers that contributed to the project during this milestone,
-  using their Github usernames.
-* One or more third level titles to either introduce an `### Issues resolved` section or multiple
-  sections, like `### Bugs Fixed`, `### New Features`, etc. Choose one option or the other
-  depending on the amount of issues that were closed.
-* Edit the issue titles that you pasted before, grouping them by types of issues, adding the
-  links to the Github issues and adding a `by @username` at the end indicating who resolved it.
+4. Check the [Actions][sdv-actions] tab on SDV to make sure all the tests pass.
 
-After your edits, the top of the file should look like this:
+[sdv-actions]: https://github.com/sdv-dev/SDV/actions
+
+## Milestone
+
+It's important to check that the GitHub and milestone issues are up to date with the release.
+
+You neet to check that:
+
+- The milestone for the current release exists.
+- All the issues closed since the latest release are associated to the milestone. If they are not, associate them.
+- All the issues associated to the milestone are closed. If there are open issues but the milestone needs to
+  be released anyway, move them to the next milestone.
+- All the issues in the milestone are assigned to at least one person.
+- All the pull requests closed since the latest release are associated to an issue. If necessary, create issues
+  and assign them to the milestone. Also assign the person who opened the pull request to the issue.
+
+## Update HISTORY
+Run the [Release Prep](https://github.com/sdv-dev/SDMetrics/actions/workflows/prepare_release.yml) workflow. This workflow will create a pull request with updates to HISTORY.md
+
+Make sure HISTORY.md is updated with the issues of the milestone:
 
 ```
 # History
 
-## X.Y.Z - YYYY-MM-DD
-
-<SHORT DESCRIPTION>
-
-Thanks to @<CONTRIBUTOR-USER-NAMES...> for contributing to this release.
+## X.Y.Z (YYYY-MM-DD)
 
 ### New Features
 
@@ -144,32 +130,43 @@ Thanks to @<CONTRIBUTOR-USER-NAMES...> for contributing to this release.
 * <ISSUE TITLE> - [Issue #<issue>](https://github.com/sdv-dev/SDMetrics/issues/<issue>) by @resolver
 ```
 
-In case of doubt, loo at the previous release notes and try to follow a similar style.
+The issue list per milestone can be found [here][milestones].
 
-Once this is done, commit the change directly to `main` with the message `Add release notes for
-vX.Y.Z`.
+[milestones]: https://github.com/sdv-dev/SDMetrics/milestones
 
-## Make the final release
+Put the pull request up for review and get 2 approvals to merge into `main`.
 
-Once everything else is ready, make the actual release with the command:
+## Check the release
+Once HISTORY.md has been updated on `main`, check if the release can be made:
 
 ```bash
-make release
+make check-release
 ```
 
-Type `confirm` when asked, and if required enter your PyPI username and password.
+## Update stable branch and bump version
+The `stable` branch needs to be updated with the changes from `main` and the version needs to be bumped.
+Depending on the type of release, run one of the following:
 
-## Add the release notes to Github
+* `make release`: This will release a patch, which is the most common type of release. Use this when the changes are bugfixes or enhancements that do not modify the existing user API. Changes that modify the user API to add new features but that do not modify the usage of the previous features can also be released as a patch.
+* `make release-minor`: This will release the next minor version. Use this if the changes modify the existing user API in any way, even if it is backwards compatible. Minor backwards incompatible changes can also be released as minor versions while the library is still in beta state. After the major version 1 has been released, minor version can only be used to add backwards compatible API changes.
+* `make release-major`: This will release the next major version. Use this if the changes modify the user API in a backwards incompatible way after the major version 1 has been released.
 
-After the release is made, copy the text that you just added to HISTORY.md and go the [Releases](
-https://github.com/sdv-dev/SDMetrics/releases) section in Github. You should find the release
-that you just made at the top, without description. Click on it and edit it, and then paste
-the HISTORY.md that you just copied on the description box and set
-`v<release-version> - <release-date>` as the title (mind the proceeding `v`).
+Running one of these will **push commits directly** to `main`.
+At the end, you should see the 3 commits on `main` (from oldest to newest):
+- `make release-tag: Merge branch 'main' into stable`
+- `Bump version: X.Y.Z.devN → X.Y.Z`
+- `Bump version: X.Y.Z -> X.Y.A.dev0`
 
-## Close the milestone and create the new one
+## Create the Release on GitHub
 
-At this point, go back to the [SDMetrics Milestones page](https://github.com/sdv-dev/SDMetrics/milestones)
-and `close` the one that corresponds to the release that we just made.
+After the update to HISTORY.md is merged into `main` and the version is bumped, it is time to [create the release GitHub](https://github.com/sdv-dev/SDMetrics/releases/new).
+- Create a new tag with the version number with a v prefix (e.g. v0.3.1)
+- The target should be the `stable` branch
+- Release title is the same as the tag (e.g. v0.3.1)
+- This is not a pre-release (`Set as a pre-release` should be unchecked)
 
-Also, if they do not exist yet, create the next patch and minor milestones.
+Click `Publish release`, which will kickoff the release workflow and automatically upload the package to [public PyPI](https://pypi.org/project/sdmetrics/).
+
+## Close milestone and create new milestone
+
+Finaly, **close the milestone** and, if it does not exist, **create the next milestone**.
