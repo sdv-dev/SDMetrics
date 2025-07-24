@@ -6,11 +6,11 @@ import pandas as pd
 import pytest
 
 from sdmetrics.single_table.data_augmentation.utils import (
-    _process_data_with_metadata_ml_efficacy_metrics,
     _validate_data_and_metadata,
     _validate_inputs,
     _validate_parameters,
 )
+from sdmetrics.single_table.utils import _process_data_with_metadata_ml_efficacy_metrics
 
 
 def test__validate_parameters():
@@ -92,7 +92,7 @@ def test__validate_data_and_metadata():
         'real_validation_data': pd.DataFrame({'target': [1, 0, 0]}),
         'metadata': {'columns': {'target': {'sdtype': 'categorical'}}},
         'prediction_column_name': 'target',
-        'minority_class_label': 1,
+        'prediction_column_label': 1,
     }
     expected_message_missing_prediction_column = re.escape(
         'The column `target` is not described in the metadata. Please update your metadata.'
@@ -107,11 +107,6 @@ def test__validate_data_and_metadata():
         "The metric can't be computed because the value `1` is not present in "
         'the column `target` for the real validation data. The `precision` and `recall`'
         ' are undefined for this case.'
-    )
-    expected_error_synthetic_wrong_label = re.escape(
-        'The ``target`` column must have the same values in the real and synthetic data. '
-        'The following values are present in the synthetic data and not the real'
-        " data: 'wrong_1', 'wrong_2'"
     )
 
     # Run and Assert
@@ -137,11 +132,6 @@ def test__validate_data_and_metadata():
     })
     with pytest.raises(ValueError, match=expected_error_missing_minority):
         _validate_data_and_metadata(**missing_minority_class_label_validation)
-
-    wrong_synthetic_label = deepcopy(inputs)
-    wrong_synthetic_label['synthetic_data'] = pd.DataFrame({'target': [0, 1, 'wrong_1', 'wrong_2']})
-    with pytest.raises(ValueError, match=expected_error_synthetic_wrong_label):
-        _validate_data_and_metadata(**wrong_synthetic_label)
 
 
 @patch('sdmetrics.single_table.data_augmentation.utils._validate_parameters')
@@ -189,8 +179,26 @@ def test__validate_inputs_mock(mock_validate_data_and_metadata, mock_validate_pa
         fixed_recall_value,
     )
 
+    expected_error_synthetic_wrong_label = re.escape(
+        'The `target` column must have the same values in the real and synthetic data. '
+        'The following values are present in the synthetic data and not the real'
+        " data: 'wrong_1', 'wrong_2'"
+    )
+    wrong_synthetic_label = pd.DataFrame({'target': [0, 1, 'wrong_1', 'wrong_2']})
+    with pytest.raises(ValueError, match=expected_error_synthetic_wrong_label):
+        _validate_inputs(
+            real_training_data,
+            wrong_synthetic_label,
+            real_validation_data,
+            metadata,
+            prediction_column_name,
+            minority_class_label,
+            classifier,
+            fixed_recall_value,
+        )
 
-@patch('sdmetrics.single_table.data_augmentation.utils._process_data_with_metadata')
+
+@patch('sdmetrics.single_table.utils._process_data_with_metadata')
 def test__process_data_with_metadata_ml_efficacy_metrics(mock_process_data_with_metadata):
     """Test the ``_process_data_with_metadata_ml_efficacy_metrics`` method."""
     # Setup

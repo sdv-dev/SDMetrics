@@ -51,7 +51,8 @@ class DCROverfittingProtection(SingleTableMetric):
         ):
             raise TypeError(
                 f'All of real_training_data ({type(real_training_data)}), synthetic_data '
-                f'({type(synthetic_data)}), and real_validation_data ({type(real_validation_data)}) '
+                f'({type(synthetic_data)}), and real_validation_data '
+                f'({type(real_validation_data)}) '
                 'must be of type pandas.DataFrame.'
             )
 
@@ -59,7 +60,8 @@ class DCROverfittingProtection(SingleTableMetric):
             warnings.warn(
                 f'Your real_validation_data contains {len(real_validation_data)} rows while your '
                 f'real_training_data contains {len(real_training_data)} rows. For most accurate '
-                'results, we recommend that the validation data at least half the size of the training data.'
+                'results, we recommend that the validation data at least half the size of the '
+                'training data.'
             )
 
         return num_rows_subsample, num_iterations

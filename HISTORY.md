@@ -1,5 +1,25 @@
 # History
 
+## v0.22.0 - 2025-07-24
+
+### New Features
+
+* Add a fairness metric that computes Equalized Odds - Issue [#772](https://github.com/sdv-dev/SDMetrics/issues/772) by @fealho
+* Add a violin plot visualizations to compare a pair of columns - Issue [#759](https://github.com/sdv-dev/SDMetrics/issues/759) by @R-Palazzo
+
+### Internal
+
+* Fix test failures with pandas 2.3 - Issue [#773](https://github.com/sdv-dev/SDMetrics/issues/773) by @rwedge
+* Check pyproject for release candidate dependencies - Issue [#770](https://github.com/sdv-dev/SDMetrics/issues/770) by @rwedge
+
+### Maintenance
+
+* Update python setup step in workflows to use latest python version - Issue [#653](https://github.com/sdv-dev/SDMetrics/issues/653) by @frances-h
+
+### Miscellaneous
+
+* Add workflow to release SDMetrics on PyPI - Issue [#783](https://github.com/sdv-dev/SDMetrics/issues/783) by @gsheni
+
 ## v0.21.0 - 2025-05-29
 
 ### New Features
