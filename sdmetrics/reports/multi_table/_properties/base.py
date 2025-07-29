@@ -3,6 +3,8 @@
 import numpy as np
 import pandas as pd
 
+from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
+
 
 class BaseMultiTableProperty:
     """Base class for multi table properties.
@@ -26,6 +28,7 @@ class BaseMultiTableProperty:
         self._properties = {}
         self.is_computed = False
         self.details = pd.DataFrame()
+        self.num_rows_subsample = DEFAULT_NUM_ROWS_SUBSAMPLE
 
     def _get_num_iterations(self, metadata):
         """Get the number of iterations for the property."""
