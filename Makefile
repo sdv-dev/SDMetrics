@@ -55,7 +55,6 @@ clean-coverage: ## remove coverage artifacts
 
 .PHONY: clean-test
 clean-test: ## remove test artifacts
-	rm -fr .tox/
 	rm -fr .pytest_cache
 
 .PHONY: clean
@@ -76,6 +75,9 @@ install-test: clean-build clean-pyc ## install the package and test dependencies
 install-develop: clean-build clean-pyc ## install the package in editable mode and dependencies for development
 	pip install -e .[dev]
 
+.PHONY: install-readme
+install-readme: clean-build clean-pyc ## install the package in editable mode and readme dependencies for developement
+	pip install -e .[readme]
 
 # LINT TARGETS
 
@@ -105,12 +107,8 @@ test-readme: ## run the readme snippets
 .PHONY: test
 test: test-unit test-integration test-readme ## test everything that needs test dependencies
 
-.PHONY: test-devel
-test-devel: lint ## test everything that needs development dependencies
-
-.PHONY: test-all
-test-all: ## run tests on every Python version with tox
-	tox -r
+.PHONY: test-repo
+test-repo: lint test-unit test-integration test-readme test-performance ## test everything
 
 .PHONY: coverage
 coverage: ## check code coverage quickly with the default Python
@@ -142,26 +140,31 @@ publish-test: dist publish-confirm ## package and upload a release on TestPyPI
 publish: dist publish-confirm ## package and upload a release
 	twine upload dist/*
 
-.PHONY: bumpversion-release
-bumpversion-release: ## Merge main to stable and bumpversion release
+.PHONY: git-merge-main-stable
+git-merge-main-stable: ## Merge main into stable
 	git checkout stable || git checkout -b stable
 	git merge --no-ff main -m"make release-tag: Merge branch 'main' into stable"
-	bump-my-version bump release
-	git push --tags origin stable
 
-.PHONY: bumpversion-release-test
-bumpversion-release-test: ## Merge main to stable and bumpversion release
-	git checkout stable || git checkout -b stable
-	git merge --no-ff main -m"make release-tag: Merge branch 'main' into stable"
-	bump-my-version bump release --no-tag
-	@echo git push --tags origin stable
-
-.PHONY: bumpversion-patch
-bumpversion-patch: ## Merge stable to main and bumpversion patch
+.PHONY: git-merge-stable-main
+git-merge-stable-main: ## Merge stable into main
 	git checkout main
 	git merge stable
-	bump-my-version bump --no-tag patch
+
+.PHONY: git-push
+git-push: ## Simply push the repository to github
 	git push
+
+.PHONY: git-push-tags-stable
+git-push-tags-stable: ## Push tags and stable to github
+	git push --tags origin stable
+
+.PHONY: bumpversion-release
+bumpversion-release: ## Bump the version to the next release
+	bump-my-version bump release --no-tag
+
+.PHONY: bumpversion-patch
+bumpversion-patch: ## Bump the version to the next patch
+	bump-my-version bump --no-tag patch
 
 .PHONY: bumpversion-candidate
 bumpversion-candidate: ## Bump the version to the next candidate
@@ -177,11 +180,13 @@ bumpversion-major: ## Bump the version the next major skipping the release
 
 .PHONY: bumpversion-revert
 bumpversion-revert: ## Undo a previous bumpversion-release
+	git tag --delete $(shell git tag --points-at HEAD)
 	git checkout main
 	git branch -D stable
 
 CLEAN_DIR := $(shell git status --short | grep -v ??)
 CURRENT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
+CURRENT_VERSION := $(shell grep "^current_version" pyproject.toml | grep -o "dev[0-9]*")
 CHANGELOG_LINES := $(shell git diff HEAD..origin/stable HISTORY.md 2>&1 | wc -l)
 
 .PHONY: check-clean
@@ -196,6 +201,12 @@ ifneq ($(CURRENT_BRANCH),main)
 	$(error Please make the release from main branch\n)
 endif
 
+.PHONY: check-candidate
+check-candidate: ## Check if a release candidate has been made
+ifeq ($(CURRENT_VERSION),dev0)
+	$(error Please make a release candidate and test it before atempting a release)
+endif
+
 .PHONY: check-history
 check-history: ## Check if HISTORY.md has been modified
 ifeq ($(CHANGELOG_LINES),0)
@@ -207,19 +218,16 @@ check-deps: # Dependency targets
 	$(eval allow_list='numpy=|pandas=|scikit-learn=|scipy=|tqdm=|plotly=|copulas=')
 	pip freeze | grep -v "SDMetrics.git" | grep -E $(allow_list) | sort > $(OUTPUT_FILEPATH)
 
-.PHONY: git-push
-git-push: ## Simply push the repository to github
-	git push
-
 .PHONY: check-release
-check-release: check-clean check-main check-history ## Check if the release can be made
+check-release: check-clean check-candidate check-main check-history ## Check if the release can be made
 	@echo "A new release can be made"
 
 .PHONY: release
-release: check-release bumpversion-release publish bumpversion-patch
+release: check-release git-merge-main-stable bumpversion-release git-push-tags-stable \
+	git-merge-stable-main bumpversion-patch git-push
 
 .PHONY: release-test
-release-test: check-release bumpversion-release-test publish-test bumpversion-revert
+release-test: check-release git-merge-main-stable bumpversion-release bumpversion-revert
 
 .PHONY: release-candidate
 release-candidate: check-main publish bumpversion-candidate git-push
