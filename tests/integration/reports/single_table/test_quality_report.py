@@ -143,7 +143,7 @@ class TestQualityReport:
         )
         assert report.get_score() == 0.8393750143888287
         assert report._properties['Column Shapes'].num_rows_subsample is None
-        assert report._properties['Column Pair Trends'].num_rows_subsample == None
+        assert report._properties['Column Pair Trends'].num_rows_subsample is None
         report_info = report.get_info()
         assert report_info == report.report_info
 
