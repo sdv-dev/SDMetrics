@@ -42,15 +42,22 @@ class DataValidity(BaseSingleTableProperty):
         error_messages = []
         primary_key = metadata.get('primary_key')
         alternate_keys = metadata.get('alternate_keys', [])
+        sequence_index = metadata.get('sequence_index')
+
         for column_name in metadata['columns']:
             sdtype = metadata['columns'][column_name]['sdtype']
             primary_key_match = column_name == primary_key
             alternate_key_match = column_name in alternate_keys
             is_unique = primary_key_match or alternate_key_match
+            is_sequence_index = column_name == sequence_index
 
             try:
                 if sdtype not in self._sdtype_to_metric and not is_unique:
                     continue
+
+                if is_sequence_index and sdtype in self._sdtype_to_metric:
+                    if self._sdtype_to_metric[sdtype] == BoundaryAdherence:
+                        continue
 
                 metric = self._sdtype_to_metric.get(sdtype, KeyUniqueness)
                 column_score = metric.compute(real_data[column_name], synthetic_data[column_name])
