@@ -152,3 +152,53 @@ class TestDataValidity:
             margin={'t': 150},
             font={'size': 18},
         )
+
+    @patch('sdmetrics.reports.single_table._properties.data_validity.BoundaryAdherence.compute')
+    @patch('sdmetrics.reports.single_table._properties.data_validity.CategoryAdherence.compute')
+    @patch('sdmetrics.reports.single_table._properties.data_validity.KeyUniqueness.compute')
+    def test__generate_details_skip_sequence_index_boundary_adherence(
+        self, key_uniqueness_mock, category_a_compute_mock, boundary_a_compute_mock
+    ):
+        """Test that sequence_index columns are excluded from BoundaryAdherence checks."""
+        # Setup
+        real_data = pd.DataFrame({
+            'date': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
+            'value': [1, 2, 3],
+            'category': ['a', 'b', 'c'],
+        })
+        synthetic_data = pd.DataFrame({
+            'date': pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06']),
+            'value': [4, 5, 6],
+            'category': ['d', 'e', 'f'],
+        })
+        metadata = {
+            'sequence_index': 'date',  # This should skip BoundaryAdherence
+            'columns': {
+                'date': {'sdtype': 'datetime'},
+                'value': {'sdtype': 'numerical'},
+                'category': {'sdtype': 'categorical'},
+            },
+        }
+
+        boundary_a_compute_mock.return_value = 0.8
+        category_a_compute_mock.return_value = 0.9
+
+        # Run
+        data_validity_property = DataValidity()
+        result = data_validity_property._generate_details(real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_calls_ba = [call(real_data['value'], synthetic_data['value'])]
+        boundary_a_compute_mock.assert_has_calls(expected_calls_ba)
+        assert boundary_a_compute_mock.call_count == 1
+
+        expected_calls_ca = [call(real_data['category'], synthetic_data['category'])]
+        category_a_compute_mock.assert_has_calls(expected_calls_ca)
+        assert category_a_compute_mock.call_count == 1
+
+        key_uniqueness_mock.assert_not_called()
+
+        expected_columns = ['value', 'category']
+        assert list(result['Column']) == expected_columns
+        expected_metrics = ['BoundaryAdherence', 'CategoryAdherence']
+        assert list(result['Metric']) == expected_metrics
