@@ -17,6 +17,7 @@ from sdmetrics.utils import (
 
 CONTINUOUS_SDTYPES = ['numerical', 'datetime']
 DISCRETE_SDTYPES = ['categorical', 'boolean']
+DEFAULT_NUM_ROWS_SUBSAMPLE = 50000
 
 
 class PlotConfig:

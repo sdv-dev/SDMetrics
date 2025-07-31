@@ -10,8 +10,6 @@ from sdmetrics.column_pairs.statistical import ContingencySimilarity, Correlatio
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
 
-DEFAULT_NUM_ROWS_SUBSAMPLE = 50000
-
 
 class ColumnPairTrends(BaseSingleTableProperty):
     """Column pair trends property.
@@ -30,6 +28,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
     }
 
     def __init__(self):
+        super().__init__()
         self._columns_datetime_conversion_failed = {}
         self._columns_discretization_failed = {}
 
@@ -276,10 +275,12 @@ class ColumnPairTrends(BaseSingleTableProperty):
             )
 
             metric_params = {}
-            if (metric == ContingencySimilarity) and (
-                max(len(col_real), len(col_synthetic)) > DEFAULT_NUM_ROWS_SUBSAMPLE
+            if (
+                self.num_rows_subsample
+                and (metric == ContingencySimilarity)
+                and (max(len(col_real), len(col_synthetic)) > self.num_rows_subsample)
             ):
-                metric_params['num_rows_subsample'] = DEFAULT_NUM_ROWS_SUBSAMPLE
+                metric_params['num_rows_subsample'] = self.num_rows_subsample
 
             try:
                 error = self._preprocessing_failed(

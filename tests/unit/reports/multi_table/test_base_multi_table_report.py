@@ -8,6 +8,7 @@ import pytest
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
+from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
 
 
 class TestBaseReport:
@@ -21,6 +22,7 @@ class TestBaseReport:
         assert report.is_generated is False
         assert report._properties == {}
         assert report.table_names == []
+        assert report.num_rows_subsample == DEFAULT_NUM_ROWS_SUBSAMPLE
 
     def test__validate_data_format(self):
         """Test the ``_validate_data_format`` method.
