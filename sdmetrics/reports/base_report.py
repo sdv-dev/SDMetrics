@@ -14,6 +14,7 @@ import pandas as pd
 import tqdm
 
 from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata
+from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
 from sdmetrics.visualization import set_plotly_config
 
 
@@ -27,6 +28,7 @@ class BaseReport:
         self._overall_score = None
         self.is_generated = False
         self._properties = {}
+        self.num_rows_subsample = DEFAULT_NUM_ROWS_SUBSAMPLE
         self.report_info = {
             'report_type': self.__class__.__name__,
             'generated_date': None,
@@ -163,6 +165,7 @@ class BaseReport:
                     f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}'
                 )
 
+            self._properties[property_name].num_rows_subsample = self.num_rows_subsample
             score = self._properties[property_name].get_score(
                 real_data, synthetic_data, metadata, progress_bar=progress_bar
             )
