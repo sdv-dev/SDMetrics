@@ -55,9 +55,8 @@ class DataValidity(BaseSingleTableProperty):
                 if sdtype not in self._sdtype_to_metric and not is_unique:
                     continue
 
-                if is_sequence_index and sdtype in self._sdtype_to_metric:
-                    if self._sdtype_to_metric[sdtype] == BoundaryAdherence:
-                        continue
+                if is_sequence_index and self._sdtype_to_metric.get(sdtype) == BoundaryAdherence:
+                    continue
 
                 metric = self._sdtype_to_metric.get(sdtype, KeyUniqueness)
                 column_score = metric.compute(real_data[column_name], synthetic_data[column_name])
