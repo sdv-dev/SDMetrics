@@ -2,6 +2,8 @@
 
 import pandas as pd
 
+from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
+
 
 class BaseSingleTableProperty:
     """Base class for single table properties.
@@ -14,6 +16,7 @@ class BaseSingleTableProperty:
 
     def __init__(self):
         self.details = pd.DataFrame()
+        self.num_rows_subsample = DEFAULT_NUM_ROWS_SUBSAMPLE
 
     def _compute_average(self):
         """Average the scores for each column."""

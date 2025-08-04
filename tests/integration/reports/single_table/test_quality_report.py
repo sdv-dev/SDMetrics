@@ -77,6 +77,7 @@ class TestQualityReport:
             key: val for key, val in metadata['columns'].items() if key in column_names
         }
         report = QualityReport()
+        report.num_rows_subsample = None
 
         # Run
         generate_start_time = time.time()
@@ -141,7 +142,8 @@ class TestQualityReport:
             report.get_details('Column Pair Trends'), expected_details_cpt
         )
         assert report.get_score() == 0.8393750143888287
-
+        assert report._properties['Column Shapes'].num_rows_subsample is None
+        assert report._properties['Column Pair Trends'].num_rows_subsample is None
         report_info = report.get_info()
         assert report_info == report.report_info
 
@@ -183,6 +185,8 @@ class TestQualityReport:
         # Assert
         cpt_report_1 = report_1.get_properties().iloc[1]['Score']
         cpt_report_2 = report_2.get_properties().iloc[1]['Score']
+        assert report_1._properties['Column Pair Trends'].num_rows_subsample == 50000
+        assert report_2._properties['Column Pair Trends'].num_rows_subsample == 50000
         assert score_1_run_1 != score_1_run_2
         assert np.isclose(score_1_run_1, score_1_run_2, atol=0.001)
         assert np.isclose(report_2.get_score(), score_1_run_1, atol=0.001)
