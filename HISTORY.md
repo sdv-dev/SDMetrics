@@ -1,5 +1,15 @@
 # History
 
+## v0.23.0 - 2025-08-14
+
+### New Features
+
+* Allow me to turn off or control any subsampling done within the quality report - Issue [#790](https://github.com/sdv-dev/SDMetrics/issues/790) by @R-Palazzo
+
+### Bugs Fixed
+
+* Diagnostic Report should ignore `sequence_index` column in the DataValidity checks - Issue [#731](https://github.com/sdv-dev/SDMetrics/issues/731) by @fealho
+
 ## v0.22.0 - 2025-07-24
 
 ### New Features

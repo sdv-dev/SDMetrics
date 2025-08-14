@@ -9,9 +9,21 @@ import pytest
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.base_report import BaseReport
+from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
 
 
 class TestBaseReport:
+    def test__init__(self):
+        """Test the initialization of the BaseReport class."""
+        # Run
+        base_report = BaseReport()
+
+        # Assert
+        assert base_report._overall_score is None
+        assert not base_report.is_generated
+        assert base_report._properties == {}
+        assert base_report.num_rows_subsample == DEFAULT_NUM_ROWS_SUBSAMPLE
+
     def test__validate_data_format(self):
         """Test the ``_validate_data_format`` method.
 
@@ -268,6 +280,7 @@ class TestBaseReport:
         version_mock.return_value = 'version'
 
         base_report = BaseReport()
+        base_report.num_rows_subsample = 1000
         mock_validate = Mock()
         mock__print_results = Mock()
         base_report._print_results = mock__print_results
@@ -292,9 +305,11 @@ class TestBaseReport:
         base_report._properties['Property 1'].get_score.assert_called_with(
             real_data, synthetic_data, metadata, progress_bar=None
         )
+        assert base_report._properties['Property 1'].num_rows_subsample == 1000
         base_report._properties['Property 2'].get_score.assert_called_with(
             real_data, synthetic_data, metadata, progress_bar=None
         )
+        assert base_report._properties['Property 2'].num_rows_subsample == 1000
         expected_info = {
             'report_type': 'BaseReport',
             'generated_date': '2020-01-05',
