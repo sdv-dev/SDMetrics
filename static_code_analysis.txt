@@ -1,4 +1,4 @@
-Run started:2025-07-24 19:28:17.001789
+Run started:2025-08-13 23:11:12.422595
 
 Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -25,31 +25,31 @@ Test results:
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
    More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b112_try_except_continue.html
-   Location: ./sdmetrics/reports/base_report.py:105:16
-104	                    synthetic_data[column] = _convert_datetime_column(column, synth_col, col_meta)
-105	                except Exception:
-106	                    continue
-107	
+   Location: ./sdmetrics/reports/base_report.py:107:16
+106	                    synthetic_data[column] = _convert_datetime_column(column, synth_col, col_meta)
+107	                except Exception:
+108	                    continue
+109	
 
 --------------------------------------------------
 >> Issue: [B301:blacklist] Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
    Severity: Medium   Confidence: High
    CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
    More Info: https://bandit.readthedocs.io/en/1.7.7/blacklists/blacklist_calls.html#b301-pickle
-   Location: ./sdmetrics/reports/base_report.py:292:21
-291	        with open(filepath, 'rb') as f:
-292	            report = pickle.load(f)
-293	            if current_version != report._package_version:
+   Location: ./sdmetrics/reports/base_report.py:295:21
+294	        with open(filepath, 'rb') as f:
+295	            report = pickle.load(f)
+296	            if current_version != report._package_version:
 
 --------------------------------------------------
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
    More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
-   Location: ./sdmetrics/reports/multi_table/_properties/base.py:67:8
-66	
-67	        assert is_dataframe, assert_message
-68	        if not has_score_column:
+   Location: ./sdmetrics/reports/multi_table/_properties/base.py:70:8
+69	
+70	        assert is_dataframe, assert_message
+71	        if not has_score_column:
 
 --------------------------------------------------
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -117,7 +117,7 @@ Test results:
 --------------------------------------------------
 
 Code scanned:
-	Total lines of code: 11825
+	Total lines of code: 11839
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 
