@@ -85,13 +85,11 @@ class InterRowMSAS(ColumnPairsMetric):
             if len(group) <= n_rows_diff:
                 return np.nan
             group = group.to_numpy()
-            with warnings.catch_warnings():
-                warnings.filterwarnings('ignore', message='Mean of empty slice')
-                return np.nanmean(group[n_rows_diff:] - group[:-n_rows_diff])
+            return (group[n_rows_diff:] - group[:-n_rows_diff]).flatten()
 
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', message='invalid value encountered in.*')
-            return grouped.apply(diff_func)
+            return grouped.apply(diff_func).explode().astype(float)
 
     @classmethod
     def compute(cls, real_data, synthetic_data, n_rows_diff=1, apply_log=False):

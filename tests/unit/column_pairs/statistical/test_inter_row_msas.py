@@ -24,7 +24,7 @@ class TestInterRowMSAS:
         )
 
         # Assert
-        assert result == {'score': 0.5}
+        assert result == {'score': 0.25}
 
     def test_compute(self):
         """Test it runs."""
@@ -40,7 +40,7 @@ class TestInterRowMSAS:
         )
 
         # Assert
-        assert score == 0.5
+        assert score == 0.25
 
     def test_compute_nans(self):
         """Test it runs with nans."""
