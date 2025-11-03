@@ -1,5 +1,19 @@
 # History
 
+## v0.24.0 - 2025-11-03
+
+### New Features
+
+* Update `InterRowMSAS` to compare the overall distributions between row `n` and `n+1` (not the average) - Issue [#800](https://github.com/sdv-dev/SDMetrics/issues/800) by @sarahmish
+
+### Bugs Fixed
+
+* Minimum tests failing - OSError: [WinError 1114] A dynamic link library (DLL) initialization routine failed - Issue [#802](https://github.com/sdv-dev/SDMetrics/issues/802) by @sarahmish
+
+### Maintenance
+
+* Remove support for Python 3.8 - Issue [#801](https://github.com/sdv-dev/SDMetrics/issues/801) by @fealho
+
 ## v0.23.0 - 2025-08-14
 
 ### New Features
