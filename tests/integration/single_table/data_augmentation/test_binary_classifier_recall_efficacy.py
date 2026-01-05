@@ -123,7 +123,7 @@ class TestBinaryClassifierRecallEfficacy:
         )
 
         # Assert
-        assert round(result_breakdown['score'], 2) == 0.65
+        assert result_breakdown['score'] == 0.6538461538461539
 
     def test_with_minority_being_majority(self):
         """Test the metric when the minority class is the majority class."""
@@ -174,7 +174,7 @@ class TestBinaryClassifierRecallEfficacy:
         )
 
         # Assert
-        assert round(score_breakdown['score'], 2) == 0.54
+        assert score_breakdown['score'] == 0.5384615384615384
 
     def test_special_data_metadata_config(self):
         """Test the metric with a special data and metadata configuration.
