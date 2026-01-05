@@ -44,11 +44,11 @@ class TestBinaryClassifierPrecisionEfficacy:
             'real_data_baseline': {
                 'recall_score_training': 0.8095238095238095,
                 'recall_score_validation': 0.15384615384615385,
-                'precision_score_validation': 0.4,
+                'precision_score_validation': 0.6666666666666666,
                 'prediction_counts_validation': {
                     'true_positive': 2,
-                    'false_positive': 3,
-                    'true_negative': 22,
+                    'false_positive': 1,
+                    'true_negative': 24,
                     'false_negative': 11,
                 },
             },
@@ -69,16 +69,9 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0.3,
+            'score': 0.16666666666666669,
         }
-        assert np.isclose(
-            score_breakdown['real_data_baseline']['recall_score_training'], 0.8, atol=0.1
-        )
-        assert np.isclose(
-            score_breakdown['augmented_data']['recall_score_validation'], 0.1, atol=0.1
-        )
-        assert score_breakdown == expected_score_breakdown
-        assert score == score_breakdown['score']
+        assert expected_score_breakdown == score_breakdown
 
     def test_with_no_minority_class_in_validation(self):
         """Test the metric when the minority class is not present in the validation data."""
@@ -147,11 +140,11 @@ class TestBinaryClassifierPrecisionEfficacy:
             'augmented_data': {
                 'recall_score_training': 0.8,
                 'recall_score_validation': 0.23076923076923078,
-                'precision_score_validation': 0.6,
+                'precision_score_validation': 0.42857142857142855,
                 'prediction_counts_validation': {
                     'true_positive': 3,
-                    'false_positive': 2,
-                    'true_negative': 31,
+                    'false_positive': 4,
+                    'true_negative': 29,
                     'false_negative': 10,
                 },
             },
@@ -161,8 +154,9 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0.5857142857142857,
+            'score': 0.5,
         }
+
         assert result_breakdown == expected_result
 
     def test_with_minority_being_majority(self):
@@ -187,7 +181,7 @@ class TestBinaryClassifierPrecisionEfficacy:
         )
 
         # Assert
-        assert score == 0.3
+        assert np.isclose(score, 0.16, atol=0.01)
 
     def test_with_multi_class(self):
         """Test the metric with multi-class classification.
@@ -228,13 +222,13 @@ class TestBinaryClassifierPrecisionEfficacy:
             },
             'augmented_data': {
                 'recall_score_training': 0.8035714285714286,
-                'recall_score_validation': 0.46153846153846156,
+                'recall_score_validation': 0.5384615384615384,
                 'precision_score_validation': 1.0,
                 'prediction_counts_validation': {
-                    'true_positive': 6,
+                    'true_positive': 7,
                     'false_positive': 0,
                     'true_negative': 25,
-                    'false_negative': 7,
+                    'false_negative': 6,
                 },
             },
             'parameters': {

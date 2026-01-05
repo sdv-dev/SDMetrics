@@ -191,9 +191,7 @@ class TestBaseDataAugmentationMetric:
         metric = BaseDataAugmentationMetric()
 
         # Run
-        discrete_columns, datetime_columns = metric._fit(
-            real_training_data, metadata, 'target'
-        )
+        discrete_columns, datetime_columns = metric._fit(real_training_data, metadata, 'target')
 
         # Assert
         assert discrete_columns == ['boolean', 'categorical']
@@ -203,7 +201,7 @@ class TestBaseDataAugmentationMetric:
         """Test the ``_transform`` method."""
         # Setup
         metric = BaseDataAugmentationMetric()
-        discrete_columns = ['categorical', 'boolean']
+        discrete_columns = ['boolean', 'categorical']
         datetime_columns = ['datetime']
         tables = {
             'real_training_data': real_training_data,
@@ -212,9 +210,7 @@ class TestBaseDataAugmentationMetric:
         }
 
         # Run
-        transformed = metric._transform(
-            tables, discrete_columns, datetime_columns, 'target', 1
-        )
+        transformed = metric._transform(tables, discrete_columns, datetime_columns, 'target', 1)
 
         # Assert
         expected_transformed = {

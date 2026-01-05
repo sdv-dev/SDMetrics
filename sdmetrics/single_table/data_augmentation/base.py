@@ -33,6 +33,7 @@ class ClassifierTrainer:
         self._classifier_name = classifier
         self._classifier = XGBClassifier(
             enable_categorical=True,
+            base_score=0.5,
             tree_method='hist',
         )
         self._metric_to_fix = 'recall' if metric_name == 'precision' else 'precision'
@@ -106,7 +107,8 @@ class BaseDataAugmentationMetric(SingleTableMetric):
     @classmethod
     def _fit(cls, data, metadata, prediction_column_name):
         """Fit preprocessing parameters."""
-        discrete_columns = []
+        categorical_columns = []
+        boolean_columns = []
         datetime_columns = []
         data_columns = data.columns
         metadata_columns = metadata['columns'].keys()
@@ -116,18 +118,21 @@ class BaseDataAugmentationMetric(SingleTableMetric):
                 continue
             column_meta = metadata['columns'][column]
             column_sdtype = column_meta['sdtype']
-            if column_sdtype in ['categorical', 'boolean']:
-                discrete_columns.append(column)
+            if column_sdtype == 'categorical':
+                categorical_columns.append(column)
+            elif column_sdtype == 'boolean':
+                boolean_columns.append(column)
             elif column_sdtype == 'datetime':
                 datetime_columns.append(column)
 
-        return discrete_columns, datetime_columns
+        return categorical_columns, boolean_columns, datetime_columns
 
     @classmethod
     def _transform(
         cls,
         tables,
-        discrete_columns,
+        categorical_columns,
+        boolean_columns,
         datetime_columns,
         prediction_column_name,
         minority_class_label,
@@ -137,10 +142,11 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         Args:
             tables (dict[str, pandas.DataFrame]):
                 Dict containing `real_training_data`, `synthetic_data` and `real_validation_data`.
-            discrete_columns (list[str]):
+            categorical_columns (list[str]):
                 List of column names to treat as categorical. Cast to category pandas dtype.
             datetime_columns (list[str]):
-                List of column names to treat as datetime. Cast to numeric pandas dtype (int/float).
+                List of column names to treat as datetime. Converted to string pandas dtype and then
+                to category pandas dtype.
             prediction_column_name (str):
                 The name of the column to be predicted. Cast to integer pandas dtype.
             minority_class_label (int):
@@ -149,7 +155,8 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         tables_result = {}
         for table_name, table in tables.items():
             table = table.copy()
-            table[discrete_columns] = table[discrete_columns].astype('category')
+            table[categorical_columns] = table[categorical_columns].astype('category')
+            table[boolean_columns] = table[boolean_columns].astype('str').astype('category')
             table[datetime_columns] = table[datetime_columns].apply(pd.to_numeric)
             table[prediction_column_name] = (
                 table[prediction_column_name] == minority_class_label
@@ -169,7 +176,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         minority_class_label,
     ):
         """Fit and transform the metric."""
-        discrete_columns, datetime_columns = cls._fit(
+        categorical_columns, boolean_columns, datetime_columns = cls._fit(
             real_training_data, metadata, prediction_column_name
         )
         tables = {
@@ -180,7 +187,8 @@ class BaseDataAugmentationMetric(SingleTableMetric):
 
         return cls._transform(
             tables,
-            discrete_columns,
+            categorical_columns,
+            boolean_columns,
             datetime_columns,
             prediction_column_name,
             minority_class_label,
@@ -282,7 +290,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             minority_class_label (int):
                 The minority class label.
             classifier (str):
-                The ML algorithm to use when building a Binary Classfication.
+                The ML algorithm to use when building a Binary Classification.
                 Supported options are ``XGBoost``.
             fixed_value (float):
                 A float value in the range (0, 1.0) that specifies the metric value
