@@ -188,7 +188,7 @@ class TestBinaryClassifierPrecisionEfficacy:
         )
 
         # Assert
-        assert np.isclose(score, 0.16, atol=0.01)
+        assert score == 0.16666666666666669
 
     def test_with_multi_class(self):
         """Test the metric with multi-class classification.
