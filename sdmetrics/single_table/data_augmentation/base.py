@@ -106,8 +106,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
     @classmethod
     def _fit(cls, data, metadata, prediction_column_name):
         """Fit preprocessing parameters."""
-        categorical_columns = []
-        boolean_columns = []
+        discrete_columns = []
         datetime_columns = []
         data_columns = data.columns
         metadata_columns = metadata['columns'].keys()
@@ -117,21 +116,18 @@ class BaseDataAugmentationMetric(SingleTableMetric):
                 continue
             column_meta = metadata['columns'][column]
             column_sdtype = column_meta['sdtype']
-            if column_sdtype == 'categorical':
-                categorical_columns.append(column)
-            elif column_sdtype == 'boolean':
-                boolean_columns.append(column)
+            if column_sdtype in ['categorical', 'boolean']:
+                discrete_columns.append(column)
             elif column_sdtype == 'datetime':
                 datetime_columns.append(column)
 
-        return categorical_columns, boolean_columns, datetime_columns
+        return discrete_columns, datetime_columns
 
     @classmethod
     def _transform(
         cls,
         tables,
-        categorical_columns,
-        boolean_columns,
+        discrete_columns,
         datetime_columns,
         prediction_column_name,
         minority_class_label,
@@ -141,7 +137,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         Args:
             tables (dict[str, pandas.DataFrame]):
                 Dict containing `real_training_data`, `synthetic_data` and `real_validation_data`.
-            categorical_columns (list[str]):
+            discrete_columns (list[str]):
                 List of column names to treat as categorical. Cast to category pandas dtype.
             datetime_columns (list[str]):
                 List of column names to treat as datetime. Converted to string pandas dtype and then
@@ -154,8 +150,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         tables_result = {}
         for table_name, table in tables.items():
             table = table.copy()
-            table[categorical_columns] = table[categorical_columns].astype('category')
-            table[boolean_columns] = table[boolean_columns].astype('str').astype('category')
+            table[discrete_columns] = table[discrete_columns].astype('category')
             table[datetime_columns] = table[datetime_columns].apply(pd.to_numeric)
             table[prediction_column_name] = (
                 table[prediction_column_name] == minority_class_label
@@ -175,7 +170,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         minority_class_label,
     ):
         """Fit and transform the metric."""
-        categorical_columns, boolean_columns, datetime_columns = cls._fit(
+        discrete_columns, datetime_columns = cls._fit(
             real_training_data, metadata, prediction_column_name
         )
         tables = {
@@ -186,8 +181,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
 
         return cls._transform(
             tables,
-            categorical_columns,
-            boolean_columns,
+            discrete_columns,
             datetime_columns,
             prediction_column_name,
             minority_class_label,
