@@ -140,8 +140,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             discrete_columns (list[str]):
                 List of column names to treat as categorical. Cast to category pandas dtype.
             datetime_columns (list[str]):
-                List of column names to treat as datetime. Converted to string pandas dtype and then
-                to category pandas dtype.
+                List of column names to treat as datetime. Cast to numeric pandas dtype (int/float).
             prediction_column_name (str):
                 The name of the column to be predicted. Cast to integer pandas dtype.
             minority_class_label (int):

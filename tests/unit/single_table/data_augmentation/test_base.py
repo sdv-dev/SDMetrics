@@ -203,7 +203,7 @@ class TestBaseDataAugmentationMetric:
         """Test the ``_transform`` method."""
         # Setup
         metric = BaseDataAugmentationMetric()
-        discrete_columns = ['boolean', 'categorical']
+        discrete_columns = ['categorical', 'boolean']
         datetime_columns = ['datetime']
         tables = {
             'real_training_data': real_training_data,
