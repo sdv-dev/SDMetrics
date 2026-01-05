@@ -144,6 +144,9 @@ class BaseDataAugmentationMetric(SingleTableMetric):
                 Dict containing `real_training_data`, `synthetic_data` and `real_validation_data`.
             categorical_columns (list[str]):
                 List of column names to treat as categorical. Cast to category pandas dtype.
+            boolean_columns (list[str]):
+                List of column names to treat as boolean. Cast to str and then to
+                category pandas dtype.
             datetime_columns (list[str]):
                 List of column names to treat as datetime. Converted to string pandas dtype and then
                 to category pandas dtype.

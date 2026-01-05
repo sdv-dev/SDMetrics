@@ -71,7 +71,14 @@ class TestBinaryClassifierPrecisionEfficacy:
             },
             'score': 0.16666666666666669,
         }
-        assert expected_score_breakdown == score_breakdown
+        assert np.isclose(
+            score_breakdown['real_data_baseline']['recall_score_training'], 0.8, atol=0.1
+        )
+        assert np.isclose(
+            score_breakdown['augmented_data']['recall_score_validation'], 0.1, atol=0.1
+        )
+        assert score_breakdown == expected_score_breakdown
+        assert score == score_breakdown['score']
 
     def test_with_no_minority_class_in_validation(self):
         """Test the metric when the minority class is not present in the validation data."""
