@@ -33,8 +33,30 @@ class ClassifierTrainer:
         self._classifier_name = classifier
         self._classifier = XGBClassifier(
             enable_categorical=True,
-            base_score=0.5,
+            booster='gbtree',
+            eta=0.3,
+            gamma=6,
+            max_depth=6,
+            min_child_weight=1,
+            max_delta_step=0,
+            subsample=1,
+            sampling_method='uniform',
+            colsample_bytree=1,
+            colsample_bylevel=1,
+            colsample_bynode=1,
+            reg_lambda=1,
+            reg_alpha=0,
             tree_method='hist',
+            scale_pos_weight=1,
+            refresh_leaf=1,
+            process_type='default',
+            grow_policy='depthwise',
+            max_leaves=0,
+            max_bin=256,
+            num_parallel_tree=1,
+            multi_strategy='one_output_per_tree',
+            base_score=0.5,
+            eval_metric='logloss',
         )
         self._metric_to_fix = 'recall' if metric_name == 'precision' else 'precision'
         self._metric_method = METRIC_NAME_TO_METHOD[self._metric_to_fix]
