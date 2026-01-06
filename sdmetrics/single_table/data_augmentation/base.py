@@ -31,9 +31,7 @@ class ClassifierTrainer:
         self.fixed_value = fixed_value
         self.metric_name = metric_name
         self._classifier_name = classifier
-        self._classifier = XGBClassifier(
-            enable_categorical=True,
-        )
+        self._classifier = XGBClassifier(enable_categorical=True)
         self._metric_to_fix = 'recall' if metric_name == 'precision' else 'precision'
         self._metric_method = METRIC_NAME_TO_METHOD[self._metric_to_fix]
 
