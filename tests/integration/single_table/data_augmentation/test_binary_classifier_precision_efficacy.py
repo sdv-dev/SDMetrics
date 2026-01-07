@@ -1,13 +1,21 @@
 import re
+from unittest.mock import patch
 
 import numpy as np
 import pytest
+from xgboost import XGBClassifier
 
 from sdmetrics.demos import load_demo
 from sdmetrics.single_table.data_augmentation import BinaryClassifierPrecisionEfficacy
 
 
+@pytest.mark.usefixtures('xgboost_init')
 class TestBinaryClassifierPrecisionEfficacy:
+    @pytest.fixture(autouse=True)
+    def apply_xgboost_patch(self, xgboost_init):
+        with patch.object(XGBClassifier, '__init__', autospec=True, side_effect=xgboost_init):
+            yield
+
     def test_end_to_end(self):
         """Test the metric end-to-end."""
         # Setup
@@ -43,24 +51,24 @@ class TestBinaryClassifierPrecisionEfficacy:
         expected_score_breakdown = {
             'real_data_baseline': {
                 'recall_score_training': 0.8095238095238095,
-                'recall_score_validation': 0.15384615384615385,
-                'precision_score_validation': 0.4,
+                'recall_score_validation': 0.8461538461538461,
+                'precision_score_validation': 0.4583333333333333,
                 'prediction_counts_validation': {
-                    'true_positive': 2,
-                    'false_positive': 3,
-                    'true_negative': 22,
-                    'false_negative': 11,
+                    'true_positive': 11,
+                    'false_positive': 13,
+                    'true_negative': 12,
+                    'false_negative': 2,
                 },
             },
             'augmented_data': {
-                'recall_score_training': 0.8057553956834532,
-                'recall_score_validation': 0.0,
-                'precision_score_validation': 0.0,
+                'recall_score_training': 0.8776978417266187,
+                'recall_score_validation': 0.8461538461538461,
+                'precision_score_validation': 0.3548387096774194,
                 'prediction_counts_validation': {
-                    'true_positive': 0,
-                    'false_positive': 1,
-                    'true_negative': 24,
-                    'false_negative': 13,
+                    'true_positive': 11,
+                    'false_positive': 20,
+                    'true_negative': 5,
+                    'false_negative': 2,
                 },
             },
             'parameters': {
@@ -69,13 +77,13 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0.3,
+            'score': 0.448252688172043,
         }
         assert np.isclose(
             score_breakdown['real_data_baseline']['recall_score_training'], 0.8, atol=0.1
         )
         assert np.isclose(
-            score_breakdown['augmented_data']['recall_score_validation'], 0.1, atol=0.1
+            score_breakdown['augmented_data']['recall_score_validation'], 0.8, atol=0.1
         )
         assert score_breakdown == expected_score_breakdown
         assert score == score_breakdown['score']
@@ -134,25 +142,25 @@ class TestBinaryClassifierPrecisionEfficacy:
         # Assert
         expected_result = {
             'real_data_baseline': {
-                'recall_score_training': 0.8135593220338984,
-                'recall_score_validation': 0.23076923076923078,
-                'precision_score_validation': 0.42857142857142855,
+                'recall_score_training': 0.8983050847457628,
+                'recall_score_validation': 0.6153846153846154,
+                'precision_score_validation': 0.26666666666666666,
                 'prediction_counts_validation': {
-                    'true_positive': 3,
-                    'false_positive': 4,
-                    'true_negative': 29,
-                    'false_negative': 10,
+                    'true_positive': 8,
+                    'false_positive': 22,
+                    'true_negative': 11,
+                    'false_negative': 5,
                 },
             },
             'augmented_data': {
-                'recall_score_training': 0.8,
-                'recall_score_validation': 0.23076923076923078,
-                'precision_score_validation': 0.6,
+                'recall_score_training': 0.8814814814814815,
+                'recall_score_validation': 0.6923076923076923,
+                'precision_score_validation': 0.2903225806451613,
                 'prediction_counts_validation': {
-                    'true_positive': 3,
-                    'false_positive': 2,
-                    'true_negative': 31,
-                    'false_negative': 10,
+                    'true_positive': 9,
+                    'false_positive': 22,
+                    'true_negative': 11,
+                    'false_negative': 4,
                 },
             },
             'parameters': {
@@ -161,7 +169,7 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0.5857142857142857,
+            'score': 0.5118279569892473,
         }
         assert result_breakdown == expected_result
 
@@ -187,7 +195,7 @@ class TestBinaryClassifierPrecisionEfficacy:
         )
 
         # Assert
-        assert score == 0.3
+        assert score == 0.448252688172043
 
     def test_with_multi_class(self):
         """Test the metric with multi-class classification.
@@ -216,25 +224,25 @@ class TestBinaryClassifierPrecisionEfficacy:
         # Assert
         expected_score_breakdown = {
             'real_data_baseline': {
-                'recall_score_training': 0.8076923076923077,
-                'recall_score_validation': 0.6923076923076923,
-                'precision_score_validation': 0.9,
+                'recall_score_training': 0.8205128205128205,
+                'recall_score_validation': 0.7692307692307693,
+                'precision_score_validation': 0.8333333333333334,
                 'prediction_counts_validation': {
-                    'true_positive': 9,
-                    'false_positive': 1,
-                    'true_negative': 24,
-                    'false_negative': 4,
+                    'true_positive': 10,
+                    'false_positive': 2,
+                    'true_negative': 23,
+                    'false_negative': 3,
                 },
             },
             'augmented_data': {
-                'recall_score_training': 0.8035714285714286,
-                'recall_score_validation': 0.46153846153846156,
-                'precision_score_validation': 1.0,
+                'recall_score_training': 0.8690476190476191,
+                'recall_score_validation': 0.8461538461538461,
+                'precision_score_validation': 0.4782608695652174,
                 'prediction_counts_validation': {
-                    'true_positive': 6,
-                    'false_positive': 0,
-                    'true_negative': 25,
-                    'false_negative': 7,
+                    'true_positive': 11,
+                    'false_positive': 12,
+                    'true_negative': 13,
+                    'false_negative': 2,
                 },
             },
             'parameters': {
@@ -243,6 +251,6 @@ class TestBinaryClassifierPrecisionEfficacy:
                 'classifier': 'XGBoost',
                 'fixed_recall_value': 0.8,
             },
-            'score': 0.55,
+            'score': 0.322463768115942,
         }
         assert score_breakdown == expected_score_breakdown
