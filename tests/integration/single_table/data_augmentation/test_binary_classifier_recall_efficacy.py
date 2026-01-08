@@ -1,13 +1,21 @@
 import re
+from unittest.mock import patch
 
 import numpy as np
 import pytest
+from xgboost import XGBClassifier
 
 from sdmetrics.demos import load_demo
 from sdmetrics.single_table.data_augmentation import BinaryClassifierRecallEfficacy
 
 
+@pytest.mark.usefixtures('xgboost_init')
 class TestBinaryClassifierRecallEfficacy:
+    @pytest.fixture(autouse=True)
+    def apply_xgboost_patch(self, xgboost_init):
+        with patch.object(XGBClassifier, '__init__', autospec=True, side_effect=xgboost_init):
+            yield
+
     def test_end_to_end(self):
         """Test the metric end-to-end."""
         # Setup
@@ -123,7 +131,7 @@ class TestBinaryClassifierRecallEfficacy:
         )
 
         # Assert
-        assert result_breakdown['score'] in (0.3846153846153846, 0.6538461538461539)
+        assert result_breakdown['score'] == 0.5
 
     def test_with_minority_being_majority(self):
         """Test the metric when the minority class is the majority class."""
@@ -147,7 +155,7 @@ class TestBinaryClassifierRecallEfficacy:
         )
 
         # Assert
-        assert score in (0.5, 0.3846153846153846)
+        assert score == 0.5
 
     def test_with_multi_class(self):
         """Test the metric with multi-class classification.
@@ -174,9 +182,9 @@ class TestBinaryClassifierRecallEfficacy:
         )
 
         # Assert
-        assert score_breakdown['score'] in (0.4230769230769231, 0.5384615384615384)
+        assert score_breakdown['score'] == 0.46153846153846156
 
-    def test_speical_data_metadata_config(self):
+    def test_special_data_metadata_config(self):
         """Test the metric with a special data and metadata configuration.
 
         in this test:
@@ -213,4 +221,4 @@ class TestBinaryClassifierRecallEfficacy:
             )
 
         # Assert
-        assert score in (0.5, 0.3846153846153846)
+        assert score == 0.5

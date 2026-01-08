@@ -191,17 +191,21 @@ class TestBaseDataAugmentationMetric:
         metric = BaseDataAugmentationMetric()
 
         # Run
-        discrete_columns, datetime_columns = metric._fit(real_training_data, metadata, 'target')
+        categorical_columns, boolean_columns, datetime_columns = metric._fit(
+            real_training_data, metadata, 'target'
+        )
 
         # Assert
-        assert discrete_columns == ['boolean', 'categorical']
+        assert categorical_columns == ['categorical']
+        assert boolean_columns == ['boolean']
         assert datetime_columns == ['datetime']
 
     def test__transform(self, real_training_data, synthetic_data, real_validation_data):
         """Test the ``_transform`` method."""
         # Setup
         metric = BaseDataAugmentationMetric()
-        discrete_columns = ['categorical', 'boolean']
+        categorical_columns = ['categorical']
+        boolean_columns = ['boolean']
         datetime_columns = ['datetime']
         tables = {
             'real_training_data': real_training_data,
@@ -210,7 +214,9 @@ class TestBaseDataAugmentationMetric:
         }
 
         # Run
-        transformed = metric._transform(tables, discrete_columns, datetime_columns, 'target', 1)
+        transformed = metric._transform(
+            tables, categorical_columns, boolean_columns, datetime_columns, 'target', 1
+        )
 
         # Assert
         expected_transformed = {
@@ -218,7 +224,7 @@ class TestBaseDataAugmentationMetric:
                 'target': [1, 0, 0],
                 'numerical': [1, 2, 3],
                 'categorical': pd.Categorical(['a', 'b', 'b']),
-                'boolean': pd.Categorical([True, False, True]),
+                'boolean': pd.Categorical(['True', 'False', 'True']),
                 'datetime': pd.to_numeric(
                     pd.to_datetime(['2021-01-01', '2021-01-02', '2021-01-03'])
                 ),
@@ -227,7 +233,7 @@ class TestBaseDataAugmentationMetric:
                 'target': [0, 1, 0],
                 'numerical': [2, 2, 3],
                 'categorical': pd.Categorical(['b', 'a', 'b']),
-                'boolean': pd.Categorical([False, True, False]),
+                'boolean': pd.Categorical(['False', 'True', 'False']),
                 'datetime': pd.to_numeric(
                     pd.to_datetime(['2021-01-25', '2021-01-02', '2021-01-03'])
                 ),
@@ -236,7 +242,7 @@ class TestBaseDataAugmentationMetric:
                 'target': [1, 0, 0],
                 'numerical': [3, 3, 3],
                 'categorical': pd.Categorical(['a', 'b', 'b']),
-                'boolean': pd.Categorical([True, False, True]),
+                'boolean': pd.Categorical(['True', 'False', 'True']),
                 'datetime': pd.to_numeric(
                     pd.to_datetime(['2021-01-01', '2021-01-12', '2021-01-03'])
                 ),
@@ -254,10 +260,12 @@ class TestBaseDataAugmentationMetric:
         # Setup
         metric = BaseDataAugmentationMetric()
         BaseDataAugmentationMetric._fit = Mock()
-        discrete_columns = ['categorical', 'boolean']
+        categorical_columns = ['categorical']
+        boolean_columns = ['boolean']
         datetime_columns = ['datetime']
         BaseDataAugmentationMetric._fit.return_value = (
-            discrete_columns,
+            categorical_columns,
+            boolean_columns,
             datetime_columns,
         )
         tables = {
@@ -277,7 +285,7 @@ class TestBaseDataAugmentationMetric:
             real_training_data, metadata, 'target'
         )
         BaseDataAugmentationMetric._transform.assert_called_once_with(
-            tables, discrete_columns, datetime_columns, 'target', 1
+            tables, categorical_columns, boolean_columns, datetime_columns, 'target', 1
         )
         for table_name, table in transformed.items():
             assert table.equals(tables[table_name])

@@ -1,5 +1,11 @@
 # History
 
+## v0.25.0 - 2026-01-08
+
+### Maintenance
+
+* Update SDMetrics to have XGBoost 3.0.0 Compatibility - Issue [#750](https://github.com/sdv-dev/SDMetrics/issues/750) by @gsheni
+
 ## v0.24.0 - 2025-11-03
 
 ### New Features
