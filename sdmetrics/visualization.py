@@ -847,12 +847,14 @@ def get_column_line_plot(real_data, synthetic_data, column_name, metadata):
         x_axis = metadata['sequence_index']
         if 'sequence_key' in metadata:
             r_data = (
-                r_data.groupby(x_axis, as_index=False)
+                r_data
+                .groupby(x_axis, as_index=False)
                 .agg({x_axis: 'first', column_name: ['mean', 'min', 'max']})
                 .rename(columns={'mean': column_name, 'first': x_axis})
             )
             s_data = (
-                s_data.groupby(x_axis, as_index=False)
+                s_data
+                .groupby(x_axis, as_index=False)
                 .agg({x_axis: 'first', column_name: ['mean', 'min', 'max']})
                 .rename(columns={'mean': column_name, 'first': x_axis})
             )
