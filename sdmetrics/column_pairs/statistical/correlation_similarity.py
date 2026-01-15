@@ -55,7 +55,9 @@ class CorrelationSimilarity(ColumnPairsMetric):
             cls._raise_constant_data_error(synthetic_columns, 'synthetic data')
 
     @classmethod
-    def compute_breakdown(cls, real_data, synthetic_data, coefficient='Pearson'):
+    def compute_breakdown(
+        cls, real_data, synthetic_data, coefficient='Pearson', real_correlation_threshold=0
+    ):
         """Compare the breakdown of correlation similarity of two continuous columns.
 
         Args:
@@ -68,6 +70,12 @@ class CorrelationSimilarity(ColumnPairsMetric):
             dict:
                 A dict containing the score, and the real and synthetic metric values.
         """
+        if (
+            not isinstance(real_correlation_threshold, (int, float))
+            or not 0 <= real_correlation_threshold <= 1
+        ):
+            raise ValueError('real_correlation_threshold must be a number between 0 and 1.')
+
         real_data = real_data.copy()
         synthetic_data = synthetic_data.copy()
 
@@ -101,10 +109,13 @@ class CorrelationSimilarity(ColumnPairsMetric):
             )
 
         correlation_real, _ = correlation_fn(real_data[column1], real_data[column2])
+        if np.abs(correlation_real) <= real_correlation_threshold:
+            return {'score': np.nan, 'real': correlation_real, 'synthetic': np.nan}
+
         correlation_synthetic, _ = correlation_fn(synthetic_data[column1], synthetic_data[column2])
 
         if np.isnan(correlation_real) or np.isnan(correlation_synthetic):
-            return {'score': np.nan}
+            return {'score': np.nan, 'real': correlation_real, 'synthetic': correlation_synthetic}
 
         return {
             'score': 1 - abs(correlation_real - correlation_synthetic) / 2,
@@ -113,7 +124,9 @@ class CorrelationSimilarity(ColumnPairsMetric):
         }
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, coefficient='Pearson'):
+    def compute(
+        cls, real_data, synthetic_data, coefficient='Pearson', real_correlation_threshold=0
+    ):
         """Compare the correlation similarity of two continuous columns.
 
         Args:
@@ -121,12 +134,20 @@ class CorrelationSimilarity(ColumnPairsMetric):
                 The values from the real dataset.
             synthetic_data (Union[numpy.ndarray, pandas.Series]):
                 The values from the synthetic dataset.
+            coefficient (str):
+                The correlation coefficient to use. Either 'Pearson' or 'Spearman'.
+                Default is 'Pearson'.
+            real_correlation_threshold (float):
+                The minimum absolute correlation value for the real data to be considered
+                correlated. Default is 0.
 
         Returns:
             float:
                 The correlation similarity of the two columns.
         """
-        return cls.compute_breakdown(real_data, synthetic_data, coefficient)['score']
+        return cls.compute_breakdown(
+            real_data, synthetic_data, coefficient, real_correlation_threshold
+        )['score']
 
     @classmethod
     def normalize(cls, raw_score):
