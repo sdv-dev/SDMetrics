@@ -27,6 +27,7 @@ class TestContingencySimilarity:
             continuous_column_names=None,
             num_discrete_bins=10,
             num_rows_subsample=3,
+            real_association_threshold=0,
         )
         expected_bad_data = re.escape('The data must be a pandas DataFrame with two columns.')
         with pytest.raises(ValueError, match=expected_bad_data):
@@ -36,6 +37,7 @@ class TestContingencySimilarity:
                 continuous_column_names=None,
                 num_discrete_bins=10,
                 num_rows_subsample=3,
+                real_association_threshold=0,
             )
 
         expected_mismatch_columns_error = re.escape(
@@ -48,6 +50,7 @@ class TestContingencySimilarity:
                 continuous_column_names=None,
                 num_discrete_bins=10,
                 num_rows_subsample=3,
+                real_association_threshold=0,
             )
 
         expected_bad_continous_column_error = re.escape(
@@ -60,6 +63,7 @@ class TestContingencySimilarity:
                 continuous_column_names=bad_continous_columns,
                 num_discrete_bins=10,
                 num_rows_subsample=3,
+                real_association_threshold=0,
             )
 
         expected_bad_num_discrete_bins_error = re.escape(
@@ -72,6 +76,7 @@ class TestContingencySimilarity:
                 continuous_column_names=['col1'],
                 num_discrete_bins=bad_num_discrete_bins,
                 num_rows_subsample=3,
+                real_association_threshold=0,
             )
         expected_bad_num_rows_subsample_error = re.escape(
             '`num_rows_subsample` must be an integer greater than zero.'
@@ -83,6 +88,20 @@ class TestContingencySimilarity:
                 continuous_column_names=['col1'],
                 num_discrete_bins=10,
                 num_rows_subsample=bad_num_rows_subsample,
+                real_association_threshold=0,
+            )
+
+        expected_bad_threshold_error = re.escape(
+            '`real_association_threshold` must be a number greater than or equal to zero.'
+        )
+        with pytest.raises(ValueError, match=expected_bad_threshold_error):
+            ContingencySimilarity._validate_inputs(
+                real_data=real_data,
+                synthetic_data=synthetic_data,
+                continuous_column_names=['col1'],
+                num_discrete_bins=10,
+                num_rows_subsample=3,
+                real_association_threshold=-0.1,
             )
 
     @patch(
@@ -99,7 +118,7 @@ class TestContingencySimilarity:
         score = ContingencySimilarity.compute(real_data, synthetic_data)
 
         # Assert
-        compute_breakdown_mock.assert_called_once_with(real_data, synthetic_data, None, 10, None)
+        compute_breakdown_mock.assert_called_once_with(real_data, synthetic_data, None, 10, None, 0)
         assert score == 0.25
 
     @patch(
@@ -134,6 +153,7 @@ class TestContingencySimilarity:
             None,
             10,
             None,
+            0,
         )
         assert result == {'score': expected_score}
 
@@ -218,3 +238,47 @@ class TestContingencySimilarity:
         ContingencySimilarity.compute(
             real_data=real_data[['A', 'B']], synthetic_data=synthetic_data[['A', 'B']]
         )
+
+    def test_real_association_threshold_returns_nan(self):
+        """Test that NaN is returned when real association is below threshold."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C'], size=100),
+            'col2': np.random.choice(['X', 'Y', 'Z'], size=100),
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': np.random.choice(['A', 'B', 'C'], size=100),
+            'col2': np.random.choice(['X', 'Y', 'Z'], size=100),
+        })
+
+        # Run
+        result = ContingencySimilarity.compute(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            real_association_threshold=0.3,
+        )
+
+        # Assert
+        assert np.isnan(result)
+
+    def test_real_association_threshold_computes_normally(self):
+        """Test that metric computes normally when real association exceeds threshold."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': ['A'] * 50 + ['B'] * 50,
+            'col2': ['X'] * 48 + ['Y'] * 2 + ['Y'] * 48 + ['X'] * 2,
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': ['A'] * 50 + ['B'] * 50,
+            'col2': ['X'] * 45 + ['Y'] * 5 + ['Y'] * 45 + ['X'] * 5,
+        })
+
+        # Run
+        result = ContingencySimilarity.compute(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            real_association_threshold=0.3,
+        )
+
+        # Assert
+        assert 0 <= result <= 1
