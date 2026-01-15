@@ -1,5 +1,6 @@
 """Visualization methods for SDMetrics."""
 
+import os
 from functools import wraps
 
 import pandas as pd
@@ -29,8 +30,11 @@ def set_plotly_config(function):
             # Lazy import IPython
             from IPython import get_ipython
 
+            env_plotly_renderer = os.environ.get('SDMETRICS_PLOTLY_RENDERER', None)
             ipython_interpreter = str(get_ipython())
-            if 'ZMQInteractiveShell' in ipython_interpreter and 'iframe' in renderers:
+            if env_plotly_renderer is not None:
+                pio.renderers.default = env_plotly_renderer
+            elif 'ZMQInteractiveShell' in ipython_interpreter and 'iframe' in renderers:
                 # This means we are using jupyter notebook
                 pio.renderers.default = 'iframe'
 
