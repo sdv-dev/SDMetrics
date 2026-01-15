@@ -65,6 +65,12 @@ class CorrelationSimilarity(ColumnPairsMetric):
                 The values from the real dataset.
             synthetic_data (Union[numpy.ndarray, pandas.Series]):
                 The values from the synthetic dataset.
+            coefficient (str):
+                The correlation coefficient to use. Either 'Pearson' or 'Spearman'.
+                Default is 'Pearson'.
+            real_correlation_threshold (float):
+                The minimum absolute correlation value for the real data to be considered
+                correlated. Default is 0.
 
         Returns:
             dict:

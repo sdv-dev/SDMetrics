@@ -129,7 +129,7 @@ class TestCorrelationSimilarity:
     def test_compute_breakdown_with_real_correlation_threshold(
         self, real_correlation_threshold, score
     ):
-        """Test the ``compute_breakdown`` method with real correlation threshold.
+        """Test the ``compute_breakdown`` method with `real_correlation_threshold`.
 
         In this test, real data has a correlation of 0.498212 and synthetic data
         has a correlation of 0.3.
@@ -154,7 +154,11 @@ class TestCorrelationSimilarity:
         )
 
         # Assert
-        assert result['score'] == score if not np.isnan(score) else np.isnan(result['score'])
+        assert (
+            np.isclose(result['score'], score, atol=1e-6)
+            if not np.isnan(score)
+            else np.isnan(result['score'])
+        )
 
     def test_compute_breakdown_invalid_real_correlation_threshold(self):
         """Test an error is thrown when an invalid `real_correlation_threshold` is passed."""
