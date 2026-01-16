@@ -92,7 +92,7 @@ class TestContingencySimilarity:
             )
 
         expected_bad_threshold_error = re.escape(
-            '`real_association_threshold` must be a number greater than or equal to zero.'
+            'real_association_threshold must be a number between 0 and 1.'
         )
         with pytest.raises(ValueError, match=expected_bad_threshold_error):
             ContingencySimilarity._validate_inputs(

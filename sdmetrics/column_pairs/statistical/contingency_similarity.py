@@ -63,10 +63,9 @@ class ContingencySimilarity(ColumnPairsMetric):
         if (
             not isinstance(real_association_threshold, (int, float))
             or real_association_threshold < 0
+            or real_association_threshold > 1
         ):
-            raise ValueError(
-                '`real_association_threshold` must be a number greater than or equal to zero.'
-            )
+            raise ValueError('real_association_threshold must be a number between 0 and 1.')
 
     @classmethod
     def compute_breakdown(
@@ -105,7 +104,7 @@ class ContingencySimilarity(ColumnPairsMetric):
         if real_association_threshold > 0:
             contingency_2d = contingency_real_counts.unstack(fill_value=0)  # noqa: PD010
             real_cramer = association(contingency_2d.values, method='cramer')
-            if real_cramer < real_association_threshold:
+            if real_cramer <= real_association_threshold:
                 return {'score': np.nan}
 
         contingency_real = contingency_real_counts / len(real)
