@@ -36,7 +36,7 @@ def unit(c):
 def integration(c, env=None):
     env = env or {}
     env.update({"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"})
-    
+
     c.run(
         'python -m pytest ./tests/integration --reruns 5 --disable-warnings --cov=sdmetrics --cov-report=xml:./integration_cov.xml',
         env=env
@@ -70,6 +70,8 @@ def _get_minimum_versions(dependencies, python_version):
                 (spec.version for spec in req.specifier if spec.operator in ('>=', '==')),
                 existing_version,
             )
+            if isinstance(new_version, str):
+                new_version = Version(new_version)
             if new_version > existing_version:
                 # Change when a valid newer version is found
                 min_versions[req.name] = f'{req.name}=={new_version}'
