@@ -15,7 +15,6 @@ from packaging.version import Version
 COMPARISONS = {'>=': operator.ge, '>': operator.gt, '<': operator.lt, '<=': operator.le}
 
 EXTERNAL_DEPENDENCY_CAPS = {
-    'torch': '2.9.0'
 }
 
 if not hasattr(inspect, 'getargspec'):
