@@ -1,6 +1,8 @@
 """Contingency Similarity Metric."""
 
+import numpy as np
 import pandas as pd
+from scipy.stats.contingency import association
 
 from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
@@ -28,7 +30,12 @@ class ContingencySimilarity(ColumnPairsMetric):
 
     @staticmethod
     def _validate_inputs(
-        real_data, synthetic_data, continuous_column_names, num_discrete_bins, num_rows_subsample
+        real_data,
+        synthetic_data,
+        continuous_column_names,
+        num_discrete_bins,
+        num_rows_subsample,
+        real_association_threshold,
     ):
         for data in [real_data, synthetic_data]:
             if not isinstance(data, pd.DataFrame) or len(data.columns) != 2:
@@ -53,6 +60,13 @@ class ContingencySimilarity(ColumnPairsMetric):
             if not isinstance(num_rows_subsample, int) or num_rows_subsample <= 0:
                 raise ValueError('`num_rows_subsample` must be an integer greater than zero.')
 
+        if (
+            not isinstance(real_association_threshold, (int, float))
+            or real_association_threshold < 0
+            or real_association_threshold > 1
+        ):
+            raise ValueError('real_association_threshold must be a number between 0 and 1.')
+
     @classmethod
     def compute_breakdown(
         cls,
@@ -61,6 +75,7 @@ class ContingencySimilarity(ColumnPairsMetric):
         continuous_column_names=None,
         num_discrete_bins=10,
         num_rows_subsample=None,
+        real_association_threshold=0,
     ):
         """Compute the breakdown of this metric."""
         cls._validate_inputs(
@@ -69,6 +84,7 @@ class ContingencySimilarity(ColumnPairsMetric):
             continuous_column_names,
             num_discrete_bins,
             num_rows_subsample,
+            real_association_threshold,
         )
         columns = real_data.columns[:2]
 
@@ -84,7 +100,14 @@ class ContingencySimilarity(ColumnPairsMetric):
                     real[column], synthetic[column], num_discrete_bins=num_discrete_bins
                 )
 
-        contingency_real = real.groupby(list(columns), dropna=False).size() / len(real)
+        contingency_real_counts = real.groupby(list(columns), dropna=False).size()
+        if real_association_threshold > 0:
+            contingency_2d = contingency_real_counts.unstack(fill_value=0)  # noqa: PD010
+            real_cramer = association(contingency_2d.values, method='cramer')
+            if real_cramer <= real_association_threshold:
+                return {'score': np.nan}
+
+        contingency_real = contingency_real_counts / len(real)
         contingency_synthetic = synthetic.groupby(list(columns), dropna=False).size() / len(
             synthetic
         )
@@ -103,6 +126,7 @@ class ContingencySimilarity(ColumnPairsMetric):
         continuous_column_names=None,
         num_discrete_bins=10,
         num_rows_subsample=None,
+        real_association_threshold=0,
     ):
         """Compare the contingency similarity of two discrete columns.
 
@@ -120,10 +144,15 @@ class ContingencySimilarity(ColumnPairsMetric):
             num_rows_subsample (int, optional):
                 The number of rows to subsample from the real and synthetic data before computing
                 the metric. Defaults to ``None``.
+            real_association_threshold (float, optional):
+                The minimum Cramer's V association score required in the real data for the
+                metric to be computed. If the real data's association is below this threshold,
+                the metric returns NaN. Defaults to 0 (no threshold).
 
         Returns:
             float:
-                The contingency similarity of the two columns.
+                The contingency similarity of the two columns, or NaN if the real data's
+                association is below the threshold.
         """
         return cls.compute_breakdown(
             real_data,
@@ -131,6 +160,7 @@ class ContingencySimilarity(ColumnPairsMetric):
             continuous_column_names,
             num_discrete_bins,
             num_rows_subsample,
+            real_association_threshold,
         )['score']
 
     @classmethod
