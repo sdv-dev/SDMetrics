@@ -92,7 +92,7 @@ def install_minimum(c):
         install_deps = ' '.join(minimum_versions)
         c.run(f'python -m pip install {install_deps}')
         if platform.system() == 'Windows':
-            for dep, cap in EXTERNAL_DEPENDENCY_CAPS.items():
+            for dep, cap in EXTERNAL_DEPENDENCY_WINDOWS_CAPS.items():
                 c.run(f'python -m pip install "{dep}<{cap}"')
 
 @task
