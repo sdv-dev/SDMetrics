@@ -2,6 +2,7 @@ import glob
 import inspect
 import operator
 import os
+import platform
 import shutil
 import stat
 import sys
@@ -14,9 +15,7 @@ from packaging.version import Version
 
 COMPARISONS = {'>=': operator.ge, '>': operator.gt, '<': operator.lt, '<=': operator.le}
 
-EXTERNAL_DEPENDENCY_CAPS = {
-    'torch': '2.9.0'
-}
+EXTERNAL_DEPENDENCY_CAPS_FOR_WINDOWS = {'torch': '2.9.0'}
 
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
@@ -36,7 +35,7 @@ def unit(c):
 def integration(c, env=None):
     env = env or {}
     env.update({"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"})
-    
+
     c.run(
         'python -m pytest ./tests/integration --reruns 5 --disable-warnings --cov=sdmetrics --cov-report=xml:./integration_cov.xml',
         env=env
@@ -70,6 +69,8 @@ def _get_minimum_versions(dependencies, python_version):
                 (spec.version for spec in req.specifier if spec.operator in ('>=', '==')),
                 existing_version,
             )
+            if isinstance(new_version, str):
+                new_version = Version(new_version)
             if new_version > existing_version:
                 # Change when a valid newer version is found
                 min_versions[req.name] = f'{req.name}=={new_version}'
@@ -90,8 +91,9 @@ def install_minimum(c):
     if minimum_versions:
         install_deps = ' '.join(minimum_versions)
         c.run(f'python -m pip install {install_deps}')
-        for dep, cap in EXTERNAL_DEPENDENCY_CAPS.items():
-            c.run(f'python -m pip install "{dep}<{cap}"')
+        if platform.system() == 'Windows' and sys.version_info < (3,14):
+            for dep, cap in EXTERNAL_DEPENDENCY_CAPS_FOR_WINDOWS.items():
+                c.run(f'python -m pip install "{dep}<{cap}"')
 
 @task
 def minimum(c):
