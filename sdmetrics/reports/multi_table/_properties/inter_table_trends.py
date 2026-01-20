@@ -23,6 +23,15 @@ class InterTableTrends(BaseMultiTableProperty):
 
     _num_iteration_case = 'inter_table_column_pair'
 
+    def __init__(self):
+        super().__init__()
+        self.real_correlation_threshold = 0
+        self.real_association_threshold = 0
+
+    def _compute_average(self):
+        """Average only the scores for column pairs that meet the threshold."""
+        return self._compute_average_with_threshold('Meets Threshold?')
+
     def _denormalize_tables(self, real_data, synthetic_data, relationship):
         """Merge a parent and child table into one denormalized table.
 
@@ -123,6 +132,12 @@ class InterTableTrends(BaseMultiTableProperty):
             parent_child_pairs = itertools.product(parent_cols, child_cols)
 
             self._properties[(parent, child, foreign_key)] = SingleTableColumnPairTrends()
+            self._properties[
+                (parent, child, foreign_key)
+            ].real_correlation_threshold = self.real_correlation_threshold
+            self._properties[
+                (parent, child, foreign_key)
+            ].real_association_threshold = self.real_association_threshold
             details = self._properties[(parent, child, foreign_key)]._generate_details(
                 denormalized_real,
                 denormalized_synthetic,
@@ -156,6 +171,10 @@ class InterTableTrends(BaseMultiTableProperty):
                 'Real Correlation',
                 'Synthetic Correlation',
             ]
+            if 'Real Association' in self.details.columns:
+                detail_columns.append('Real Association')
+            if 'Meets Threshold?' in self.details.columns:
+                detail_columns.append('Meets Threshold?')
             if 'Error' in self.details.columns:
                 detail_columns.append('Error')
 
@@ -200,7 +219,11 @@ class InterTableTrends(BaseMultiTableProperty):
         to_plot['Real Correlation'] = to_plot['Real Correlation'].fillna('None')
         to_plot['Synthetic Correlation'] = to_plot['Synthetic Correlation'].fillna('None')
 
-        average_score = round(to_plot['Score'].mean(), 2)
+        if 'Meets Threshold?' in to_plot.columns:
+            contributing = to_plot['Meets Threshold?']
+            average_score = round(to_plot.loc[contributing, 'Score'].mean(), 2)
+        else:
+            average_score = round(to_plot['Score'].mean(), 2)
 
         fig = px.bar(
             to_plot,

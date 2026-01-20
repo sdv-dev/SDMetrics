@@ -9,6 +9,11 @@ from sdmetrics.reports.single_table import QualityReport
 from tests.utils import get_error_type
 
 
+def _set_thresholds_zero(report):
+    report.real_correlation_threshold = 0
+    report.real_association_threshold = 0
+
+
 class TestQualityReport:
     def test__get_properties(self):
         """Test the properties of the report."""
@@ -50,6 +55,7 @@ class TestQualityReport:
         }
 
         report = QualityReport()
+        _set_thresholds_zero(report)
 
         # Run
         report.generate(real_data, synthetic_data, metadata)
@@ -77,6 +83,7 @@ class TestQualityReport:
             key: val for key, val in metadata['columns'].items() if key in column_names
         }
         report = QualityReport()
+        _set_thresholds_zero(report)
         report.num_rows_subsample = None
 
         # Run
@@ -130,7 +137,16 @@ class TestQualityReport:
                 0.9348837209302325,
             ],
             'Real Correlation': [0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan],
-            'Synthetic Correlation': [-0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan],
+            'Synthetic Correlation': [
+                -0.11506297326956305,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+            ],
+            'Real Association': [np.nan] * 6,
+            'Meets Threshold?': [True] * 6,
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
         expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)
@@ -174,6 +190,8 @@ class TestQualityReport:
 
         report_1 = QualityReport()
         report_2 = QualityReport()
+        _set_thresholds_zero(report_1)
+        _set_thresholds_zero(report_2)
 
         # Run
         report_1.generate(real_data, synthetic_data, metadata, verbose=False)
@@ -209,6 +227,7 @@ class TestQualityReport:
             key: val for key, val in metadata['columns'].items() if key in column_names
         }
         report = QualityReport()
+        _set_thresholds_zero(report)
 
         # Run
         report.generate(real_data[column_names], synthetic_data[column_names], metadata)
@@ -259,7 +278,16 @@ class TestQualityReport:
                 0.9348837209302325,
             ],
             'Real Correlation': [0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan],
-            'Synthetic Correlation': [-0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan],
+            'Synthetic Correlation': [
+                -0.11506297326956305,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+                np.nan,
+            ],
+            'Real Association': [np.nan] * 6,
+            'Meets Threshold?': [True] * 6,
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
         expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)
@@ -285,6 +313,7 @@ class TestQualityReport:
         real_data['second_perc'].iloc[2] = 'a'
 
         report = QualityReport()
+        _set_thresholds_zero(report)
 
         # Run
         report.generate(real_data[column_names], synthetic_data[column_names], metadata)
@@ -337,8 +366,10 @@ class TestQualityReport:
             ],
             'Real Correlation': [np.nan] * 6,
             'Synthetic Correlation': [np.nan] * 6,
+            'Real Association': [np.nan] * 6,
+            'Meets Threshold?': [False, True, True, False, False, True],
             'Error': [
-                'ValueError',  # This can be either ValueError or AttributeError
+                'AttributeError',  # This can be either ValueError or AttributeError
                 None,
                 None,
                 'TypeError',
@@ -375,6 +406,7 @@ class TestQualityReport:
         column_names.append('nan_column')
 
         report = QualityReport()
+        _set_thresholds_zero(report)
 
         # Run
         report.generate(real_data[column_names], synthetic_data[column_names], metadata)
@@ -467,7 +499,7 @@ class TestQualityReport:
                 np.nan,
             ],
             'Synthetic Correlation': [
-                -0.11506297326956302,
+                -0.11506297326956305,
                 np.nan,
                 np.nan,
                 np.nan,
@@ -478,6 +510,8 @@ class TestQualityReport:
                 np.nan,
                 np.nan,
             ],
+            'Real Association': [np.nan] * 10,
+            'Meets Threshold?': [True, True, True, False, True, True, False, True, True, True],
             'Error': [
                 None,
                 None,
@@ -529,6 +563,7 @@ class TestQualityReport:
         metadata['columns']['nan_column'] = {'sdtype': 'numerical'}
 
         report = QualityReport()
+        _set_thresholds_zero(report)
 
         # Run
         report.generate(real_data, synthetic_data, metadata)
@@ -545,6 +580,7 @@ class TestQualityReport:
         data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1, 1, 1, 1]})
         metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
         report = QualityReport()
+        _set_thresholds_zero(report)
 
         # Run
         report.generate(data, data, metadata)
@@ -562,6 +598,7 @@ class TestQualityReport:
         data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1.2, 1, 1, 1]})
         metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
         report = QualityReport()
+        _set_thresholds_zero(report)
 
         # Run
         report.generate(data, data, metadata)
@@ -580,6 +617,7 @@ class TestQualityReport:
         synthetic_data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1, 1, 1, 1]})
         metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
         report = QualityReport()
+        _set_thresholds_zero(report)
 
         # Run
         report.generate(data, synthetic_data, metadata)

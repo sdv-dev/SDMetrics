@@ -20,8 +20,16 @@ class BaseSingleTableProperty:
 
     def _compute_average(self):
         """Average the scores for each column."""
+        return self._compute_average_with_threshold()
+
+    def _compute_average_with_threshold(self, threshold_column=None):
+        """Average the scores, optionally filtering by a threshold column."""
         if not isinstance(self.details, pd.DataFrame) or 'Score' not in self.details.columns:
             raise ValueError("The property details must be a DataFrame with a 'Score' column.")
+
+        if threshold_column and threshold_column in self.details.columns:
+            contributing = self.details[threshold_column]
+            return self.details.loc[contributing, 'Score'].mean()
 
         return self.details['Score'].mean()
 

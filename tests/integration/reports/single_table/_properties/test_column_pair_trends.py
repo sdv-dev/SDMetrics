@@ -60,6 +60,8 @@ class TestColumnPairTrends:
             ],
             'Real Correlation': [0.04735340044317632, np.nan, np.nan, np.nan, np.nan, np.nan],
             'Synthetic Correlation': [-0.11506297326956302, np.nan, np.nan, np.nan, np.nan, np.nan],
+            'Real Association': [np.nan] * 6,
+            'Meets Threshold?': [True] * 6,
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(column_pair_trends.details, expected_details)
@@ -148,6 +150,8 @@ class TestColumnPairTrends:
             ],
             'Real Correlation': [np.nan] * 6,
             'Synthetic Correlation': [np.nan] * 6,
+            'Real Association': [np.nan] * 6,
+            'Meets Threshold?': [True] * 6,
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(column_pair_trends.details, expected_details)

@@ -31,6 +31,12 @@ class ColumnPairTrends(BaseSingleTableProperty):
         super().__init__()
         self._columns_datetime_conversion_failed = {}
         self._columns_discretization_failed = {}
+        self.real_correlation_threshold = 0
+        self.real_association_threshold = 0
+
+    def _compute_average(self):
+        """Average the scores for each column pair, honoring contribution rules."""
+        return self._compute_average_with_threshold('Meets Threshold?')
 
     def _convert_datetime_columns_to_numeric(self, data, metadata):
         """Convert all the datetime columns to numeric columns.
@@ -240,6 +246,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
         scores = []
         real_correlations = []
         synthetic_correlations = []
+        real_associations = []
+        meets_threshold = []
         error_messages = []
 
         list_dtypes = self._sdtype_to_shape.keys()
@@ -289,21 +297,48 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 if error:
                     raise Exception('Preprocessing failed')
 
-                score_breakdown = metric.compute_breakdown(
-                    real_data=col_real, synthetic_data=col_synthetic, **metric_params
-                )
-                pair_score = score_breakdown['score']
+                real_association = np.nan
                 if metric.__name__ == 'CorrelationSimilarity':
+                    score_breakdown = metric.compute_breakdown(
+                        real_data=col_real, synthetic_data=col_synthetic, **metric_params
+                    )
+                    pair_score = score_breakdown['score']
                     real_correlation = score_breakdown['real']
                     synthetic_correlation = score_breakdown['synthetic']
+                    if self.real_correlation_threshold <= 0:
+                        meets_threshold_pair = True
+                    else:
+                        meets_threshold_pair = (
+                            not np.isnan(real_correlation)
+                            and abs(real_correlation) > self.real_correlation_threshold
+                        )
                 else:
                     real_correlation = np.nan
                     synthetic_correlation = np.nan
+                    if self.real_association_threshold > 0:
+                        metric_params['real_association_threshold'] = (
+                            self.real_association_threshold
+                        )
+                    score_breakdown = metric.compute_breakdown(
+                        real_data=col_real, synthetic_data=col_synthetic, **metric_params
+                    )
+                    pair_score = score_breakdown['score']
+                    real_association = score_breakdown.get('real_association', np.nan)
+
+                    if self.real_association_threshold > 0:
+                        meets_threshold_pair = (
+                            not np.isnan(real_association)
+                            and real_association > self.real_association_threshold
+                        )
+                    else:
+                        meets_threshold_pair = True
 
             except Exception as e:
                 pair_score = np.nan
                 real_correlation = np.nan
                 synthetic_correlation = np.nan
+                real_association = np.nan
+                meets_threshold_pair = False
                 if not str(e) == 'Preprocessing failed':
                     error = f'{type(e).__name__}: {e}'
             finally:
@@ -316,6 +351,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
             scores.append(pair_score)
             real_correlations.append(real_correlation)
             synthetic_correlations.append(synthetic_correlation)
+            real_associations.append(real_association)
+            meets_threshold.append(meets_threshold_pair)
             error_messages.append(error)
 
         result = pd.DataFrame({
@@ -325,6 +362,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
             'Score': scores,
             'Real Correlation': real_correlations,
             'Synthetic Correlation': synthetic_correlations,
+            'Real Association': real_associations,
+            'Meets Threshold?': meets_threshold,
             'Error': error_messages,
         })
 
