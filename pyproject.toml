@@ -74,8 +74,8 @@ xgboost = [
 test = [
     'sdmetrics[pomegranate,torch,xgboost]',
     'pytest>=6.2.5,<10',
-    'pytest-cov>=2.6.0,<3',
-    'pytest-rerunfailures>=10.3,<15',
+    'pytest-cov>=2.6.0,<8',
+    'pytest-rerunfailures>=10.3,<17',
     'jupyter>=1.0.0,<2',
     'tomli>=2.0.0,<3',
     'invoke',
