@@ -64,7 +64,7 @@ torch = [
     "torch>=2.0.0;python_version>='3.10' and python_version<'3.12'",
     "torch>=2.2.0;python_version>='3.12' and python_version<'3.13'",
     "torch>=2.6.0;python_version>='3.13' and python_version<'3.14'",
-    "torch>=2.9.0;python_version>='3.14'",
+    "torch>=2.8.0;python_version>='3.14'",
 ]
 pomegranate = ['pomegranate>=1.1.2,<2.0']
 xgboost = [
@@ -73,8 +73,8 @@ xgboost = [
 ]
 test = [
     'sdmetrics[pomegranate,torch,xgboost]',
-    'pytest>=6.2.5,<10',
-    'pytest-cov>=2.6.0,<8',
+    'pytest>=6.2.5',
+    'pytest-cov>=2.6.0',
     'pytest-rerunfailures>=10.3,<17',
     'jupyter>=1.0.0,<2',
     'tomli>=2.0.0,<3',

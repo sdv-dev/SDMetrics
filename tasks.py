@@ -14,8 +14,7 @@ from packaging.version import Version
 
 COMPARISONS = {'>=': operator.ge, '>': operator.gt, '<': operator.lt, '<=': operator.le}
 
-EXTERNAL_DEPENDENCY_CAPS = {
-}
+EXTERNAL_DEPENDENCY_CAPS = {}
 
 if not hasattr(inspect, 'getargspec'):
     inspect.getargspec = inspect.getfullargspec
