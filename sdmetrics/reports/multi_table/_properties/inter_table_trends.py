@@ -212,15 +212,15 @@ class InterTableTrends(BaseMultiTableProperty):
         child_cols = to_plot['Child Table'] + '.' + to_plot['Column 2']
         to_plot['Columns'] = parent_cols + ', ' + child_cols
         duplicated = to_plot['Columns'].duplicated(keep=False)
-        to_plot['Columns'][duplicated] = (
-            to_plot['Columns'][duplicated] + ' (' + to_plot['Foreign Key'][duplicated] + ')'
+        to_plot.loc[duplicated, 'Columns'] = (
+            to_plot.loc[duplicated, 'Columns'] + ' (' + to_plot.loc[duplicated, 'Foreign Key'] + ')'
         )
 
         to_plot['Real Correlation'] = to_plot['Real Correlation'].fillna('None')
         to_plot['Synthetic Correlation'] = to_plot['Synthetic Correlation'].fillna('None')
 
         if 'Meets Threshold?' in to_plot.columns:
-            contributing = to_plot['Meets Threshold?']
+            contributing = to_plot['Meets Threshold?'].fillna(False)
             average_score = round(to_plot.loc[contributing, 'Score'].mean(), 2)
         else:
             average_score = round(to_plot['Score'].mean(), 2)

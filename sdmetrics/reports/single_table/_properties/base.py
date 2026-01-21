@@ -28,7 +28,7 @@ class BaseSingleTableProperty:
             raise ValueError("The property details must be a DataFrame with a 'Score' column.")
 
         if threshold_column and threshold_column in self.details.columns:
-            contributing = self.details[threshold_column]
+            contributing = self.details[threshold_column].fillna(False)
             return self.details.loc[contributing, 'Score'].mean()
 
         return self.details['Score'].mean()

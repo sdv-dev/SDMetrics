@@ -299,6 +299,10 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
                 real_association = np.nan
                 if metric.__name__ == 'CorrelationSimilarity':
+                    if self.real_correlation_threshold > 0:
+                        metric_params['real_correlation_threshold'] = (
+                            self.real_correlation_threshold
+                        )
                     score_breakdown = metric.compute_breakdown(
                         real_data=col_real, synthetic_data=col_synthetic, **metric_params
                     )
@@ -338,7 +342,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 real_correlation = np.nan
                 synthetic_correlation = np.nan
                 real_association = np.nan
-                meets_threshold_pair = False
+                meets_threshold_pair = np.nan
                 if not str(e) == 'Preprocessing failed':
                     error = f'{type(e).__name__}: {e}'
             finally:

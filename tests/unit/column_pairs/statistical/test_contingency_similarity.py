@@ -155,7 +155,8 @@ class TestContingencySimilarity:
             None,
             0,
         )
-        assert result == {'score': expected_score}
+        assert result['score'] == expected_score
+        assert np.isnan(result['real_association'])
 
     @patch('sdmetrics.column_pairs.statistical.contingency_similarity.discretize_column')
     def test_compute_with_num_rows_subsample(self, discretize_column_mock):

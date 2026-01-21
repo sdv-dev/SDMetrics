@@ -5,7 +5,6 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from scipy.stats.contingency import association
 from sklearn.preprocessing import OneHotEncoder
 
 
@@ -71,21 +70,6 @@ def get_frequencies(real, synthetic):
         f_exp.append(real[value] / sum(real.values()))  # noqa: PD011
 
     return f_obs, f_exp
-
-
-def compute_cramers_v(contingency_counts):
-    """Compute Cramer's V association from contingency counts.
-
-    Args:
-        contingency_counts (pandas.Series):
-            A Series of counts indexed by the two categorical columns.
-
-    Returns:
-        float:
-            The Cramer's V association.
-    """
-    contingency_2d = contingency_counts.unstack(fill_value=0)  # noqa: PD010
-    return association(contingency_2d.values, method='cramer')
 
 
 def get_missing_percentage(data_column):

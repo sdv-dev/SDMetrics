@@ -2,10 +2,11 @@
 
 import numpy as np
 import pandas as pd
+from scipy.stats.contingency import association
 
 from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
-from sdmetrics.utils import compute_cramers_v, discretize_column
+from sdmetrics.utils import discretize_column
 
 
 class ContingencySimilarity(ColumnPairsMetric):
@@ -100,8 +101,12 @@ class ContingencySimilarity(ColumnPairsMetric):
                 )
 
         contingency_real_counts = real.groupby(list(columns), dropna=False).size()
+
+        # Only compute real_association when threshold is set (for performance)
+        real_association = np.nan
         if real_association_threshold > 0:
-            real_association = compute_cramers_v(contingency_real_counts)
+            contingency_2d = contingency_real_counts.unstack(fill_value=0)  # noqa: PD010
+            real_association = association(contingency_2d.values, method='cramer')
             if real_association <= real_association_threshold:
                 return {'score': np.nan, 'real_association': real_association}
 
@@ -115,10 +120,8 @@ class ContingencySimilarity(ColumnPairsMetric):
         diff = abs(contingency_real - contingency_synthetic).fillna(0)
         variation = diff / 2
         score = 1 - variation.sum()
-        if real_association_threshold > 0:
-            return {'score': score, 'real_association': real_association}
 
-        return {'score': score}
+        return {'score': score, 'real_association': real_association}
 
     @classmethod
     def compute(

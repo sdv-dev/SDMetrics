@@ -157,6 +157,41 @@ class TestColumnPairTrends:
         pd.testing.assert_frame_equal(column_pair_trends.details, expected_details)
         assert score == 0.8930232558139535
 
+    def test_real_association_threshold_filters_pairs(self):
+        """Test that low-association pairs are excluded from the score."""
+        # Setup
+        data = pd.DataFrame({
+            'col1': ['A', 'A', 'B', 'B'],
+            'col2': ['X', 'Y', 'X', 'Y'],
+            'col3': ['M', 'M', 'N', 'N'],
+        })
+        metadata = {
+            'columns': {
+                'col1': {'sdtype': 'categorical'},
+                'col2': {'sdtype': 'categorical'},
+                'col3': {'sdtype': 'categorical'},
+            }
+        }
+        column_pair_trends = ColumnPairTrends()
+        column_pair_trends.real_association_threshold = 0.3
+
+        # Run
+        score = column_pair_trends.get_score(data, data, metadata)
+
+        # Assert
+        expected_details = pd.DataFrame({
+            'Column 1': ['col1', 'col1', 'col2'],
+            'Column 2': ['col2', 'col3', 'col3'],
+            'Metric': ['ContingencySimilarity'] * 3,
+            'Score': [np.nan, 1.0, np.nan],
+            'Real Correlation': [np.nan, np.nan, np.nan],
+            'Synthetic Correlation': [np.nan, np.nan, np.nan],
+            'Real Association': [0.0, 1.0, 0.0],
+            'Meets Threshold?': [False, True, False],
+        })
+        pd.testing.assert_frame_equal(column_pair_trends.details, expected_details)
+        assert score == 1.0
+
     def test_with_different_indexes(self):
         """Test the property when the real and synthetic data only differ by their indexes."""
         # Setup

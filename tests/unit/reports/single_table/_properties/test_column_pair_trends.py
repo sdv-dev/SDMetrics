@@ -441,6 +441,77 @@ class TestColumnPairTrends:
         pd.testing.assert_frame_equal(heatmap_real, expected_real_heatmap)
         pd.testing.assert_frame_equal(heatmap_synthetic, expected_synthetic_heatmap)
 
+    @patch(
+        'sdmetrics.reports.single_table._properties.column_pair_trends.'
+        'CorrelationSimilarity.compute_breakdown'
+    )
+    def test__generate_details_real_correlation_threshold(self, correlation_compute_mock):
+        """Test that real correlation thresholds set contribution flags."""
+        # Setup
+        real_data = pd.DataFrame({'col1': [1, 2, 3, 4], 'col2': [1, 2, 3, 4]})
+        synthetic_data = pd.DataFrame({'col1': [1, 2, 3, 4], 'col2': [1, 2, 3, 4]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+        correlation_compute_mock.return_value = {
+            'score': 0.8,
+            'real': 0.2,
+            'synthetic': 0.1,
+        }
+        cpt_property = ColumnPairTrends()
+        cpt_property.real_correlation_threshold = 0.3
+
+        # Run
+        details = cpt_property._generate_details(real_data, synthetic_data, metadata, None)
+
+        # Assert
+        expected_details = pd.DataFrame({
+            'Column 1': ['col1'],
+            'Column 2': ['col2'],
+            'Metric': ['CorrelationSimilarity'],
+            'Score': [0.8],
+            'Real Correlation': [0.2],
+            'Synthetic Correlation': [0.1],
+            'Real Association': [np.nan],
+            'Meets Threshold?': [False],
+        })
+        pd.testing.assert_frame_equal(details, expected_details)
+        correlation_compute_mock.assert_called_once()
+
+    @patch(
+        'sdmetrics.reports.single_table._properties.column_pair_trends.'
+        'ContingencySimilarity.compute_breakdown'
+    )
+    def test__generate_details_real_association_threshold(self, contingency_compute_mock):
+        """Test that real association thresholds set contribution flags."""
+        # Setup
+        real_data = pd.DataFrame({'col1': ['A', 'A', 'B', 'B'], 'col2': ['X', 'Y', 'X', 'Y']})
+        metadata = {
+            'columns': {'col1': {'sdtype': 'categorical'}, 'col2': {'sdtype': 'categorical'}}
+        }
+        contingency_compute_mock.return_value = {
+            'score': np.nan,
+            'real_association': 0.2,
+        }
+        cpt_property = ColumnPairTrends()
+        cpt_property.real_association_threshold = 0.3
+
+        # Run
+        details = cpt_property._generate_details(real_data, real_data, metadata, None)
+
+        # Assert
+        expected_details = pd.DataFrame({
+            'Column 1': ['col1'],
+            'Column 2': ['col2'],
+            'Metric': ['ContingencySimilarity'],
+            'Score': [np.nan],
+            'Real Correlation': [np.nan],
+            'Synthetic Correlation': [np.nan],
+            'Real Association': [0.2],
+            'Meets Threshold?': [False],
+        })
+        pd.testing.assert_frame_equal(details, expected_details)
+        _, contingency_kwargs = contingency_compute_mock.call_args
+        assert contingency_kwargs['real_association_threshold'] == 0.3
+
     @patch('sdmetrics.reports.single_table._properties.column_pair_trends.make_subplots')
     def test_get_visualization(self, mock_make_subplots):
         """Test the ``get_visualization`` method."""

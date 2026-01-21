@@ -367,7 +367,7 @@ class TestQualityReport:
             'Real Correlation': [np.nan] * 6,
             'Synthetic Correlation': [np.nan] * 6,
             'Real Association': [np.nan] * 6,
-            'Meets Threshold?': [False, True, True, False, False, True],
+            'Meets Threshold?': [np.nan, True, True, np.nan, np.nan, True],
             'Error': [
                 'AttributeError',  # This can be either ValueError or AttributeError
                 None,
@@ -511,7 +511,7 @@ class TestQualityReport:
                 np.nan,
             ],
             'Real Association': [np.nan] * 10,
-            'Meets Threshold?': [True, True, True, False, True, True, False, True, True, True],
+            'Meets Threshold?': [True, True, True, np.nan, True, True, np.nan, True, True, True],
             'Error': [
                 None,
                 None,
