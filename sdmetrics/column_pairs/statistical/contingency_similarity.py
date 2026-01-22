@@ -106,6 +106,9 @@ class ContingencySimilarity(ColumnPairsMetric):
         real_association = np.nan
         if real_association_threshold > 0:
             contingency_2d = contingency_real_counts.unstack(fill_value=0)  # noqa: PD010
+            if contingency_2d.to_numpy().sum() == 0 or min(contingency_2d.shape) < 2:
+                return {'score': np.nan, 'real_association': real_association}
+
             real_association = association(contingency_2d.values, method='cramer')
             if real_association <= real_association_threshold:
                 return {'score': np.nan, 'real_association': real_association}

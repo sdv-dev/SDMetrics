@@ -262,6 +262,25 @@ class TestContingencySimilarity:
         # Assert
         assert np.isnan(result)
 
+    @patch('sdmetrics.column_pairs.statistical.contingency_similarity.association')
+    def test_real_association_threshold_skips_degenerate_table(self, association_mock):
+        """Test that degenerate contingency tables skip association computation."""
+        # Setup
+        real_data = pd.DataFrame({'col1': ['A'] * 10, 'col2': list('AABBCCDDEE')})
+        synthetic_data = pd.DataFrame({'col1': ['A'] * 10, 'col2': list('AACCDDEEFF')})
+
+        # Run
+        result = ContingencySimilarity.compute_breakdown(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            real_association_threshold=0.1,
+        )
+
+        # Assert
+        association_mock.assert_not_called()
+        assert np.isnan(result['score'])
+        assert np.isnan(result['real_association'])
+
     def test_real_association_threshold_computes_normally(self):
         """Test that metric computes normally when real association exceeds threshold."""
         # Setup
