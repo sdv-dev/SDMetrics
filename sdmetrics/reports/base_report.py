@@ -272,7 +272,8 @@ class BaseReport:
             pandas.DataFrame
         """
         self._validate_property_generated(property_name)
-        return self._properties[property_name].details.copy()
+        details = self._properties[property_name].details.copy()
+        return details
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.

@@ -217,6 +217,60 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         return error
 
+    def _compute_pair_score(
+        self,
+        metric,
+        col_real,
+        col_synthetic,
+        metric_params,
+    ):
+        """Compute the score breakdown and threshold check for a column pair."""
+        params = dict(metric_params)
+        if metric.__name__ == 'CorrelationSimilarity':
+            if self.real_correlation_threshold > 0:
+                params['real_correlation_threshold'] = self.real_correlation_threshold
+
+            score_breakdown = metric.compute_breakdown(
+                real_data=col_real, synthetic_data=col_synthetic, **params
+            )
+            pair_score = score_breakdown['score']
+            real_correlation = score_breakdown['real']
+            synthetic_correlation = score_breakdown['synthetic']
+            real_association = np.nan
+            if self.real_correlation_threshold <= 0:
+                meets_threshold_pair = True
+            else:
+                meets_threshold_pair = (
+                    not np.isnan(real_correlation)
+                    and abs(real_correlation) > self.real_correlation_threshold
+                )
+        else:
+            if self.real_association_threshold > 0:
+                params['real_association_threshold'] = self.real_association_threshold
+
+            score_breakdown = metric.compute_breakdown(
+                real_data=col_real, synthetic_data=col_synthetic, **params
+            )
+            pair_score = score_breakdown['score']
+            real_correlation = np.nan
+            synthetic_correlation = np.nan
+            real_association = score_breakdown.get('real_association', np.nan)
+            if self.real_association_threshold > 0:
+                meets_threshold_pair = (
+                    not np.isnan(real_association)
+                    and real_association > self.real_association_threshold
+                )
+            else:
+                meets_threshold_pair = True
+
+        return (
+            pair_score,
+            real_correlation,
+            synthetic_correlation,
+            real_association,
+            meets_threshold_pair,
+        )
+
     def _generate_details(
         self, real_data, synthetic_data, metadata, progress_bar=None, column_pairs=None
     ):
@@ -297,45 +351,13 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 if error:
                     raise Exception('Preprocessing failed')
 
-                real_association = np.nan
-                if metric.__name__ == 'CorrelationSimilarity':
-                    if self.real_correlation_threshold > 0:
-                        metric_params['real_correlation_threshold'] = (
-                            self.real_correlation_threshold
-                        )
-                    score_breakdown = metric.compute_breakdown(
-                        real_data=col_real, synthetic_data=col_synthetic, **metric_params
-                    )
-                    pair_score = score_breakdown['score']
-                    real_correlation = score_breakdown['real']
-                    synthetic_correlation = score_breakdown['synthetic']
-                    if self.real_correlation_threshold <= 0:
-                        meets_threshold_pair = True
-                    else:
-                        meets_threshold_pair = (
-                            not np.isnan(real_correlation)
-                            and abs(real_correlation) > self.real_correlation_threshold
-                        )
-                else:
-                    real_correlation = np.nan
-                    synthetic_correlation = np.nan
-                    if self.real_association_threshold > 0:
-                        metric_params['real_association_threshold'] = (
-                            self.real_association_threshold
-                        )
-                    score_breakdown = metric.compute_breakdown(
-                        real_data=col_real, synthetic_data=col_synthetic, **metric_params
-                    )
-                    pair_score = score_breakdown['score']
-                    real_association = score_breakdown.get('real_association', np.nan)
-
-                    if self.real_association_threshold > 0:
-                        meets_threshold_pair = (
-                            not np.isnan(real_association)
-                            and real_association > self.real_association_threshold
-                        )
-                    else:
-                        meets_threshold_pair = True
+                (
+                    pair_score,
+                    real_correlation,
+                    synthetic_correlation,
+                    real_association,
+                    meets_threshold_pair,
+                ) = self._compute_pair_score(metric, col_real, col_synthetic, metric_params)
 
             except Exception as e:
                 pair_score = np.nan
@@ -386,14 +408,26 @@ class ColumnPairTrends(BaseSingleTableProperty):
         if column_name not in ['Score', 'Real Correlation', 'Synthetic Correlation']:
             raise ValueError(f"Invalid column name for _get_correlation_matrix : '{column_name}'")
 
-        table = self.details.dropna(subset=[column_name])
-        names = list(pd.concat([table['Column 1'], table['Column 2']]).unique())
+        table = self.details
+        if column_name in ['Real Correlation', 'Synthetic Correlation']:
+            names_source = table[table['Metric'] == 'CorrelationSimilarity']
+        else:
+            names_source = table
+
+        table = names_source.dropna(subset=[column_name])
+        if column_name == 'Score':
+            names_source = self.details
+
+        names = list(pd.concat([names_source['Column 1'], names_source['Column 2']]).unique())
+        available_columns = set(pd.concat([table['Column 1'], table['Column 2']]).unique())
         heatmap_df = pd.DataFrame(index=names, columns=names)
 
         for idx_1, column_name_1 in enumerate(names):
             for column_name_2 in names[idx_1:]:
                 if column_name_1 == column_name_2:
-                    heatmap_df.loc[column_name_1, column_name_2] = 1
+                    heatmap_df.loc[column_name_1, column_name_2] = (
+                        1 if column_name_1 in available_columns else np.nan
+                    )
                     continue
 
                 # check wether the combination (Colunm 1, Column 2) or (Column 2, Column 1)
@@ -426,7 +460,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             customdata (pandas.DataFrame or None):
                 The customdata to use. Defaults to None.
         """
-        fig = go.Heatmap(
+        base_heatmap = go.Heatmap(
             x=correlation_matrix.columns,
             y=correlation_matrix.columns,
             z=correlation_matrix,
@@ -435,7 +469,20 @@ class ColumnPairTrends(BaseSingleTableProperty):
             hovertemplate=hovertemplate,
         )
 
-        return fig
+        nan_mask = correlation_matrix.isna().to_numpy()
+        if not nan_mask.any():
+            return [base_heatmap]
+
+        nan_heatmap = go.Heatmap(
+            x=correlation_matrix.columns,
+            y=correlation_matrix.columns,
+            z=np.where(nan_mask, 1, np.nan),
+            colorscale=[[0, '#B0B0B0'], [1, '#B0B0B0']],
+            showscale=False,
+            hoverinfo='skip',
+        )
+
+        return [base_heatmap, nan_heatmap]
 
     def _update_layout(self, fig):
         """Update the layout of the figure.
@@ -495,13 +542,16 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         fig.update_xaxes(tickangle=45)
 
-        fig.add_trace(self._get_heatmap(similarity_correlation, 'coloraxis', tmpl_1), 1, 1)
-        fig.add_trace(
-            self._get_heatmap(real_correlation, 'coloraxis2', tmpl_2, synthetic_correlation), 2, 1
-        )
-        fig.add_trace(
-            self._get_heatmap(synthetic_correlation, 'coloraxis2', tmpl_2, real_correlation), 2, 2
-        )
+        for trace in self._get_heatmap(similarity_correlation, 'coloraxis', tmpl_1):
+            fig.add_trace(trace, 1, 1)
+        for trace in self._get_heatmap(
+            real_correlation, 'coloraxis2', tmpl_2, synthetic_correlation
+        ):
+            fig.add_trace(trace, 2, 1)
+        for trace in self._get_heatmap(
+            synthetic_correlation, 'coloraxis2', tmpl_2, real_correlation
+        ):
+            fig.add_trace(trace, 2, 2)
 
         self._update_layout(fig)
 

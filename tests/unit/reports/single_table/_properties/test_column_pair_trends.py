@@ -385,7 +385,7 @@ class TestColumnPairTrends:
         cpt_property.details = pd.DataFrame({
             'Column 1': ['col1', 'col1', 'col2'],
             'Column 2': ['col2', 'col3', 'col3'],
-            'metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
+            'Metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
             'Score': [0.5, 0.6, 0.7],
         })
 
@@ -411,7 +411,7 @@ class TestColumnPairTrends:
         cpt_property.details = pd.DataFrame({
             'Column 1': ['col1', 'col1', 'col2'],
             'Column 2': ['col2', 'col3', 'col3'],
-            'metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
+            'Metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
             'Score': [0.5, 0.6, 0.7],
             'Real Correlation': [0.3, None, None],
             'Synthetic Correlation': [0.4, None, None],
@@ -526,7 +526,7 @@ class TestColumnPairTrends:
         cpt_property._get_correlation_matrix = mock__get_correlation_matrix
 
         mock_heatmap = Mock()
-        cpt_property._get_heatmap = Mock(return_value=mock_heatmap)
+        cpt_property._get_heatmap = Mock(return_value=[mock_heatmap])
 
         mock__update_layout = Mock()
         cpt_property._update_layout = mock__update_layout
