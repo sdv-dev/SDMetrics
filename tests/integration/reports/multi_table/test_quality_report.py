@@ -266,6 +266,47 @@ def test_quality_report_end_to_end():
     assert info['num_rows_synthetic_data'] == {'sessions': 10, 'users': 10, 'transactions': 10}
 
 
+def test_column_pair_trends_threshold_changes_details():
+    """Test threshold impact on column pair trends details."""
+    # Setup
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    report_default = QualityReport()
+    report_zero = QualityReport()
+    _set_thresholds_zero(report_zero)
+
+    # Run
+    report_default.generate(real_data, synthetic_data, metadata, verbose=False)
+    report_zero.generate(real_data, synthetic_data, metadata, verbose=False)
+    score_default = (
+        report_default
+        .get_properties()
+        .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
+        .iloc[0]
+    )
+    score_zero = (
+        report_zero
+        .get_properties()
+        .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
+        .iloc[0]
+    )
+    score_defaul_intertable = (
+        report_default
+        .get_properties()
+        .loc[lambda df: df['Property'] == 'Intertable Trends', 'Score']
+        .iloc[0]
+    )
+    score_zero_intertable = (
+        report_zero
+        .get_properties()
+        .loc[lambda df: df['Property'] == 'Intertable Trends', 'Score']
+        .iloc[0]
+    )
+
+    # Assert
+    assert score_zero >= score_default  # scores should be approximately 0.4 > 0.3
+    assert score_zero_intertable >= score_defaul_intertable  # approximately 0.45 > 0.4
+
+
 def test_quality_report_with_object_datetimes():
     """Test the multi table QualityReport with object datetimes."""
     # Setup

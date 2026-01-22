@@ -177,6 +177,33 @@ class TestQualityReport:
         assert report_info['num_rows_synthetic_data'] == 215
         assert report_info['generation_time'] <= generate_end_time - generate_start_time
 
+    def test_column_pair_trends_threshold_changes_details(self):
+        """Test threshold impact on column pair trends details."""
+        # Setup
+        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        report_default = QualityReport()
+        report_zero = QualityReport()
+        _set_thresholds_zero(report_zero)
+
+        # Run
+        report_default.generate(real_data, synthetic_data, metadata, verbose=False)
+        report_zero.generate(real_data, synthetic_data, metadata, verbose=False)
+        score_default = (
+            report_default
+            .get_properties()
+            .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
+            .iloc[0]
+        )
+        score_zero = (
+            report_zero
+            .get_properties()
+            .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
+            .iloc[0]
+        )
+
+        # Assert
+        assert score_zero >= score_default  # scores should be approximately 0.8 > 0.7
+
     def test_with_large_dataset(self):
         """Test the quality report with a large dataset (>50000 rows).
 
