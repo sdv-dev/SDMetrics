@@ -289,7 +289,7 @@ def test_column_pair_trends_threshold_changes_details():
         .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
         .iloc[0]
     )
-    score_defaul_intertable = (
+    score_default_intertable = (
         report_default
         .get_properties()
         .loc[lambda df: df['Property'] == 'Intertable Trends', 'Score']
@@ -304,7 +304,7 @@ def test_column_pair_trends_threshold_changes_details():
 
     # Assert
     assert score_zero >= score_default  # scores should be approximately 0.4 > 0.3
-    assert score_zero_intertable >= score_defaul_intertable  # approximately 0.45 > 0.4
+    assert score_zero_intertable >= score_default_intertable  # approximately 0.45 > 0.4
 
 
 def test_quality_report_with_object_datetimes():

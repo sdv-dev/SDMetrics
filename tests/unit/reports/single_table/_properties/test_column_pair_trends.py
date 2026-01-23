@@ -541,3 +541,35 @@ class TestColumnPairTrends:
         assert fig_mock.add_trace.call_count == 3
         cpt_property._update_layout.assert_called_once_with(fig_mock)
         assert result == fig_mock
+
+    def test_get_visualization_layout_alignment(self):
+        """Test layout settings that keep subplots aligned."""
+        # Setup
+        cpt_property = ColumnPairTrends()
+        cpt_property.details = pd.DataFrame({
+            'Column 1': ['col1'],
+            'Column 2': ['col2'],
+            'Metric': ['CorrelationSimilarity'],
+            'Score': [0.75],
+            'Real Correlation': [0.5],
+            'Synthetic Correlation': [0.6],
+            'Real Association': [0.2],
+            'Meets Threshold?': [True],
+        })
+
+        # Run
+        fig = cpt_property.get_visualization()
+
+        # Assert
+        assert fig.layout.height == 900
+        assert fig.layout.width == 900
+        assert fig.layout.xaxis3.matches == 'x2'
+        assert fig.layout.yaxis3.matches == 'y2'
+        assert fig.layout.yaxis3.visible is False
+        assert fig.layout.coloraxis.cmin == 0
+        assert fig.layout.coloraxis.cmax == 1
+        assert fig.layout.coloraxis.colorbar.x == 0.8
+        assert fig.layout.coloraxis.colorbar.y == 0.8
+        assert fig.layout.coloraxis2.cmin == -1
+        assert fig.layout.coloraxis2.cmax == 1
+        assert fig.layout.coloraxis2.colorbar.y == 0.2

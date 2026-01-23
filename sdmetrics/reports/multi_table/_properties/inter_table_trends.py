@@ -220,7 +220,7 @@ class InterTableTrends(BaseMultiTableProperty):
         to_plot['Synthetic Correlation'] = to_plot['Synthetic Correlation'].fillna('None')
 
         if 'Meets Threshold?' in to_plot.columns:
-            contributing = to_plot['Meets Threshold?'].fillna(False)
+            contributing = to_plot['Meets Threshold?'].astype('boolean').fillna(False)
             average_score = round(to_plot.loc[contributing, 'Score'].mean(), 2)
         else:
             average_score = round(to_plot['Score'].mean(), 2)
