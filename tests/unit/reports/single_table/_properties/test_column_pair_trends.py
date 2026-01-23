@@ -385,7 +385,7 @@ class TestColumnPairTrends:
         cpt_property.details = pd.DataFrame({
             'Column 1': ['col1', 'col1', 'col2'],
             'Column 2': ['col2', 'col3', 'col3'],
-            'metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
+            'Metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
             'Score': [0.5, 0.6, 0.7],
         })
 
@@ -411,7 +411,7 @@ class TestColumnPairTrends:
         cpt_property.details = pd.DataFrame({
             'Column 1': ['col1', 'col1', 'col2'],
             'Column 2': ['col2', 'col3', 'col3'],
-            'metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
+            'Metric': ['CorrelationSimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
             'Score': [0.5, 0.6, 0.7],
             'Real Correlation': [0.3, None, None],
             'Synthetic Correlation': [0.4, None, None],
@@ -441,6 +441,77 @@ class TestColumnPairTrends:
         pd.testing.assert_frame_equal(heatmap_real, expected_real_heatmap)
         pd.testing.assert_frame_equal(heatmap_synthetic, expected_synthetic_heatmap)
 
+    @patch(
+        'sdmetrics.reports.single_table._properties.column_pair_trends.'
+        'CorrelationSimilarity.compute_breakdown'
+    )
+    def test__generate_details_real_correlation_threshold(self, correlation_compute_mock):
+        """Test that real correlation thresholds set contribution flags."""
+        # Setup
+        real_data = pd.DataFrame({'col1': [1, 2, 3, 4], 'col2': [1, 2, 3, 4]})
+        synthetic_data = pd.DataFrame({'col1': [1, 2, 3, 4], 'col2': [1, 2, 3, 4]})
+        metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+        correlation_compute_mock.return_value = {
+            'score': 0.8,
+            'real': 0.2,
+            'synthetic': 0.1,
+        }
+        cpt_property = ColumnPairTrends()
+        cpt_property.real_correlation_threshold = 0.3
+
+        # Run
+        details = cpt_property._generate_details(real_data, synthetic_data, metadata, None)
+
+        # Assert
+        expected_details = pd.DataFrame({
+            'Column 1': ['col1'],
+            'Column 2': ['col2'],
+            'Metric': ['CorrelationSimilarity'],
+            'Score': [0.8],
+            'Real Correlation': [0.2],
+            'Synthetic Correlation': [0.1],
+            'Real Association': [np.nan],
+            'Meets Threshold?': [False],
+        })
+        pd.testing.assert_frame_equal(details, expected_details)
+        correlation_compute_mock.assert_called_once()
+
+    @patch(
+        'sdmetrics.reports.single_table._properties.column_pair_trends.'
+        'ContingencySimilarity.compute_breakdown'
+    )
+    def test__generate_details_real_association_threshold(self, contingency_compute_mock):
+        """Test that real association thresholds set contribution flags."""
+        # Setup
+        real_data = pd.DataFrame({'col1': ['A', 'A', 'B', 'B'], 'col2': ['X', 'Y', 'X', 'Y']})
+        metadata = {
+            'columns': {'col1': {'sdtype': 'categorical'}, 'col2': {'sdtype': 'categorical'}}
+        }
+        contingency_compute_mock.return_value = {
+            'score': np.nan,
+            'real_association': 0.2,
+        }
+        cpt_property = ColumnPairTrends()
+        cpt_property.real_association_threshold = 0.3
+
+        # Run
+        details = cpt_property._generate_details(real_data, real_data, metadata, None)
+
+        # Assert
+        expected_details = pd.DataFrame({
+            'Column 1': ['col1'],
+            'Column 2': ['col2'],
+            'Metric': ['ContingencySimilarity'],
+            'Score': [np.nan],
+            'Real Correlation': [np.nan],
+            'Synthetic Correlation': [np.nan],
+            'Real Association': [0.2],
+            'Meets Threshold?': [False],
+        })
+        pd.testing.assert_frame_equal(details, expected_details)
+        _, contingency_kwargs = contingency_compute_mock.call_args
+        assert contingency_kwargs['real_association_threshold'] == 0.3
+
     @patch('sdmetrics.reports.single_table._properties.column_pair_trends.make_subplots')
     def test_get_visualization(self, mock_make_subplots):
         """Test the ``get_visualization`` method."""
@@ -455,7 +526,7 @@ class TestColumnPairTrends:
         cpt_property._get_correlation_matrix = mock__get_correlation_matrix
 
         mock_heatmap = Mock()
-        cpt_property._get_heatmap = Mock(return_value=mock_heatmap)
+        cpt_property._get_heatmap = Mock(return_value=[mock_heatmap])
 
         mock__update_layout = Mock()
         cpt_property._update_layout = mock__update_layout
@@ -470,3 +541,35 @@ class TestColumnPairTrends:
         assert fig_mock.add_trace.call_count == 3
         cpt_property._update_layout.assert_called_once_with(fig_mock)
         assert result == fig_mock
+
+    def test_get_visualization_layout_alignment(self):
+        """Test layout settings that keep subplots aligned."""
+        # Setup
+        cpt_property = ColumnPairTrends()
+        cpt_property.details = pd.DataFrame({
+            'Column 1': ['col1'],
+            'Column 2': ['col2'],
+            'Metric': ['CorrelationSimilarity'],
+            'Score': [0.75],
+            'Real Correlation': [0.5],
+            'Synthetic Correlation': [0.6],
+            'Real Association': [0.2],
+            'Meets Threshold?': [True],
+        })
+
+        # Run
+        fig = cpt_property.get_visualization()
+
+        # Assert
+        assert fig.layout.height == 900
+        assert fig.layout.width == 900
+        assert fig.layout.xaxis3.matches == 'x2'
+        assert fig.layout.yaxis3.matches == 'y2'
+        assert fig.layout.yaxis3.visible is False
+        assert fig.layout.coloraxis.cmin == 0
+        assert fig.layout.coloraxis.cmax == 1
+        assert fig.layout.coloraxis.colorbar.x == 0.8
+        assert fig.layout.coloraxis.colorbar.y == 0.8
+        assert fig.layout.coloraxis2.cmin == -1
+        assert fig.layout.coloraxis2.cmax == 1
+        assert fig.layout.coloraxis2.colorbar.y == 0.2

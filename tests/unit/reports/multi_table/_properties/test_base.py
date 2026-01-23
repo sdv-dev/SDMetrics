@@ -199,6 +199,23 @@ class TestBaseMultiTableProperty:
         base_property.details = pd.DataFrame({'Column': ['a', 'b', 'c']})
         assert np.isnan(base_property._compute_average())
 
+    def test__compute_average_with_threshold(self):
+        """Test that the threshold column filters correctly."""
+        # Setup
+        base_property = BaseMultiTableProperty()
+        base_property.details = pd.DataFrame({
+            'Score': [0.2, 0.8, 1.0],
+            'Meets Threshold?': [True, False, True],
+        })
+
+        # Run
+        filtered_average = base_property._compute_average_with_threshold('Meets Threshold?')
+        unfiltered_average = base_property._compute_average_with_threshold()
+
+        # Assert
+        assert filtered_average == 0.6
+        assert unfiltered_average == 2.0 / 3
+
     def test_get_score(self):
         """Test the ``get_score`` method."""
         # Setup

@@ -354,6 +354,7 @@ def test_get_visualization_multiple_relationships(plotly_mock):
         'Score': [1.0, 0.5],
         'Real Correlation': [np.nan, 1.0],
         'Synthetic Correlation': [0.8, 0.6],
+        'Meets Threshold?': [True, False],
         'Error': ['Some error', None],
     })
     instance.is_computed = True
@@ -372,6 +373,7 @@ def test_get_visualization_multiple_relationships(plotly_mock):
         'Score': [1.0, 0.5],
         'Real Correlation': ['None', 1.0],
         'Synthetic Correlation': [0.8, 0.6],
+        'Meets Threshold?': [True, False],
         'Error': ['Some error', None],
         'Columns': [
             'users.column_a, sessions.column_b (child_id1)',
@@ -382,7 +384,7 @@ def test_get_visualization_multiple_relationships(plotly_mock):
         DataFrameMatcher(expected_plot_df),
         x='Columns',
         y='Score',
-        title='Data Quality: Intertable Trends (Average Score=0.75)',
+        title='Data Quality: Intertable Trends (Average Score=1.0)',
         category_orders={'group': SeriesMatcher(expected_plot_df['Columns'])},
         color='Metric',
         color_discrete_map={

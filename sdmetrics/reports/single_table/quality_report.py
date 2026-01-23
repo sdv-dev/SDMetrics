@@ -13,6 +13,8 @@ class QualityReport(BaseReport):
 
     def __init__(self):
         super().__init__()
+        self.real_correlation_threshold = 0.5
+        self.real_association_threshold = 0.3
         self._properties = {
             'Column Shapes': ColumnShapes(),
             'Column Pair Trends': ColumnPairTrends(),

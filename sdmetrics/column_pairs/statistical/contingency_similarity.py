@@ -101,11 +101,17 @@ class ContingencySimilarity(ColumnPairsMetric):
                 )
 
         contingency_real_counts = real.groupby(list(columns), dropna=False).size()
+
+        # Only compute real_association when threshold is set (for performance)
+        real_association = np.nan
         if real_association_threshold > 0:
             contingency_2d = contingency_real_counts.unstack(fill_value=0)  # noqa: PD010
-            real_cramer = association(contingency_2d.values, method='cramer')
-            if real_cramer <= real_association_threshold:
-                return {'score': np.nan}
+            if contingency_2d.to_numpy().sum() == 0 or min(contingency_2d.shape) < 2:
+                return {'score': np.nan, 'real_association': real_association}
+
+            real_association = association(contingency_2d.values, method='cramer')
+            if real_association <= real_association_threshold:
+                return {'score': np.nan, 'real_association': real_association}
 
         contingency_real = contingency_real_counts / len(real)
         contingency_synthetic = synthetic.groupby(list(columns), dropna=False).size() / len(
@@ -116,7 +122,9 @@ class ContingencySimilarity(ColumnPairsMetric):
         contingency_real = contingency_real.reindex(combined_index, fill_value=0)
         diff = abs(contingency_real - contingency_synthetic).fillna(0)
         variation = diff / 2
-        return {'score': 1 - variation.sum()}
+        score = 1 - variation.sum()
+
+        return {'score': score, 'real_association': real_association}
 
     @classmethod
     def compute(
