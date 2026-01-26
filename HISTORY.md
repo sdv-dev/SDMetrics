@@ -1,5 +1,16 @@
 # History
 
+## v0.26.0 - 2026-01-26
+
+### Bugs Fixed
+
+* Cannot plot PNG figures with Jupyter - Issue [#810](https://github.com/sdv-dev/SDMetrics/issues/810) by @sarahmish
+
+### Maintenance
+
+* Pin Pandas below 3.0 - Issue [#828](https://github.com/sdv-dev/SDMetrics/issues/828) by @R-Palazzo
+* Support Python 3.14 - Issue [#818](https://github.com/sdv-dev/SDMetrics/issues/818) by @gsheni
+
 ## v0.25.0 - 2026-01-08
 
 ### Maintenance
