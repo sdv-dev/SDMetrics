@@ -1,10 +1,10 @@
-Run started:2026-01-08 21:53:50.480719
+Run started:2026-01-26 18:58:49.863184+00:00
 
 Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b101_assert_used.html
    Location: ./sdmetrics/multi_table/multi_single_table.py:187:8
 186	        """
 187	        assert cls.min_value == 0.0
@@ -14,7 +14,7 @@ Test results:
 >> Issue: [B403:blacklist] Consider possible security implications associated with pickle module.
    Severity: Low   Confidence: High
    CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/blacklists/blacklist_imports.html#b403-import-pickle
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_imports.html#b403-import-pickle
    Location: ./sdmetrics/reports/base_report.py:4:0
 3	import importlib.metadata
 4	import pickle
@@ -24,7 +24,7 @@ Test results:
 >> Issue: [B112:try_except_continue] Try, Except, Continue detected.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b112_try_except_continue.html
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b112_try_except_continue.html
    Location: ./sdmetrics/reports/base_report.py:107:16
 106	                    synthetic_data[column] = _convert_datetime_column(column, synth_col, col_meta)
 107	                except Exception:
@@ -35,7 +35,7 @@ Test results:
 >> Issue: [B301:blacklist] Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
    Severity: Medium   Confidence: High
    CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/blacklists/blacklist_calls.html#b301-pickle
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b301-pickle
    Location: ./sdmetrics/reports/base_report.py:295:21
 294	        with open(filepath, 'rb') as f:
 295	            report = pickle.load(f)
@@ -45,7 +45,7 @@ Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b101_assert_used.html
    Location: ./sdmetrics/reports/multi_table/_properties/base.py:70:8
 69	
 70	        assert is_dataframe, assert_message
@@ -55,7 +55,7 @@ Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b101_assert_used.html
    Location: ./sdmetrics/single_table/multi_column_pairs.py:146:8
 145	        """
 146	        assert cls.min_value == 0.0
@@ -65,7 +65,7 @@ Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b101_assert_used.html
    Location: ./sdmetrics/single_table/multi_single_column.py:163:8
 162	        """
 163	        assert cls.min_value == 0.0
@@ -75,7 +75,7 @@ Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b101_assert_used.html
    Location: ./sdmetrics/single_table/privacy/loss.py:80:8
 79	        """
 80	        assert len(pred) == len(real)
@@ -85,7 +85,7 @@ Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b101_assert_used.html
    Location: ./sdmetrics/single_table/privacy/util.py:72:4
 71	    dist = 0
 72	    assert len(target) == len(test), (
@@ -97,7 +97,7 @@ Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b101_assert_used.html
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b101_assert_used.html
    Location: ./sdmetrics/timeseries/detection.py:104:8
 103	        """
 104	        assert cls.min_value == 0.0
@@ -107,17 +107,17 @@ Test results:
 >> Issue: [B110:try_except_pass] Try, Except, Pass detected.
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
-   More Info: https://bandit.readthedocs.io/en/1.7.7/plugins/b110_try_except_pass.html
-   Location: ./sdmetrics/visualization.py:37:8
-36	
-37	        except Exception:
-38	            pass
-39	
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b110_try_except_pass.html
+   Location: ./sdmetrics/visualization.py:41:8
+40	
+41	        except Exception:
+42	            pass
+43	
 
 --------------------------------------------------
 
 Code scanned:
-	Total lines of code: 11863
+	Total lines of code: 11869
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 
