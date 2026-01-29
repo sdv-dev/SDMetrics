@@ -441,6 +441,31 @@ class TestColumnPairTrends:
         pd.testing.assert_frame_equal(heatmap_real, expected_real_heatmap)
         pd.testing.assert_frame_equal(heatmap_synthetic, expected_synthetic_heatmap)
 
+    def test__get_correlation_matrix_score_drops_empty_columns(self):
+        """Test that empty score columns are removed from the score heatmap."""
+        # Setup
+        cpt_property = ColumnPairTrends()
+        cpt_property.details = pd.DataFrame({
+            'Column 1': ['col1', 'col2'],
+            'Column 2': ['col2', 'col3'],
+            'Metric': ['CorrelationSimilarity', 'CorrelationSimilarity'],
+            'Score': [0.5, np.nan],
+            'Error': [None, None],
+        })
+
+        # Run
+        heatmap = cpt_property._get_correlation_matrix('Score')
+
+        # Assert
+        expected_heatmap = pd.DataFrame(
+            {
+                'col1': [1, 0.5],
+                'col2': [0.5, 1],
+            },
+            index=['col1', 'col2'],
+        )
+        pd.testing.assert_frame_equal(heatmap, expected_heatmap)
+
     @patch(
         'sdmetrics.reports.single_table._properties.column_pair_trends.'
         'CorrelationSimilarity.compute_breakdown'
@@ -520,10 +545,21 @@ class TestColumnPairTrends:
 
         fig_mock = Mock()
         fig_mock.add_trace = Mock()
+        fig_mock.update_xaxes = Mock()
         mock_make_subplots.return_value = fig_mock
 
-        mock__get_correlation_matrix = Mock()
-        cpt_property._get_correlation_matrix = mock__get_correlation_matrix
+        similarity_correlation = pd.DataFrame(
+            {'col1': [1, 0.5], 'col2': [0.5, 1]}, index=['col1', 'col2']
+        )
+        real_correlation = pd.DataFrame(
+            {'col1': [1, 0.2], 'col2': [0.2, 1]}, index=['col1', 'col2']
+        )
+        synthetic_correlation = pd.DataFrame(
+            {'col1': [1, 0.3], 'col2': [0.3, 1]}, index=['col1', 'col2']
+        )
+        cpt_property._get_correlation_matrix = Mock(
+            side_effect=[similarity_correlation, real_correlation, synthetic_correlation]
+        )
 
         mock_heatmap = Mock()
         cpt_property._get_heatmap = Mock(return_value=[mock_heatmap])
@@ -535,12 +571,63 @@ class TestColumnPairTrends:
         result = cpt_property.get_visualization()
 
         # Assert
-        assert mock__get_correlation_matrix.call_count == 3
+        assert cpt_property._get_correlation_matrix.call_count == 3
         mock_make_subplots.assert_called()
         assert cpt_property._get_heatmap.call_count == 3
         assert fig_mock.add_trace.call_count == 3
         cpt_property._update_layout.assert_called_once_with(fig_mock)
         assert result == fig_mock
+
+    @patch('sdmetrics.reports.single_table._properties.column_pair_trends.make_subplots')
+    def test_get_visualization_without_correlations(self, mock_make_subplots):
+        """Test the ``get_visualization`` method without numerical correlations."""
+        # Setup
+        cpt_property = ColumnPairTrends()
+        cpt_property.details = pd.DataFrame({
+            'Column 1': ['col1'],
+            'Column 2': ['col2'],
+            'Metric': ['ContingencySimilarity'],
+            'Score': [0.75],
+        })
+
+        fig_mock = Mock()
+        fig_mock.add_trace = Mock()
+        fig_mock.update_xaxes = Mock()
+        mock_make_subplots.return_value = fig_mock
+
+        mock_heatmap = Mock()
+        cpt_property._get_heatmap = Mock(return_value=[mock_heatmap])
+
+        mock__update_layout = Mock()
+        cpt_property._update_layout = mock__update_layout
+
+        # Run
+        result = cpt_property.get_visualization()
+
+        # Assert
+        mock_make_subplots.assert_called_with(
+            rows=1, cols=1, subplot_titles=['Real vs. Synthetic Similarity']
+        )
+        assert fig_mock.add_trace.call_count == 1
+        cpt_property._update_layout.assert_called_once_with(fig_mock, show_correlations=False)
+        assert result == fig_mock
+
+    def test_get_visualization_empty(self):
+        """Test the ``get_visualization`` method when no scores are available."""
+        # Setup
+        cpt_property = ColumnPairTrends()
+        cpt_property.details = pd.DataFrame({
+            'Column 1': ['col1'],
+            'Column 2': ['col2'],
+            'Metric': ['CorrelationSimilarity'],
+            'Score': [np.nan],
+        })
+
+        # Run
+        fig = cpt_property.get_visualization()
+
+        # Assert
+        assert fig.data == ()
 
     def test_get_visualization_layout_alignment(self):
         """Test layout settings that keep subplots aligned."""
