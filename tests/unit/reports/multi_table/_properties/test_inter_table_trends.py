@@ -297,7 +297,7 @@ def test_get_visualization(plotly_mock):
         'Score': [1.0, 0.5],
         'Real Correlation': [np.nan, 1.0],
         'Synthetic Correlation': [0.8, 0.6],
-        'Error': ['Some error', None],
+        'Error': [None, None],
     })
     instance.is_computed = True
 
@@ -315,7 +315,7 @@ def test_get_visualization(plotly_mock):
         'Score': [1.0],
         'Real Correlation': ['None'],
         'Synthetic Correlation': [0.8],
-        'Error': ['Some error'],
+        'Error': [None],
         'Columns': ['users_parent.column_a, users_child.column_c'],
     })
     plotly_mock.bar.assert_called_once_with(
@@ -354,7 +354,8 @@ def test_get_visualization_multiple_relationships(plotly_mock):
         'Score': [1.0, 0.5],
         'Real Correlation': [np.nan, 1.0],
         'Synthetic Correlation': [0.8, 0.6],
-        'Error': ['Some error', None],
+        'Meets Threshold?': [True, False],
+        'Error': [None, None],
     })
     instance.is_computed = True
 
@@ -372,7 +373,8 @@ def test_get_visualization_multiple_relationships(plotly_mock):
         'Score': [1.0, 0.5],
         'Real Correlation': ['None', 1.0],
         'Synthetic Correlation': [0.8, 0.6],
-        'Error': ['Some error', None],
+        'Meets Threshold?': [True, False],
+        'Error': [None, None],
         'Columns': [
             'users.column_a, sessions.column_b (child_id1)',
             'users.column_a, sessions.column_b (child_id2)',
@@ -382,7 +384,7 @@ def test_get_visualization_multiple_relationships(plotly_mock):
         DataFrameMatcher(expected_plot_df),
         x='Columns',
         y='Score',
-        title='Data Quality: Intertable Trends (Average Score=0.75)',
+        title='Data Quality: Intertable Trends (Average Score=1.0)',
         category_orders={'group': SeriesMatcher(expected_plot_df['Columns'])},
         color='Metric',
         color_discrete_map={

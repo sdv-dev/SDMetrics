@@ -4,6 +4,7 @@ import itertools
 
 import pandas as pd
 import plotly.express as px
+from plotly import graph_objects as go
 
 from sdmetrics.reports.multi_table._properties import BaseMultiTableProperty
 from sdmetrics.reports.single_table._properties import (
@@ -22,6 +23,15 @@ class InterTableTrends(BaseMultiTableProperty):
     """
 
     _num_iteration_case = 'inter_table_column_pair'
+
+    def __init__(self):
+        super().__init__()
+        self.real_correlation_threshold = 0
+        self.real_association_threshold = 0
+
+    def _compute_average(self):
+        """Average only the scores for column pairs that meet the threshold."""
+        return self._compute_average_with_threshold('Meets Threshold?')
 
     def _denormalize_tables(self, real_data, synthetic_data, relationship):
         """Merge a parent and child table into one denormalized table.
@@ -123,6 +133,12 @@ class InterTableTrends(BaseMultiTableProperty):
             parent_child_pairs = itertools.product(parent_cols, child_cols)
 
             self._properties[(parent, child, foreign_key)] = SingleTableColumnPairTrends()
+            self._properties[
+                (parent, child, foreign_key)
+            ].real_correlation_threshold = self.real_correlation_threshold
+            self._properties[
+                (parent, child, foreign_key)
+            ].real_association_threshold = self.real_association_threshold
             details = self._properties[(parent, child, foreign_key)]._generate_details(
                 denormalized_real,
                 denormalized_synthetic,
@@ -156,10 +172,63 @@ class InterTableTrends(BaseMultiTableProperty):
                 'Real Correlation',
                 'Synthetic Correlation',
             ]
+            if 'Real Association' in self.details.columns:
+                detail_columns.append('Real Association')
+            if 'Meets Threshold?' in self.details.columns:
+                detail_columns.append('Meets Threshold?')
             if 'Error' in self.details.columns:
                 detail_columns.append('Error')
 
             self.details = self.details[detail_columns]
+
+    def _filter_details_for_plot(self, table_name=None):
+        to_plot = self.details.copy()
+        if table_name is not None:
+            to_plot = to_plot[
+                (to_plot['Parent Table'] == table_name) | (to_plot['Child Table'] == table_name)
+            ]
+
+        if 'Error' in to_plot.columns:
+            to_plot = to_plot[to_plot['Error'].isna()]
+        if 'Score' in to_plot.columns:
+            to_plot = to_plot[to_plot['Score'].notna()]
+
+        return to_plot
+
+    def _create_empty_plot(self):
+        fig = go.Figure()
+        fig.update_layout(
+            title_text='No data to plot',
+            xaxis={'visible': False},
+            yaxis={'visible': False},
+            showlegend=False,
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='white',
+        )
+        return fig
+
+    def _prepare_plot_data(self, to_plot):
+        to_plot = to_plot.reset_index(drop=True)
+
+        parent_cols = to_plot['Parent Table'] + '.' + to_plot['Column 1']
+        child_cols = to_plot['Child Table'] + '.' + to_plot['Column 2']
+        to_plot['Columns'] = parent_cols + ', ' + child_cols
+        duplicated = to_plot['Columns'].duplicated(keep=False)
+        to_plot.loc[duplicated, 'Columns'] = (
+            to_plot.loc[duplicated, 'Columns'] + ' (' + to_plot.loc[duplicated, 'Foreign Key'] + ')'
+        )
+
+        to_plot['Real Correlation'] = to_plot['Real Correlation'].fillna('None')
+        to_plot['Synthetic Correlation'] = to_plot['Synthetic Correlation'].fillna('None')
+
+        return to_plot
+
+    def _compute_average_score(self, to_plot):
+        if 'Meets Threshold?' in to_plot.columns:
+            contributing = to_plot['Meets Threshold?'].astype('boolean').fillna(False)
+            return round(to_plot.loc[contributing, 'Score'].mean(), 2)
+
+        return round(to_plot['Score'].mean(), 2)
 
     def get_visualization(self, table_name=None):
         """Create a plot to show the inter table trends data.
@@ -183,24 +252,12 @@ class InterTableTrends(BaseMultiTableProperty):
                 'Please call the ``get_score`` method first.'
             )
 
-        to_plot = self.details.copy()
-        if table_name is not None:
-            to_plot = to_plot[
-                (to_plot['Parent Table'] == table_name) | (to_plot['Child Table'] == table_name)
-            ]
+        to_plot = self._filter_details_for_plot(table_name)
+        if to_plot.empty:
+            return self._create_empty_plot()
 
-        parent_cols = to_plot['Parent Table'] + '.' + to_plot['Column 1']
-        child_cols = to_plot['Child Table'] + '.' + to_plot['Column 2']
-        to_plot['Columns'] = parent_cols + ', ' + child_cols
-        duplicated = to_plot['Columns'].duplicated(keep=False)
-        to_plot['Columns'][duplicated] = (
-            to_plot['Columns'][duplicated] + ' (' + to_plot['Foreign Key'][duplicated] + ')'
-        )
-
-        to_plot['Real Correlation'] = to_plot['Real Correlation'].fillna('None')
-        to_plot['Synthetic Correlation'] = to_plot['Synthetic Correlation'].fillna('None')
-
-        average_score = round(to_plot['Score'].mean(), 2)
+        to_plot = self._prepare_plot_data(to_plot)
+        average_score = self._compute_average_score(to_plot)
 
         fig = px.bar(
             to_plot,

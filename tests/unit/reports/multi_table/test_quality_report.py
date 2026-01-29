@@ -21,3 +21,5 @@ class TestQualityReport:
         assert isinstance(report._properties['Column Pair Trends'], ColumnPairTrends)
         assert isinstance(report._properties['Cardinality'], Cardinality)
         assert isinstance(report._properties['Intertable Trends'], InterTableTrends)
+        assert report.real_correlation_threshold == 0.5
+        assert report.real_association_threshold == 0.3

@@ -13,3 +13,5 @@ class TestQualityReport:
         assert not report.is_generated
         assert isinstance(report._properties['Column Shapes'], ColumnShapes)
         assert isinstance(report._properties['Column Pair Trends'], ColumnPairTrends)
+        assert report.real_correlation_threshold == 0.5
+        assert report.real_association_threshold == 0.3
