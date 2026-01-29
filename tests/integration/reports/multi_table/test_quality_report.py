@@ -9,6 +9,11 @@ from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table.quality_report import QualityReport
 
 
+def _set_thresholds_zero(report):
+    report.real_correlation_threshold = 0
+    report.real_association_threshold = 0
+
+
 def load_test_data():
     real_data = {
         'table1': pd.DataFrame({
@@ -88,6 +93,7 @@ def test_multi_table_quality_report():
     # Setup
     real_data, synthetic_data, metadata = load_test_data()
     report = QualityReport()
+    _set_thresholds_zero(report)
 
     # Run `generate`, `get_properties` and `get_score`,
     # as well as `get_visualization` and `get_details` for every property:
@@ -135,6 +141,8 @@ def test_multi_table_quality_report():
         'Score': [0.25],
         'Real Correlation': [np.nan],
         'Synthetic Correlation': [np.nan],
+        'Real Association': [np.nan],
+        'Meets Threshold?': [True],
     })
     pd.testing.assert_frame_equal(details[1], expected_df_1)
 
@@ -167,6 +175,8 @@ def test_multi_table_quality_report():
         'Score': [0.5, 0.5, 0.5, 0.0, 0.0, 0.0],
         'Real Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
         'Synthetic Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+        'Real Association': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+        'Meets Threshold?': [True, True, True, True, True, True],
     })
     pd.testing.assert_frame_equal(details[3], expected_df_3)
     pd.testing.assert_frame_equal(details[7], expected_df_3)
@@ -194,6 +204,8 @@ def test_multi_table_quality_report():
         'Score': [0.25, 0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
         'Real Correlation': [np.nan, 0.946664, 0.966247, 0.862622],
         'Synthetic Correlation': [np.nan, 0.926925, 0.936853, 0.798384],
+        'Real Association': [np.nan, np.nan, np.nan, np.nan],
+        'Meets Threshold?': [True, True, True, True],
     })
     pd.testing.assert_frame_equal(details[5], expected_df_4)
 
@@ -223,6 +235,7 @@ def test_quality_report_end_to_end():
     # Setup
     real_data, synthetic_data, metadata = load_demo(modality='multi_table')
     report = QualityReport()
+    _set_thresholds_zero(report)
 
     # Run
     report.generate(real_data, synthetic_data, metadata)
@@ -253,6 +266,47 @@ def test_quality_report_end_to_end():
     assert info['num_rows_synthetic_data'] == {'sessions': 10, 'users': 10, 'transactions': 10}
 
 
+def test_column_pair_trends_threshold_changes_details():
+    """Test threshold impact on column pair trends details."""
+    # Setup
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    report_default = QualityReport()
+    report_zero = QualityReport()
+    _set_thresholds_zero(report_zero)
+
+    # Run
+    report_default.generate(real_data, synthetic_data, metadata, verbose=False)
+    report_zero.generate(real_data, synthetic_data, metadata, verbose=False)
+    score_default = (
+        report_default
+        .get_properties()
+        .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
+        .iloc[0]
+    )
+    score_zero = (
+        report_zero
+        .get_properties()
+        .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
+        .iloc[0]
+    )
+    score_default_intertable = (
+        report_default
+        .get_properties()
+        .loc[lambda df: df['Property'] == 'Intertable Trends', 'Score']
+        .iloc[0]
+    )
+    score_zero_intertable = (
+        report_zero
+        .get_properties()
+        .loc[lambda df: df['Property'] == 'Intertable Trends', 'Score']
+        .iloc[0]
+    )
+
+    # Assert
+    assert score_zero >= score_default  # scores should be approximately 0.4 > 0.3
+    assert score_zero_intertable >= score_default_intertable  # approximately 0.45 > 0.4
+
+
 def test_quality_report_with_object_datetimes():
     """Test the multi table QualityReport with object datetimes."""
     # Setup
@@ -264,6 +318,7 @@ def test_quality_report_with_object_datetimes():
                 real_data[table][column] = real_data[table][column].dt.strftime(dt_format)
 
     report = QualityReport()
+    _set_thresholds_zero(report)
 
     # Run
     report.generate(real_data, synthetic_data, metadata)
@@ -288,6 +343,7 @@ def test_quality_report_with_errors():
     real_data['transactions']['amount'].iloc[0] = 'error_3'
 
     report = QualityReport()
+    _set_thresholds_zero(report)
 
     # Run
     report.generate(real_data, synthetic_data, metadata)
@@ -365,6 +421,7 @@ def test_quality_report_with_no_relationships():
 
     del metadata['relationships']
     report = QualityReport()
+    _set_thresholds_zero(report)
 
     # Run
     report.generate(real_data, synthetic_data, metadata, verbose=True)

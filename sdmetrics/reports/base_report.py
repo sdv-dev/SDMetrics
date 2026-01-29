@@ -165,6 +165,15 @@ class BaseReport:
                     f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}'
                 )
 
+            if hasattr(self, 'real_correlation_threshold') and hasattr(
+                property_instance, 'real_correlation_threshold'
+            ):
+                property_instance.real_correlation_threshold = self.real_correlation_threshold
+            if hasattr(self, 'real_association_threshold') and hasattr(
+                property_instance, 'real_association_threshold'
+            ):
+                property_instance.real_association_threshold = self.real_association_threshold
+
             self._properties[property_name].num_rows_subsample = self.num_rows_subsample
             score = self._properties[property_name].get_score(
                 real_data, synthetic_data, metadata, progress_bar=progress_bar
@@ -263,7 +272,8 @@ class BaseReport:
             pandas.DataFrame
         """
         self._validate_property_generated(property_name)
-        return self._properties[property_name].details.copy()
+        details = self._properties[property_name].details.copy()
+        return details
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.

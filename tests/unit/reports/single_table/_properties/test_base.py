@@ -93,3 +93,20 @@ class TestBaseSingleTableProperty:
             real_data, synthetic_data, metadata, progress_bar
         )
         mock_compute_average.assert_called_once()
+
+    def test__compute_average_with_threshold(self):
+        """Test that the threshold column filters correctly."""
+        # Setup
+        base_property = BaseSingleTableProperty()
+        base_property.details = pd.DataFrame({
+            'Score': [0.2, 0.8, 1.0],
+            'Meets Threshold?': [True, False, True],
+        })
+
+        # Run
+        filtered_average = base_property._compute_average_with_threshold('Meets Threshold?')
+        unfiltered_average = base_property._compute_average_with_threshold()
+
+        # Assert
+        assert filtered_average == 0.6
+        assert unfiltered_average == 2.0 / 3

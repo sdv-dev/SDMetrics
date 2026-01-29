@@ -63,6 +63,10 @@ class BaseMultiTableProperty:
 
     def _compute_average(self):
         """Average the scores for each column."""
+        return self._compute_average_with_threshold()
+
+    def _compute_average_with_threshold(self, threshold_column=None):
+        """Average the scores, optionally filtering by a threshold column."""
         is_dataframe = isinstance(self.details, pd.DataFrame)
         has_score_column = 'Score' in self.details.columns
         assert_message = "The property details must be in a DataFrame with a 'Score' column."
@@ -70,6 +74,10 @@ class BaseMultiTableProperty:
         assert is_dataframe, assert_message
         if not has_score_column:
             return np.nan
+
+        if threshold_column and threshold_column in self.details.columns:
+            contributing = self.details[threshold_column].astype('boolean').fillna(False)
+            return self.details.loc[contributing, 'Score'].mean()
 
         return self.details['Score'].mean()
 
@@ -91,6 +99,7 @@ class BaseMultiTableProperty:
 
         for table_name, metadata_table in metadata['tables'].items():
             self._properties[table_name] = self._single_table_property()
+            self._configure_single_table_property(table_name)
             self._properties[table_name].get_score(
                 real_data[table_name], synthetic_data[table_name], metadata_table, progress_bar
             )
@@ -105,6 +114,10 @@ class BaseMultiTableProperty:
 
         cols = ['Table'] + [col for col in self.details if col != 'Table']
         self.details = self.details[cols]
+
+    def _configure_single_table_property(self, table_name):
+        """Hook for subclasses to configure per-table properties."""
+        return
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score of all the individual metric scores computed.

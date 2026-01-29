@@ -1,5 +1,7 @@
 from unittest.mock import Mock
 
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
 from sdmetrics.demos import load_demo
@@ -40,3 +42,54 @@ class TestInterTableTrends:
         # Assert
         assert result == 0.4416666666666666
         assert mock_update.call_count == num_iter
+
+    def test_real_correlation_threshold_filters_pairs(self):
+        """Test that low-correlation pairs are excluded from the score."""
+        # Setup
+        real_data = {
+            'parents': pd.DataFrame({
+                'parent_id': [1, 2, 3, 4],
+                'numerical': [1, 2, 3, 4],
+            }),
+            'children': pd.DataFrame({
+                'child_id': [10, 11, 12, 13],
+                'parent_id': [1, 2, 3, 4],
+                'numerical': [1, -1, 1, -1],
+            }),
+        }
+        metadata = {
+            'tables': {
+                'parents': {
+                    'primary_key': 'parent_id',
+                    'columns': {
+                        'parent_id': {'sdtype': 'id'},
+                        'numerical': {'sdtype': 'numerical'},
+                    },
+                },
+                'children': {
+                    'primary_key': 'child_id',
+                    'columns': {
+                        'child_id': {'sdtype': 'id'},
+                        'parent_id': {'sdtype': 'id'},
+                        'numerical': {'sdtype': 'numerical'},
+                    },
+                },
+            },
+            'relationships': [
+                {
+                    'parent_table_name': 'parents',
+                    'parent_primary_key': 'parent_id',
+                    'child_table_name': 'children',
+                    'child_foreign_key': 'parent_id',
+                }
+            ],
+        }
+        inter_table_trends = InterTableTrends()
+        inter_table_trends.real_correlation_threshold = 0.5
+
+        # Run
+        score = inter_table_trends.get_score(real_data, real_data, metadata)
+
+        # Assert
+        assert np.isnan(score)
+        assert inter_table_trends.details['Meets Threshold?'].sum() == 0
