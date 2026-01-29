@@ -1,5 +1,15 @@
 # History
 
+## v0.27.0 - 2026-01-29
+
+### New Features
+
+* When visualizing InterTable Trends, don't display pairs without any scores - Issue [#833](https://github.com/sdv-dev/SDMetrics/issues/833) by @fealho
+* When visualizing Column Pair Trends, don't display rows/columns without any scores - Issue [#832](https://github.com/sdv-dev/SDMetrics/issues/832) by @fealho
+* Add a threshold to the ContingencySimilarity metric - Issue [#817](https://github.com/sdv-dev/SDMetrics/issues/817) by @fealho
+* Add a threshold to the CorrelationSimilarity metric - Issue [#816](https://github.com/sdv-dev/SDMetrics/issues/816) by @R-Palazzo
+* In the quality report, ignore column pairs that don't have trends in the real data - Issue [#815](https://github.com/sdv-dev/SDMetrics/issues/815) by @fealho
+
 ## v0.26.0 - 2026-01-26
 
 ### Bugs Fixed
