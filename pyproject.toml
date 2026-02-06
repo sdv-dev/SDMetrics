@@ -53,7 +53,7 @@ dependencies = [
 "Issue Tracker" = "https://github.com/sdv-dev/SDMetrics/issues"
 "Changes" = "https://github.com/sdv-dev/SDMetrics/blob/main/HISTORY.md"
 "Twitter" = "https://twitter.com/sdv_dev"
-"Chat" = "https://bit.ly/sdv-slack-invite"
+"Chat" = "https://forum.datacebo.com/"
 
 [project.entry-points]
 sdmetrics = { main = 'sdmetrics.cli.__main__:main' }
