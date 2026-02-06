@@ -9,7 +9,7 @@
 [![Downloads](https://pepy.tech/badge/sdmetrics)](https://pepy.tech/project/sdmetrics)
 [![Tests](https://github.com/sdv-dev/SDMetrics/workflows/Run%20Tests/badge.svg)](https://github.com/sdv-dev/SDMetrics/actions?query=workflow%3A%22Run+Tests%22+branch%3Amain)
 [![Coverage Status](https://codecov.io/gh/sdv-dev/SDMetrics/branch/main/graph/badge.svg)](https://codecov.io/gh/sdv-dev/SDMetrics)
-[![Slack](https://img.shields.io/badge/Community-Slack-blue?style=plastic&logo=slack)](https://bit.ly/sdv-slack-invite)
+[![Forum](https://img.shields.io/badge/Forum-Join%20now!-36C5F0)](https://forum.datacebo.com)
 [![Tutorial](https://img.shields.io/badge/Demo-Get%20started-orange?style=plastic&logo=googlecolab)](https://bit.ly/sdmetrics-demo)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14279167.svg)](https://doi.org/10.5281/zenodo.14279167)
 
