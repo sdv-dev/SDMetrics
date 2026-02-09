@@ -392,6 +392,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             'Meets Threshold?': meets_threshold,
             'Error': error_messages,
         })
+        result['Meets Threshold?'] = result['Meets Threshold?'].astype('boolean')
 
         if result['Error'].isna().all():
             result = result.drop('Error', axis=1)
