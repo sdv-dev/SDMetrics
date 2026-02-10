@@ -272,6 +272,11 @@ class EqualizedOddsImprovement(SingleTableMetric):
         required_columns = [prediction_column_name, sensitive_column_name]
         _validate_required_columns(dataframes_dict, required_columns)
 
+        # Use base class validation for real_training_data and synthetic_data
+        real_training_data, synthetic_data, metadata = cls._validate_inputs(
+            real_training_data, synthetic_data, metadata
+        )
+
         # Validate data and metadata consistency for prediction column
         _validate_data_and_metadata(
             real_training_data,
@@ -285,11 +290,6 @@ class EqualizedOddsImprovement(SingleTableMetric):
         # Validate sensitive column value exists in all datasets
         column_value_pairs = [(sensitive_column_name, sensitive_column_value)]
         _validate_column_values_exist(dataframes_dict, column_value_pairs)
-
-        # Use base class validation for real_training_data and synthetic_data
-        real_training_data, synthetic_data, metadata = cls._validate_inputs(
-            real_training_data, synthetic_data, metadata
-        )
 
         # Validate the validation data separately (not part of standard _validate_inputs)
         real_validation_data = real_validation_data.copy()
