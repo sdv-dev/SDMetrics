@@ -228,7 +228,7 @@ class HyperTransformer:
                 nulls = data[field].isna()
                 integers = pd.to_numeric(data[field], errors='coerce').to_numpy().astype(np.float64)
                 integers[nulls] = np.nan
-                data[field] = pd.Series(integers)
+                data[field] = pd.Series(integers, index=data.index)
                 data[field] = data[field].fillna(transform_info['mean'])
 
         return data
