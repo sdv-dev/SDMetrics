@@ -142,7 +142,7 @@ def test_multi_table_quality_report():
         'Real Correlation': [np.nan],
         'Synthetic Correlation': [np.nan],
         'Real Association': [np.nan],
-        'Meets Threshold?': [True],
+        'Meets Threshold?': pd.Series([True], dtype='boolean'),
     })
     pd.testing.assert_frame_equal(details[1], expected_df_1)
 
@@ -176,7 +176,7 @@ def test_multi_table_quality_report():
         'Real Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
         'Synthetic Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
         'Real Association': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-        'Meets Threshold?': [True, True, True, True, True, True],
+        'Meets Threshold?': pd.Series([True, True, True, True, True, True], dtype='boolean'),
     })
     pd.testing.assert_frame_equal(details[3], expected_df_3)
     pd.testing.assert_frame_equal(details[7], expected_df_3)
@@ -205,7 +205,7 @@ def test_multi_table_quality_report():
         'Real Correlation': [np.nan, 0.946664, 0.966247, 0.862622],
         'Synthetic Correlation': [np.nan, 0.926925, 0.936853, 0.798384],
         'Real Association': [np.nan, np.nan, np.nan, np.nan],
-        'Meets Threshold?': [True, True, True, True],
+        'Meets Threshold?': pd.Series([True, True, True, True], dtype='boolean'),
     })
     pd.testing.assert_frame_equal(details[5], expected_df_4)
 

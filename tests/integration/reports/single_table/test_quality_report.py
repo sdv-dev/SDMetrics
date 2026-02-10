@@ -146,7 +146,7 @@ class TestQualityReport:
                 np.nan,
             ],
             'Real Association': [np.nan] * 6,
-            'Meets Threshold?': [True] * 6,
+            'Meets Threshold?': pd.Series([True] * 6, dtype='boolean'),
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
         expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)
@@ -314,7 +314,7 @@ class TestQualityReport:
                 np.nan,
             ],
             'Real Association': [np.nan] * 6,
-            'Meets Threshold?': [True] * 6,
+            'Meets Threshold?': pd.Series([True] * 6, dtype='boolean'),
         }
         expected_details_column_shapes = pd.DataFrame(expected_details_column_shapes_dict)
         expected_details_cpt = pd.DataFrame(expected_details_cpt__dict)
@@ -394,7 +394,9 @@ class TestQualityReport:
             'Real Correlation': [np.nan] * 6,
             'Synthetic Correlation': [np.nan] * 6,
             'Real Association': [np.nan] * 6,
-            'Meets Threshold?': [np.nan, True, True, np.nan, np.nan, True],
+            'Meets Threshold?': pd.Series(
+                [np.nan, True, True, np.nan, np.nan, True], dtype='boolean'
+            ),
             'Error': [
                 'AttributeError',  # This can be either ValueError or AttributeError
                 None,
@@ -416,6 +418,27 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(col_shape_report, expected_details_column_shapes)
         pd.testing.assert_frame_equal(col_pair_report[1:], expected_details_cpt[1:])
         assert report.get_score() == 0.8204378797402054
+
+    def test_meets_threshold_column_has_boolean_dtype_with_errors(self):
+        """Test that 'Meets Threshold?' column contains booleans when errors occur."""
+        # Setup
+        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data.loc[2, 'second_perc'] = 'a'  # Corrupt data to trigger errors
+
+        # Run
+        report = QualityReport()
+        report.generate(real_data, synthetic_data, metadata, verbose=False)
+        details = report.get_details('Column Pair Trends')
+
+        # Assert
+        meets_threshold_col = details['Meets Threshold?']
+        assert meets_threshold_col.dtype == 'boolean'
+
+        # Ensure non-NA values are actual booleans, not integers
+        non_na_values = meets_threshold_col.dropna()
+        assert len(non_na_values) > 0
+        for val in non_na_values:
+            assert isinstance(val, np.bool_)
 
     def test_report_with_column_nan(self):
         """Test the report with column full of NaNs."""
@@ -538,7 +561,9 @@ class TestQualityReport:
                 np.nan,
             ],
             'Real Association': [np.nan] * 10,
-            'Meets Threshold?': [True, True, True, np.nan, True, True, np.nan, True, True, True],
+            'Meets Threshold?': pd.array(
+                [True, True, True, pd.NA, True, True, pd.NA, True, True, True], dtype='boolean'
+            ),
             'Error': [
                 None,
                 None,
