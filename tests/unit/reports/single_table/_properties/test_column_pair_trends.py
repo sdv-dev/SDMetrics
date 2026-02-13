@@ -496,7 +496,7 @@ class TestColumnPairTrends:
             'Real Correlation': [0.2],
             'Synthetic Correlation': [0.1],
             'Real Association': [np.nan],
-            'Meets Threshold?': [False],
+            'Meets Threshold?': pd.Series([False], dtype='boolean'),
         })
         pd.testing.assert_frame_equal(details, expected_details)
         correlation_compute_mock.assert_called_once()
@@ -531,7 +531,7 @@ class TestColumnPairTrends:
             'Real Correlation': [np.nan],
             'Synthetic Correlation': [np.nan],
             'Real Association': [0.2],
-            'Meets Threshold?': [False],
+            'Meets Threshold?': pd.Series([False], dtype='boolean'),
         })
         pd.testing.assert_frame_equal(details, expected_details)
         _, contingency_kwargs = contingency_compute_mock.call_args
@@ -641,7 +641,7 @@ class TestColumnPairTrends:
             'Real Correlation': [0.5],
             'Synthetic Correlation': [0.6],
             'Real Association': [0.2],
-            'Meets Threshold?': [True],
+            'Meets Threshold?': pd.Series([True], dtype='boolean'),
         })
 
         # Run
