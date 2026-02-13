@@ -1,5 +1,16 @@
 # History
 
+## v0.27.1 - 2026-02-13
+
+### Bugs Fixed
+
+* `Meets Threshold?` column in QualityReport details is showing numerical values instead of booleans - Issue [#843](https://github.com/sdv-dev/SDMetrics/issues/843) by @fealho
+
+### Maintenance
+
+* Update README and other meta information to point to the DataCebo forum - Issue [#845](https://github.com/sdv-dev/SDMetrics/issues/845) by @pvk-developer
+* Update license information in pyproject.toml to use new format - Issue [#814](https://github.com/sdv-dev/SDMetrics/issues/814) by @pvk-developer
+
 ## v0.27.0 - 2026-01-29
 
 ### New Features
