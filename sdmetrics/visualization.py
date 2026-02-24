@@ -440,7 +440,7 @@ def _generate_cardinality_plot(
     if plot_type == 'bar':
         max_cardinality = _get_max_between_datasets(real_data, synthetic_data)
         min_cardinality = _get_min_between_datasets(real_data, synthetic_data)
-        plot_kwargs = {'nbins': max_cardinality - min_cardinality + 1}
+        plot_kwargs = {'nbins': int(max_cardinality - min_cardinality + 1)}
 
     return _generate_column_plot(
         real_data, synthetic_data, plot_type, plot_kwargs, plot_title, x_label
