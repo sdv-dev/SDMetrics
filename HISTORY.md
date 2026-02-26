@@ -1,5 +1,11 @@
 # History
 
+## v0.27.2 - 2026-02-26
+
+### Bugs Fixed
+
+* The cardinality plot crashes if I have dtype `string` in my data - Issue [#853](https://github.com/sdv-dev/SDMetrics/issues/853) by @fealho
+
 ## v0.27.1 - 2026-02-13
 
 ### Bugs Fixed
