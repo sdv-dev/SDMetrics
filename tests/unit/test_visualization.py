@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from sdmetrics.demos import load_demo
 from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.visualization import (
     _generate_box_plot,
@@ -352,6 +353,33 @@ def test_get_cardinality_plot_bad_plot_type():
             parent_primary_key,
             plot_type='bad_type',
         )
+
+
+def test_get_cardinality_plot_with_string_id_columns():
+    """Test ``get_cardinality_plot`` doesn't crash when ID columns have string dtype."""
+    # Setup
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+
+    # cast the primary/foreign columns in the user-sessions relationship to string
+    real_data['users']['user_id'] = real_data['users']['user_id'].astype('string')
+    real_data['sessions']['user_id'] = real_data['sessions']['user_id'].astype('string')
+
+    synthetic_data['users']['user_id'] = synthetic_data['users']['user_id'].astype('string')
+    synthetic_data['sessions']['user_id'] = synthetic_data['sessions']['user_id'].astype('string')
+
+    # Run
+    fig = get_cardinality_plot(
+        real_data=real_data,
+        synthetic_data=synthetic_data,
+        parent_table_name='users',
+        child_table_name='sessions',
+        parent_primary_key='user_id',
+        child_foreign_key='user_id',
+        plot_type='bar',
+    )
+
+    # Assert
+    assert fig is not None
 
 
 def test_get_column_plot_column_not_found():
