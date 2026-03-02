@@ -127,7 +127,7 @@ class TestReferentialIntegrity:
         assert result_2 == 2 / 3
 
     def test_compute_breakdown_composite_keys_two_columns(self):
-        """Test ``compute_breakdown`` with foreign keys."""
+        """Test ``compute_breakdown`` with composite keys."""
         # Setup
         real_data = pd.DataFrame({
             'id': [1, 2, 3, 4, 5],
@@ -156,7 +156,7 @@ class TestReferentialIntegrity:
         assert result == {'score': 0.8}
 
     def test_compute_breakdown_composite_keys_multiple_columns(self):
-        """Test ``compute_breakdown`` with multiple foreign key columns."""
+        """Test ``compute_breakdown`` with multiple composite key columns."""
         # Setup
         real_data = pd.DataFrame({
             'id': [1, 2, 3, 4, 5],
