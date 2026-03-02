@@ -37,7 +37,7 @@ class TestCardinalityBoundaryAdherence:
         synthetic_parent_keys = real_parent_keys.copy()
         synthetic_foreign_keys = pd.DataFrame({
             'fk1': ['id0'] * 4 + ['id1'] * 4,
-            'fk2': [0, 0, 0, 1, None, 0, 0, None]
+            'fk2': [0, 0, 0, 1, None, 0, 0, None],
         })
         synthetic_data = (synthetic_parent_keys, synthetic_foreign_keys)
 
