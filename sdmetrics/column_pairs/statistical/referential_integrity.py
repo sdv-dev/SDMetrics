@@ -2,12 +2,11 @@
 
 import logging
 
-import pandas as pd
-
 from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
 
 LOGGER = logging.getLogger(__name__)
+INDICATOR_NAME = '__ri_indicator__'
 
 
 class ReferentialIntegrity(ColumnPairsMetric):
@@ -37,25 +36,44 @@ class ReferentialIntegrity(ColumnPairsMetric):
         """Compute the score breakdown of the referential integrity metric.
 
         Args:
-            real_data (tuple of 2 pandas.Series):
+            real_data (tuple of 2 pandas.DataFrame):
                 (primary_key, foreign_key) columns from the real data.
-            synthetic_data (tuple of 2 pandas.Series):
+            synthetic_data (tuple of 2 pandas.DataFrame):
                 (primary_key, foreign_key) columns from the synthetic data.
 
         Returns:
             dict:
                 The score breakdown of the key uniqueness metric.
         """
-        if pd.isna(real_data[1]).any():
-            synthetic_data = list(synthetic_data)
-            synthetic_data[1] = synthetic_data[1].dropna()
+        real_pk_df, real_fk_df = real_data
+        synth_pk_df, synth_fk_df = synthetic_data
+        pk_columns = list(real_pk_df.columns)
+        fk_columns = list(real_fk_df.columns)
 
-        missing_parents = not real_data[1].isin(real_data[0]).all()
+        # Check if real data has broken referential integrity
+        real_merged = real_fk_df.merge(
+            real_pk_df.drop_duplicates(),
+            how='left',
+            left_on=fk_columns,
+            right_on=pk_columns,
+            indicator=INDICATOR_NAME,
+        )
+        missing_parents = (real_merged[INDICATOR_NAME] == 'left_only').any()
         if missing_parents:
             LOGGER.info("The real data has foreign keys that don't reference any primary key.")
 
-        score = synthetic_data[1].isin(synthetic_data[0]).mean()
+        if real_fk_df.isna().any().any():
+            synth_fk_df = synth_fk_df.dropna()
 
+        synth_merged = synth_fk_df.merge(
+            synth_pk_df.drop_duplicates(),
+            how='left',
+            left_on=fk_columns,
+            right_on=pk_columns,
+            indicator=INDICATOR_NAME,
+        )
+
+        score = (synth_merged[INDICATOR_NAME] == 'both').mean()
         return {'score': score}
 
     @classmethod
@@ -63,9 +81,9 @@ class ReferentialIntegrity(ColumnPairsMetric):
         """Compute the referential integrity of two columns.
 
         Args:
-            real_data (tuple of 2 pandas.Series):
+            real_data (tuple of 2 pandas.DataFrame):
                 (primary_key, foreign_key) columns from the real data.
-            synthetic_data (tuple of 2 pandas.Series):
+            synthetic_data (tuple of 2 pandas.DataFrame):
                 (primary_key, foreign_key) columns from the synthetic data.
 
         Returns:
