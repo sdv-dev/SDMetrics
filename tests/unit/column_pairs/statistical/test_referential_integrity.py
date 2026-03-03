@@ -308,10 +308,12 @@ class TestReferentialIntegrity:
         fk_columns = ['fk_id']
 
         # Run
-        result = ReferentialIntegrity._create_unique_name(pk_columns, fk_columns)
+        result = ReferentialIntegrity._create_unique_name(
+            '__ri_indicator__', pk_columns + fk_columns
+        )
 
         # Assert
-        assert result == '__ri_indicator__idfk_id'
+        assert result == '__ri_indicator__'
 
     def test__create_unique_name_composite_columns(self):
         """Test unique name generation with composite PK and FK columns."""
@@ -320,15 +322,17 @@ class TestReferentialIntegrity:
         fk_columns = ['fk_id', 'fk_type']
 
         # Run
-        result = ReferentialIntegrity._create_unique_name(pk_columns, fk_columns)
-
-        # Assert
-        assert result == '__ri_indicator__idtypefk_idfk_type'
-
-    def test__create_unique_name_empty_lists(self):
-        """Test behavior when both column lists are empty."""
-        # Run
-        result = ReferentialIntegrity._create_unique_name([], [])
+        result = ReferentialIntegrity._create_unique_name(
+            '__ri_indicator__', pk_columns + fk_columns
+        )
 
         # Assert
         assert result == '__ri_indicator__'
+
+    def test__create_unique_name_exist_in_list(self):
+        """Test behavior when both column lists are empty."""
+        # Run
+        result = ReferentialIntegrity._create_unique_name('__ri_indicator__', ['__ri_indicator__'])
+
+        # Assert
+        assert result == '__ri_indicator___'

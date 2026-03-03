@@ -31,9 +31,14 @@ class ReferentialIntegrity(ColumnPairsMetric):
     max_value = 1.0
     INDICATOR_NAME = '__ri_indicator__'
 
-    @classmethod
-    def _create_unique_name(cls, pk_columns, fk_columns):
-        return cls.INDICATOR_NAME + ''.join(pk_columns + fk_columns)
+    @staticmethod
+    def _create_unique_name(name, list_names):
+        """Modify the ``name`` parameter if it already exists in the list of names."""
+        result = name
+        while result in list_names:
+            result += '_'
+
+        return result
 
     @classmethod
     def compute_breakdown(cls, real_data, synthetic_data):
@@ -53,7 +58,7 @@ class ReferentialIntegrity(ColumnPairsMetric):
         synth_pk_df, synth_fk_df = synthetic_data
         pk_columns = list(real_pk_df.columns)
         fk_columns = list(real_fk_df.columns)
-        indicator_name = cls._create_unique_name(pk_columns, fk_columns)
+        indicator_name = cls._create_unique_name(cls.INDICATOR_NAME, pk_columns + fk_columns)
 
         real_merged = real_fk_df.merge(
             real_pk_df.drop_duplicates(),
