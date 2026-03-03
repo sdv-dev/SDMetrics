@@ -6,7 +6,6 @@ from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
 
 LOGGER = logging.getLogger(__name__)
-INDICATOR_NAME = '__ri_indicator__'
 
 
 class ReferentialIntegrity(ColumnPairsMetric):
@@ -30,6 +29,11 @@ class ReferentialIntegrity(ColumnPairsMetric):
     goal = Goal.MAXIMIZE
     min_value = 0.0
     max_value = 1.0
+    INDICATOR_NAME = '__ri_indicator__'
+
+    @classmethod
+    def _create_unique_name(cls, pk_columns, fk_columns):
+        return cls.INDICATOR_NAME + ''.join(pk_columns + fk_columns)
 
     @classmethod
     def compute_breakdown(cls, real_data, synthetic_data):
@@ -49,20 +53,20 @@ class ReferentialIntegrity(ColumnPairsMetric):
         synth_pk_df, synth_fk_df = synthetic_data
         pk_columns = list(real_pk_df.columns)
         fk_columns = list(real_fk_df.columns)
+        indicator_name = cls._create_unique_name(pk_columns, fk_columns)
 
-        # Check if real data has broken referential integrity
         real_merged = real_fk_df.merge(
             real_pk_df.drop_duplicates(),
             how='left',
             left_on=fk_columns,
             right_on=pk_columns,
-            indicator=INDICATOR_NAME,
+            indicator=indicator_name,
         )
-        missing_parents = (real_merged[INDICATOR_NAME] == 'left_only').any()
+        missing_parents = (real_merged[indicator_name] == 'left_only').any()
         if missing_parents:
             LOGGER.info("The real data has foreign keys that don't reference any primary key.")
 
-        if real_fk_df.isna().any().any():
+        if real_fk_df.isna().any().any() and len(fk_columns) == 1:
             synth_fk_df = synth_fk_df.dropna()
 
         synth_merged = synth_fk_df.merge(
@@ -70,10 +74,10 @@ class ReferentialIntegrity(ColumnPairsMetric):
             how='left',
             left_on=fk_columns,
             right_on=pk_columns,
-            indicator=INDICATOR_NAME,
+            indicator=indicator_name,
         )
 
-        score = (synth_merged[INDICATOR_NAME] == 'both').mean()
+        score = (synth_merged[indicator_name] == 'both').mean()
         return {'score': score}
 
     @classmethod

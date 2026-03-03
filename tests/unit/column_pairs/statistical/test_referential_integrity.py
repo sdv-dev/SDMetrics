@@ -219,3 +219,84 @@ class TestReferentialIntegrity:
 
         # Assert
         assert result == {'score': 0.50}
+
+    def test_compute_breakdown_composite_keys_with_nan_values(self):
+        """Test ``compute_breakdown`` with composite keys and random ``nan`` values."""
+        # Setup
+        real_data = pd.DataFrame({
+            'id': [1, 2, 3, 4],
+            'type': ['A', 'A', np.nan, np.nan],
+            'fk_id': [1, 2, 3, 4],
+            'fk_type': ['A', 'B', np.nan, np.nan],
+        })
+
+        synthetic_data = pd.DataFrame({
+            'id': [1, 1, 2, 3],
+            'type': ['A', 'A', np.nan, np.nan],
+            'fk_id': [1, 2, 3, 3],
+            'fk_type': ['A', 'B', np.nan, np.nan],
+        })
+
+        metric = ReferentialIntegrity()
+        tuple_real = (real_data[['id', 'type']], real_data[['fk_id', 'fk_type']])
+        tuple_synthetic = (synthetic_data[['id', 'type']], synthetic_data[['fk_id', 'fk_type']])
+
+        # Run
+        result = metric.compute_breakdown(tuple_real, tuple_synthetic)
+
+        # Assert
+        assert result == {'score': 0.75}
+
+    def test_compute_breakdown_composite_keys_with_only_nan_values(self):
+        """Test ``compute_breakdown`` with composite keys and only ``nan`` values."""
+        # Setup
+        real_data = pd.DataFrame({
+            'id': [np.nan] * 4,
+            'type': [np.nan] * 4,
+            'fk_id': [np.nan] * 4,
+            'fk_type': [np.nan] * 4,
+        })
+
+        synthetic_data = pd.DataFrame({
+            'id': [np.nan] * 4,
+            'type': [np.nan] * 4,
+            'fk_id': [np.nan] * 4,
+            'fk_type': [np.nan] * 4,
+        })
+
+        metric = ReferentialIntegrity()
+        tuple_real = (real_data[['id', 'type']], real_data[['fk_id', 'fk_type']])
+        tuple_synthetic = (synthetic_data[['id', 'type']], synthetic_data[['fk_id', 'fk_type']])
+
+        # Run
+        result = metric.compute_breakdown(tuple_real, tuple_synthetic)
+
+        # Assert
+        assert result == {'score': 1.0}
+
+    def test_compute_breakdown_composite_keys_with_mixture_of_nans(self):
+        """Test ``compute_breakdown`` with mixture of ``nan`` values."""
+        # Setup
+        real_data = pd.DataFrame({
+            'id': ['A', 'B', 'C', 'D'],
+            'type': [np.nan] * 4,
+            'fk_id': ['A'] * 4,
+            'fk_type': [np.nan] * 4,
+        })
+
+        synthetic_data = pd.DataFrame({
+            'id': ['A', 'B', 'C', 'D'],
+            'type': [np.nan] * 4,
+            'fk_id': ['A', 'F'] * 2,
+            'fk_type': [np.nan] * 4,
+        })
+
+        metric = ReferentialIntegrity()
+        tuple_real = (real_data[['id', 'type']], real_data[['fk_id', 'fk_type']])
+        tuple_synthetic = (synthetic_data[['id', 'type']], synthetic_data[['fk_id', 'fk_type']])
+
+        # Run
+        result = metric.compute_breakdown(tuple_real, tuple_synthetic)
+
+        # Assert
+        assert result == {'score': 0.5}
