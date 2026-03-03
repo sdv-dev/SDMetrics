@@ -300,3 +300,35 @@ class TestReferentialIntegrity:
 
         # Assert
         assert result == {'score': 0.5}
+
+    def test__create_unique_name_single_column(self):
+        """Test unique name generation with single PK and FK columns."""
+        # Setup
+        pk_columns = ['id']
+        fk_columns = ['fk_id']
+
+        # Run
+        result = ReferentialIntegrity._create_unique_name(pk_columns, fk_columns)
+
+        # Assert
+        assert result == '__ri_indicator__idfk_id'
+
+    def test__create_unique_name_composite_columns(self):
+        """Test unique name generation with composite PK and FK columns."""
+        # Setup
+        pk_columns = ['id', 'type']
+        fk_columns = ['fk_id', 'fk_type']
+
+        # Run
+        result = ReferentialIntegrity._create_unique_name(pk_columns, fk_columns)
+
+        # Assert
+        assert result == '__ri_indicator__idtypefk_idfk_type'
+
+    def test__create_unique_name_empty_lists(self):
+        """Test behavior when both column lists are empty."""
+        # Run
+        result = ReferentialIntegrity._create_unique_name([], [])
+
+        # Assert
+        assert result == '__ri_indicator__'
