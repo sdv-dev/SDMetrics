@@ -36,10 +36,10 @@ class KeyUniqueness(SingleColumnMetric):
         """Compute the score breakdown of the key uniqueness metric.
 
         Args:
-            real_data (pandas.DataFrame):
-                The real data.
-            synthetic_data (pandas.DataFrame):
-                The synthetic data.
+            real_data (pandas.DataFrame or pd.Series):
+                The real data key.
+            synthetic_data (pandas.DataFrame or pd.Series):
+                The synthetic data key.
 
         Returns:
             dict:
@@ -66,10 +66,10 @@ class KeyUniqueness(SingleColumnMetric):
         """Compute the key uniqueness metric.
 
         Args:
-            real_data (pandas.Series):
-                The real data.
-            synthetic_data (pandas.Series):
-                The synthetic data.
+            real_data (pd.DataFrame or pd.Series):
+                The real data key.
+            synthetic_data (pd.DataFrame or pd.Series):
+                The synthetic data key.
 
         Returns:
             float:
