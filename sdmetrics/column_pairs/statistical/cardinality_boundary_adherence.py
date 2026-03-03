@@ -33,10 +33,10 @@ class CardinalityBoundaryAdherence(ColumnPairsMetric):
         """Calculate the percentage of synthetic parents with cardinality in the correct range.
 
         Args:
-            real_data (tuple(pd.DataFrame, pd.DataFrame)):
+            real_data (tuple(pd.DataFrame, pd.DataFrame) or tuple(pd.Series, pd.Series)):
                 A tuple with the real primary key DataFrame as the first element and real
                 foreign keys DataFrame as the second element.
-            synthetic_data (tuple(pd.DataFrame, pd.Series)):
+            synthetic_data (tuple(pd.DataFrame, pd.DataFrame) or tuple(pd.Series, pd.Series)):
                 A tuple with the synthetic primary key as the first element and synthetic
                 foreign keys as the second element.
 
@@ -66,10 +66,10 @@ class CardinalityBoundaryAdherence(ColumnPairsMetric):
         """Calculate the percentage of synthetic parents with cardinality in the correct range.
 
         Args:
-            real_data (tuple(pd.DataFrame, pd.DataFrame)):
+            real_data (tuple(pd.DataFrame, pd.DataFrame) or tuple(pd.Series, pd.Series)):
                 A tuple with the real primary key DataFrame as the first element and real
                 foreign keys DataFrame as the second element.
-            synthetic_data (tuple(pd.DataFrame, pd.DataFrame)):
+            synthetic_data (tuple(pd.DataFrame, pd.DataFrame) or tuple(pd.Series, pd.Series)):
                 A tuple with the synthetic primary key as the first element and synthetic
                 foreign keys as the second element.
 
