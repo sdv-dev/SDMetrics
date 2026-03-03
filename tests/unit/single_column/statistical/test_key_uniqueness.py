@@ -12,7 +12,7 @@ class TestKeyUniqueness:
         ('real_data', 'synthetic_data'),
         [
             [
-                pd.Series(pd.Series([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])),
+                pd.Series([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
                 pd.Series([1, 2, np.nan, 3, np.nan, 5, 2, np.nan, 6, None]),
             ],
             [
