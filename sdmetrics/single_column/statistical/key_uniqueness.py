@@ -2,6 +2,8 @@
 
 import logging
 
+import pandas as pd
+
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
 
@@ -34,21 +36,27 @@ class KeyUniqueness(SingleColumnMetric):
         """Compute the score breakdown of the key uniqueness metric.
 
         Args:
-            real_data (pandas.Series):
-                The real data.
-            synthetic_data (pandas.Series):
-                The synthetic data.
+            real_data (pandas.DataFrame or pd.Series):
+                The real data key.
+            synthetic_data (pandas.DataFrame or pd.Series):
+                The synthetic data key.
 
         Returns:
             dict:
                 The score breakdown of the key uniqueness metric.
         """
+        if isinstance(real_data, pd.Series):
+            real_data = real_data.to_frame()
+        if isinstance(synthetic_data, pd.Series):
+            synthetic_data = synthetic_data.to_frame()
+
         has_duplicates = real_data.duplicated().any()
-        has_nans = real_data.isna().any()
+        has_nans = real_data.isna().all(axis=1).any()
         if has_duplicates or has_nans:
             LOGGER.info('The real data contains NA or duplicate values.')
 
-        nans_or_duplicates_synthetic = synthetic_data.duplicated() | synthetic_data.isna()
+        is_nan_synthetic = synthetic_data.isna().all(axis=1)
+        nans_or_duplicates_synthetic = synthetic_data.duplicated() | is_nan_synthetic
         score = 1 - nans_or_duplicates_synthetic.sum() / len(synthetic_data)
 
         return {'score': score}
@@ -58,10 +66,10 @@ class KeyUniqueness(SingleColumnMetric):
         """Compute the key uniqueness metric.
 
         Args:
-            real_data (pandas.Series):
-                The real data.
-            synthetic_data (pandas.Series):
-                The synthetic data.
+            real_data (pd.DataFrame or pd.Series):
+                The real data key.
+            synthetic_data (pd.DataFrame or pd.Series):
+                The synthetic data key.
 
         Returns:
             float:
