@@ -233,18 +233,15 @@ class InterTableTrends(BaseMultiTableProperty):
     def get_visualization(self, table_name=None):
         """Create a plot to show the inter table trends data.
 
-        Returns:
-            plotly.graph_objects._figure.Figure
-
         Args:
             table_name (str, optional):
                 Table to plot. Defaults to None.
 
-        Raises:
-            - ``ValueError`` if property has not been computed.
-
         Returns:
             plotly.graph_objects._figure.Figure
+
+        Raises:
+            - ``ValueError`` if property has not been computed.
         """
         if not self.is_computed:
             raise ValueError(
