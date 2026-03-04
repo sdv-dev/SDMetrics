@@ -2,6 +2,8 @@
 
 import logging
 
+import pandas as pd
+
 from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
 
@@ -71,7 +73,7 @@ class ReferentialIntegrity(ColumnPairsMetric):
         if missing_parents:
             LOGGER.info("The real data has foreign keys that don't reference any primary key.")
 
-        if real_fk_df.isna().any().any() and len(fk_columns) == 1:
+        if len(fk_columns) == 1 and pd.isna(real_fk_df[fk_columns[0]]).any():
             synth_fk_df = synth_fk_df.dropna()
 
         synth_merged = synth_fk_df.merge(
