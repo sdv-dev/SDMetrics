@@ -90,17 +90,22 @@ def get_cardinality_distribution(parent_column, child_column):
     """Compute the cardinality distribution of the (parent, child) pairing.
 
     Args:
-        parent_column (pandas.Series):
-            The parent column.
-        child_column (pandas.Series):
-            The child column.
+        parent_column (pd.Series or pd.DataFrame):
+            The parent column(s).
+        child_column (pd.Series or pd.DataFrame):
+            The child column(s).
 
     Returns:
-        pandas.Series:
+        pd.Series:
             The cardinality distribution.
     """
-    child_df = pd.DataFrame({'child_counts': child_column.value_counts()})
-    cardinality_df = pd.DataFrame({'parent': parent_column}).join(child_df, on='parent').fillna(0)
+    child_df = pd.DataFrame({'child_counts': child_column.value_counts(dropna=False)})
+    parent_df = (
+        pd.DataFrame({'parent': parent_column})
+        if isinstance(parent_column, pd.Series)
+        else parent_column
+    )
+    cardinality_df = parent_df.join(child_df, on=list(parent_df.columns)).fillna(0)
 
     return cardinality_df['child_counts']
 
