@@ -3,6 +3,7 @@ from datetime import date, datetime
 
 import numpy as np
 import pandas as pd
+import pytest
 from packaging import version
 
 from sdmetrics.demos import load_demo
@@ -230,10 +231,14 @@ def test_multi_table_quality_report():
     assert report_info['generation_time'] <= generate_end_time - generate_start_time
 
 
-def test_quality_report_end_to_end():
+@pytest.mark.parametrize('key_type', ['single', 'composite'])
+def test_quality_report_end_to_end(key_type, composite_keys_multi_table_demo):
     """Test the multi table QualityReport end to end."""
     # Setup
-    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    if key_type == 'single':
+        real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    else:
+        real_data, synthetic_data, metadata = composite_keys_multi_table_demo
     report = QualityReport()
     _set_thresholds_zero(report)
 
@@ -244,11 +249,17 @@ def test_quality_report_end_to_end():
     info = report.get_info()
 
     # Assert
+    expected_single_scores = [0.7978174603174604, 0.45654629583521095, 0.95, 0.4416666666666666]
+    expected_composite_scores = [0.82568543, 0.53305494, 0.95, 0.5375]
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.7978174603174604, 0.45654629583521095, 0.95, 0.4416666666666666],
+        'Score': expected_single_scores if key_type == 'single' else expected_composite_scores,
     })
-    assert score == 0.6615076057048344
+    if key_type == 'single':
+        assert score == 0.6615076057048344
+    else:
+        assert score == 0.7115600909354644
+
     pd.testing.assert_frame_equal(properties, expected_properties)
     expected_info_keys = {
         'report_type',

@@ -39,13 +39,19 @@ class DataValidity(BaseSingleTableProperty):
                 The progress bar to use. Defaults to None.
         """
         column_names, metric_names, scores = [], [], []
+        column_sdtypes = [(col, metadata['columns'][col]['sdtype']) for col in metadata['columns']]
         error_messages = []
         primary_key = metadata.get('primary_key')
+        if isinstance(primary_key, list):
+            if len(primary_key) > 1:
+                column_sdtypes = [(primary_key, None)] + column_sdtypes
+            else:
+                primary_key = primary_key[0]
+
         alternate_keys = metadata.get('alternate_keys', [])
         sequence_index = metadata.get('sequence_index')
 
-        for column_name in metadata['columns']:
-            sdtype = metadata['columns'][column_name]['sdtype']
+        for column_name, sdtype in column_sdtypes:
             primary_key_match = column_name == primary_key
             alternate_key_match = column_name in alternate_keys
             is_unique = primary_key_match or alternate_key_match

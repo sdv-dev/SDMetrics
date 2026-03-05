@@ -119,7 +119,88 @@ class TestDiagnosticReport:
                 1.0,
             ],
         })
+        expected_details_data_structure = pd.DataFrame({
+            'Metric': ['TableStructure'],
+            'Score': [1.0],
+        })
 
+        pd.testing.assert_frame_equal(
+            report.get_details('Data Validity'), expected_details_data_validity
+        )
+
+        pd.testing.assert_frame_equal(
+            report.get_details('Data Structure'), expected_details_data_structure
+        )
+
+    def test_end_to_end_composite_keys(self, composite_keys_single_table_demo):
+        """Test the end-to-end functionality of the diagnostic report."""
+        # Setup
+        real_data, synthetic_data, metadata = composite_keys_single_table_demo
+        report = DiagnosticReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_details_data_validity = pd.DataFrame({
+            'Column': [
+                ['student_id', 'degree_type'],
+                'start_date',
+                'end_date',
+                'salary',
+                'duration',
+                'high_perc',
+                'high_spec',
+                'mba_spec',
+                'second_perc',
+                'gender',
+                'degree_perc',
+                'placed',
+                'experience_years',
+                'employability_perc',
+                'mba_perc',
+                'work_experience',
+                'degree_type',
+            ],
+            'Metric': [
+                'KeyUniqueness',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'CategoryAdherence',
+                'CategoryAdherence',
+                'BoundaryAdherence',
+                'CategoryAdherence',
+                'BoundaryAdherence',
+                'CategoryAdherence',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'BoundaryAdherence',
+                'CategoryAdherence',
+                'CategoryAdherence',
+            ],
+            'Score': [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+            ],
+        })
         expected_details_data_structure = pd.DataFrame({
             'Metric': ['TableStructure'],
             'Score': [1.0],
