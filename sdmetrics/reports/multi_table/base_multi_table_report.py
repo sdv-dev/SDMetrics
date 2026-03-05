@@ -48,14 +48,17 @@ class BaseMultiTableReport(BaseReport):
             parent_key = rel['parent_primary_key']
             child = rel['child_table_name']
             child_key = rel['child_foreign_key']
+            parent_key_str = f"'{parent_key}'" if isinstance(parent_key, str) else str(parent_key)
+            child_key_str = f"'{child_key}'" if isinstance(child_key, str) else str(child_key)
             parent_primary_key = _cast_to_iterable(parent_key)
             child_foreign_key = _cast_to_iterable(child_key)
+
             if len(parent_primary_key) != len(child_foreign_key):
                 error_msg = (
                     f"The '{parent}' table and '{child}' table cannot be merged "
                     'for computing the cardinality. Please make sure the number of columns '
-                    f'in the primary key ({len(parent_primary_key)}) matches the number of '
-                    f'columns in the foreign key ({len(child_foreign_key)}).'
+                    f'in the primary key ({parent_key_str}) matches the number of '
+                    f'columns in the foreign key ({child_key_str}).'
                 )
                 raise ValueError(error_msg)
             parent_dtypes = real_data[rel['parent_table_name']][parent_primary_key].dtypes
@@ -64,17 +67,11 @@ class BaseMultiTableReport(BaseReport):
                 if (parent_dtype == 'object' and child_dtype != 'object') or (
                     parent_dtype != 'object' and child_dtype == 'object'
                 ):
-                    parent_key_str = (
-                        parent_key if isinstance(parent_key, str) else "', '".join(parent_key)
-                    )
-                    child_key_str = (
-                        child_key if isinstance(child_key, str) else "', '".join(child_key)
-                    )
                     error_msg = (
                         f"The '{parent}' table and '{child}' table cannot be merged "
                         'for computing the cardinality. Please make sure the primary key'
-                        f" in '{parent}' ('{parent_key_str}') and the foreign key in '{child}'"
-                        f" ('{child_key_str}') have the same data types."
+                        f" in '{parent}' ({parent_key_str}) and the foreign key in '{child}'"
+                        f' ({child_key_str}) have the same data types.'
                     )
                     raise ValueError(error_msg)
 

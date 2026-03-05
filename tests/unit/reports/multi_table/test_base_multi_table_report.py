@@ -130,8 +130,8 @@ class TestBaseReport:
         expected_error_message = re.escape(
             "The 'Table_1' table and 'Table_2' table cannot be merged for computing"
             ' the cardinality. Please make sure the number of columns'
-            ' in the primary key (2) matches the number of'
-            ' columns in the foreign key (1).'
+            " in the primary key (['col1', 'col2']) matches the number of"
+            " columns in the foreign key ('col2')."
         )
         with pytest.raises(ValueError, match=expected_error_message):
             report._validate_relationships(real_data, synthetic_data, metadata)
