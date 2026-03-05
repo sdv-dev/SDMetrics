@@ -87,10 +87,54 @@ class TestBaseReport:
         expected_error_message = re.escape(
             "The 'Table_1' table and 'Table_2' table cannot be merged for computing"
             " the cardinality. Please make sure the primary key in 'Table_1' ('col1')"
-            " and the foreign key in 'Table_2' ('col2') have the same data type."
+            " and the foreign key in 'Table_2' ('col2') have the same data types."
         )
         with pytest.raises(ValueError, match=expected_error_message):
             report._validate_metadata_matches_data(real_data_bad, synthetic_data, metadata)
+
+    def test__validate_relationships_num_key_cols_mismatch(self):
+        """Test the ``_validate_relationships`` method."""
+        # Setup
+        real_data = {
+            'Table_1': pd.DataFrame({'col1': [1, 2, 3]}),
+            'Table_2': pd.DataFrame({'col2': [1, 2, 3]}),
+        }
+        synthetic_data = {
+            'Table_1': pd.DataFrame({'col1': [1, 2, 3]}),
+            'Table_2': pd.DataFrame({'col2': [1, 2, 3]}),
+        }
+        metadata = {
+            'tables': {
+                'Table_1': {
+                    'columns': {
+                        'col1': {},
+                    },
+                },
+                'Table_2': {
+                    'columns': {'col2': {}},
+                },
+            },
+            'relationships': [
+                {
+                    'parent_table_name': 'Table_1',
+                    'parent_primary_key': ['col1', 'col2'],
+                    'child_table_name': 'Table_2',
+                    'child_foreign_key': 'col2',
+                },
+            ],
+        }
+
+        report = BaseMultiTableReport()
+
+        # Run and Assert
+        expected_error_message = re.escape(
+            "The 'Table_1' table and 'Table_2' table cannot be merged for computing"
+            ' the cardinality. Please make sure the number of columns'
+            ' in the primary key (2) matches the number of'
+            ' columns in the foreign key (1).'
+        )
+        with pytest.raises(ValueError, match=expected_error_message):
+            report._validate_relationships(real_data, synthetic_data, metadata)
 
     @patch('sdmetrics.reports.base_report.BaseReport._validate_metadata_matches_data')
     def test__validate_metadata_matches_data(self, mock__validate_metadata_matches_data):

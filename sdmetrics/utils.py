@@ -321,3 +321,11 @@ def strip_characters(list_character, a_string):
             result = result.replace(character, '')
 
     return result
+
+
+def _cast_to_iterable(value):
+    """Return a ``list`` if the input object is not a ``list`` or ``tuple``."""
+    if isinstance(value, (list, tuple)):
+        return value
+
+    return [value]
