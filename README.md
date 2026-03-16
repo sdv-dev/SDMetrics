@@ -91,10 +91,7 @@ my_report = QualityReport.load(filepath='demo_data_quality_report.pkl')
 # set by the real data
 from sdmetrics.single_column import BoundaryAdherence
 
-BoundaryAdherence.compute(
-    real_data['start_date'],
-    synthetic_data['start_date']
-)
+BoundaryAdherence.compute(real_data['start_date'], synthetic_data['start_date'])
 ```
 ```
 0.8503937007874016
@@ -104,11 +101,7 @@ BoundaryAdherence.compute(
 # calculate whether the synthetic data is new or whether it's an exact copy of the real data
 from sdmetrics.single_table import NewRowSynthesis
 
-NewRowSynthesis.compute(
-    real_data,
-    synthetic_data,
-    metadata
-)
+NewRowSynthesis.compute(real_data, synthetic_data, metadata)
 ```
 ```
 1.0
