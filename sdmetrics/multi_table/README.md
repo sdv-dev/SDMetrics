@@ -91,6 +91,6 @@ For example, we could execute the same metric as before by passing the `metadata
 of having to specify the individual `foreign_keys`:
 
 ```python
-In [10]: LogisticParentChildDetection.compute(real_data, synthetic_data, metadata)
+In[10]: LogisticParentChildDetection.compute(real_data, synthetic_data, metadata)
 Out[10]: 0.7569444444444444
 ```

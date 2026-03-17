@@ -15,10 +15,10 @@ class TestReferentialIntegrity:
             'primary_key': [1, 2, 3, 4, 5],
             'foreign_key': [1, 6, 3, 4, 5],
         })
+        tuple_real = (real_data[['primary_key']], real_data[['foreign_key']])
+        tuple_synthetic = (synthetic_data[['primary_key']], synthetic_data[['foreign_key']])
 
         metric = ReferentialIntegrity()
-        tuple_real = (real_data['primary_key'], real_data['foreign_key'])
-        tuple_synthetic = (synthetic_data['primary_key'], synthetic_data['foreign_key'])
 
         # Run
         result = metric.compute_breakdown(tuple_real, tuple_synthetic)
@@ -36,9 +36,10 @@ class TestReferentialIntegrity:
             'foreign_key': [1, 6, 3, 4, 5],
         })
 
+        tuple_real = (real_data[['primary_key']], real_data[['foreign_key']])
+        tuple_synthetic = (synthetic_data[['primary_key']], synthetic_data[['foreign_key']])
+
         metric = ReferentialIntegrity()
-        tuple_real = (real_data['primary_key'], real_data['foreign_key'])
-        tuple_synthetic = (synthetic_data['primary_key'], synthetic_data['foreign_key'])
 
         # Run
         result = metric.compute_breakdown(tuple_real, tuple_synthetic)
@@ -55,10 +56,11 @@ class TestReferentialIntegrity:
     def test_compute(self, compute_breakdown_mock):
         """Test the ``compute`` method."""
         # Setup
-        real_data = pd.Series(['A', 'B', 'C', 'B', 'A'])
-        synthetic_data = pd.Series(['A', 'B', 'C', 'D', 'E'])
-        metric = ReferentialIntegrity()
+        real_data = pd.DataFrame({'real': ['A', 'B', 'C', 'B', 'A']})
+        synthetic_data = pd.DataFrame({'synth': ['A', 'B', 'C', 'D', 'E']})
         compute_breakdown_mock.return_value = {'score': 0.6}
+
+        metric = ReferentialIntegrity()
 
         # Run
         result = metric.compute(real_data, synthetic_data)
@@ -74,10 +76,11 @@ class TestReferentialIntegrity:
         values, as the real data have null foreign keys.
         """
         # Setup
-        parent_keys = pd.Series(['a', 'b', 'c'])
-        real_fk = pd.Series(['a', 'a', 'b', 'c', np.nan])
-        synthetic_fk = pd.Series(['a', 'a', 'b', 'c', 'a'])
-        synthetic_fk_with_nan = pd.Series(['a', 'a', 'b', 'c', np.nan])
+        parent_keys = pd.DataFrame({'pk': ['a', 'b', 'c']})
+        real_fk = pd.DataFrame({'fk': ['a', 'a', 'b', 'c', np.nan]})
+        synthetic_fk = pd.DataFrame({'fk': ['a', 'a', 'b', 'c', 'a']})
+        synthetic_fk_with_nan = pd.DataFrame({'fk': ['a', 'a', 'b', 'c', np.nan]})
+
         metric = ReferentialIntegrity()
 
         # Run
@@ -99,11 +102,12 @@ class TestReferentialIntegrity:
         the number of NaN values in the synthetic data increases.
         """
         # Setup
-        parent_keys = pd.Series(['a', 'b', 'c'])
-        real_fk = pd.Series(['a', 'a', 'b', 'c', 'a'])
-        synth_fk_0_nan = pd.Series(['a', 'a', 'b', 'c'])
-        synth_fk_1_nan = pd.Series(['a', 'a', 'b', 'c', np.nan])
-        synth_fk_2_nan = pd.Series(['a', 'a', 'b', 'c', np.nan, np.nan])
+        parent_keys = pd.DataFrame({'pk': ['a', 'b', 'c']})
+        real_fk = pd.DataFrame({'fk': ['a', 'a', 'b', 'c', 'a']})
+        synth_fk_0_nan = pd.DataFrame({'fk': ['a', 'a', 'b', 'c']})
+        synth_fk_1_nan = pd.DataFrame({'fk': ['a', 'a', 'b', 'c', np.nan]})
+        synth_fk_2_nan = pd.DataFrame({'fk': ['a', 'a', 'b', 'c', np.nan, np.nan]})
+
         metric = ReferentialIntegrity()
 
         # Run
@@ -121,3 +125,214 @@ class TestReferentialIntegrity:
         assert result_0 == 1.0
         assert result_1 == 0.8
         assert result_2 == 2 / 3
+
+    def test_compute_breakdown_composite_keys_two_columns(self):
+        """Test ``compute_breakdown`` with composite keys."""
+        # Setup
+        real_data = pd.DataFrame({
+            'id': [1, 2, 3, 4, 5],
+            'type': ['A', 'A', 'B', 'B', 'C'],
+            'fk_id': [1, 2, 3, 2, 1],
+            'fk_type': ['A', 'A', 'B', 'X', 'A'],
+        })
+
+        synthetic_data = pd.DataFrame({
+            'id': [1, 2, 3, 4, 5],
+            'type': ['A', 'A', 'B', 'B', 'C'],
+            'fk_id': [1, 2, 3, 4, 5],
+            'fk_type': ['A', 'Z', 'B', 'B', 'C'],
+        })
+
+        metric = ReferentialIntegrity()
+
+        tuple_real = (real_data[['id', 'type']], real_data[['fk_id', 'fk_type']])
+
+        tuple_synthetic = (synthetic_data[['id', 'type']], synthetic_data[['fk_id', 'fk_type']])
+
+        # Run
+        result = metric.compute_breakdown(tuple_real, tuple_synthetic)
+
+        # Assert
+        assert result == {'score': 0.8}
+
+    def test_compute_breakdown_composite_keys_multiple_columns(self):
+        """Test ``compute_breakdown`` with multiple composite key columns."""
+        # Setup
+        real_data = pd.DataFrame({
+            'id': [1, 2, 3, 4, 5],
+            'type': ['A', 'A', 'B', 'B', 'C'],
+            'region': ['US', 'EU', 'US', 'EU', 'APAC'],
+            'fk_id': [1, 2, 3, 2, 1],
+            '_merge': ['A', 'A', 'B', 'B', 'A'],
+            'fk_region': ['US', 'EU', 'US', 'XX', 'US'],
+        })
+        synthetic_data = pd.DataFrame({
+            'id': [1, 2, 3, 4, 5],
+            'type': ['A', 'A', 'B', 'B', 'C'],
+            'region': ['US', 'EU', 'US', 'EU', 'APAC'],
+            'fk_id': [1, 2, 3, 4, 5],
+            '_merge': ['A', 'A', 'B', 'B', 'C'],
+            'fk_region': ['US', 'WRONG', 'US', 'EU', 'APAC'],
+        })
+
+        metric = ReferentialIntegrity()
+
+        tuple_real = (
+            real_data[['id', 'type', 'region']],
+            real_data[['fk_id', '_merge', 'fk_region']],
+        )
+
+        tuple_synthetic = (
+            synthetic_data[['id', 'type', 'region']],
+            synthetic_data[['fk_id', '_merge', 'fk_region']],
+        )
+
+        # Run
+        result = metric.compute_breakdown(tuple_real, tuple_synthetic)
+
+        # Assert
+        assert result == {'score': 0.8}
+
+    def test_compute_breakdown_composite_keys_duplicate_primary_keys(self):
+        """Test that duplicate PK rows do not inflate match counts."""
+        # Setup
+        real_data = pd.DataFrame({
+            'id': [1, 1, 4, 5],
+            'type': ['A', 'A', 'B', 'C'],
+            'fk_id': [1, 2, 3, 4],
+            'fk_type': ['A', 'B', 'B', 'C'],
+        })
+
+        synthetic_data = pd.DataFrame({
+            'id': [1, 1, 2, 7],
+            'type': ['A', 'A', 'B', 'D'],
+            'fk_id': [1, 2, 3, 8],
+            'fk_type': ['A', 'B', 'B', 'F'],
+        })
+
+        metric = ReferentialIntegrity()
+        tuple_real = (real_data[['id', 'type']], real_data[['fk_id', 'fk_type']])
+        tuple_synthetic = (synthetic_data[['id', 'type']], synthetic_data[['fk_id', 'fk_type']])
+
+        # Run
+        result = metric.compute_breakdown(tuple_real, tuple_synthetic)
+
+        # Assert
+        assert result == {'score': 0.50}
+
+    def test_compute_breakdown_composite_keys_with_nan_values(self):
+        """Test ``compute_breakdown`` with composite keys and random ``nan`` values."""
+        # Setup
+        real_data = pd.DataFrame({
+            'id': [1, 2, 3, 4],
+            'type': ['A', 'A', np.nan, np.nan],
+            'fk_id': [1, 2, 3, 4],
+            'fk_type': ['A', 'B', np.nan, np.nan],
+        })
+
+        synthetic_data = pd.DataFrame({
+            'id': [1, 1, 2, 3],
+            'type': ['A', 'A', np.nan, np.nan],
+            'fk_id': [1, 2, 3, 3],
+            'fk_type': ['A', 'B', np.nan, np.nan],
+        })
+
+        metric = ReferentialIntegrity()
+        tuple_real = (real_data[['id', 'type']], real_data[['fk_id', 'fk_type']])
+        tuple_synthetic = (synthetic_data[['id', 'type']], synthetic_data[['fk_id', 'fk_type']])
+
+        # Run
+        result = metric.compute_breakdown(tuple_real, tuple_synthetic)
+
+        # Assert
+        assert result == {'score': 0.75}
+
+    def test_compute_breakdown_composite_keys_with_only_nan_values(self):
+        """Test ``compute_breakdown`` with composite keys and only ``nan`` values."""
+        # Setup
+        real_data = pd.DataFrame({
+            'id': [np.nan] * 4,
+            'type': [np.nan] * 4,
+            'fk_id': [np.nan] * 4,
+            'fk_type': [np.nan] * 4,
+        })
+
+        synthetic_data = pd.DataFrame({
+            'id': [np.nan] * 4,
+            'type': [np.nan] * 4,
+            'fk_id': [np.nan] * 4,
+            'fk_type': [np.nan] * 4,
+        })
+
+        metric = ReferentialIntegrity()
+        tuple_real = (real_data[['id', 'type']], real_data[['fk_id', 'fk_type']])
+        tuple_synthetic = (synthetic_data[['id', 'type']], synthetic_data[['fk_id', 'fk_type']])
+
+        # Run
+        result = metric.compute_breakdown(tuple_real, tuple_synthetic)
+
+        # Assert
+        assert result == {'score': 1.0}
+
+    def test_compute_breakdown_composite_keys_with_mixture_of_nans(self):
+        """Test ``compute_breakdown`` with mixture of ``nan`` values."""
+        # Setup
+        real_data = pd.DataFrame({
+            'id': ['A', 'B', 'C', 'D'],
+            'type': [np.nan] * 4,
+            'fk_id': ['A'] * 4,
+            'fk_type': [np.nan] * 4,
+        })
+
+        synthetic_data = pd.DataFrame({
+            'id': ['A', 'B', 'C', 'D'],
+            'type': [np.nan] * 4,
+            'fk_id': ['A', 'F'] * 2,
+            'fk_type': [np.nan] * 4,
+        })
+
+        metric = ReferentialIntegrity()
+        tuple_real = (real_data[['id', 'type']], real_data[['fk_id', 'fk_type']])
+        tuple_synthetic = (synthetic_data[['id', 'type']], synthetic_data[['fk_id', 'fk_type']])
+
+        # Run
+        result = metric.compute_breakdown(tuple_real, tuple_synthetic)
+
+        # Assert
+        assert result == {'score': 0.5}
+
+    def test__create_unique_name_single_column(self):
+        """Test unique name generation with single PK and FK columns."""
+        # Setup
+        pk_columns = ['id']
+        fk_columns = ['fk_id']
+
+        # Run
+        result = ReferentialIntegrity._create_unique_name(
+            '__ri_indicator__', pk_columns + fk_columns
+        )
+
+        # Assert
+        assert result == '__ri_indicator__'
+
+    def test__create_unique_name_composite_columns(self):
+        """Test unique name generation with composite PK and FK columns."""
+        # Setup
+        pk_columns = ['id', 'type']
+        fk_columns = ['fk_id', 'fk_type']
+
+        # Run
+        result = ReferentialIntegrity._create_unique_name(
+            '__ri_indicator__', pk_columns + fk_columns
+        )
+
+        # Assert
+        assert result == '__ri_indicator__'
+
+    def test__create_unique_name_exist_in_list(self):
+        """Test behavior when both column lists are empty."""
+        # Run
+        result = ReferentialIntegrity._create_unique_name('__ri_indicator__', ['__ri_indicator__'])
+
+        # Assert
+        assert result == '__ri_indicator___'

@@ -68,8 +68,8 @@ For example, we could execute the same metric as before by adding the `target` e
 metadata dict:
 
 ```python
-In [7]: metadata['sequence_key'] = 'store_id'
+In[7]: metadata['sequence_key'] = 'store_id'
 
-In [8]: LSTMDetection.compute(real_data, synthetic_data, metadata=metadata)
+In[8]: LSTMDetection.compute(real_data, synthetic_data, metadata=metadata)
 Out[8]: 0.5
 ```

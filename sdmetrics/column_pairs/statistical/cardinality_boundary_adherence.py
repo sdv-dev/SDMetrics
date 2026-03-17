@@ -33,10 +33,10 @@ class CardinalityBoundaryAdherence(ColumnPairsMetric):
         """Calculate the percentage of synthetic parents with cardinality in the correct range.
 
         Args:
-            real_data (tuple(pd.Series, pd.Series)):
-                A tuple with the real primary key Series as the first element and real
-                foreign keys Series as the second element.
-            synthetic_data (tuple(pd.Series, pd.Series)):
+            real_data (tuple(pd.DataFrame, pd.DataFrame) or tuple(pd.Series, pd.Series)):
+                A tuple with the real primary key DataFrame as the first element and real
+                foreign keys DataFrame as the second element.
+            synthetic_data (tuple(pd.DataFrame, pd.DataFrame) or tuple(pd.Series, pd.Series)):
                 A tuple with the synthetic primary key as the first element and synthetic
                 foreign keys as the second element.
 
@@ -45,10 +45,10 @@ class CardinalityBoundaryAdherence(ColumnPairsMetric):
                 Metric output.
         """
         real_cardinality = pd.DataFrame(index=real_data[0].copy())
-        real_cardinality['cardinality'] = real_data[1].value_counts()
+        real_cardinality['cardinality'] = real_data[1].value_counts(dropna=False)
         real_cardinality = real_cardinality.fillna(0)
         synthetic_cardinality = pd.DataFrame(index=synthetic_data[0].copy())
-        synthetic_cardinality['cardinality'] = synthetic_data[1].value_counts()
+        synthetic_cardinality['cardinality'] = synthetic_data[1].value_counts(dropna=False)
         synthetic_cardinality = synthetic_cardinality.fillna(0)
 
         min_cardinality = real_cardinality['cardinality'].min()
@@ -66,10 +66,10 @@ class CardinalityBoundaryAdherence(ColumnPairsMetric):
         """Calculate the percentage of synthetic parents with cardinality in the correct range.
 
         Args:
-            real_data (tuple(pd.Series, pd.Series)):
-                A tuple with the real primary key Series as the first element and real
-                foreign keys Series as the second element.
-            synthetic_data (tuple(pd.Series, pd.Series)):
+            real_data (tuple(pd.DataFrame, pd.DataFrame) or tuple(pd.Series, pd.Series)):
+                A tuple with the real primary key DataFrame as the first element and real
+                foreign keys DataFrame as the second element.
+            synthetic_data (tuple(pd.DataFrame, pd.DataFrame) or tuple(pd.Series, pd.Series)):
                 A tuple with the synthetic primary key as the first element and synthetic
                 foreign keys as the second element.
 

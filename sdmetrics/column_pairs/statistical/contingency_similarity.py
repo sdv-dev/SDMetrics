@@ -117,7 +117,9 @@ class ContingencySimilarity(ColumnPairsMetric):
         contingency_synthetic = synthetic.groupby(list(columns), dropna=False).size() / len(
             synthetic
         )
-        combined_index = contingency_real.index.union(contingency_synthetic.index, sort=False)
+        combined_index = contingency_real.index.union(
+            contingency_synthetic.index, sort=False
+        ).drop_duplicates()
         contingency_synthetic = contingency_synthetic.reindex(combined_index, fill_value=0)
         contingency_real = contingency_real.reindex(combined_index, fill_value=0)
         diff = abs(contingency_real - contingency_synthetic).fillna(0)
