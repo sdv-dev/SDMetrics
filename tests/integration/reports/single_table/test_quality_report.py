@@ -3,6 +3,7 @@ from datetime import date, datetime
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table import QualityReport
@@ -70,14 +71,18 @@ class TestQualityReport:
             }),
         )
 
-    def test_report_end_to_end(self):
+    @pytest.mark.parametrize('key_type', ['single', 'composite'])
+    def test_report_end_to_end(self, key_type, composite_keys_single_table_demo):
         """Test the quality report end to end.
 
         The report must compute each property and the overall quality score.
         """
         # Setup
         column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        if key_type == 'single':
+            real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        else:
+            real_data, synthetic_data, metadata = composite_keys_single_table_demo
 
         metadata['columns'] = {
             key: val for key, val in metadata['columns'].items() if key in column_names

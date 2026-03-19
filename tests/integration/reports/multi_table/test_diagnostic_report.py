@@ -19,6 +19,18 @@ class TestDiagnosticReport:
         # Assert
         assert results == 1.0
 
+    def test_end_to_end_composite_keys(self, composite_keys_multi_table_demo):
+        """Test the end-to-end functionality of the ``DiagnosticReport`` report."""
+        real_data, synthetic_data, metadata = composite_keys_multi_table_demo
+        report = DiagnosticReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata, verbose=False)
+        results = report.get_score()
+
+        # Assert
+        assert results == 1.0
+
     def test_end_to_end_with_object_datetimes(self):
         """Test the ``DiagnosticReport`` report with object datetimes."""
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')

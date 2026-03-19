@@ -11,6 +11,7 @@ from sdmetrics.reports.single_table._properties import (
     ColumnPairTrends as SingleTableColumnPairTrends,
 )
 from sdmetrics.reports.utils import PlotConfig
+from sdmetrics.utils import _cast_to_iterable
 
 
 class InterTableTrends(BaseMultiTableProperty):
@@ -50,16 +51,16 @@ class InterTableTrends(BaseMultiTableProperty):
         """
         parent = relationship['parent_table_name']
         child = relationship['child_table_name']
-        foreign_key = relationship['child_foreign_key']
-        primary_key = relationship['parent_primary_key']
+        foreign_key = _cast_to_iterable(relationship['child_foreign_key'])
+        primary_key = _cast_to_iterable(relationship['parent_primary_key'])
 
         real_parent = real_data[parent].add_prefix(f'{parent}.')
         real_child = real_data[child].add_prefix(f'{child}.')
         synthetic_parent = synthetic_data[parent].add_prefix(f'{parent}.')
         synthetic_child = synthetic_data[child].add_prefix(f'{child}.')
 
-        child_index = f'{child}.{foreign_key}'
-        parent_index = f'{parent}.{primary_key}'
+        child_index = [f'{child}.{key_col}' for key_col in foreign_key]
+        parent_index = [f'{parent}.{key_col}' for key_col in primary_key]
 
         denormalized_real = real_child.merge(
             real_parent, left_on=child_index, right_on=parent_index
@@ -101,7 +102,12 @@ class InterTableTrends(BaseMultiTableProperty):
         merged_metadata['columns'] = {**child_cols, **parent_cols}
         if 'primary_key' in merged_metadata:
             primary_key = merged_metadata['primary_key']
-            merged_metadata['primary_key'] = f'{child_table}.{primary_key}'
+            if isinstance(primary_key, list):
+                merged_metadata['primary_key'] = [
+                    f'{child_table}.{pk_col}' for pk_col in primary_key
+                ]
+            else:
+                merged_metadata['primary_key'] = f'{child_table}.{primary_key}'
 
         return merged_metadata, list(parent_cols.keys()), list(child_cols.keys())
 
@@ -123,6 +129,7 @@ class InterTableTrends(BaseMultiTableProperty):
             parent = relationship['parent_table_name']
             child = relationship['child_table_name']
             foreign_key = relationship['child_foreign_key']
+            fk_tuple = tuple(foreign_key) if isinstance(foreign_key, list) else foreign_key
 
             denormalized_real, denormalized_synthetic = self._denormalize_tables(
                 real_data, synthetic_data, relationship
@@ -132,14 +139,14 @@ class InterTableTrends(BaseMultiTableProperty):
 
             parent_child_pairs = itertools.product(parent_cols, child_cols)
 
-            self._properties[(parent, child, foreign_key)] = SingleTableColumnPairTrends()
+            self._properties[(parent, child, fk_tuple)] = SingleTableColumnPairTrends()
             self._properties[
-                (parent, child, foreign_key)
+                (parent, child, fk_tuple)
             ].real_correlation_threshold = self.real_correlation_threshold
             self._properties[
-                (parent, child, foreign_key)
+                (parent, child, fk_tuple)
             ].real_association_threshold = self.real_association_threshold
-            details = self._properties[(parent, child, foreign_key)]._generate_details(
+            details = self._properties[(parent, child, fk_tuple)]._generate_details(
                 denormalized_real,
                 denormalized_synthetic,
                 merged_metadata,
@@ -149,7 +156,7 @@ class InterTableTrends(BaseMultiTableProperty):
 
             details['Parent Table'] = parent
             details['Child Table'] = child
-            details['Foreign Key'] = foreign_key
+            details['Foreign Key'] = str(foreign_key)
             if not details.empty:
                 details['Column 1'] = details['Column 1'].str.replace(
                     f'{parent}.', '', n=1, regex=False
@@ -233,18 +240,15 @@ class InterTableTrends(BaseMultiTableProperty):
     def get_visualization(self, table_name=None):
         """Create a plot to show the inter table trends data.
 
-        Returns:
-            plotly.graph_objects._figure.Figure
-
         Args:
             table_name (str, optional):
                 Table to plot. Defaults to None.
 
-        Raises:
-            - ``ValueError`` if property has not been computed.
-
         Returns:
             plotly.graph_objects._figure.Figure
+
+        Raises:
+            - ``ValueError`` if property has not been computed.
         """
         if not self.is_computed:
             raise ValueError(

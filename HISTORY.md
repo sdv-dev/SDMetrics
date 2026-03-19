@@ -1,5 +1,15 @@
 # History
 
+## v0.28.0 - 2026-03-19
+
+### New Features
+
+* Allow the `CardinalityShapeSimilarity` metric to work with composite keys - Issue [#839](https://github.com/sdv-dev/SDMetrics/issues/839) by @frances-h
+* Allow the `ReferentialIntegrity` metric to work with composite keys - Issue [#838](https://github.com/sdv-dev/SDMetrics/issues/838) by @pvk-developer
+* Allow the `KeyUniqueness` metric to work on composite keys - Issue [#837](https://github.com/sdv-dev/SDMetrics/issues/837) by @frances-h
+* Allow `CardinalityBoundaryAdherence` metric to work on composite keys - Issue [#836](https://github.com/sdv-dev/SDMetrics/issues/836) by @frances-h
+* Allow SDMetrics reports to run on composite keys - Issue [#835](https://github.com/sdv-dev/SDMetrics/issues/835) by @frances-h
+
 ## v0.27.2 - 2026-02-26
 
 ### Bugs Fixed

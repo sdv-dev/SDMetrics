@@ -172,10 +172,12 @@ For example, we could execute the same metric as before by adding the `target` e
 metadata dict:
 
 ```python
-In [11]: users_metadata = metadata['tables']['users'].copy()
+In[11]: users_metadata = metadata['tables']['users'].copy()
 
-In [12]: users_metadata['target'] = 'country'
+In[12]: users_metadata['target'] = 'country'
 
-In [13]: MulticlassDecisionTreeClassifier.compute(real_table, synthetic_table, metadata=users_metadata)
+In[13]: MulticlassDecisionTreeClassifier.compute(
+    real_table, synthetic_table, metadata=users_metadata
+)
 Out[13]: (0.05555555555555555,)
 ```
