@@ -1,5 +1,5 @@
 copulas==0.14.1
-numpy==2.4.3
+numpy==2.4.4
 pandas==2.3.3
 plotly==6.6.0
 scikit-learn==1.8.0
