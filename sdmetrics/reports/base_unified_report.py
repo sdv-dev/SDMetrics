@@ -30,7 +30,14 @@ class BaseUnifiedReport(BaseMultiTableReport):
         return data
 
     def _validate_data_format(self, real_data, synthetic_data):
-        """Validate that the real and synthetic are dictionaries of tables or pandas DataFrames."""
+        """Validate that the real and synthetic data have compatible formats.
+
+        Args:
+            real_data (pandas.DataFrame or dict[str, pd.DataFrame]):
+                The real data.
+            synthetic_data (pandas.DataFrame or dict[str, pd.DataFrame]):
+                The synthetic data.
+        """
         is_real_dict = isinstance(real_data, dict)
         is_real_dataframe = isinstance(real_data, pd.DataFrame)
 
@@ -62,12 +69,12 @@ class BaseUnifiedReport(BaseMultiTableReport):
         """Validate the inputs and normalize the real_data/synthetic_data.
 
         Args:
-            real_data (pandas.DataFrame):
+            real_data (pandas.DataFrame or dict[str, pd.DataFrame]):
                 The real data.
-            synthetic_data (pandas.DataFrame):
+            synthetic_data (pandas.DataFrame or dict[str, pd.DataFrame]):
                 The synthetic data.
             metadata (dict):
-                The metadata of the table.
+                The metadata.
         """
         _validate_metadata(metadata)
         self.table_names = list(metadata.get('tables', []))

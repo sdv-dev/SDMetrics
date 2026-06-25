@@ -7,6 +7,10 @@ from sdmetrics.reports.multi_table._properties import (
     InterTableTrends,
 )
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
+from sdmetrics.reports.utils import (
+    DEFAULT_REAL_ASSOCIATION_THRESHOLD,
+    DEFAULT_REAL_CORRELATION_THRESHOLD,
+)
 
 
 class QualityReport(BaseMultiTableReport):
@@ -18,8 +22,8 @@ class QualityReport(BaseMultiTableReport):
 
     def __init__(self):
         super().__init__()
-        self.real_correlation_threshold = 0.5
-        self.real_association_threshold = 0.3
+        self.real_correlation_threshold = DEFAULT_REAL_CORRELATION_THRESHOLD
+        self.real_association_threshold = DEFAULT_REAL_ASSOCIATION_THRESHOLD
         self._properties = {
             'Column Shapes': ColumnShapes(),
             'Column Pair Trends': ColumnPairTrends(),

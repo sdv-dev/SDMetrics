@@ -7,8 +7,8 @@ from sdmetrics.reports.multi_table._properties import DataValidity, Relationship
 class DiagnosticReport(BaseUnifiedReport):
     """Diagnostic report for single-table and multi-table data.
 
-    This class creates a diagnostic report for single-table and multi-table data.
-    It calculates the diagnostic score using the multi-table report properties.
+    This class creates a diagnostic report for single-table data.
+    It calculates the quality score using the multi-table report properties.
     """
 
     def __init__(self):
