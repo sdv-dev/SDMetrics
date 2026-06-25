@@ -134,6 +134,8 @@ class BaseReport:
                 Whether or not to print report summary and progress.
         """
         self._validate(real_data, synthetic_data, metadata)
+        real_data = self._normalize_data(real_data, metadata)
+        synthetic_data = self._normalize_data(synthetic_data, metadata)
         self.convert_datetimes(real_data, synthetic_data, metadata)
 
         self.report_info['generated_date'] = datetime.today().strftime('%Y-%m-%d')
@@ -311,3 +313,8 @@ class BaseReport:
                 )
 
             return report
+
+    @staticmethod
+    def _normalize_data(data, metadata):
+        """No-op."""
+        return data
