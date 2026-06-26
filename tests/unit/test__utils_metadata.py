@@ -13,8 +13,6 @@ from sdmetrics._utils_metadata import (
     _remove_non_modelable_columns,
     _validate_metadata,
     _validate_metadata_dict,
-    _validate_multi_table_metadata,
-    _validate_single_table_metadata,
 )
 
 
@@ -72,90 +70,60 @@ def test__validate_metadata_dict(metadata):
         _validate_metadata_dict(metadata_wrong)
 
 
-def test__validate_single_table_metadata(metadata):
-    """Test the ``_validate_single_table_metadata`` method."""
-    # Setup
-    metadata_wrong = {
-        'wrong_key': {
-            'numerical': {'sdtype': 'numerical'},
-            'categorical': {'sdtype': 'categorical'},
-        }
-    }
-    expected_error = re.escape(
-        "Single-table metadata must include a 'columns' key that maps column names"
-        ' to their corresponding information.'
-    )
-
+def test__validate_metadata_valid(metadata):
+    """Test the ``_validate_metadata`` method with valid metadata."""
     # Run and Assert
-    _validate_single_table_metadata(metadata['tables']['table1'])
-    with pytest.raises(ValueError, match=expected_error):
-        _validate_single_table_metadata(metadata_wrong)
-
-
-def test__validate_multi_table_metadata(metadata):
-    """Test the ``_validate_multi_table_metadata`` method."""
-    # Setup
-    metadata_wrong = {
-        'wrong_tables': {
-            'table1': {
-                'columns': {
-                    'numerical': {'sdtype': 'numerical'},
-                    'categorical': {'sdtype': 'categorical'},
-                }
-            },
-        }
-    }
-
-    metadata_wrong_single_table = {
-        'tables': {
-            'table1': {
-                'columns': {
-                    'numerical': {'sdtype': 'numerical'},
-                    'categorical': {'sdtype': 'categorical'},
-                }
-            },
-            'table2': {
-                'wrong_key': {
-                    'numerical': {'sdtype': 'numerical'},
-                    'categorical': {'sdtype': 'categorical'},
-                }
-            },
-        }
-    }
-    expected_error = re.escape(
-        "Multi-table metadata must include a 'tables' key that maps table names to"
-        ' their respective metadata.'
-    )
-    expected_error_single_table = re.escape(
-        "Error in table 'table2': Single-table metadata must include a 'columns' key"
-        ' that maps column names to their corresponding information.'
-    )
-
-    # Run and Assert
-    _validate_multi_table_metadata(metadata)
-    with pytest.raises(ValueError, match=expected_error):
-        _validate_multi_table_metadata(metadata_wrong)
-
-    with pytest.raises(ValueError, match=expected_error_single_table):
-        _validate_multi_table_metadata(metadata_wrong_single_table)
-
-
-@patch('sdmetrics._utils_metadata._validate_multi_table_metadata')
-def test__validate_metadata(mock_validate_multi_table_metadata, metadata):
-    """Test the ``_validate_metadata`` method."""
-    # Setup
-    wrong_metadata = {'worng_key': 'wrong_value'}
-    expected_error = re.escape(
-        "Metadata must include either a 'columns' key for single-table metadata"
-        " or a 'tables' key for multi-table metadata."
-    )
-    # Run
     _validate_metadata(metadata)
-    with pytest.raises(ValueError, match=expected_error):
-        _validate_metadata(wrong_metadata)
 
-    # Assert
-    mock_validate_multi_table_metadata.assert_called_once_with(metadata)
+
+@pytest.mark.parametrize(
+    ('metadata_wrong', 'expected_error'),
+    [
+        (
+            {
+                'wrong_tables': {
+                    'table1': {
+                        'columns': {
+                            'numerical': {'sdtype': 'numerical'},
+                            'categorical': {'sdtype': 'categorical'},
+                        }
+                    },
+                }
+            },
+            re.escape(
+                "Metadata must include a 'tables' key that maps table names to"
+                ' their respective metadata.'
+            ),
+        ),
+        (
+            {
+                'tables': {
+                    'table1': {
+                        'columns': {
+                            'numerical': {'sdtype': 'numerical'},
+                            'categorical': {'sdtype': 'categorical'},
+                        }
+                    },
+                    'table2': {
+                        'wrong_key': {
+                            'numerical': {'sdtype': 'numerical'},
+                            'categorical': {'sdtype': 'categorical'},
+                        }
+                    },
+                }
+            },
+            re.escape(
+                "Error in table 'table2': Each table in the metadata must include a 'columns' key"
+                ' that maps column names to their corresponding information.'
+            ),
+        ),
+    ],
+)
+def test__validate_metadata_invalid(metadata_wrong, expected_error):
+    """Test the ``_validate_metadata`` method with invalid metadata."""
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_error):
+        _validate_metadata(metadata_wrong)
 
 
 def test__convert_datetime_column(data, metadata):

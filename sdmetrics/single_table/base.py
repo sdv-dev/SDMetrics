@@ -3,7 +3,7 @@
 import copy
 from operator import attrgetter
 
-from sdmetrics._utils_metadata import _convert_datetime_column, _validate_single_table_metadata
+from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata
 from sdmetrics.base import BaseMetric
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.utils import get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta
@@ -107,7 +107,7 @@ class SingleTableMetric(BaseMetric):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 
         if metadata is not None:
-            _validate_single_table_metadata(metadata)
+            _validate_metadata(metadata)
             fields = get_columns_from_metadata(metadata)
             for column in real_data.columns:
                 if column not in fields:

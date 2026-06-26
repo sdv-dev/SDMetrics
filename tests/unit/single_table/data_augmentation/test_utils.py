@@ -39,7 +39,7 @@ def test__validate_parameters():
         'real_training_data': pd.DataFrame({'target': [1, 0, 0]}),
         'synthetic_data': pd.DataFrame({'target': [1, 0, 0]}),
         'real_validation_data': pd.DataFrame({'target': [1, 0, 0]}),
-        'metadata': {'columns': {'target': {'sdtype': 'categorical'}}},
+        'metadata': {'tables': {'table': {'columns': {'target': {'sdtype': 'categorical'}}}}},
         'prediction_column_name': 'target',
         'classifier': 'XGBoost',
         'fixed_recall_value': 0.9,

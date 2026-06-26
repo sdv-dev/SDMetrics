@@ -264,6 +264,14 @@ def get_columns_from_metadata(metadata):
         dict:
             The columns metadata.
     """
+    table_name = None
+    tables = metadata.get('tables', [])
+    if tables:
+        table_name = list(tables)[0]
+
+    if table_name:
+        return metadata.get('tables', {}).get(table_name, {}).get('columns', {})
+
     return metadata.get('columns', {})
 
 

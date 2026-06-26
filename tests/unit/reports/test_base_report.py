@@ -169,9 +169,13 @@ class TestBaseReport:
             'column4': [4, 5, 6],
         })
         metadata = {
-            'columns': {
-                'column1': {'sdtype': 'numerical'},
-                'column2': {'sdtype': 'categorical'},
+            'tables': {
+                'table': {
+                    'columns': {
+                        'column1': {'sdtype': 'numerical'},
+                        'column2': {'sdtype': 'categorical'},
+                    }
+                }
             }
         }
 
@@ -421,11 +425,15 @@ class TestBaseReport:
             'column4': [7, 8, 9],
         })
         metadata = {
-            'columns': {
-                'column1': {'sdtype': 'numerical'},
-                'column2': {'sdtype': 'categorical'},
-                'column3': {'sdtype': 'numerical'},
-                'column4': {'sdtype': 'numerical'},
+            'tables': {
+                'table': {
+                    'columns': {
+                        'column1': {'sdtype': 'numerical'},
+                        'column2': {'sdtype': 'categorical'},
+                        'column3': {'sdtype': 'numerical'},
+                        'column4': {'sdtype': 'numerical'},
+                    }
+                }
             }
         }
 
@@ -543,7 +551,14 @@ class TestBaseReport:
         real_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
         metadata = {
-            'columns': {'column1': {'sdtype': 'numerical'}, 'column2': {'sdtype': 'categorical'}}
+            'tables': {
+                'table': {
+                    'columns': {
+                        'column1': {'sdtype': 'numerical'},
+                        'column2': {'sdtype': 'categorical'},
+                    }
+                }
+            }
         }
 
         # Run

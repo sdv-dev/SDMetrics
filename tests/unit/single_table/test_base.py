@@ -28,10 +28,14 @@ class TestSingleTableMetric:
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['c', 'b', 'c']})
         metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'categorical'},
-            },
+            'tables': {
+                'table': {
+                    'columns': {
+                        'col1': {'sdtype': 'numerical'},
+                        'col2': {'sdtype': 'categorical'},
+                    },
+                }
+            }
         }
 
         # Run
@@ -102,10 +106,14 @@ class TestSingleTableMetric:
             'col3': [1, 2, 3],
         })
         metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'categorical'},
-            },
+            'tables': {
+                'table': {
+                    'columns': {
+                        'col1': {'sdtype': 'numerical'},
+                        'col2': {'sdtype': 'categorical'},
+                    },
+                }
+            }
         }
 
         # Run and assert
@@ -132,11 +140,15 @@ class TestSingleTableMetric:
         real_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'col1': [2, 2, 3], 'col2': ['c', 'b', 'c']})
         metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'categorical'},
-                'col3': {'sdtype': 'boolean'},
-            },
+            'tables': {
+                'table': {
+                    'columns': {
+                        'col1': {'sdtype': 'numerical'},
+                        'col2': {'sdtype': 'categorical'},
+                        'col3': {'sdtype': 'boolean'},
+                    },
+                }
+            }
         }
 
         # Run and assert
@@ -196,11 +208,15 @@ class TestSingleTableMetric:
             'col3': [date(2020, 11, 12), date(2022, 11, 2), date(2022, 3, 13)],
         })
         metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'categorical'},
-                'col3': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-            },
+            'tables': {
+                'table': {
+                    'columns': {
+                        'col1': {'sdtype': 'numerical'},
+                        'col2': {'sdtype': 'categorical'},
+                        'col3': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                    },
+                }
+            }
         }
 
         # Run

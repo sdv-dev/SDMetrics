@@ -15,6 +15,7 @@ import tqdm
 
 from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata
 from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
+from sdmetrics.utils import get_columns_from_metadata
 from sdmetrics.visualization import set_plotly_config
 
 
@@ -42,7 +43,7 @@ class BaseReport:
         """
         real_columns = set(real_data.columns)
         synthetic_columns = set(synthetic_data.columns)
-        metadata_columns = set(metadata['columns'].keys())
+        metadata_columns = set(get_columns_from_metadata(metadata).keys())
 
         missing_data = metadata_columns.difference(real_columns.union(synthetic_columns))
         missing_metadata = real_columns.union(synthetic_columns).difference(metadata_columns)
@@ -97,7 +98,7 @@ class BaseReport:
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
         """
-        for column, col_meta in metadata['columns'].items():
+        for column, col_meta in get_columns_from_metadata(metadata).items():
             if col_meta['sdtype'] == 'datetime':
                 real_col = real_data[column]
                 synth_col = synthetic_data[column]
@@ -137,7 +138,7 @@ class BaseReport:
         self.convert_datetimes(real_data, synthetic_data, metadata)
 
         self.report_info['generated_date'] = datetime.today().strftime('%Y-%m-%d')
-        if 'tables' in metadata:
+        if len(metadata.get('tables', [])) > 1:
             self.report_info['num_tables'] = len(metadata['tables'])
             self.report_info['num_rows_real_data'] = {
                 name: len(table) for name, table in real_data.items()

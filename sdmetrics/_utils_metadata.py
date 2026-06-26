@@ -17,42 +17,29 @@ def _validate_metadata_dict(metadata):
         )
 
 
-def _validate_single_table_metadata(metadata):
+def _validate_columns_exist_in_single_table_metadata(metadata):
     """Validate the metadata for a single table."""
     _validate_metadata_dict(metadata)
     if 'columns' not in metadata:
         raise ValueError(
-            "Single-table metadata must include a 'columns' key that maps column names"
+            "Each table in the metadata must include a 'columns' key that maps column names"
             ' to their corresponding information.'
         )
-
-
-def _validate_multi_table_metadata(metadata):
-    """Validate the metadata for multiple tables."""
-    _validate_metadata_dict(metadata)
-    if 'tables' not in metadata:
-        raise ValueError(
-            "Multi-table metadata must include a 'tables' key that maps table names"
-            ' to their respective metadata.'
-        )
-    for table_name, table_metadata in metadata['tables'].items():
-        try:
-            _validate_single_table_metadata(table_metadata)
-        except ValueError as e:
-            raise ValueError(f"Error in table '{table_name}': {str(e)}")
 
 
 def _validate_metadata(metadata):
     """Validate the metadata."""
     _validate_metadata_dict(metadata)
-    if ('columns' not in metadata) and ('tables' not in metadata):
+    if 'tables' not in metadata:
         raise ValueError(
-            "Metadata must include either a 'columns' key for single-table metadata"
-            " or a 'tables' key for multi-table metadata."
+            "Metadata must include a 'tables' key that maps table names"
+            ' to their respective metadata.'
         )
-
-    if 'tables' in metadata:
-        _validate_multi_table_metadata(metadata)
+    for table_name, table_metadata in metadata['tables'].items():
+        try:
+            _validate_columns_exist_in_single_table_metadata(table_metadata)
+        except ValueError as e:
+            raise ValueError(f"Error in table '{table_name}': {str(e)}")
 
 
 def handle_single_and_multi_table(single_table_func):
