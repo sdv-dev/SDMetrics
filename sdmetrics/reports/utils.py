@@ -32,7 +32,7 @@ def _warn_deprecated_report(report_name, replacement_class):
             Name of the replacement report class.
     """
     warnings.warn(
-        f"The {report_name} report is deprecated. Please use the {replacement_class} "
+        f'The {report_name} report is deprecated. Please use the {replacement_class} '
         "from 'sdmetrics.reports' instead.",
         FutureWarning,
         stacklevel=3,

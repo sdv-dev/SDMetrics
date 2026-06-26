@@ -18,16 +18,15 @@ class BaseUnifiedReport(BaseMultiTableReport):
             synthetic_data (dict[str, pd.DataFrame]):
                 The synthetic data.
         """
-        error_message = (
-            f'{self.__class__.__name__} expects real_data and synthetic_data to both be '
-            'pandas.DataFrame, or both be dictionaries mapping table names to '
-            f'pandas.DataFrame. Received real_data={type(real_data).__name__} and '
-            f'synthetic_data={type(synthetic_data).__name__}.'
-        )
-        dictionary_error_message = 'Please pass in a dictionary mapping tables to dataframes.'
-        for data in (real_data, synthetic_data):
-            if not isinstance(data, dict):
-                raise ValueError(dictionary_error_message)
+        if not isinstance(real_data, dict):
+            raise ValueError(
+                'Please pass in a dictionary mapping tables to dataframes for real_data.'
+            )
+
+        if not isinstance(synthetic_data, dict):
+            raise ValueError(
+                'Please pass in a dictionary mapping tables to dataframes for synthetic_data.'
+            )
 
         all_real_dataframes = all(isinstance(table, pd.DataFrame) for table in real_data.values())
         all_synthetic_dataframes = all(
@@ -36,7 +35,12 @@ class BaseUnifiedReport(BaseMultiTableReport):
         if all_real_dataframes and all_synthetic_dataframes:
             return
 
-        raise ValueError(error_message)
+        raise ValueError(
+            f'{self.__class__.__name__} expects real_data and synthetic_data to both be '
+            'pandas.DataFrame, or both be dictionaries mapping table names to '
+            f'pandas.DataFrame. Received real_data={type(real_data).__name__} and '
+            f'synthetic_data={type(synthetic_data).__name__}.'
+        )
 
     def _validate(self, real_data, synthetic_data, metadata):
         """Validate the inputs.

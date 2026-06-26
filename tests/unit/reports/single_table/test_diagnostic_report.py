@@ -11,7 +11,7 @@ class TestDiagnosticReport:
         """Test the ``__init__`` method."""
         # Run
         expected_warning = re.escape(
-            "The single table diagnostic report is deprecated. Please use the DiagnosticReport "
+            'The single table diagnostic report is deprecated. Please use the DiagnosticReport '
             "from 'sdmetrics.reports' instead."
         )
         with pytest.warns(FutureWarning, match=expected_warning):

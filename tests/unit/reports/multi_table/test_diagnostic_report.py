@@ -12,7 +12,7 @@ class TestDiagnosticReport:
         """Test that the ``__init__`` method for MultiTableDiagnosticReport."""
         # Setup and Run
         expected_warning = re.escape(
-            "The multi table diagnostic report is deprecated. Please use the DiagnosticReport "
+            'The multi table diagnostic report is deprecated. Please use the DiagnosticReport '
             "from 'sdmetrics.reports' instead."
         )
         with pytest.warns(FutureWarning, match=expected_warning):

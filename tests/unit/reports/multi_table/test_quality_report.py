@@ -17,7 +17,7 @@ class TestQualityReport:
         """Test that the ``__init__`` method for MultiTableQualityReport."""
         # Setup and Run
         expected_warning = re.escape(
-            "The multi table quality report is deprecated. Please use the QualityReport "
+            'The multi table quality report is deprecated. Please use the QualityReport '
             "from 'sdmetrics.reports' instead."
         )
         with pytest.warns(FutureWarning, match=expected_warning):

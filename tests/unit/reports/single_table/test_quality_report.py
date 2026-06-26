@@ -11,7 +11,7 @@ class TestQualityReport:
         """Test the ``__init__`` method."""
         # Run
         expected_warning = re.escape(
-            "The single table quality report is deprecated. Please use the QualityReport "
+            'The single table quality report is deprecated. Please use the QualityReport '
             "from 'sdmetrics.reports' instead."
         )
         with pytest.warns(FutureWarning, match=expected_warning):

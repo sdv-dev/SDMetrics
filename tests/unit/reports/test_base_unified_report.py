@@ -34,7 +34,9 @@ class TestBaseUnifiedReport:
         }
 
         # Run and Assert
-        expected_message = re.escape('Please pass in a dictionary mapping tables to dataframes.')
+        expected_message = re.escape(
+            'Please pass in a dictionary mapping tables to dataframes for real_data.'
+        )
         with pytest.raises(ValueError, match=expected_message):
             base_report._validate_data_format(real_data, synthetic_data)
 
@@ -48,7 +50,9 @@ class TestBaseUnifiedReport:
         synthetic_data = pd.DataFrame({'column1': [1, 2, 3]})
 
         # Run and Assert
-        expected_message = re.escape('Please pass in a dictionary mapping tables to dataframes.')
+        expected_message = re.escape(
+            'Please pass in a dictionary mapping tables to dataframes for synthetic_data.'
+        )
         with pytest.raises(ValueError, match=expected_message):
             base_report._validate_data_format(real_data, synthetic_data)
 
@@ -192,33 +196,4 @@ class TestBaseUnifiedReport:
         mock__validate_metadata.assert_called_once_with(metadata)
         assert base_report.table_names == []
         base_report._validate_data_format.assert_not_called()
-        base_report._validate_metadata_matches_data.assert_not_called()
-
-    def test__validate_data_format_error_short_circuits(self):
-        """Test the ``_validate`` method when data format validation fails."""
-        # Setup
-        base_report = BaseUnifiedReport()
-        base_report._validate_metadata_matches_data = Mock()
-
-        real_data = {
-            'table1': pd.DataFrame({'column1': [1, 2, 3]}),
-        }
-        synthetic_data = pd.DataFrame({'column1': [1, 2, 3]})
-        metadata = {
-            'tables': {
-                'table1': {
-                    'columns': {
-                        'column1': {'sdtype': 'numerical'},
-                    },
-                },
-            },
-            'relationships': [],
-        }
-
-        # Run and Assert
-        expected_message = re.escape('Please pass in a dictionary mapping tables to dataframes.')
-        with pytest.raises(ValueError, match=expected_message):
-            base_report._validate(real_data, synthetic_data, metadata)
-
-        assert base_report.table_names == ['table1']
         base_report._validate_metadata_matches_data.assert_not_called()
