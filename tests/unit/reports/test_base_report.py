@@ -687,26 +687,3 @@ class TestBaseReport:
             'currently using version `new_version`. Some features may not work as intended.'
         )
         assert loaded == pickle_mock.load.return_value
-
-    def test__normalize_data(self):
-        """Test the ``_normalize_data`` method."""
-        # Setup
-        data = pd.DataFrame({'a': [1, 2]})
-        metadata = {
-            'tables': {
-                'table': {
-                    'columns': {
-                        'a': {'sdtype': 'categorical'},
-                    },
-                }
-            },
-            'relationships': [],
-            'METADATA_SPEC_VERSION': 'V1',
-        }
-
-        # Run
-        base_report = BaseReport()
-        returned_data = base_report._normalize_data(data, metadata)
-
-        # Assert
-        assert returned_data.equals(data)

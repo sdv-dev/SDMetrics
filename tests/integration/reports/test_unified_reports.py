@@ -146,7 +146,7 @@ def test_unified_diagnostic_report_single_table(single_table_demo):
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, verbose=False)
+    report.generate({'table': real_data}, {'table': synthetic_data}, metadata, verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
@@ -234,7 +234,12 @@ def test_unified_quality_report_single_table(single_table_demo):
     report = QualityReport()
     _set_thresholds_zero(report)
     report.num_rows_subsample = None
-    report.generate(real_data[column_names], synthetic_data[column_names], metadata, verbose=False)
+    report.generate(
+        {'table': real_data[column_names]},
+        {'table': synthetic_data[column_names]},
+        metadata,
+        verbose=False,
+    )
 
     # Assert
     expected_properties = pd.DataFrame({
