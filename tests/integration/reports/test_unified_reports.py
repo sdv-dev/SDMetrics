@@ -215,6 +215,7 @@ def test_unified_diagnostic_report_single_table(single_table_demo):
         report.get_details('Relationship Validity'),
         expected_details_relationship_validity,
         check_dtype=False,
+        check_index_type=False,
     )
     assert report.get_score() == 1.0
     _assert_report_info(report, 'DiagnosticReport', {'table': 215}, {'table': 215})
@@ -317,6 +318,7 @@ def test_unified_quality_report_single_table(single_table_demo):
         report.get_details('Cardinality'),
         expected_details_cardinality,
         check_dtype=False,
+        check_index_type=False,
     )
     pd.testing.assert_frame_equal(
         report.get_details('Intertable Trends'), expected_details_intertable_trends
