@@ -2,6 +2,7 @@
 
 from sdmetrics.reports.base_report import BaseReport
 from sdmetrics.reports.single_table._properties import DataValidity, Structure
+from sdmetrics.reports.utils import _warn_deprecated_report
 
 
 class DiagnosticReport(BaseReport):
@@ -12,6 +13,7 @@ class DiagnosticReport(BaseReport):
     """
 
     def __init__(self):
+        _warn_deprecated_report('single table diagnostic', 'DiagnosticReport')
         super().__init__()
         self._properties = {
             'Data Validity': DataValidity(),

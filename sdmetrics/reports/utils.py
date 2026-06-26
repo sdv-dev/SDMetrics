@@ -22,6 +22,23 @@ DEFAULT_REAL_CORRELATION_THRESHOLD = 0.5
 DEFAULT_REAL_ASSOCIATION_THRESHOLD = 0.3
 
 
+def _warn_deprecated_report(report_name, replacement_class):
+    """Warn users that a report is deprecated.
+
+    Args:
+        report_name (str):
+            Name of the deprecated report.
+        replacement_class (str):
+            Name of the replacement report class.
+    """
+    warnings.warn(
+        f"The {report_name} report is deprecated. Please use the {replacement_class} "
+        "from 'sdmetrics.reports' instead.",
+        FutureWarning,
+        stacklevel=3,
+    )
+
+
 class PlotConfig:
     """Custom plot settings for visualizations."""
 
