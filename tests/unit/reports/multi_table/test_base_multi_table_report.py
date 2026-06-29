@@ -42,8 +42,7 @@ class TestBaseReport:
         )
         with pytest.raises(ValueError, match=expected_message):
             base_report._validate_data_format(
-                real_data['student_placements'],
-                synthetic_data['student_placements']
+                real_data['student_placements'], synthetic_data['student_placements']
             )
 
     def test__validate_relationships(self):

@@ -75,7 +75,9 @@ class TestQualityReport:
         )
 
     @pytest.mark.parametrize('key_type', ['single', 'composite'])
-    def test_report_end_to_end(self, key_type, composite_keys_single_table_demo, single_table_demo_data_and_metadata):
+    def test_report_end_to_end(
+        self, key_type, composite_keys_single_table_demo, single_table_demo_data_and_metadata
+    ):
         """Test the quality report end to end.
 
         The report must compute each property and the overall quality score.
@@ -87,9 +89,9 @@ class TestQualityReport:
         else:
             real_data, synthetic_data, metadata = composite_keys_single_table_demo
 
-        table_meta = metadata['tables']['student_placements']
+        table_meta = metadata['tables']['student_placements']['columns']
         metadata['tables']['student_placements']['columns'] = {
-            key: val for key, val in table_meta['columns'].items() if key in column_names
+            key: val for key, val in table_meta.items() if key in column_names
         }
         report = QualityReport()
         _set_thresholds_zero(report)
@@ -186,7 +188,9 @@ class TestQualityReport:
         assert report_info['num_rows_synthetic_data'] == 215
         assert report_info['generation_time'] <= generate_end_time - generate_start_time
 
-    def test_column_pair_trends_threshold_changes_details(self, single_table_demo_data_and_metadata):
+    def test_column_pair_trends_threshold_changes_details(
+        self, single_table_demo_data_and_metadata
+    ):
         """Test threshold impact on column pair trends details."""
         # Setup
         real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
@@ -259,7 +263,7 @@ class TestQualityReport:
                 dt_format = column_meta['datetime_format']
                 real_data[column] = real_data[column].dt.strftime(dt_format)
 
-        table_meta = metadata['tables']['student_placements']
+        table_meta = metadata['tables']['student_placements']['columns']
         metadata['tables']['student_placements']['columns'] = {
             key: val for key, val in table_meta.items() if key in column_names
         }
@@ -343,7 +347,7 @@ class TestQualityReport:
         column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
         real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
 
-        table_meta = metadata['tables']['student_placements']
+        table_meta = metadata['tables']['student_placements']['columns']
         metadata['tables']['student_placements']['columns'] = {
             key: val for key, val in table_meta.items() if key in column_names
         }
@@ -430,7 +434,9 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(col_pair_report[1:], expected_details_cpt[1:])
         assert report.get_score() == 0.8204378797402054
 
-    def test_meets_threshold_column_has_boolean_dtype_with_errors(self, single_table_demo_data_and_metadata):
+    def test_meets_threshold_column_has_boolean_dtype_with_errors(
+        self, single_table_demo_data_and_metadata
+    ):
         """Test that 'Meets Threshold?' column contains booleans when errors occur."""
         # Setup
         real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
@@ -457,7 +463,7 @@ class TestQualityReport:
         column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
         real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
 
-        table_meta = metadata['tables']['student_placements']
+        table_meta = metadata['tables']['student_placements']['columns']
         metadata['tables']['student_placements']['columns'] = {
             key: val for key, val in table_meta.items() if key in column_names
         }
@@ -688,8 +694,8 @@ class TestQualityReport:
         metadata = {
             'tables': {
                 'table': {
-
-                    'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+                    'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}
+                }
             }
         }
         report = QualityReport()

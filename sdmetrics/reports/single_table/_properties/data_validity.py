@@ -47,8 +47,7 @@ class DataValidity(BaseSingleTableProperty):
         columns_meta = get_columns_from_metadata(metadata)
         column_names, metric_names, scores = [], [], []
         column_sdtypes = [
-            (col_name, col_meta['sdtype'])
-            for col_name, col_meta in columns_meta.items()
+            (col_name, col_meta['sdtype']) for col_name, col_meta in columns_meta.items()
         ]
         error_messages = []
         primary_key = get_primary_key_from_metadata(metadata)

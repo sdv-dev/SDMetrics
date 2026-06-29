@@ -3,6 +3,7 @@
 import pandas as pd
 
 from sdmetrics._utils_metadata import _process_data_with_metadata
+from sdmetrics.utils import get_columns_from_metadata
 
 
 def _validate_tables(real_training_data, synthetic_data, real_validation_data):

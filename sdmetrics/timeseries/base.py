@@ -56,7 +56,7 @@ class TimeSeriesMetric(BaseMetric):
                 if column not in columns_from_metadata:
                     raise ValueError(f'Column {column} not found in metadata')
 
-            for field in fields.keys():
+            for field in columns_from_metadata.keys():
                 if field not in real_data.columns:
                     raise ValueError(f'Field {field} not found in data')
 

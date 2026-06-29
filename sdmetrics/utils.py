@@ -281,6 +281,16 @@ def get_columns_from_metadata(metadata):
 
 
 def get_primary_key_from_metadata(metadata):
+    """Get the primary key from a metadata dict.
+
+    Args:
+        metadata (dict):
+            The metadata dict.
+
+    Returns:
+        string or list:
+            The primary key.
+    """
     table_name = _get_table_name_from_metadata(metadata)
     if table_name:
         return metadata.get('tables', {}).get(table_name, {}).get('primary_key', '')
@@ -336,6 +346,10 @@ def get_sequence_index(metadata):
     Args:
         metadata (dict):
             The metadata dict.
+
+    Returns:
+        string or None:
+            The sequence index.
     """
     table_name = _get_table_name_from_metadata(metadata)
     if table_name:
@@ -345,6 +359,16 @@ def get_sequence_index(metadata):
 
 
 def get_table_data_from_dict(data):
+    """Get the table data from a data object.
+
+    Args:
+        data (dict or pandas.DataFrame):
+            The data object. If a dict is provided, the first table is returned.
+
+    Returns:
+        pandas.DataFrame:
+            The table data.
+    """
     if isinstance(data, dict):
         return data[list(data)[0]]
 
