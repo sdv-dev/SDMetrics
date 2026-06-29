@@ -120,7 +120,7 @@ def _validate_data_and_metadata(
     Raises:
         ValueError: If validation fails
     """
-    if prediction_column_name not in metadata.get('columns', {}):
+    if prediction_column_name not in get_columns_from_metadata(metadata):
         raise ValueError(
             f'The column `{prediction_column_name}` is not described in the metadata.'
             ' Please update your metadata.'

@@ -3,7 +3,7 @@
 import pandas as pd
 
 from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
-from sdmetrics.utils import get_columns_from_metadata
+from sdmetrics.utils import get_columns_from_metadata, get_table_data_from_dict
 
 
 class BaseSingleTableProperty:
@@ -66,6 +66,8 @@ class BaseSingleTableProperty:
             float:
                 The average score for the property.
         """
+        real_data = get_table_data_from_dict(real_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
         self.details = self._generate_details(real_data, synthetic_data, metadata, progress_bar)
         return self._compute_average()
 

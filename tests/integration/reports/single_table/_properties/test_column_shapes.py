@@ -80,8 +80,8 @@ class TestColumnShapes:
         # Setup
         real_data, synthetic_data, metadata = load_demo('single_table')
 
-        real_data['start_date'].iloc[0] = 0
-        real_data['employability_perc'].iloc[2] = 'a'
+        real_data['student_placements']['start_date'].iloc[0] = 0
+        real_data['student_placements']['employability_perc'].iloc[2] = 'a'
 
         # Run
         column_shape_property = ColumnShapes()

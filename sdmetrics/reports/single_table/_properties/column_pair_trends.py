@@ -9,7 +9,7 @@ from sdmetrics._utils_metadata import _convert_datetime_column
 from sdmetrics.column_pairs.statistical import ContingencySimilarity, CorrelationSimilarity
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
-from sdmetrics.utils import get_columns_from_metadata
+from sdmetrics.utils import get_columns_from_metadata, get_table_data_from_dict
 
 
 class ColumnPairTrends(BaseSingleTableProperty):
@@ -291,6 +291,9 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 Pairs of columns to calculate results for. If None, uses every combination of
                 pairs of columns in the metadata. Defaults to None.
         """
+        real_data = get_table_data_from_dict(real_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
+
         processed_real_data, discrete_real = self._get_processed_data(real_data, metadata)
         processed_synthetic_data, discrete_synthetic = self._get_processed_data(
             synthetic_data, metadata

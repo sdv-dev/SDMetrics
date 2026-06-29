@@ -37,7 +37,11 @@ class TestStructure:
 
         # Run
         synthesis_property = Structure()
-        score = synthesis_property.get_score(real_data.iloc[:20], [], metadata)
+        score = synthesis_property.get_score(
+            real_data['student_placements'].iloc[:20],
+            [],
+            metadata
+        )
 
         # Assert
         assert pd.isna(score)

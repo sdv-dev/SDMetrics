@@ -13,7 +13,11 @@ class TestSynthesis:
 
         # Run
         synthesis_property = Synthesis()
-        score = synthesis_property.get_score(real_data.iloc[:20], real_data.iloc[10:30], metadata)
+        score = synthesis_property.get_score(
+            real_data['student_placements'].iloc[:20],
+            real_data['student_placements'].iloc[10:30],
+            metadata
+        )
 
         # Assert
         assert score == 0.5
@@ -28,7 +32,11 @@ class TestSynthesis:
 
         # Run
         synthesis_property = Synthesis()
-        score = synthesis_property.get_score(real_data.iloc[:20], [], metadata)
+        score = synthesis_property.get_score(
+            real_data['student_placements'].iloc[:20],
+            [],
+            metadata
+        )
 
         # Assert
         assert pd.isna(score)

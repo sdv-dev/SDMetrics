@@ -2,7 +2,7 @@ import warnings
 
 import pandas as pd
 
-from sdmetrics.utils import is_datetime
+from sdmetrics.utils import is_datetime, get_columns_from_metadata
 
 MODELABLE_SDTYPES = ('numerical', 'datetime', 'categorical', 'boolean')
 
@@ -80,11 +80,9 @@ def _convert_datetime_column(column_name, column_data, column_metadata):
 @handle_single_and_multi_table
 def _convert_datetime_columns(data, metadata):
     """Convert datetime columns to datetime type."""
-    for column in metadata['columns']:
-        if metadata['columns'][column]['sdtype'] == 'datetime':
-            data[column] = _convert_datetime_column(
-                column, data[column], metadata['columns'][column]
-            )
+    for column, column_metadata in get_columns_from_metadata(metadata).items():
+        if column_metadata['sdtype'] == 'datetime':
+            data[column] = _convert_datetime_column(column, data[column], column_metadata)
 
     return data
 
@@ -92,7 +90,7 @@ def _convert_datetime_columns(data, metadata):
 @handle_single_and_multi_table
 def _remove_missing_columns_metadata(data, metadata):
     """Remove columns that are not present in the metadata."""
-    columns_in_metadata = set(metadata['columns'].keys())
+    columns_in_metadata = set(get_columns_from_metadata(metadata).keys())
     columns_in_data = set(data.columns)
     columns_to_remove = columns_in_data - columns_in_metadata
     extra_metadata_columns = columns_in_metadata - columns_in_data
@@ -112,7 +110,11 @@ def _remove_missing_columns_metadata(data, metadata):
         )
 
     data = data.drop(columns=columns_to_remove)
-    column_intersection = [column for column in data.columns if column in metadata['columns']]
+    column_intersection = [
+        column
+        for column in data.columns
+        if column in get_columns_from_metadata(metadata)
+    ]
 
     return data[column_intersection]
 
@@ -124,8 +126,8 @@ def _remove_non_modelable_columns(data, metadata):
     All modelable columns are numerical, datetime, categorical, or boolean sdtypes.
     """
     columns_modelable = []
-    for column in metadata['columns']:
-        column_sdtype = metadata['columns'][column]['sdtype']
+    for column, column_metadata in get_columns_from_metadata(metadata).items():
+        column_sdtype = column_metadata['sdtype']
         if column_sdtype in MODELABLE_SDTYPES and column in data.columns:
             columns_modelable.append(column)
 
