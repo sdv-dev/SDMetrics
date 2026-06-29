@@ -11,9 +11,10 @@ CHUNK_SIZE = 1000
 
 def _process_dcr_chunk(dataset_chunk, reference_chunk, cols_to_keep, metadata, ranges):
     full_dataset = dataset_chunk.merge(reference_chunk, how='cross', suffixes=('_data', '_ref'))
+    metadata_columns = get_columns_from_metadata(metadata)
 
     for col_name in cols_to_keep:
-        sdtype = metadata['columns'][col_name]['sdtype']
+        sdtype = metadata_columns[col_name]['sdtype']
         ref_column = full_dataset[col_name + '_ref']
         data_column = full_dataset[col_name + '_data']
         diff_col_name = col_name + '_diff'

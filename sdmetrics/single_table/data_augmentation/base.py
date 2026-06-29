@@ -107,12 +107,13 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         boolean_columns = []
         datetime_columns = []
         data_columns = data.columns
-        metadata_columns = metadata['columns'].keys()
-        common_columns = set(data_columns).intersection(metadata_columns)
+        metadata_columns = get_columns_from_metadata(metadata)
+        common_columns = set(data_columns).intersection(metadata_columns.keys())
         for column in sorted(common_columns):
             if column == prediction_column_name:
                 continue
-            column_meta = metadata['columns'][column]
+
+            column_meta = metadata_columns[column]
             column_sdtype = column_meta['sdtype']
             if column_sdtype == 'categorical':
                 categorical_columns.append(column)

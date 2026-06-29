@@ -125,7 +125,8 @@ def _validate_data_and_metadata(
             ' Please update your metadata.'
         )
 
-    column_sdtype = metadata['columns'][prediction_column_name].get('sdtype')
+    metadata_columns = get_columns_from_metadata(metadata)
+    column_sdtype = metadata_columns[prediction_column_name].get('sdtype')
     if column_sdtype not in ('categorical', 'boolean'):
         raise ValueError(
             f'The column `{prediction_column_name}` must be either categorical or boolean.'

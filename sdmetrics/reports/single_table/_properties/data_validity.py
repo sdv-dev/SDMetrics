@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
+from sdmetrics.utils import get_alternate_keys, get_columns_from_metadata, get_sequence_index, get_primary_key_from_metadata
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.single_column import BoundaryAdherence, CategoryAdherence, KeyUniqueness
@@ -38,18 +39,22 @@ class DataValidity(BaseSingleTableProperty):
             progress_bar (tqdm.tqdm or None):
                 The progress bar to use. Defaults to None.
         """
+        columns_meta = get_columns_from_metadata(metadata)
         column_names, metric_names, scores = [], [], []
-        column_sdtypes = [(col, metadata['columns'][col]['sdtype']) for col in metadata['columns']]
+        column_sdtypes = [
+            (col_name, col_meta['sdtype'])
+            for col_name, col_meta in columns_meta.items()
+        ]
         error_messages = []
-        primary_key = metadata.get('primary_key')
+        primary_key = get_primary_key_from_metadata(metadata)
         if isinstance(primary_key, list):
             if len(primary_key) > 1:
                 column_sdtypes = [(primary_key, None)] + column_sdtypes
             else:
                 primary_key = primary_key[0]
 
-        alternate_keys = metadata.get('alternate_keys', [])
-        sequence_index = metadata.get('sequence_index')
+        alternate_keys = get_alternate_keys(metadata)
+        sequence_index = get_sequence_index(metadata)
 
         for column_name, sdtype in column_sdtypes:
             primary_key_match = column_name == primary_key

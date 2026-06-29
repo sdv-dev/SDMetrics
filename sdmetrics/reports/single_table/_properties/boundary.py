@@ -5,6 +5,7 @@ import plotly.express as px
 from sdmetrics.errors import InvalidDataError
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.single_column import BoundaryAdherence
+from sdmetrics.utils import get_table_data_from_dict, get_columns_from_metadata
 
 
 class Boundary(BaseSingleTableProperty):
@@ -37,8 +38,11 @@ class Boundary(BaseSingleTableProperty):
         """
         column_names, metric_names, scores = [], [], []
         error_messages = []
-        for column_name in metadata['columns']:
-            sdtype = metadata['columns'][column_name]['sdtype']
+        real_data = get_table_data_from_dict(real_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
+
+        for column_name, column_meta in get_columns_from_metadata(metadata).items():
+            sdtype = column_meta['sdtype']
             error_message = None
             try:
                 if sdtype in ('numerical', 'datetime'):

@@ -3,10 +3,10 @@
 import copy
 from operator import attrgetter
 
-from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata
+from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata, _validate_columns_exist_in_single_table_metadata
 from sdmetrics.base import BaseMetric
 from sdmetrics.errors import IncomputableMetricError
-from sdmetrics.utils import get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta
+from sdmetrics.utils import get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta, get_table_data_from_dict, get_primary_key_from_metadata
 
 
 class SingleTableMetric(BaseMetric):
@@ -61,7 +61,7 @@ class SingleTableMetric(BaseMetric):
         if isinstance(types, str):
             types = (types,)
 
-        primary_key = metadata.get('primary_key', '')
+        primary_key = get_primary_key_from_metadata(metadata)
         alternate_keys = get_alternate_keys(metadata)
 
         for field_name, field_meta in get_columns_from_metadata(metadata).items():
@@ -98,16 +98,18 @@ class SingleTableMetric(BaseMetric):
             (pandas.DataFrame, pandas.DataFrame, dict):
                 The validated data and metadata.
         """
-        real_data = real_data.copy()
-        synthetic_data = synthetic_data.copy()
-        if metadata is not None:
-            metadata = copy.deepcopy(metadata)
-
+        real_data = get_table_data_from_dict(real_data).copy()
+        synthetic_data = get_table_data_from_dict(synthetic_data).copy()
         if set(real_data.columns) != set(synthetic_data.columns):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 
         if metadata is not None:
-            _validate_metadata(metadata)
+            metadata = copy.deepcopy(metadata)
+            if 'tables' not in metadata:
+                _validate_columns_exist_in_single_table_metadata(metadata)
+            else:
+                _validate_metadata(metadata)
+
             fields = get_columns_from_metadata(metadata)
             for column in real_data.columns:
                 if column not in fields:
@@ -131,7 +133,11 @@ class SingleTableMetric(BaseMetric):
             real_data,
             synthetic_data,
             {
-                'columns': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
+                'tables': {
+                    'table': {
+                        'columns': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict(),
+                    }
+                },
             },
         )
 

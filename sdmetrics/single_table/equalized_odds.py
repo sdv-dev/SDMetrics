@@ -17,6 +17,7 @@ from sdmetrics.single_table.utils import (
     _validate_tables,
     _process_data_with_metadata_ml_efficacy_metrics,
 )
+from sdmetrics.utils import get_columns_from_metadata
 
 
 class EqualizedOddsImprovement(SingleTableMetric):
@@ -93,7 +94,7 @@ class EqualizedOddsImprovement(SingleTableMetric):
             ).astype(int)
 
         # Handle categorical columns for XGBoost
-        for column, column_meta in metadata['columns'].items():
+        for column, column_meta in get_columns_from_metadata(metadata).items():
             if (
                 column in data.columns
                 and column_meta.get('sdtype') in ['categorical', 'boolean']

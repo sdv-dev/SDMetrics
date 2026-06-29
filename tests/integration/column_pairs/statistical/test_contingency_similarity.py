@@ -12,8 +12,8 @@ def test_with_num_rows_subsample():
     # Setup
     np.random.seed(42)
     real_data, synthetic_data, _ = load_demo('single_table')
-    real_data = real_data[['degree_type', 'high_spec']]
-    synthetic_data = synthetic_data[['degree_type', 'high_spec']]
+    real_data = real_data['student_placements'][['degree_type', 'high_spec']]
+    synthetic_data = synthetic_data['student_placements'][['degree_type', 'high_spec']]
     num_rows_subsample = 100
 
     # Run

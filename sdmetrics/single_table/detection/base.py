@@ -9,7 +9,7 @@ from sklearn.model_selection import StratifiedKFold
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.utils import HyperTransformer, get_alternate_keys
+from sdmetrics.utils import HyperTransformer, get_alternate_keys, get_primary_key_from_metadata, get_columns_from_metadata
 
 LOGGER = logging.getLogger(__name__)
 
@@ -52,21 +52,20 @@ class DetectionMetric(SingleTableMetric):
         if metadata is not None:
             drop_columns = []
             drop_columns.extend(get_alternate_keys(metadata))
-            for column in metadata.get('columns', []):
-                if 'primary_key' in metadata and (
-                    column == metadata['primary_key'] or column in metadata['primary_key']
-                ):
+            primary_key = get_primary_key_from_metadata(metadata)
+            for column, column_meta in get_columns_from_metadata(metadata).items():
+                if column == primary_key or column in primary_key:
                     drop_columns.append(column)
 
-                column_info = metadata['columns'].get(column, {})
-                sdtype = column_info.get('sdtype')
-                pii = column_info.get('pii')
+                sdtype = column_meta.get('sdtype')
+                pii = column_meta.get('pii')
                 if sdtype not in ['numerical', 'datetime', 'categorical'] or pii:
                     drop_columns.append(column)
 
             if drop_columns:
                 transformed_real_data = real_data.drop(drop_columns, axis=1)
                 transformed_synthetic_data = synthetic_data.drop(drop_columns, axis=1)
+
         return transformed_real_data, transformed_synthetic_data
 
     @classmethod
@@ -120,6 +119,7 @@ class DetectionMetric(SingleTableMetric):
                 scores.append(max(0.5, roc_auc) * 2 - 1)
 
             return 1 - np.mean(scores)
+
         except ValueError as err:
             raise IncomputableMetricError(f'DetectionMetric: Unable to be fit with error {err}')
 

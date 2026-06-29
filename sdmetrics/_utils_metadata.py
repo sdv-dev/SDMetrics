@@ -35,6 +35,7 @@ def _validate_metadata(metadata):
             "Metadata must include a 'tables' key that maps table names"
             ' to their respective metadata.'
         )
+
     for table_name, table_metadata in metadata['tables'].items():
         try:
             _validate_columns_exist_in_single_table_metadata(table_metadata)

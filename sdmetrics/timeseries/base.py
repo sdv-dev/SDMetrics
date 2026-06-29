@@ -51,16 +51,16 @@ class TimeSeriesMetric(BaseMetric):
 
         if metadata is not None:
             _validate_metadata_dict(metadata)
-            fields = get_columns_from_metadata(metadata)
+            columns_from_metadata = get_columns_from_metadata(metadata)
             for column in real_data.columns:
-                if column not in fields:
+                if column not in columns_from_metadata:
                     raise ValueError(f'Column {column} not found in metadata')
 
             for field in fields.keys():
                 if field not in real_data.columns:
                     raise ValueError(f'Field {field} not found in data')
 
-            for column, col_metadata in metadata['columns'].items():
+            for column, col_metadata in columns_from_metadata.items():
                 if col_metadata['sdtype'] == 'datetime':
                     real_data[column] = _convert_datetime_column(
                         column, real_data[column], col_metadata
