@@ -1,13 +1,29 @@
+from copy import deepcopy
+
 import pytest
 
 from sdmetrics.demos import load_demo
 
 
 @pytest.fixture(scope='module')
+def single_table_demo_data_and_metadata():
+    real_data, synthetic_data, metadata = load_demo(modality='single_table')
+    return (
+        deepcopy(real_data['student_placements']),
+        deepcopy(synthetic_data['student_placements']),
+        deepcopy(metadata)
+    )
+
+
+@pytest.fixture(scope='module')
 def composite_keys_single_table_demo():
     real_data, synthetic_data, metadata = load_demo(modality='single_table')
-    metadata['primary_key'] = ['student_id', 'degree_type']
-    return real_data, synthetic_data, metadata
+    metadata['tables']['student_placements']['primary_key'] = ['student_id', 'degree_type']
+    return (
+        deepcopy(real_data['student_placements']),
+        deepcopy(synthetic_data['student_placements']),
+        deepcopy(metadata)
+    )
 
 
 @pytest.fixture(scope='module')

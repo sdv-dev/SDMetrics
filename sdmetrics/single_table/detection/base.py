@@ -9,7 +9,12 @@ from sklearn.model_selection import StratifiedKFold
 from sdmetrics.errors import IncomputableMetricError
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
-from sdmetrics.utils import HyperTransformer, get_alternate_keys, get_primary_key_from_metadata, get_columns_from_metadata
+from sdmetrics.utils import (
+    HyperTransformer,
+    get_alternate_keys,
+    get_columns_from_metadata,
+    get_primary_key_from_metadata,
+)
 
 LOGGER = logging.getLogger(__name__)
 

@@ -31,10 +31,8 @@ def _validate_metadata(metadata):
     """Validate the metadata."""
     _validate_metadata_dict(metadata)
     if 'tables' not in metadata:
-        raise ValueError(
-            "Metadata must include a 'tables' key that maps table names"
-            ' to their respective metadata.'
-        )
+        _validate_columns_exist_in_single_table_metadata(metadata)
+        return
 
     for table_name, table_metadata in metadata['tables'].items():
         try:

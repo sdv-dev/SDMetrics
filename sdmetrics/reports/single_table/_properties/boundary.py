@@ -5,7 +5,7 @@ import plotly.express as px
 from sdmetrics.errors import InvalidDataError
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.single_column import BoundaryAdherence
-from sdmetrics.utils import get_table_data_from_dict, get_columns_from_metadata
+from sdmetrics.utils import get_columns_from_metadata, get_table_data_from_dict
 
 
 class Boundary(BaseSingleTableProperty):

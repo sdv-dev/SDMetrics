@@ -2,10 +2,15 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
-from sdmetrics.utils import get_alternate_keys, get_columns_from_metadata, get_sequence_index, get_primary_key_from_metadata
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.single_column import BoundaryAdherence, CategoryAdherence, KeyUniqueness
+from sdmetrics.utils import (
+    get_alternate_keys,
+    get_columns_from_metadata,
+    get_primary_key_from_metadata,
+    get_sequence_index,
+)
 
 
 class DataValidity(BaseSingleTableProperty):

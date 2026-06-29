@@ -3,10 +3,20 @@
 import copy
 from operator import attrgetter
 
-from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata, _validate_columns_exist_in_single_table_metadata
+from sdmetrics._utils_metadata import (
+    _convert_datetime_column,
+    _validate_columns_exist_in_single_table_metadata,
+    _validate_metadata,
+)
 from sdmetrics.base import BaseMetric
 from sdmetrics.errors import IncomputableMetricError
-from sdmetrics.utils import get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta, get_table_data_from_dict, get_primary_key_from_metadata
+from sdmetrics.utils import (
+    get_alternate_keys,
+    get_columns_from_metadata,
+    get_primary_key_from_metadata,
+    get_table_data_from_dict,
+    get_type_from_column_meta,
+)
 
 
 class SingleTableMetric(BaseMetric):
