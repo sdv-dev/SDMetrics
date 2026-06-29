@@ -1,21 +1,35 @@
 import re
+import sys
 
 import pytest
 
-from sdmetrics.reports.single_table import QualityReport
 from sdmetrics.reports.single_table._properties import ColumnPairTrends, ColumnShapes
 
 
 class TestQualityReport:
-    def test___init__(self):
-        """Test the ``__init__`` method."""
-        # Run
+    def test_warns_on_import(self):
+        """Test that importing the deprecated report produces a warning."""
+        # Setup
         expected_warning = re.escape(
             'The single table quality report is deprecated. Please use the QualityReport '
             "from 'sdmetrics.reports' instead."
         )
+        sys.modules.pop('sdmetrics.reports.single_table.quality_report', None)
+
+        # Run and Assert
         with pytest.warns(FutureWarning, match=expected_warning):
-            report = QualityReport()
+            from sdmetrics.reports.single_table import QualityReport
+        assert QualityReport.__name__ == 'QualityReport'
+
+    @pytest.mark.filterwarnings(
+        'ignore:The single table quality report is deprecated:FutureWarning'
+    )
+    def test___init__(self):
+        """Test the ``__init__`` method."""
+        # Run
+        from sdmetrics.reports.single_table import QualityReport
+
+        report = QualityReport()
 
         # Assert
         assert report._overall_score is None

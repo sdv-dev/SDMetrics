@@ -13,6 +13,8 @@ from sdmetrics.reports.utils import (
     _warn_deprecated_report,
 )
 
+_warn_deprecated_report('multi table quality', 'QualityReport')
+
 
 class QualityReport(BaseMultiTableReport):
     """Multi table quality report.
@@ -22,7 +24,6 @@ class QualityReport(BaseMultiTableReport):
     """
 
     def __init__(self):
-        _warn_deprecated_report('multi table quality', 'QualityReport')
         super().__init__()
         self.real_correlation_threshold = DEFAULT_REAL_CORRELATION_THRESHOLD
         self.real_association_threshold = DEFAULT_REAL_ASSOCIATION_THRESHOLD

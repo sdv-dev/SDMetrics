@@ -4,6 +4,8 @@ from sdmetrics.reports.multi_table._properties import DataValidity, Relationship
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
 from sdmetrics.reports.utils import _warn_deprecated_report
 
+_warn_deprecated_report('multi table diagnostic', 'DiagnosticReport')
+
 
 class DiagnosticReport(BaseMultiTableReport):
     """Multi table diagnostic report.
@@ -13,7 +15,6 @@ class DiagnosticReport(BaseMultiTableReport):
     """
 
     def __init__(self):
-        _warn_deprecated_report('multi table diagnostic', 'DiagnosticReport')
         super().__init__()
         self._properties = {
             'Data Validity': DataValidity(),
