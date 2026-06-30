@@ -9,7 +9,7 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
 from sdmetrics.single_table.privacy.util import validate_num_samples_num_iteration
-from sdmetrics.utils import is_datetime
+from sdmetrics.utils import is_datetime, get_table_data_from_dict
 
 
 class DCRBaselineProtection(SingleTableMetric):
@@ -87,6 +87,8 @@ class DCRBaselineProtection(SingleTableMetric):
                 and the median DCR score between the random data and real data.
                 Averages of the medians are returned in the case of multiple iterations.
         """
+        real_data = get_table_data_from_dict(real_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
         num_rows_subsample, num_iterations = cls._validate_inputs(
             real_data,
             synthetic_data,

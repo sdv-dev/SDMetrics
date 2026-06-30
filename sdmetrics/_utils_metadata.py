@@ -2,7 +2,7 @@ import warnings
 
 import pandas as pd
 
-from sdmetrics.utils import is_datetime, get_columns_from_metadata
+from sdmetrics.utils import get_columns_from_metadata, is_datetime
 
 MODELABLE_SDTYPES = ('numerical', 'datetime', 'categorical', 'boolean')
 
@@ -111,9 +111,7 @@ def _remove_missing_columns_metadata(data, metadata):
 
     data = data.drop(columns=columns_to_remove)
     column_intersection = [
-        column
-        for column in data.columns
-        if column in get_columns_from_metadata(metadata)
+        column for column in data.columns if column in get_columns_from_metadata(metadata)
     ]
 
     return data[column_intersection]

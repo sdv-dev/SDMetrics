@@ -4,7 +4,7 @@ from operator import attrgetter
 
 from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata_dict
 from sdmetrics.base import BaseMetric
-from sdmetrics.utils import get_columns_from_metadata
+from sdmetrics.utils import get_columns_from_metadata, get_sequence_index
 
 
 class TimeSeriesMetric(BaseMetric):
@@ -73,7 +73,7 @@ class TimeSeriesMetric(BaseMetric):
             dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
             metadata = {'columns': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict()}
 
-        sequence_key = metadata.get('sequence_key', sequence_key or [])
+        sequence_key = sequence_key or get_sequence_index(metadata)
         sequence_key = [sequence_key] if not isinstance(sequence_key, list) else sequence_key
 
         return metadata, sequence_key
