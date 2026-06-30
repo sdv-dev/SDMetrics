@@ -370,7 +370,8 @@ def get_table_data_from_dict(data):
             The table data.
     """
     if isinstance(data, dict):
-        return data[list(data)[0]]
+        if len(list(data)) > 0:
+            return data[list(data)[0]]
 
     return data
 

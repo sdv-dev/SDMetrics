@@ -74,9 +74,13 @@ class TestSingleTableMetric:
 
         # Assert
         expected_metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'categorical'},
+            'tables': {
+                'table': {
+                    'columns': {
+                        'col1': {'sdtype': 'numerical'},
+                        'col2': {'sdtype': 'categorical'},
+                    },
+                },
             },
         }
         pd.testing.assert_frame_equal(real_data, validated_real)

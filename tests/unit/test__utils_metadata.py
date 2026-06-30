@@ -81,22 +81,6 @@ def test__validate_metadata_valid(metadata):
     [
         (
             {
-                'wrong_tables': {
-                    'table1': {
-                        'columns': {
-                            'numerical': {'sdtype': 'numerical'},
-                            'categorical': {'sdtype': 'categorical'},
-                        }
-                    },
-                }
-            },
-            re.escape(
-                "Metadata must include a 'tables' key that maps table names to"
-                ' their respective metadata.'
-            ),
-        ),
-        (
-            {
                 'tables': {
                     'table1': {
                         'columns': {
