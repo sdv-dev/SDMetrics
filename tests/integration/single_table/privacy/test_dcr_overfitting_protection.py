@@ -6,9 +6,9 @@ import pandas as pd
 import pytest
 from sklearn.model_selection import train_test_split
 
-from sdmetrics.utils import get_table_data_from_dict
 from sdmetrics.demos import load_single_table_demo
 from sdmetrics.single_table.privacy import DCROverfittingProtection
+from sdmetrics.utils import get_table_data_from_dict
 
 
 class TestDCROverfittingProtection:

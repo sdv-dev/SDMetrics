@@ -1,8 +1,8 @@
 import pytest
 
 from sdmetrics import load_demo
-from sdmetrics.utils import get_table_data_from_dict
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
+from sdmetrics.utils import get_table_data_from_dict
 
 METRICS = [LogisticDetection, SVCDetection]
 

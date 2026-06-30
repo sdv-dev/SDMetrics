@@ -5,11 +5,11 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from sdmetrics.utils import get_table_data_from_dict
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
 from sdmetrics.single_table.privacy.util import validate_num_samples_num_iteration
+from sdmetrics.utils import get_table_data_from_dict
 
 
 class DCROverfittingProtection(SingleTableMetric):
