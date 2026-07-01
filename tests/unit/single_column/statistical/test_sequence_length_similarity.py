@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from sdmetrics.single_column import SequenceLengthSimilarity
 
@@ -28,7 +29,7 @@ class TestSequenceLengthSimilarity:
         score = SequenceLengthSimilarity.compute(real_data, synthetic_data)
 
         # Assert
-        assert score == 0.6666666666666667
+        assert score == pytest.approx(2 / 3)
 
     def test_compute_one(self):
         """Test it returns 1 when real and synthetic data have the same distribution."""
