@@ -41,6 +41,18 @@ def _validate_metadata(metadata):
             raise ValueError(f"Error in table '{table_name}': {str(e)}")
 
 
+def _validate_unified_metadata(metadata):
+    """Validate the unified metadata object."""
+    _validate_metadata_dict(metadata)
+    if 'tables' not in metadata:
+        raise ValueError(
+            "Metadata must include a 'tables' key that maps table names"
+            ' to their respective metadata.'
+        )
+
+    _validate_metadata(metadata)
+
+
 def handle_single_and_multi_table(single_table_func):
     """Decorator to handle both single and multi table functions."""
 

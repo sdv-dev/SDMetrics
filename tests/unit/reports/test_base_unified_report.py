@@ -166,7 +166,7 @@ class TestBaseUnifiedReport:
         # Assert
         assert base_report.table_names == ['table1', 'table2']
 
-    @patch('sdmetrics.reports.base_unified_report._validate_metadata')
+    @patch('sdmetrics.reports.base_unified_report._validate_unified_metadata')
     def test__validate_metadata_error(self, mock__validate_metadata):
         """Test the ``_validate`` method when metadata validation fails."""
         # Setup

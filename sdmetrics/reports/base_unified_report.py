@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from sdmetrics._utils_metadata import _validate_metadata
+from sdmetrics._utils_metadata import _validate_unified_metadata
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
 
 
@@ -53,7 +53,7 @@ class BaseUnifiedReport(BaseMultiTableReport):
             metadata (dict):
                 The metadata.
         """
-        _validate_metadata(metadata)
+        _validate_unified_metadata(metadata)
         self.table_names = list(metadata.get('tables', []))
         self._validate_data_format(real_data, synthetic_data)
         self._validate_metadata_matches_data(

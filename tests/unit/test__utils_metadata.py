@@ -13,6 +13,7 @@ from sdmetrics._utils_metadata import (
     _remove_non_modelable_columns,
     _validate_metadata,
     _validate_metadata_dict,
+    _validate_unified_metadata,
 )
 
 
@@ -338,3 +339,13 @@ def test__process_data_with_metadata(
 
     _process_data_with_metadata(data, metadata, keep_modelable_columns_only=True)
     mock_remove_non_modelable_columns.assert_called_once_with(data, metadata)
+
+
+def test__validate_unified_metadata_requires_tables_key():
+    """Validate that the unified metadata object must include tables."""
+    # Setup
+    metadata = {}
+
+    # Assert
+    with pytest.raises(ValueError, match="Metadata must include a 'tables' key"):
+        _validate_unified_metadata(metadata)
