@@ -93,6 +93,7 @@ class TestQualityReport:
         metadata['tables']['student_placements']['columns'] = {
             key: val for key, val in table_meta.items() if key in column_names
         }
+        metadata = metadata['tables']['student_placements']
         report = QualityReport()
         _set_thresholds_zero(report)
         report.num_rows_subsample = None

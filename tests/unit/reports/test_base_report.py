@@ -551,14 +551,7 @@ class TestBaseReport:
         real_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
         synthetic_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
         metadata = {
-            'tables': {
-                'table': {
-                    'columns': {
-                        'column1': {'sdtype': 'numerical'},
-                        'column2': {'sdtype': 'categorical'},
-                    }
-                }
-            }
+            'columns': {'column1': {'sdtype': 'numerical'}, 'column2': {'sdtype': 'categorical'}}
         }
 
         # Run

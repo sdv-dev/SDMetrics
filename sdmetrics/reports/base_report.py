@@ -138,7 +138,7 @@ class BaseReport:
         self.convert_datetimes(real_data, synthetic_data, metadata)
 
         self.report_info['generated_date'] = datetime.today().strftime('%Y-%m-%d')
-        if len(metadata.get('tables', [])) > 1:
+        if 'tables' in metadata:
             self.report_info['num_tables'] = len(metadata['tables'])
             self.report_info['num_rows_real_data'] = {
                 name: len(table) for name, table in real_data.items()

@@ -2,7 +2,6 @@ from datetime import date, datetime
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from sdmetrics.demos import load_multi_table_demo, load_single_table_demo
 from sdmetrics.reports import DiagnosticReport, QualityReport
@@ -102,51 +101,13 @@ def _load_quality_report_data():
     return real_data, synthetic_data, metadata
 
 
-@pytest.fixture()
-def single_table_demo():
-    real_data, synthetic_data, _ = load_single_table_demo()
-    # TEMPORARY
-    metadata = {
-        'tables': {
-            'table': {
-                'primary_key': 'student_id',
-                'columns': {
-                    'start_date': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-                    'end_date': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-                    'salary': {'sdtype': 'numerical', 'computer_representation': 'Int64'},
-                    'duration': {'sdtype': 'numerical', 'computer_representation': 'Int64'},
-                    'student_id': {'sdtype': 'id', 'regex_format': '\\d{30}'},
-                    'high_perc': {'sdtype': 'numerical', 'computer_representation': 'Float'},
-                    'high_spec': {'sdtype': 'categorical'},
-                    'mba_spec': {'sdtype': 'categorical'},
-                    'second_perc': {'sdtype': 'numerical', 'computer_representation': 'Float'},
-                    'gender': {'sdtype': 'categorical'},
-                    'degree_perc': {'sdtype': 'numerical', 'computer_representation': 'Float'},
-                    'placed': {'sdtype': 'boolean'},
-                    'experience_years': {'sdtype': 'numerical', 'computer_representation': 'Float'},
-                    'employability_perc': {
-                        'sdtype': 'numerical',
-                        'computer_representation': 'Float',
-                    },
-                    'mba_perc': {'sdtype': 'numerical', 'computer_representation': 'Float'},
-                    'work_experience': {'sdtype': 'boolean'},
-                    'degree_type': {'sdtype': 'categorical'},
-                },
-            }
-        },
-        'relationships': [],
-        'METADATA_SPEC_VERSION': 'V1',
-    }
-    return real_data, synthetic_data, metadata
-
-
-def test_unified_diagnostic_report_single_table(single_table_demo):
+def test_unified_diagnostic_report_single_table():
     # Setup
-    real_data, synthetic_data, metadata = single_table_demo
+    real_data, synthetic_data, metadata = load_single_table_demo()
 
     # Run
     report = DiagnosticReport()
-    report.generate({'table': real_data}, {'table': synthetic_data}, metadata, verbose=False)
+    report.generate(real_data, synthetic_data, metadata, verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
@@ -154,7 +115,7 @@ def test_unified_diagnostic_report_single_table(single_table_demo):
         'Score': [1.0, 1.0, float('nan')],
     })
     expected_details_data_validity = pd.DataFrame({
-        'Table': ['table'] * 17,
+        'Table': ['student_placements'] * 17,
         'Column': [
             'start_date',
             'end_date',
@@ -196,7 +157,7 @@ def test_unified_diagnostic_report_single_table(single_table_demo):
         'Score': [1.0] * 17,
     })
     expected_details_data_structure = pd.DataFrame({
-        'Table': ['table'],
+        'Table': ['student_placements'],
         'Metric': ['TableStructure'],
         'Score': [1.0],
     })
@@ -218,16 +179,18 @@ def test_unified_diagnostic_report_single_table(single_table_demo):
         check_index_type=False,
     )
     assert report.get_score() == 1.0
-    _assert_report_info(report, 'DiagnosticReport', {'table': 215}, {'table': 215})
+    _assert_report_info(
+        report, 'DiagnosticReport', {'student_placements': 215}, {'student_placements': 215}
+    )
 
 
-def test_unified_quality_report_single_table(single_table_demo):
+def test_unified_quality_report_single_table():
     # Setup
-    real_data, synthetic_data, metadata = single_table_demo
+    real_data, synthetic_data, metadata = load_single_table_demo()
     column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
-    metadata['tables']['table']['columns'] = {
+    metadata['tables']['student_placements']['columns'] = {
         key: val
-        for key, val in metadata['tables']['table']['columns'].items()
+        for key, val in metadata['tables']['student_placements']['columns'].items()
         if key in column_names
     }
 
@@ -236,8 +199,8 @@ def test_unified_quality_report_single_table(single_table_demo):
     _set_thresholds_zero(report)
     report.num_rows_subsample = None
     report.generate(
-        {'table': real_data[column_names]},
-        {'table': synthetic_data[column_names]},
+        {'student_placements': real_data['student_placements'][column_names]},
+        {'student_placements': synthetic_data['student_placements'][column_names]},
         metadata,
         verbose=False,
     )
@@ -248,7 +211,12 @@ def test_unified_quality_report_single_table(single_table_demo):
         'Score': [0.8736798729642614, 0.805070155812896, np.nan, np.nan],
     })
     expected_details_column_shapes = pd.DataFrame({
-        'Table': ['table', 'table', 'table', 'table'],
+        'Table': [
+            'student_placements',
+            'student_placements',
+            'student_placements',
+            'student_placements',
+        ],
         'Column': ['start_date', 'second_perc', 'work_experience', 'degree_type'],
         'Metric': ['KSComplement', 'KSComplement', 'TVComplement', 'TVComplement'],
         'Score': [
@@ -259,7 +227,7 @@ def test_unified_quality_report_single_table(single_table_demo):
         ],
     })
     expected_details_cpt = pd.DataFrame({
-        'Table': ['table'] * 6,
+        'Table': ['student_placements'] * 6,
         'Column 1': [
             'start_date',
             'start_date',
@@ -326,7 +294,9 @@ def test_unified_quality_report_single_table(single_table_demo):
     assert report.get_score() == 0.8393750143888287
     assert report._properties['Column Shapes'].num_rows_subsample is None
     assert report._properties['Column Pair Trends'].num_rows_subsample is None
-    _assert_report_info(report, 'QualityReport', {'table': 215}, {'table': 215})
+    _assert_report_info(
+        report, 'QualityReport', {'student_placements': 215}, {'student_placements': 215}
+    )
 
 
 def test_unified_diagnostic_report_multi_table():
