@@ -101,6 +101,23 @@ def _load_quality_report_data():
     return real_data, synthetic_data, metadata
 
 
+def _load_single_table_quality_report_data():
+    """Load a small single-table dataset for quality report tests."""
+    real_data, synthetic_data, metadata = load_single_table_demo()
+    column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
+    metadata['tables']['student_placements']['columns'] = {
+        key: val
+        for key, val in metadata['tables']['student_placements']['columns'].items()
+        if key in column_names
+    }
+
+    return (
+        {'student_placements': real_data['student_placements'][column_names]},
+        {'student_placements': synthetic_data['student_placements'][column_names]},
+        metadata,
+    )
+
+
 def test_unified_diagnostic_report_single_table():
     # Setup
     real_data, synthetic_data, metadata = load_single_table_demo()
@@ -183,7 +200,7 @@ def test_unified_diagnostic_report_single_table():
 
 
 def test_unified_diagnostic_report_single_table_verbose_skips_relationship_validity(capsys):
-    """Test verbose mode skips Relationship Validity for single-table unified data."""
+    """Test verbose mode skips Relationship Validity for single-table unified data (diagnostic)."""
     # Setup
     real_data, synthetic_data, metadata = load_single_table_demo()
 
@@ -214,24 +231,13 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
 
 def test_unified_quality_report_single_table():
     # Setup
-    real_data, synthetic_data, metadata = load_single_table_demo()
-    column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
-    metadata['tables']['student_placements']['columns'] = {
-        key: val
-        for key, val in metadata['tables']['student_placements']['columns'].items()
-        if key in column_names
-    }
+    real_data, synthetic_data, metadata = _load_single_table_quality_report_data()
 
     # Run
     report = QualityReport()
     _set_thresholds_zero(report)
     report.num_rows_subsample = None
-    report.generate(
-        {'student_placements': real_data['student_placements'][column_names]},
-        {'student_placements': synthetic_data['student_placements'][column_names]},
-        metadata,
-        verbose=False,
-    )
+    report.generate(real_data, synthetic_data, metadata, verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
@@ -326,26 +332,15 @@ def test_unified_quality_report_single_table():
 
 
 def test_unified_quality_report_single_table_verbose_skips_relationship_properties(capsys):
-    """Test verbose mode skips relationship-only quality properties for single-table data."""
+    """Test verbose mode skips Relationship Validity for single-table unified data (quality)."""
     # Setup
-    real_data, synthetic_data, metadata = load_single_table_demo()
-    column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
-    metadata['tables']['student_placements']['columns'] = {
-        key: val
-        for key, val in metadata['tables']['student_placements']['columns'].items()
-        if key in column_names
-    }
+    real_data, synthetic_data, metadata = _load_single_table_quality_report_data()
 
     # Run
     report = QualityReport()
     _set_thresholds_zero(report)
     report.num_rows_subsample = None
-    report.generate(
-        {'student_placements': real_data['student_placements'][column_names]},
-        {'student_placements': synthetic_data['student_placements'][column_names]},
-        metadata,
-        verbose=True,
-    )
+    report.generate(real_data, synthetic_data, metadata, verbose=True)
     output = capsys.readouterr().out
 
     # Assert
@@ -462,28 +457,6 @@ def test_unified_diagnostic_report_multi_table():
     )
 
 
-def test_unified_diagnostic_report_multi_table_with_no_relationships_does_not_skip_properties():
-    """Test multi-table diagnostic reports do not skip properties when relationships are absent."""
-    # Setup
-    real_data, synthetic_data, metadata = _load_quality_report_data()
-    del metadata['relationships']
-
-    # Run
-    report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, verbose=False)
-    properties = report.get_properties()
-
-    # Assert
-    assert list(properties['Property']) == [
-        'Data Validity',
-        'Data Structure',
-        'Relationship Validity',
-    ]
-    assert pd.isna(
-        properties.loc[properties['Property'] == 'Relationship Validity', 'Score'].iloc[0]
-    )
-
-
 def test_unified_quality_report_multi_table():
     # Setup
     real_data, synthetic_data, metadata = _load_quality_report_data()
@@ -592,8 +565,30 @@ def test_unified_quality_report_multi_table():
     )
 
 
+def test_unified_diagnostic_report_multi_table_with_no_relationships_does_not_skip_properties():
+    """Test multi-table diagnostic reports do not skip properties (2 tables, no relationships)."""
+    # Setup
+    real_data, synthetic_data, metadata = _load_quality_report_data()
+    del metadata['relationships']
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, verbose=False)
+    properties = report.get_properties()
+
+    # Assert
+    assert list(properties['Property']) == [
+        'Data Validity',
+        'Data Structure',
+        'Relationship Validity',
+    ]
+    assert pd.isna(
+        properties.loc[properties['Property'] == 'Relationship Validity', 'Score'].iloc[0]
+    )
+
+
 def test_unified_quality_report_multi_table_with_no_relationships_does_not_skip_properties():
-    """Test multi-table quality reports do not skip properties when relationships are absent."""
+    """Test multi-table quality reports do not skip properties (2 tables, no relationships)."""
     # Setup
     real_data, synthetic_data, metadata = _load_quality_report_data()
     del metadata['relationships']
