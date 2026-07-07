@@ -128,8 +128,8 @@ def test_unified_diagnostic_report_single_table():
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Data Validity', 'Data Structure'],
-        'Score': [1.0, 1.0],
+        'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
+        'Score': [1.0, 1.0, float('nan')],
     })
     expected_details_data_validity = pd.DataFrame({
         'Table': ['student_placements'] * 17,
@@ -211,8 +211,8 @@ def test_unified_quality_report_single_table():
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Column Shapes', 'Column Pair Trends'],
-        'Score': [0.8736798729642614, 0.805070155812896],
+        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
+        'Score': [0.8736798729642614, 0.805070155812896, np.nan, np.nan],
     })
     expected_details_column_shapes = pd.DataFrame({
         'Table': [
@@ -325,7 +325,11 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
     for line in expected_lines:
         assert line in output
 
-    assert list(report.get_properties()['Property']) == ['Data Validity', 'Data Structure']
+    assert list(report.get_properties()['Property']) == [
+        'Data Validity',
+        'Data Structure',
+        'Relationship Validity',
+    ]
     assert report.get_score() == 1.0
 
 
@@ -357,7 +361,12 @@ def test_unified_quality_report_single_table_verbose_skips_relationship_properti
         assert line in output
 
     assert output.count('This property does not apply to single-table data.') == 2
-    assert list(report.get_properties()['Property']) == ['Column Shapes', 'Column Pair Trends']
+    assert list(report.get_properties()['Property']) == [
+        'Column Shapes',
+        'Column Pair Trends',
+        'Cardinality',
+        'Intertable Trends',
+    ]
     assert np.isclose(report.get_score(), 0.83, atol=0.01)
 
 

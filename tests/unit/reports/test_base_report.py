@@ -469,6 +469,7 @@ class TestBaseReport:
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 1'].details = pd.DataFrame({'old': [1]})
         base_report._properties['Property 1'].is_computed = True
+        base_report._properties['Property 1']._compute_average.return_value = float('nan')
         base_report._properties['Property 2'] = Mock()
         base_report._properties['Property 2'].get_score.return_value = 1.0
         base_report._properties['Property 2']._get_num_iterations.return_value = 3
@@ -502,8 +503,8 @@ class TestBaseReport:
         pd.testing.assert_frame_equal(
             base_report.get_properties(),
             pd.DataFrame({
-                'Property': ['Property 2'],
-                'Score': [1.0],
+                'Property': ['Property 1', 'Property 2'],
+                'Score': [float('nan'), 1.0],
             }),
         )
         base_report._print_results.assert_called_once_with(True)

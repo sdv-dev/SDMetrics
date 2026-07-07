@@ -267,11 +267,7 @@ class BaseReport:
         """
         self._check_report_generated()
         name, score = [], []
-        skipped_properties = getattr(self, '_skipped_properties', set())
         for property_name, property_instance in self._properties.items():
-            if property_name in skipped_properties:
-                continue
-
             name.append(property_name)
             score.append(property_instance._compute_average())
 
