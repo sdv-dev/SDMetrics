@@ -22,6 +22,7 @@ class TestBaseReport:
         assert base_report._overall_score is None
         assert not base_report.is_generated
         assert base_report._properties == {}
+        assert base_report._skipped_properties == set()
         assert base_report.num_rows_subsample == DEFAULT_NUM_ROWS_SUBSAMPLE
 
     def test__validate_data_format(self):
@@ -452,6 +453,59 @@ class TestBaseReport:
             call(total=6, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout),
         ]
         mock_tqdm.assert_has_calls(calls, any_order=True)
+        base_report._print_results.assert_called_once_with(True)
+
+    @patch('sys.stdout.write')
+    @patch('tqdm.tqdm')
+    def test_generate_verbose_with_skipped_property(self, mock_tqdm, mock_write):
+        """Test verbose generation when a property is skipped."""
+        # Setup
+        base_report = BaseReport()
+        base_report._validate = Mock()
+        base_report.convert_datetimes = Mock()
+        base_report._print_results = Mock()
+        base_report._skipped_properties = {'Old Property'}
+        base_report._get_skipped_properties = Mock(return_value={'Property 1'})
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 1'].details = pd.DataFrame({'old': [1]})
+        base_report._properties['Property 1'].is_computed = True
+        base_report._properties['Property 2'] = Mock()
+        base_report._properties['Property 2'].get_score.return_value = 1.0
+        base_report._properties['Property 2']._get_num_iterations.return_value = 3
+        base_report._properties['Property 2']._compute_average.return_value = 1.0
+
+        real_data = pd.DataFrame({'column1': [1, 2, 3]})
+        synthetic_data = pd.DataFrame({'column1': [1, 2, 3]})
+        metadata = {'columns': {'column1': {'sdtype': 'numerical'}}}
+
+        # Run
+        base_report.generate(real_data, synthetic_data, metadata, verbose=True)
+
+        # Assert
+        base_report._properties['Property 1'].get_score.assert_not_called()
+        base_report._properties['Property 1']._get_num_iterations.assert_not_called()
+        assert base_report._properties['Property 1'].details.empty
+        assert not base_report._properties['Property 1'].is_computed
+        assert base_report._skipped_properties == {'Property 1'}
+        base_report._get_skipped_properties.assert_called_once_with(metadata)
+        base_report._properties['Property 2'].get_score.assert_called_once_with(
+            real_data, synthetic_data, metadata, progress_bar=mock_tqdm.return_value
+        )
+        mock_write.assert_any_call('Generating report ...\n\n')
+        mock_write.assert_any_call(
+            '(1/2) Evaluating Property 1: N/A\nThis property was skipped.\n\n'
+        )
+        assert call('Property 1 Score: 50.0%\n\n') not in mock_write.call_args_list
+        mock_tqdm.assert_called_once_with(
+            total=3, bar_format='{desc}|{bar}{r_bar}|', file=sys.stdout
+        )
+        pd.testing.assert_frame_equal(
+            base_report.get_properties(),
+            pd.DataFrame({
+                'Property': ['Property 2'],
+                'Score': [1.0],
+            }),
+        )
         base_report._print_results.assert_called_once_with(True)
 
     def test__check_report_generated(self):

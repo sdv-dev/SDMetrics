@@ -166,6 +166,53 @@ class TestBaseUnifiedReport:
         # Assert
         assert base_report.table_names == ['table1', 'table2']
 
+    def test__get_skipped_properties_single_table(self):
+        """Test single-table unified data returns relationship properties."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        metadata = {
+            'tables': {
+                'table1': {
+                    'columns': {
+                        'column1': {'sdtype': 'numerical'},
+                    },
+                },
+            },
+            'relationships': [],
+        }
+
+        # Run
+        skipped_properties = base_report._get_skipped_properties(metadata)
+
+        # Assert
+        assert skipped_properties == {'Relationship Validity', 'Cardinality', 'Intertable Trends'}
+
+    def test__get_skipped_properties_multi_table(self):
+        """Test multi-table unified data does not skip relationship properties."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        metadata = {
+            'tables': {
+                'table1': {
+                    'columns': {
+                        'column1': {'sdtype': 'numerical'},
+                    },
+                },
+                'table2': {
+                    'columns': {
+                        'column2': {'sdtype': 'numerical'},
+                    },
+                },
+            },
+            'relationships': [],
+        }
+
+        # Run
+        skipped_properties = base_report._get_skipped_properties(metadata)
+
+        # Assert
+        assert skipped_properties == set()
+
     @patch('sdmetrics.reports.base_unified_report._validate_unified_metadata')
     def test__validate_metadata_error(self, mock__validate_metadata):
         """Test the ``_validate`` method when metadata validation fails."""

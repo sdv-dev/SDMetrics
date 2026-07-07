@@ -25,10 +25,13 @@ class BaseReport:
     This class creates a base report for single-table data.
     """
 
+    _skipped_property_message = 'This property was skipped.'
+
     def __init__(self):
         self._overall_score = None
         self.is_generated = False
         self._properties = {}
+        self._skipped_properties = set()
         self.num_rows_subsample = DEFAULT_NUM_ROWS_SUBSAMPLE
         self.report_info = {
             'report_type': self.__class__.__name__,
@@ -118,6 +121,19 @@ class BaseReport:
         if verbose:
             sys.stdout.write(f'Overall Score (Average): {round(self._overall_score * 100, 2)}%\n\n')
 
+    def _get_skipped_properties(self, metadata):
+        """Return properties that should not be computed for the metadata.
+
+        Args:
+            metadata (dict):
+                The metadata dict.
+
+        Returns:
+            set[str]:
+                Names of properties to skip.
+        """
+        return set()
+
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
 
@@ -135,6 +151,7 @@ class BaseReport:
                 Whether or not to print report summary and progress.
         """
         self._validate(real_data, synthetic_data, metadata)
+        self._skipped_properties = self._get_skipped_properties(metadata)
         self.convert_datetimes(real_data, synthetic_data, metadata)
 
         self.report_info['generated_date'] = datetime.today().strftime('%Y-%m-%d')
@@ -157,14 +174,24 @@ class BaseReport:
 
         start_time = time.time()
         for ind, (property_name, property_instance) in enumerate(self._properties.items()):
+            property_description = f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}'
+            if property_name in self._skipped_properties:
+                property_instance.is_computed = False
+                property_instance.details = pd.DataFrame()
+                if verbose:
+                    sys.stdout.write(
+                        f'{property_description}: N/A\n{self._skipped_property_message}\n\n'
+                    )
+                    sys.stdout.flush()
+
+                continue
+
             if verbose:
                 num_iterations = int(property_instance._get_num_iterations(metadata))
                 progress_bar = tqdm.tqdm(
                     total=num_iterations, file=sys.stdout, bar_format='{desc}|{bar}{r_bar}|'
                 )
-                progress_bar.set_description(
-                    f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}'
-                )
+                progress_bar.set_description(property_description)
 
             if hasattr(self, 'real_correlation_threshold') and hasattr(
                 property_instance, 'real_correlation_threshold'
@@ -181,7 +208,9 @@ class BaseReport:
             )
             scores.append(score)
             if verbose:
-                progress_bar.close()
+                if progress_bar is not None:
+                    progress_bar.close()
+                    progress_bar = None
                 sys.stdout.write(f'{property_name} Score: {round(score * 100, 2)}%\n\n')
                 sys.stdout.flush()
 
@@ -238,7 +267,11 @@ class BaseReport:
         """
         self._check_report_generated()
         name, score = [], []
+        skipped_properties = getattr(self, '_skipped_properties', set())
         for property_name, property_instance in self._properties.items():
+            if property_name in skipped_properties:
+                continue
+
             name.append(property_name)
             score.append(property_instance._compute_average())
 
