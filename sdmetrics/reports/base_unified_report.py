@@ -9,7 +9,7 @@ from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTable
 class BaseUnifiedReport(BaseMultiTableReport):
     """Base Unified Report for single-table and multi-table data."""
 
-    _single_table_skipped_properties = frozenset({
+    _SINGLE_TABLE_SKIPPED_PROPERTIES = frozenset({
         'Relationship Validity',
         'Cardinality',
         'Intertable Trends',
@@ -28,7 +28,7 @@ class BaseUnifiedReport(BaseMultiTableReport):
                 Names of properties to skip.
         """
         if len(metadata.get('tables', {})) == 1:
-            return self._single_table_skipped_properties
+            return self._SINGLE_TABLE_SKIPPED_PROPERTIES
 
         return super()._get_skipped_properties(metadata)
 
