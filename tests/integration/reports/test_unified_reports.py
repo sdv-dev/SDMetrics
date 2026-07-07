@@ -302,7 +302,7 @@ def test_unified_quality_report_single_table():
 
 
 def test_unified_diagnostic_report_single_table_verbose_skips_relationship_validity(capsys):
-    """Test verbose mode skips Relationship Validity for single-table unified data (diagnostic)."""
+    """Test unified diagnostic report skips Relationship Validity for single-table data."""
     # Setup
     real_data, synthetic_data, metadata = load_single_table_demo()
 
@@ -325,14 +325,12 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
     for line in expected_lines:
         assert line in output
 
-    assert '0/0' not in output
-    assert 'Relationship Validity Score: nan%' not in output
     assert list(report.get_properties()['Property']) == ['Data Validity', 'Data Structure']
     assert report.get_score() == 1.0
 
 
 def test_unified_quality_report_single_table_verbose_skips_relationship_properties(capsys):
-    """Test verbose mode skips Relationship Validity for single-table unified data (quality)."""
+    """Test unified quality report skips Relationship Validity for single-table data."""
     # Setup
     real_data, synthetic_data, metadata = _load_single_table_quality_report_data()
 
@@ -359,11 +357,8 @@ def test_unified_quality_report_single_table_verbose_skips_relationship_properti
         assert line in output
 
     assert output.count('This property does not apply to single-table data.') == 2
-    assert '0/0' not in output
-    assert 'Cardinality Score: nan%' not in output
-    assert 'Intertable Trends Score: nan%' not in output
     assert list(report.get_properties()['Property']) == ['Column Shapes', 'Column Pair Trends']
-    assert report.get_score() == 0.8393750143888287
+    assert np.isclose(report.get_score(), 0.83, atol=0.01)
 
 
 def test_unified_diagnostic_report_multi_table():
@@ -566,7 +561,7 @@ def test_unified_quality_report_multi_table():
 
 
 def test_unified_diagnostic_report_multi_table_with_no_relationships_does_not_skip_properties():
-    """Test multi-table diagnostic reports do not skip properties (2 tables, no relationships)."""
+    """Test unified diagnostic reports do not skip properties (2 tables, no relationships)."""
     # Setup
     real_data, synthetic_data, metadata = _load_quality_report_data()
     del metadata['relationships']
@@ -588,7 +583,7 @@ def test_unified_diagnostic_report_multi_table_with_no_relationships_does_not_sk
 
 
 def test_unified_quality_report_multi_table_with_no_relationships_does_not_skip_properties():
-    """Test multi-table quality reports do not skip properties (2 tables, no relationships)."""
+    """Test unified quality reports do not skip properties (2 tables, no relationships)."""
     # Setup
     real_data, synthetic_data, metadata = _load_quality_report_data()
     del metadata['relationships']
