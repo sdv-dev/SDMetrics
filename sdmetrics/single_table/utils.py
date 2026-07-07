@@ -3,6 +3,7 @@
 import pandas as pd
 
 from sdmetrics._utils_metadata import _process_data_with_metadata
+from sdmetrics.utils import get_columns_from_metadata
 
 
 def _validate_tables(real_training_data, synthetic_data, real_validation_data):
@@ -119,13 +120,14 @@ def _validate_data_and_metadata(
     Raises:
         ValueError: If validation fails
     """
-    if prediction_column_name not in metadata.get('columns', {}):
+    if prediction_column_name not in get_columns_from_metadata(metadata):
         raise ValueError(
             f'The column `{prediction_column_name}` is not described in the metadata.'
             ' Please update your metadata.'
         )
 
-    column_sdtype = metadata['columns'][prediction_column_name].get('sdtype')
+    metadata_columns = get_columns_from_metadata(metadata)
+    column_sdtype = metadata_columns[prediction_column_name].get('sdtype')
     if column_sdtype not in ('categorical', 'boolean'):
         raise ValueError(
             f'The column `{prediction_column_name}` must be either categorical or boolean.'

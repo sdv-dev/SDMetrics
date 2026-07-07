@@ -4,7 +4,7 @@ from operator import attrgetter
 
 from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata_dict
 from sdmetrics.base import BaseMetric
-from sdmetrics.utils import get_columns_from_metadata
+from sdmetrics.utils import get_columns_from_metadata, get_sequence_index
 
 
 class TimeSeriesMetric(BaseMetric):
@@ -51,16 +51,16 @@ class TimeSeriesMetric(BaseMetric):
 
         if metadata is not None:
             _validate_metadata_dict(metadata)
-            fields = get_columns_from_metadata(metadata)
+            columns_from_metadata = get_columns_from_metadata(metadata)
             for column in real_data.columns:
-                if column not in fields:
+                if column not in columns_from_metadata:
                     raise ValueError(f'Column {column} not found in metadata')
 
-            for field in fields.keys():
+            for field in columns_from_metadata.keys():
                 if field not in real_data.columns:
                     raise ValueError(f'Field {field} not found in data')
 
-            for column, col_metadata in metadata['columns'].items():
+            for column, col_metadata in columns_from_metadata.items():
                 if col_metadata['sdtype'] == 'datetime':
                     real_data[column] = _convert_datetime_column(
                         column, real_data[column], col_metadata
@@ -73,7 +73,7 @@ class TimeSeriesMetric(BaseMetric):
             dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
             metadata = {'columns': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict()}
 
-        sequence_key = metadata.get('sequence_key', sequence_key or [])
+        sequence_key = sequence_key or get_sequence_index(metadata)
         sequence_key = [sequence_key] if not isinstance(sequence_key, list) else sequence_key
 
         return metadata, sequence_key

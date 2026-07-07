@@ -253,6 +253,15 @@ class HyperTransformer:
         return self.transform(data)
 
 
+def _get_table_name_from_metadata(metadata):
+    table_name = None
+    tables = metadata.get('tables', [])
+    if tables:
+        table_name = list(tables)[0]
+
+    return table_name
+
+
 def get_columns_from_metadata(metadata):
     """Get the column info from a metadata dict.
 
@@ -264,7 +273,29 @@ def get_columns_from_metadata(metadata):
         dict:
             The columns metadata.
     """
+    table_name = _get_table_name_from_metadata(metadata)
+    if table_name:
+        return metadata.get('tables', {}).get(table_name, {}).get('columns', {})
+
     return metadata.get('columns', {})
+
+
+def get_primary_key_from_metadata(metadata):
+    """Get the primary key from a metadata dict.
+
+    Args:
+        metadata (dict):
+            The metadata dict.
+
+    Returns:
+        string or list:
+            The primary key.
+    """
+    table_name = _get_table_name_from_metadata(metadata)
+    if table_name:
+        return metadata.get('tables', {}).get(table_name, {}).get('primary_key', '')
+
+    return metadata.get('primary_key', '')
 
 
 def get_type_from_column_meta(column_metadata):
@@ -292,14 +323,57 @@ def get_alternate_keys(metadata):
         list:
             The list of alternate keys.
     """
-    alternate_keys = []
-    for alternate_key in metadata.get('alternate_keys', []):
-        if isinstance(alternate_key, list):
-            alternate_keys.extend(alternate_key)
-        else:
-            alternate_keys.append(alternate_key)
+    table_name = _get_table_name_from_metadata(metadata)
+    if table_name:
+        alternate_keys = metadata.get('tables', {}).get(table_name, {}).get('alternate_keys', [])
 
-    return alternate_keys
+    else:
+        alternate_keys = metadata.get('alternate_keys', [])
+
+    alt_keys = []
+    for alternate_key in alternate_keys:
+        if isinstance(alternate_key, list):
+            alt_keys.extend(alternate_key)
+        else:
+            alt_keys.append(alternate_key)
+
+    return alt_keys
+
+
+def get_sequence_index(metadata):
+    """Get the sequence index from a metadata dict.
+
+    Args:
+        metadata (dict):
+            The metadata dict.
+
+    Returns:
+        string or None:
+            The sequence index.
+    """
+    table_name = _get_table_name_from_metadata(metadata)
+    if table_name:
+        return metadata.get('tables', {}).get(table_name, {}).get('sequence_index')
+
+    return metadata.get('sequence_index')
+
+
+def get_table_data_from_dict(data):
+    """Get the table data from a data object.
+
+    Args:
+        data (dict or pandas.DataFrame):
+            The data object. If a dict is provided, the first table is returned.
+
+    Returns:
+        pandas.DataFrame:
+            The table data.
+    """
+    if isinstance(data, dict):
+        if len(list(data)) > 0:
+            return data[list(data)[0]]
+
+    return data
 
 
 def strip_characters(list_character, a_string):

@@ -3,6 +3,7 @@
 import pandas as pd
 
 from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
+from sdmetrics.utils import get_columns_from_metadata, get_table_data_from_dict
 
 
 class BaseSingleTableProperty:
@@ -39,12 +40,14 @@ class BaseSingleTableProperty:
 
     def _get_num_iterations(self, metadata):
         """Get the number of iterations for the property."""
+        metadata_columns = get_columns_from_metadata(metadata)
+        col_len = len(metadata_columns)
         if self._num_iteration_case == 'column':
-            return len(metadata['columns'])
+            return col_len
         elif self._num_iteration_case == 'table':
             return 1
         elif self._num_iteration_case == 'column_pair':
-            return int(len(metadata['columns']) * (len(metadata['columns']) - 1) / 2)
+            return int(col_len * (col_len - 1) / 2)
 
     def get_score(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Get the average score for the property on the data.
@@ -63,6 +66,8 @@ class BaseSingleTableProperty:
             float:
                 The average score for the property.
         """
+        real_data = get_table_data_from_dict(real_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
         self.details = self._generate_details(real_data, synthetic_data, metadata, progress_bar)
         return self._compute_average()
 

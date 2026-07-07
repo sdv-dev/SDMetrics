@@ -1,15 +1,14 @@
 import numpy as np
 import pandas as pd
 
-from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table import DiagnosticReport
 
 
 class TestDiagnosticReport:
-    def test_get_properties(self):
+    def test_get_properties(self, single_table_demo_data_and_metadata):
         """Test the ``get_properties`` method."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         report = DiagnosticReport()
 
         # Run
@@ -23,10 +22,10 @@ class TestDiagnosticReport:
         })
         pd.testing.assert_frame_equal(properties_frame, expected_frame)
 
-    def test_get_score(self):
+    def test_get_score(self, single_table_demo_data_and_metadata):
         """Test the ``get_score`` method."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         report = DiagnosticReport()
 
         # Run
@@ -37,10 +36,10 @@ class TestDiagnosticReport:
 
         assert result == 1.0
 
-    def test_get_score_with_no_verbose(self):
+    def test_get_score_with_no_verbose(self, single_table_demo_data_and_metadata):
         """Test the ``get_score`` method works when verbose=False."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         report = DiagnosticReport()
 
         # Run
@@ -50,10 +49,10 @@ class TestDiagnosticReport:
         # Assert
         assert result_dict == 1.0
 
-    def test_end_to_end(self):
+    def test_end_to_end(self, single_table_demo_data_and_metadata):
         """Test the end-to-end functionality of the diagnostic report."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         report = DiagnosticReport()
 
         # Run
@@ -132,10 +131,12 @@ class TestDiagnosticReport:
             report.get_details('Data Structure'), expected_details_data_structure
         )
 
-    def test_end_to_end_composite_keys(self, composite_keys_single_table_demo):
+    def test_end_to_end_composite_keys(self, single_table_demo_data_and_metadata):
         """Test the end-to-end functionality of the diagnostic report."""
         # Setup
-        real_data, synthetic_data, metadata = composite_keys_single_table_demo
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
+
+        metadata['tables']['student_placements']['primary_key'] = ['student_id', 'degree_type']
         report = DiagnosticReport()
 
         # Run
@@ -214,11 +215,11 @@ class TestDiagnosticReport:
             report.get_details('Data Structure'), expected_details_data_structure
         )
 
-    def test_generate_with_object_datetimes(self):
+    def test_generate_with_object_datetimes(self, single_table_demo_data_and_metadata):
         """Test the diagnostic report with object datetimes."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
-        for column, column_meta in metadata['columns'].items():
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
+        for column, column_meta in metadata['tables']['student_placements']['columns'].items():
             if column_meta['sdtype'] == 'datetime':
                 dt_format = column_meta['datetime_format']
                 real_data[column] = real_data[column].dt.strftime(dt_format)
@@ -302,10 +303,10 @@ class TestDiagnosticReport:
             report.get_details('Data Structure'), expected_details_data_structure
         )
 
-    def test_generate_multiple_times(self):
+    def test_generate_multiple_times(self, single_table_demo_data_and_metadata):
         """The results should be the same both times."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         report = DiagnosticReport()
 
         # Run and assert
@@ -316,10 +317,10 @@ class TestDiagnosticReport:
         report.generate(real_data, synthetic_data, metadata)
         assert report.get_score() == 1.0
 
-    def test_get_details_with_errors(self):
+    def test_get_details_with_errors(self, single_table_demo_data_and_metadata):
         """Test the ``get_details`` function of the diagnostic report when there are errors."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         report = DiagnosticReport()
         real_data['second_perc'] = 'A'
 
@@ -418,12 +419,16 @@ class TestDiagnosticReport:
         })
 
         metadata = {
-            'columns': {
-                'id': {'sdtype': 'id'},
-                'val1': {'sdtype': 'categorical'},
-                'val2': {'sdtype': 'numerical'},
+            'tables': {
+                'table': {
+                    'columns': {
+                        'id': {'sdtype': 'id'},
+                        'val1': {'sdtype': 'categorical'},
+                        'val2': {'sdtype': 'numerical'},
+                    },
+                    'primary_key': 'id',
+                },
             },
-            'primary_key': 'id',
         }
         report = DiagnosticReport()
 

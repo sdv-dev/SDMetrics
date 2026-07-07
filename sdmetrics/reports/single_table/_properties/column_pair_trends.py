@@ -9,6 +9,7 @@ from sdmetrics._utils_metadata import _convert_datetime_column
 from sdmetrics.column_pairs.statistical import ContingencySimilarity, CorrelationSimilarity
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
+from sdmetrics.utils import get_columns_from_metadata, get_table_data_from_dict
 
 
 class ColumnPairTrends(BaseSingleTableProperty):
@@ -51,8 +52,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
             pandas.Series:
                 The converted column.
         """
-        for column_name in metadata['columns']:
-            column_meta = metadata['columns'][column_name]
+        for column_name, column_meta in get_columns_from_metadata(metadata).items():
             col_sdtype = column_meta['sdtype']
             try:
                 if col_sdtype == 'datetime':
@@ -65,6 +65,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
                         data.loc[nan_mask, column_name] = np.nan
 
                 continue
+
             except Exception as e:
                 message = f'{type(e).__name__}: {e}'
                 self._columns_datetime_conversion_failed[column_name] = message
@@ -118,8 +119,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         processed_data = self._convert_datetime_columns_to_numeric(processed_data, metadata)
 
-        for column_name in metadata['columns']:
-            column_meta = metadata['columns'][column_name]
+        for column_name, column_meta in get_columns_from_metadata(metadata).items():
             column_sdtype = column_meta['sdtype']
             if column_sdtype in ['numerical', 'datetime']:
                 discretized_dict[column_name], _ = self._discretize_column(
@@ -161,8 +161,10 @@ class ColumnPairTrends(BaseSingleTableProperty):
             metadata (dict):
                 The metadata of the table
         """
-        sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
-        sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
+        metadata_columns = get_columns_from_metadata(metadata)
+        sdtype_col_1 = metadata_columns[column_name_1]['sdtype']
+        sdtype_col_2 = metadata_columns[column_name_2]['sdtype']
+
         if self._sdtype_to_shape[sdtype_col_1] != self._sdtype_to_shape[sdtype_col_2]:
             metric = ContingencySimilarity
             if self._sdtype_to_shape[sdtype_col_1] == 'continuous':
@@ -289,6 +291,9 @@ class ColumnPairTrends(BaseSingleTableProperty):
                 Pairs of columns to calculate results for. If None, uses every combination of
                 pairs of columns in the metadata. Defaults to None.
         """
+        real_data = get_table_data_from_dict(real_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
+
         processed_real_data, discrete_real = self._get_processed_data(real_data, metadata)
         processed_synthetic_data, discrete_synthetic = self._get_processed_data(
             synthetic_data, metadata
@@ -306,8 +311,9 @@ class ColumnPairTrends(BaseSingleTableProperty):
 
         list_dtypes = self._sdtype_to_shape.keys()
 
+        metadata_columns = get_columns_from_metadata(metadata)
         column_pairs = (
-            itertools.combinations(list(metadata['columns']), r=2)
+            itertools.combinations(list(metadata_columns), r=2)
             if column_pairs is None
             else column_pairs
         )
@@ -315,8 +321,8 @@ class ColumnPairTrends(BaseSingleTableProperty):
             column_name_1 = column_names[0]
             column_name_2 = column_names[1]
 
-            sdtype_col_1 = metadata['columns'][column_name_1]['sdtype']
-            sdtype_col_2 = metadata['columns'][column_name_2]['sdtype']
+            sdtype_col_1 = metadata_columns[column_name_1]['sdtype']
+            sdtype_col_2 = metadata_columns[column_name_2]['sdtype']
 
             error = None
             valid_sdtypes = sdtype_col_1 in list_dtypes and sdtype_col_2 in list_dtypes

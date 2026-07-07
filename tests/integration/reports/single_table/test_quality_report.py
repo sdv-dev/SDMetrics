@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table import QualityReport
 from tests.utils import get_error_type
 
@@ -46,12 +45,16 @@ class TestQualityReport:
         })
 
         metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'categorical'},
-                'col3': {'sdtype': 'boolean'},
-                'col4': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-                'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+            'tables': {
+                'table': {
+                    'columns': {
+                        'col1': {'sdtype': 'numerical'},
+                        'col2': {'sdtype': 'categorical'},
+                        'col3': {'sdtype': 'boolean'},
+                        'col4': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                        'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                    }
+                }
             }
         }
 
@@ -72,7 +75,9 @@ class TestQualityReport:
         )
 
     @pytest.mark.parametrize('key_type', ['single', 'composite'])
-    def test_report_end_to_end(self, key_type, composite_keys_single_table_demo):
+    def test_report_end_to_end(
+        self, key_type, composite_keys_single_table_demo, single_table_demo_data_and_metadata
+    ):
         """Test the quality report end to end.
 
         The report must compute each property and the overall quality score.
@@ -80,13 +85,15 @@ class TestQualityReport:
         # Setup
         column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
         if key_type == 'single':
-            real_data, synthetic_data, metadata = load_demo(modality='single_table')
+            real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         else:
             real_data, synthetic_data, metadata = composite_keys_single_table_demo
 
-        metadata['columns'] = {
-            key: val for key, val in metadata['columns'].items() if key in column_names
+        table_meta = metadata['tables']['student_placements']['columns']
+        metadata['tables']['student_placements']['columns'] = {
+            key: val for key, val in table_meta.items() if key in column_names
         }
+        metadata = metadata['tables']['student_placements']
         report = QualityReport()
         _set_thresholds_zero(report)
         report.num_rows_subsample = None
@@ -182,10 +189,12 @@ class TestQualityReport:
         assert report_info['num_rows_synthetic_data'] == 215
         assert report_info['generation_time'] <= generate_end_time - generate_start_time
 
-    def test_column_pair_trends_threshold_changes_details(self):
+    def test_column_pair_trends_threshold_changes_details(
+        self, single_table_demo_data_and_metadata
+    ):
         """Test threshold impact on column pair trends details."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         report_default = QualityReport()
         report_zero = QualityReport()
         _set_thresholds_zero(report_zero)
@@ -209,14 +218,14 @@ class TestQualityReport:
         # Assert
         assert score_zero >= score_default  # scores should be approximately 0.8 > 0.7
 
-    def test_with_large_dataset(self):
+    def test_with_large_dataset(self, single_table_demo_data_and_metadata):
         """Test the quality report with a large dataset (>50000 rows).
 
         The `real_data` and `synthetic_data` in the demo have 215 rows.
         So we augment them to be larger than 50000 rows.
         """
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         real_data = pd.concat([real_data] * 1000, ignore_index=True)
         synthetic_data = pd.concat([synthetic_data] * 1000, ignore_index=True)
 
@@ -242,21 +251,22 @@ class TestQualityReport:
         assert np.isclose(report_2.get_score(), score_1_run_1, atol=0.001)
         assert np.isclose(cpt_report_1, cpt_report_2, atol=0.001)
 
-    def test_quality_report_with_object_datetimes(self):
+    def test_quality_report_with_object_datetimes(self, single_table_demo_data_and_metadata):
         """Test the quality report with object datetimes.
 
         The report must compute each property and the overall quality score.
         """
         # Setup
         column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
-        for column, column_meta in metadata['columns'].items():
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
+        for column, column_meta in metadata['tables']['student_placements']['columns'].items():
             if column_meta['sdtype'] == 'datetime':
                 dt_format = column_meta['datetime_format']
                 real_data[column] = real_data[column].dt.strftime(dt_format)
 
-        metadata['columns'] = {
-            key: val for key, val in metadata['columns'].items() if key in column_names
+        table_meta = metadata['tables']['student_placements']['columns']
+        metadata['tables']['student_placements']['columns'] = {
+            key: val for key, val in table_meta.items() if key in column_names
         }
         report = QualityReport()
         _set_thresholds_zero(report)
@@ -332,14 +342,15 @@ class TestQualityReport:
         )
         assert report.get_score() == 0.8393750143888287
 
-    def test_report_end_to_end_with_errors(self):
+    def test_report_end_to_end_with_errors(self, single_table_demo_data_and_metadata):
         """Test the quality report end to end with errors in the properties computation."""
         # Setup
         column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
 
-        metadata['columns'] = {
-            key: val for key, val in metadata['columns'].items() if key in column_names
+        table_meta = metadata['tables']['student_placements']['columns']
+        metadata['tables']['student_placements']['columns'] = {
+            key: val for key, val in table_meta.items() if key in column_names
         }
 
         real_data['second_perc'].iloc[2] = 'a'
@@ -424,10 +435,12 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(col_pair_report[1:], expected_details_cpt[1:])
         assert report.get_score() == 0.8204378797402054
 
-    def test_meets_threshold_column_has_boolean_dtype_with_errors(self):
+    def test_meets_threshold_column_has_boolean_dtype_with_errors(
+        self, single_table_demo_data_and_metadata
+    ):
         """Test that 'Meets Threshold?' column contains booleans when errors occur."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         real_data.loc[2, 'second_perc'] = 'a'  # Corrupt data to trigger errors
 
         # Run
@@ -445,19 +458,20 @@ class TestQualityReport:
         for val in non_na_values:
             assert isinstance(val, np.bool_)
 
-    def test_report_with_column_nan(self):
+    def test_report_with_column_nan(self, single_table_demo_data_and_metadata):
         """Test the report with column full of NaNs."""
         # Setup
         column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
 
-        metadata['columns'] = {
-            key: val for key, val in metadata['columns'].items() if key in column_names
+        table_meta = metadata['tables']['student_placements']['columns']
+        metadata['tables']['student_placements']['columns'] = {
+            key: val for key, val in table_meta.items() if key in column_names
         }
 
         real_data['nan_column'] = np.nan * len(real_data)
         synthetic_data['nan_column'] = np.nan * len(synthetic_data)
-        metadata['columns']['nan_column'] = {'sdtype': 'numerical'}
+        metadata['tables']['student_placements']['columns']['nan_column'] = {'sdtype': 'numerical'}
         column_names.append('nan_column')
 
         report = QualityReport()
@@ -597,7 +611,7 @@ class TestQualityReport:
         pd.testing.assert_frame_equal(col_shape_report, expected_details_column_shapes)
         pd.testing.assert_frame_equal(col_pair_report, expected_details_cpt)
 
-    def test_report_with_verbose(self, capsys):
+    def test_report_with_verbose(self, capsys, single_table_demo_data_and_metadata):
         """Test the report with verbose.
 
         Check that the report prints the correct information.
@@ -613,11 +627,11 @@ class TestQualityReport:
             r'-\sColumn\sPair\sTrends:\s79\.46%',
         ]
 
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
 
         real_data['nan_column'] = np.nan * len(real_data)
         synthetic_data['nan_column'] = np.nan * len(synthetic_data)
-        metadata['columns']['nan_column'] = {'sdtype': 'numerical'}
+        metadata['tables']['student_placements']['columns']['nan_column'] = {'sdtype': 'numerical'}
 
         report = QualityReport()
         _set_thresholds_zero(report)
@@ -635,7 +649,13 @@ class TestQualityReport:
         """Error out when CorrelationSimilarity is used with a constant pair of columns."""
         # Setup
         data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1, 1, 1, 1]})
-        metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+        metadata = {
+            'tables': {
+                'table': {
+                    'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}
+                }
+            }
+        }
         report = QualityReport()
         _set_thresholds_zero(report)
 
@@ -672,7 +692,13 @@ class TestQualityReport:
         # Setup
         data = pd.DataFrame({'col1': [2, 1, 1, 1], 'col2': [3, 1, 1, 1]})
         synthetic_data = pd.DataFrame({'col1': [1, 1, 1, 1], 'col2': [1, 1, 1, 1]})
-        metadata = {'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}}
+        metadata = {
+            'tables': {
+                'table': {
+                    'columns': {'col1': {'sdtype': 'numerical'}, 'col2': {'sdtype': 'numerical'}}
+                }
+            }
+        }
         report = QualityReport()
         _set_thresholds_zero(report)
 

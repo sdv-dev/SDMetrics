@@ -3,11 +3,17 @@ import pytest
 from sdmetrics.demos import load_demo
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture
+def single_table_demo_data_and_metadata():
+    real_data, synthetic_data, metadata = load_demo(modality='single_table')
+    return real_data['student_placements'], synthetic_data['student_placements'], metadata
+
+
+@pytest.fixture
 def composite_keys_single_table_demo():
     real_data, synthetic_data, metadata = load_demo(modality='single_table')
-    metadata['primary_key'] = ['student_id', 'degree_type']
-    return real_data, synthetic_data, metadata
+    metadata['tables']['student_placements']['primary_key'] = ['student_id', 'degree_type']
+    return real_data['student_placements'], synthetic_data['student_placements'], metadata
 
 
 @pytest.fixture(scope='module')

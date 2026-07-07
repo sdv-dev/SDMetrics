@@ -5,6 +5,7 @@ from sdmetrics import compute_metrics
 from sdmetrics.demos import load_timeseries_demo
 from sdmetrics.timeseries.base import TimeSeriesMetric
 from sdmetrics.timeseries.detection import LSTMDetection
+from sdmetrics.utils import get_table_data_from_dict
 
 METRICS = [
     LSTMDetection,
@@ -47,9 +48,11 @@ def test_compute_lstmdetection_multiple_categorical_columns():
     """Test LSTMDetection metric handles multiple categorical columns."""
     # Setup
     real_data, synthetic_data, metadata = load_timeseries_demo()
-    metadata['columns']['day_of_week'] = {'sdtype': 'categorical'}
+    metadata['tables']['timeseries']['columns']['day_of_week'] = {'sdtype': 'categorical'}
     day_map = {0: 'Sun', 1: 'Mon', 2: 'Tues', 3: 'Wed', 4: 'Thurs', 5: 'Fri', 6: 'Sat'}
+    real_data = get_table_data_from_dict(real_data)
     real_data['day_of_week'] = real_data['day_of_week'].replace(day_map)
+    synthetic_data = get_table_data_from_dict(synthetic_data)
     synthetic_data['day_of_week'] = synthetic_data['day_of_week'].clip(0, 6).replace(day_map)
 
     # Run
