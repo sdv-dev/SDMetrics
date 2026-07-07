@@ -334,7 +334,7 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
 
 
 def test_unified_quality_report_single_table_verbose_skips_relationship_properties(capsys):
-    """Test unified quality report skips Relationship Validity for single-table data."""
+    """Test unified quality report skips Cardinality/Intertable for single-table data."""
     # Setup
     real_data, synthetic_data, metadata = _load_single_table_quality_report_data()
 
