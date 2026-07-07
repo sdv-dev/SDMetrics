@@ -199,36 +199,6 @@ def test_unified_diagnostic_report_single_table():
     )
 
 
-def test_unified_diagnostic_report_single_table_verbose_skips_relationship_validity(capsys):
-    """Test verbose mode skips Relationship Validity for single-table unified data (diagnostic)."""
-    # Setup
-    real_data, synthetic_data, metadata = load_single_table_demo()
-
-    # Run
-    report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, verbose=True)
-    output = capsys.readouterr().out
-
-    # Assert
-    expected_lines = [
-        'Generating report ...',
-        '(1/3) Evaluating Data Validity:',
-        'Data Validity Score: 100.0%',
-        '(2/3) Evaluating Data Structure:',
-        'Data Structure Score: 100.0%',
-        '(3/3) Evaluating Relationship Validity: N/A',
-        'This property does not apply to single-table data.',
-        'Overall Score (Average): 100.0%',
-    ]
-    for line in expected_lines:
-        assert line in output
-
-    assert '0/0' not in output
-    assert 'Relationship Validity Score: nan%' not in output
-    assert list(report.get_properties()['Property']) == ['Data Validity', 'Data Structure']
-    assert report.get_score() == 1.0
-
-
 def test_unified_quality_report_single_table():
     # Setup
     real_data, synthetic_data, metadata = _load_single_table_quality_report_data()
@@ -329,6 +299,36 @@ def test_unified_quality_report_single_table():
     _assert_report_info(
         report, 'QualityReport', {'student_placements': 215}, {'student_placements': 215}
     )
+
+
+def test_unified_diagnostic_report_single_table_verbose_skips_relationship_validity(capsys):
+    """Test verbose mode skips Relationship Validity for single-table unified data (diagnostic)."""
+    # Setup
+    real_data, synthetic_data, metadata = load_single_table_demo()
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, verbose=True)
+    output = capsys.readouterr().out
+
+    # Assert
+    expected_lines = [
+        'Generating report ...',
+        '(1/3) Evaluating Data Validity:',
+        'Data Validity Score: 100.0%',
+        '(2/3) Evaluating Data Structure:',
+        'Data Structure Score: 100.0%',
+        '(3/3) Evaluating Relationship Validity: N/A',
+        'This property does not apply to single-table data.',
+        'Overall Score (Average): 100.0%',
+    ]
+    for line in expected_lines:
+        assert line in output
+
+    assert '0/0' not in output
+    assert 'Relationship Validity Score: nan%' not in output
+    assert list(report.get_properties()['Property']) == ['Data Validity', 'Data Structure']
+    assert report.get_score() == 1.0
 
 
 def test_unified_quality_report_single_table_verbose_skips_relationship_properties(capsys):
