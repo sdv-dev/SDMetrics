@@ -9,6 +9,29 @@ from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTable
 class BaseUnifiedReport(BaseMultiTableReport):
     """Base Unified Report for single-table and multi-table data."""
 
+    _SINGLE_TABLE_SKIPPED_PROPERTIES = frozenset({
+        'Relationship Validity',
+        'Cardinality',
+        'Intertable Trends',
+    })
+    _skipped_property_message = 'This property does not apply to single-table data.'
+
+    def _get_skipped_properties(self, metadata):
+        """Return properties unavailable to single-table data.
+
+        Args:
+            metadata (dict):
+                The metadata dict.
+
+        Returns:
+            set[str]:
+                Names of properties to skip.
+        """
+        if len(metadata.get('tables', {})) == 1:
+            return self._SINGLE_TABLE_SKIPPED_PROPERTIES
+
+        return super()._get_skipped_properties(metadata)
+
     def _validate_data_format(self, real_data, synthetic_data):
         """Validate that the real and synthetic data have compatible formats.
 
