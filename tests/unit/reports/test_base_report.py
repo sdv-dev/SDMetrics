@@ -523,6 +523,46 @@ class TestBaseReport:
         base_report.is_generated = True
         base_report._check_report_generated()
 
+    def test__check_property_single_table_does_not_raise_for_available_property(self):
+        """Test ``_check_property_single_table`` does not raise for available properties."""
+        # Setup
+        base_report = BaseReport()
+        base_report._SINGLE_TABLE_SKIPPED_PROPERTIES = {'a', 'b'}
+        base_report.report_info = {'num_tables': 1}
+
+        # Run
+        base_report._check_property_single_table('Column Shapes')
+
+    def test__check_property_single_table_does_not_raise_for_multi_table(self):
+        """Test ``_check_property_single_table`` does not raise for multi-table data."""
+        # Setup
+        base_report = BaseReport()
+        base_report.report_info = {'num_tables': 2}
+
+        # Run
+        base_report._check_property_single_table('Relationship Validity')
+
+    @pytest.mark.parametrize(
+        'property_name', ('Cardinality', 'Intertable Trends', 'Relationship Validity')
+    )
+    def test__check_property_single_table_raises_for_skipped_property(self, property_name):
+        """Test ``_check_property_single_table`` raises for skipped single-table properties."""
+        # Setup
+        base_report = BaseReport()
+        base_report._SINGLE_TABLE_SKIPPED_PROPERTIES = frozenset({
+            'Relationship Validity',
+            'Cardinality',
+            'Intertable Trends',
+        })
+        base_report.report_info = {'num_tables': 1}
+
+        # Run and Assert
+        with pytest.raises(
+            ValueError,
+            match='This property is not available for single-table datasets.',
+        ):
+            base_report._check_property_single_table(property_name)
+
     def test__validate_property_generated(self):
         """Test the ``_validate_property_generated`` method."""
         # Setup
@@ -627,6 +667,7 @@ class TestBaseReport:
         """Test the ``get_visualization`` method."""
         # Setup
         base_report = BaseReport()
+        base_report.report_info = {'num_tables': 1}
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 2'] = Mock()
         base_report.is_generated = True
