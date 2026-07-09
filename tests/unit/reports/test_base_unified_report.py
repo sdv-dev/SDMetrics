@@ -292,3 +292,37 @@ class TestBaseUnifiedReport:
         relationship_validity._compute_average.assert_not_called()
         cardinality._compute_average.assert_not_called()
         intertable_trends._compute_average.assert_not_called()
+
+    def test__check_property_single_table_does_not_raise_for_available_property(self):
+        """Test ``_check_property_single_table`` does not raise for available properties."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        base_report.report_info = {'num_tables': 1}
+
+        # Run
+        base_report._check_property_single_table('Column Shapes')
+
+    def test__check_property_single_table_does_not_raise_for_multi_table(self):
+        """Test ``_check_property_single_table`` does not raise for multi-table data."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        base_report.report_info = {'num_tables': 2}
+
+        # Run
+        base_report._check_property_single_table('Relationship Validity')
+
+    @pytest.mark.parametrize(
+        'property_name', ('Cardinality', 'Intertable Trends', 'Relationship Validity')
+    )
+    def test__check_property_single_table_raises_for_skipped_property(self, property_name):
+        """Test ``_check_property_single_table`` raises for skipped single-table properties."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        base_report.report_info = {'num_tables': 1}
+
+        # Run and Assert
+        with pytest.raises(
+            ValueError,
+            match='This property is not available for single-table datasets.',
+        ):
+            base_report._check_property_single_table(property_name)

@@ -253,17 +253,10 @@ class BaseReport:
         if not self.is_generated:
             raise ValueError('The report has not been generated. Please call `generate` first.')
 
-    def _check_property_single_table(self, property_name):
-        is_single_table = self.report_info.get('num_tables', 0) == 1
-        skipped_properties = getattr(self, '_SINGLE_TABLE_SKIPPED_PROPERTIES', [])
-        if is_single_table and property_name in skipped_properties:
-            raise ValueError('This property is not available for single-table datasets.')
-
     def _validate_property_generated(self, property_name):
         """Validate that the given property name and that the report has been generated."""
         self._check_property_name(property_name)
         self._check_report_generated()
-        self._check_property_single_table(property_name)
 
     def get_properties(self):
         """Return the property score.
