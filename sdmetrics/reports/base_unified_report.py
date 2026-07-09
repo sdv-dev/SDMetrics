@@ -94,7 +94,7 @@ class BaseUnifiedReport(BaseMultiTableReport):
         """
         self._check_report_generated()
         name, score = [], []
-        is_single_table = self.report_info['num_tables'] == 1
+        is_single_table = self.report_info.get('num_tables', 0) == 1
 
         for property_name, property_instance in self._properties.items():
             if not (is_single_table and property_name in self._SINGLE_TABLE_SKIPPED_PROPERTIES):
