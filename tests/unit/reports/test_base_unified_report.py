@@ -244,3 +244,85 @@ class TestBaseUnifiedReport:
         assert base_report.table_names == []
         base_report._validate_data_format.assert_not_called()
         base_report._validate_metadata_matches_data.assert_not_called()
+
+    def test_get_properties_single_table_skips_relationship_properties(self):
+        """Test ``get_properties`` skips relationship properties for single-table data."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        base_report._check_report_generated = Mock()
+        base_report.report_info = {'num_tables': 1}
+
+        column_shapes = Mock()
+        column_shapes._compute_average.return_value = 0.8
+
+        column_pair_trends = Mock()
+        column_pair_trends._compute_average.return_value = 0.6
+
+        relationship_validity = Mock()
+        relationship_validity._compute_average.return_value = 0.4
+
+        cardinality = Mock()
+        cardinality._compute_average.return_value = 0.3
+
+        intertable_trends = Mock()
+        intertable_trends._compute_average.return_value = 0.2
+
+        base_report._properties = {
+            'Column Shapes': column_shapes,
+            'Column Pair Trends': column_pair_trends,
+            'Relationship Validity': relationship_validity,
+            'Cardinality': cardinality,
+            'Intertable Trends': intertable_trends,
+        }
+
+        expected_properties = pd.DataFrame({
+            'Property': ['Column Shapes', 'Column Pair Trends'],
+            'Score': [0.8, 0.6],
+        })
+
+        # Run
+        properties = base_report.get_properties()
+
+        # Assert
+        base_report._check_report_generated.assert_called_once()
+        pd.testing.assert_frame_equal(properties, expected_properties)
+
+        column_shapes._compute_average.assert_called_once()
+        column_pair_trends._compute_average.assert_called_once()
+        relationship_validity._compute_average.assert_not_called()
+        cardinality._compute_average.assert_not_called()
+        intertable_trends._compute_average.assert_not_called()
+
+    def test__check_property_single_table_does_not_raise_for_available_property(self):
+        """Test ``_check_property_single_table`` does not raise for available properties."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        base_report.report_info = {'num_tables': 1}
+
+        # Run
+        base_report._check_property_single_table('Column Shapes')
+
+    def test__check_property_single_table_does_not_raise_for_multi_table(self):
+        """Test ``_check_property_single_table`` does not raise for multi-table data."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        base_report.report_info = {'num_tables': 2}
+
+        # Run
+        base_report._check_property_single_table('Relationship Validity')
+
+    @pytest.mark.parametrize(
+        'property_name', ('Cardinality', 'Intertable Trends', 'Relationship Validity')
+    )
+    def test__check_property_single_table_raises_for_skipped_property(self, property_name):
+        """Test ``_check_property_single_table`` raises for skipped single-table properties."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        base_report.report_info = {'num_tables': 1}
+
+        # Run and Assert
+        with pytest.raises(
+            ValueError,
+            match='This property is not available for single-table datasets.',
+        ):
+            base_report._check_property_single_table(property_name)

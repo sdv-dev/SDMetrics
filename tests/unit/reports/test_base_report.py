@@ -627,6 +627,7 @@ class TestBaseReport:
         """Test the ``get_visualization`` method."""
         # Setup
         base_report = BaseReport()
+        base_report.report_info = {'num_tables': 1}
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 2'] = Mock()
         base_report.is_generated = True

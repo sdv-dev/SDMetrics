@@ -65,6 +65,16 @@ class BaseUnifiedReport(BaseMultiTableReport):
             f'synthetic_data={type(synthetic_data).__name__}.'
         )
 
+    def _check_property_single_table(self, property_name):
+        is_single_table = self.report_info.get('num_tables', 0) == 1
+        skipped_properties = getattr(self, '_SINGLE_TABLE_SKIPPED_PROPERTIES', [])
+        if is_single_table and property_name in skipped_properties:
+            raise ValueError('This property is not available for single-table datasets.')
+
+    def _validate_property_generated(self, property_name):
+        super()._validate_property_generated(property_name)
+        self._check_property_single_table(property_name)
+
     def _validate(self, real_data, synthetic_data, metadata):
         """Validate the inputs.
 
@@ -84,3 +94,25 @@ class BaseUnifiedReport(BaseMultiTableReport):
             synthetic_data,
             metadata,
         )
+
+    def get_properties(self):
+        """Return the property score.
+
+        Returns:
+            pandas.DataFrame
+                The property score.
+        """
+        self._check_report_generated()
+        name, score = [], []
+        is_single_table = self.report_info.get('num_tables', 0) == 1
+
+        for property_name, property_instance in self._properties.items():
+            if not (is_single_table and property_name in self._SINGLE_TABLE_SKIPPED_PROPERTIES):
+                property_score = property_instance._compute_average()
+                name.append(property_name)
+                score.append(property_score)
+
+        return pd.DataFrame({
+            'Property': name,
+            'Score': score,
+        })

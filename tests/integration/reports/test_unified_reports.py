@@ -128,8 +128,8 @@ def test_unified_diagnostic_report_single_table():
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-        'Score': [1.0, 1.0, float('nan')],
+        'Property': ['Data Validity', 'Data Structure'],
+        'Score': [1.0, 1.0],
     })
     expected_details_data_validity = pd.DataFrame({
         'Table': ['student_placements'] * 17,
@@ -178,7 +178,6 @@ def test_unified_diagnostic_report_single_table():
         'Metric': ['TableStructure'],
         'Score': [1.0],
     })
-    expected_details_relationship_validity = pd.DataFrame()
 
     pd.testing.assert_frame_equal(report.get_properties(), expected_properties)
     pd.testing.assert_frame_equal(
@@ -186,12 +185,6 @@ def test_unified_diagnostic_report_single_table():
     )
     pd.testing.assert_frame_equal(
         report.get_details('Data Structure'), expected_details_data_structure
-    )
-    pd.testing.assert_frame_equal(
-        report.get_details('Relationship Validity'),
-        expected_details_relationship_validity,
-        check_dtype=False,
-        check_index_type=False,
     )
     assert report.get_score() == 1.0
     _assert_report_info(
@@ -211,8 +204,8 @@ def test_unified_quality_report_single_table():
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.8736798729642614, 0.805070155812896, np.nan, np.nan],
+        'Property': ['Column Shapes', 'Column Pair Trends'],
+        'Score': [0.8736798729642614, 0.805070155812896],
     })
     expected_details_column_shapes = pd.DataFrame({
         'Table': [
@@ -276,23 +269,12 @@ def test_unified_quality_report_single_table():
         'Real Association': [np.nan] * 6,
         'Meets Threshold?': pd.Series([True] * 6, dtype='boolean'),
     })
-    expected_details_cardinality = pd.DataFrame()
-    expected_details_intertable_trends = pd.DataFrame()
 
     pd.testing.assert_frame_equal(report.get_properties(), expected_properties)
     pd.testing.assert_frame_equal(
         report.get_details('Column Shapes'), expected_details_column_shapes
     )
     pd.testing.assert_frame_equal(report.get_details('Column Pair Trends'), expected_details_cpt)
-    pd.testing.assert_frame_equal(
-        report.get_details('Cardinality'),
-        expected_details_cardinality,
-        check_dtype=False,
-        check_index_type=False,
-    )
-    pd.testing.assert_frame_equal(
-        report.get_details('Intertable Trends'), expected_details_intertable_trends
-    )
     assert report.get_score() == 0.8393750143888287
     assert report._properties['Column Shapes'].num_rows_subsample is None
     assert report._properties['Column Pair Trends'].num_rows_subsample is None
@@ -328,7 +310,6 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
     assert list(report.get_properties()['Property']) == [
         'Data Validity',
         'Data Structure',
-        'Relationship Validity',
     ]
     assert report.get_score() == 1.0
 
@@ -364,8 +345,6 @@ def test_unified_quality_report_single_table_verbose_skips_relationship_properti
     assert list(report.get_properties()['Property']) == [
         'Column Shapes',
         'Column Pair Trends',
-        'Cardinality',
-        'Intertable Trends',
     ]
     assert np.isclose(report.get_score(), 0.83, atol=0.01)
 
