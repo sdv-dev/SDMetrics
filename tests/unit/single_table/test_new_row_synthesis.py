@@ -29,16 +29,20 @@ class TestNewRowSynthesis:
             'col6': ['2020-01-02', '2022-11-24', '2022-06-01', '2021-04-12', '2020-12-11'],
         })
         metadata = {
-            'primary_key': 'pk',
-            'columns': {
-                'pk': {'sdtype': 'id'},
-                'col1': {'sdtype': 'id'},
-                'col2': {'sdtype': 'numerical'},
-                'col3': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'numerical'},
-                'col5': {'sdtype': 'categorical'},
-                'col6': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-            },
+            'tables': {
+                'table': {
+                    'primary_key': 'pk',
+                    'columns': {
+                        'pk': {'sdtype': 'id'},
+                        'col1': {'sdtype': 'id'},
+                        'col2': {'sdtype': 'numerical'},
+                        'col3': {'sdtype': 'categorical'},
+                        'col4': {'sdtype': 'numerical'},
+                        'col5': {'sdtype': 'categorical'},
+                        'col6': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                    },
+                }
+            }
         }
         metric = NewRowSynthesis()
 
@@ -60,9 +64,13 @@ class TestNewRowSynthesis:
             'col1': ['PSC 0481, Box 5945\nAPO AP 37588', '9759 8761\nDPO AE 97614'],
         })
         metadata = {
-            'columns': {
-                'col1': {'sdtype': 'categorical'},
-            },
+            'tables': {
+                'table': {
+                    'columns': {
+                        'col1': {'sdtype': 'categorical'},
+                    },
+                }
+            }
         }
         metric = NewRowSynthesis()
 
@@ -89,11 +97,15 @@ class TestNewRowSynthesis:
             'col3': [1.46, 1.56, 1.21, np.nan, 1.92],
         })
         metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'categorical'},
-                'col3': {'sdtype': 'numerical'},
-            },
+            'tables': {
+                'table': {
+                    'columns': {
+                        'col1': {'sdtype': 'numerical'},
+                        'col2': {'sdtype': 'categorical'},
+                        'col3': {'sdtype': 'numerical'},
+                    },
+                }
+            }
         }
         sample_size = 2
         metric = NewRowSynthesis()
@@ -124,11 +136,15 @@ class TestNewRowSynthesis:
             'col3': [1.35, 1.56, 1.21, np.nan, 1.92],
         })
         metadata = {
-            'columns': {
-                'col1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'categorical'},
-                'col3': {'sdtype': 'numerical'},
-            },
+            'tables': {
+                'table': {
+                    'columns': {
+                        'col1': {'sdtype': 'numerical'},
+                        'col2': {'sdtype': 'categorical'},
+                        'col3': {'sdtype': 'numerical'},
+                    },
+                }
+            }
         }
         sample_size = 15
         metric = NewRowSynthesis()
@@ -159,7 +175,11 @@ class TestNewRowSynthesis:
             f'col{i}': list(np.random.uniform(low=0, high=10, size=100)) for i in range(num_cols)
         })
         metadata = {
-            'columns': {f'col{i}': {'sdtype': 'numerical'} for i in range(num_cols)},
+            'tables': {
+                'table': {
+                    'columns': {f'col{i}': {'sdtype': 'numerical'} for i in range(num_cols)},
+                }
+            }
         }
         metric = NewRowSynthesis()
 

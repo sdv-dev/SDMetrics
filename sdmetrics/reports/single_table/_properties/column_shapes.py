@@ -5,6 +5,7 @@ import plotly.express as px
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.single_column import KSComplement, TVComplement
+from sdmetrics.utils import get_columns_from_metadata
 
 
 class ColumnShapes(BaseSingleTableProperty):
@@ -40,8 +41,8 @@ class ColumnShapes(BaseSingleTableProperty):
         """
         column_names, metric_names, scores = [], [], []
         error_messages = []
-        for column_name in metadata['columns']:
-            sdtype = metadata['columns'][column_name]['sdtype']
+        for column_name, column_metadata in get_columns_from_metadata(metadata).items():
+            sdtype = column_metadata['sdtype']
             try:
                 if sdtype in self._sdtype_to_metric:
                     metric = self._sdtype_to_metric[sdtype]

@@ -1,27 +1,20 @@
-"""Multi table quality report."""
+"""Unified quality report."""
 
+from sdmetrics.reports.base_unified_report import BaseUnifiedReport
 from sdmetrics.reports.multi_table._properties import (
     Cardinality,
     ColumnPairTrends,
     ColumnShapes,
     InterTableTrends,
 )
-from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
 from sdmetrics.reports.utils import (
     DEFAULT_REAL_ASSOCIATION_THRESHOLD,
     DEFAULT_REAL_CORRELATION_THRESHOLD,
-    _warn_deprecated_report,
 )
 
-_warn_deprecated_report('multi table quality', 'QualityReport')
 
-
-class QualityReport(BaseMultiTableReport):
-    """Multi table quality report.
-
-    This class creates a quality report for multi-table data. It calculates the quality
-    score along three properties - Column Shapes, Column Pair Trends, and Cardinality.
-    """
+class QualityReport(BaseUnifiedReport):
+    """Quality report for single-table and multi-table data."""
 
     def __init__(self):
         super().__init__()

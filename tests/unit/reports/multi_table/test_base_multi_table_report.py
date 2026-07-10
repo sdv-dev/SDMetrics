@@ -41,7 +41,9 @@ class TestBaseReport:
             'pd.DataFrame, please use the single-table BaseMultiTableReport instead.'
         )
         with pytest.raises(ValueError, match=expected_message):
-            base_report._validate_data_format(real_data, synthetic_data)
+            base_report._validate_data_format(
+                real_data['student_placements'], synthetic_data['student_placements']
+            )
 
     def test__validate_relationships(self):
         """Test the ``_validate_relationships`` method."""

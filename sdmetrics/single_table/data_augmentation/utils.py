@@ -1,6 +1,6 @@
 """Utils method for data augmentation metrics."""
 
-from sdmetrics._utils_metadata import _validate_single_table_metadata
+from sdmetrics._utils_metadata import _validate_metadata
 from sdmetrics.single_table.utils import (
     _validate_classifier,
     _validate_data_and_metadata,
@@ -26,7 +26,7 @@ def _validate_parameters(
 ):
     """Validate the parameters of the Data Augmentation metrics."""
     _validate_tables(real_training_data, synthetic_data, real_validation_data)
-    _validate_single_table_metadata(metadata)
+    _validate_metadata(metadata)
     _validate_prediction_column_name(prediction_column_name)
     _validate_classifier(classifier)
     _validate_fixed_recall_value(fixed_recall_value)

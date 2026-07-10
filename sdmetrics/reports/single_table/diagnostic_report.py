@@ -2,6 +2,9 @@
 
 from sdmetrics.reports.base_report import BaseReport
 from sdmetrics.reports.single_table._properties import DataValidity, Structure
+from sdmetrics.reports.utils import _warn_deprecated_report
+
+_warn_deprecated_report('single table diagnostic', 'DiagnosticReport')
 
 
 class DiagnosticReport(BaseReport):

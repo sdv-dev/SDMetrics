@@ -26,11 +26,13 @@ def test_shuffling_data_single_table(property):
     """Test the property score is the same when shuffling the data for single-table."""
     # Setup
     property_instance = property()
+    real_data = REAL_DATA_ST[list(REAL_DATA_ST)[0]]
+    synth_data = SYNTHETIC_DATA_ST[list(SYNTHETIC_DATA_ST)[0]]
 
     # Run
-    score = property_instance.get_score(REAL_DATA_ST, SYNTHETIC_DATA_ST, METADATA_ST)
+    score = property_instance.get_score(real_data, synth_data, METADATA_ST)
     score_shuffled = property_instance.get_score(
-        REAL_DATA_ST.sample(frac=1), SYNTHETIC_DATA_ST.sample(frac=1), METADATA_ST
+        real_data.sample(frac=1), synth_data.sample(frac=1), METADATA_ST
     )
 
     # Assert

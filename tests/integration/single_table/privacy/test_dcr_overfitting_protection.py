@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 
 from sdmetrics.demos import load_single_table_demo
 from sdmetrics.single_table.privacy import DCROverfittingProtection
+from sdmetrics.utils import get_table_data_from_dict
 
 
 class TestDCROverfittingProtection:
@@ -22,6 +23,8 @@ class TestDCROverfittingProtection:
         """
         # Setup
         real_data, synthetic_data, metadata = load_single_table_demo()
+        real_data = get_table_data_from_dict(real_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
         train_df, holdout_df = train_test_split(real_data, test_size=0.5)
 
         # Run

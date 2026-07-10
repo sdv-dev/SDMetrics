@@ -2,6 +2,9 @@
 
 from sdmetrics.reports.multi_table._properties import DataValidity, RelationshipValidity, Structure
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
+from sdmetrics.reports.utils import _warn_deprecated_report
+
+_warn_deprecated_report('multi table diagnostic', 'DiagnosticReport')
 
 
 class DiagnosticReport(BaseMultiTableReport):

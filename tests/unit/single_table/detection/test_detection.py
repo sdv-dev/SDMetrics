@@ -30,13 +30,17 @@ class TestDetectionMetric:
             'col4': [55, 66, 77, 88, 99],
         })
         metadata = {
-            'columns': {
-                'ID_1': {'sdtype': 'numerical'},
-                'col2': {'sdtype': 'numerical'},
-                'ID_2': {'sdtype': 'categorical'},
-                'col4': {'sdtype': 'numerical'},
-            },
-            'primary_key': {'ID_1', 'ID_2'},
+            'tables': {
+                'table': {
+                    'columns': {
+                        'ID_1': {'sdtype': 'numerical'},
+                        'col2': {'sdtype': 'numerical'},
+                        'ID_2': {'sdtype': 'categorical'},
+                        'col4': {'sdtype': 'numerical'},
+                    },
+                    'primary_key': {'ID_1', 'ID_2'},
+                }
+            }
         }
 
         expected_real_dataframe = pd.DataFrame({
@@ -98,19 +102,23 @@ class TestDetectionMetric:
             'col5': [10, 20, 30, 40, 50],
         })
         metadata = {
-            'columns': {
-                'ID_1': {'sdtype': 'numerical'},
-                'col1': {'sdtype': 'numerical', 'pii': True},
-                'col2': {'sdtype': 'numerical'},
-                'ID_2': {'sdtype': 'categorical'},
-                'col3': {'sdtype': 'numerical'},
-                'ID_3': {'sdtype': 'id'},
-                'blob': {'sdtype': 'text'},
-                'col4': {'sdtype': 'numerical', 'pii': False},
-                'col5': {'sdtype': 'numerical'},
-            },
-            'primary_key': {'ID_1', 'ID_2'},
-            'alternate_keys': ['col5'],
+            'tables': {
+                'table': {
+                    'columns': {
+                        'ID_1': {'sdtype': 'numerical'},
+                        'col1': {'sdtype': 'numerical', 'pii': True},
+                        'col2': {'sdtype': 'numerical'},
+                        'ID_2': {'sdtype': 'categorical'},
+                        'col3': {'sdtype': 'numerical'},
+                        'ID_3': {'sdtype': 'id'},
+                        'blob': {'sdtype': 'text'},
+                        'col4': {'sdtype': 'numerical', 'pii': False},
+                        'col5': {'sdtype': 'numerical'},
+                    },
+                    'primary_key': {'ID_1', 'ID_2'},
+                    'alternate_keys': ['col5'],
+                }
+            }
         }
 
         expected_real_dataframe = pd.DataFrame({

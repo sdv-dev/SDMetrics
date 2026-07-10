@@ -15,6 +15,7 @@ import tqdm
 
 from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata
 from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
+from sdmetrics.utils import get_columns_from_metadata
 from sdmetrics.visualization import set_plotly_config
 
 
@@ -24,10 +25,13 @@ class BaseReport:
     This class creates a base report for single-table data.
     """
 
+    _skipped_property_message = 'This property was skipped.'
+
     def __init__(self):
         self._overall_score = None
         self.is_generated = False
         self._properties = {}
+        self._skipped_properties = set()
         self.num_rows_subsample = DEFAULT_NUM_ROWS_SUBSAMPLE
         self.report_info = {
             'report_type': self.__class__.__name__,
@@ -42,7 +46,7 @@ class BaseReport:
         """
         real_columns = set(real_data.columns)
         synthetic_columns = set(synthetic_data.columns)
-        metadata_columns = set(metadata['columns'].keys())
+        metadata_columns = set(get_columns_from_metadata(metadata).keys())
 
         missing_data = metadata_columns.difference(real_columns.union(synthetic_columns))
         missing_metadata = real_columns.union(synthetic_columns).difference(metadata_columns)
@@ -97,7 +101,7 @@ class BaseReport:
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
         """
-        for column, col_meta in metadata['columns'].items():
+        for column, col_meta in get_columns_from_metadata(metadata).items():
             if col_meta['sdtype'] == 'datetime':
                 real_col = real_data[column]
                 synth_col = synthetic_data[column]
@@ -117,6 +121,19 @@ class BaseReport:
         if verbose:
             sys.stdout.write(f'Overall Score (Average): {round(self._overall_score * 100, 2)}%\n\n')
 
+    def _get_skipped_properties(self, metadata):
+        """Return properties that should not be computed for the metadata.
+
+        Args:
+            metadata (dict):
+                The metadata dict.
+
+        Returns:
+            set[str]:
+                Names of properties to skip.
+        """
+        return set()
+
     def generate(self, real_data, synthetic_data, metadata, verbose=True):
         """Generate report.
 
@@ -134,6 +151,7 @@ class BaseReport:
                 Whether or not to print report summary and progress.
         """
         self._validate(real_data, synthetic_data, metadata)
+        self._skipped_properties = self._get_skipped_properties(metadata)
         self.convert_datetimes(real_data, synthetic_data, metadata)
 
         self.report_info['generated_date'] = datetime.today().strftime('%Y-%m-%d')
@@ -156,14 +174,24 @@ class BaseReport:
 
         start_time = time.time()
         for ind, (property_name, property_instance) in enumerate(self._properties.items()):
+            property_description = f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}'
+            if property_name in self._skipped_properties:
+                property_instance.is_computed = False
+                property_instance.details = pd.DataFrame()
+                if verbose:
+                    sys.stdout.write(
+                        f'{property_description}: N/A\n{self._skipped_property_message}\n\n'
+                    )
+                    sys.stdout.flush()
+
+                continue
+
             if verbose:
                 num_iterations = int(property_instance._get_num_iterations(metadata))
                 progress_bar = tqdm.tqdm(
                     total=num_iterations, file=sys.stdout, bar_format='{desc}|{bar}{r_bar}|'
                 )
-                progress_bar.set_description(
-                    f'({ind + 1}/{len(self._properties)}) Evaluating {property_name}'
-                )
+                progress_bar.set_description(property_description)
 
             if hasattr(self, 'real_correlation_threshold') and hasattr(
                 property_instance, 'real_correlation_threshold'
@@ -180,7 +208,9 @@ class BaseReport:
             )
             scores.append(score)
             if verbose:
-                progress_bar.close()
+                if progress_bar is not None:
+                    progress_bar.close()
+                    progress_bar = None
                 sys.stdout.write(f'{property_name} Score: {round(score * 100, 2)}%\n\n')
                 sys.stdout.flush()
 

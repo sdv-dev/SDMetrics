@@ -61,6 +61,8 @@ def test_calculate_dcr_chunked():
     """Test calculate_dcr with chunking calculations."""
     # Setup
     real_data, synthetic_data, metadata = load_single_table_demo()
+    real_data = real_data['student_placements']
+    synthetic_data = synthetic_data['student_placements']
 
     # Run
     result = calculate_dcr(
