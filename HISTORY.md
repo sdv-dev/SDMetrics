@@ -1,5 +1,18 @@
 # History
 
+## v0.28.1 - 2026-07-16
+
+### New Features
+
+* Make the unified report errors more user-friendly for single-table datasets - Issue [#881](https://github.com/sdv-dev/SDMetrics/issues/881) by @pvk-developer
+* Make the unified report verbosity more user-friendly for single-table datasets - Issue [#880](https://github.com/sdv-dev/SDMetrics/issues/880) by @gsheni
+* Consolidate single and multi-table reports into one - Issue [#874](https://github.com/sdv-dev/SDMetrics/issues/874) by @gsheni
+* Consolidate single and multi-table metadata into one - Issue [#873](https://github.com/sdv-dev/SDMetrics/issues/873) by @pvk-developer
+
+### Maintenance
+
+* Use Node.js 24 compatible github actions - Issue [#869](https://github.com/sdv-dev/SDMetrics/issues/869) by @gsheni
+
 ## v0.28.0 - 2026-03-19
 
 ### New Features
