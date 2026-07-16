@@ -1,4 +1,4 @@
-Run started:2026-03-18 21:23:39.494040+00:00
+Run started:2026-07-16 18:13:43.527206+00:00
 
 Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -25,21 +25,21 @@ Test results:
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
    More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b112_try_except_continue.html
-   Location: ./sdmetrics/reports/base_report.py:107:16
-106	                    synthetic_data[column] = _convert_datetime_column(column, synth_col, col_meta)
-107	                except Exception:
-108	                    continue
-109	
+   Location: ./sdmetrics/reports/base_report.py:111:16
+110	                    synthetic_data[column] = _convert_datetime_column(column, synth_col, col_meta)
+111	                except Exception:
+112	                    continue
+113	
 
 --------------------------------------------------
 >> Issue: [B301:blacklist] Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
    Severity: Medium   Confidence: High
    CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
    More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b301-pickle
-   Location: ./sdmetrics/reports/base_report.py:305:21
-304	        with open(filepath, 'rb') as f:
-305	            report = pickle.load(f)
-306	            if current_version != report._package_version:
+   Location: ./sdmetrics/reports/base_report.py:335:21
+334	        with open(filepath, 'rb') as f:
+335	            report = pickle.load(f)
+336	            if current_version != report._package_version:
 
 --------------------------------------------------
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -98,10 +98,10 @@ Test results:
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
    More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b101_assert_used.html
-   Location: ./sdmetrics/timeseries/detection.py:104:8
-103	        """
-104	        assert cls.min_value == 0.0
-105	        return super().normalize(raw_score)
+   Location: ./sdmetrics/timeseries/detection.py:106:8
+105	        """
+106	        assert cls.min_value == 0.0
+107	        return super().normalize(raw_score)
 
 --------------------------------------------------
 >> Issue: [B110:try_except_pass] Try, Except, Pass detected.
@@ -117,7 +117,7 @@ Test results:
 --------------------------------------------------
 
 Code scanned:
-	Total lines of code: 12257
+	Total lines of code: 12582
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 
