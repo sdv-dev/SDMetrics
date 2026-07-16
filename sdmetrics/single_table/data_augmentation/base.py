@@ -11,6 +11,7 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.data_augmentation.utils import _validate_inputs
 from sdmetrics.single_table.utils import _process_data_with_metadata_ml_efficacy_metrics
+from sdmetrics.utils import get_columns_from_metadata, get_table_data_from_dict
 
 METRIC_NAME_TO_METHOD = {'recall': recall_score, 'precision': precision_score}
 
@@ -107,12 +108,13 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         boolean_columns = []
         datetime_columns = []
         data_columns = data.columns
-        metadata_columns = metadata['columns'].keys()
-        common_columns = set(data_columns).intersection(metadata_columns)
+        metadata_columns = get_columns_from_metadata(metadata)
+        common_columns = set(data_columns).intersection(metadata_columns.keys())
         for column in sorted(common_columns):
             if column == prediction_column_name:
                 continue
-            column_meta = metadata['columns'][column]
+
+            column_meta = metadata_columns[column]
             column_sdtype = column_meta['sdtype']
             if column_sdtype == 'categorical':
                 categorical_columns.append(column)
@@ -206,6 +208,8 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         fixed_value,
     ):
         """Compute the score breakdown of the metric."""
+        real_training_data = get_table_data_from_dict(real_training_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
         _validate_inputs(
             real_training_data,
             synthetic_data,

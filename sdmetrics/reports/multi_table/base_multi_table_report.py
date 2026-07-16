@@ -20,7 +20,7 @@ class BaseMultiTableReport(BaseReport):
         self.table_names = []
 
     def _validate_data_format(self, real_data, synthetic_data):
-        """Validate that the real and synthetic are dictionnaries of tables."""
+        """Validate that the real and synthetic are dictionaries of tables."""
         is_real_dict = isinstance(real_data, dict)
         is_synthetic_dict = isinstance(synthetic_data, dict)
         if is_real_dict and is_synthetic_dict:

@@ -33,12 +33,16 @@ def synthetic_data():
 @pytest.fixture
 def metadata():
     return {
-        'columns': {
-            'a': {'sdtype': 'categorical'},
-            'b': {'sdtype': 'categorical'},
-            'c': {'sdtype': 'boolean'},
-            'd': {'sdtype': 'categorical'},
-            'e': {'sdtype': 'numerical'},
+        'tables': {
+            'table': {
+                'columns': {
+                    'a': {'sdtype': 'categorical'},
+                    'b': {'sdtype': 'categorical'},
+                    'c': {'sdtype': 'boolean'},
+                    'd': {'sdtype': 'categorical'},
+                    'e': {'sdtype': 'numerical'},
+                }
+            }
         }
     }
 

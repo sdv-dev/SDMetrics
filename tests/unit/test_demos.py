@@ -10,12 +10,14 @@ def test_load_single_table_demo():
     real_data, synthetic_data, metadata = load_demo(modality)
 
     # Assert
-    assert metadata['columns']['duration'] == {
+    assert metadata['tables']['student_placements']['columns']['duration'] == {
         'sdtype': 'numerical',
         'computer_representation': 'Int64',
     }
-    assert real_data['duration'].dtype == 'float64'
-    assert synthetic_data['duration'].dtype == 'float64'
+    assert real_data['student_placements']['duration'].dtype == 'float64'
+    assert synthetic_data['student_placements']['duration'].dtype == 'float64'
+    assert isinstance(real_data, dict)
+    assert isinstance(synthetic_data, dict)
 
 
 def test_load_multi_table_demo():

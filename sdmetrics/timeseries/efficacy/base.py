@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 from sdmetrics.goal import Goal
 from sdmetrics.timeseries.base import TimeSeriesMetric
-from sdmetrics.utils import HyperTransformer
+from sdmetrics.utils import HyperTransformer, get_table_data_from_dict
 
 
 class TimeSeriesEfficacyMetric(TimeSeriesMetric):
@@ -103,6 +103,8 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
             Union[float, tuple[float]]:
                 Metric output.
         """
+        real_data = get_table_data_from_dict(real_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
         sequence_key, target = cls._validate_inputs(
             real_data, synthetic_data, metadata, sequence_key, target
         )
