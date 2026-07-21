@@ -42,22 +42,40 @@ class ReferentialIntegrity(ColumnPairsMetric):
 
         return result
 
+    @staticmethod
+    def _convert_to_dataframes(columns):
+        """Convert a tuple of columns to DataFrames.
+
+        Args:
+            columns (tuple):
+                Each item can be a pandas.Series or pandas.DataFrame.
+
+        Returns:
+            tuple:
+                Each item is a pandas.DataFrame.
+        """
+        return tuple(pd.DataFrame(column) for column in columns)
+
     @classmethod
     def compute_breakdown(cls, real_data, synthetic_data):
         """Compute the score breakdown of the referential integrity metric.
 
         Args:
-            real_data (tuple of 2 pandas.DataFrame):
-                (primary_key, foreign_key) columns from the real data.
-            synthetic_data (tuple of 2 pandas.DataFrame):
-                (primary_key, foreign_key) columns from the synthetic data.
+            real_data (tuple):
+                A two-item tuple containing the real data (PK) followed by
+                the real data (FK). Each item can be a pandas.Series or
+                pandas.DataFrame.
+            synthetic_data (tuple):
+                A two-item tuple containing the synthetic data (PK) followed
+                by the synthetic data (FK). Each item can be a pandas.Series or
+                pandas.DataFrame.
 
         Returns:
             dict:
                 The score breakdown of the key uniqueness metric.
         """
-        real_pk_df, real_fk_df = real_data
-        synth_pk_df, synth_fk_df = synthetic_data
+        real_pk_df, real_fk_df = cls._convert_to_dataframes(real_data)
+        synth_pk_df, synth_fk_df = cls._convert_to_dataframes(synthetic_data)
         pk_columns = list(real_pk_df.columns)
         fk_columns = list(real_fk_df.columns)
         indicator_name = cls._create_unique_name(cls.INDICATOR_NAME, pk_columns + fk_columns)
@@ -92,10 +110,14 @@ class ReferentialIntegrity(ColumnPairsMetric):
         """Compute the referential integrity of two columns.
 
         Args:
-            real_data (tuple of 2 pandas.DataFrame):
-                (primary_key, foreign_key) columns from the real data.
-            synthetic_data (tuple of 2 pandas.DataFrame):
-                (primary_key, foreign_key) columns from the synthetic data.
+            real_data (tuple):
+                A two-item tuple containing the real data (PK) followed by
+                the real data (FK). Each item can be a pandas.Series or
+                pandas.DataFrame.
+            synthetic_data (tuple):
+                A two-item tuple containing the synthetic data (PK) followed
+                by the synthetic data (FK). Each item can be a pandas.Series or
+                pandas.DataFrame.
 
         Returns:
             float:

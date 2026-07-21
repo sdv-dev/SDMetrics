@@ -51,3 +51,17 @@ def get_error_type(error):
 
 def check_if_value_in_threshold(value, expected_value, threshold):
     assert abs(value - expected_value) < threshold
+
+
+def assert_report_scores_are_not_nan(report):
+    """Assert that every report property and detail has a score."""
+    properties = report.get_properties()
+    missing_property_scores = properties.loc[properties['Score'].isna()]
+    assert missing_property_scores.empty
+
+    for property_name in properties['Property']:
+        details = report.get_details(property_name)
+        missing_detail_scores = details.loc[details['Score'].isna()]
+        assert missing_detail_scores.empty, (
+            f'{property_name} details contain NaN scores:\n{missing_detail_scores}'
+        )

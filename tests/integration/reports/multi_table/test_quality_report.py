@@ -8,6 +8,7 @@ from packaging import version
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table.quality_report import QualityReport
+from tests.utils import assert_report_scores_are_not_nan
 
 
 def _set_thresholds_zero(report):
@@ -261,6 +262,7 @@ def test_quality_report_end_to_end(key_type, composite_keys_multi_table_demo):
         assert score == 0.7115600909354644
 
     pd.testing.assert_frame_equal(properties, expected_properties)
+    assert_report_scores_are_not_nan(report)
     expected_info_keys = {
         'report_type',
         'generated_date',
