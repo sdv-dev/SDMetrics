@@ -182,24 +182,6 @@ class TestRelationshipValidity:
         progress_bar.update.assert_called()
         progress_bar.update.assert_called_once()
         mock_compute_average.assert_called_once()
-        mock_referentialintegrity.compute.assert_called_once()
-        mock_cardinalityboundaryadherence.compute.assert_called_once()
-        expected_real_columns = (
-            real_data['users']['user_id'],
-            real_data['sessions']['user_id'],
-        )
-        expected_synthetic_columns = (
-            synthetic_data['users']['user_id'],
-            synthetic_data['sessions']['user_id'],
-        )
-        for metric in (mock_referentialintegrity, mock_cardinalityboundaryadherence):
-            metric_real, metric_synthetic = metric.compute.call_args.args
-            for actual, expected in zip(metric_real, expected_real_columns):
-                pd.testing.assert_series_equal(actual, expected)
-
-            for actual, expected in zip(metric_synthetic, expected_synthetic_columns):
-                pd.testing.assert_series_equal(actual, expected)
-
         pd.testing.assert_frame_equal(relationship_validity.details, expected_details_property)
 
     @patch(

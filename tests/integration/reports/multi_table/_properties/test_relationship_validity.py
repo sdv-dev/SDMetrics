@@ -19,6 +19,10 @@ class TestRelationshipValidity:
 
         # Assert
         assert result == 1.0
+        referential_integrity_scores = details.loc[
+            details['Metric'] == 'ReferentialIntegrity', 'Score'
+        ]
+        assert referential_integrity_scores.tolist() == [1.0, 1.0]
         assert details['Score'].notna().all()
         assert 'Error' not in details
 
