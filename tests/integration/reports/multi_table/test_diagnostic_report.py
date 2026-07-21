@@ -57,6 +57,7 @@ class TestDiagnosticReport:
         })
         assert results == 1.0
         pd.testing.assert_frame_equal(properties, expected_dataframe)
+        assert_report_scores_are_not_nan(report)
 
     def test_end_to_end_with_metrics_failing(self):
         """Test the ``DiagnosticReport`` report when some metrics crash.

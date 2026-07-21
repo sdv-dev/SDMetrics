@@ -345,6 +345,7 @@ def test_quality_report_with_object_datetimes():
     })
     assert score == 0.6615076057048344
     pd.testing.assert_frame_equal(properties, expected_properties)
+    assert_report_scores_are_not_nan(report)
 
 
 def test_quality_report_with_errors():
