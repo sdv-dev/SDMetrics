@@ -32,6 +32,8 @@ class TestDiagnosticReport:
 
         # Assert
         assert results == 1.0
+        properties = report.get_properties()
+        assert all(properties['Score'] == 1.0)
         assert_report_scores_are_not_nan(report)
 
     def test_end_to_end_with_object_datetimes(self):

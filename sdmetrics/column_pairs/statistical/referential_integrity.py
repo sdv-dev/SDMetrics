@@ -54,7 +54,7 @@ class ReferentialIntegrity(ColumnPairsMetric):
             tuple:
                 Each item is a pandas.DataFrame.
         """
-        return tuple(pd.DataFrame(column) for column in columns)
+        return tuple(pd.DataFrame(c) for c in columns)
 
     @classmethod
     def compute_breakdown(cls, real_data, synthetic_data):
