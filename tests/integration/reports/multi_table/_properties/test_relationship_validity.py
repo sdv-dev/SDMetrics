@@ -15,9 +15,16 @@ class TestRelationshipValidity:
 
         # Run
         result = relationship_validity.get_score(real_data, synthetic_data, metadata)
+        details = relationship_validity.get_details()
 
         # Assert
         assert result == 1.0
+        referential_integrity_scores = details.loc[
+            details['Metric'] == 'ReferentialIntegrity', 'Score'
+        ]
+        assert referential_integrity_scores.tolist() == [1.0, 1.0]
+        assert details['Score'].notna().all()
+        assert 'Error' not in details
 
     def test_with_progress_bar(self, capsys):
         """Test that the progress bar is correctly updated."""
