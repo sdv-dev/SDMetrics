@@ -1,5 +1,11 @@
 # History
 
+## v0.28.2 - 2026-07-24
+
+### Bugs Fixed
+
+* `ReferentialIntegrity` metric erroring with `AttributeError` when running DiagnosticReport - Issue [#884](https://github.com/sdv-dev/SDMetrics/issues/884) by @gsheni
+
 ## v0.28.1 - 2026-07-16
 
 ### New Features
