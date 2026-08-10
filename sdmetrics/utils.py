@@ -358,18 +358,29 @@ def get_sequence_index(metadata):
     return metadata.get('sequence_index')
 
 
-def get_table_data_from_dict(data):
+def get_table_data_from_dict(data, table_name=None):
     """Get the table data from a data object.
 
     Args:
         data (dict or pandas.DataFrame):
-            The data object. If a dict is provided, the first table is returned.
+            The data object.
+        table_name (str or None):
+            Name of the table to return. If ``None``, the first table is returned.
 
     Returns:
         pandas.DataFrame:
             The table data.
     """
     if isinstance(data, dict):
+        if table_name is not None:
+            if not isinstance(table_name, str):
+                raise TypeError('`table_name` must be a string.')
+            if table_name not in data:
+                table_names = list(data)
+                raise ValueError(f"Unknown table ('{table_name}'). Must be one of {table_names}.")
+
+            return data[table_name]
+
         if len(list(data)) > 0:
             return data[list(data)[0]]
 

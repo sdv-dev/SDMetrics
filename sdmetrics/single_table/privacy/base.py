@@ -4,10 +4,11 @@ from enum import Enum
 
 import numpy as np
 
+from sdmetrics._utils_metadata import _get_single_table_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.loss import InverseCDFDistance
-from sdmetrics.utils import get_columns_from_metadata
+from sdmetrics.utils import get_columns_from_metadata, get_table_data_from_dict
 
 
 class CategoricalType(Enum):
@@ -90,6 +91,7 @@ class CategoricalPrivacyMetric(SingleTableMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         key_fields=None,
         sensitive_fields=None,
         model_kwargs=None,
@@ -115,6 +117,8 @@ class CategoricalPrivacyMetric(SingleTableMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             key_fields (list(str)):
                 Name of the column(s) to use as the key attributes.
             sensitive_fields (list(str)):
@@ -127,6 +131,9 @@ class CategoricalPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
+        metadata, table_name = _get_single_table_metadata(metadata, table_name)
+        real_data = get_table_data_from_dict(real_data, table_name)
+        synthetic_data = get_table_data_from_dict(synthetic_data, table_name)
         key_fields, sensitive_fields, metadata = cls._validate_inputs(
             real_data, synthetic_data, metadata, key_fields, sensitive_fields
         )
@@ -244,6 +251,7 @@ class NumericalPrivacyMetric(SingleTableMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         key_fields=None,
         sensitive_fields=None,
         model_kwargs=None,
@@ -271,6 +279,8 @@ class NumericalPrivacyMetric(SingleTableMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             key_fields (list(str)):
                 Name of the column(s) to use as the key attributes.
             sensitive_fields (list(str)):
@@ -288,6 +298,9 @@ class NumericalPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
+        metadata, table_name = _get_single_table_metadata(metadata, table_name)
+        real_data = get_table_data_from_dict(real_data, table_name)
+        synthetic_data = get_table_data_from_dict(synthetic_data, table_name)
         key_fields, sensitive_fields, metadata = cls._validate_inputs(
             real_data, synthetic_data, metadata, key_fields, sensitive_fields
         )

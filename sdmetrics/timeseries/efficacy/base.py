@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+from sdmetrics._utils_metadata import _get_single_table_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.timeseries.base import TimeSeriesMetric
 from sdmetrics.utils import HyperTransformer, get_table_data_from_dict
@@ -82,7 +83,15 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
         return synt_acc / real_acc
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, sequence_key=None, target=None):
+    def compute(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        table_name=None,
+        sequence_key=None,
+        target=None,
+    ):
         """Compute this metric.
 
         Args:
@@ -93,6 +102,8 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
             metadata (dict):
                 TimeSeries metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             sequence_key (list[str]):
                 Names of the columns which identify different time series
                 sequences.
@@ -103,10 +114,15 @@ class TimeSeriesEfficacyMetric(TimeSeriesMetric):
             Union[float, tuple[float]]:
                 Metric output.
         """
-        real_data = get_table_data_from_dict(real_data)
-        synthetic_data = get_table_data_from_dict(synthetic_data)
+        metadata, table_name = _get_single_table_metadata(metadata, table_name)
+        real_data = get_table_data_from_dict(real_data, table_name)
+        synthetic_data = get_table_data_from_dict(synthetic_data, table_name)
         sequence_key, target = cls._validate_inputs(
-            real_data, synthetic_data, metadata, sequence_key, target
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            sequence_key=sequence_key,
+            target=target,
         )
 
         return cls._compute_score(real_data, synthetic_data, sequence_key, target)

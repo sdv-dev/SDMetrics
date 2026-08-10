@@ -87,6 +87,23 @@ class TestSingleTableMetric:
         pd.testing.assert_frame_equal(synthetic_data, validated_synthetic)
         assert metadata == expected_metadata
 
+    def test_compute_breakdown_uses_legacy(self):
+        """Test it with legacy subclass (doesn't have table_name in signature)."""
+
+        class LegacySingleTableMetric(SingleTableMetric):
+            @classmethod
+            def compute(cls, real_data, synthetic_data, metadata=None):
+                return 0.75
+
+        # Run
+        result = LegacySingleTableMetric.compute_breakdown(
+            pd.DataFrame({'column': [1]}),
+            pd.DataFrame({'column': [1]}),
+        )
+
+        # Assert
+        assert result == {'score': 0.75}
+
     def test__validate_inputs_invalid_metadata(self):
         """Test the ``_validate_inputs`` method with invalid_metadata.
 

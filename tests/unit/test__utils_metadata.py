@@ -8,6 +8,7 @@ import pytest
 from sdmetrics._utils_metadata import (
     _convert_datetime_column,
     _convert_datetime_columns,
+    _get_single_table_metadata,
     _process_data_with_metadata,
     _remove_missing_columns_metadata,
     _remove_non_modelable_columns,
@@ -349,3 +350,88 @@ def test__validate_unified_metadata_requires_tables_key():
     # Assert
     with pytest.raises(ValueError, match="Metadata must include a 'tables' key"):
         _validate_unified_metadata(metadata)
+
+
+def test__get_single_table_metadata_single_table():
+    """Test it with only one table."""
+    # Setup
+    table_metadata = {'columns': {'column': {'sdtype': 'numerical'}}}
+    metadata = {'tables': {'table': table_metadata}}
+
+    # Run
+    result, table_name = _get_single_table_metadata(metadata)
+
+    # Assert
+    assert result == table_metadata
+    assert table_name == 'table'
+
+
+def test__get_single_table_metadata_multiple_tables():
+    """Test it with multiple tables."""
+    # Setup
+    selected_metadata = {'columns': {'selected': {'sdtype': 'categorical'}}}
+    metadata = {
+        'tables': {
+            'first': {'columns': {'first': {'sdtype': 'numerical'}}},
+            'selected': selected_metadata,
+        }
+    }
+
+    # Run
+    result, table_name = _get_single_table_metadata(metadata, 'selected')
+
+    # Assert
+    assert result == selected_metadata
+    assert table_name == 'selected'
+
+
+def test__get_single_table_metadata_invalid_tables():
+    """Test it must define `tables`."""
+    # Setup
+    metadata = {'tables': []}
+    expected_message = "Expected a dictionary but received a 'list' instead."
+
+    # Run and Assert
+    with pytest.raises(TypeError, match=expected_message):
+        _get_single_table_metadata(metadata)
+
+
+def test__get_single_table_metadata_requires_name():
+    """Test it requires table name."""
+    # Setup
+    metadata = {
+        'tables': {
+            'first': {'columns': {}},
+            'second': {'columns': {}},
+        }
+    }
+    expected_message = re.escape(
+        'Metadata contains more than one table, please specify the `table_name`.'
+    )
+
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_message):
+        _get_single_table_metadata(metadata)
+
+
+def test__get_single_table_metadata_unknown_table():
+    """Test it with unknown table."""
+    # Setup
+    metadata = {
+        'tables': {
+            'first': {'columns': {}},
+            'second': {'columns': {}},
+        }
+    }
+    expected_message = re.escape("Unknown table ('unknown'). Must be one of ['first', 'second'].")
+
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_message):
+        _get_single_table_metadata(metadata, 'unknown')
+
+
+def test__get_single_table_metadata_invalid_table_name():
+    """Test it with invalid table name."""
+    # Run and Assert
+    with pytest.raises(TypeError, match=re.escape('`table_name` must be a string.')):
+        _get_single_table_metadata(None, 1)

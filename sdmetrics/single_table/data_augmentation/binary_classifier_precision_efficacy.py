@@ -16,6 +16,7 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
         synthetic_data,
         real_validation_data,
         metadata,
+        table_name,
         prediction_column_name,
         minority_class_label,
         classifier='XGBoost',
@@ -23,14 +24,15 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
     ):
         """Compute the score breakdown of the metric."""
         return super().compute_breakdown(
-            real_training_data,
-            synthetic_data,
-            real_validation_data,
-            metadata,
-            prediction_column_name,
-            minority_class_label,
-            classifier,
-            fixed_recall_value,
+            real_training_data=real_training_data,
+            synthetic_data=synthetic_data,
+            real_validation_data=real_validation_data,
+            metadata=metadata,
+            table_name=table_name,
+            prediction_column_name=prediction_column_name,
+            minority_class_label=minority_class_label,
+            classifier=classifier,
+            fixed_value=fixed_recall_value,
         )
 
     @classmethod
@@ -40,6 +42,7 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
         synthetic_data,
         real_validation_data,
         metadata,
+        table_name,
         prediction_column_name,
         minority_class_label,
         classifier='xgboost',
@@ -56,6 +59,8 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
                 The real validation data.
             metadata (dict):
                 The metadata dictionary describing the table of data.
+            table_name (str):
+                The name of the table to use from the metadata and data dictionaries.
             prediction_column_name (str):
                 The name of the column to be predicted.
             minority_class_label (int):
@@ -71,12 +76,13 @@ class BinaryClassifierPrecisionEfficacy(BaseDataAugmentationMetric):
                 The score of the metric.
         """
         return super().compute(
-            real_training_data,
-            synthetic_data,
-            real_validation_data,
-            metadata,
-            prediction_column_name,
-            minority_class_label,
-            classifier,
-            fixed_recall_value,
+            real_training_data=real_training_data,
+            synthetic_data=synthetic_data,
+            real_validation_data=real_validation_data,
+            metadata=metadata,
+            table_name=table_name,
+            prediction_column_name=prediction_column_name,
+            minority_class_label=minority_class_label,
+            classifier=classifier,
+            fixed_value=fixed_recall_value,
         )

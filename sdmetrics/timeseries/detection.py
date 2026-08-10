@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+from sdmetrics._utils_metadata import _get_single_table_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.timeseries import ml_scorers
 from sdmetrics.timeseries.base import TimeSeriesMetric
@@ -55,7 +56,7 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
         raise NotImplementedError()
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, sequence_key=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, table_name=None, sequence_key=None):
         """Compute this metric.
 
         Args:
@@ -66,6 +67,8 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
             metadata (dict):
                 TimeSeries metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             sequence_key (list[str]):
                 Names of the columns which identify different time series
                 sequences.
@@ -74,10 +77,16 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
             Union[float, tuple[float]]:
                 Metric output.
         """
-        real_data = get_table_data_from_dict(real_data)
-        synthetic_data = get_table_data_from_dict(synthetic_data)
+        metadata, table_name = _get_single_table_metadata(metadata, table_name)
+        real_data = get_table_data_from_dict(real_data, table_name)
+        synthetic_data = get_table_data_from_dict(synthetic_data, table_name)
         real_data, synthetic_data = real_data.copy(), synthetic_data.copy()
-        _, sequence_key = cls._validate_inputs(real_data, synthetic_data, metadata, sequence_key)
+        _, sequence_key = cls._validate_inputs(
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            sequence_key=sequence_key,
+        )
 
         ht = HyperTransformer()
         ht.fit(real_data.drop(sequence_key, axis=1))

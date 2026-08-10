@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from unittest.mock import Mock, patch
 
@@ -12,8 +13,33 @@ from sdmetrics.utils import (
     get_cardinality_distribution,
     get_columns_from_metadata,
     get_missing_percentage,
+    get_table_data_from_dict,
     get_type_from_column_meta,
 )
+
+
+def test_get_table_data_from_dict_with_table_name():
+    """Test it with table name."""
+    # Setup
+    first = pd.DataFrame({'first': [1]})
+    selected = pd.DataFrame({'selected': [2]})
+
+    # Run
+    result = get_table_data_from_dict({'first': first, 'selected': selected}, 'selected')
+
+    # Assert
+    assert result is selected
+
+
+def test_get_table_data_from_dict_with_unknown_table_name():
+    """Test it with unknown table data."""
+    # Setup
+    data = {'first': pd.DataFrame(), 'second': pd.DataFrame()}
+    expected_message = re.escape("Unknown table ('unknown'). Must be one of ['first', 'second'].")
+
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_message):
+        get_table_data_from_dict(data, 'unknown')
 
 
 @pytest.mark.parametrize(

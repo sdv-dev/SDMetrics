@@ -39,6 +39,7 @@ class NewRowSynthesis(SingleTableMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         numerical_match_tolerance=0.01,
         synthetic_sample_size=None,
     ):
@@ -54,6 +55,8 @@ class NewRowSynthesis(SingleTableMetric):
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict.
+            table_name (str):
+                Name of the table to use when ``metadata`` contains multiple tables.
             numerical_match_tolerance (float):
                 A float larger than 0 representing how close two numerical values have to be
                 in order to be considered a match. Defaults to `0.01`.
@@ -69,7 +72,7 @@ class NewRowSynthesis(SingleTableMetric):
                 The new row synthesis score breakdown.
         """
         real_data, synthetic_data, metadata = cls._validate_inputs(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, table_name
         )
 
         if synthetic_sample_size is not None:
@@ -169,6 +172,7 @@ class NewRowSynthesis(SingleTableMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         numerical_match_tolerance=0.01,
         synthetic_sample_size=None,
     ):
@@ -184,6 +188,8 @@ class NewRowSynthesis(SingleTableMetric):
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict.
+            table_name (str):
+                Name of the table to use when ``metadata`` contains multiple tables.
             numerical_match_tolerance (float):
                 A float larger than 0 representing how close two numerical values have to be
                 in order to be considered a match. Defaults to `0.01`.
@@ -199,11 +205,12 @@ class NewRowSynthesis(SingleTableMetric):
                 The new row synthesis score.
         """
         return cls.compute_breakdown(
-            real_data,
-            synthetic_data,
-            metadata,
-            numerical_match_tolerance,
-            synthetic_sample_size,
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            table_name=table_name,
+            numerical_match_tolerance=numerical_match_tolerance,
+            synthetic_sample_size=synthetic_sample_size,
         )['score']
 
     @classmethod

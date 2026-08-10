@@ -5,6 +5,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
+from sdmetrics._utils_metadata import _get_single_table_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
@@ -74,6 +75,7 @@ class DCROverfittingProtection(SingleTableMetric):
         synthetic_data,
         real_validation_data,
         metadata,
+        table_name,
         num_rows_subsample=None,
         num_iterations=1,
     ):
@@ -90,6 +92,8 @@ class DCROverfittingProtection(SingleTableMetric):
                 This data should not have been used to train the synthesizer.
             metadata (dict):
                 A metadata dictionary that describes the table of data.
+            table_name (str):
+                The name of the table to use from the metadata.
             num_rows_subsample (int or None):
                 The number of synthetic data rows to subsample from the synthetic data.
                 This is used to increase the speed of the computation, if the dataset is large.
@@ -105,8 +109,10 @@ class DCROverfittingProtection(SingleTableMetric):
                 closer to the real dataset. Averages of the medians are returned in the case of
                 multiple iterations.
         """
-        real_training_data = get_table_data_from_dict(real_training_data)
-        synthetic_data = get_table_data_from_dict(synthetic_data)
+        metadata, table_name = _get_single_table_metadata(metadata, table_name)
+        real_training_data = get_table_data_from_dict(real_training_data, table_name)
+        synthetic_data = get_table_data_from_dict(synthetic_data, table_name)
+        real_validation_data = get_table_data_from_dict(real_validation_data, table_name)
         num_rows_subsample, num_iterations = cls._validate_inputs(
             real_training_data,
             synthetic_data,
@@ -166,6 +172,7 @@ class DCROverfittingProtection(SingleTableMetric):
         synthetic_data,
         real_validation_data,
         metadata,
+        table_name,
         num_rows_subsample=None,
         num_iterations=1,
     ):
@@ -182,6 +189,8 @@ class DCROverfittingProtection(SingleTableMetric):
                 This data should not have been used to train the synthesizer.
             metadata (dict):
                 A metadata dictionary that describes the table of data.
+            table_name (str):
+                The name of the table to use from the metadata.
             num_rows_subsample (int or None):
                 The number of synthetic data rows to subsample from the synthetic data.
                 This is used to increase the speed of the computation, if the dataset is large.
@@ -195,12 +204,13 @@ class DCROverfittingProtection(SingleTableMetric):
                 The score for the DCROverfittingProtection metric.
         """
         result = cls.compute_breakdown(
-            real_training_data,
-            synthetic_data,
-            real_validation_data,
-            metadata,
-            num_rows_subsample,
-            num_iterations,
+            real_training_data=real_training_data,
+            synthetic_data=synthetic_data,
+            real_validation_data=real_validation_data,
+            metadata=metadata,
+            table_name=table_name,
+            num_rows_subsample=num_rows_subsample,
+            num_iterations=num_iterations,
         )
 
         return result.get('score')

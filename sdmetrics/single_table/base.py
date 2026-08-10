@@ -5,6 +5,7 @@ from operator import attrgetter
 
 from sdmetrics._utils_metadata import (
     _convert_datetime_column,
+    _get_single_table_metadata,
     _validate_columns_exist_in_single_table_metadata,
     _validate_metadata,
 )
@@ -17,6 +18,8 @@ from sdmetrics.utils import (
     get_table_data_from_dict,
     get_type_from_column_meta,
 )
+
+BACKWARDS_COMPATIBLE_NONE = object()
 
 
 class SingleTableMetric(BaseMetric):
@@ -89,7 +92,13 @@ class SingleTableMetric(BaseMetric):
         return fields
 
     @classmethod
-    def _validate_inputs(cls, real_data, synthetic_data, metadata=None):
+    def _validate_inputs(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        table_name=BACKWARDS_COMPATIBLE_NONE,
+    ):
         """Validate the inputs and return the validated data and metadata.
 
         If a metadata is passed, the data is validated against it.
@@ -103,13 +112,20 @@ class SingleTableMetric(BaseMetric):
                 The synthetic data.
             metadata (dict):
                 The metadata, if any.
+            table_name (str):
+                Name of the table to use when ``metadata`` contains multiple tables.
 
         Returns:
             (pandas.DataFrame, pandas.DataFrame, dict):
                 The validated data and metadata.
         """
-        real_data = get_table_data_from_dict(real_data).copy()
-        synthetic_data = get_table_data_from_dict(synthetic_data).copy()
+        if table_name is not BACKWARDS_COMPATIBLE_NONE:
+            metadata, table_name = _get_single_table_metadata(metadata, table_name)
+        else:
+            table_name = None
+
+        real_data = get_table_data_from_dict(real_data, table_name).copy()
+        synthetic_data = get_table_data_from_dict(synthetic_data, table_name).copy()
         if set(real_data.columns) != set(synthetic_data.columns):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 
@@ -152,7 +168,7 @@ class SingleTableMetric(BaseMetric):
         )
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, table_name=None):
         """Compute this metric.
 
         Real data and synthetic data must be passed as ``pandas.DataFrame`` instances
@@ -169,6 +185,8 @@ class SingleTableMetric(BaseMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str):
+                Name of the table to use when ``metadata`` contains multiple tables.
 
         Returns:
             Union[float, tuple[float]]:
@@ -177,7 +195,7 @@ class SingleTableMetric(BaseMetric):
         raise NotImplementedError()
 
     @classmethod
-    def compute_breakdown(cls, real_data, synthetic_data, metadata=None):
+    def compute_breakdown(cls, real_data, synthetic_data, metadata=None, table_name=None):
         """Compute this metric breakdown.
 
         Args:
@@ -188,6 +206,8 @@ class SingleTableMetric(BaseMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str):
+                Name of the table to use when ``metadata`` contains multiple tables.
             real_data (Union[numpy.ndarray, pandas.Series]):
                 The values from the real dataset, passed as a 1d numpy
                 array or as a pandas.Series.
@@ -196,4 +216,8 @@ class SingleTableMetric(BaseMetric):
             dict
                 Mapping of the metric output. Must include the key 'score'.
         """
-        return {'score': cls.compute(real_data, synthetic_data, metadata)}
+        # For backwards compatibility
+        if table_name is None:
+            return {'score': cls.compute(real_data, synthetic_data, metadata)}
+
+        return {'score': cls.compute(real_data, synthetic_data, metadata, table_name)}
