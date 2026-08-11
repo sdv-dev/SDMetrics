@@ -22,6 +22,7 @@ __all__ = [
     'CategoryCoverage',
     'CategoryAdherence',
     'CSTest',
+    'DatetimeFormatAdherence',
     'KeyUniqueness',
     'KSComplement',
     'MissingValueSimilarity',
