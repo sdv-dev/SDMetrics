@@ -92,7 +92,7 @@ class RegexFormatAdherence(SingleColumnMetric):
         cls._validate_regex_format(regex_format)
 
         real_valid, real_groups = cls._validate_regex_column(real_data, regex_format)
-        if real_valid.sum() == 0:
+        if len(real_valid) != len(real_data):
             LOGGER.warning('The real data does not match the given regex format.')
 
         synthetic_valid, _ = cls._validate_regex_column(synthetic_data, regex_format, real_groups)
