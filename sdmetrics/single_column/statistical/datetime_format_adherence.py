@@ -92,7 +92,7 @@ class DatetimeFormatAdherence(SingleColumnMetric):
 
         Returns:
             float:
-                The proportion of data points in the synthetic data that are unique.
+                The proportion of data points in the synthetic data that match the datetime format.
         """
         real_data_nan = pd.isna(real_data)
         synthetic_data_nan = pd.isna(synthetic_data)
