@@ -52,6 +52,8 @@ class RegexFormatAdherence(SingleColumnMetric):
                 Column to evaluate.
             regex_format (str):
                 The regex format.
+            compare (pd.Series | pd.DataFrame, optional):
+                Dataframe containing groups to compare against.
 
         Returns:
             tuple (pd.Series, pd.DataFrame):
