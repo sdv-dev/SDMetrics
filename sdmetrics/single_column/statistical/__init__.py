@@ -8,6 +8,7 @@ from sdmetrics.single_column.statistical.key_uniqueness import KeyUniqueness
 from sdmetrics.single_column.statistical.kscomplement import KSComplement
 from sdmetrics.single_column.statistical.missing_value_similarity import MissingValueSimilarity
 from sdmetrics.single_column.statistical.range_coverage import RangeCoverage
+from sdmetrics.single_column.statistical.regex_format_adherence import RegexFormatAdherence
 from sdmetrics.single_column.statistical.statistic_similarity import StatisticSimilarity
 from sdmetrics.single_column.statistical.tv_complement import TVComplement
 from sdmetrics.single_column.statistical.sequence_length_similarity import SequenceLengthSimilarity
@@ -21,6 +22,7 @@ __all__ = [
     'KSComplement',
     'MissingValueSimilarity',
     'RangeCoverage',
+    'RegexFormatAdherence',
     'StatisticSimilarity',
     'TVComplement',
     'SequenceLengthSimilarity',
