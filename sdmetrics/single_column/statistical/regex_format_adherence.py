@@ -42,7 +42,7 @@ class RegexFormatAdherence(SingleColumnMetric):
             raise ValueError(f"Invalid regex format string '{regex_format}'.") from exception
 
     @staticmethod
-    def _validate_regex_column(column, regex_format, compare=None):
+    def _filter_valid_regex_rows(column, regex_format, compare=None):
         """Return values from the column that match the specified regex format.
 
         Args:
@@ -89,7 +89,7 @@ class RegexFormatAdherence(SingleColumnMetric):
         """
         cls._validate_regex_format(regex_format)
 
-        real_valid, real_groups = cls._validate_regex_column(real_data, regex_format)
+        real_valid, real_groups = cls._filter_valid_regex_rows(real_data, regex_format)
         if len(real_valid) != len(real_data):
             invalid_values = real_data[~real_data.index.isin(real_valid.index)]
             num_examples = 2
@@ -104,7 +104,7 @@ class RegexFormatAdherence(SingleColumnMetric):
 
             warnings.warn(message)
 
-        synthetic_valid, _ = cls._validate_regex_column(synthetic_data, regex_format, real_groups)
+        synthetic_valid, _ = cls._filter_valid_regex_rows(synthetic_data, regex_format, real_groups)
         score = len(synthetic_valid) / len(synthetic_data)
 
         return score

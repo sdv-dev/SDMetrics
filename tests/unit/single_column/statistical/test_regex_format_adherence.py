@@ -59,8 +59,8 @@ class TestRegexFormatAdherence:
         with pytest.raises(ValueError, match=re.escape(message)):
             metric._validate_regex_format(bad_format)
 
-    def test__validate_regex_column(self):
-        """Test the `_validate_regex_column` method.
+    def test__filter_valid_regex_rows(self):
+        """Test the `_filter_valid_regex_rows` method.
 
         Expect that valid rows (that match the format) are returned.
 
@@ -80,14 +80,14 @@ class TestRegexFormatAdherence:
         metric = RegexFormatAdherence()
 
         # Run
-        result, groups = metric._validate_regex_column(data, regex_format)
+        result, groups = metric._filter_valid_regex_rows(data, regex_format)
 
         # Assert
         assert result.equals(expected)
         assert groups is None
 
-    def test__validate_regex_column_nan(self):
-        """Test the `_validate_regex_column` method.
+    def test__filter_valid_regex_rows_nan(self):
+        """Test the `_filter_valid_regex_rows` method.
 
         Expect nulls are counted as True.
         """
@@ -99,14 +99,14 @@ class TestRegexFormatAdherence:
         metric = RegexFormatAdherence()
 
         # Run
-        result, groups = metric._validate_regex_column(data, regex_format)
+        result, groups = metric._filter_valid_regex_rows(data, regex_format)
 
         # Assert
         assert result.equals(expected)
         assert groups is None
 
-    def test__validate_regex_column_with_groups(self):
-        """Test the `_validate_regex_column` method.
+    def test__filter_valid_regex_rows_with_groups(self):
+        """Test the `_filter_valid_regex_rows` method.
 
         Expect groups are returned.
         """
@@ -129,14 +129,14 @@ class TestRegexFormatAdherence:
         metric = RegexFormatAdherence()
 
         # Run
-        result, groups = metric._validate_regex_column(data, regex_format)
+        result, groups = metric._filter_valid_regex_rows(data, regex_format)
 
         # Assert
         assert len(result) == 4
         pd.testing.assert_frame_equal(groups, expected)
 
-    def test__validate_regex_column_with_groups_compare(self):
-        """Test the `_validate_regex_column` method.
+    def test__filter_valid_regex_rows_with_groups_compare(self):
+        """Test the `_filter_valid_regex_rows` method.
 
         Expect groups are returned.
         """
@@ -148,7 +148,7 @@ class TestRegexFormatAdherence:
         metric = RegexFormatAdherence()
 
         # Run
-        result, groups = metric._validate_regex_column(data, regex_format, compare)
+        result, groups = metric._filter_valid_regex_rows(data, regex_format, compare)
 
         # Assert
         assert len(result) == 2  # including nan
