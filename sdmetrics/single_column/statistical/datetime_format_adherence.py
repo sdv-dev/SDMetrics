@@ -101,7 +101,18 @@ class DatetimeFormatAdherence(SingleColumnMetric):
         if is_string_dtype(real_data[~real_data_nan]):
             real_valid_rows = cls._filter_valid_datetime_rows(real_data, datetime_format)
             if len(real_valid_rows) != len(real_data):
-                warnings.warn('The real data does not match the given datetime format.')
+                invalid = real_data[~real_data.index.isin(real_valid_rows.index)]
+                num_examples = 2
+                message = (
+                    'Some values in the real data do not match the specified datetime format: '
+                    + ', '.join(f"'{value}'" for value in invalid.head(num_examples).astype(str))
+                )
+
+                remaining = len(invalid) - num_examples
+                if remaining > 0:
+                    message += f' + {remaining} more.'
+
+                warnings.warn(message)
 
         synthetic_valid_rows = cls._filter_valid_datetime_rows(synthetic_data, datetime_format)
         score = len(synthetic_valid_rows) / len(synthetic_data)

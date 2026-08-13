@@ -129,15 +129,18 @@ class TestDatetimeFormatAdherence:
         assert result == 1.0
 
     def test_compute_warning(self):
-        """Test the ``compute`` method gives warning.
+        """Test the ``compute`` method.
 
-        If real data doesn't match the format, a warning is given.
+        Expect a warning is given when real data doesn't match the format.
         """
         # Setup
         real_data = pd.Series(['10/10/2020', '10/11/2021', '10/12/2022'])
         synthetic_data = pd.Series(['9-10-2020', '29-7-2020', '15-12-2020'])
         datetime_format = '%d-%m-%Y'
-        message = 'The real data does not match the given datetime format.'
+        message = (
+            'Some values in the real data do not match the specified datetime format: '
+            "'10/10/2020', '10/11/2021' + 1 more."
+        )
 
         metric = DatetimeFormatAdherence()
 
@@ -151,9 +154,9 @@ class TestDatetimeFormatAdherence:
         assert str(record[0].message) == message
 
     def test_compute_nans(self):
-        """Test the ``compute`` method with nan values.
+        """Test the ``compute`` method.
 
-        Nan values are not counted as a mismatch.
+        Expect nan values are not counted as a mismatch.
         """
         # Setup
         real_data = pd.Series(['10-10-2020', '10-11-2021', '10-12-2022'])
@@ -169,14 +172,17 @@ class TestDatetimeFormatAdherence:
         assert result == 1.0
 
     def test_compute_nans_with_incomplete_score(self):
-        """Test the ``compute`` method with nan and incomplete score."""
+        """Test the ``compute`` method.
+
+        Expect nan values are not counted as a mismatch when there are other mismatches.
+        """
         # Setup
         real_data = pd.Series(['10-10-2020', '10-11-2021', '10-12-2022'])
         synthetic_data = pd.Series([
             '2026-01-01',
             '2026-01-02',
             np.nan,
-            '2026-01-02 12:20:59',
+            '2026-01-41 12:20:59',
         ])
         datetime_format = '%Y-%m-%d'
 
