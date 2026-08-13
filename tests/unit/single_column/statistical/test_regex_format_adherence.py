@@ -74,7 +74,7 @@ class TestRegexFormatAdherence:
         """
         # Setup
         data = pd.Series(['first', 'second', 'third'])
-        regex_format = r'[a-z]{5, 6}'
+        regex_format = r'[a-z]{5,6}'
         expected = pd.Series([True, True, True])
 
         metric = RegexFormatAdherence()
@@ -93,7 +93,7 @@ class TestRegexFormatAdherence:
         """
         # Setup
         data = pd.Series([np.nan, 'second', '1234'])
-        regex_format = r'[a-z]{5, 6}'
+        regex_format = r'[a-z]{5,6}'
         expected = pd.Series([True, True, False])
 
         metric = RegexFormatAdherence()
@@ -153,7 +153,7 @@ class TestRegexFormatAdherence:
         # Assert
         assert len(result) == 2  # including nan
 
-    def test_compute(self, caplog):
+    def test_compute(self):
         """Test the `compute` method.
 
         Expect that the percentage of rows that match the regex format is returned.
@@ -169,17 +169,45 @@ class TestRegexFormatAdherence:
         # Setup
         real_data = pd.Series(['first', 'second', 'third', '1234'])
         synthetic_data = pd.Series([np.nan, 'second', 'third', '1234'])
-        regex_format = r'[a-z]{5, 6}'
-        message = 'The real data does not match the given regex format.'
+        regex_format = r'[a-z]{5,6}'
+        message = "Some values in the real data do not match the specified regex format: '1234'"
 
         metric = RegexFormatAdherence()
 
         # Run
-        result = metric.compute(real_data, synthetic_data, regex_format)
+        with pytest.warns(UserWarning) as record:
+            result = metric.compute(real_data, synthetic_data, regex_format)
 
         # Assert
         result == 0.75
-        message in caplog.text
+        assert len(record) == 1
+        assert str(record[0].message) == message
+
+
+    def test_compute_real_data_not_match(self):
+        """Test the `compute` method with real data not matching.
+
+        Expect that a warning is raised when all points in real_data do not match regex_format.
+        """
+        # Setup
+        real_data = pd.Series(['1abcd', 'Aabcd', '&abcd', '12345'])
+        synthetic_data = pd.Series(['first', 'second', 'third', 'abcde'])
+        regex_format = r'[a-z]{5,6}'
+        message = (
+            "Some values in the real data do not match the specified regex format: "
+            "'1abcd', 'Aabcd' + 2 more."
+        )
+
+        metric = RegexFormatAdherence()
+
+        # Run
+        with pytest.warns(UserWarning) as record:
+            result = metric.compute(real_data, synthetic_data, regex_format)
+
+        # Assert
+        result == 1.0
+        assert len(record) == 1
+        assert str(record[0].message) == message
 
     def test__compute_with_groups(self, caplog):
         """Test the `compute` method.

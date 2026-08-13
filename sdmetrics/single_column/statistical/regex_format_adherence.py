@@ -1,14 +1,12 @@
 """Regex Format Adherence Metric."""
 
-import logging
 import re
+import warnings
 
 import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
-
-LOGGER = logging.getLogger(__name__)
 
 
 class RegexFormatAdherence(SingleColumnMetric):
@@ -93,7 +91,18 @@ class RegexFormatAdherence(SingleColumnMetric):
 
         real_valid, real_groups = cls._validate_regex_column(real_data, regex_format)
         if len(real_valid) != len(real_data):
-            LOGGER.warning('The real data does not match the given regex format.')
+            invalid_values = real_data[~real_data.index.isin(real_valid.index)]
+            num_examples = 2
+            message = (
+                "Some values in the real data do not match the specified regex format: "
+                + ", ".join(f"'{value}'" for value in invalid_values.head(num_examples).astype(str))
+            )
+
+            remaining = len(invalid_values) - num_examples
+            if remaining > 0:
+                message += f" + {remaining} more."
+
+            warnings.warn(message)
 
         synthetic_valid, _ = cls._validate_regex_column(synthetic_data, regex_format, real_groups)
         score = len(synthetic_valid) / len(synthetic_data)
