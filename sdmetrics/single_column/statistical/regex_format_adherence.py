@@ -63,7 +63,7 @@ class RegexFormatAdherence(SingleColumnMetric):
         groups = None
         if re.compile(regex_format).groups:
             groups = column[regex_column].str.extract(regex_format)
-            if compare is not None:
+            if compare is not None and not compare.empty:
                 valid_groups = set(map(tuple, compare.dropna().to_numpy()))
                 regex_column = groups.apply(tuple, axis=1).isin(valid_groups)
 
@@ -94,13 +94,13 @@ class RegexFormatAdherence(SingleColumnMetric):
             invalid_values = real_data[~real_data.index.isin(real_valid.index)]
             num_examples = 2
             message = (
-                "Some values in the real data do not match the specified regex format: "
-                + ", ".join(f"'{value}'" for value in invalid_values.head(num_examples).astype(str))
+                'Some values in the real data do not match the specified regex format: '
+                + ', '.join(f"'{value}'" for value in invalid_values.head(num_examples).astype(str))
             )
 
             remaining = len(invalid_values) - num_examples
             if remaining > 0:
-                message += f" + {remaining} more."
+                message += f' + {remaining} more.'
 
             warnings.warn(message)
 
