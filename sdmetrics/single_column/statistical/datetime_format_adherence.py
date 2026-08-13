@@ -1,7 +1,7 @@
 """Datetime Format Adherence Metric."""
 
-import logging
 import re
+import warnings
 from datetime import datetime
 
 import numpy as np
@@ -10,8 +10,6 @@ from pandas.api.types import is_string_dtype
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
-
-LOGGER = logging.getLogger(__name__)
 
 
 class DatetimeFormatAdherence(SingleColumnMetric):
@@ -52,7 +50,7 @@ class DatetimeFormatAdherence(SingleColumnMetric):
             raise ValueError(message)
 
     @staticmethod
-    def _validate_datetime_column(column, datetime_format):
+    def _filter_valid_datetime_rows(column, datetime_format):
         """Return values from the column that match the specified datetime format.
 
         Args:
@@ -101,11 +99,11 @@ class DatetimeFormatAdherence(SingleColumnMetric):
 
         cls._validate_datetime_format(datetime_format)
         if is_string_dtype(real_data[~real_data_nan]):
-            real_valid_rows = cls._validate_datetime_column(real_data, datetime_format)
+            real_valid_rows = cls._filter_valid_datetime_rows(real_data, datetime_format)
             if len(real_valid_rows) != len(real_data):
-                LOGGER.warning('The real data does not match the given datetime format.')
+                warnings.warn('The real data does not match the given datetime format.')
 
-        synthetic_valid_rows = cls._validate_datetime_column(synthetic_data, datetime_format)
+        synthetic_valid_rows = cls._filter_valid_datetime_rows(synthetic_data, datetime_format)
         score = len(synthetic_valid_rows) / len(synthetic_data)
 
         return score

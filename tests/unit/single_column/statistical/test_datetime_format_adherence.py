@@ -59,8 +59,8 @@ class TestDatetimeFormatAdherence:
         with pytest.raises(ValueError, match=message):
             metric._validate_datetime_format(bad_format)
 
-    def test__validate_datetime_column(self):
-        """Test the `_validate_datetime_column` method.
+    def test__filter_valid_datetime_rows(self):
+        """Test the `_filter_valid_datetime_rows` method.
 
         Expect that valid rows (that match the format) are returned.
 
@@ -74,33 +74,33 @@ class TestDatetimeFormatAdherence:
         # Setup
         data = pd.Series(['9-10-2020', '29-7-2020', '15-12-2020'])
         datetime_format = '%d-%m-%Y'
-        expected = pd.Series([True, True, True])
+        expected = pd.Series(['9-10-2020', '29-7-2020', '15-12-2020'])
 
         metric = DatetimeFormatAdherence()
 
         # Run
-        result = metric._validate_datetime_column(data, datetime_format)
+        result = metric._filter_valid_datetime_rows(data, datetime_format)
 
         # Assert
-        result.equals(expected)
+        assert result.equals(expected)
 
-    def test__validate_datetime_column_nan(self):
-        """Test the `_validate_datetime_column` method.
+    def test__filter_valid_datetime_rows_nan(self):
+        """Test the `_filter_valid_datetime_rows` method.
 
         Expect nulls are counted as True.
         """
         # Setup
         data = pd.Series(['9-10-2020', None, '15-12-2020'])
         datetime_format = '%d-%m-%Y'
-        expected = pd.Series([True, True, True])
+        expected = pd.Series(['9-10-2020', None, '15-12-2020'])
 
         metric = DatetimeFormatAdherence()
 
         # Run
-        result = metric._validate_datetime_column(data, datetime_format)
+        result = metric._filter_valid_datetime_rows(data, datetime_format)
 
         # Assert
-        result.equals(expected)
+        assert result.equals(expected)
 
     def test_compute(self):
         """Test the ``compute`` method.
@@ -128,6 +128,28 @@ class TestDatetimeFormatAdherence:
         # Assert
         assert result == 1.0
 
+    def test_compute_warning(self):
+        """Test the ``compute`` method gives warning.
+
+        If real data doesn't match the format, a warning is given.
+        """
+        # Setup
+        real_data = pd.Series(['10/10/2020', '10/11/2021', '10/12/2022'])
+        synthetic_data = pd.Series(['9-10-2020', '29-7-2020', '15-12-2020'])
+        datetime_format = '%d-%m-%Y'
+        message = 'The real data does not match the given datetime format.'
+
+        metric = DatetimeFormatAdherence()
+
+        # Run
+        with pytest.warns(UserWarning) as record:
+            result = metric.compute(real_data, synthetic_data, datetime_format)
+
+        # Assert
+        assert result == 1.0
+        assert len(record) == 1
+        assert str(record[0].message) == message
+
     def test_compute_nans(self):
         """Test the ``compute`` method with nan values.
 
@@ -145,6 +167,26 @@ class TestDatetimeFormatAdherence:
 
         # Assert
         assert result == 1.0
+
+    def test_compute_nans_with_incomplete_score(self):
+        """Test the ``compute`` method with nan and incomplete score."""
+        # Setup
+        real_data = pd.Series(['10-10-2020', '10-11-2021', '10-12-2022'])
+        synthetic_data = pd.Series([
+            '2026-01-01',
+            '2026-01-02',
+            np.nan,
+            '2026-01-02 12:20:59',
+        ])
+        datetime_format = '%Y-%m-%d'
+
+        metric = DatetimeFormatAdherence()
+
+        # Run
+        result = metric.compute(real_data, synthetic_data, datetime_format)
+
+        # Assert
+        assert result == 0.75
 
     def test_compute_datetime_error(self):
         """Test the ``compute`` method with datetime64 type.
