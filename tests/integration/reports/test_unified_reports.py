@@ -5,6 +5,7 @@ import pandas as pd
 
 from sdmetrics.demos import load_multi_table_demo, load_single_table_demo
 from sdmetrics.reports import DiagnosticReport, QualityReport
+from tests.utils import assert_report_scores_are_not_nan
 
 
 def _set_thresholds_zero(report):
@@ -187,6 +188,7 @@ def test_unified_diagnostic_report_single_table():
         report.get_details('Data Structure'), expected_details_data_structure
     )
     assert report.get_score() == 1.0
+    assert_report_scores_are_not_nan(report)
     _assert_report_info(
         report, 'DiagnosticReport', {'student_placements': 215}, {'student_placements': 215}
     )
@@ -278,6 +280,7 @@ def test_unified_quality_report_single_table():
     assert report.get_score() == 0.8393750143888287
     assert report._properties['Column Shapes'].num_rows_subsample is None
     assert report._properties['Column Pair Trends'].num_rows_subsample is None
+    assert_report_scores_are_not_nan(report)
     _assert_report_info(
         report, 'QualityReport', {'student_placements': 215}, {'student_placements': 215}
     )
@@ -432,6 +435,7 @@ def test_unified_diagnostic_report_multi_table():
         report.get_details('Data Validity', 'users'), expected_details_users
     )
     assert report.get_score() == 1.0
+    assert_report_scores_are_not_nan(report)
     _assert_report_info(
         report,
         'DiagnosticReport',
@@ -540,6 +544,7 @@ def test_unified_quality_report_multi_table():
     pd.testing.assert_frame_equal(details[5], expected_details_all_cpt)
     pd.testing.assert_frame_equal(details[6], expected_details_cardinality)
     pd.testing.assert_frame_equal(details[7], expected_details_intertable_trends)
+    assert_report_scores_are_not_nan(report)
     _assert_report_info(
         report,
         'QualityReport',

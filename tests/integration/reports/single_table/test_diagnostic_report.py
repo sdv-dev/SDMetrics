@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from sdmetrics.reports.single_table import DiagnosticReport
+from tests.utils import assert_report_scores_are_not_nan
 
 
 class TestDiagnosticReport:
@@ -130,6 +131,7 @@ class TestDiagnosticReport:
         pd.testing.assert_frame_equal(
             report.get_details('Data Structure'), expected_details_data_structure
         )
+        assert_report_scores_are_not_nan(report)
 
     def test_end_to_end_composite_keys(self, single_table_demo_data_and_metadata):
         """Test the end-to-end functionality of the diagnostic report."""
@@ -214,6 +216,7 @@ class TestDiagnosticReport:
         pd.testing.assert_frame_equal(
             report.get_details('Data Structure'), expected_details_data_structure
         )
+        assert_report_scores_are_not_nan(report)
 
     def test_generate_with_object_datetimes(self, single_table_demo_data_and_metadata):
         """Test the diagnostic report with object datetimes."""

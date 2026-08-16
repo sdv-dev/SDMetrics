@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from sdmetrics.reports.single_table import QualityReport
-from tests.utils import get_error_type
+from tests.utils import assert_report_scores_are_not_nan, get_error_type
 
 
 def _set_thresholds_zero(report):
@@ -76,7 +76,10 @@ class TestQualityReport:
 
     @pytest.mark.parametrize('key_type', ['single', 'composite'])
     def test_report_end_to_end(
-        self, key_type, composite_keys_single_table_demo, single_table_demo_data_and_metadata
+        self,
+        key_type,
+        composite_keys_single_table_demo,
+        single_table_demo_data_and_metadata,
     ):
         """Test the quality report end to end.
 
@@ -172,6 +175,7 @@ class TestQualityReport:
         assert report.get_score() == 0.8393750143888287
         assert report._properties['Column Shapes'].num_rows_subsample is None
         assert report._properties['Column Pair Trends'].num_rows_subsample is None
+        assert_report_scores_are_not_nan(report)
         report_info = report.get_info()
         assert report_info == report.report_info
 

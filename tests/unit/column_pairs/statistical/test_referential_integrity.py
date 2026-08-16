@@ -7,8 +7,8 @@ from sdmetrics.column_pairs.statistical import ReferentialIntegrity
 
 
 class TestReferentialIntegrity:
-    def test_compute_breakdown(self):
-        """Test the ``compute_breakdown`` method."""
+    def test_compute_breakdown_with_dataframes(self):
+        """Test the ``compute_breakdown`` method with DataFrame inputs."""
         # Setup
         real_data = pd.DataFrame({'primary_key': [1, 2, 3, 4, 5], 'foreign_key': [1, 2, 3, 2, 1]})
         synthetic_data = pd.DataFrame({
@@ -22,6 +22,23 @@ class TestReferentialIntegrity:
 
         # Run
         result = metric.compute_breakdown(tuple_real, tuple_synthetic)
+
+        # Assert
+        assert result == {'score': 0.8}
+
+    def test_compute_breakdown_with_series(self):
+        """Test the ``compute_breakdown`` method with Series inputs."""
+        # Setup
+        real_data = pd.DataFrame({'primary_key': [1, 2, 3, 4, 5], 'foreign_key': [1, 2, 3, 2, 1]})
+        synthetic_data = pd.DataFrame({
+            'primary_key': [1, 2, 3, 4, 5],
+            'foreign_key': [1, 6, 3, 4, 5],
+        })
+        tuple_real = (real_data['primary_key'], real_data['foreign_key'])
+        tuple_synthetic = (synthetic_data['primary_key'], synthetic_data['foreign_key'])
+
+        # Run
+        result = ReferentialIntegrity.compute_breakdown(tuple_real, tuple_synthetic)
 
         # Assert
         assert result == {'score': 0.8}
