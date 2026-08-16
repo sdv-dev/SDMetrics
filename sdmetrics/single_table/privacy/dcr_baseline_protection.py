@@ -91,9 +91,9 @@ class DCRBaselineProtection(SingleTableMetric):
                 and the median DCR score between the random data and real data.
                 Averages of the medians are returned in the case of multiple iterations.
         """
-        metadata, table_name = _get_single_table_metadata(metadata, table_name)
-        real_data = get_table_data_from_dict(real_data, table_name)
-        synthetic_data = get_table_data_from_dict(synthetic_data, table_name)
+        metadata = _get_single_table_metadata(metadata, table_name)
+        real_data = get_table_data_from_dict(real_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
         num_rows_subsample, num_iterations = cls._validate_inputs(
             real_data,
             synthetic_data,

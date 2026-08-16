@@ -359,11 +359,10 @@ def test__get_single_table_metadata_single_table():
     metadata = {'tables': {'table': table_metadata}}
 
     # Run
-    result, table_name = _get_single_table_metadata(metadata)
+    result = _get_single_table_metadata(metadata)
 
     # Assert
     assert result == table_metadata
-    assert table_name == 'table'
 
 
 def test__get_single_table_metadata_multiple_tables():
@@ -378,11 +377,10 @@ def test__get_single_table_metadata_multiple_tables():
     }
 
     # Run
-    result, table_name = _get_single_table_metadata(metadata, 'selected')
+    result = _get_single_table_metadata(metadata, 'selected')
 
     # Assert
     assert result == selected_metadata
-    assert table_name == 'selected'
 
 
 def test__get_single_table_metadata_invalid_tables():

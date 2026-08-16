@@ -210,10 +210,9 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         fixed_value,
     ):
         """Compute the score breakdown of the metric."""
-        metadata, table_name = _get_single_table_metadata(metadata, table_name)
-        real_training_data = get_table_data_from_dict(real_training_data, table_name)
-        synthetic_data = get_table_data_from_dict(synthetic_data, table_name)
-        real_validation_data = get_table_data_from_dict(real_validation_data, table_name)
+        metadata = _get_single_table_metadata(metadata, table_name)
+        real_training_data = get_table_data_from_dict(real_training_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
         _validate_inputs(
             real_training_data,
             synthetic_data,

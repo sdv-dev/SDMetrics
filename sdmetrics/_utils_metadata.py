@@ -54,16 +54,16 @@ def _validate_unified_metadata(metadata):
 
 
 def _get_single_table_metadata(metadata, table_name=None):
-    """Get single table metadata and its table_name."""
+    """Get single table metadata."""
     if table_name is not None and not isinstance(table_name, str):
         raise TypeError('`table_name` must be a string.')
 
     if metadata is None:
-        return None, table_name
+        return None
 
     _validate_metadata_dict(metadata)
     if 'tables' not in metadata:
-        return metadata, table_name
+        return metadata
 
     tables = metadata['tables']
     _validate_metadata_dict(tables)
@@ -81,7 +81,7 @@ def _get_single_table_metadata(metadata, table_name=None):
     elif table_name not in tables:
         raise ValueError(f"Unknown table ('{table_name}'). Must be one of {table_names}.")
 
-    return tables[table_name], table_name
+    return tables[table_name]
 
 
 def handle_single_and_multi_table(single_table_func):

@@ -8,7 +8,7 @@ from sdmetrics._utils_metadata import _get_single_table_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.loss import InverseCDFDistance
-from sdmetrics.utils import get_columns_from_metadata, get_table_data_from_dict
+from sdmetrics.utils import get_columns_from_metadata
 
 
 class CategoricalType(Enum):
@@ -131,9 +131,7 @@ class CategoricalPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        metadata, table_name = _get_single_table_metadata(metadata, table_name)
-        real_data = get_table_data_from_dict(real_data, table_name)
-        synthetic_data = get_table_data_from_dict(synthetic_data, table_name)
+        metadata = _get_single_table_metadata(metadata, table_name)
         key_fields, sensitive_fields, metadata = cls._validate_inputs(
             real_data, synthetic_data, metadata, key_fields, sensitive_fields
         )
@@ -298,9 +296,7 @@ class NumericalPrivacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the attackers when evaluated on the real data.
         """
-        metadata, table_name = _get_single_table_metadata(metadata, table_name)
-        real_data = get_table_data_from_dict(real_data, table_name)
-        synthetic_data = get_table_data_from_dict(synthetic_data, table_name)
+        metadata = _get_single_table_metadata(metadata, table_name)
         key_fields, sensitive_fields, metadata = cls._validate_inputs(
             real_data, synthetic_data, metadata, key_fields, sensitive_fields
         )

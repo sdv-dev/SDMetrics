@@ -77,9 +77,9 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
             Union[float, tuple[float]]:
                 Metric output.
         """
-        metadata, table_name = _get_single_table_metadata(metadata, table_name)
-        real_data = get_table_data_from_dict(real_data, table_name)
-        synthetic_data = get_table_data_from_dict(synthetic_data, table_name)
+        metadata = _get_single_table_metadata(metadata, table_name)
+        real_data = get_table_data_from_dict(real_data)
+        synthetic_data = get_table_data_from_dict(synthetic_data)
         real_data, synthetic_data = real_data.copy(), synthetic_data.copy()
         _, sequence_key = cls._validate_inputs(
             real_data=real_data,

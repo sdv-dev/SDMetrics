@@ -120,12 +120,10 @@ class SingleTableMetric(BaseMetric):
                 The validated data and metadata.
         """
         if table_name is not BACKWARDS_COMPATIBLE_NONE:
-            metadata, table_name = _get_single_table_metadata(metadata, table_name)
-        else:
-            table_name = None
+            metadata = _get_single_table_metadata(metadata, table_name)
 
-        real_data = get_table_data_from_dict(real_data, table_name).copy()
-        synthetic_data = get_table_data_from_dict(synthetic_data, table_name).copy()
+        real_data = get_table_data_from_dict(real_data).copy()
+        synthetic_data = get_table_data_from_dict(synthetic_data).copy()
         if set(real_data.columns) != set(synthetic_data.columns):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 
