@@ -113,7 +113,7 @@ class GMLogLikelihood(SingleTableMetric):
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict.
-            table_name (str):
+            table_name (str or None):
                 Name of the table to use when ``metadata`` contains multiple tables.
             n_components (Union[int, tuple[int]]):
                 Number of components to use for the GMM. If a tuple with

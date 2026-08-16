@@ -121,7 +121,7 @@ class MLEfficacyMetric(SingleTableMetric):
                 The values from the training dataset.
             metadata (dict):
                 Table metadata dict. If not passed, it is built from the data.
-            table_name (str):
+            table_name (str or None):
                 Name of the table to use when ``metadata`` contains multiple tables.
             target (str):
                 Name of the column to use as the target.

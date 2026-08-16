@@ -394,6 +394,16 @@ def test__get_single_table_metadata_invalid_tables():
         _get_single_table_metadata(metadata)
 
 
+def test__get_single_table_metadata_no_tables():
+    """Test it with no tables."""
+    # Setup
+    metadata = {'tables': {}}
+
+    # Run and Assert
+    with pytest.raises(ValueError, match=re.escape('Metadata does not contain any tables.')):
+        _get_single_table_metadata(metadata)
+
+
 def test__get_single_table_metadata_requires_name():
     """Test it requires table name."""
     # Setup

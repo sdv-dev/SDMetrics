@@ -183,7 +183,7 @@ class SingleTableMetric(BaseMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
-            table_name (str):
+            table_name (str or None):
                 Name of the table to use when ``metadata`` contains multiple tables.
 
         Returns:
@@ -204,7 +204,7 @@ class SingleTableMetric(BaseMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
-            table_name (str):
+            table_name (str or None):
                 Name of the table to use when ``metadata`` contains multiple tables.
             real_data (Union[numpy.ndarray, pandas.Series]):
                 The values from the real dataset, passed as a 1d numpy

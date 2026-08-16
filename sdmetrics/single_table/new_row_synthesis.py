@@ -55,7 +55,7 @@ class NewRowSynthesis(SingleTableMetric):
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict.
-            table_name (str):
+            table_name (str or None):
                 Name of the table to use when ``metadata`` contains multiple tables.
             numerical_match_tolerance (float):
                 A float larger than 0 representing how close two numerical values have to be
@@ -188,7 +188,7 @@ class NewRowSynthesis(SingleTableMetric):
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict.
-            table_name (str):
+            table_name (str or None):
                 Name of the table to use when ``metadata`` contains multiple tables.
             numerical_match_tolerance (float):
                 A float larger than 0 representing how close two numerical values have to be

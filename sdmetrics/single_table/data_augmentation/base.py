@@ -293,7 +293,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             metadata (dict):
                 The metadata dictionary describing the table of data.
             table_name (str):
-                The name of the table to use from the metadata and data dictionaries.
+                The name of the table to use from the metadata.
             prediction_column_name (str):
                 The name of the column to be predicted.
             minority_class_label (int):

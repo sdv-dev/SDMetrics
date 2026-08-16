@@ -132,7 +132,7 @@ class BNLikelihood(BNLikelihoodBase):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes. Optionally, the metadata can include
                 a ``structure`` entry with the structure of the Bayesian Network.
-            table_name (str):
+            table_name (str or None):
                 Name of the table to use when ``metadata`` contains multiple tables.
             structure (dict):
                 Optional. BayesianNetwork structure to use when fitting
@@ -214,7 +214,7 @@ class BNLogLikelihood(BNLikelihoodBase):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes. Optionally, the metadata can include
                 a ``structure`` entry with the structure of the Bayesian Network.
-            table_name (str):
+            table_name (str or None):
                 Name of the table to use when ``metadata`` contains multiple tables.
             structure (dict):
                 Optional. BayesianNetwork structure to use when fitting
