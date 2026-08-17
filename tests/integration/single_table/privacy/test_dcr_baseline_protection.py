@@ -25,10 +25,10 @@ class TestDCRBaselineProtection:
 
         # Run
         compute_breakdown_result = DCRBaselineProtection.compute_breakdown(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, 'student_placements'
         )
         compute_same_data = DCRBaselineProtection.compute_breakdown(
-            synthetic_data, synthetic_data, metadata
+            synthetic_data, synthetic_data, metadata, 'student_placements'
         )
 
         median_key = 'median_DCR_to_real_data'
@@ -53,7 +53,7 @@ class TestDCRBaselineProtection:
             }
         }
 
-        result = DCRBaselineProtection.compute_breakdown(real_data, synth_data, metadata)
+        result = DCRBaselineProtection.compute_breakdown(real_data, synth_data, metadata, 'table')
         assert result['score'] == 0.0
         assert result['median_DCR_to_real_data']['random_data_baseline'] > 0
 
@@ -68,19 +68,19 @@ class TestDCRBaselineProtection:
 
         # Run
         compute_subsample = DCRBaselineProtection.compute_breakdown(
-            real_data, synthetic_data, metadata, num_rows_subsample
+            real_data, synthetic_data, metadata, 'table', num_rows_subsample
         )
         compute_full_1 = DCRBaselineProtection.compute_breakdown(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, 'table'
         )
         compute_full_2 = DCRBaselineProtection.compute_breakdown(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, 'table'
         )
 
         large_subsample_msg = re.escape('Ignoring the num_rows_subsample and num_iterations args.')
         with pytest.warns(UserWarning, match=large_subsample_msg):
             compute_large_subsample = DCRBaselineProtection.compute_breakdown(
-                real_data, synthetic_data, metadata, large_num_subsample
+                real_data, synthetic_data, metadata, 'table', large_num_subsample
             )
 
         # Assert that subsampling provides different values.
@@ -110,6 +110,7 @@ class TestDCRBaselineProtection:
             real_data,
             synthetic_data,
             metadata,
+            'table',
         )
 
         # Assert
@@ -125,7 +126,10 @@ class TestDCRBaselineProtection:
 
         # Run
         result = DCRBaselineProtection.compute_breakdown(
-            real_data=real_data, synthetic_data=synthetic_data, metadata=metadata
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            table_name='table',
         )
 
         # Assert
@@ -140,7 +144,10 @@ class TestDCRBaselineProtection:
 
         # Run
         result = DCRBaselineProtection.compute_breakdown(
-            real_data=real_data, synthetic_data=synthetic_data, metadata=metadata
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            table_name='table',
         )
 
         # Assert
@@ -157,7 +164,10 @@ class TestDCRBaselineProtection:
 
         # Run
         result = DCRBaselineProtection.compute_breakdown(
-            real_data=real_data, synthetic_data=synthetic_data, metadata=metadata
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            table_name='table',
         )
 
         # Assert
@@ -177,6 +187,7 @@ class TestDCRBaselineProtection:
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
+            table_name='table',
         )
 
         # Assert
@@ -224,6 +235,7 @@ class TestDCRBaselineProtection:
                 real_data=real_data,
                 synthetic_data=synthetic_data,
                 metadata=metadata,
+                table_name='table',
             )
 
         metadata['columns']['datetime_str_no_fmt']['datetime_format'] = '%b %d %Y'
@@ -231,6 +243,7 @@ class TestDCRBaselineProtection:
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
+            table_name='table',
         )
 
         # Assert
@@ -251,17 +264,20 @@ class TestDCRBaselineProtection:
                 real_data=real_data,
                 synthetic_data=synthetic_data,
                 metadata=metadata,
+                table_name='table',
             )
             result_2 = DCRBaselineProtection.compute_breakdown(
                 real_data=real_data,
                 synthetic_data=synthetic_data,
                 metadata=metadata,
+                table_name='table',
             )
         with patch.object(DCRBaselineProtection, '_seed', new=5):
             result_3 = DCRBaselineProtection.compute_breakdown(
                 real_data=real_data,
                 synthetic_data=synthetic_data,
                 metadata=metadata,
+                table_name='table',
             )
 
         # Assert

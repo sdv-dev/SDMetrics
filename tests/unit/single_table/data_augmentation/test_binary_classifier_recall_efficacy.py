@@ -30,6 +30,7 @@ class TestBinaryClassifierPrecisionEfficacy:
         synthetic_data = pd.DataFrame()
         real_validation_data = pd.DataFrame()
         metadata = {}
+        table_name = 'table'
         prediction_column_name = 'prediction_column_name'
         minority_class_label = 'minority_class_label'
 
@@ -39,20 +40,22 @@ class TestBinaryClassifierPrecisionEfficacy:
             synthetic_data=synthetic_data,
             real_validation_data=real_validation_data,
             metadata=metadata,
+            table_name=table_name,
             prediction_column_name=prediction_column_name,
             minority_class_label=minority_class_label,
         )
 
         # Assert
         mock_compute_breakdown.assert_called_once_with(
-            real_training_data,
-            synthetic_data,
-            real_validation_data,
-            metadata,
-            prediction_column_name,
-            minority_class_label,
-            'XGBoost',
-            0.9,
+            real_training_data=real_training_data,
+            synthetic_data=synthetic_data,
+            real_validation_data=real_validation_data,
+            metadata=metadata,
+            table_name=table_name,
+            prediction_column_name=prediction_column_name,
+            minority_class_label=minority_class_label,
+            classifier='XGBoost',
+            fixed_value=0.9,
         )
 
     @patch('sdmetrics.single_table.data_augmentation.base.BaseDataAugmentationMetric.compute')
@@ -63,6 +66,7 @@ class TestBinaryClassifierPrecisionEfficacy:
         synthetic_data = pd.DataFrame()
         real_validation_data = pd.DataFrame()
         metadata = {}
+        table_name = 'table'
         prediction_column_name = 'prediction_column_name'
         minority_class_label = 'minority_class_label'
         classifier = 'XGBoost'
@@ -74,6 +78,7 @@ class TestBinaryClassifierPrecisionEfficacy:
             synthetic_data=synthetic_data,
             real_validation_data=real_validation_data,
             metadata=metadata,
+            table_name=table_name,
             prediction_column_name=prediction_column_name,
             minority_class_label=minority_class_label,
             classifier=classifier,
@@ -82,12 +87,13 @@ class TestBinaryClassifierPrecisionEfficacy:
 
         # Assert
         mock_compute.assert_called_once_with(
-            real_training_data,
-            synthetic_data,
-            real_validation_data,
-            metadata,
-            prediction_column_name,
-            minority_class_label,
-            classifier,
-            fixed_precision_value,
+            real_training_data=real_training_data,
+            synthetic_data=synthetic_data,
+            real_validation_data=real_validation_data,
+            metadata=metadata,
+            table_name=table_name,
+            prediction_column_name=prediction_column_name,
+            minority_class_label=minority_class_label,
+            classifier=classifier,
+            fixed_value=fixed_precision_value,
         )

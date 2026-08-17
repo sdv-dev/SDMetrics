@@ -29,22 +29,23 @@ class TestDCROverfittingProtection:
 
         # Run
         compute_breakdown_result = DCROverfittingProtection.compute_breakdown(
-            train_df, synthetic_data, holdout_df, metadata
+            train_df, synthetic_data, holdout_df, metadata, 'student_placements'
         )
         compute_result = DCROverfittingProtection.compute(
-            train_df, synthetic_data, holdout_df, metadata
+            train_df, synthetic_data, holdout_df, metadata, 'student_placements'
         )
         compute_holdout_same = DCROverfittingProtection.compute_breakdown(
-            train_df, synthetic_data, synthetic_data, metadata
+            train_df, synthetic_data, synthetic_data, metadata, 'student_placements'
         )
         compute_train_same = DCROverfittingProtection.compute_breakdown(
-            synthetic_data, synthetic_data, holdout_df, metadata
+            synthetic_data, synthetic_data, holdout_df, metadata, 'student_placements'
         )
         compute_all_same = DCROverfittingProtection.compute_breakdown(
             synthetic_data,
             synthetic_data,
             synthetic_data,
             metadata,
+            'student_placements',
         )
 
         synth_percentages_key = 'synthetic_data_percentages'
@@ -79,7 +80,7 @@ class TestDCROverfittingProtection:
 
         # Run
         result = DCROverfittingProtection.compute_breakdown(
-            train_data, synth_data, holdout_data, metadata
+            train_data, synth_data, holdout_data, metadata, 'table'
         )
 
         # Assert
@@ -99,20 +100,30 @@ class TestDCROverfittingProtection:
 
         # Run
         compute_subsample = DCROverfittingProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample
+            train_data,
+            synthetic_data,
+            holdout_data,
+            metadata,
+            'table',
+            num_rows_subsample,
         )
 
         large_subsample_msg = re.escape('Ignoring the num_rows_subsample and num_iterations args.')
         with pytest.warns(UserWarning, match=large_subsample_msg):
             compute_large_subsample = DCROverfittingProtection.compute_breakdown(
-                train_data, synthetic_data, holdout_data, metadata, large_num_subsample
+                train_data,
+                synthetic_data,
+                holdout_data,
+                metadata,
+                'table',
+                large_num_subsample,
             )
 
         compute_full_1 = DCROverfittingProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata
+            train_data, synthetic_data, holdout_data, metadata, 'table'
         )
         compute_full_2 = DCROverfittingProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata
+            train_data, synthetic_data, holdout_data, metadata, 'table'
         )
 
         # Assert that subsampling provides different values if smaller than data length.
@@ -132,10 +143,16 @@ class TestDCROverfittingProtection:
 
         # Run
         compute_num_iteration_1 = DCROverfittingProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, 1
+            train_data, synthetic_data, holdout_data, metadata, 'table', num_rows_subsample, 1
         )
         compute_num_iteration_1000 = DCROverfittingProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, num_iterations
+            train_data,
+            synthetic_data,
+            holdout_data,
+            metadata,
+            'table',
+            num_rows_subsample,
+            num_iterations,
         )
 
         # Assert
@@ -190,6 +207,7 @@ class TestDCROverfittingProtection:
                 synthetic_data=synthetic_data,
                 real_validation_data=holdout_data,
                 metadata=metadata,
+                table_name='table',
             )
 
         metadata['columns']['datetime_str_no_fmt']['datetime_format'] = '%b %d %Y'
@@ -198,6 +216,7 @@ class TestDCROverfittingProtection:
             synthetic_data=synthetic_data,
             real_validation_data=holdout_data,
             metadata=metadata,
+            table_name='table',
         )
 
         # Assert
