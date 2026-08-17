@@ -90,6 +90,7 @@ class TestSingleTableMetric:
     def test_compute_breakdown_uses_legacy(self):
         """Test it with legacy subclass (doesn't have table_name in signature)."""
 
+        # Setup
         class LegacySingleTableMetric(SingleTableMetric):
             @classmethod
             def compute(cls, real_data, synthetic_data, metadata=None):

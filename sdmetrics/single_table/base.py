@@ -19,6 +19,7 @@ from sdmetrics.utils import (
     get_type_from_column_meta,
 )
 
+# Distinguish an omitted table name from an explicitly passed ``None``.
 BACKWARDS_COMPATIBLE_NONE = object()
 
 

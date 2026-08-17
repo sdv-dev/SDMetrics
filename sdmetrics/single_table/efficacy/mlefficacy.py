@@ -56,9 +56,6 @@ class MLEfficacy(MLEfficacyMetric):
                 Name of the table to use when ``metadata`` contains multiple tables.
             target (str):
                 Name of the column to use as the target.
-            scorer (Union[callable, list[callable], NoneType]):
-                Scorer (or list of scorers) to apply. If not passed, use the default
-                one for the type of metric.
 
         Returns:
             union[float, tuple[float]]:
