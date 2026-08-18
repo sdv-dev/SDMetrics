@@ -4,7 +4,13 @@ import plotly.express as px
 
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
-from sdmetrics.single_column import BoundaryAdherence, CategoryAdherence, KeyUniqueness
+from sdmetrics.single_column import (
+    BoundaryAdherence,
+    CategoryAdherence,
+    DatetimeFormatAdherence,
+    KeyUniqueness,
+    RegexFormatAdherence,
+)
 from sdmetrics.utils import (
     get_alternate_keys,
     get_columns_from_metadata,
@@ -25,10 +31,11 @@ class DataValidity(BaseSingleTableProperty):
 
     _num_iteration_case = 'column'
     _sdtype_to_metric = {
-        'numerical': BoundaryAdherence,
-        'datetime': BoundaryAdherence,
-        'categorical': CategoryAdherence,
-        'boolean': CategoryAdherence,
+        'numerical': [BoundaryAdherence],
+        'datetime': [BoundaryAdherence, DatetimeFormatAdherence],
+        'categorical': [CategoryAdherence],
+        'boolean': [CategoryAdherence],
+        'id': [RegexFormatAdherence],
     }
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
@@ -66,28 +73,47 @@ class DataValidity(BaseSingleTableProperty):
             is_unique = primary_key_match or alternate_key_match
             is_sequence_index = column_name == sequence_index
 
-            try:
-                if sdtype not in self._sdtype_to_metric and not is_unique:
-                    continue
+            if sdtype not in self._sdtype_to_metric and not is_unique:
+                continue
 
-                if is_sequence_index and self._sdtype_to_metric.get(sdtype) == BoundaryAdherence:
-                    continue
+            if is_sequence_index and BoundaryAdherence in self._sdtype_to_metric.get(sdtype):
+                continue
 
-                metric = self._sdtype_to_metric.get(sdtype, KeyUniqueness)
-                column_score = metric.compute(real_data[column_name], synthetic_data[column_name])
-                error_message = None
+            metrics = self._sdtype_to_metric.get(sdtype, [KeyUniqueness])
+            for metric in metrics:
+                try:
+                    if metric in [DatetimeFormatAdherence, RegexFormatAdherence]:
+                        if metric == DatetimeFormatAdherence:
+                            format_name = 'datetime_format'
 
-            except Exception as e:
-                column_score = np.nan
-                error_message = f'{type(e).__name__}: {e}'
-            finally:
-                if progress_bar:
-                    progress_bar.update()
+                        elif metric == RegexFormatAdherence:
+                            format_name = 'regex_format'
 
-            column_names.append(column_name)
-            metric_names.append(metric.__name__)
-            scores.append(column_score)
-            error_messages.append(error_message)
+                        format = columns_meta[column_name].get(format_name)
+                        if format is None:
+                            continue
+
+                        column_score = metric.compute(
+                            real_data[column_name], synthetic_data[column_name], format
+                        )
+                    else:
+                        column_score = metric.compute(
+                            real_data[column_name], synthetic_data[column_name]
+                        )
+
+                    error_message = None
+
+                except Exception as e:
+                    column_score = np.nan
+                    error_message = f'{type(e).__name__}: {e}'
+                finally:
+                    if progress_bar:
+                        progress_bar.update()
+
+                column_names.append(column_name)
+                metric_names.append(metric.__name__)
+                scores.append(column_score)
+                error_messages.append(error_message)
 
         result = pd.DataFrame({
             'Column': column_names,
