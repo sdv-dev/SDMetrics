@@ -73,7 +73,7 @@ class DataValidity(BaseSingleTableProperty):
             is_unique = primary_key_match or alternate_key_match
             is_sequence_index = column_name == sequence_index
 
-            if sdtype not in self._sdtype_to_metric and not is_unique:
+            if (sdtype == 'id' or sdtype not in self._sdtype_to_metric) and not is_unique:
                 continue
 
             if is_sequence_index and BoundaryAdherence in self._sdtype_to_metric.get(sdtype):
