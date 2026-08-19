@@ -1,8 +1,8 @@
 import pandas as pd
+from tests.utils import _cast_datetime_and_id_to_string
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties import DataValidity
-
 
 
 class TestDataValidity:
@@ -10,14 +10,8 @@ class TestDataValidity:
         """Test the ``get_score`` method"""
         # Setup
         real_data, synthetic_data, metadata = load_demo('single_table')
-
-        for column in ['start_date', 'end_date', 'student_id']:
-            real_data['student_placements'][column] = (
-                real_data['student_placements'][column].astype(str).replace('NaT', None)
-            )
-            synthetic_data['student_placements'][column] = (
-                synthetic_data['student_placements'][column].astype(str).replace('NaT', None)
-            )
+        real_data = _cast_datetime_and_id_to_string(real_data, metadata)
+        synthetic_data = _cast_datetime_and_id_to_string(synthetic_data, metadata)
 
         # Run
         data_validity_property = DataValidity()
