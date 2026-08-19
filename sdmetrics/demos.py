@@ -12,7 +12,7 @@ def _load_table(metadata, path):
         if column_meta['sdtype'] == 'datetime':
             datetime_columns.append(column)
 
-    return pd.read_csv(path, parse_dates=datetime_columns)
+    return pd.read_csv(path)
 
 
 def load_demo(modality='multi_table'):
