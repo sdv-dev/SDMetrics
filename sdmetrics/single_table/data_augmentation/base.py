@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.metrics import confusion_matrix, precision_recall_curve, precision_score, recall_score
 from xgboost import XGBClassifier
 
+from sdmetrics._utils_metadata import _get_single_table_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.data_augmentation.utils import _validate_inputs
@@ -202,12 +203,14 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         synthetic_data,
         real_validation_data,
         metadata,
+        table_name,
         prediction_column_name,
         minority_class_label,
         classifier,
         fixed_value,
     ):
         """Compute the score breakdown of the metric."""
+        metadata = _get_single_table_metadata(metadata, table_name)
         real_training_data = get_table_data_from_dict(real_training_data)
         synthetic_data = get_table_data_from_dict(synthetic_data)
         _validate_inputs(
@@ -272,6 +275,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
         synthetic_data,
         real_validation_data,
         metadata,
+        table_name,
         prediction_column_name,
         minority_class_label,
         classifier,
@@ -288,6 +292,8 @@ class BaseDataAugmentationMetric(SingleTableMetric):
                 The real validation data.
             metadata (dict):
                 The metadata dictionary describing the table of data.
+            table_name (str):
+                The name of the table to use from the metadata.
             prediction_column_name (str):
                 The name of the column to be predicted.
             minority_class_label (int):
@@ -308,6 +314,7 @@ class BaseDataAugmentationMetric(SingleTableMetric):
             synthetic_data,
             real_validation_data,
             metadata,
+            table_name,
             prediction_column_name,
             minority_class_label,
             classifier,

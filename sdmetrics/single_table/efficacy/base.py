@@ -69,14 +69,19 @@ class MLEfficacyMetric(SingleTableMetric):
         return predictions
 
     @classmethod
-    def _validate_inputs(cls, test_data, train_data, metadata, target):
-        test_data, train_data, metadata = super()._validate_inputs(test_data, train_data, metadata)
+    def _validate_inputs(cls, test_data, train_data, metadata, table_name, target):
+        test_data, train_data, metadata = super()._validate_inputs(
+            test_data,
+            train_data,
+            metadata,
+            table_name,
+        )
         if 'target' in metadata:
             target = metadata['target']
         elif target is None:
             raise TypeError('`target` must be passed either directly or inside `metadata`')
 
-        return target
+        return test_data, train_data, metadata, target
 
     @classmethod
     def _score(cls, scorer, test_target, predictions):
@@ -88,7 +93,15 @@ class MLEfficacyMetric(SingleTableMetric):
             return scorer(test_target, predictions)
 
     @classmethod
-    def compute(cls, test_data, train_data, metadata=None, target=None, scorer=None):
+    def compute(
+        cls,
+        test_data,
+        train_data,
+        metadata=None,
+        table_name=None,
+        target=None,
+        scorer=None,
+    ):
         """Compute this metric.
 
         This fits a Machine Learning model on the training data and
@@ -106,6 +119,10 @@ class MLEfficacyMetric(SingleTableMetric):
                 The values from the test dataset.
             train_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the training dataset.
+            metadata (dict):
+                Table metadata dict. If not passed, it is built from the data.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             target (str):
                 Name of the column to use as the target.
             scorer (Union[callable, list[callable], NoneType]):
@@ -116,7 +133,13 @@ class MLEfficacyMetric(SingleTableMetric):
             union[float, tuple[float]]:
                 Scores obtained by the models when evaluated on the test data.
         """
-        target = cls._validate_inputs(test_data, train_data, metadata, target)
+        test_data, train_data, _, target = cls._validate_inputs(
+            test_data,
+            train_data,
+            metadata,
+            table_name,
+            target,
+        )
 
         test_data = test_data.copy()
         train_data = train_data.copy()

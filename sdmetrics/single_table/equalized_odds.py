@@ -4,6 +4,7 @@
 import pandas as pd
 from sklearn.metrics import confusion_matrix
 
+from sdmetrics._utils_metadata import _get_single_table_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.utils import (
@@ -305,6 +306,7 @@ class EqualizedOddsImprovement(SingleTableMetric):
         synthetic_data,
         real_validation_data,
         metadata,
+        table_name,
         prediction_column_name,
         positive_class_label,
         sensitive_column_name,
@@ -322,6 +324,8 @@ class EqualizedOddsImprovement(SingleTableMetric):
                 The holdout real data for validation.
             metadata (dict):
                 Metadata describing the table.
+            table_name (str):
+                The name of the table to use from the metadata.
             prediction_column_name (str):
                 Name of the column to predict.
             positive_class_label:
@@ -336,6 +340,8 @@ class EqualizedOddsImprovement(SingleTableMetric):
         Returns:
             dict: breakdown of the score
         """
+        metadata = _get_single_table_metadata(metadata, table_name)
+
         cls._validate_parameters(
             real_training_data,
             synthetic_data,
@@ -406,6 +412,7 @@ class EqualizedOddsImprovement(SingleTableMetric):
         synthetic_data,
         real_validation_data,
         metadata,
+        table_name,
         prediction_column_name,
         positive_class_label,
         sensitive_column_name,
@@ -423,6 +430,8 @@ class EqualizedOddsImprovement(SingleTableMetric):
                 The holdout real data for validation.
             metadata (dict):
                 Metadata describing the table.
+            table_name (str):
+                The name of the table to use from the metadata.
             prediction_column_name (str):
                 Name of the column to predict.
             positive_class_label:
@@ -439,15 +448,16 @@ class EqualizedOddsImprovement(SingleTableMetric):
                   0.0 = maximum degradation).
         """
         breakdown = cls.compute_breakdown(
-            real_training_data,
-            synthetic_data,
-            real_validation_data,
-            metadata,
-            prediction_column_name,
-            positive_class_label,
-            sensitive_column_name,
-            sensitive_column_value,
-            classifier,
+            real_training_data=real_training_data,
+            synthetic_data=synthetic_data,
+            real_validation_data=real_validation_data,
+            metadata=metadata,
+            table_name=table_name,
+            prediction_column_name=prediction_column_name,
+            positive_class_label=positive_class_label,
+            sensitive_column_name=sensitive_column_name,
+            sensitive_column_value=sensitive_column_value,
+            classifier=classifier,
         )
 
         return breakdown['score']
