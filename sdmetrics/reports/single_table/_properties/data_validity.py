@@ -35,7 +35,7 @@ class DataValidity(BaseSingleTableProperty):
         'datetime': [BoundaryAdherence, DatetimeFormatAdherence],
         'categorical': [CategoryAdherence],
         'boolean': [CategoryAdherence],
-        'id': [RegexFormatAdherence],
+        'id': [KeyUniqueness, RegexFormatAdherence],
     }
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):

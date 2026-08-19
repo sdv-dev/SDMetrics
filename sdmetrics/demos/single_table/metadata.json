@@ -21,7 +21,7 @@
                 },
                 "student_id": {
                     "sdtype": "id",
-                    "regex_format": "\\d{30}"
+                    "regex_format": "\\d{1,30}"
                 },
                 "high_perc": {
                     "sdtype": "numerical",

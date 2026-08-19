@@ -4,11 +4,20 @@ from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties import DataValidity
 
 
+
 class TestDataValidity:
     def test_get_score(self):
         """Test the ``get_score`` method"""
         # Setup
         real_data, synthetic_data, metadata = load_demo('single_table')
+
+        for column in ['start_date', 'end_date', 'student_id']:
+            real_data['student_placements'][column] = (
+                real_data['student_placements'][column].astype(str).replace('NaT', None)
+            )
+            synthetic_data['student_placements'][column] = (
+                synthetic_data['student_placements'][column].astype(str).replace('NaT', None)
+            )
 
         # Run
         data_validity_property = DataValidity()
@@ -18,9 +27,12 @@ class TestDataValidity:
         expected_details_dict = {
             'Column': [
                 'start_date',
+                'start_date',
+                'end_date',
                 'end_date',
                 'salary',
                 'duration',
+                'student_id',
                 'student_id',
                 'high_perc',
                 'high_spec',
@@ -37,10 +49,13 @@ class TestDataValidity:
             ],
             'Metric': [
                 'BoundaryAdherence',
+                'DatetimeFormatAdherence',
                 'BoundaryAdherence',
+                'DatetimeFormatAdherence',
                 'BoundaryAdherence',
                 'BoundaryAdherence',
                 'KeyUniqueness',
+                'RegexFormatAdherence',
                 'BoundaryAdherence',
                 'CategoryAdherence',
                 'CategoryAdherence',
@@ -54,7 +69,7 @@ class TestDataValidity:
                 'CategoryAdherence',
                 'CategoryAdherence',
             ],
-            'Score': [1.0] * 17,
+            'Score': [1.0] * 20,
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(data_validity_property.details, expected_details)
@@ -64,6 +79,13 @@ class TestDataValidity:
         """Test the ``get_score`` method when the metrics are raising errors for some columns."""
         # Setup
         real_data, synthetic_data, metadata = load_demo('single_table')
+        for column in ['end_date', 'student_id']:
+            real_data['student_placements'][column] = (
+                real_data['student_placements'][column].astype(str).replace('NaT', None)
+            )
+            synthetic_data['student_placements'][column] = (
+                synthetic_data['student_placements'][column].astype(str).replace('NaT', None)
+            )
 
         real_data['student_placements']['start_date'].iloc[0] = 0
         real_data['student_placements']['employability_perc'].iloc[2] = 'a'
@@ -77,14 +99,13 @@ class TestDataValidity:
         expected_message_2 = "TypeError: '<=' not supported between instances of 'float' and 'str'"
 
         score = data_validity_property.get_score(real_data, synthetic_data, metadata)
-
         # Assert
 
         details = data_validity_property.details
         details_nan = details.loc[pd.isna(details['Score'])]
         column_names_nan = details_nan['Column'].tolist()
         error_messages = details_nan['Error'].tolist()
-        assert column_names_nan == ['start_date', 'employability_perc']
+        assert column_names_nan == ['start_date', 'start_date', 'employability_perc']
         assert error_messages[0] == expected_message_1
-        assert error_messages[1] == expected_message_2
+        assert error_messages[2] == expected_message_2
         assert score == 1.0
