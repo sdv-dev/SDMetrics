@@ -472,7 +472,15 @@ class TestEqualizedOddsImprovement:
 
         # Run
         result = EqualizedOddsImprovement.compute_breakdown(
-            real_training, synthetic, validation, metadata, 'target', 'A', 'sensitive', 'X'
+            real_training,
+            synthetic,
+            validation,
+            metadata,
+            'table',
+            'target',
+            'A',
+            'sensitive',
+            'X',
         )
 
         # Assert
@@ -507,7 +515,15 @@ class TestEqualizedOddsImprovement:
 
         # Run
         result = EqualizedOddsImprovement.compute(
-            pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), {}, 'pred', 'pos', 'sens', 'val'
+            pd.DataFrame(),
+            pd.DataFrame(),
+            pd.DataFrame(),
+            {},
+            'table',
+            'pred',
+            'pos',
+            'sens',
+            'val',
         )
 
         # Assert

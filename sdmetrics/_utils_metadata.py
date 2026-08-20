@@ -53,6 +53,37 @@ def _validate_unified_metadata(metadata):
     _validate_metadata(metadata)
 
 
+def _get_single_table_metadata(metadata, table_name=None):
+    """Get single table metadata."""
+    if table_name is not None and not isinstance(table_name, str):
+        raise TypeError('`table_name` must be a string.')
+
+    if metadata is None:
+        return None
+
+    _validate_metadata_dict(metadata)
+    if 'tables' not in metadata:
+        return metadata
+
+    tables = metadata['tables']
+    _validate_metadata_dict(tables)
+    table_names = list(tables)
+    if not table_names:
+        raise ValueError('Metadata does not contain any tables.')
+
+    if table_name is None:
+        if len(table_names) > 1:
+            raise ValueError(
+                'Metadata contains more than one table, please specify the `table_name`.'
+            )
+
+        table_name = table_names[0]
+    elif table_name not in tables:
+        raise ValueError(f"Unknown table ('{table_name}'). Must be one of {table_names}.")
+
+    return tables[table_name]
+
+
 def handle_single_and_multi_table(single_table_func):
     """Decorator to handle both single and multi table functions."""
 

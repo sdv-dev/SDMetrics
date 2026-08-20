@@ -1,5 +1,13 @@
 # History
 
+## v0.29.0 - 2026-08-20
+
+### New Features
+
+* Add `DatetimeFormatAdherence` metric - Issue [#898](https://github.com/sdv-dev/SDMetrics/issues/898) by @sarahmish
+* Add `RegexFormatAdherence` metric - Issue [#897](https://github.com/sdv-dev/SDMetrics/issues/897) by @sarahmish
+* Single table metrics that require metadata should also accept a table name - Issue [#891](https://github.com/sdv-dev/SDMetrics/issues/891) by @fealho
+
 ## v0.28.2 - 2026-07-24
 
 ### Bugs Fixed
