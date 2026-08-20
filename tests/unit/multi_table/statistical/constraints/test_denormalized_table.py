@@ -77,15 +77,12 @@ class TestDenormalizedTable:
             constraint._validate_data(data)
 
     def test__is_valid(self, data, constraint):
-        """Test ``_is_valid`` flags the rows that don't match the rest of their group."""
-        # Setup
-        data['UserTransaction'].loc[3, 'FirstName'] = 'Cam'
-
+        """Test ``_is_valid`` method."""
         # Run
         is_valid = constraint._is_valid(data)
 
         # Assert
-        expected = pd.Series([True, True, False, False, True])
+        expected = pd.Series([True, True, True, True, True])
         pd.testing.assert_series_equal(is_valid['UserTransaction'], expected)
 
     def test__is_valid_no_denormalized_columns(self, data):
@@ -118,6 +115,30 @@ class TestDenormalizedTable:
 
         # Assert
         pd.testing.assert_series_equal(is_valid['UserTransaction'], pd.Series([True] * 4))
+
+    def test__is_valid_empty_table(self, data, constraint):
+        """Test it returns all true when the table is empty."""
+        # Setup
+        empty = data['UserTransaction'].iloc[0:0].copy()
+        data['UserTransaction'] = empty
+
+        # Run
+        valid_rows = constraint._is_valid(data)
+
+        # Assert
+        assert valid_rows['UserTransaction'].empty
+
+    def test__is_valid_inconsistent_other_denorm_column(self, data, constraint):
+        """Variation in any denormalized column marks all rows for that key invalid."""
+        # Setup
+        data['UserTransaction'].loc[3, 'FirstName'] = 'Cam'
+
+        # Run
+        valid_rows = constraint._is_valid(data)
+
+        # Assert
+        expected = pd.Series([True, True, False, False, True])
+        pd.testing.assert_series_equal(valid_rows['UserTransaction'], expected)
 
     def test_get_score(self, data, constraint):
         """Test get_score returns the proportion of valid rows."""
