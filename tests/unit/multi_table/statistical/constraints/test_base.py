@@ -1,7 +1,9 @@
 import re
+
 import pytest
 
 from sdmetrics.multi_table.statistical.constraints import BaseConstraint, DenormalizedTable
+
 
 class TestBaseConstraint:
     def test_load_constraint_from_dict(self):
@@ -70,4 +72,3 @@ class TestBaseConstraint:
         # Run
         with pytest.raises(ValueError, match=expected_error):
             BaseConstraint.load_constraint_from_dict(constraint_dict)
-

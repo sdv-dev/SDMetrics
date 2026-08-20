@@ -1,8 +1,11 @@
 """Denormalized Table Constraint."""
-import pandas as pd
 
-from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint, ConstraintNotApplicableError
+from sdmetrics.multi_table.statistical.constraints.base import (
+    BaseConstraint,
+    ConstraintNotApplicableError,
+)
 from sdmetrics.multi_table.statistical.constraints.utils import _get_table_to_valid_rows
+
 
 class DenormalizedTable(BaseConstraint):
     """Constraint for a table that contains denormalized columns.

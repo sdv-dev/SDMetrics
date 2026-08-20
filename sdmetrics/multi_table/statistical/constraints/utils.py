@@ -1,10 +1,10 @@
 """Utility Functions for Constraints."""
 import re
-from datetime import datetime
 from collections.abc import Iterable
+from datetime import datetime
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
 PRECISION_LEVELS = {
@@ -34,8 +34,10 @@ PRECISION_LEVELS = {
     '%X': 0,  # Locale-based time
 }
 
+
 def _get_table_to_valid_rows(data):
     return {table: pd.Series(True, index=data[table].index) for table in data}
+
 
 def _get_is_valid_dict(data, table_name):
     """Create a dictionary of True values for each table besides table_name.
@@ -58,6 +60,7 @@ def _get_is_valid_dict(data, table_name):
         for table, table_data in data.items()
         if table != table_name or table_name is None
     }
+
 
 def _cast_to_iterable(value, iterable_type=None):
     """Return a ``list`` if the input object is not a ``list`` or ``tuple``."""
@@ -93,6 +96,7 @@ def _get_datetime_format(value):
 
     return _guess_datetime_format_for_array(value)
 
+
 def _is_datetime_type(value):
     """Determine if the input is a datetime type or not.
 
@@ -127,6 +131,7 @@ def _is_datetime_type(value):
             return False
 
     return True
+
 
 def cast_to_datetime64(value, datetime_format=None, ignore_timezone=True):
     """Cast a given value to a ``numpy.datetime64`` format.
@@ -191,6 +196,7 @@ def _parse_datetime(value, datetime_format, ignore_timezone):
 
     return parsed_value
 
+
 def get_datetime_format_precision(format_str):
     """Return the precision level of a datetime format string."""
     # Find all format codes in the format string
@@ -202,6 +208,7 @@ def get_datetime_format_precision(format_str):
     )
 
     return max(found_levels, default=0)
+
 
 def format_datetime_array(datetime_array, target_format):
     """Format each element in a numpy datetime64 array to a specified string format.
@@ -219,6 +226,7 @@ def format_datetime_array(datetime_array, target_format):
         pd.to_datetime(date).strftime(target_format) if not pd.isna(date) else pd.NaT
         for date in datetime_array
     ])
+
 
 def get_lower_precision_format(primary_format, secondary_format):
     """Compare two datetime format strings and return the one with lower precision.
