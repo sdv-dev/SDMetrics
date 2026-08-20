@@ -2,11 +2,13 @@
 
 import inspect
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 
 class ConstraintNotApplicableError(Exception):
     """Raised when a constraint cannot be checked against the given data."""
+
 
 class BaseConstraint:
     """Base class for all constraints.
@@ -79,7 +81,7 @@ class BaseConstraint:
                 f"Invalid parameter(s) '{invalid_parameters}' for constraint '{class_name}'. "
                 f"The supported parameters are: '{expected}'."
             )
-        
+
     @classmethod
     def load_constraint_from_dict(cls, constraint_dict):
         """Uses the given parameters to recreate an instance of the constraint."""
@@ -94,7 +96,7 @@ class BaseConstraint:
             raise ValueError(
                 f"Unable to create the constraint '{class_name}': {ex}"
             ) from ex
-    
+
     def __init__(self):
         self.metadata = None
         self._fitted = False
@@ -123,7 +125,7 @@ class BaseConstraint:
                 If the constraint cannot be checked against the data.
         """
         raise NotImplementedError()
-    
+
     def _is_valid(self, data, metadata=None):
         """Determine whether each row in the data adheres to this constraint.
 

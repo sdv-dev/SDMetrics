@@ -4,8 +4,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sdmetrics.multi_table.statistical.constraints import BaseConstraint, DenormalizedTable
+from sdmetrics.multi_table.statistical.constraints import DenormalizedTable
 from sdmetrics.multi_table.statistical.constraints.base import ConstraintNotApplicableError
+
 
 @pytest.fixture
 def data():
