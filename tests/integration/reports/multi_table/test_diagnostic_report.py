@@ -4,15 +4,13 @@ import pytest
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table import DiagnosticReport
-from tests.utils import _cast_datetime_and_id_to_string
 
 
 class TestDiagnosticReport:
     def test_end_to_end(self):
         """Test the end-to-end functionality of the ``DiagnosticReport`` report."""
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-        real_data = _cast_datetime_and_id_to_string(real_data, metadata)
-        synthetic_data = _cast_datetime_and_id_to_string(synthetic_data, metadata)
+
         report = DiagnosticReport()
 
         # Run
@@ -41,8 +39,7 @@ class TestDiagnosticReport:
     def test_end_to_end_with_object_datetimes(self):
         """Test the ``DiagnosticReport`` report with object datetimes."""
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-        real_data = _cast_datetime_and_id_to_string(real_data, metadata)
-        synthetic_data = _cast_datetime_and_id_to_string(synthetic_data, metadata)
+
         report = DiagnosticReport()
 
         # Run
@@ -135,33 +132,33 @@ class TestDiagnosticReport:
             ],
             'Score': [
                 1.0,
-                np.nan,
-                1.0,
-                1.0,
-                np.nan,
-                1.0,
-                np.nan,
                 1.0,
                 1.0,
                 1.0,
                 np.nan,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
                 np.nan,
-                np.nan,
+                1.0,
                 np.nan,
                 1.0,
             ],
             'Error': [
                 None,
-                'AttributeError: Can only use .str accessor with string values!',
+                None,
                 None,
                 None,
                 "TypeError: '<=' not supported between instances of 'str' and 'int'",
                 None,
-                'AttributeError: Can only use .str accessor with string values!',
                 None,
                 None,
                 None,
-                'AttributeError: Can only use .str accessor with string values!',
+                None,
+                None,
                 "TypeError: '<=' not supported between instances of 'str' and 'Timestamp'",
                 None,
                 "TypeError: '<=' not supported between instances of 'str' and 'float'",
@@ -196,8 +193,7 @@ class TestDiagnosticReport:
         """Test the ``get_details`` method."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-        real_data = _cast_datetime_and_id_to_string(real_data, metadata)
-        synthetic_data = _cast_datetime_and_id_to_string(synthetic_data, metadata)
+
         report = DiagnosticReport()
 
         # Run
@@ -257,7 +253,7 @@ class TestDiagnosticReport:
                 'BoundaryAdherence',
                 'CategoryAdherence',
             ],
-            'Score': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, None, 1.0, 1.0],
+            'Score': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
         })
 
         pd.testing.assert_frame_equal(details, expected_dataframe)
@@ -266,8 +262,7 @@ class TestDiagnosticReport:
         """Test the ``get_details`` method with a table_name parameter."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-        real_data = _cast_datetime_and_id_to_string(real_data, metadata)
-        synthetic_data = _cast_datetime_and_id_to_string(synthetic_data, metadata)
+
         report = DiagnosticReport()
 
         # Run

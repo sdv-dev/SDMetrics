@@ -5,7 +5,7 @@ import pandas as pd
 
 from sdmetrics.demos import load_multi_table_demo, load_single_table_demo
 from sdmetrics.reports import DiagnosticReport, QualityReport
-from tests.utils import _cast_datetime_and_id_to_string, assert_report_scores_are_not_nan
+from tests.utils import assert_report_scores_are_not_nan
 
 
 def _set_thresholds_zero(report):
@@ -122,8 +122,6 @@ def _load_single_table_quality_report_data():
 def test_unified_diagnostic_report_single_table():
     # Setup
     real_data, synthetic_data, metadata = load_single_table_demo()
-    real_data = _cast_datetime_and_id_to_string(real_data, metadata)
-    synthetic_data = _cast_datetime_and_id_to_string(synthetic_data, metadata)
 
     # Run
     report = DiagnosticReport()
@@ -182,8 +180,6 @@ def test_unified_diagnostic_report_single_table():
         ],
         'Score': [1.0] * 20,
     })
-    expected_details_data_validity['Score'].iloc[1] = np.nan
-    expected_details_data_validity['Score'].iloc[3] = np.nan
     expected_details_data_structure = pd.DataFrame({
         'Table': ['student_placements'],
         'Metric': ['TableStructure'],
@@ -198,7 +194,7 @@ def test_unified_diagnostic_report_single_table():
         report.get_details('Data Structure'), expected_details_data_structure
     )
     assert report.get_score() == 1.0
-    # assert_report_scores_are_not_nan(report)
+    assert_report_scores_are_not_nan(report)
     _assert_report_info(
         report, 'DiagnosticReport', {'student_placements': 215}, {'student_placements': 215}
     )
@@ -365,8 +361,6 @@ def test_unified_quality_report_single_table_verbose_skips_relationship_properti
 def test_unified_diagnostic_report_multi_table():
     # Setup
     real_data, synthetic_data, metadata = load_multi_table_demo()
-    real_data = _cast_datetime_and_id_to_string(real_data, metadata)
-    synthetic_data = _cast_datetime_and_id_to_string(synthetic_data, metadata)
 
     # Run
     report = DiagnosticReport()
@@ -431,7 +425,6 @@ def test_unified_diagnostic_report_multi_table():
         ],
         'Score': [1.0] * 15,
     })
-    expected_details_data_validity['Score'].iloc[12] = np.nan
     expected_details_data_structure = pd.DataFrame({
         'Table': ['users', 'sessions', 'transactions'],
         'Metric': ['TableStructure', 'TableStructure', 'TableStructure'],
@@ -461,7 +454,7 @@ def test_unified_diagnostic_report_multi_table():
         report.get_details('Data Validity', 'users'), expected_details_users
     )
     assert report.get_score() == 1.0
-    # assert_report_scores_are_not_nan(report)
+    assert_report_scores_are_not_nan(report)
     _assert_report_info(
         report,
         'DiagnosticReport',

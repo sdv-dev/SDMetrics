@@ -1,5 +1,4 @@
 import pandas as pd
-from tests.utils import _cast_datetime_and_id_to_string
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties import DataValidity
@@ -10,8 +9,6 @@ class TestDataValidity:
         """Test the ``get_score`` method"""
         # Setup
         real_data, synthetic_data, metadata = load_demo('single_table')
-        real_data = _cast_datetime_and_id_to_string(real_data, metadata)
-        synthetic_data = _cast_datetime_and_id_to_string(synthetic_data, metadata)
 
         # Run
         data_validity_property = DataValidity()
@@ -73,13 +70,6 @@ class TestDataValidity:
         """Test the ``get_score`` method when the metrics are raising errors for some columns."""
         # Setup
         real_data, synthetic_data, metadata = load_demo('single_table')
-        for column in ['end_date', 'student_id']:
-            real_data['student_placements'][column] = (
-                real_data['student_placements'][column].astype(str).replace('NaT', None)
-            )
-            synthetic_data['student_placements'][column] = (
-                synthetic_data['student_placements'][column].astype(str).replace('NaT', None)
-            )
 
         real_data['student_placements']['start_date'].iloc[0] = 0
         real_data['student_placements']['employability_perc'].iloc[2] = 'a'
@@ -99,7 +89,7 @@ class TestDataValidity:
         details_nan = details.loc[pd.isna(details['Score'])]
         column_names_nan = details_nan['Column'].tolist()
         error_messages = details_nan['Error'].tolist()
-        assert column_names_nan == ['start_date', 'start_date', 'employability_perc']
+        assert column_names_nan == ['start_date', 'employability_perc']
         assert error_messages[0] == expected_message_1
-        assert error_messages[2] == expected_message_2
+        assert error_messages[1] == expected_message_2
         assert score == 1.0

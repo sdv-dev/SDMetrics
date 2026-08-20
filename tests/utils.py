@@ -63,18 +63,3 @@ def assert_report_scores_are_not_nan(report):
         details = report.get_details(property_name)
         missing_detail_scores = details.loc[details['Score'].isna()]
         assert missing_detail_scores.empty
-
-
-def _cast_datetime_and_id_to_string(data, metadata):
-    """Cast datetime and id columns to string representation."""
-    data = data.copy()
-    for table_name in metadata['tables']:
-        for column, column_meta in metadata['tables'][table_name]['columns'].items():
-            sdtype = column_meta.get('sdtype')
-            datetime_format = column_meta.get('datetime_format')
-            if sdtype == 'datetime' and datetime_format is not None:
-                data[table_name][column] = data[table_name][column].dt.strftime(datetime_format)
-            if sdtype == 'id' and column_meta.get('regex_format') is not None:
-                data[table_name][column] = data[table_name][column].astype(str)
-
-    return data

@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
+from sdmetrics._utils_metadata import _convert_column_to_string
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
 from sdmetrics.single_column import (
@@ -83,19 +84,22 @@ class DataValidity(BaseSingleTableProperty):
             for metric in metrics:
                 try:
                     if metric in [DatetimeFormatAdherence, RegexFormatAdherence]:
+                        column_meta = columns_meta[column_name]
                         if metric == DatetimeFormatAdherence:
                             format_name = 'datetime_format'
 
                         elif metric == RegexFormatAdherence:
                             format_name = 'regex_format'
 
-                        format = columns_meta[column_name].get(format_name)
+                        format = column_meta.get(format_name)
                         if format is None:
                             continue
 
-                        column_score = metric.compute(
-                            real_data[column_name], synthetic_data[column_name], format
+                        real_column = _convert_column_to_string(real_data[column_name], column_meta)
+                        synthetic_column = _convert_column_to_string(
+                            synthetic_data[column_name], column_meta
                         )
+                        column_score = metric.compute(real_column, synthetic_column, format)
                     else:
                         column_score = metric.compute(
                             real_data[column_name], synthetic_data[column_name]

@@ -115,11 +115,9 @@ class TestDataValidity:
         data_validity_property._generate_details(real_data, synthetic_data, metadata)
 
         # Assert
-        expected_calls_dfa = [
-            call(real_data['col4'], synthetic_data['col4'], '%Y-%m-%d'),
-        ]
-        expected_calls_rfa = [
-            call(real_data['col5'], synthetic_data['col5'], r'ID_\d+'),
+        expected_calls = [
+            (real_data['col4'], synthetic_data['col4'], '%Y-%m-%d'),
+            (real_data['col5'], synthetic_data['col5'], r'ID_\d+'),
         ]
         expected_calls_ba = [
             call(real_data['col1'], synthetic_data['col1']),
@@ -133,11 +131,19 @@ class TestDataValidity:
             call(real_data['col5'], synthetic_data['col5']),
             call(real_data['col6'], synthetic_data['col6']),
         ]
-        datetime_a_compute_mock.assert_has_calls(expected_calls_dfa)
-        regex_a_compute_mock.assert_has_calls(expected_calls_rfa)
+        datetime_a_compute_mock.assert_called_once()
+        regex_a_compute_mock.assert_called_once()
         boundary_a_compute_mock.assert_has_calls(expected_calls_ba)
         category_a_compute_mock.assert_has_calls(expected_calls_ca)
         key_uniqueness_mock.assert_has_calls(expected_calls_key)
+
+        for i, mock in enumerate([datetime_a_compute_mock, regex_a_compute_mock]):
+            mock_call_args = mock.call_args.args
+            for actual, expected in zip(mock_call_args, expected_calls[i]):
+                if isinstance(expected, pd.Series):
+                    pd.testing.assert_series_equal(actual, expected)
+                else:
+                    assert actual == expected
 
     def test__generate_details_error(self):
         """Test the ``_generate_details`` method with the error column."""

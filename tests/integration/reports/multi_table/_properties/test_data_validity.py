@@ -4,7 +4,6 @@ from tqdm import tqdm
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table._properties import DataValidity
-from tests.utils import _cast_datetime_and_id_to_string
 
 
 class TestDataValidity:
@@ -12,8 +11,6 @@ class TestDataValidity:
         """Test the ``DataValidity`` multi-table property end to end."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-        real_data = _cast_datetime_and_id_to_string(real_data, metadata)
-        synthetic_data = _cast_datetime_and_id_to_string(synthetic_data, metadata)
 
         column_shapes = DataValidity()
 
@@ -27,8 +24,6 @@ class TestDataValidity:
         """Test that the progress bar is correctly updated."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-        real_data = _cast_datetime_and_id_to_string(real_data, metadata)
-        synthetic_data = _cast_datetime_and_id_to_string(synthetic_data, metadata)
 
         column_shapes = DataValidity()
         num_columns = 15
