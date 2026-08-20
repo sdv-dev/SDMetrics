@@ -3,6 +3,7 @@
 import inspect
 
 import pandas as pd
+import numpy as np
 
 class ConstraintNotApplicableError(Exception):
     """Raised when a constraint cannot be checked against the given data."""
@@ -123,7 +124,7 @@ class BaseConstraint:
         """
         raise NotImplementedError()
     
-    def _is_valid(self, data, metadata):
+    def _is_valid(self, data, metadata=None):
         """Determine whether each row in the data adheres to this constraint.
 
         Args:
@@ -152,8 +153,9 @@ class BaseConstraint:
                 Series of boolean values indicating if the row is valid for the constraint or not.
         """
         metadata = self.metadata if metadata is None else metadata
-        data_dict = self._convert_data_to_dictionary(data, metadata)
-        is_valid_data = self._is_valid(data_dict, metadata)
+        self._validate_data(data, metadata)
+
+        is_valid_data = self._is_valid(data, metadata)
         if isinstance(data, pd.DataFrame) or self._single_table:
             table_name = (
                 self._get_single_table_name(metadata)
