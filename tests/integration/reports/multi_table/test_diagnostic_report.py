@@ -19,7 +19,7 @@ class TestDiagnosticReport:
 
         # Assert
         assert results == 1.0
-        # assert_report_scores_are_not_nan(report)
+        assert_report_scores_are_not_nan(report)
 
     def test_end_to_end_composite_keys(self, composite_keys_multi_table_demo):
         """Test the end-to-end functionality of the ``DiagnosticReport`` report."""
