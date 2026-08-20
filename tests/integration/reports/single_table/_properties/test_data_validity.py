@@ -83,6 +83,7 @@ class TestDataValidity:
         expected_message_2 = "TypeError: '<=' not supported between instances of 'float' and 'str'"
 
         score = data_validity_property.get_score(real_data, synthetic_data, metadata)
+
         # Assert
 
         details = data_validity_property.details

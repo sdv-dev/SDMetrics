@@ -11,7 +11,6 @@ class TestDataValidity:
         """Test the ``DataValidity`` multi-table property end to end."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-
         column_shapes = DataValidity()
 
         # Run
@@ -24,7 +23,6 @@ class TestDataValidity:
         """Test that the progress bar is correctly updated."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-
         column_shapes = DataValidity()
         num_columns = 15
 

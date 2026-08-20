@@ -34,6 +34,7 @@ class TestDiagnosticReport:
         result = report.get_score()
 
         # Assert
+
         assert result == 1.0
 
     def test_get_score_with_no_verbose(self, single_table_demo_data_and_metadata):

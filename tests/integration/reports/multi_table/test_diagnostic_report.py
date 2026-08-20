@@ -4,13 +4,13 @@ import pytest
 
 from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table import DiagnosticReport
+from tests.utils import assert_report_scores_are_not_nan
 
 
 class TestDiagnosticReport:
     def test_end_to_end(self):
         """Test the end-to-end functionality of the ``DiagnosticReport`` report."""
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-
         report = DiagnosticReport()
 
         # Run
@@ -34,11 +34,16 @@ class TestDiagnosticReport:
         assert results == 1.0
         properties = report.get_properties()
         assert all(properties['Score'] == 1.0)
-        # assert_report_scores_are_not_nan(report)
+        assert_report_scores_are_not_nan(report)
 
     def test_end_to_end_with_object_datetimes(self):
         """Test the ``DiagnosticReport`` report with object datetimes."""
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+        for table, table_meta in metadata['tables'].items():
+            for column, column_meta in table_meta['columns'].items():
+                if column_meta['sdtype'] == 'datetime':
+                    dt_format = column_meta['datetime_format']
+                    real_data[table][column] = real_data[table][column].dt.strftime(dt_format)
 
         report = DiagnosticReport()
 
@@ -54,7 +59,7 @@ class TestDiagnosticReport:
         })
         assert results == 1.0
         pd.testing.assert_frame_equal(properties, expected_dataframe)
-        # assert_report_scores_are_not_nan(report)
+        assert_report_scores_are_not_nan(report)
 
     def test_end_to_end_with_metrics_failing(self):
         """Test the ``DiagnosticReport`` report when some metrics crash.
@@ -193,7 +198,6 @@ class TestDiagnosticReport:
         """Test the ``get_details`` method."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-
         report = DiagnosticReport()
 
         # Run
@@ -262,7 +266,6 @@ class TestDiagnosticReport:
         """Test the ``get_details`` method with a table_name parameter."""
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
-
         report = DiagnosticReport()
 
         # Run
