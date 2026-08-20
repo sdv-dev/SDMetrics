@@ -1,4 +1,5 @@
 """Denormalized Table Constraint."""
+import pandas as pd
 
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint, ConstraintNotApplicableError
 from sdmetrics.multi_table.statistical.constraints.utils import _get_table_to_valid_rows
@@ -21,6 +22,7 @@ class DenormalizedTable(BaseConstraint):
             empty, there is nothing to check and every row is considered valid.
     """
     def __init__(self, table_name, denormalized_primary_key, denormalized_column_names=None):
+        super().__init__()
         if not isinstance(table_name, str):
             raise ValueError("The 'table_name' parameter must be a string.")
 
@@ -76,7 +78,7 @@ class DenormalizedTable(BaseConstraint):
         """
         table = data[self.table_name]
         table_to_valid_rows = _get_table_to_valid_rows(data)
-        if len(table) == 0:
+        if not self.denormalized_column_names or table.empty:
             return table_to_valid_rows
 
         counts_per_row = table.groupby(self.denormalized_primary_key, dropna=False)[
