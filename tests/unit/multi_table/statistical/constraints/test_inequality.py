@@ -58,9 +58,7 @@ class TestInequality:
             )
 
         # Run & Assert 2
-        error_message = (
-            '`low_column_name` and `high_column_name` must be strings.'
-        )
+        error_message = '`low_column_name` and `high_column_name` must be strings.'
         with pytest.raises(ValueError, match=error_message):
             Inequality(
                 table_name='table',
