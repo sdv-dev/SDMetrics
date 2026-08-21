@@ -6,10 +6,6 @@ import numpy as np
 import pandas as pd
 
 
-class ConstraintNotApplicableError(Exception):
-    """Raised when a constraint cannot be checked against the given data."""
-
-
 class BaseConstraint:
     """Base class for all constraints.
 
