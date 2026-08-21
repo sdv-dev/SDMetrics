@@ -1,6 +1,5 @@
 """OneHotEncoding Constraint."""
 
-
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
 from sdmetrics.multi_table.statistical.constraints.utils import _get_is_valid_dict
@@ -16,6 +15,7 @@ class OneHotEncoding(BaseConstraint):
             The name of the table that contains the columns. Optional if the
             data is only a single table. Defaults to None.
     """
+
     def __init__(self, column_names, table_name=None):
         super().__init__()
         if not isinstance(table_name, str):
@@ -25,9 +25,7 @@ class OneHotEncoding(BaseConstraint):
             isinstance(column_name, str) for column_name in column_names
         )
         if not is_list_of_strings:
-            raise ValueError(
-                "The 'column_names' parameter must be a list of strings."
-            )
+            raise ValueError("The 'column_names' parameter must be a list of strings.")
 
         self._column_names = column_names
         self.table_name = table_name
@@ -41,15 +39,12 @@ class OneHotEncoding(BaseConstraint):
 
         columns = data[self.table_name].columns
         missing_columns = [
-            column_name
-            for column_name in self._column_names
-            if column_name not in columns
+            column_name for column_name in self._column_names if column_name not in columns
         ]
         if missing_columns:
             missing_columns = "', '".join(missing_columns)
             raise ConstraintNotApplicableError(
-                f"The column(s) '{missing_columns}' are missing from the table "
-                f"'{self.table_name}'."
+                f"The column(s) '{missing_columns}' are missing from the table '{self.table_name}'."
             )
 
     def _get_valid_table_data(self, table_data):
