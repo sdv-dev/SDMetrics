@@ -75,7 +75,6 @@ class TestOneHotEncoding:
         """Test ``_is_valid`` does not completely pass."""
         # Setup
         instance = OneHotEncoding(column_names=['a', 'b', 'c'], table_name='table')
-        instance._fitted = True
 
         # Run
         table_data = pd.DataFrame({

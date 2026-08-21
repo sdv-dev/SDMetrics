@@ -6,5 +6,14 @@ from sdmetrics.multi_table.statistical.constraints.one_hot_encoding import OneHo
 from sdmetrics.multi_table.statistical.constraints.inequality import Inequality
 from sdmetrics.multi_table.statistical.constraints.chained_inequality import ChainedInequality
 from sdmetrics.multi_table.statistical.constraints.range import Range
+from sdmetrics.multi_table.statistical.constraints.fixed_increments import FixedIncrements
 
-__all__ = (BaseConstraint, DenormalizedTable, OneHotEncoding, Range, Inequality, ChainedInequality)
+__all__ = (
+    BaseConstraint,
+    DenormalizedTable,
+    OneHotEncoding,
+    Range,
+    Inequality,
+    ChainedInequality,
+    FixedIncrements,
+)
