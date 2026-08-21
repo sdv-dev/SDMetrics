@@ -12,9 +12,9 @@ class TestBaseConstraint:
         constraint_dict = {
             'class_name': 'DenormalizedTable',
             'parameters': {
-                'table_name': 'UserTransaction',
-                'denormalized_primary_key': 'User ID',
-                'denormalized_column_names': ['FirstName'],
+                'table_name': 'tableA',
+                'denormalized_primary_key': 'id',
+                'denormalized_column_names': ['name'],
             },
         }
 
@@ -23,9 +23,9 @@ class TestBaseConstraint:
 
         # Assert
         assert isinstance(instance, DenormalizedTable)
-        assert instance.table_name == 'UserTransaction'
-        assert instance.denormalized_primary_key == 'User ID'
-        assert instance.denormalized_column_names == ['FirstName']
+        assert instance.table_name == 'tableA'
+        assert instance.denormalized_primary_key == 'id'
+        assert instance.denormalized_column_names == ['name']
 
     def test_load_constraint_from_dict_unknown_class_name(self):
         """Test ``load_constraint_from_dict`` errors if the constraint class is not supported."""
@@ -50,7 +50,7 @@ class TestBaseConstraint:
         # Setup
         constraint_dict = {
             'class_name': 'DenormalizedTable',
-            'parameters': {'table_name': 'UserTransaction', 'unknown': 'value'},
+            'parameters': {'table_name': 'tableA', 'unknown': 'value'},
         }
 
         expected_error = re.escape("Invalid parameter(s) 'unknown' for constraint")
@@ -64,7 +64,7 @@ class TestBaseConstraint:
         # Setup
         constraint_dict = {
             'class_name': 'DenormalizedTable',
-            'parameters': {'table_name': 'UserTransaction'},
+            'parameters': {'table_name': 'tableA'},
         }
 
         expected_error = re.escape("Unable to create the constraint 'DenormalizedTable'")
