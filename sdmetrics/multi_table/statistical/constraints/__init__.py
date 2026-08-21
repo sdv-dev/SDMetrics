@@ -7,6 +7,7 @@ from sdmetrics.multi_table.statistical.constraints.inequality import Inequality
 from sdmetrics.multi_table.statistical.constraints.chained_inequality import ChainedInequality
 from sdmetrics.multi_table.statistical.constraints.range import Range
 from sdmetrics.multi_table.statistical.constraints.fixed_increments import FixedIncrements
+from sdmetrics.multi_table.statistical.constraints.fixed_combinations import FixedCombinations
 
 __all__ = (
     BaseConstraint,
@@ -16,4 +17,5 @@ __all__ = (
     Inequality,
     ChainedInequality,
     FixedIncrements,
+    FixedCombinations,
 )
