@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from sdmetrics._utils_metadata import (
+    _convert_column_to_string,
     _convert_datetime_column,
     _convert_datetime_columns,
     _get_single_table_metadata,
@@ -110,6 +111,52 @@ def test__validate_metadata_invalid(metadata_wrong, expected_error):
     # Run and Assert
     with pytest.raises(ValueError, match=expected_error):
         _validate_metadata(metadata_wrong)
+
+
+def test__convert_column_to_string(data, metadata):
+    """Test the ``_convert_column_to_string`` method."""
+    # Setup
+    numerical_col = pd.Series([1, 2, 3])
+    float_col = pd.Series([1.1, 2.2, 3.3])
+    string_col = pd.Series(['first', 'second', 'third'])
+
+    # Run
+    numerical_result = _convert_column_to_string(numerical_col, {'sdtype': 'numerical'})
+    float_result = _convert_column_to_string(float_col, {'sdtype': 'numerical'})
+    string_result = _convert_column_to_string(string_col, {'sdtype': 'categorical'})
+
+    # Assert
+    pd.testing.assert_series_equal(pd.Series(['1', '2', '3']), numerical_result)
+    pd.testing.assert_series_equal(pd.Series(['1.1', '2.2', '3.3']), float_result)
+    pd.testing.assert_series_equal(string_col, string_result)
+
+
+def test__convert_column_to_string_datetime(data, metadata):
+    """Test the ``_convert_column_to_string`` method with datetime columns."""
+    # Setup
+    column_metadata = {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'}
+    string_col = pd.Series(['2021-01-01', '2021-01-02', '2021-01-03'])
+    datetime_col = pd.Series([
+        pd.Timestamp('2021-01-01'),
+        pd.Timestamp('2021-01-02'),
+        pd.Timestamp('2021-01-03'),
+    ])
+
+    # Run
+    datetime_result = _convert_column_to_string(datetime_col, column_metadata)
+    string_result = _convert_column_to_string(string_col, column_metadata)
+    datetime_no_format_result = _convert_column_to_string(datetime_col, {'sdtype': 'datetime'})
+    datetime_different_format_result = _convert_column_to_string(
+        datetime_col, {'sdtype': 'datetime', 'datetime_format': '%Y %H'}
+    )
+
+    # Assert
+    pd.testing.assert_series_equal(string_col, datetime_result)
+    pd.testing.assert_series_equal(string_col, string_result)
+    pd.testing.assert_series_equal(string_col, datetime_no_format_result)
+    pd.testing.assert_series_equal(
+        pd.Series(['2021 00', '2021 00', '2021 00']), datetime_different_format_result
+    )
 
 
 def test__convert_datetime_column(data, metadata):

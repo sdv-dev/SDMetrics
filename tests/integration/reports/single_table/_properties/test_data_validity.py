@@ -18,9 +18,12 @@ class TestDataValidity:
         expected_details_dict = {
             'Column': [
                 'start_date',
+                'start_date',
+                'end_date',
                 'end_date',
                 'salary',
                 'duration',
+                'student_id',
                 'student_id',
                 'high_perc',
                 'high_spec',
@@ -37,10 +40,13 @@ class TestDataValidity:
             ],
             'Metric': [
                 'BoundaryAdherence',
+                'DatetimeFormatAdherence',
                 'BoundaryAdherence',
+                'DatetimeFormatAdherence',
                 'BoundaryAdherence',
                 'BoundaryAdherence',
                 'KeyUniqueness',
+                'RegexFormatAdherence',
                 'BoundaryAdherence',
                 'CategoryAdherence',
                 'CategoryAdherence',
@@ -54,7 +60,7 @@ class TestDataValidity:
                 'CategoryAdherence',
                 'CategoryAdherence',
             ],
-            'Score': [1.0] * 17,
+            'Score': [1.0] * 20,
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(data_validity_property.details, expected_details)
