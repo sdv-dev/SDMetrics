@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sdmetrics.multi_table.statistical.constraints import Range
+from sdmetrics.multi_table.statistical.constraints import Inequality
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
 
 
@@ -15,8 +15,7 @@ def data():
         'table': pd.DataFrame({
             'col1': [1, 2, 3, 4],
             'col2': [10, 20, 30, 40],
-            'col3': [100, 200, 300, 400],
-            'col4': [1, 20, 300, 4000],
+            'col3': [1, 20, 300, 4000],
         })
     }
 
@@ -30,7 +29,6 @@ def metadata():
                     'col1': {'sdtype': 'numerical'},
                     'col2': {'sdtype': 'numerical'},
                     'col3': {'sdtype': 'numerical'},
-                    'col4': {'sdtype': 'numerical'},
                 }
             }
         }
@@ -39,38 +37,35 @@ def metadata():
 
 @pytest.fixture
 def constraint():
-    return Range(
+    return Inequality(
         table_name='table',
         low_column_name='col1',
-        middle_column_name='col2',
-        high_column_name='col3',
+        high_column_name='col2',
         strict_boundaries=True,
     )
 
 
-class TestRange:
+class TestInequality:
     def test___init__invalid_parameters(self):
         """Test ``__init__`` validates the parameter types."""
         # Run & Assert 1
         with pytest.raises(ValueError, match="The 'table_name' parameter must be a string."):
-            Range(
+            Inequality(
                 table_name=1,
                 low_column_name='col1',
-                middle_column_name='col2',
-                high_column_name='col3',
+                high_column_name='col2',
                 strict_boundaries=True,
             )
 
         # Run & Assert 2
         error_message = (
-            '`low_column_name`, `middle_column_name` and `high_column_name` must be strings.'
+            '`low_column_name` and `high_column_name` must be strings.'
         )
         with pytest.raises(ValueError, match=error_message):
-            Range(
+            Inequality(
                 table_name='table',
                 low_column_name='col1',
-                middle_column_name=1,
-                high_column_name='col3',
+                high_column_name=1,
                 strict_boundaries=True,
             )
 
@@ -109,7 +104,6 @@ class TestRange:
             'table': pd.DataFrame({
                 'a': [1, np.nan, 3, 4, None, 6, 8, 0],
                 'b': [4, 2, 2, 4, np.nan, -6, 10, float('nan')],
-                'c': [7, 8, 9, 10, 11, 12, 13, 14],
                 'col': [7, 8, 9, 10, 11, 12, 13, 14],
             })
         }
@@ -119,16 +113,14 @@ class TestRange:
                     'columns': {
                         'a': {'sdtype': 'numerical'},
                         'b': {'sdtype': 'numerical'},
-                        'c': {'sdtype': 'numerical'},
                         'col': {'sdtype': 'numerical'},
                     }
                 }
             }
         }
-        instance = Range(
+        instance = Inequality(
             low_column_name='a',
-            middle_column_name='b',
-            high_column_name='c',
+            high_column_name='b',
             strict_boundaries=True,
             table_name='table',
         )
@@ -148,7 +140,6 @@ class TestRange:
             'table': pd.DataFrame({
                 'a': [1, np.nan, 3, 3, None, 6, 8, 0],
                 'b': [4, 2, 2, 4, np.nan, -6, 10, float('nan')],
-                'c': [7, 8, 9, 10, 11, 12, 13, 14],
                 'col': [7, 8, 9, 10, 11, 12, 13, 14],
             })
         }
@@ -158,16 +149,14 @@ class TestRange:
                     'columns': {
                         'a': {'sdtype': 'numerical'},
                         'b': {'sdtype': 'numerical'},
-                        'c': {'sdtype': 'numerical'},
                         'col': {'sdtype': 'numerical'},
                     }
                 }
             }
         }
-        instance = Range(
+        instance = Inequality(
             low_column_name='a',
-            middle_column_name='b',
-            high_column_name='c',
+            high_column_name='b',
             strict_boundaries=False,
             table_name='table',
         )
@@ -197,16 +186,14 @@ class TestRange:
                     'columns': {
                         'a': {'sdtype': 'datetime'},
                         'b': {'sdtype': 'datetime'},
-                        'c': {'sdtype': 'datetime'},
                         'col': {'sdtype': 'numerical'},
                     }
                 }
             }
         }
-        instance = Range(
+        instance = Inequality(
             low_column_name='a',
-            middle_column_name='b',
-            high_column_name='c',
+            high_column_name='b',
             strict_boundaries=True,
             table_name='table',
         )
@@ -236,16 +223,14 @@ class TestRange:
                     'columns': {
                         'a': {'sdtype': 'datetime'},
                         'b': {'sdtype': 'datetime'},
-                        'c': {'sdtype': 'datetime'},
                         'col': {'sdtype': 'numerical'},
                     }
                 }
             }
         }
-        instance = Range(
+        instance = Inequality(
             low_column_name='a',
-            middle_column_name='b',
-            high_column_name='c',
+            high_column_name='b',
             table_name='table',
             strict_boundaries=True,
         )
