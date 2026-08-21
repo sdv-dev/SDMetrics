@@ -18,7 +18,7 @@ class Inequality(BaseConstraint):
     """Constraint for inequality columns.
 
     Check that `high_column_name` is greater than `low_column_name`.
-    
+
     Args:
         low_column_name (str):
             Name of the column that contains the low values.
@@ -31,15 +31,14 @@ class Inequality(BaseConstraint):
             The name of the table that contains the columns. Optional if the
             data is only a single table. Defaults to None.
     """
+
     def __init__(self, low_column_name, high_column_name, strict_boundaries=False, table_name=None):
         super().__init__()
         if not isinstance(table_name, str):
             raise ValueError("The 'table_name' parameter must be a string.")
 
         if not _is_list_of_type([low_column_name, high_column_name], str):
-            raise ValueError(
-                '`low_column_name` and `high_column_name` must be strings.'
-            )
+            raise ValueError('`low_column_name` and `high_column_name` must be strings.')
 
         if not isinstance(strict_boundaries, bool):
             raise ValueError('`strict_boundaries` must be a boolean.')
@@ -65,7 +64,7 @@ class Inequality(BaseConstraint):
             missing_columns = "', '".join(missing_columns)
             raise ConstraintNotApplicableError(
                 f"The column(s) '{missing_columns}' are missing from the table '{self.table_name}'."
-        )
+            )
 
     def _get_data(self, data):
         low = data[self._low_column_name].to_numpy()
@@ -73,10 +72,14 @@ class Inequality(BaseConstraint):
         return low, high
 
     def _get_is_datetime(self, metadata, table_name):
-        return metadata['tables'][table_name]['columns'][self._low_column_name]['sdtype'] == 'datetime'
+        return (
+            metadata['tables'][table_name]['columns'][self._low_column_name]['sdtype'] == 'datetime'
+        )
 
     def _get_datetime_format(self, metadata, table_name, column_name):
-        datetime_format = metadata['tables'][table_name]['columns'][column_name].get('datetime_format')
+        datetime_format = metadata['tables'][table_name]['columns'][column_name].get(
+            'datetime_format'
+        )
         return datetime_format
 
     def _get_valid_table_data(self, table_data, metadata, table_name):
