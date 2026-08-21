@@ -11,14 +11,12 @@ from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApp
 @pytest.fixture
 def data():
     return {
-        "tableA": pd.DataFrame(
-            {
-                "col1": [1, 0, 0, 1],
-                "col2": [0, 1, 0, 0],
-                "col3": [0, 0, 1, 0],
-                "col4": [10, 20, 30, 40],
-            }
-        )
+        'tableA': pd.DataFrame({
+            'col1': [1, 0, 0, 1],
+            'col2': [0, 1, 0, 0],
+            'col3': [0, 0, 1, 0],
+            'col4': [10, 20, 30, 40],
+        })
     }
 
 
@@ -58,9 +56,7 @@ class TestOneHotEncoding:
         """Test ``_validate_data`` errors if a referenced column is not in the table."""
         # Setup
         del data['tableA']['col2']
-        expected_error = re.escape(
-            "The column(s) 'col2' are missing from the table 'tableA'."
-        )
+        expected_error = re.escape("The column(s) 'col2' are missing from the table 'tableA'.")
 
         # Run & Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):

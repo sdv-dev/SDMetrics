@@ -1,4 +1,5 @@
 """Constraint Adherence metric."""
+
 import warnings
 
 import numpy as np
@@ -74,7 +75,5 @@ class ConstraintAdherence(MultiTableMetric):
         try:
             return constraint.get_score(synthetic_data, metadata)
         except ConstraintNotApplicableError as error:
-            warnings.warn(
-                f'Unable to check the constraint against the synthetic data: {error}'
-            )
+            warnings.warn(f'Unable to check the constraint against the synthetic data: {error}')
             return np.nan

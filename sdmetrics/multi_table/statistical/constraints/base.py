@@ -13,6 +13,7 @@ class BaseConstraint:
     Subclasses must define ``_validate_data`` and ``_is_valid``, and accept every
     constraint parameter as a keyword argument in their ``__init__``.
     """
+
     _is_single_table = True
 
     @classmethod
@@ -89,9 +90,7 @@ class BaseConstraint:
         try:
             return constraint_class(**constraint_dict['parameters'])
         except TypeError as ex:
-            raise ValueError(
-                f"Unable to create the constraint '{class_name}': {ex}"
-            ) from ex
+            raise ValueError(f"Unable to create the constraint '{class_name}': {ex}") from ex
 
     def __init__(self):
         self.metadata = None

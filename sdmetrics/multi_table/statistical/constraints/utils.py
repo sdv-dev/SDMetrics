@@ -1,4 +1,5 @@
 """Utility Functions for Constraints."""
+
 import re
 from collections.abc import Iterable
 from datetime import datetime
@@ -33,6 +34,11 @@ PRECISION_LEVELS = {
     '%x': 0,  # Locale-based date
     '%X': 0,  # Locale-based time
 }
+
+
+def _is_list_of_type(values, type_to_check=str):
+    """Checks that 'values' is a list and all elements are of type 'type_to_check'."""
+    return isinstance(values, list) and all(isinstance(value, type_to_check) for value in values)
 
 
 def _get_table_to_valid_rows(data):

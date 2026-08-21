@@ -22,6 +22,7 @@ class DenormalizedTable(BaseConstraint):
             The names of the columns that come from the parent table. If ``None`` or
             empty, there is nothing to check and every row is considered valid.
     """
+
     def __init__(self, table_name, denormalized_primary_key, denormalized_column_names=None):
         super().__init__()
         if not isinstance(table_name, str):
@@ -37,9 +38,7 @@ class DenormalizedTable(BaseConstraint):
             isinstance(column_name, str) for column_name in denormalized_column_names
         )
         if not is_list_of_strings:
-            raise ValueError(
-                "The 'denormalized_column_names' parameter must be a list of strings."
-            )
+            raise ValueError("The 'denormalized_column_names' parameter must be a list of strings.")
 
         if denormalized_primary_key in denormalized_column_names:
             raise ValueError(
@@ -67,8 +66,7 @@ class DenormalizedTable(BaseConstraint):
         if missing_columns:
             missing_columns = "', '".join(missing_columns)
             raise ConstraintNotApplicableError(
-                f"The column(s) '{missing_columns}' are missing from the table "
-                f"'{self.table_name}'."
+                f"The column(s) '{missing_columns}' are missing from the table '{self.table_name}'."
             )
 
     def _is_valid(self, data, metadata=None):
@@ -84,9 +82,7 @@ class DenormalizedTable(BaseConstraint):
 
         counts_per_row = table.groupby(self.denormalized_primary_key, dropna=False)[
             self.denormalized_column_names
-        ].transform(
-            lambda col: col.nunique(dropna=False)
-        )
+        ].transform(lambda col: col.nunique(dropna=False))
 
         row_invalid = (counts_per_row > 1).any(axis=1)
         if row_invalid.any():

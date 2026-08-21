@@ -69,9 +69,7 @@ class TestDenormalizedTable:
         """Test ``_validate_data`` errors if a referenced column is not in the table."""
         # Setup
         del data['tableA']['name']
-        expected_error = re.escape(
-            "The column(s) 'name' are missing from the table 'tableA'."
-        )
+        expected_error = re.escape("The column(s) 'name' are missing from the table 'tableA'.")
 
         # Run & Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
@@ -89,9 +87,7 @@ class TestDenormalizedTable:
     def test__is_valid_no_denormalized_columns(self, data):
         """Test ``_is_valid`` return every row is valid when there is nothing to check."""
         # Setup
-        instance = DenormalizedTable(
-            table_name='tableA', denormalized_primary_key='id'
-        )
+        instance = DenormalizedTable(table_name='tableA', denormalized_primary_key='id')
 
         # Run
         is_valid = instance._is_valid(data)

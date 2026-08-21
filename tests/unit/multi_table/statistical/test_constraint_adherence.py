@@ -65,7 +65,7 @@ class TestConstraintAdherence:
         # Setup
         constraint['parameters']['table_name'] = 'MissingTable'
         expected_msg = (
-            "Unable to check the constraint against the real data: "
+            'Unable to check the constraint against the real data: '
             "The table 'MissingTable' is missing from the data."
         )
 
