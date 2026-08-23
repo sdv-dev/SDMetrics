@@ -124,7 +124,7 @@ class BaseConstraint:
     def _fit(self, data, metadata=None):
         """Learn the attributes of the constraint from the real data.
 
-        Constraints that do not need to learn anything can rely on this no-op.
+        Constraints that do not need to learn anything are a NOP.
 
         Args:
             data (dict[str, pandas.DataFrame]):
@@ -132,7 +132,7 @@ class BaseConstraint:
             metadata (dict):
                 The multi table metadata.
         """
-        pass
+        return
 
     def fit(self, data, metadata=None):
         """Learn this constraint from the real data.

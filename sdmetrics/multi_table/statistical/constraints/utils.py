@@ -41,6 +41,27 @@ def _is_list_of_type(values, type_to_check=str):
     return isinstance(values, list) and all(isinstance(value, type_to_check) for value in values)
 
 
+def _tuple_from_columns(row, column_names):
+    """Build a hashable tuple with the values that ``row`` has in ``column_names``.
+
+    Every missing value is mapped to ``None`` so that two rows that are null in the
+    same columns produce equal tuples.
+
+    Args:
+        row (pandas.Series):
+            A pandas row.
+        column_names (list[str]):
+            The names of the columns to take the values from.
+
+    Returns:
+        tuple:
+            The values of the row, in the order of ``column_names``.
+    """
+    return tuple(
+        None if pd.isna(row[column_name]) else row[column_name] for column_name in column_names
+    )
+
+
 def _get_table_to_valid_rows(data):
     return {table: pd.Series(True, index=data[table].index) for table in data}
 
@@ -296,3 +317,47 @@ def match_datetime_precision(low, high, low_datetime_format, high_datetime_forma
         high = downcast_datetime_to_lower_precision(high, lower_precision_format)
 
     return low, high
+
+
+def get_nan_component_value(row):
+    """Check for NaNs in a pandas row.
+
+    Outputs a concatenated string of the column names with NaNs.
+
+    Args:
+        row (pandas.Series):
+            A pandas row.
+
+    Returns:
+        A concatenated string of the column names with NaNs.
+    """
+    columns_with_nans = []
+    for column, value in row.items():
+        if pd.isna(value):
+            columns_with_nans.append(column)
+
+    if columns_with_nans:
+        return ', '.join(columns_with_nans)
+
+    return 'None'
+
+
+def compute_nans_column(table_data, list_column_names):
+    """Compute a categorical column to the table_data indicating where NaNs are.
+
+    Args:
+        table_data (pandas.DataFrame):
+            The table data.
+        list_column_names (list):
+            The list of column names to check for NaNs.
+
+    Returns:
+        A dict with the column name as key and the column indicating where NaNs are as value.
+        Empty dict if there are no NaNs.
+    """
+    nan_column_name = '#'.join(list_column_names) + '.nan_component'
+    column = table_data[list_column_names].apply(get_nan_component_value, axis=1)
+    if not (column == 'None').all():
+        return pd.Series(column, name=nan_column_name)
+
+    return None

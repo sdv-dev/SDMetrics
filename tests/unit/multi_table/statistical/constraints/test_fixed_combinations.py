@@ -54,7 +54,7 @@ class TestFixedCombinations:
         with pytest.raises(ValueError, match=err_msg):
             FixedCombinations(column_names=['a', 2], table_name='table')
 
-        err_msg = re.escape("FixedCombinations constraint requires at least two columns.")
+        err_msg = re.escape('FixedCombinations constraint requires at least two columns.')
         with pytest.raises(ValueError, match=err_msg):
             FixedCombinations(column_names=['a'], table_name='table')
 
