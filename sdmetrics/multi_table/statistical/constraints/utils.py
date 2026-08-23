@@ -36,30 +36,14 @@ PRECISION_LEVELS = {
 }
 
 
+def _tuple_from_columns(row, columns):
+    """Return a tuple of values for ``columns`` using ``None`` in place of NaN."""
+    return tuple(row[c] if not pd.isna(row[c]) else None for c in columns)
+
+
 def _is_list_of_type(values, type_to_check=str):
     """Checks that 'values' is a list and all elements are of type 'type_to_check'."""
     return isinstance(values, list) and all(isinstance(value, type_to_check) for value in values)
-
-
-def _tuple_from_columns(row, column_names):
-    """Build a hashable tuple with the values that ``row`` has in ``column_names``.
-
-    Every missing value is mapped to ``None`` so that two rows that are null in the
-    same columns produce equal tuples.
-
-    Args:
-        row (pandas.Series):
-            A pandas row.
-        column_names (list[str]):
-            The names of the columns to take the values from.
-
-    Returns:
-        tuple:
-            The values of the row, in the order of ``column_names``.
-    """
-    return tuple(
-        None if pd.isna(row[column_name]) else row[column_name] for column_name in column_names
-    )
 
 
 def _get_table_to_valid_rows(data):
@@ -222,6 +206,32 @@ def _parse_datetime(value, datetime_format, ignore_timezone):
         return pd.Series(parsed_value)
 
     return parsed_value
+
+
+def _format_invalid_values_string(invalid_values, num_values):
+    """Convert ``invalid_values`` into a string of invalid values.
+
+    Args:
+        invalid_values (pd.DataFrame, set):
+            Object of values to be converted into string.
+        num_values (int):
+            Maximum number of values of the object to show.
+
+    Returns:
+        str:
+            A stringified version of the object.
+    """
+    if isinstance(invalid_values, pd.DataFrame):
+        if len(invalid_values) > num_values:
+            return f'{invalid_values.head(num_values)}\n+{len(invalid_values) - num_values} more'
+
+    if isinstance(invalid_values, set):
+        invalid_values = sorted(invalid_values, key=lambda x: str(x))
+        if len(invalid_values) > num_values:
+            extra_missing_values = [f'+ {len(invalid_values) - num_values} more']
+            return f'{invalid_values[:num_values] + extra_missing_values}'
+
+    return f'{invalid_values}'
 
 
 def get_datetime_format_precision(format_str):
