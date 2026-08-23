@@ -121,6 +121,33 @@ class BaseConstraint:
         """
         raise NotImplementedError()
 
+    def _fit(self, data, metadata=None):
+        """Learn the attributes of the constraint from the real data.
+
+        Constraints that do not need to learn anything can rely on this no-op.
+
+        Args:
+            data (dict[str, pandas.DataFrame]):
+                A dictionary mapping each table name to its real data.
+            metadata (dict):
+                The multi table metadata.
+        """
+        pass
+
+    def fit(self, data, metadata=None):
+        """Learn this constraint from the real data.
+
+        Args:
+            data (dict[str, pandas.DataFrame]):
+                A dictionary mapping each table name to its real data.
+            metadata (dict):
+                The multi table metadata.
+        """
+        metadata = self.metadata if metadata is None else metadata
+        self._validate_data(data, metadata)
+        self._fit(data, metadata)
+        self._fitted = True
+
     def _is_valid(self, data, metadata=None):
         """Determine whether each row in the data adheres to this constraint.
 
@@ -165,6 +192,9 @@ class BaseConstraint:
 
     def get_score(self, data, metadata=None):
         """Get the proportion of rows in the data that adhere to this constraint.
+
+        Constraints that learn from the real data must be fitted first before
+        calling this method.
 
         Args:
             data (dict[str, pandas.DataFrame]):

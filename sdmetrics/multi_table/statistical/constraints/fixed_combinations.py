@@ -6,6 +6,19 @@ from sdmetrics.multi_table.statistical.constraints.utils import _get_is_valid_di
 
 
 class FixedCombinations(BaseConstraint):
+    """Constraint to check that a set of columns only takes known combinations of values.
+
+    The valid combinations are the ones present in the fitted data. The data is
+    then checked against those combinations.
+
+    Args:
+        column_names (list[str]):
+            Names of the columns that must keep their combinations of values fixed.
+        table_name (str, optional):
+            The name of the table that contains the columns. Optional if the
+            data is only a single table. Defaults to None.
+    """
+
     def __init__(self, column_names, table_name=None):
         super().__init__()
 
@@ -14,6 +27,9 @@ class FixedCombinations(BaseConstraint):
 
         if not _is_list_of_type(column_names, str):
             raise ValueError("The 'column_names' parameter must be a list of strings.")
+
+        if len(column_names) < 2:
+            raise ValueError('FixedCombinations constraint requires at least two columns.')
 
         self.column_names = column_names
         self.table_name = table_name
@@ -37,14 +53,25 @@ class FixedCombinations(BaseConstraint):
                 f"The column(s) '{missing_columns}' are missing from the table '{self.table_name}'."
             )
 
+    def _fit(self, data, metadata=None):
+        """Learn the combinations of values that are present in the real data."""
+        table_name = self._get_single_table_name(metadata)
+        self._combinations = data[table_name][self.column_names].drop_duplicates()
+
     def _is_valid(self, data, metadata=None):
         """Determine whether the data matches the constraint."""
+        if not self._fitted:
+            raise ConstraintNotApplicableError(
+                'FixedCombinations constraint must be called with ``fit`` first.'
+            )
+
         table_name = self._get_single_table_name(metadata)
         is_valid = _get_is_valid_dict(data, table_name)
-        merged = data[table_name].merge(
+        table_data = data[table_name][self.column_names]
+        merged = table_data.merge(
             self._combinations, how='left', on=self.column_names, indicator=self._joint_column
         )
         valid_data = merged[self._joint_column] == 'both'
-        valid_data.index = data[table_name].index
+        valid_data.index = table_data.index
         is_valid[table_name] = valid_data
         return is_valid

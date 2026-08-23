@@ -61,6 +61,7 @@ class ConstraintAdherence(MultiTableMetric):
             return np.nan
 
         try:
+            constraint.fit(real_data, metadata)
             real_score = constraint.get_score(real_data, metadata)
         except ConstraintNotApplicableError as error:
             warnings.warn(f'Unable to check the constraint against the real data: {error}')
