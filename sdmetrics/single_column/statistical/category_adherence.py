@@ -1,6 +1,7 @@
 """Category Adherence Metric."""
 
 import numpy as np
+import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
@@ -10,6 +11,8 @@ class CategoryAdherence(SingleColumnMetric):
     """Category adherence metric.
 
     The proportion of synthetic data points that match an existing category from the real data.
+    If any of ``range_values`` or ``range_is_nullable`` are provided, they are used instead of
+    the categories computed from the real data.
 
     Attributes:
         name (str):
@@ -28,7 +31,9 @@ class CategoryAdherence(SingleColumnMetric):
     max_value = 1.0
 
     @classmethod
-    def compute_breakdown(cls, real_data, synthetic_data):
+    def compute_breakdown(
+        cls, real_data, synthetic_data, range_values=None, range_is_nullable=None
+    ):
         """Compute the score breakdown of the category adherence metric.
 
         Args:
@@ -36,19 +41,35 @@ class CategoryAdherence(SingleColumnMetric):
                 The real data.
             synthetic_data (pandas.Series):
                 The synthetic data.
+            range_values (List[str], optional):
+                The list of categories the column is allowed to take. If ``None``, the
+                categories of the real data are used instead. Defaults to ``None``.
+            range_is_nullable (bool, optional):
+                Whether the column is allowed to contain missing values.
+                Defaults to ``None``.
 
         Returns:
             dict:
                 The score breakdown of the category adherence metric.
         """
-        real_data = real_data.fillna(np.nan)
-        synthetic_data = synthetic_data.fillna(np.nan)
-        score = synthetic_data.isin(real_data).mean()
+        real_data = pd.Series(real_data).fillna(np.nan)
+        synthetic_data = pd.Series(synthetic_data).fillna(np.nan)
+        if range_values is None:
+            valid_values = pd.Series(real_data.unique())
+        else:
+            valid_values = pd.Series(list(range_values))
 
-        return {'score': score}
+        if range_is_nullable is None:
+            range_is_nullable = any(pd.isna(real_data)) or any(pd.isna(valid_values))
+
+        valid = synthetic_data.isin(valid_values.dropna())
+        if range_is_nullable:
+            valid = valid | pd.isna(synthetic_data)
+
+        return {'score': valid.mean()}
 
     @classmethod
-    def compute(cls, real_data, synthetic_data):
+    def compute(cls, real_data, synthetic_data, range_values=None, range_is_nullable=None):
         """Compute the category adherence of two columns.
 
         Args:
@@ -56,9 +77,20 @@ class CategoryAdherence(SingleColumnMetric):
                 The real data.
             synthetic_data (pandas.Series):
                 The synthetic data.
+            range_values (List[str], optional):
+                The list of categories the column is allowed to take. If ``None``, the
+                categories of the real data are used instead. Defaults to ``None``.
+            range_is_nullable (bool, optional):
+                Whether the column is allowed to contain missing values.
+                Defaults to ``None``.
 
         Returns:
             float:
                 The category adherence metric score.
         """
-        return cls.compute_breakdown(real_data, synthetic_data)['score']
+        return cls.compute_breakdown(
+            real_data,
+            synthetic_data,
+            range_values=range_values,
+            range_is_nullable=range_is_nullable,
+        )['score']
