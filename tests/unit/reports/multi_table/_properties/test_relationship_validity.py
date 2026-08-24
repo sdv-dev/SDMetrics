@@ -92,7 +92,31 @@ class TestRelationshipValidity:
         real_columns = relationship_validity._extract_tuple(real_data, relation)
 
         # Assert
-        assert real_columns == (real_data['users']['user_id'], real_data['sessions']['user_id'])
+        pd.testing.assert_frame_equal(real_columns[0], real_data['users'][['user_id']])
+        pd.testing.assert_frame_equal(real_columns[1], real_data['sessions'][['user_id']])
+
+    def test__generate_details_referential_integrity_score(
+        self, real_data_fixture, synthetic_data_fixture, metadata_fixture
+    ):
+        """Test that ``ReferentialIntegrity`` returns a score instead of erroring.
+
+        ``_extract_tuple`` used to pass the key columns as ``pd.Series``, which made
+        ``ReferentialIntegrity`` fail with ``AttributeError: 'Series' object has no
+        attribute 'columns'`` and record a ``nan`` score.
+        """
+        # Setup
+        relationship_validity = RelationshipValidity()
+
+        # Run
+        relationship_validity._generate_details(
+            real_data_fixture, synthetic_data_fixture, metadata_fixture
+        )
+
+        # Assert
+        details = relationship_validity.details
+        ri_row = details[details['Metric'] == 'ReferentialIntegrity'].iloc[0]
+        assert ri_row['Error'] is None
+        assert not np.isnan(ri_row['Score'])
 
     def test__get_num_iteration(self):
         """Test the ``_get_num_iterations`` method."""
