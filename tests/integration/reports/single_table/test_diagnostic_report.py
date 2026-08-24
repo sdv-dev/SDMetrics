@@ -121,6 +121,68 @@ class TestDiagnosticReport:
         )
         assert_report_scores_are_not_nan(report)
 
+    def test_end_to_end_with_metadata_v2(self, metadata_v2_single_table_demo):
+        """Test the diagnostic report with a metadata that defines the range of the columns."""
+        # Setup
+        real_data, synthetic_data, metadata = metadata_v2_single_table_demo
+        report = DiagnosticReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+        # Assert
+        details = report.get_details('Data Validity')
+        assert set(details['Metric']) == {
+            'BoundaryAdherence',
+            'CategoryAdherence',
+            'DatetimeFormatAdherence',
+            'KeyUniqueness',
+            'RegexFormatAdherence',
+        }
+        assert (details['Score'] == 1.0).all()
+        assert report.get_score() == 1.0
+        assert_report_scores_are_not_nan(report)
+
+    def test_end_to_end_metadata_v2_ranges_broader_than_real_data(
+        self, single_table_demo_data_and_metadata, metadata_v2_single_table_demo
+    ):
+        """Test that the ranges of the metadata are used instead of the ones of the real data.
+
+        Synthetic values that are outside the range of the real data but inside the range
+        defined by the metadata should be considered valid.
+        """
+        # Setup
+        real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
+        real_data_v2, synthetic_data_v2, metadata_v2 = metadata_v2_single_table_demo
+        for synthetic_table in [synthetic_data, synthetic_data_v2]:
+            synthetic_table.loc[0, 'salary'] = 150000.0
+            synthetic_table.loc[0, 'second_perc'] = 99.5
+            synthetic_table.loc[0, 'start_date'] = pd.Timestamp('2021-06-01')
+            synthetic_table.loc[0, 'high_spec'] = 'Engineering'
+
+        report = DiagnosticReport()
+        report_v2 = DiagnosticReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata, verbose=False)
+        report_v2.generate(real_data_v2, synthetic_data_v2, metadata_v2, verbose=False)
+
+        # Assert
+        out_of_real_range = [
+            ('salary', 'BoundaryAdherence'),
+            ('second_perc', 'BoundaryAdherence'),
+            ('start_date', 'BoundaryAdherence'),
+            ('high_spec', 'CategoryAdherence'),
+        ]
+        scores = report.get_details('Data Validity').set_index(['Column', 'Metric'])['Score']
+        scores_v2 = report_v2.get_details('Data Validity').set_index(['Column', 'Metric'])['Score']
+        for column_name, metric_name in out_of_real_range:
+            assert scores[(column_name, metric_name)] < 1.0
+            assert scores_v2[(column_name, metric_name)] == 1.0
+
+        assert report.get_score() < 1.0
+        assert report_v2.get_score() == 1.0
+
     def test_end_to_end_composite_keys(self, single_table_demo_data_and_metadata):
         """Test the end-to-end functionality of the diagnostic report."""
         # Setup
