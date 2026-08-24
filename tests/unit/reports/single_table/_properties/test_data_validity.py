@@ -8,6 +8,72 @@ from sdmetrics.reports.single_table._properties.data_validity import DataValidit
 class TestDataValidity:
     @patch('sdmetrics.reports.single_table._properties.data_validity.BoundaryAdherence.compute')
     @patch('sdmetrics.reports.single_table._properties.data_validity.CategoryAdherence.compute')
+    def test__generate_details_with_ranges_in_metadata(
+        self, category_a_compute_mock, boundary_a_compute_mock
+    ):
+        """Test that the range information of the metadata is passed down to the metrics."""
+        # Setup
+        real_data = pd.DataFrame({
+            'col1': [10, 20, 30],
+            'col2': ['a', 'a', 'b'],
+            'col3': [True, False, True],
+            'col4': pd.to_datetime(['2020-01-01', '2020-01-02', '2020-01-03']),
+        })
+        synthetic_data = pd.DataFrame({
+            'col1': [15, 25, 35],
+            'col2': ['a', 'c', 'a'],
+            'col3': [True, True, False],
+            'col4': pd.to_datetime(['2020-01-04', '2020-01-05', '2020-01-06']),
+        })
+        metadata = {
+            'columns': {
+                'col1': {
+                    'sdtype': 'numerical',
+                    'range_min': 0,
+                    'range_max': 80,
+                    'decimal_places': 0,
+                },
+                'col2': {
+                    'sdtype': 'categorical',
+                    'range_values': ['a', 'b', 'c'],
+                    'range_is_nullable': True,
+                },
+                'col3': {'sdtype': 'boolean'},
+                'col4': {
+                    'sdtype': 'datetime',
+                    'datetime_format': '%Y-%m-%d',
+                    'range_min': '2019-01-01',
+                },
+            },
+        }
+
+        # Run
+        data_validity_property = DataValidity()
+        data_validity_property._generate_details(real_data, synthetic_data, metadata)
+
+        # Assert
+        expected_calls_ba = [
+            call(real_data['col1'], synthetic_data['col1'], range_min=0, range_max=80),
+            call(
+                real_data['col4'],
+                synthetic_data['col4'],
+                range_min='2019-01-01',
+            ),
+        ]
+        expected_calls_ca = [
+            call(
+                real_data['col2'],
+                synthetic_data['col2'],
+                range_values=['a', 'b', 'c'],
+                range_is_nullable=True,
+            ),
+            call(real_data['col3'], synthetic_data['col3']),
+        ]
+        boundary_a_compute_mock.assert_has_calls(expected_calls_ba)
+        category_a_compute_mock.assert_has_calls(expected_calls_ca)
+
+    @patch('sdmetrics.reports.single_table._properties.data_validity.BoundaryAdherence.compute')
+    @patch('sdmetrics.reports.single_table._properties.data_validity.CategoryAdherence.compute')
     @patch('sdmetrics.reports.single_table._properties.data_validity.KeyUniqueness.compute')
     def test__generate_details(
         self, key_uniqueness_mock, category_a_compute_mock, boundary_a_compute_mock
