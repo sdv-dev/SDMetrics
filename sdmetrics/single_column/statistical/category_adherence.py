@@ -52,8 +52,8 @@ class CategoryAdherence(SingleColumnMetric):
             dict:
                 The score breakdown of the category adherence metric.
         """
-        real_data = pd.Series(real_data).fillna(np.nan)
-        synthetic_data = pd.Series(synthetic_data).fillna(np.nan)
+        real_data = real_data.fillna(np.nan)
+        synthetic_data = synthetic_data.fillna(np.nan)
         if range_values is None:
             valid_values = pd.Series(real_data.unique())
         else:
