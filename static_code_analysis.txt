@@ -1,4 +1,4 @@
-Run started:2026-07-24 12:46:57.153921+00:00
+Run started:2026-08-20 20:20:55.743597+00:00
 
 Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -98,10 +98,10 @@ Test results:
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
    More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b101_assert_used.html
-   Location: ./sdmetrics/timeseries/detection.py:106:8
-105	        """
-106	        assert cls.min_value == 0.0
-107	        return super().normalize(raw_score)
+   Location: ./sdmetrics/timeseries/detection.py:115:8
+114	        """
+115	        assert cls.min_value == 0.0
+116	        return super().normalize(raw_score)
 
 --------------------------------------------------
 >> Issue: [B110:try_except_pass] Try, Except, Pass detected.
@@ -117,7 +117,7 @@ Test results:
 --------------------------------------------------
 
 Code scanned:
-	Total lines of code: 12601
+	Total lines of code: 13012
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 
