@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from sdmetrics._utils_metadata import (
+    _convert_column_to_string,
     _convert_datetime_column,
     _convert_datetime_columns,
     _get_single_table_metadata,
@@ -110,6 +111,55 @@ def test__validate_metadata_invalid(metadata_wrong, expected_error):
     # Run and Assert
     with pytest.raises(ValueError, match=expected_error):
         _validate_metadata(metadata_wrong)
+
+
+@pytest.mark.parametrize(
+    ('column_data', 'column_metadata', 'expected_result'),
+    [
+        (pd.Series([1, 2, 3]), {'sdtype': 'numerical'}, pd.Series(['1', '2', '3'])),
+        (pd.Series([1.1, 2.2, 3.3]), {'sdtype': 'numerical'}, pd.Series(['1.1', '2.2', '3.3'])),
+        (pd.Series(['a', 'b', 'c']), {'sdtype': 'categorical'}, pd.Series(['a', 'b', 'c'])),
+        (
+            pd.Series([
+                pd.Timestamp('2021-01-01'),
+                pd.Timestamp('2021-01-02'),
+                pd.Timestamp('2021-01-03'),
+            ]),
+            {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+            pd.Series(['2021-01-01', '2021-01-02', '2021-01-03']),
+        ),
+        (
+            pd.Series(['2021-01-01', '2021-01-02', '2021-01-03']),
+            {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+            pd.Series(['2021-01-01', '2021-01-02', '2021-01-03']),
+        ),
+        (
+            pd.Series([
+                pd.Timestamp('2021-01-01'),
+                pd.Timestamp('2021-01-02'),
+                pd.Timestamp('2021-01-03'),
+            ]),
+            {'sdtype': 'datetime'},
+            pd.Series(['2021-01-01', '2021-01-02', '2021-01-03']),
+        ),
+        (
+            pd.Series([
+                pd.Timestamp('2021-01-01'),
+                pd.Timestamp('2021-01-02'),
+                pd.Timestamp('2021-01-03'),
+            ]),
+            {'sdtype': 'datetime', 'datetime_format': '%Y %H'},
+            pd.Series(['2021 00', '2021 00', '2021 00']),
+        ),
+    ],
+)
+def test__convert_column_to_string(column_data, column_metadata, expected_result):
+    """Test the ``_convert_column_to_string`` method."""
+    # Run
+    result = _convert_column_to_string(column_data, column_metadata)
+
+    # Assert
+    pd.testing.assert_series_equal(expected_result, result)
 
 
 def test__convert_datetime_column(data, metadata):
