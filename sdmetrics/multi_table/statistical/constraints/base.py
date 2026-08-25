@@ -104,7 +104,7 @@ class BaseConstraint:
         if not hasattr(self, 'table_name'):
             raise ValueError('No ``table_name`` attribute has been set.')
 
-        return metadata._get_single_table_name() if self.table_name is None else self.table_name
+        return next(iter(metadata['tables']), None) if self.table_name is None else self.table_name
 
     def _validate_data(self, data, metadata=None):
         """Check that this constraint can be applied to the given data.

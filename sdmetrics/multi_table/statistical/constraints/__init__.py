@@ -8,6 +8,7 @@ from sdmetrics.multi_table.statistical.constraints.one_hot_encoding import OneHo
 from sdmetrics.multi_table.statistical.constraints.inequality import Inequality
 from sdmetrics.multi_table.statistical.constraints.chained_inequality import ChainedInequality
 from sdmetrics.multi_table.statistical.constraints.range import Range
+from sdmetrics.multi_table.statistical.constraints.mixed_scales import MixedScales
 from sdmetrics.multi_table.statistical.constraints.fixed_increments import FixedIncrements
 from sdmetrics.multi_table.statistical.constraints.fixed_combinations import FixedCombinations
 from sdmetrics.multi_table.statistical.constraints.fixed_null_combinations import (
@@ -26,4 +27,5 @@ __all__ = (
     FixedNullCombinations,
     ColumnFormula,
     CarryOverColumns,
+    MixedScales,
 )

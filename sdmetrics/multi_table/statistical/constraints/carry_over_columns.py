@@ -64,8 +64,8 @@ def _validate_carry_over_columns(data, common_column_info):
 class CarryOverColumns(BaseConstraint):
     """Constraint for a table that carries columns.
 
-    The Carry Over Columns Constraint is a constraint that carries over columns from
-    a parent table to a child table.
+    The Carry Over Columns constraint that checks columns that were carried over
+    from a parent table to a child table.
 
     Args:
         common_column_info (list[dict]):

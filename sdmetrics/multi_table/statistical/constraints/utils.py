@@ -36,6 +36,34 @@ PRECISION_LEVELS = {
 }
 
 
+class CustomNan:
+    """Custom NaN class."""
+
+    def __eq__(self, other):
+        """Check if the other object is a CustomNan."""
+        return isinstance(other, CustomNan)
+
+    def __hash__(self):
+        """Return a hash for the CustomNan."""
+        return hash('CustomNaN')
+
+    def __lt__(self, value):
+        """Return that this class is always less than value."""
+        return False
+
+    def __gt__(self, value):
+        """Return that this class is always greater than value."""
+        return True
+
+    def __str__(self):
+        """Return a human-readable string representation of the object."""
+        return 'CustomNan'
+
+    def __repr__(self):
+        """Return a human-readable string representation of the object."""
+        return 'CustomNan()'
+
+
 def _replace_nans_with_none(series):
     """Replace all NaN values in a pandas Series with None.
 
