@@ -28,9 +28,18 @@ class DataValidity(BaseSingleTableProperty):
     The BoundaryAdherence metric is used for numerical and datetime columns, the CategoryAdherence
     is used for categorical and boolean columns and the KeyUniqueness for primary
     and alternate keys. The other column types are ignored by this property.
+
+    If the metadata defines the valid range of a column, it is passed down to the metric,
+    which uses it instead of computing it from the real data.
     """
 
     _num_iteration_case = 'column'
+    _metric_to_arguments = {
+        DatetimeFormatAdherence: ('datetime_format',),
+        RegexFormatAdherence: ('regex_format',),
+        BoundaryAdherence: ('range_min', 'range_max', 'range_is_nullable'),
+        CategoryAdherence: ('range_values', 'range_is_nullable'),
+    }
     _sdtype_to_metric = {
         'numerical': [BoundaryAdherence],
         'datetime': [BoundaryAdherence, DatetimeFormatAdherence],
@@ -38,6 +47,33 @@ class DataValidity(BaseSingleTableProperty):
         'boolean': [CategoryAdherence],
         'id': [KeyUniqueness, RegexFormatAdherence],
     }
+
+    @classmethod
+    def _get_metric_arguments(cls, metric, column_name, columns_meta):
+        """Get the information of a column defined in the metadata.
+
+        Args:
+            metric (SingleColumnMetric):
+                The metric to compute the column score with.
+            column_name (str):
+                The name of the column.
+            columns_meta (dict):
+                The metadata of every column of the table.
+
+        Returns:
+            dict:
+                The arguments to pass down to the metric. Any information that is not
+                defined in the metadata is omitted.
+        """
+        arguments = cls._metric_to_arguments.get(metric)
+        if not arguments:
+            return {}
+
+        column_meta = columns_meta[column_name]
+        column_arguments = {
+            argument: column_meta[argument] for argument in arguments if argument in column_meta
+        }
+        return column_arguments
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the data validity property.
@@ -83,26 +119,21 @@ class DataValidity(BaseSingleTableProperty):
             metrics = self._sdtype_to_metric.get(sdtype, [KeyUniqueness])
             for metric in metrics:
                 try:
+                    metric_arguments = self._get_metric_arguments(metric, column_name, columns_meta)
                     if metric in [DatetimeFormatAdherence, RegexFormatAdherence]:
                         column_meta = columns_meta[column_name]
-                        if metric == DatetimeFormatAdherence:
-                            format_name = 'datetime_format'
-
-                        elif metric == RegexFormatAdherence:
-                            format_name = 'regex_format'
-
-                        format = column_meta.get(format_name)
-                        if format is None:
-                            continue
-
                         real_column = _convert_column_to_string(real_data[column_name], column_meta)
                         synthetic_column = _convert_column_to_string(
                             synthetic_data[column_name], column_meta
                         )
-                        column_score = metric.compute(real_column, synthetic_column, format)
+                        column_score = metric.compute(
+                            real_column, synthetic_column, **metric_arguments
+                        )
                     else:
                         column_score = metric.compute(
-                            real_data[column_name], synthetic_data[column_name]
+                            real_data[column_name],
+                            synthetic_data[column_name],
+                            **metric_arguments,
                         )
 
                     error_message = None

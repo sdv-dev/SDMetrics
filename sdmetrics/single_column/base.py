@@ -41,7 +41,7 @@ class SingleColumnMetric(BaseMetric):
         raise NotImplementedError()
 
     @classmethod
-    def compute_breakdown(cls, real_data, synthetic_data):
+    def compute_breakdown(cls, real_data, synthetic_data, **kwargs):
         """Compute this metric breakdown.
 
         Args:
@@ -51,9 +51,11 @@ class SingleColumnMetric(BaseMetric):
             synthetic_data (Union[numpy.ndarray, pandas.Series]):
                 The values from the synthetic dataset, passed as a 1d numpy
                 array or as a pandas.Series.
+            **kwargs:
+                Additional keyword arguments to pass to the ``compute`` method.
 
         Returns:
             dict
                 Mapping of the metric output. Must include the key 'score'.
         """
-        return {'score': cls.compute(real_data, synthetic_data)}
+        return {'score': cls.compute(real_data, synthetic_data, **kwargs)}

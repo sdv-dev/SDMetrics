@@ -36,6 +36,59 @@ class TestDiagnosticReport:
         assert all(properties['Score'] == 1.0)
         assert_report_scores_are_not_nan(report)
 
+    def test_end_to_end_with_metadata_v2(self, metadata_v2_multi_table_demo):
+        """Test the diagnostic report with a metadata that defines the range of the columns."""
+        # Setup
+        real_data, synthetic_data, metadata = metadata_v2_multi_table_demo
+        report = DiagnosticReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata, verbose=False)
+        results = report.get_score()
+
+        # Assert
+        assert results == 1.0
+        properties = report.get_properties()
+        assert all(properties['Score'] == 1.0)
+        assert_report_scores_are_not_nan(report)
+
+    def test_end_to_end_metadata_v2_ranges_broader_than_real_data(
+        self, metadata_v2_multi_table_demo
+    ):
+        """Test that the ranges of the metadata are used instead of the ones of the real data."""
+        # Setup
+        real_data, synthetic_data, metadata_v2 = metadata_v2_multi_table_demo
+        metadata_v1 = load_demo(modality='multi_table')[2]
+
+        synthetic_data['users'].loc[0, 'age'] = 80
+        synthetic_data['users'].loc[0, 'country'] = 'IT'
+        synthetic_data['transactions'].loc[0, 'amount'] = 500.0
+        synthetic_data['transactions'].loc[0, 'timestamp'] = pd.Timestamp('2019-06-01')
+
+        report = DiagnosticReport()
+        report_v2 = DiagnosticReport()
+
+        # Run
+        report.generate(real_data, synthetic_data, metadata_v1, verbose=False)
+        report_v2.generate(real_data, synthetic_data, metadata_v2, verbose=False)
+
+        # Assert
+        out_of_real_range = [
+            ('users', 'age', 'BoundaryAdherence'),
+            ('users', 'country', 'CategoryAdherence'),
+            ('transactions', 'amount', 'BoundaryAdherence'),
+            ('transactions', 'timestamp', 'BoundaryAdherence'),
+        ]
+        index = ['Table', 'Column', 'Metric']
+        scores = report.get_details('Data Validity').set_index(index)['Score']
+        scores_v2 = report_v2.get_details('Data Validity').set_index(index)['Score']
+        for detail in out_of_real_range:
+            assert scores[detail] < 1.0
+            assert scores_v2[detail] == 1.0
+
+        assert report.get_score() < 1.0
+        assert report_v2.get_score() == 1.0
+
     def test_end_to_end_with_object_datetimes(self):
         """Test the ``DiagnosticReport`` report with object datetimes."""
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
