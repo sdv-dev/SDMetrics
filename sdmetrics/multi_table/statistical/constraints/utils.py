@@ -36,6 +36,18 @@ PRECISION_LEVELS = {
 }
 
 
+def _replace_nans_with_none(series):
+    """Replace all NaN values in a pandas Series with None.
+
+    Args:
+        series (pd.Series): The input pandas Series.
+
+    Returns:
+        pd.Series: A new Series with NaN values replaced by None.
+    """
+    return series.astype(object).where(series.notna(), None)
+
+
 def _tuple_from_columns(row, columns):
     """Return a tuple of values for ``columns`` using ``None`` in place of NaN."""
     return tuple(row[c] if not pd.isna(row[c]) else None for c in columns)

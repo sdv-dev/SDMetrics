@@ -1,6 +1,7 @@
 """Constraints."""
 
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
+from sdmetrics.multi_table.statistical.constraints.carry_over_columns import CarryOverColumns
 from sdmetrics.multi_table.statistical.constraints.column_formula import ColumnFormula
 from sdmetrics.multi_table.statistical.constraints.denormalized_table import DenormalizedTable
 from sdmetrics.multi_table.statistical.constraints.one_hot_encoding import OneHotEncoding
@@ -24,4 +25,5 @@ __all__ = (
     FixedCombinations,
     FixedNullCombinations,
     ColumnFormula,
+    CarryOverColumns,
 )
