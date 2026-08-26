@@ -1,8 +1,8 @@
 """Denormalized Table Constraint."""
 
+from sdmetrics.multi_table.statistical.constraints._utils import _get_table_to_valid_rows
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
-from sdmetrics.multi_table.statistical.constraints._utils import _get_table_to_valid_rows
 
 
 class DenormalizedTable(BaseConstraint):
