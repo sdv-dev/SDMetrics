@@ -8,6 +8,10 @@ import numpy as np
 import pandas as pd
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
+from sdmetrics.multi_table.statistical.constraints.error import (
+    ConstraintNotApplicableError,
+)
+
 PRECISION_LEVELS = {
     '%Y': 1,  # Year
     '%y': 1,  # Year without century (same precision as %Y)
@@ -93,6 +97,190 @@ def _tuple_from_columns(row, columns):
 def _is_list_of_type(values, type_to_check=str):
     """Checks that 'values' is a list and all elements are of type 'type_to_check'."""
     return isinstance(values, list) and all(isinstance(value, type_to_check) for value in values)
+
+
+def _get_key_values(table_data, key_columns):
+    """Return one hashable value per row for the given key columns.
+
+    Every missing value is mapped to ``None`` so that two rows that are null in the
+    same columns produce equal values.
+
+    Args:
+        table_data (pandas.DataFrame):
+            The data of the table.
+        key_columns (list[str]):
+            The names of the columns that make up the key.
+
+    Returns:
+        pandas.Series:
+            A tuple with the values of ``key_columns`` for every row.
+    """
+    return pd.Series(
+        [_tuple_from_columns(row, key_columns) for _, row in table_data[key_columns].iterrows()],
+        index=table_data.index,
+        dtype=object,
+    )
+
+
+def _validate_foreign_to_primary_key_subset_input(
+    parent_table_name,
+    child_table_name,
+    child_foreign_key,
+    conditional_column_name,
+    conditional_values,
+):
+    """Validate the input for the ForeignToPrimaryKeySubset constraint."""
+    if not isinstance(parent_table_name, str):
+        raise TypeError('`parent_table_name` must be a string.')
+
+    if not isinstance(child_table_name, str):
+        raise TypeError('`child_table_name` must be a string.')
+
+    if not isinstance(child_foreign_key, str) and not _is_list_of_type(child_foreign_key):
+        raise TypeError('`child_foreign_key` must be a string or a list of strings.')
+
+    if not isinstance(conditional_column_name, str):
+        raise TypeError('`conditional_column_name` must be a string.')
+
+    if not isinstance(conditional_values, list):
+        raise TypeError('`conditional_values` must be a list.')
+
+
+def _validate_foreign_to_primary_key_subset(
+    data,
+    parent_primary_key,
+    parent_table_name,
+    child_table_name,
+    child_foreign_key,
+    conditional_column_name,
+    conditional_values,
+):
+    """Validate the ForeignToPrimaryKeySubset constraint."""
+    parent_primary_key = _cast_to_iterable(parent_primary_key)
+    child_foreign_key = _cast_to_iterable(child_foreign_key)
+    indicator_col = _create_unique_name('_merge', parent_primary_key + child_foreign_key)
+    parent_table = data[parent_table_name]
+    merged_parent = (
+        parent_table[parent_primary_key]
+        .merge(
+            data[child_table_name][child_foreign_key].drop_duplicates(),
+            left_on=parent_primary_key,
+            right_on=child_foreign_key,
+            how='left',
+            indicator=indicator_col,
+        )
+        .set_index(parent_table.index)
+    )
+    filtered_parent = parent_table[merged_parent[indicator_col] == 'both']
+    table_to_valid_rows = _get_table_to_valid_rows(data)
+    if not set(filtered_parent[conditional_column_name]).issubset(conditional_values):
+        good_parent_value_index = filtered_parent[conditional_column_name].isin(conditional_values)
+        good_parent_values = filtered_parent.loc[good_parent_value_index][parent_primary_key]
+        invalid_rows = (
+            data[child_table_name][child_foreign_key]
+            .merge(
+                good_parent_values,
+                left_on=child_foreign_key,
+                right_on=parent_primary_key,
+                how='left',
+                indicator=indicator_col,
+            )
+            .set_index(data[child_table_name].index)[indicator_col]
+            == 'left_only'
+        )
+        table_to_valid_rows[child_table_name][invalid_rows] = False
+
+    return table_to_valid_rows
+
+
+def _validate_foreign_to_foreign_key_input(columns, foreign_key_generation):
+    """Validates a list of foreign key specifications.
+
+    Args:
+        columns (list[dict]):
+            A list of dictionaries, each specifying a foreign key that are all connected.
+            Each dictionary should have the keys:
+                - 'table_name' (str): The name of the table.
+                - 'foreign_key' (str or tuple[str]): The foreign key column(s).
+        foreign_key_generation (str):
+            Method to use to generate new foreign key values. Must be one of ['new', 'reuse'].
+
+    Raises:
+        ValueError:
+            If the ``columns`` value is not instance of list or dictionaries do not
+            contain the right inputs, or if ``foreign_key_generation`` value is not a string or
+            is an invalid option.
+    """
+    expected_length = None
+
+    if not isinstance(columns, list):
+        raise ValueError('columns must be a list of dictionaries')
+
+    for entry in columns:
+        if not isinstance(entry, dict):
+            raise ValueError('Each entry in columns must be a dictionary')
+
+        table_name = entry.get('table_name')
+        foreign_key = entry.get('foreign_key')
+
+        if 'table_name' not in entry or not isinstance(table_name, str):
+            raise ValueError("Each dictionary must have a 'table_name' key with a string value")
+
+        if 'foreign_key' not in entry:
+            raise ValueError("Each dictionary must have a 'foreign_key' key")
+
+        if isinstance(foreign_key, str):
+            key_columns = [foreign_key]
+        elif isinstance(foreign_key, tuple) and all(isinstance(col, str) for col in foreign_key):
+            key_columns = list(foreign_key)
+        else:
+            raise ValueError("'foreign_key' must be a string or a tuple of strings")
+
+        if expected_length is None:
+            expected_length = len(key_columns)
+
+        elif len(key_columns) != expected_length:
+            raise ValueError(
+                'All foreign key entries must have the same number of columns. '
+                f"Entry for table '{table_name}' has {len(key_columns)} columns, "
+                f'expected {expected_length}.'
+            )
+
+        if not isinstance(foreign_key_generation, str):
+            raise ValueError('`foreign_key_generation` must be a string.')
+
+        if foreign_key_generation not in ['new', 'reuse']:
+            raise ValueError(
+                f"Unrecognized `foreign_key_generation` value '{foreign_key_generation}'. "
+                "Must be one of ['new', 'reuse']."
+            )
+
+
+def _get_primary_key(metadata, table_name):
+    """Return the primary key of a table, as it is written in the metadata.
+
+    Args:
+        metadata (dict):
+            The multi table metadata.
+        table_name (str):
+            The name of the table to get the primary key of.
+
+    Returns:
+        str:
+            The name of the primary key column.
+
+    Raises:
+        ConstraintNotApplicableError:
+            If the metadata does not give a primary key for the table.
+    """
+    tables_metadata = (metadata or {}).get('tables', {})
+    primary_key = tables_metadata.get(table_name, {}).get('primary_key')
+    if not isinstance(primary_key, str):
+        raise ConstraintNotApplicableError(
+            f"The table '{table_name}' does not have a primary key in the metadata."
+        )
+
+    return primary_key
 
 
 def _get_table_to_valid_rows(data):
