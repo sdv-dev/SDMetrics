@@ -178,7 +178,9 @@ class FixedNullCombinations(BaseConstraint):
 
         Args:
             data (dict[str, pandas.DataFrame]):
-                Table data.
+                The data dictionary.
+            metadata (dict):
+                Metadata as a dictionary.
 
         Returns:
             dict[str, pandas.Series]:

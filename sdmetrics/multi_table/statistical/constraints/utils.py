@@ -64,6 +64,15 @@ class CustomNan:
         return 'CustomNan()'
 
 
+def _create_unique_name(name, list_names):
+    """Modify the ``name`` parameter if it already exists in the list of names."""
+    result = name
+    while result in list_names:
+        result += '_'
+
+    return result
+
+
 def _replace_nans_with_none(series):
     """Replace all NaN values in a pandas Series with None.
 

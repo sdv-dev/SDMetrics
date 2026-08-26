@@ -96,6 +96,8 @@ class ChainedInequality(BaseConstraint):
         Args:
             data (dict[str, pd.DataFrame]):
                 The data dictionary.
+            metadata (dict):
+                Metadata as a dictionary.
 
         Returns:
             dict[str, pd.Series]:

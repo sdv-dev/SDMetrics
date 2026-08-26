@@ -134,5 +134,15 @@ class CarryOverColumns(BaseConstraint):
 
         A row is considered invalid if the value of its carryover column does not match
         the value that other rows with the same key have, in any of the tables.
+
+        Args:
+            data (dict[str, pandas.DataFrame]):
+                The data dictionary.
+            metadata (dict):
+                Metadata as a dictionary.
+
+        Returns:
+            dict[str, pandas.Series]:
+                Whether each row is valid.
         """
         return _validate_carry_over_columns(data, self.common_column_info)

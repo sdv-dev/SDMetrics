@@ -74,6 +74,16 @@ class DenormalizedTable(BaseConstraint):
 
         A row is considered invalid if the value in any column in denormalized_column_names
         does not match the value for other instances of the same key.
+
+        Args:
+            data (dict[str, pandas.DataFrame]):
+                The data dictionary.
+            metadata (dict):
+                Metadata as a dictionary.
+
+        Returns:
+            dict[str, pandas.Series]:
+                Whether each row is valid.
         """
         table = data[self.table_name]
         table_to_valid_rows = _get_table_to_valid_rows(data)

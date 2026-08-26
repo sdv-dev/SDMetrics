@@ -134,7 +134,18 @@ class ColumnFormula(BaseConstraint):
         return valid_rows.fillna(False)
 
     def _is_valid(self, data, metadata=None):
-        """Return row-level validity based on the formula output."""
+        """Return row-level validity based on the formula output.
+
+        Args:
+            data (dict[str, pandas.DataFrame]):
+                The data dictionary.
+            metadata (dict):
+                Metadata as a dictionary.
+
+        Returns:
+            dict[str, pandas.Series]:
+                Whether each row is valid.
+        """
         table_name = self._get_single_table_name(metadata)
         is_valid = {table: pd.Series(True, index=data[table].index) for table in data}
         is_valid[table_name] = self._get_valid_rows(data[table_name])

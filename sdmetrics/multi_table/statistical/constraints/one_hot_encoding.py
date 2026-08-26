@@ -63,6 +63,8 @@ class OneHotEncoding(BaseConstraint):
         Args:
             data (dict[str, pd.DataFrame]):
                 Table data.
+            metadata (dict):
+                Metadata as a dictionary.
 
         Returns:
             dict[str, pd.Series]:

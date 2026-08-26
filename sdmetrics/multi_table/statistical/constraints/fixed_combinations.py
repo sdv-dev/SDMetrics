@@ -59,7 +59,18 @@ class FixedCombinations(BaseConstraint):
         self._combinations = data[table_name][self.column_names].drop_duplicates()
 
     def _is_valid(self, data, metadata=None):
-        """Determine whether the data matches the constraint."""
+        """Determine whether the data matches the constraint.
+
+        Args:
+            data (dict[str, pandas.DataFrame]):
+                The data dictionary.
+            metadata (dict):
+                Metadata as a dictionary.
+
+        Returns:
+            dict[str, pandas.Series]:
+                Whether each row is valid.
+        """
         if not self._fitted:
             raise ConstraintNotApplicableError(
                 'FixedCombinations constraint must be called with ``fit`` first.'

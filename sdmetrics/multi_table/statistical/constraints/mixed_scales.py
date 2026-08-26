@@ -110,6 +110,8 @@ class MixedScales(BaseConstraint):
         Args:
             data (dict[str, pandas.DataFrame]):
                 The data dictionary.
+            metadata (dict):
+                Metadata as a dictionary.
 
         Returns:
             dict[str, pandas.Series]:

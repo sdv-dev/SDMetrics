@@ -1,6 +1,9 @@
 """Constraints."""
 
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
+from sdmetrics.multi_table.statistical.constraints.self_referential_hierarchy import (
+    SelfReferentialHierarchy,
+)
 from sdmetrics.multi_table.statistical.constraints.carry_over_columns import CarryOverColumns
 from sdmetrics.multi_table.statistical.constraints.column_formula import ColumnFormula
 from sdmetrics.multi_table.statistical.constraints.denormalized_table import DenormalizedTable
@@ -28,4 +31,5 @@ __all__ = (
     ColumnFormula,
     CarryOverColumns,
     MixedScales,
+    SelfReferentialHierarchy,
 )
