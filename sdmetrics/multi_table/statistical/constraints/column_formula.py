@@ -4,12 +4,12 @@ from importlib import import_module
 
 import pandas as pd
 
-from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
-from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
 from sdmetrics.multi_table.statistical.constraints._utils import (
     _format_invalid_values_string,
     _is_list_of_type,
 )
+from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
+from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
 
 
 class ColumnFormula(BaseConstraint):

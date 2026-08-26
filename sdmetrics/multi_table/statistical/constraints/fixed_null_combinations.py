@@ -2,14 +2,14 @@
 
 import pandas as pd
 
-from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
-from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
 from sdmetrics.multi_table.statistical.constraints._utils import (
     _get_is_valid_dict,
     _is_list_of_type,
     _tuple_from_columns,
     compute_nans_column,
 )
+from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
+from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
 
 
 class FixedNullCombinations(BaseConstraint):

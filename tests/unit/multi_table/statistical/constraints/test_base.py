@@ -13,7 +13,7 @@ class TestBaseConstraint:
             'class_name': 'FixedCombinations',
             'parameters': {
                 'table_name': 'tableA',
-                'column_names': ['name'],
+                'column_names': ['col1', 'col2'],
             },
         }
 
@@ -23,7 +23,7 @@ class TestBaseConstraint:
         # Assert
         assert isinstance(instance, FixedCombinations)
         assert instance.table_name == 'tableA'
-        assert instance.column_names == ['name']
+        assert instance.column_names == ['col1', 'col2']
 
     def test_load_constraint_from_dict_unknown_class_name(self):
         """Test ``load_constraint_from_dict`` errors if the constraint class is not supported."""
@@ -47,7 +47,7 @@ class TestBaseConstraint:
         """Test ``load_constraint_from_dict`` errors if a parameter is not supported."""
         # Setup
         constraint_dict = {
-            'class_name': 'DenormalizedTable',
+            'class_name': 'FixedCombinations',
             'parameters': {'table_name': 'tableA', 'unknown': 'value'},
         }
 
@@ -61,11 +61,11 @@ class TestBaseConstraint:
         """Test it errors if a required parameter is not passed in."""
         # Setup
         constraint_dict = {
-            'class_name': 'DenormalizedTable',
+            'class_name': 'FixedCombinations',
             'parameters': {'table_name': 'tableA'},
         }
 
-        expected_error = re.escape("Unable to create the constraint 'DenormalizedTable'")
+        expected_error = re.escape("Unable to create the constraint 'FixedCombinations'")
 
         # Run
         with pytest.raises(ValueError, match=expected_error):
