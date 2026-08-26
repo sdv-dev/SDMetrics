@@ -240,8 +240,6 @@ def _generate_column_distplot(real_data, synthetic_data, plot_kwargs={}):
     Returns:
         plotly.graph_objects._figure.Figure
     """
-    plot_kwargs = plot_kwargs or {}
-
     hist_data = []
     col_names = []
     colors = []
@@ -265,7 +263,6 @@ def _generate_column_distplot(real_data, synthetic_data, plot_kwargs={}):
         end = max(data)
 
         curve_x = [start + x * (end - start) / 500 for x in range(500)]
-
         curve_y = scipy.stats.gaussian_kde(data)(curve_x)
 
         traces.append(
