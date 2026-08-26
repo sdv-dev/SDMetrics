@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from sdmetrics.multi_table.statistical.constraints import BaseConstraint, DenormalizedTable
+from sdmetrics.multi_table.statistical.constraints import BaseConstraint, FixedCombinations
 
 
 class TestBaseConstraint:
@@ -10,11 +10,10 @@ class TestBaseConstraint:
         """Test ``load_constraint_from_dict`` method."""
         # Setup
         constraint_dict = {
-            'class_name': 'DenormalizedTable',
+            'class_name': 'FixedCombinations',
             'parameters': {
                 'table_name': 'tableA',
-                'denormalized_primary_key': 'id',
-                'denormalized_column_names': ['name'],
+                'column_names': ['name'],
             },
         }
 
@@ -22,10 +21,9 @@ class TestBaseConstraint:
         instance = BaseConstraint.load_constraint_from_dict(constraint_dict)
 
         # Assert
-        assert isinstance(instance, DenormalizedTable)
+        assert isinstance(instance, FixedCombinations)
         assert instance.table_name == 'tableA'
-        assert instance.denormalized_primary_key == 'id'
-        assert instance.denormalized_column_names == ['name']
+        assert instance.column_names == ['name']
 
     def test_load_constraint_from_dict_unknown_class_name(self):
         """Test ``load_constraint_from_dict`` errors if the constraint class is not supported."""

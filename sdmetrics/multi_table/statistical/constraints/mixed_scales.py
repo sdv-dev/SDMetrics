@@ -4,11 +4,13 @@ import pandas as pd
 
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
-from sdmetrics.multi_table.statistical.constraints.numerical_formatter import NumericalFormatter
-from sdmetrics.multi_table.statistical.constraints.utils import (
+from sdmetrics.multi_table.statistical.constraints._utils import (
     CustomNan,
     _get_is_valid_dict,
     _is_list_of_type,
+)
+from sdmetrics.multi_table.statistical.constraints.utils.numerical_formatter import (
+    NumericalFormatter,
 )
 
 

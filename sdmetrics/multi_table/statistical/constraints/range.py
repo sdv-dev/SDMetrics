@@ -7,7 +7,7 @@ from pandas.api.types import is_object_dtype
 
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
-from sdmetrics.multi_table.statistical.constraints.utils import (
+from sdmetrics.multi_table.statistical.constraints._utils import (
     _get_is_valid_dict,
     _is_list_of_type,
     cast_to_datetime64,

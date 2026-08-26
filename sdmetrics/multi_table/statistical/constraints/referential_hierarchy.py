@@ -4,13 +4,10 @@ import pandas as pd
 
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
-from sdmetrics.multi_table.statistical.constraints.utils import (
+from sdmetrics.multi_table.statistical.constraints._utils import (
     _create_unique_name,
     _get_table_to_valid_rows,
 )
-
-SCALING_METHODS = ('branch', 'depth', 'multiply')
-
 
 def _values_match(expected_value, value):
     """Say whether two values are the same, treating two missing values as equal."""

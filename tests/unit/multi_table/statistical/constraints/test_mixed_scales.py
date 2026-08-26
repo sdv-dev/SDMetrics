@@ -7,7 +7,7 @@ import pytest
 
 from sdmetrics.multi_table.statistical.constraints import MixedScales
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
-from sdmetrics.multi_table.statistical.constraints.utils import CustomNan
+from sdmetrics.multi_table.statistical.constraints._utils import CustomNan
 
 
 @pytest.fixture

@@ -4,7 +4,7 @@ import pandas as pd
 
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
-from sdmetrics.multi_table.statistical.constraints.utils import _get_is_valid_dict
+from sdmetrics.multi_table.statistical.constraints._utils import _get_is_valid_dict
 
 
 class FixedIncrements(BaseConstraint):
