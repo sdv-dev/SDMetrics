@@ -116,7 +116,7 @@ class SelfReferentialHierarchy(BaseConstraint):
     def _get_grandparent_column(self, data):
         """Get the actual grandparent column from the data."""
         index_col = _create_unique_name('_index', data.columns)
-        data = data.reset_index(names=index_col).set_index(self._base_column)
+        data = data.rename_axis(index_col).reset_index().set_index(self._base_column)
         roots = (data.index == data[self._parent_column]) | (data[self._parent_column].isna())
         root_children = data[self._parent_column].isin(data[roots].index) | (
             ~data[self._parent_column].isin(data.index)
@@ -140,7 +140,7 @@ class SelfReferentialHierarchy(BaseConstraint):
     def _get_root_column(self, data, root_nodes):
         """Get the actual root column from the data."""
         index_col = _create_unique_name('_index', data.columns)
-        data = data.reset_index(names=index_col).set_index(self._base_column)
+        data = data.rename_axis(index_col).reset_index().set_index(self._base_column)
 
         known_root_values = {root_node: root_node for root_node in root_nodes}
 

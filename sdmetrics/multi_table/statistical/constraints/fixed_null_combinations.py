@@ -95,6 +95,9 @@ class FixedNullCombinations(BaseConstraint):
 
     def _get_categorical_value_tuples(self, table_data):
         categorical_df = table_data[self._categorical_columns]
+        if categorical_df.empty:
+            return pd.Series([], index=categorical_df.index, dtype='object')
+
         return categorical_df.apply(self._categorical_tuple_from_row, axis=1)
 
     def _has_categorical_columns(self):
