@@ -5,9 +5,9 @@ from functools import wraps
 
 import pandas as pd
 import plotly.express as px
-import plotly.figure_factory as ff
 import plotly.graph_objects as go
 import plotly.io as pio
+import scipy
 from pandas.api.types import is_datetime64_dtype
 
 from sdmetrics.reports.utils import PlotConfig
@@ -252,22 +252,30 @@ def _generate_column_distplot(real_data, synthetic_data, plot_kwargs={}):
         col_names.append('Synthetic')
         colors.append(PlotConfig.DATACEBO_GREEN)
 
-    default_distplot_kwargs = {
-        'show_hist': False,
-        'show_rug': False,
-        'colors': colors,
-    }
-
     has_data = any(len(data) > 0 for data in hist_data)
 
-    if has_data:
-        return ff.create_distplot(
-            hist_data,
-            col_names,
-            **{**default_distplot_kwargs, **plot_kwargs},
+    if not has_data:
+        return go.Figure()
+
+    traces = []
+    for index, data in enumerate(hist_data):
+        start = min(data)
+        end = max(data)
+
+        curve_x = [start + x * (end - start) / 500 for x in range(500)]
+        curve_y = scipy.stats.gaussian_kde(data)(curve_x)
+
+        traces.append(
+            go.Scatter(
+                x=curve_x,
+                y=curve_y,
+                mode='lines',
+                name=col_names[index],
+                line={'color': colors[index]},
+            )
         )
 
-    return go.Figure()
+    return go.Figure(data=traces, **plot_kwargs)
 
 
 def _generate_column_plot(
