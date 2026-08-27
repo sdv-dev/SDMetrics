@@ -1,7 +1,11 @@
 """Constraints."""
 
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
+from sdmetrics.multi_table.statistical.constraints.carry_over_columns import CarryOverColumns
 from sdmetrics.multi_table.statistical.constraints.column_formula import ColumnFormula
+from sdmetrics.multi_table.statistical.constraints.denormalized_table import (
+    DenormalizedTable,
+)
 from sdmetrics.multi_table.statistical.constraints.chained_inequality import ChainedInequality
 from sdmetrics.multi_table.statistical.constraints.inequality import Inequality
 from sdmetrics.multi_table.statistical.constraints.fixed_combinations import FixedCombinations
@@ -31,7 +35,9 @@ from sdmetrics.multi_table.statistical.constraints.referential_hierarchy import 
 
 __all__ = (
     BaseConstraint,
+    CarryOverColumns,
     ColumnFormula,
+    DenormalizedTable,
     ChainedInequality,
     Inequality,
     FixedIncrements,
