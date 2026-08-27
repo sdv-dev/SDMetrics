@@ -2,12 +2,12 @@
 
 from copy import deepcopy
 
-from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
-from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
-from sdmetrics.multi_table.statistical.constraints.utils import (
+from sdmetrics.multi_table.statistical.constraints._utils import (
     _get_table_to_valid_rows,
     _replace_nans_with_none,
 )
+from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
+from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
 
 
 def _validate_carry_over_columns(data, common_column_info):
