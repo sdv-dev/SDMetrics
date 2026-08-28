@@ -1,5 +1,16 @@
 # History
 
+## v0.30.0 - 2026-08-28
+
+### New Features
+
+* SDV 2.0: The diagnostic report should consider the ranges in the metadata (V2) - Issue [#910](https://github.com/sdv-dev/SDMetrics/issues/910) by @sarahmish
+* Add `RegexFormatAdherence` and `DateimeFormatAdherence` to `DataValidity` property - Issue [#902](https://github.com/sdv-dev/SDMetrics/issues/902) by @sarahmish
+
+### Bugs Fixed
+
+* get_column_plot broken with plotly 7.0 - Issue [#917](https://github.com/sdv-dev/SDMetrics/issues/917) by @sarahmish
+
 ## v0.29.0 - 2026-08-20
 
 ### New Features
