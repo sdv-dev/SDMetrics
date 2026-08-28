@@ -100,6 +100,15 @@ def handle_single_and_multi_table(single_table_func):
     return wrapper
 
 
+def _convert_column_to_string(column_data, column_metadata):
+    if is_datetime(column_data):
+        datetime_format = column_metadata.get('datetime_format')
+        if datetime_format is not None:
+            return column_data.dt.strftime(datetime_format)
+
+    return column_data.astype(str)
+
+
 def _convert_datetime_column(column_name, column_data, column_metadata):
     if is_datetime(column_data):
         return column_data

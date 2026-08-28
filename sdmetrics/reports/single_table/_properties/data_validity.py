@@ -2,9 +2,16 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
+from sdmetrics._utils_metadata import _convert_column_to_string
 from sdmetrics.reports.single_table._properties import BaseSingleTableProperty
 from sdmetrics.reports.utils import PlotConfig
-from sdmetrics.single_column import BoundaryAdherence, CategoryAdherence, KeyUniqueness
+from sdmetrics.single_column import (
+    BoundaryAdherence,
+    CategoryAdherence,
+    DatetimeFormatAdherence,
+    KeyUniqueness,
+    RegexFormatAdherence,
+)
 from sdmetrics.utils import (
     get_alternate_keys,
     get_columns_from_metadata,
@@ -21,15 +28,52 @@ class DataValidity(BaseSingleTableProperty):
     The BoundaryAdherence metric is used for numerical and datetime columns, the CategoryAdherence
     is used for categorical and boolean columns and the KeyUniqueness for primary
     and alternate keys. The other column types are ignored by this property.
+
+    If the metadata defines the valid range of a column, it is passed down to the metric,
+    which uses it instead of computing it from the real data.
     """
 
     _num_iteration_case = 'column'
-    _sdtype_to_metric = {
-        'numerical': BoundaryAdherence,
-        'datetime': BoundaryAdherence,
-        'categorical': CategoryAdherence,
-        'boolean': CategoryAdherence,
+    _metric_to_arguments = {
+        DatetimeFormatAdherence: ('datetime_format',),
+        RegexFormatAdherence: ('regex_format',),
+        BoundaryAdherence: ('range_min', 'range_max', 'range_is_nullable'),
+        CategoryAdherence: ('range_values', 'range_is_nullable'),
     }
+    _sdtype_to_metric = {
+        'numerical': [BoundaryAdherence],
+        'datetime': [BoundaryAdherence, DatetimeFormatAdherence],
+        'categorical': [CategoryAdherence],
+        'boolean': [CategoryAdherence],
+        'id': [KeyUniqueness, RegexFormatAdherence],
+    }
+
+    @classmethod
+    def _get_metric_arguments(cls, metric, column_name, columns_meta):
+        """Get the information of a column defined in the metadata.
+
+        Args:
+            metric (SingleColumnMetric):
+                The metric to compute the column score with.
+            column_name (str):
+                The name of the column.
+            columns_meta (dict):
+                The metadata of every column of the table.
+
+        Returns:
+            dict:
+                The arguments to pass down to the metric. Any information that is not
+                defined in the metadata is omitted.
+        """
+        arguments = cls._metric_to_arguments.get(metric)
+        if not arguments:
+            return {}
+
+        column_meta = columns_meta[column_name]
+        column_arguments = {
+            argument: column_meta[argument] for argument in arguments if argument in column_meta
+        }
+        return column_arguments
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the data validity property.
@@ -66,28 +110,45 @@ class DataValidity(BaseSingleTableProperty):
             is_unique = primary_key_match or alternate_key_match
             is_sequence_index = column_name == sequence_index
 
-            try:
-                if sdtype not in self._sdtype_to_metric and not is_unique:
-                    continue
+            if (sdtype == 'id' or sdtype not in self._sdtype_to_metric) and not is_unique:
+                continue
 
-                if is_sequence_index and self._sdtype_to_metric.get(sdtype) == BoundaryAdherence:
-                    continue
+            if is_sequence_index and BoundaryAdherence in self._sdtype_to_metric.get(sdtype):
+                continue
 
-                metric = self._sdtype_to_metric.get(sdtype, KeyUniqueness)
-                column_score = metric.compute(real_data[column_name], synthetic_data[column_name])
-                error_message = None
+            metrics = self._sdtype_to_metric.get(sdtype, [KeyUniqueness])
+            for metric in metrics:
+                try:
+                    metric_arguments = self._get_metric_arguments(metric, column_name, columns_meta)
+                    if metric in [DatetimeFormatAdherence, RegexFormatAdherence]:
+                        column_meta = columns_meta[column_name]
+                        real_column = _convert_column_to_string(real_data[column_name], column_meta)
+                        synthetic_column = _convert_column_to_string(
+                            synthetic_data[column_name], column_meta
+                        )
+                        column_score = metric.compute(
+                            real_column, synthetic_column, **metric_arguments
+                        )
+                    else:
+                        column_score = metric.compute(
+                            real_data[column_name],
+                            synthetic_data[column_name],
+                            **metric_arguments,
+                        )
 
-            except Exception as e:
-                column_score = np.nan
-                error_message = f'{type(e).__name__}: {e}'
-            finally:
-                if progress_bar:
-                    progress_bar.update()
+                    error_message = None
 
-            column_names.append(column_name)
-            metric_names.append(metric.__name__)
-            scores.append(column_score)
-            error_messages.append(error_message)
+                except Exception as e:
+                    column_score = np.nan
+                    error_message = f'{type(e).__name__}: {e}'
+                finally:
+                    if progress_bar:
+                        progress_bar.update()
+
+                column_names.append(column_name)
+                metric_names.append(metric.__name__)
+                scores.append(column_score)
+                error_messages.append(error_message)
 
         result = pd.DataFrame({
             'Column': column_names,

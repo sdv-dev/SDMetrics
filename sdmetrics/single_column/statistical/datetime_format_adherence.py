@@ -6,10 +6,10 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.api.types import is_string_dtype
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
+from sdmetrics.utils import is_datetime
 
 
 class DatetimeFormatAdherence(SingleColumnMetric):
@@ -92,13 +92,11 @@ class DatetimeFormatAdherence(SingleColumnMetric):
             float:
                 The proportion of data points in the synthetic data that match the datetime format.
         """
-        real_data_nan = pd.isna(real_data)
-        synthetic_data_nan = pd.isna(synthetic_data)
-        if not is_string_dtype(synthetic_data[~synthetic_data_nan]):
+        if is_datetime(synthetic_data):
             return np.nan
 
         cls._validate_datetime_format(datetime_format)
-        if is_string_dtype(real_data[~real_data_nan]):
+        if not is_datetime(real_data):
             real_valid_rows = cls._filter_valid_datetime_rows(real_data, datetime_format)
             if len(real_valid_rows) != len(real_data):
                 invalid = real_data[~real_data.index.isin(real_valid_rows.index)]
