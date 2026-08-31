@@ -365,22 +365,26 @@ def test_column_pair_trends_threshold_changes_details():
     report_default.generate(real_data, synthetic_data, metadata, verbose=False)
     report_zero.generate(real_data, synthetic_data, metadata, verbose=False)
     score_default = (
-        report_default.get_properties()
+        report_default
+        .get_properties()
         .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
         .iloc[0]
     )
     score_zero = (
-        report_zero.get_properties()
+        report_zero
+        .get_properties()
         .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
         .iloc[0]
     )
     score_default_intertable = (
-        report_default.get_properties()
+        report_default
+        .get_properties()
         .loc[lambda df: df['Property'] == 'Intertable Trends', 'Score']
         .iloc[0]
     )
     score_zero_intertable = (
-        report_zero.get_properties()
+        report_zero
+        .get_properties()
         .loc[lambda df: df['Property'] == 'Intertable Trends', 'Score']
         .iloc[0]
     )
