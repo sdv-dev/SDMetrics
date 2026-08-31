@@ -33,11 +33,11 @@ def constraint():
 class TestDenormalizedTable:
     def test___init__invalid_parameters(self):
         """Test ``__init__`` validates the parameter types."""
-        # Run & Assert 1
+        # Run and Assert 1
         with pytest.raises(ValueError, match="The 'table_name' parameter must be a string."):
             DenormalizedTable(table_name=1, denormalized_primary_key='id')
 
-        # Run & Assert 2
+        # Run and Assert 2
         error_message = "The 'denormalized_column_names' parameter must be a list of strings."
         with pytest.raises(ValueError, match=error_message):
             DenormalizedTable(
@@ -48,7 +48,7 @@ class TestDenormalizedTable:
 
     def test___init__primary_key_in_column_names(self):
         """Test ``__init__`` errors if the primary key is also a denormalized column."""
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ValueError, match='cannot be both'):
             DenormalizedTable(
                 table_name='tableA',
@@ -61,7 +61,7 @@ class TestDenormalizedTable:
         # Setup
         expected_error = re.escape("The table 'tableA' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data({'OtherTable': pd.DataFrame()})
 
@@ -71,7 +71,7 @@ class TestDenormalizedTable:
         del data['tableA']['name']
         expected_error = re.escape("The column(s) 'name' are missing from the table 'tableA'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data)
 
@@ -142,7 +142,7 @@ class TestDenormalizedTable:
         # Setup
         data['tableA'].loc[3, 'name'] = 'Cam'
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data) == 0.6
 
     def test_get_score_empty_table(self, data, constraint):
@@ -150,5 +150,5 @@ class TestDenormalizedTable:
         # Setup
         data['tableA'] = data['tableA'].iloc[:0]
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data))
