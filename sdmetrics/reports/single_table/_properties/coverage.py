@@ -13,7 +13,7 @@ class Coverage(BaseSingleTableProperty):
     This property assesses data coverage between the real and synthetic data.
     A metric score is computed column-wise and the final score is the average over all columns.
     The ``RangeCoverage`` metric is used for numerical and datetime columns while the
-    ``CategoryCoverage`` is used for categorical and boolean columns.
+    ``CategoryCoverage`` is used for categorical, ordinal and boolean columns.
     The other column types are ignored by this property.
     """
 
@@ -23,6 +23,7 @@ class Coverage(BaseSingleTableProperty):
         'datetime': RangeCoverage,
         'categorical': CategoryCoverage,
         'boolean': CategoryCoverage,
+        'ordinal': CategoryCoverage,
     }
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):

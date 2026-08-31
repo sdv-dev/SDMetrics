@@ -26,7 +26,7 @@ class DataValidity(BaseSingleTableProperty):
     This property computes, at base, whether each column contains valid data.
     The metric is based on the type data in each column.
     The BoundaryAdherence metric is used for numerical and datetime columns, the CategoryAdherence
-    is used for categorical and boolean columns and the KeyUniqueness for primary
+    is used for categorical, ordinal and boolean columns and the KeyUniqueness for primary
     and alternate keys. The other column types are ignored by this property.
 
     If the metadata defines the valid range of a column, it is passed down to the metric,
@@ -44,6 +44,7 @@ class DataValidity(BaseSingleTableProperty):
         'numerical': [BoundaryAdherence],
         'datetime': [BoundaryAdherence, DatetimeFormatAdherence],
         'categorical': [CategoryAdherence],
+        'ordinal': [CategoryAdherence],
         'boolean': [CategoryAdherence],
         'id': [KeyUniqueness, RegexFormatAdherence],
     }
