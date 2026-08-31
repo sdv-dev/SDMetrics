@@ -326,6 +326,37 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
     assert report.get_score() == 1.0
 
 
+def test_diagnostic_report_with_ordinal_sdtype():
+    """Test diagnostic report handles ordinal sdtype correctly.
+
+    In the data, `col4` in `table1` is an ordinal column.
+    """
+    # Setup
+    real_data, synthetic_data, metadata = _load_quality_report_data()
+    expected_details = pd.DataFrame({
+        'Table': ['table1', 'table1', 'table1', 'table2', 'table2', 'table2', 'table2', 'table2'],
+        'Column': ['col2', 'col3', 'col4', 'col5', 'col5', 'col6', 'col6', 'col8'],
+        'Metric': [
+            'CategoryAdherence',
+            'CategoryAdherence',
+            'CategoryAdherence',
+            'BoundaryAdherence',
+            'DatetimeFormatAdherence',
+            'BoundaryAdherence',
+            'DatetimeFormatAdherence',
+            'BoundaryAdherence',
+        ],
+        'Score': [1.0, 1.0, 1.0, 0.75, 1.0, 0.75, 1.0, 1.0],
+    })
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+    # Assert
+    pd.testing.assert_frame_equal(report.get_details('Data Validity'), expected_details)
+
+
 def test_unified_quality_report_single_table_verbose_skips_relationship_properties(capsys):
     """Test unified quality report skips Cardinality/Intertable for single-table data."""
     # Setup
