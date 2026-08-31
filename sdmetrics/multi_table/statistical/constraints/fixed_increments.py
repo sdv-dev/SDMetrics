@@ -85,13 +85,13 @@ class FixedIncrements(BaseConstraint):
         """Determine if the data is evenly divisible by the increment.
 
         Args:
-            data (dict[str, pandas.DataFrame]):
-                The data dictionary.
+            data (dict[str, pd.DataFrame]):
+                A dictionary mapping each table name to its data.
             metadata (dict):
-                Metadata as a dictionary.
+               The multi table metadata.
 
         Returns:
-            (dict[pd.DataFrame]):
+            (dict[str, pd.DataFrame]):
                 For the specified table and column, returns a Series
                 which specifies if that row is evenly divisible or
                 not by the increment.

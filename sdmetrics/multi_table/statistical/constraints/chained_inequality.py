@@ -95,9 +95,9 @@ class ChainedInequality(BaseConstraint):
 
         Args:
             data (dict[str, pd.DataFrame]):
-                The data dictionary.
+                A dictionary mapping each table name to its data.
             metadata (dict):
-                Metadata as a dictionary.
+               The multi table metadata.
 
         Returns:
             dict[str, pd.Series]:

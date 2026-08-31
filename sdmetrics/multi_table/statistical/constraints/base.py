@@ -11,10 +11,9 @@ class BaseConstraint:
 
     A constraint knows how to check, row by row, whether some data adheres to it.
     Subclasses must define ``_validate_data`` and ``_is_valid``, and accept every
-    constraint parameter as a keyword argument in their ``__init__``.
+    constraint parameter as a keyword argument in their ``__init__``. Occassionally,
+    the constraint must learn values from the real data using ``_fit``.
     """
-
-    _is_single_table = True
 
     @classmethod
     def _get_subclasses(cls):
@@ -95,10 +94,6 @@ class BaseConstraint:
     def __init__(self):
         self.metadata = None
         self._fitted = False
-        self._single_table = False
-        self._dtypes = None
-        self._formatters = {}
-        self._datetime_min_max_value = {}
 
     def _get_single_table_name(self, metadata):
         if not hasattr(self, 'table_name'):
@@ -127,7 +122,7 @@ class BaseConstraint:
         Constraints that do not need to learn anything are a NOP.
 
         Args:
-            data (dict[str, pandas.DataFrame]):
+            data (dict[str, pd.DataFrame]):
                 A dictionary mapping each table name to its real data.
             metadata (dict):
                 The multi table metadata.
@@ -138,7 +133,7 @@ class BaseConstraint:
         """Learn this constraint from the real data.
 
         Args:
-            data (dict[str, pandas.DataFrame]):
+            data (dict[str, pd.DataFrame]):
                 A dictionary mapping each table name to its real data.
             metadata (dict):
                 The multi table metadata.
@@ -169,26 +164,19 @@ class BaseConstraint:
         """Say whether the given table rows are valid.
 
         Args:
-            data (pd.DataFrame or dict[pd.DataFrame]):
-                Table data.
+            data (dict[str, pd.DataFrame]):
+                A dictionary mapping each table name to its data.
+            metadata (dict):
+               The multi table metadata.
 
         Returns:
-            pd.Series or dict[pd.Series]:
+            dict[pd.Series]:
                 Series of boolean values indicating if the row is valid for the constraint or not.
         """
         metadata = self.metadata if metadata is None else metadata
         self._validate_data(data, metadata)
 
-        is_valid_data = self._is_valid(data, metadata)
-        if isinstance(data, pd.DataFrame) or self._single_table:
-            table_name = (
-                self._get_single_table_name(metadata)
-                if getattr(self, '_table_name', None) is None
-                else self._table_name
-            )
-            return is_valid_data[table_name]
-
-        return is_valid_data
+        return self._is_valid(data, metadata)
 
     def get_score(self, data, metadata=None):
         """Get the proportion of rows in the data that adhere to this constraint.
@@ -197,7 +185,7 @@ class BaseConstraint:
         calling this method.
 
         Args:
-            data (dict[str, pandas.DataFrame]):
+            data (dict[str, pd.DataFrame]):
                 A dictionary mapping each table name to its data.
             metadata (dict):
                 The multi table metadata.

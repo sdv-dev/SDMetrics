@@ -137,10 +137,10 @@ class ColumnFormula(BaseConstraint):
         """Return row-level validity based on the formula output.
 
         Args:
-            data (dict[str, pandas.DataFrame]):
-                The data dictionary.
+            data (dict[str, pd.DataFrame]):
+                A dictionary mapping each table name to its data.
             metadata (dict):
-                Metadata as a dictionary.
+               The multi table metadata.
 
         Returns:
             dict[str, pandas.Series]:

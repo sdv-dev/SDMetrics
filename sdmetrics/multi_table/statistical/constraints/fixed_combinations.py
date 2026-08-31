@@ -65,10 +65,10 @@ class FixedCombinations(BaseConstraint):
         """Determine whether the data matches the constraint.
 
         Args:
-            data (dict[str, pandas.DataFrame]):
-                The data dictionary.
+            data (dict[str, pd.DataFrame]):
+                A dictionary mapping each table name to its data.
             metadata (dict):
-                Metadata as a dictionary.
+               The multi table metadata.
 
         Returns:
             dict[str, pandas.Series]:

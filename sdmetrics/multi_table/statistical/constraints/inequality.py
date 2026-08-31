@@ -106,10 +106,10 @@ class Inequality(BaseConstraint):
         """Check whether `high` is greater than `low` in each row.
 
         Args:
-            data (dict[str, pandas.DataFrame]):
-                The data dictionary.
+            data (dict[str, pd.DataFrame]):
+                A dictionary mapping each table name to its data.
             metadata (dict):
-                Metadata as a dictionary.
+               The multi table metadata.
 
         Returns:
             dict[str, pd.Series]:

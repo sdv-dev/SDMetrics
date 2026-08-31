@@ -180,13 +180,13 @@ class FixedNullCombinations(BaseConstraint):
         """Check that the data only has null combinations that are in the real data.
 
         Args:
-            data (dict[str, pandas.DataFrame]):
-                The data dictionary.
+            data (dict[str, pd.DataFrame]):
+                A dictionary mapping each table name to its data.
             metadata (dict):
-                Metadata as a dictionary.
+               The multi table metadata.
 
         Returns:
-            dict[str, pandas.Series]:
+            dict[str, pd.Series]:
                 Whether each row is valid.
         """
         if not self._fitted:

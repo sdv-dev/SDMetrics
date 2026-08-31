@@ -110,13 +110,13 @@ class MixedScales(BaseConstraint):
         """Check that the data respect the bounds of the segment.
 
         Args:
-            data (dict[str, pandas.DataFrame]):
-                The data dictionary.
+            data (dict[str, pd.DataFrame]):
+                A dictionary mapping each table name to its data.
             metadata (dict):
-                Metadata as a dictionary.
+               The multi table metadata.
 
         Returns:
-            dict[str, pandas.Series]:
+            dict[str, pd.Series]:
                 For each table, a pandas Series indicating whether each row is valid.
         """
         if not self._fitted:

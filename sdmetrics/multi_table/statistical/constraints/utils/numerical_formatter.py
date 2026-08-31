@@ -8,7 +8,7 @@ import pandas as pd
 
 LOGGER = logging.getLogger(__name__)
 
-MAX_DECIMALS = sys.float_info.dig - 1
+MAX_DECIMALS = sys.float_info.dig
 INTEGER_BOUNDS = {
     'Int8': (-(2**7), 2**7 - 1),
     'Int16': (-(2**15), 2**15 - 1),
