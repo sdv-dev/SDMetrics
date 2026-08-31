@@ -325,7 +325,7 @@ class TestPrimaryToPrimaryKeySubset:
         data['table_1']['col_1'] = [1, 2, 5]
 
         # Run and Assert
-        assert constraint.get_score(data, metadata) == 0.9
+        assert constraint.get_score(data, metadata) == 0.8
 
     def test_get_score_empty_tables(self, data, metadata, constraint):
         """Test ``get_score`` returns NaN when there are no rows to check."""

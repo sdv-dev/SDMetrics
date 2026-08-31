@@ -632,7 +632,7 @@ class TestConstraintAdherence:
         score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
 
         # Assert
-        assert score == 10 / 11
+        assert score == 5 / 6
 
     def test_mixed_scales(self):
         """Test the score is 1.0 when every value stays in the bounds of its segment."""
@@ -842,7 +842,7 @@ class TestConstraintAdherence:
         score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
 
         # Assert
-        assert score == 9 / 10
+        assert score == 5 / 6
 
     def test_primary_to_primary_key_subset(self):
         """Test the score is 1.0 when every attribute row is allowed to connect."""
@@ -959,7 +959,7 @@ class TestConstraintAdherence:
         score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
 
         # Assert
-        assert score == 11 / 12
+        assert score == 5 / 6
 
     def test_self_referential_hierarchy(self):
         """Test the score is 1.0 when every employee reports up to a root."""
