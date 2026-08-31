@@ -23,8 +23,8 @@ class ColumnShapes(BaseSingleTableProperty):
         'numerical': KSComplement,
         'datetime': KSComplement,
         'categorical': TVComplement,
-        'boolean': TVComplement,
         'ordinal': TVComplement,
+        'boolean': TVComplement,
     }
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):

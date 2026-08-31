@@ -29,6 +29,7 @@ class TestQualityReport:
                 datetime(2022, 10, 1),
             ],
             'col5': [date(2020, 9, 13), date(2020, 12, 1), date(2021, 1, 12), date(2022, 8, 13)],
+            'col6': ['LOW', 'MEDIUM', 'HIGH', 'MEDIUM'],
         })
 
         synthetic_data = pd.DataFrame({
@@ -42,6 +43,7 @@ class TestQualityReport:
                 datetime(2022, 12, 1),
             ],
             'col5': [date(2020, 10, 13), date(2020, 2, 4), date(2021, 3, 11), date(2022, 7, 23)],
+            'col6': ['LOW', 'HIGH', 'MEDIUM', 'MEDIUM'],
         })
 
         metadata = {
@@ -53,6 +55,7 @@ class TestQualityReport:
                         'col3': {'sdtype': 'boolean'},
                         'col4': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
                         'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                        'col6': {'sdtype': 'ordinal'},
                     }
                 }
             }
@@ -70,7 +73,7 @@ class TestQualityReport:
             properties,
             pd.DataFrame({
                 'Property': ['Column Shapes', 'Column Pair Trends'],
-                'Score': [0.750000, 0.5005754481922459],
+                'Score': [0.7916666666666666, 0.5337169654614973],
             }),
         )
 
@@ -207,14 +210,12 @@ class TestQualityReport:
         report_default.generate(real_data, synthetic_data, metadata, verbose=False)
         report_zero.generate(real_data, synthetic_data, metadata, verbose=False)
         score_default = (
-            report_default
-            .get_properties()
+            report_default.get_properties()
             .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
             .iloc[0]
         )
         score_zero = (
-            report_zero
-            .get_properties()
+            report_zero.get_properties()
             .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
             .iloc[0]
         )

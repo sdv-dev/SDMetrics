@@ -101,7 +101,7 @@ class NewRowSynthesis(SingleTableMetric):
             numerical_fields = []
 
         try:
-            categorical_fields = cls._select_fields(metadata, ('categorical', 'boolean'))
+            categorical_fields = cls._select_fields(metadata, ('categorical', 'boolean', 'ordinal'))
         except IncomputableMetricError:
             categorical_fields = []
 

@@ -22,8 +22,8 @@ class Coverage(BaseSingleTableProperty):
         'numerical': RangeCoverage,
         'datetime': RangeCoverage,
         'categorical': CategoryCoverage,
-        'boolean': CategoryCoverage,
         'ordinal': CategoryCoverage,
+        'boolean': CategoryCoverage,
     }
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):

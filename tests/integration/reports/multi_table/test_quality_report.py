@@ -22,17 +22,18 @@ def load_test_data():
             'col1': [0, 1, 2, 3],
             'col2': ['a', 'b', 'c', 'd'],
             'col3': [True, False, False, True],
+            'col4': ['LOW', 'MEDIUM', 'HIGH', 'MEDIUM'],
         }),
         'table2': pd.DataFrame({
-            'col4': [
+            'col5': [
                 datetime(2020, 10, 1),
                 datetime(2021, 1, 2),
                 datetime(2021, 9, 12),
                 datetime(2022, 10, 1),
             ],
-            'col5': [date(2020, 9, 13), date(2020, 12, 1), date(2021, 1, 12), date(2022, 8, 13)],
-            'col6': [0, 1, 1, 0],
-            'col7': [0.1, 0.2, 0.3, 0.4],
+            'col6': [date(2020, 9, 13), date(2020, 12, 1), date(2021, 1, 12), date(2022, 8, 13)],
+            'col7': [0, 1, 1, 0],
+            'col8': [0.1, 0.2, 0.3, 0.4],
         }),
     }
 
@@ -41,17 +42,18 @@ def load_test_data():
             'col1': [0, 2, 2, 3],
             'col2': ['a', 'c', 'c', 'b'],
             'col3': [False, False, False, True],
+            'col4': ['LOW', 'MEDIUM', 'HIGH', 'MEDIUM'],
         }),
         'table2': pd.DataFrame({
-            'col4': [
+            'col5': [
                 datetime(2020, 11, 4),
                 datetime(2021, 2, 1),
                 datetime(2021, 8, 1),
                 datetime(2022, 12, 1),
             ],
-            'col5': [date(2020, 10, 13), date(2020, 2, 4), date(2021, 3, 11), date(2022, 7, 23)],
-            'col6': [0, 1, 1, 0],
-            'col7': [0.1, 0.2, 0.3, 0.4],
+            'col6': [date(2020, 10, 13), date(2020, 2, 4), date(2021, 3, 11), date(2022, 7, 23)],
+            'col7': [0, 1, 1, 0],
+            'col8': [0.1, 0.2, 0.3, 0.4],
         }),
     }
 
@@ -62,14 +64,15 @@ def load_test_data():
                     'col1': {'sdtype': 'id'},
                     'col2': {'sdtype': 'categorical'},
                     'col3': {'sdtype': 'boolean'},
+                    'col4': {'sdtype': 'ordinal'},
                 },
             },
             'table2': {
                 'columns': {
-                    'col4': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
                     'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-                    'col6': {'sdtype': 'id'},
-                    'col7': {'sdtype': 'numerical'},
+                    'col6': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                    'col7': {'sdtype': 'id'},
+                    'col8': {'sdtype': 'numerical'},
                 },
             },
         },
@@ -78,7 +81,7 @@ def load_test_data():
                 'parent_table_name': 'table1',
                 'parent_primary_key': 'col1',
                 'child_table_name': 'table2',
-                'child_foreign_key': 'col6',
+                'child_foreign_key': 'col7',
             }
         ],
     }
@@ -116,35 +119,35 @@ def test_multi_table_quality_report():
         details.append(report.get_details(property_))
 
     # Assert score
-    assert round(score, 15) == 0.649582127409184
+    assert round(score, 15) == 0.674721418272789
     pd.testing.assert_frame_equal(
         properties,
         pd.DataFrame({
             'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-            'Score': [0.8, 0.7983285096367361, 0.75, 0.25],
+            'Score': [0.8333333333333334, 0.7822190064244907, 0.75, 0.3333333333333333],
         }),
     )
 
     # Assert Column Shapes details
     expected_df_0 = pd.DataFrame({
-        'Table': ['table1', 'table1'],
-        'Column': ['col2', 'col3'],
-        'Metric': ['TVComplement', 'TVComplement'],
-        'Score': [0.75, 0.75],
+        'Table': ['table1', 'table1', 'table1'],
+        'Column': ['col2', 'col3', 'col4'],
+        'Metric': ['TVComplement', 'TVComplement', 'TVComplement'],
+        'Score': [0.75, 0.75, 1.0],
     })
     pd.testing.assert_frame_equal(details[0], expected_df_0)
 
     # Assert Column Pair Trends details
     expected_df_1 = pd.DataFrame({
-        'Table': ['table1'],
-        'Column 1': ['col2'],
-        'Column 2': ['col3'],
-        'Metric': ['ContingencySimilarity'],
-        'Score': [0.25],
-        'Real Correlation': [np.nan],
-        'Synthetic Correlation': [np.nan],
-        'Real Association': [np.nan],
-        'Meets Threshold?': pd.Series([True], dtype='boolean'),
+        'Table': ['table1', 'table1', 'table1'],
+        'Column 1': ['col2', 'col2', 'col3'],
+        'Column 2': ['col3', 'col4', 'col4'],
+        'Metric': ['ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
+        'Score': [0.25, 0.75, 0.75],
+        'Real Correlation': [np.nan, np.nan, np.nan],
+        'Synthetic Correlation': [np.nan, np.nan, np.nan],
+        'Real Association': [np.nan, np.nan, np.nan],
+        'Meets Threshold?': pd.Series([True, True, True], dtype='boolean'),
     })
     pd.testing.assert_frame_equal(details[1], expected_df_1)
 
@@ -152,7 +155,7 @@ def test_multi_table_quality_report():
     expected_df_2 = pd.DataFrame({
         'Child Table': ['table2'],
         'Parent Table': ['table1'],
-        'Foreign Key': ['col6'],
+        'Foreign Key': ['col7'],
         'Metric': ['CardinalityShapeSimilarity'],
         'Score': [0.75],
     })
@@ -161,11 +164,31 @@ def test_multi_table_quality_report():
 
     # Assert Intertable Trends details
     expected_df_3 = pd.DataFrame({
-        'Parent Table': ['table1', 'table1', 'table1', 'table1', 'table1', 'table1'],
-        'Child Table': ['table2', 'table2', 'table2', 'table2', 'table2', 'table2'],
-        'Foreign Key': ['col6', 'col6', 'col6', 'col6', 'col6', 'col6'],
-        'Column 1': ['col2', 'col2', 'col2', 'col3', 'col3', 'col3'],
-        'Column 2': ['col4', 'col5', 'col7', 'col4', 'col5', 'col7'],
+        'Parent Table': [
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+        ],
+        'Child Table': [
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+        ],
+        'Foreign Key': ['col7', 'col7', 'col7', 'col7', 'col7', 'col7', 'col7', 'col7', 'col7'],
+        'Column 1': ['col2', 'col2', 'col2', 'col3', 'col3', 'col3', 'col4', 'col4', 'col4'],
+        'Column 2': ['col5', 'col6', 'col8', 'col5', 'col6', 'col8', 'col5', 'col6', 'col8'],
         'Metric': [
             'ContingencySimilarity',
             'ContingencySimilarity',
@@ -173,43 +196,94 @@ def test_multi_table_quality_report():
             'ContingencySimilarity',
             'ContingencySimilarity',
             'ContingencySimilarity',
+            'ContingencySimilarity',
+            'ContingencySimilarity',
+            'ContingencySimilarity',
         ],
-        'Score': [0.5, 0.5, 0.5, 0.0, 0.0, 0.0],
-        'Real Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-        'Synthetic Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-        'Real Association': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-        'Meets Threshold?': pd.Series([True, True, True, True, True, True], dtype='boolean'),
+        'Score': [0.5, 0.5, 0.5, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5],
+        'Real Correlation': [
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+        ],
+        'Synthetic Correlation': [
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+        ],
+        'Real Association': [
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+        ],
+        'Meets Threshold?': pd.Series(
+            [True, True, True, True, True, True, True, True, True], dtype='boolean'
+        ),
     })
     pd.testing.assert_frame_equal(details[3], expected_df_3)
     pd.testing.assert_frame_equal(details[7], expected_df_3)
 
     # Assert Column Shapes details without table_name
-    expected_df_3 = pd.DataFrame({
-        'Table': ['table1', 'table1', 'table2', 'table2', 'table2'],
-        'Column': ['col2', 'col3', 'col4', 'col5', 'col7'],
-        'Metric': ['TVComplement', 'TVComplement', 'KSComplement', 'KSComplement', 'KSComplement'],
-        'Score': [0.75, 0.75, 0.75, 0.75, 1.0],
+    expected_df_4 = pd.DataFrame({
+        'Table': ['table1', 'table1', 'table1', 'table2', 'table2', 'table2'],
+        'Column': ['col2', 'col3', 'col4', 'col5', 'col6', 'col8'],
+        'Metric': [
+            'TVComplement',
+            'TVComplement',
+            'TVComplement',
+            'KSComplement',
+            'KSComplement',
+            'KSComplement',
+        ],
+        'Score': [0.75, 0.75, 1.0, 0.75, 0.75, 1.0],
     })
-    pd.testing.assert_frame_equal(details[4], expected_df_3)
+    pd.testing.assert_frame_equal(details[4], expected_df_4)
 
     # Assert Column Pair Trends details without table_name
-    expected_df_4 = pd.DataFrame({
-        'Table': ['table1', 'table2', 'table2', 'table2'],
-        'Column 1': ['col2', 'col4', 'col4', 'col5'],
-        'Column 2': ['col3', 'col5', 'col7', 'col7'],
+    expected_df_5 = pd.DataFrame({
+        'Table': ['table1', 'table1', 'table1', 'table2', 'table2', 'table2'],
+        'Column 1': ['col2', 'col2', 'col3', 'col5', 'col5', 'col6'],
+        'Column 2': ['col3', 'col4', 'col4', 'col6', 'col8', 'col8'],
         'Metric': [
+            'ContingencySimilarity',
+            'ContingencySimilarity',
             'ContingencySimilarity',
             'CorrelationSimilarity',
             'CorrelationSimilarity',
             'CorrelationSimilarity',
         ],
-        'Score': [0.25, 0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
-        'Real Correlation': [np.nan, 0.946664, 0.966247, 0.862622],
-        'Synthetic Correlation': [np.nan, 0.926925, 0.936853, 0.798384],
-        'Real Association': [np.nan, np.nan, np.nan, np.nan],
-        'Meets Threshold?': pd.Series([True, True, True, True], dtype='boolean'),
+        'Score': [0.25, 0.75, 0.75, 0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
+        'Real Correlation': [
+            np.nan,
+            np.nan,
+            np.nan,
+            0.9466639257406892,
+            0.9662472445951453,
+            0.8626223808890117,
+        ],
+        'Synthetic Correlation': [np.nan, np.nan, np.nan, 0.926925, 0.936853, 0.798384],
+        'Real Association': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+        'Meets Threshold?': pd.Series([True, True, True, True, True, True], dtype='boolean'),
     })
-    pd.testing.assert_frame_equal(details[5], expected_df_4)
+    pd.testing.assert_frame_equal(details[5], expected_df_5)
 
     # Assert report info saved
     report_info = report.get_info()
@@ -291,26 +365,22 @@ def test_column_pair_trends_threshold_changes_details():
     report_default.generate(real_data, synthetic_data, metadata, verbose=False)
     report_zero.generate(real_data, synthetic_data, metadata, verbose=False)
     score_default = (
-        report_default
-        .get_properties()
+        report_default.get_properties()
         .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
         .iloc[0]
     )
     score_zero = (
-        report_zero
-        .get_properties()
+        report_zero.get_properties()
         .loc[lambda df: df['Property'] == 'Column Pair Trends', 'Score']
         .iloc[0]
     )
     score_default_intertable = (
-        report_default
-        .get_properties()
+        report_default.get_properties()
         .loc[lambda df: df['Property'] == 'Intertable Trends', 'Score']
         .iloc[0]
     )
     score_zero_intertable = (
-        report_zero
-        .get_properties()
+        report_zero.get_properties()
         .loc[lambda df: df['Property'] == 'Intertable Trends', 'Score']
         .iloc[0]
     )
