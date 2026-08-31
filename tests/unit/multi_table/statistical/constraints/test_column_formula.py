@@ -93,7 +93,7 @@ class TestColumnFormula:
             "Module '__main__' does not contain a function named 'calculate_total'."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ValueError, match=expected_error):
             ColumnFormula(
                 input_column_names=['a', 'b'],
@@ -107,7 +107,7 @@ class TestColumnFormula:
         # Setup
         expected_error = re.escape("Unable to import module 'not_a_real_module'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ValueError, match=expected_error):
             ColumnFormula(
                 input_column_names=['a', 'b'],
@@ -124,7 +124,7 @@ class TestColumnFormula:
             f"Module '{__name__}' does not contain a function named 'not_a_real_function'."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ValueError, match=expected_error):
             _get_constraint('not_a_real_function')
 
@@ -136,7 +136,7 @@ class TestColumnFormula:
             "'NOT_A_FUNCTION' is not callable."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(TypeError, match=expected_error):
             _get_constraint('NOT_A_FUNCTION')
 
@@ -181,7 +181,7 @@ class TestColumnFormula:
         # Setup
         expected_error = re.escape("The table 'table' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data({'OtherTable': pd.DataFrame()}, metadata)
 
@@ -191,7 +191,7 @@ class TestColumnFormula:
         del data['table']['tax']
         expected_error = re.escape("The column(s) 'tax' are missing from the table 'table'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -201,7 +201,7 @@ class TestColumnFormula:
         del data['table']['total']
         expected_error = re.escape("The column(s) 'total' are missing from the table 'table'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -211,7 +211,7 @@ class TestColumnFormula:
         del data['table']['subtotal']
         expected_error = re.escape("Data is missing input columns ['subtotal'] for the formula.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._get_formula_output(data['table'])
 
@@ -221,7 +221,7 @@ class TestColumnFormula:
         instance = _get_constraint('calculate_list')
         expected_error = re.escape('The formula function must return a pandas Series.')
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(TypeError, match=expected_error):
             instance._get_formula_output(data['table'])
 
@@ -230,7 +230,7 @@ class TestColumnFormula:
         # Setup
         instance = _get_constraint('crash_formula')
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(Exception, match='This formula is broken.'):
             instance._get_formula_output(data['table'])
 
@@ -313,7 +313,7 @@ class TestColumnFormula:
 
     def test_get_score(self, data, metadata, constraint):
         """Test ``get_score`` returns the proportion of valid rows."""
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_invalid_data(self, data, metadata, constraint):
@@ -321,7 +321,7 @@ class TestColumnFormula:
         # Setup
         data['table']['total'] = [11, 999, 33, 550]
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 0.5
 
     def test_get_score_empty_table(self, data, metadata, constraint):
@@ -329,5 +329,5 @@ class TestColumnFormula:
         # Setup
         data['table'] = data['table'].iloc[:0]
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

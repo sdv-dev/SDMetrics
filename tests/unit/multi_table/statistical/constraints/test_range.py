@@ -51,7 +51,7 @@ def constraint():
 class TestRange:
     def test___init__invalid_parameters(self):
         """Test ``__init__`` validates the parameter types."""
-        # Run & Assert 1
+        # Run and Assert 1
         with pytest.raises(ValueError, match="The 'table_name' parameter must be a string."):
             Range(
                 table_name=1,
@@ -61,7 +61,7 @@ class TestRange:
                 strict_boundaries=True,
             )
 
-        # Run & Assert 2
+        # Run and Assert 2
         error_message = (
             '`low_column_name`, `middle_column_name` and `high_column_name` must be strings.'
         )
@@ -79,7 +79,7 @@ class TestRange:
         # Setup
         expected_error = re.escape("The table 'table' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data({'OtherTable': pd.DataFrame()})
 
@@ -89,7 +89,7 @@ class TestRange:
         del data['table']['col2']
         expected_error = re.escape("The column(s) 'col2' are missing from the table 'table'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data)
 
@@ -260,7 +260,7 @@ class TestRange:
 
     def test_get_score(self, data, metadata, constraint):
         """Test get_score returns the proportion of valid rows."""
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_empty_table(self, data, metadata, constraint):
@@ -268,5 +268,5 @@ class TestRange:
         # Setup
         data['table'] = data['table'].iloc[:0]
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

@@ -145,6 +145,7 @@ class TestChainedInequality:
 
     def test__is_valid_with_and_without_strict(self):
         """Test the ``is_valid`` method with and without strict boundaries."""
+        # Setup
         table_data_valid = {
             'table': pd.DataFrame({
                 'col_A': [None, 1, None, 5, 6],

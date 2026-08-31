@@ -215,7 +215,7 @@ class TestSelfReferentialHierarchy:
         del data['main_table']
         expected_error = re.escape("The table 'main_table' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -228,7 +228,7 @@ class TestSelfReferentialHierarchy:
             "The column(s) 'parent_id' are missing from the table 'main_table'."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -247,7 +247,7 @@ class TestSelfReferentialHierarchy:
             "The column(s) 'grandparent_id', 'root_id' are missing from the table 'main_table'."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             instance._validate_data(data, metadata)
 
@@ -468,7 +468,7 @@ class TestSelfReferentialHierarchy:
         # Setup
         data, metadata = data_and_metadata
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_invalid_data(self, data_and_metadata_with_loop):
@@ -481,7 +481,7 @@ class TestSelfReferentialHierarchy:
             parent_column_name='Manager ID',
         )
 
-        # Run & Assert
+        # Run and Assert
         assert instance.get_score(data, metadata) == 0.0
 
     def test_get_score_empty_table(self, data_and_metadata, constraint):
@@ -490,5 +490,5 @@ class TestSelfReferentialHierarchy:
         data, metadata = data_and_metadata
         data = {table: table_data.iloc[:0] for table, table_data in data.items()}
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

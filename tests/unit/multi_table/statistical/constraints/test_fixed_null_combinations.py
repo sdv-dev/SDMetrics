@@ -77,7 +77,7 @@ class TestFixedNullCombinations:
         # Setup
         expected_error = re.escape("The table 'table' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data({'OtherTable': pd.DataFrame()})
 
@@ -87,7 +87,7 @@ class TestFixedNullCombinations:
         del data['table']['a']
         expected_error = re.escape("The column(s) 'a' are missing from the table 'table'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data)
 
@@ -160,7 +160,7 @@ class TestFixedNullCombinations:
         del data['table']['a']
         expected_error = re.escape("The column(s) 'a' are missing from the table 'table'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint.fit(data, metadata)
 
@@ -354,7 +354,7 @@ class TestFixedNullCombinations:
         # Setup
         constraint.fit(data, metadata)
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_invalid_synthetic_data(self, data, metadata, constraint):
@@ -368,7 +368,7 @@ class TestFixedNullCombinations:
         }
         constraint.fit(data, metadata)
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(synthetic_data, metadata) == 0.5
 
     def test_get_score_empty_table(self, data, metadata, constraint):
@@ -377,5 +377,5 @@ class TestFixedNullCombinations:
         data['table'] = data['table'].iloc[:0]
         constraint.fit(data, metadata)
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

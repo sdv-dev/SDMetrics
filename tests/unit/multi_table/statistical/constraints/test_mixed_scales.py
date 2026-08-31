@@ -100,7 +100,7 @@ class TestMixedScales:
 
     def test__validate_data(self, data, metadata, constraint):
         """Test ``_validate_data`` passes with the expected sdtypes."""
-        # Run & Assert
+        # Run and Assert
         constraint._validate_data(data, metadata)
 
     def test__validate_data_boolean_segment_column(self, data, metadata, constraint):
@@ -108,7 +108,7 @@ class TestMixedScales:
         # Setup
         metadata['tables']['table']['columns']['col_B']['sdtype'] = 'boolean'
 
-        # Run & Assert
+        # Run and Assert
         constraint._validate_data(data, metadata)
 
     def test__validate_data_non_numerical_column(self, data, metadata, constraint):
@@ -120,7 +120,7 @@ class TestMixedScales:
             'col_A. The mixed_scale_column must be numerical.'
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -133,7 +133,7 @@ class TestMixedScales:
             'sdtypes col_B. All segment columns must be categorical.'
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -324,7 +324,7 @@ class TestMixedScales:
         # Setup
         constraint.fit(data, metadata)
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_invalid_data(self, data, metadata, constraint):
@@ -339,7 +339,7 @@ class TestMixedScales:
         }
         constraint.fit(data, metadata)
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(synthetic_data, metadata) == pytest.approx(4 / 7)
 
     def test_get_score_empty_table(self, data, metadata, constraint):
@@ -348,5 +348,5 @@ class TestMixedScales:
         data['table'] = data['table'].iloc[:0]
         constraint.fit(data, metadata)
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

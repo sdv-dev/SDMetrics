@@ -1,25 +1,25 @@
 from datetime import datetime
 from unittest.mock import patch
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from sdmetrics.multi_table.statistical.constraints._utils import (
     _create_unique_name,
-    _replace_nans_with_none,
-    _is_list_of_type,
     _get_datetime_format,
     _is_datetime_type,
-    _parse_datetime64_value,
+    _is_list_of_type,
     _parse_datetime,
+    _parse_datetime64_value,
+    _replace_nans_with_none,
     cast_to_datetime64,
-    get_datetime_format_precision,
-    format_datetime_array,
-    get_lower_precision_format,
+    compute_nans_column,
     downcast_datetime_to_lower_precision,
-    match_datetime_precision,
+    format_datetime_array,
+    get_datetime_format_precision,
+    get_lower_precision_format,
     get_nan_component_value,
-    compute_nans_column
+    match_datetime_precision,
 )
 
 
@@ -35,6 +35,7 @@ def test__create_unique_name():
     # Assert
     assert result == 'name___'
 
+
 def test__replace_nans_with_none():
     """Test the `_replace_nans_with_none` method."""
     # Setup
@@ -47,6 +48,7 @@ def test__replace_nans_with_none():
     expected = pd.Series([1, 2, None, 4, 5, None, None], dtype='object')
     pd.testing.assert_series_equal(result, expected)
 
+
 def test__is_list_of_type():
     """Test `_is_list_of_type` method"""
     assert _is_list_of_type(['a', 'b'])
@@ -54,6 +56,7 @@ def test__is_list_of_type():
     assert not _is_list_of_type([1, 2])
     assert not _is_list_of_type(1)
     assert not _is_list_of_type('a')
+
 
 def test__get_datetime_format():
     """Test the ``_get_datetime_format``.
@@ -322,6 +325,7 @@ def test__is_datetime_type_with_int_series():
 
     # Assert
     assert is_datetime is False
+
 
 def test_cast_to_datetime64():
     """Test the ``cast_to_datetime64`` function.
@@ -660,6 +664,7 @@ def test_downcast_datetime_to_lower_precision_to_day():
 
     # Assert
     np.testing.assert_array_equal(result, cast_to_datetime64(expected_result))
+
 
 @patch('sdmetrics.multi_table.statistical.constraints._utils.downcast_datetime_to_lower_precision')
 def test_match_datetime_precision_low_has_higher_precision(mock_downcast):

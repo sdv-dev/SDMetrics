@@ -31,11 +31,11 @@ def constraint():
 class TestOneHotEncoding:
     def test___init__invalid_parameters(self):
         """Test ``__init__`` validates the parameter types."""
-        # Run & Assert 1
+        # Run and Assert 1
         with pytest.raises(ValueError, match="The 'table_name' parameter must be a string."):
             OneHotEncoding(table_name=1, column_names=['col1', 'col2', 'col3'])
 
-        # Run & Assert 2
+        # Run and Assert 2
         error_message = "The 'column_names' parameter must be a list of strings."
         with pytest.raises(ValueError, match=error_message):
             OneHotEncoding(
@@ -48,7 +48,7 @@ class TestOneHotEncoding:
         # Setup
         expected_error = re.escape("The table 'tableA' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data({'OtherTable': pd.DataFrame()})
 
@@ -58,7 +58,7 @@ class TestOneHotEncoding:
         del data['tableA']['col2']
         expected_error = re.escape("The column(s) 'col2' are missing from the table 'tableA'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data)
 
@@ -96,7 +96,7 @@ class TestOneHotEncoding:
 
     def test_get_score(self, data, constraint):
         """Test get_score returns the proportion of valid rows."""
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data) == 1.0
 
     def test_get_score_empty_table(self, data, constraint):
@@ -104,5 +104,5 @@ class TestOneHotEncoding:
         # Setup
         data['tableA'] = data['tableA'].iloc[:0]
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data))

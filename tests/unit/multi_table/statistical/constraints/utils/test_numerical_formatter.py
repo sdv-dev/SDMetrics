@@ -1,14 +1,15 @@
-import pytest
 from unittest.mock import Mock
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 from pandas.api.types import is_float_dtype
 
 from sdmetrics.multi_table.statistical.constraints.utils.numerical_formatter import (
+    NumericalFormatter,
     learn_rounding_digits,
-    NumericalFormatter
 )
+
 
 @pytest.mark.parametrize(
     'test_data, expected_digits',
