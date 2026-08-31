@@ -386,7 +386,7 @@ class TestPolymorphicRelationship:
         data['table']['type'] = ['CREDIT', 'DEBIT', 'DEBIT', 'CREDIT', 'DEBIT']
 
         # Run and Assert
-        assert constraint.get_score(data, metadata) == pytest.approx(7 / 9)
+        assert constraint.get_score(data, metadata) == 0.6
 
     def test_get_score_empty_tables(self, data, metadata, constraint):
         """Test ``get_score`` returns NaN when there are no rows to check."""

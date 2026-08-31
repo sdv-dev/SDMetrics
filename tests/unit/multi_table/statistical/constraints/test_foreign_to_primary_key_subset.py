@@ -274,7 +274,7 @@ class TestForeignToPrimaryKeySubset:
         data['transactions']['user_id'] = [1, 2, 3, 8, 1, 3, 8, 1, 3, 8]
 
         # Run and Assert
-        assert constraint.get_score(data, metadata) == 0.95
+        assert constraint.get_score(data, metadata) == 0.9
 
     def test_get_score_empty_tables(self, data, metadata, constraint):
         """Test ``get_score`` returns NaN when there are no rows to check."""

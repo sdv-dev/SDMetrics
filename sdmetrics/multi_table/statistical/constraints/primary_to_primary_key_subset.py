@@ -46,6 +46,9 @@ class PrimaryToPrimaryKeySubset(BaseConstraint):
         self.conditional_column_name = conditional_column_name
         self.relationships = relationships
 
+    def _get_scored_tables(self, metadata=None):
+        return set(self.relationships)
+
     def _validate_data(self, data, metadata=None):
         """Check that every table and all the referenced columns exist in the data."""
         if self.main_table_name not in data:

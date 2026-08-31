@@ -127,6 +127,12 @@ class PolymorphicRelationship(BaseConstraint):
         self.type_value_to_parent = type_value_to_table if type_column_name else None
         self._parent_to_type_values, self._type_value_to_parent = self._get_parent_type_dicts()
 
+    def _get_scored_tables(self, metadata=None):
+        if self.type_column is None:
+            return {self.table_name, *self.parent_tables}
+
+        return {self.table_name}
+
     def _validate_data(self, data, metadata=None):
         """Check that every table and all the referenced columns exist in the data."""
         if self.table_name not in data:
