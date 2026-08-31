@@ -130,7 +130,7 @@ class TestCarryOverColumns:
         del data['main_table']
         expected_error = re.escape("The table 'main_table' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -142,7 +142,7 @@ class TestCarryOverColumns:
             "The column(s) 'primary_key' are missing from the table 'main_table'."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -154,7 +154,7 @@ class TestCarryOverColumns:
             "The column(s) 'child_1' are missing from the table 'carry_over_1'."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -291,7 +291,7 @@ class TestCarryOverColumns:
 
     def test_get_score(self, data, metadata, constraint):
         """Test ``get_score`` returns the proportion of valid rows."""
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_invalid_data(self, data, metadata, constraint):
@@ -299,7 +299,7 @@ class TestCarryOverColumns:
         # Setup
         data['carry_over_1'].loc[1, 'child_1'] = 'b'
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 0.95
 
     def test_get_score_empty_tables(self, data, metadata, constraint):
@@ -307,5 +307,5 @@ class TestCarryOverColumns:
         # Setup
         data = {table: table_data.iloc[:0] for table, table_data in data.items()}
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

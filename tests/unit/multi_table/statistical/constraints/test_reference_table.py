@@ -106,7 +106,7 @@ class TestReferenceTable:
 
     def test__validate_constraint_with_metadata(self, metadata, constraint):
         """Test ``_validate_constraint_with_metadata`` passes for a table with no parent."""
-        # Run & Assert
+        # Run and Assert
         constraint._validate_constraint_with_metadata(metadata)
 
     def test__validate_constraint_with_metadata_reference_parent(self, metadata):
@@ -114,7 +114,7 @@ class TestReferenceTable:
         # Setup
         instance = ReferenceTable(reference_table_names=['grandparent', 'parent'])
 
-        # Run & Assert
+        # Run and Assert
         instance._validate_constraint_with_metadata(metadata)
 
     def test__validate_constraint_with_metadata_every_table(self, metadata):
@@ -122,7 +122,7 @@ class TestReferenceTable:
         # Setup
         instance = ReferenceTable(reference_table_names=['grandparent', 'parent', 'child'])
 
-        # Run & Assert
+        # Run and Assert
         instance._validate_constraint_with_metadata(metadata)
 
     def test__validate_constraint_with_metadata_missing_table(self, metadata):
@@ -133,7 +133,7 @@ class TestReferenceTable:
             "Reference table(s) '['City', 'Country']' missing from metadata."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             instance._validate_constraint_with_metadata(metadata)
 
@@ -146,7 +146,7 @@ class TestReferenceTable:
             "child-parent pairs are invalid: '[('parent', 'grandparent')]'"
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             instance._validate_constraint_with_metadata(metadata)
 
@@ -159,7 +159,7 @@ class TestReferenceTable:
             "child-parent pairs are invalid: '[('child', 'grandparent'), ('child', 'parent')]'"
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             instance._validate_constraint_with_metadata(metadata)
 
@@ -174,7 +174,7 @@ class TestReferenceTable:
 
     def test_get_score(self, data, metadata, constraint):
         """Test ``get_score`` returns the proportion of valid rows."""
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_empty_tables(self, data, metadata, constraint):
@@ -182,5 +182,5 @@ class TestReferenceTable:
         # Setup
         data = {table: table_data.iloc[:0] for table, table_data in data.items()}
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

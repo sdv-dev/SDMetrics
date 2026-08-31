@@ -183,7 +183,7 @@ class TestForeignToForeignKey:
         del data['transactions']
         expected_error = re.escape("The table 'transactions' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -193,7 +193,7 @@ class TestForeignToForeignKey:
         del data['users']['product_id']
         expected_error = re.escape("The column(s) 'product_id' are missing from the table 'users'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -211,7 +211,7 @@ class TestForeignToForeignKey:
             "The column(s) 'company_name' are missing from the table 'transactions'."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             instance._validate_data(data, metadata)
 
@@ -250,7 +250,7 @@ class TestForeignToForeignKey:
 
     def test_get_score(self, data, metadata, constraint):
         """Test ``get_score`` returns the proportion of valid rows."""
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_with_unshared_values(self, data, metadata, constraint):
@@ -258,7 +258,7 @@ class TestForeignToForeignKey:
         # Setup
         data['users'].loc[2, 'product_id'] = 999
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_empty_tables(self, data, metadata, constraint):
@@ -266,5 +266,5 @@ class TestForeignToForeignKey:
         # Setup
         data = {table: table_data.iloc[:0] for table, table_data in data.items()}
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

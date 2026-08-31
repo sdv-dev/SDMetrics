@@ -170,7 +170,7 @@ class TestPolymorphicRelationship:
         del data['parent1']
         expected_error = re.escape("The table 'parent1' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -180,7 +180,7 @@ class TestPolymorphicRelationship:
         del data['table']['type']
         expected_error = re.escape("The column(s) 'type' are missing from the table 'table'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -193,7 +193,7 @@ class TestPolymorphicRelationship:
             "The column(s) 'primary_key' are missing from the table 'parent1'."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -205,7 +205,7 @@ class TestPolymorphicRelationship:
             "The table 'parent1' does not have a primary key in the metadata."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -377,7 +377,7 @@ class TestPolymorphicRelationship:
 
     def test_get_score(self, data, metadata, constraint):
         """Test ``get_score`` returns the proportion of valid rows."""
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_invalid_data(self, data, metadata, constraint):
@@ -385,7 +385,7 @@ class TestPolymorphicRelationship:
         # Setup
         data['table']['type'] = ['CREDIT', 'DEBIT', 'DEBIT', 'CREDIT', 'DEBIT']
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == pytest.approx(7 / 9)
 
     def test_get_score_empty_tables(self, data, metadata, constraint):
@@ -393,5 +393,5 @@ class TestPolymorphicRelationship:
         # Setup
         data = {table: table_data.iloc[:0] for table, table_data in data.items()}
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

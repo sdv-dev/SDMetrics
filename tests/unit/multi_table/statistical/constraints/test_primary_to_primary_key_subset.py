@@ -137,7 +137,7 @@ class TestPrimaryToPrimaryKeySubset:
         del data['table_2']
         expected_error = re.escape("The table 'table_2' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -147,7 +147,7 @@ class TestPrimaryToPrimaryKeySubset:
         del data['main_table']
         expected_error = re.escape("The table 'main_table' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -159,7 +159,7 @@ class TestPrimaryToPrimaryKeySubset:
             "The column(s) 'condition_column' are missing from the table 'main_table'."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -169,7 +169,7 @@ class TestPrimaryToPrimaryKeySubset:
         del data['table_1']['col_1']
         expected_error = re.escape("The column(s) 'col_1' are missing from the table 'table_1'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -181,7 +181,7 @@ class TestPrimaryToPrimaryKeySubset:
             "The table 'table_1' does not have a primary key in the metadata."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -315,7 +315,7 @@ class TestPrimaryToPrimaryKeySubset:
         # Setup
         data['table_2']['col_4'] = [2, 4]
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_invalid_data(self, data, metadata, constraint):
@@ -324,7 +324,7 @@ class TestPrimaryToPrimaryKeySubset:
         data['table_2']['col_4'] = [2, 4]
         data['table_1']['col_1'] = [1, 2, 5]
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 0.9
 
     def test_get_score_empty_tables(self, data, metadata, constraint):
@@ -332,5 +332,5 @@ class TestPrimaryToPrimaryKeySubset:
         # Setup
         data = {table: table_data.iloc[:0] for table, table_data in data.items()}
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

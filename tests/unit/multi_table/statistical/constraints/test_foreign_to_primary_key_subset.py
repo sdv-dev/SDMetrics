@@ -126,7 +126,7 @@ class TestForeignToPrimaryKeySubset:
         del data['users']
         expected_error = re.escape("The table 'users' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -138,7 +138,7 @@ class TestForeignToPrimaryKeySubset:
             "The column(s) 'company_name' are missing from the table 'users'."
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -148,7 +148,7 @@ class TestForeignToPrimaryKeySubset:
         del metadata['tables']['users']['primary_key']
         expected_error = re.escape("The table 'users' does not have a primary key in the metadata.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -265,7 +265,7 @@ class TestForeignToPrimaryKeySubset:
 
     def test_get_score(self, data, metadata, constraint):
         """Test ``get_score`` returns the proportion of valid rows."""
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_invalid_data(self, data, metadata, constraint):
@@ -273,7 +273,7 @@ class TestForeignToPrimaryKeySubset:
         # Setup
         data['transactions']['user_id'] = [1, 2, 3, 8, 1, 3, 8, 1, 3, 8]
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 0.95
 
     def test_get_score_empty_tables(self, data, metadata, constraint):
@@ -281,5 +281,5 @@ class TestForeignToPrimaryKeySubset:
         # Setup
         data = {table: table_data.iloc[:0] for table, table_data in data.items()}
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

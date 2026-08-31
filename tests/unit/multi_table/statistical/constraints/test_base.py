@@ -30,7 +30,7 @@ class TestBaseConstraint:
         # Setup
         expected_error = re.escape("Unsupported constraint class 'Unknown'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ValueError, match=expected_error):
             BaseConstraint.load_constraint_from_dict({'class_name': 'Unknown', 'parameters': {}})
 
@@ -39,7 +39,7 @@ class TestBaseConstraint:
         # Setup
         expected_error = re.escape("Invalid constraint. Missing the required key 'class_name'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ValueError, match=expected_error):
             BaseConstraint.load_constraint_from_dict({'parameters': {}})
 
@@ -53,7 +53,7 @@ class TestBaseConstraint:
 
         expected_error = re.escape("Invalid parameter(s) 'unknown' for constraint")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ValueError, match=expected_error):
             BaseConstraint.load_constraint_from_dict(constraint_dict)
 
@@ -67,6 +67,6 @@ class TestBaseConstraint:
 
         expected_error = re.escape("Unable to create the constraint 'FixedCombinations'")
 
-        # Run
+        # Run and Assert
         with pytest.raises(ValueError, match=expected_error):
             BaseConstraint.load_constraint_from_dict(constraint_dict)
