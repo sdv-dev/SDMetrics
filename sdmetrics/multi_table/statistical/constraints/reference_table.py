@@ -67,6 +67,9 @@ class ReferenceTable(BaseConstraint):
         """No data validation needed for reference tables."""
         pass
 
+    def _get_scored_tables(self, metadata=None):
+        return set(self.reference_table_names)
+
     def _is_valid(self, data, metadata=None):
         """Get valid rows.
 
