@@ -1,8 +1,10 @@
+import re
 from datetime import datetime
 from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from sdmetrics.multi_table.statistical.constraints._utils import (
     _create_unique_name,
@@ -12,6 +14,9 @@ from sdmetrics.multi_table.statistical.constraints._utils import (
     _parse_datetime,
     _parse_datetime64_value,
     _replace_nans_with_none,
+    _validate_foreign_to_foreign_key_input,
+    _validate_foreign_to_primary_key_subset,
+    _validate_foreign_to_primary_key_subset_input,
     cast_to_datetime64,
     compute_nans_column,
     downcast_datetime_to_lower_precision,
@@ -757,3 +762,168 @@ def test_compute_nans_columns_without_nan():
 
     # Assert
     assert output is None
+
+
+def test__validate_foreign_to_primary_key_subset_input():
+    """Test the ``_validate_foreign_to_primary_key_subset_input`` method."""
+    # Setup
+    expected_error_1 = re.escape('`parent_table_name` must be a string.')
+    expected_error_2 = re.escape('`child_table_name` must be a string.')
+    expected_error_3 = re.escape('`child_foreign_key` must be a string or a list of strings.')
+    expected_error_4 = re.escape('`conditional_column_name` must be a string.')
+    expected_error_5 = re.escape('`conditional_values` must be a list.')
+
+    # Run and Assert
+    _validate_foreign_to_primary_key_subset_input(
+        'parent_table', 'child_table', 'child_fk', 'conditional_column', ['value_1', 'value_2']
+    )
+    _validate_foreign_to_primary_key_subset_input(
+        'parent_table', 'child_table', 'child_fk', 'conditional_column', [0, 1, None]
+    )
+    with pytest.raises(TypeError, match=expected_error_1):
+        _validate_foreign_to_primary_key_subset_input(
+            1, 'child_table', 'child_fk', 'conditional_column', ['value_1', 'value_2']
+        )
+
+    with pytest.raises(TypeError, match=expected_error_2):
+        _validate_foreign_to_primary_key_subset_input(
+            'parent_table', 1, 'child_fk', 'conditional_column', ['value_1', 'value_2']
+        )
+
+    with pytest.raises(TypeError, match=expected_error_3):
+        _validate_foreign_to_primary_key_subset_input(
+            'parent_table', 'child_table', 1, 'conditional_column', ['value_1', 'value_2']
+        )
+
+    with pytest.raises(TypeError, match=expected_error_4):
+        _validate_foreign_to_primary_key_subset_input(
+            'parent_table', 'child_table', 'child_fk', 1, ['value_1', 'value_2']
+        )
+
+    with pytest.raises(TypeError, match=expected_error_5):
+        _validate_foreign_to_primary_key_subset_input(
+            'parent_table', 'child_table', 'child_fk', 'conditional_column', 1
+        )
+
+
+def test__validate_foreign_to_primary_key_subset():
+    """Test the ``_validate_foreign_to_primary_key_subset`` method."""
+    # Setup
+    data = {
+        'parent_table': pd.DataFrame({
+            'parent_pk': [1, 2, 3, 4],
+            'conditional_column': ['value_1', 'value_2', 'value_3', 'value_4'],
+        }),
+        'child_table': pd.DataFrame({'child_fk': [1, 2, 1, 2]}),
+    }
+
+    # Run and Assert
+    _validate_foreign_to_primary_key_subset(
+        data,
+        'parent_pk',
+        'parent_table',
+        'child_table',
+        'child_fk',
+        'conditional_column',
+        ['value_1', 'value_2'],
+    )
+
+
+@pytest.mark.parametrize(
+    'valid_input',
+    [
+        [
+            {'table_name': 'orders', 'foreign_key': 'order_id'},
+            {'table_name': 'products', 'foreign_key': 'product_id'},
+        ],
+        [
+            {'table_name': 'orders', 'foreign_key': ('order_id', 'product_id')},
+            {'table_name': 'products', 'foreign_key': ('product_id', 'product_id')},
+        ],
+        [
+            {'table_name': 'users', 'foreign_key': 'user_id'},
+        ],
+        [
+            {'table_name': 'users', 'foreign_key': ('user_id', 'account_id')},
+        ],
+    ],
+)
+@pytest.mark.parametrize('valid_fk_generation', ['new', 'reuse'])
+def test_validate_foreign_to_foreign_key_input_valid_inputs(valid_input, valid_fk_generation):
+    """Test valid foreign key input does not raise an error."""
+    # Run and Assert
+    _validate_foreign_to_foreign_key_input(valid_input, valid_fk_generation)
+
+
+@pytest.mark.parametrize(
+    'invalid_fk_input,expected_message',
+    [
+        (None, 'columns must be a list of dictionaries'),
+        ('string', 'columns must be a list of dictionaries'),
+        (123, 'columns must be a list of dictionaries'),
+        (
+            [{'table_name': 'orders'}],
+            "Each dictionary must have a 'foreign_key' key",
+        ),
+        (
+            [{'foreign_key': 'order_id'}],
+            "Each dictionary must have a 'table_name' key with a string value",
+        ),
+        (
+            [{'table_name': 'orders', 'foreign_key': 123}],
+            "'foreign_key' must be a string or a tuple of strings",
+        ),
+        (
+            [{'table_name': 123, 'foreign_key': 'order_id'}],
+            "Each dictionary must have a 'table_name' key with a string value",
+        ),
+        ([123], 'Each entry in columns must be a dictionary'),
+        (
+            [
+                {'table_name': 'orders', 'foreign_key': ('order_id', 'product_id')},
+                {'table_name': 'users', 'foreign_key': 'user_id'},
+            ],
+            (
+                'All foreign key entries must have the same number of columns. '
+                "Entry for table 'users' has 1 columns, expected 2."
+            ),
+        ),
+    ],
+)
+def test_validate_foreign_to_foreign_key_input_invalid_foreign_key_columns(
+    invalid_fk_input, expected_message
+):
+    """Test invalid foreign_key_column inputs raise ValueError with expected error messages."""
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_message):
+        _validate_foreign_to_foreign_key_input(invalid_fk_input, 'new')
+
+
+@pytest.mark.parametrize(
+    'invalid_fk_generation,expected_message',
+    [
+        (None, '`foreign_key_generation` must be a string.'),
+        (123, '`foreign_key_generation` must be a string.'),
+        (['new'], '`foreign_key_generation` must be a string.'),
+        (
+            'bad_option',
+            re.escape(
+                "Unrecognized `foreign_key_generation` value 'bad_option'. "
+                "Must be one of ['new', 'reuse']."
+            ),
+        ),
+    ],
+)
+def test_validate_foreign_to_foreign_key_input_invalid_foreign_key_generation(
+    invalid_fk_generation, expected_message
+):
+    """Test invalid foreign_key_column inputs raise ValueError with expected error messages."""
+    # Setup
+    valid_columns = [
+        {'table_name': 'orders', 'foreign_key': 'order_id'},
+        {'table_name': 'products', 'foreign_key': 'product_id'},
+    ]
+
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_message):
+        _validate_foreign_to_foreign_key_input(valid_columns, invalid_fk_generation)
