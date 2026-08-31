@@ -53,6 +53,9 @@ class ForeignToPrimaryKeySubset(BaseConstraint):
         self.conditional_values = conditional_values
         self._parent_primary_key = None
 
+    def _get_scored_tables(self, metadata=None):
+        return {self.child_table_name}
+
     def _validate_data(self, data, metadata=None):
         """Check that both tables and all the referenced columns exist in the data."""
         table_to_columns = {

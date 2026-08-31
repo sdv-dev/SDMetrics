@@ -109,6 +109,9 @@ class CarryOverColumns(BaseConstraint):
             self.table_name = table_names.pop()
             self._is_single_table = True
 
+    def _get_scored_tables(self, metadata=None):
+        return {column_info['table_name'] for column_info in self.common_column_info}
+
     def _validate_data(self, data, metadata=None):
         """Check that every table and all the referenced columns exist in the data."""
         for column_info in self.common_column_info:

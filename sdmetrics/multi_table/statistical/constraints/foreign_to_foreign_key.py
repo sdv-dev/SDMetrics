@@ -42,6 +42,9 @@ class ForeignToForeignKey(BaseConstraint):
         self.columns = columns
         self.foreign_key_generation = foreign_key_generation
 
+    def _get_scored_tables(self, metadata=None):
+        return {column_info['table_name'] for column_info in self.columns}
+
     def _validate_data(self, data, metadata=None):
         """Check that every table and all the referenced columns exist in the data."""
         for column_info in self.columns:
