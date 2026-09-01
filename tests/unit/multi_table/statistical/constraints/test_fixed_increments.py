@@ -70,7 +70,7 @@ class TestFixedIncrements:
         # Setup
         expected_error = re.escape("The table 'table' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data({'OtherTable': pd.DataFrame()}, metadata)
 
@@ -80,7 +80,7 @@ class TestFixedIncrements:
         del data['table']['col1']
         expected_error = re.escape("The column 'col1' is missing from the table 'table'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -122,7 +122,7 @@ class TestFixedIncrements:
 
     def test_get_score(self, data, metadata, constraint):
         """Test get_score returns the proportion of valid rows."""
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_empty_table(self, data, metadata, constraint):
@@ -130,5 +130,5 @@ class TestFixedIncrements:
         # Setup
         data['table'] = data['table'].iloc[:0]
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))
