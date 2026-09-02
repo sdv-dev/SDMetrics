@@ -40,6 +40,10 @@ class DataValidity(BaseSingleTableProperty):
         BoundaryAdherence: ('range_min', 'range_max', 'range_is_nullable'),
         CategoryAdherence: ('range_values', 'range_is_nullable'),
     }
+    _metric_to_required_argument = {
+        DatetimeFormatAdherence: 'datetime_format',
+        RegexFormatAdherence: 'regex_format',
+    }
     _sdtype_to_metric = {
         'numerical': [BoundaryAdherence],
         'datetime': [BoundaryAdherence, DatetimeFormatAdherence],
@@ -76,6 +80,38 @@ class DataValidity(BaseSingleTableProperty):
         }
         return column_arguments
 
+    @classmethod
+    def _get_column_metrics(cls, sdtype, column_name, columns_meta, is_unique):
+        """Get the metrics that apply to a column.
+
+        ``KeyUniqueness`` only applies to primary and alternate keys, and the format metrics
+        only apply to the columns that define their format in the metadata.
+
+        Args:
+            sdtype (str or None):
+                The sdtype of the column, or ``None`` for a composite primary key.
+            column_name (str or list):
+                The name of the column.
+            columns_meta (dict):
+                The metadata of every column of the table.
+            is_unique (bool):
+                Whether the column is a primary or an alternate key.
+
+        Returns:
+            list:
+                The metrics to compute the column scores with.
+        """
+
+        def has_required_argument(metric):
+            required_argument = cls._metric_to_required_argument.get(metric)
+            return required_argument is None or required_argument in columns_meta[column_name]
+
+        return [
+            metric
+            for metric in cls._sdtype_to_metric.get(sdtype, [KeyUniqueness])
+            if (is_unique or metric is not KeyUniqueness) and has_required_argument(metric)
+        ]
+
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the data validity property.
 
@@ -111,13 +147,10 @@ class DataValidity(BaseSingleTableProperty):
             is_unique = primary_key_match or alternate_key_match
             is_sequence_index = column_name == sequence_index
 
-            if (sdtype == 'id' or sdtype not in self._sdtype_to_metric) and not is_unique:
+            metrics = self._get_column_metrics(sdtype, column_name, columns_meta, is_unique)
+            if is_sequence_index and BoundaryAdherence in metrics:
                 continue
 
-            if is_sequence_index and BoundaryAdherence in self._sdtype_to_metric.get(sdtype):
-                continue
-
-            metrics = self._sdtype_to_metric.get(sdtype, [KeyUniqueness])
             for metric in metrics:
                 try:
                     metric_arguments = self._get_metric_arguments(metric, column_name, columns_meta)

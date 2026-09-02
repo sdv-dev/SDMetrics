@@ -416,6 +416,8 @@ def test_unified_diagnostic_report_multi_table():
             'sessions',
             'sessions',
             'sessions',
+            'sessions',
+            'transactions',
             'transactions',
             'transactions',
             'transactions',
@@ -431,10 +433,12 @@ def test_unified_diagnostic_report_multi_table():
             'age',
             'session_id',
             'session_id',
+            'user_id',
             'device',
             'os',
             'transaction_id',
             'transaction_id',
+            'session_id',
             'timestamp',
             'timestamp',
             'amount',
@@ -448,16 +452,18 @@ def test_unified_diagnostic_report_multi_table():
             'BoundaryAdherence',
             'KeyUniqueness',
             'RegexFormatAdherence',
+            'RegexFormatAdherence',
             'CategoryAdherence',
             'CategoryAdherence',
             'KeyUniqueness',
+            'RegexFormatAdherence',
             'RegexFormatAdherence',
             'BoundaryAdherence',
             'DatetimeFormatAdherence',
             'BoundaryAdherence',
             'CategoryAdherence',
         ],
-        'Score': [1.0] * 15,
+        'Score': [1.0] * 17,
     })
     expected_details_data_structure = pd.DataFrame({
         'Table': ['users', 'sessions', 'transactions'],
@@ -727,3 +733,37 @@ def test_unified_quality_report_multi_table_with_no_relationships_does_not_skip_
     ]
     assert pd.isna(properties.loc[properties['Property'] == 'Cardinality', 'Score'].iloc[0])
     assert pd.isna(properties.loc[properties['Property'] == 'Intertable Trends', 'Score'].iloc[0])
+
+
+def test_unified_report_with_non_key_regex_format():
+    # Setup
+    df1 = pd.DataFrame(
+        data={'id': ['US-123', 'CA-102', 'US-001', 'CA-091', 'US-938'], 'num': [45, 56, 31, 30, 12]}
+    )
+
+    df2 = pd.DataFrame(
+        data={'id': ['CA-394', 'US-235', 'CA-230', 'US-209', 'US-502'], 'num': [56, 31, 30, 12, 18]}
+    )
+
+    real_data = {'table': df1}
+    synthetic_data = {'table': df2}
+
+    metadata = {
+        'tables': {
+            'table': {
+                'columns': {
+                    'id': {'sdtype': 'id', 'regex_format': '[A-Z]{2}-[0-9]{3}'},
+                    'num': {'sdtype': 'numerical'},
+                }
+            }
+        }
+    }
+
+    # Run
+    diagnostic = DiagnosticReport()
+    diagnostic.generate(real_data, synthetic_data, metadata)
+    details = diagnostic.get_details('Data Validity')
+
+    # Assert
+    assert 'RegexFormatAdherence' in details['Metric'].to_numpy()
+    assert diagnostic.get_score() == 1.0
