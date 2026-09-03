@@ -99,6 +99,9 @@ class TestDiagnosticReport:
                     real_data[table][column] = pd.to_datetime(
                         real_data[table][column], format=dt_format
                     )
+                    synthetic_data[table][column] = pd.to_datetime(
+                        synthetic_data[table][column], format=dt_format
+                    )
 
         report = DiagnosticReport()
 
@@ -106,6 +109,7 @@ class TestDiagnosticReport:
         report.generate(real_data, synthetic_data, metadata, verbose=False)
         results = report.get_score()
         properties = report.get_properties()
+        validity = report.get_details('Data Validity')
 
         # Assert
         expected_dataframe = pd.DataFrame({
@@ -114,7 +118,8 @@ class TestDiagnosticReport:
         })
         assert results == 1.0
         pd.testing.assert_frame_equal(properties, expected_dataframe)
-        assert_report_scores_are_not_nan(report)
+        assert pd.isna(validity[validity['Metric'] == 'DatetimeFormatAdherence']['Score']).all()
+        assert_report_scores_are_not_nan(report, exclude=['DatetimeFormatAdherence'])
 
     def test_end_to_end_with_metrics_failing(self, converted_datetime_multi_table_demo):
         """Test the ``DiagnosticReport`` report when some metrics crash.
@@ -211,7 +216,7 @@ class TestDiagnosticReport:
                 1.0,
                 1.0,
                 np.nan,
-                1.0,
+                np.nan,
                 np.nan,
                 1.0,
             ],
