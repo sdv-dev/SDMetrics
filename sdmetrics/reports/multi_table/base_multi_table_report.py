@@ -120,9 +120,18 @@ class BaseMultiTableReport(BaseReport):
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
+
+        Returns:
+            dict:
+                The datetime columns of every table as they were before the conversion.
         """
+        original_columns = {}
         for table, table_metadata in metadata['tables'].items():
-            BaseReport.convert_datetimes(real_data[table], synthetic_data[table], table_metadata)
+            original_columns[table] = BaseReport.convert_datetimes(
+                real_data[table], synthetic_data[table], table_metadata
+            )
+
+        return original_columns
 
     def get_details(self, property_name, table_name=None):
         """Return the details table for the given property name.

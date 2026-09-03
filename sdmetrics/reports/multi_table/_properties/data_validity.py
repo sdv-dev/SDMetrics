@@ -17,3 +17,12 @@ class DataValidity(BaseMultiTableProperty):
 
     _single_table_property = SingleTableDataValidity
     _num_iteration_case = 'column'
+
+    def __init__(self):
+        super().__init__()
+        self.original_datetime_columns = {}
+
+    def _configure_single_table_property(self, table_name):
+        self._properties[table_name].original_datetime_columns = self.original_datetime_columns.get(
+            table_name, {}
+        )
