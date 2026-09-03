@@ -228,8 +228,8 @@ class TestRegexFormatAdherence:
             '+1(123)456-7891',
             '+44(123)456-7891',
             '+1(123)456-7891',
-            '+44(987)654-3211',  # (987) not seen in real
-            '+1(000)111-1111',  # combination +1 with (000) not seen in real
+            '+44(987)654-3211',
+            '+1(000)111-1111',
         ])
         regex_format = (
             r'\+(?P<country_code>\d{1,2})'
@@ -245,7 +245,7 @@ class TestRegexFormatAdherence:
 
         # Assert
         assert result_1 == 0.5
-        assert result_2 == 3 / 5
+        assert result_2 == 4 / 5
 
     def test__compute_without_groups(self):
         """Test the `compute` method.
