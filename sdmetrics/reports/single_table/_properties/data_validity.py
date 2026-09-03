@@ -89,7 +89,7 @@ class DataValidity(BaseSingleTableProperty):
 
         Args:
             sdtype (str or None):
-                The sdtype of the column, or ``None`` for a composite primary key.
+                The sdtype of the column, or ``None``.
             column_name (str or list):
                 The name of the column.
             columns_meta (dict):
