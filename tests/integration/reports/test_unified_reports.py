@@ -346,7 +346,6 @@ def test_diagnostic_report_with_ordinal_sdtype():
             'DatetimeFormatAdherence',
             'BoundaryAdherence',
         ],
-        # ``col5`` is ``datetime64``, which carries no format, so its format score is nan
         'Score': [1.0, 1.0, 1.0, 0.75, np.nan, 0.75, 1.0, 1.0],
     })
 

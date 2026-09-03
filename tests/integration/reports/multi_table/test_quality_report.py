@@ -405,6 +405,9 @@ def test_quality_report_with_datetime64_columns():
                 real_data[table][column] = pd.to_datetime(
                     real_data[table][column], format=dt_format
                 )
+                synthetic_data[table][column] = pd.to_datetime(
+                    synthetic_data[table][column], format=dt_format
+                )
 
     report = QualityReport()
     _set_thresholds_zero(report)

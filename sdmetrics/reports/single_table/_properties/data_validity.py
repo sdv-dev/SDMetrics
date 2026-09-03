@@ -34,7 +34,7 @@ class DataValidity(BaseSingleTableProperty):
     """
 
     _num_iteration_case = 'column'
-    original_datetime_columns = {}
+    _original_datetime_columns = {}
     _metric_to_arguments = {
         DatetimeFormatAdherence: ('datetime_format',),
         RegexFormatAdherence: ('regex_format',),
@@ -114,25 +114,8 @@ class DataValidity(BaseSingleTableProperty):
         ]
 
     def _get_original_columns(self, column_name, real_data, synthetic_data):
-        """Get a column as it was before the report converted the datetime columns.
-
-        ``DatetimeFormatAdherence`` evaluates the representation of a column instead of its
-        values, so it must run on the data the user provided. A column that is missing from
-        ``original_datetime_columns`` was never converted, so the current one is the original.
-
-        Args:
-            column_name (str):
-                The name of the column.
-            real_data (pandas.DataFrame):
-                The real data.
-            synthetic_data (pandas.DataFrame):
-                The synthetic data.
-
-        Returns:
-            tuple (pandas.Series, pandas.Series):
-                The original real and synthetic columns.
-        """
-        original_columns = self.original_datetime_columns.get(column_name)
+        """Get a column as it was before the report converted the datetime columns."""
+        original_columns = self._original_datetime_columns.get(column_name)
         if original_columns is None:
             return real_data[column_name], synthetic_data[column_name]
 

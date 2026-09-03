@@ -20,9 +20,9 @@ class DataValidity(BaseMultiTableProperty):
 
     def __init__(self):
         super().__init__()
-        self.original_datetime_columns = {}
+        self._original_datetime_columns = {}
 
     def _configure_single_table_property(self, table_name):
-        self._properties[table_name].original_datetime_columns = self.original_datetime_columns.get(
-            table_name, {}
-        )
+        self._properties[
+            table_name
+        ]._original_datetime_columns = self._original_datetime_columns.get(table_name, {})

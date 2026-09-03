@@ -8,11 +8,7 @@ METRICS = [LogisticDetection, SVCDetection]
 
 @pytest.mark.parametrize('metric', METRICS)
 def test_primary_key(metric, converted_datetime_single_table_demo):
-    """Test that primary keys don't affect detection metric.
-
-    The metric is computed without metadata, so it can only tell the datetime columns
-    apart by their dtype. They must be ``datetime64`` to not be treated as categories.
-    """
+    """Test that primary keys don't affect detection metric."""
     real_data_with_primary_key, synthetic_data_with_primary_key, metadata = (
         converted_datetime_single_table_demo
     )
