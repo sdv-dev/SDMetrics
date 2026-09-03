@@ -1,14 +1,13 @@
 import pandas as pd
 
-from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties import Coverage
 
 
 class TestCoverage:
-    def test_get_score(self):
+    def test_get_score(self, converted_datetime_single_table_demo):
         """Test the ``get_score`` method."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = converted_datetime_single_table_demo
         coverage_property = Coverage()
 
         # Run
@@ -76,10 +75,10 @@ class TestCoverage:
 
         pd.testing.assert_frame_equal(coverage_property.details, expected_details)
 
-    def test_get_score_error(self):
+    def test_get_score_error(self, converted_datetime_single_table_demo):
         """Test the ``get_score`` method with errors."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        real_data, synthetic_data, metadata = converted_datetime_single_table_demo
         real_data['student_placements']['start_date'].iloc[0] = 0
         real_data['student_placements']['employability_perc'].iloc[2] = 'a'
 

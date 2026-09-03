@@ -1,14 +1,14 @@
+import numpy as np
 import pandas as pd
 
-from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties import DataValidity
 
 
 class TestDataValidity:
-    def test_get_score(self):
+    def test_get_score(self, converted_datetime_single_table_demo):
         """Test the ``get_score`` method"""
         # Setup
-        real_data, synthetic_data, metadata = load_demo('single_table')
+        real_data, synthetic_data, metadata = converted_datetime_single_table_demo
 
         # Run
         data_validity_property = DataValidity()
@@ -60,16 +60,16 @@ class TestDataValidity:
                 'CategoryAdherence',
                 'CategoryAdherence',
             ],
-            'Score': [1.0] * 20,
+            'Score': [1.0, np.nan, 1.0, np.nan] + [1.0] * 16,
         }
         expected_details = pd.DataFrame(expected_details_dict)
         pd.testing.assert_frame_equal(data_validity_property.details, expected_details)
         assert score == 1.0
 
-    def test_get_score_errors(self):
+    def test_get_score_errors(self, converted_datetime_single_table_demo):
         """Test the ``get_score`` method when the metrics are raising errors for some columns."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo('single_table')
+        real_data, synthetic_data, metadata = converted_datetime_single_table_demo
 
         real_data['student_placements']['start_date'].iloc[0] = 0
         real_data['student_placements']['employability_perc'].iloc[2] = 'a'
@@ -90,7 +90,9 @@ class TestDataValidity:
         details_nan = details.loc[pd.isna(details['Score'])]
         column_names_nan = details_nan['Column'].tolist()
         error_messages = details_nan['Error'].tolist()
-        assert column_names_nan == ['start_date', 'employability_perc']
+        assert column_names_nan == ['start_date', 'start_date', 'end_date', 'employability_perc']
         assert error_messages[0] == expected_message_1
-        assert error_messages[1] == expected_message_2
+        assert error_messages[1] is None  # datetime is non-formatted
+        assert error_messages[2] is None  # datetime is non-formatted
+        assert error_messages[3] == expected_message_2
         assert score == 1.0

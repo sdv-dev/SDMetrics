@@ -34,6 +34,7 @@ class DataValidity(BaseSingleTableProperty):
     """
 
     _num_iteration_case = 'column'
+    _original_datetime_columns = {}
     _metric_to_arguments = {
         DatetimeFormatAdherence: ('datetime_format',),
         RegexFormatAdherence: ('regex_format',),
@@ -112,6 +113,14 @@ class DataValidity(BaseSingleTableProperty):
             if (is_unique or metric is not KeyUniqueness) and has_required_argument(metric)
         ]
 
+    def _get_original_columns(self, column_name, real_data, synthetic_data):
+        """Get a column as it was before the report converted the datetime columns."""
+        original_columns = self._original_datetime_columns.get(column_name)
+        if original_columns is None:
+            return real_data[column_name], synthetic_data[column_name]
+
+        return original_columns
+
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the data validity property.
 
@@ -154,7 +163,14 @@ class DataValidity(BaseSingleTableProperty):
             for metric in metrics:
                 try:
                     metric_arguments = self._get_metric_arguments(metric, column_name, columns_meta)
-                    if metric in [DatetimeFormatAdherence, RegexFormatAdherence]:
+                    if metric is DatetimeFormatAdherence:
+                        real_column, synthetic_column = self._get_original_columns(
+                            column_name, real_data, synthetic_data
+                        )
+                        column_score = metric.compute(
+                            real_column, synthetic_column, **metric_arguments
+                        )
+                    elif metric is RegexFormatAdherence:
                         column_meta = columns_meta[column_name]
                         real_column = _convert_column_to_string(real_data[column_name], column_meta)
                         synthetic_column = _convert_column_to_string(
