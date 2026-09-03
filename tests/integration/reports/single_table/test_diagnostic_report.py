@@ -264,6 +264,7 @@ class TestDiagnosticReport:
             if column_meta['sdtype'] == 'datetime':
                 dt_format = column_meta['datetime_format']
                 real_data[column] = pd.to_datetime(real_data[column], format=dt_format)
+                synthetic_data[column] = pd.to_datetime(synthetic_data[column], format=dt_format)
 
         report = DiagnosticReport()
 
@@ -316,7 +317,7 @@ class TestDiagnosticReport:
                 'CategoryAdherence',
                 'CategoryAdherence',
             ],
-            'Score': [1.0] * 20,
+            'Score': [1.0, np.nan, 1.0, np.nan] + [1.0] * 16,
         })
 
         expected_details_data_structure = pd.DataFrame({

@@ -213,8 +213,8 @@ class BaseReport:
             ):
                 property_instance.real_association_threshold = self.real_association_threshold
 
-            if hasattr(property_instance, 'original_datetime_columns'):
-                property_instance.original_datetime_columns = self._original_datetime_columns
+            if hasattr(property_instance, '_original_datetime_columns'):
+                property_instance._original_datetime_columns = self._original_datetime_columns
 
             self._properties[property_name].num_rows_subsample = self.num_rows_subsample
             score = self._properties[property_name].get_score(
