@@ -2,7 +2,6 @@ import pandas as pd
 import pytest
 
 from sdmetrics import compute_metrics
-from sdmetrics.demos import load_timeseries_demo
 from sdmetrics.timeseries.base import TimeSeriesMetric
 from sdmetrics.timeseries.detection import LSTMDetection
 from sdmetrics.utils import get_table_data_from_dict
@@ -13,8 +12,8 @@ METRICS = [
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_rank(metric):
-    real_data, synthetic_data, metadata = load_timeseries_demo()
+def test_rank(metric, converted_datetime_timeseries_demo):
+    real_data, synthetic_data, metadata = converted_datetime_timeseries_demo
 
     real_score = metric.compute(real_data, real_data, metadata)
     synthetic_score = metric.compute(real_data, synthetic_data, metadata)
@@ -26,8 +25,8 @@ def test_rank(metric):
     assert 0.0 <= normalized_synthetic_score <= normalized_real_score <= 1.0
 
 
-def test_compute_all():
-    real_data, synthetic_data, metadata = load_timeseries_demo()
+def test_compute_all(converted_datetime_timeseries_demo):
+    real_data, synthetic_data, metadata = converted_datetime_timeseries_demo
 
     output = compute_metrics(
         TimeSeriesMetric.get_subclasses(), real_data, synthetic_data, metadata=metadata
@@ -44,10 +43,10 @@ def test_compute_all():
     assert scores.normalized_score.between(0.0, 1.0).all()
 
 
-def test_compute_lstmdetection_multiple_categorical_columns():
+def test_compute_lstmdetection_multiple_categorical_columns(converted_datetime_timeseries_demo):
     """Test LSTMDetection metric handles multiple categorical columns."""
     # Setup
-    real_data, synthetic_data, metadata = load_timeseries_demo()
+    real_data, synthetic_data, metadata = converted_datetime_timeseries_demo
     metadata['tables']['timeseries']['columns']['day_of_week'] = {'sdtype': 'categorical'}
     day_map = {0: 'Sun', 1: 'Mon', 2: 'Tues', 3: 'Wed', 4: 'Thurs', 5: 'Fri', 6: 'Sat'}
     real_data = get_table_data_from_dict(real_data)

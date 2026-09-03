@@ -258,8 +258,8 @@ class TestQualityReport:
         assert np.isclose(report_2.get_score(), score_1_run_1, atol=0.001)
         assert np.isclose(cpt_report_1, cpt_report_2, atol=0.001)
 
-    def test_quality_report_with_object_datetimes(self, single_table_demo_data_and_metadata):
-        """Test the quality report with object datetimes.
+    def test_quality_report_with_datetime64_columns(self, single_table_demo_data_and_metadata):
+        """Test the quality report when the datetime columns are ``datetime64``.
 
         The report must compute each property and the overall quality score.
         """
@@ -269,7 +269,7 @@ class TestQualityReport:
         for column, column_meta in metadata['tables']['student_placements']['columns'].items():
             if column_meta['sdtype'] == 'datetime':
                 dt_format = column_meta['datetime_format']
-                real_data[column] = real_data[column].dt.strftime(dt_format)
+                real_data[column] = pd.to_datetime(real_data[column], format=dt_format)
 
         table_meta = metadata['tables']['student_placements']['columns']
         metadata['tables']['student_placements']['columns'] = {

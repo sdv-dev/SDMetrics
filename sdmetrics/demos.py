@@ -7,12 +7,7 @@ import pandas as pd
 
 
 def _load_table(metadata, path):
-    datetime_columns = []
-    for column, column_meta in metadata['columns'].items():
-        if column_meta['sdtype'] == 'datetime':
-            datetime_columns.append(column)
-
-    return pd.read_csv(path, parse_dates=datetime_columns)
+    return pd.read_csv(path)
 
 
 def load_demo(modality='multi_table'):

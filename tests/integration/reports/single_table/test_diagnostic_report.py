@@ -256,14 +256,14 @@ class TestDiagnosticReport:
         )
         assert_report_scores_are_not_nan(report)
 
-    def test_generate_with_object_datetimes(self, single_table_demo_data_and_metadata):
-        """Test the diagnostic report with object datetimes."""
+    def test_generate_with_datetime64_columns(self, single_table_demo_data_and_metadata):
+        """Test the diagnostic report when the datetime columns are ``datetime64``."""
         # Setup
         real_data, synthetic_data, metadata = single_table_demo_data_and_metadata
         for column, column_meta in metadata['tables']['student_placements']['columns'].items():
             if column_meta['sdtype'] == 'datetime':
                 dt_format = column_meta['datetime_format']
-                real_data[column] = real_data[column].dt.strftime(dt_format)
+                real_data[column] = pd.to_datetime(real_data[column], format=dt_format)
 
         report = DiagnosticReport()
 
