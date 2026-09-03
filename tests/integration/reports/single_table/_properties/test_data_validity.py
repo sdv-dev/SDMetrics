@@ -1,14 +1,13 @@
 import pandas as pd
 
-from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties import DataValidity
 
 
 class TestDataValidity:
-    def test_get_score(self):
+    def test_get_score(self, converted_datetime_single_table_demo):
         """Test the ``get_score`` method"""
         # Setup
-        real_data, synthetic_data, metadata = load_demo('single_table')
+        real_data, synthetic_data, metadata = converted_datetime_single_table_demo
 
         # Run
         data_validity_property = DataValidity()
@@ -66,10 +65,10 @@ class TestDataValidity:
         pd.testing.assert_frame_equal(data_validity_property.details, expected_details)
         assert score == 1.0
 
-    def test_get_score_errors(self):
+    def test_get_score_errors(self, converted_datetime_single_table_demo):
         """Test the ``get_score`` method when the metrics are raising errors for some columns."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo('single_table')
+        real_data, synthetic_data, metadata = converted_datetime_single_table_demo
 
         real_data['student_placements']['start_date'].iloc[0] = 0
         real_data['student_placements']['employability_perc'].iloc[2] = 'a'

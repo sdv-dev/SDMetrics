@@ -394,15 +394,17 @@ def test_column_pair_trends_threshold_changes_details():
     assert score_zero_intertable >= score_default_intertable  # approximately 0.45 > 0.4
 
 
-def test_quality_report_with_object_datetimes():
-    """Test the multi table QualityReport with object datetimes."""
+def test_quality_report_with_datetime64_columns():
+    """Test the multi table QualityReport when the datetimes are ``datetime64``."""
     # Setup
     real_data, synthetic_data, metadata = load_demo(modality='multi_table')
     for table, table_meta in metadata['tables'].items():
         for column, column_meta in table_meta['columns'].items():
             if column_meta['sdtype'] == 'datetime':
                 dt_format = column_meta['datetime_format']
-                real_data[table][column] = real_data[table][column].dt.strftime(dt_format)
+                real_data[table][column] = pd.to_datetime(
+                    real_data[table][column], format=dt_format
+                )
 
     report = QualityReport()
     _set_thresholds_zero(report)
