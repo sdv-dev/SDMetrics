@@ -427,10 +427,10 @@ def test_quality_report_with_datetime64_columns():
     assert_report_scores_are_not_nan(report)
 
 
-def test_quality_report_with_errors():
+def test_quality_report_with_errors(converted_datetime_multi_table_demo):
     """Test the multi table QualityReport with errors when computing metrics."""
     # Setup
-    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    real_data, synthetic_data, metadata = converted_datetime_multi_table_demo
     real_data['users']['age'].iloc[0] = 'error_1'
     real_data['transactions']['timestamp'].iloc[0] = 'error_2'
     real_data['transactions']['amount'].iloc[0] = 'error_3'
