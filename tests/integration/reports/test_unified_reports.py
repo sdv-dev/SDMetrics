@@ -752,7 +752,7 @@ def test_unified_report_with_non_key_regex_format():
         'tables': {
             'table': {
                 'columns': {
-                    'id': {'sdtype': 'id', 'regex_format': '[A-Z]{2}-[0-9]{3}'},
+                    'id': {'sdtype': 'id', 'regex_format': '(?P<country>[A-Z]{2})-[0-9]{3}'},
                     'num': {'sdtype': 'numerical'},
                 }
             }

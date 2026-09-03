@@ -215,8 +215,8 @@ class TestRegexFormatAdherence:
         counted as a match.
         """
         # Setup
-        real_data = pd.Series(['+1(123)456-7891', '+44(123)456-7891'])
-        synthetic_data = pd.Series([
+        real_data = pd.Series(['+1(123)456-7891', '+44(123)456-7891', '+44(000)000-0000'])
+        synthetic_data_1 = pd.Series([
             '+1(123)456-7891',
             'abc',
             '+44(123)456-7891',
@@ -224,19 +224,28 @@ class TestRegexFormatAdherence:
             None,
             '+44(987)654-3211',
         ])
+        synthetic_data_2 = pd.Series([
+            '+1(123)456-7891',
+            '+44(123)456-7891',
+            '+1(123)456-7891',
+            '+44(987)654-3211',  # (987) not seen in real
+            '+1(000)111-1111',  # combination +1 with (000) not seen in real
+        ])
         regex_format = (
             r'\+(?P<country_code>\d{1,2})'
             r'\((?P<area_code>\d{3})\)'
-            r'(?P<phone_number>\d{3}-\d{4})'
+            r'(\d{3}-\d{4})'
         )
 
         metric = RegexFormatAdherence()
 
         # Run
-        result = metric.compute(real_data, synthetic_data, regex_format)
+        result_1 = metric.compute(real_data, synthetic_data_1, regex_format)
+        result_2 = metric.compute(real_data, synthetic_data_2, regex_format)
 
         # Assert
-        assert result == 0.5
+        assert result_1 == 0.5
+        assert result_2 == 3 / 5
 
     def test__compute_without_groups(self):
         """Test the `compute` method.
