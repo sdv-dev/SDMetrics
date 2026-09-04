@@ -204,6 +204,7 @@ class TestDiagnosticReport:
                 'end_date',
                 'salary',
                 'duration',
+                'student_id',
                 'high_perc',
                 'high_spec',
                 'mba_spec',
@@ -225,6 +226,7 @@ class TestDiagnosticReport:
                 'DatetimeFormatAdherence',
                 'BoundaryAdherence',
                 'BoundaryAdherence',
+                'RegexFormatAdherence',
                 'BoundaryAdherence',
                 'CategoryAdherence',
                 'CategoryAdherence',
@@ -238,7 +240,7 @@ class TestDiagnosticReport:
                 'CategoryAdherence',
                 'CategoryAdherence',
             ],
-            'Score': [1.0] * 19,
+            'Score': [1.0] * 20,
         })
         expected_details_data_structure = pd.DataFrame({
             'Metric': ['TableStructure'],

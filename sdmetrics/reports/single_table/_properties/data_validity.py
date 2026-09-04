@@ -26,7 +26,7 @@ class DataValidity(BaseSingleTableProperty):
     This property computes, at base, whether each column contains valid data.
     The metric is based on the type data in each column.
     The BoundaryAdherence metric is used for numerical and datetime columns, the CategoryAdherence
-    is used for categorical and boolean columns and the KeyUniqueness for primary
+    is used for categorical, ordinal and boolean columns and the KeyUniqueness for primary
     and alternate keys. The other column types are ignored by this property.
 
     If the metadata defines the valid range of a column, it is passed down to the metric,
@@ -40,10 +40,15 @@ class DataValidity(BaseSingleTableProperty):
         BoundaryAdherence: ('range_min', 'range_max', 'range_is_nullable'),
         CategoryAdherence: ('range_values', 'range_is_nullable'),
     }
+    _metric_to_required_argument = {
+        DatetimeFormatAdherence: 'datetime_format',
+        RegexFormatAdherence: 'regex_format',
+    }
     _sdtype_to_metric = {
         'numerical': [BoundaryAdherence],
         'datetime': [BoundaryAdherence, DatetimeFormatAdherence],
         'categorical': [CategoryAdherence],
+        'ordinal': [CategoryAdherence],
         'boolean': [CategoryAdherence],
         'id': [KeyUniqueness, RegexFormatAdherence],
     }
@@ -74,6 +79,39 @@ class DataValidity(BaseSingleTableProperty):
             argument: column_meta[argument] for argument in arguments if argument in column_meta
         }
         return column_arguments
+
+    @classmethod
+    def _has_required_argument(cls, metric, column_name, columns_meta):
+        required_argument = cls._metric_to_required_argument.get(metric)
+        return required_argument is None or required_argument in columns_meta[column_name]
+
+    @classmethod
+    def _get_column_metrics(cls, sdtype, column_name, columns_meta, is_unique):
+        """Get the metrics that apply to a column.
+
+        ``KeyUniqueness`` only applies to primary and alternate keys, and the format metrics
+        only apply to the columns that define their format in the metadata.
+
+        Args:
+            sdtype (str or None):
+                The sdtype of the column, or ``None``.
+            column_name (str or list):
+                The name of the column.
+            columns_meta (dict):
+                The metadata of every column of the table.
+            is_unique (bool):
+                Whether the column is a primary or an alternate key.
+
+        Returns:
+            list:
+                The metrics to compute the column scores with.
+        """
+        return [
+            metric
+            for metric in cls._sdtype_to_metric.get(sdtype, [KeyUniqueness])
+            if (is_unique or metric is not KeyUniqueness)
+            and cls._has_required_argument(metric, column_name, columns_meta)
+        ]
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
         """Generate the _details dataframe for the data validity property.
@@ -110,13 +148,10 @@ class DataValidity(BaseSingleTableProperty):
             is_unique = primary_key_match or alternate_key_match
             is_sequence_index = column_name == sequence_index
 
-            if (sdtype == 'id' or sdtype not in self._sdtype_to_metric) and not is_unique:
-                continue
+            metrics = self._get_column_metrics(sdtype, column_name, columns_meta, is_unique)
+            if is_sequence_index and BoundaryAdherence in metrics:
+                metrics = []
 
-            if is_sequence_index and BoundaryAdherence in self._sdtype_to_metric.get(sdtype):
-                continue
-
-            metrics = self._sdtype_to_metric.get(sdtype, [KeyUniqueness])
             for metric in metrics:
                 try:
                     metric_arguments = self._get_metric_arguments(metric, column_name, columns_meta)
@@ -141,14 +176,14 @@ class DataValidity(BaseSingleTableProperty):
                 except Exception as e:
                     column_score = np.nan
                     error_message = f'{type(e).__name__}: {e}'
-                finally:
-                    if progress_bar:
-                        progress_bar.update()
 
                 column_names.append(column_name)
                 metric_names.append(metric.__name__)
                 scores.append(column_score)
                 error_messages.append(error_message)
+
+            if progress_bar:
+                progress_bar.update()
 
         result = pd.DataFrame({
             'Column': column_names,
