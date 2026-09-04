@@ -1,5 +1,17 @@
 # History
 
+## v0.31.0 - 2026-09-04
+
+### New Features
+
+* SDV 2.0: Reports should understand and parse the `ordinal` sdtype - Issue [#908](https://github.com/sdv-dev/SDMetrics/issues/908) by @R-Palazzo
+
+### Bugs Fixed
+
+* The `RegexFormatAdherence` considers a valid entry as incorrect due to named capture group - Issue [#930](https://github.com/sdv-dev/SDMetrics/issues/930) by @sarahmish
+* The DiagnosticReport is only applying `RegexFormatAdherence` to primary/foreign keys - Issue [#927](https://github.com/sdv-dev/SDMetrics/issues/927) by @sarahmish
+* When running DiagnosticReport, the progress bar for the Data Validity is empty with unknown denominator - Issue [#924](https://github.com/sdv-dev/SDMetrics/issues/924) by @sarahmish
+
 ## v0.30.0 - 2026-08-28
 
 ### New Features
