@@ -81,6 +81,11 @@ class DataValidity(BaseSingleTableProperty):
         return column_arguments
 
     @classmethod
+    def _has_required_argument(cls, metric, column_name, columns_meta):
+        required_argument = cls._metric_to_required_argument.get(metric)
+        return required_argument is None or required_argument in columns_meta[column_name]
+
+    @classmethod
     def _get_column_metrics(cls, sdtype, column_name, columns_meta, is_unique):
         """Get the metrics that apply to a column.
 
@@ -101,15 +106,11 @@ class DataValidity(BaseSingleTableProperty):
             list:
                 The metrics to compute the column scores with.
         """
-
-        def has_required_argument(metric):
-            required_argument = cls._metric_to_required_argument.get(metric)
-            return required_argument is None or required_argument in columns_meta[column_name]
-
         return [
             metric
             for metric in cls._sdtype_to_metric.get(sdtype, [KeyUniqueness])
-            if (is_unique or metric is not KeyUniqueness) and has_required_argument(metric)
+            if (is_unique or metric is not KeyUniqueness)
+            and cls._has_required_argument(metric, column_name, columns_meta)
         ]
 
     def _generate_details(self, real_data, synthetic_data, metadata, progress_bar=None):
