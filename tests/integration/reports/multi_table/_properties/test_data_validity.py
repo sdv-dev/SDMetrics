@@ -24,9 +24,9 @@ class TestDataValidity:
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
         column_shapes = DataValidity()
-        num_metric_computations = 17
+        num_columns = sum(len(data.columns) for data in real_data.values())
 
-        progress_bar = tqdm(total=num_metric_computations)
+        progress_bar = tqdm(total=num_columns)
         mock_update = Mock()
         progress_bar.update = mock_update
 
@@ -35,4 +35,4 @@ class TestDataValidity:
 
         # Assert
         assert result == 1.0
-        assert mock_update.call_count == num_metric_computations
+        assert mock_update.call_count == num_columns

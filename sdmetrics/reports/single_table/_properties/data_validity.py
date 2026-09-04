@@ -150,7 +150,7 @@ class DataValidity(BaseSingleTableProperty):
 
             metrics = self._get_column_metrics(sdtype, column_name, columns_meta, is_unique)
             if is_sequence_index and BoundaryAdherence in metrics:
-                continue
+                metrics = []
 
             for metric in metrics:
                 try:
@@ -176,14 +176,14 @@ class DataValidity(BaseSingleTableProperty):
                 except Exception as e:
                     column_score = np.nan
                     error_message = f'{type(e).__name__}: {e}'
-                finally:
-                    if progress_bar:
-                        progress_bar.update()
 
                 column_names.append(column_name)
                 metric_names.append(metric.__name__)
                 scores.append(column_score)
                 error_messages.append(error_message)
+
+            if progress_bar:
+                progress_bar.update()
 
         result = pd.DataFrame({
             'Column': column_names,
