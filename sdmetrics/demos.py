@@ -6,7 +6,6 @@ import pathlib
 import pandas as pd
 
 
-
 def load_demo(modality='multi_table'):
     """Load demo data of the indicated data modality.
 
