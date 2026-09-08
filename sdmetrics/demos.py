@@ -6,9 +6,6 @@ import pathlib
 import pandas as pd
 
 
-def _load_table(metadata, path):
-    return pd.read_csv(path)
-
 
 def load_demo(modality='multi_table'):
     """Load demo data of the indicated data modality.
@@ -33,8 +30,8 @@ def load_demo(modality='multi_table'):
     real_data = {}
     synthetic_data = {}
     for table, table_meta in metadata['tables'].items():
-        real_data[table] = _load_table(table_meta, demo_path / f'{table}_real.csv')
-        synthetic_data[table] = _load_table(table_meta, demo_path / f'{table}_synthetic.csv')
+        real_data[table] = pd.read_csv(demo_path / f'{table}_real.csv')
+        synthetic_data[table] = pd.read_csv(demo_path / f'{table}_synthetic.csv')
 
     return real_data, synthetic_data, metadata
 
