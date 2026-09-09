@@ -5,6 +5,7 @@ from sdmetrics.reports.multi_table._properties.boundary import Boundary
 from sdmetrics.reports.multi_table._properties.cardinality import Cardinality
 from sdmetrics.reports.multi_table._properties.column_pair_trends import ColumnPairTrends
 from sdmetrics.reports.multi_table._properties.column_shapes import ColumnShapes
+from sdmetrics.reports.multi_table._properties.constraint_validity import ConstraintValidity
 from sdmetrics.reports.multi_table._properties.coverage import Coverage
 from sdmetrics.reports.multi_table._properties.data_validity import DataValidity
 from sdmetrics.reports.multi_table._properties.inter_table_trends import InterTableTrends
@@ -18,6 +19,7 @@ __all__ = [
     'Cardinality',
     'ColumnShapes',
     'ColumnPairTrends',
+    'ConstraintValidity',
     'Coverage',
     'InterTableTrends',
     'Synthesis',
