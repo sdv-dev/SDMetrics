@@ -99,29 +99,6 @@ def _is_list_of_type(values, type_to_check=str):
     return isinstance(values, list) and all(isinstance(value, type_to_check) for value in values)
 
 
-def _get_key_values(table_data, key_columns):
-    """Return one hashable value per row for the given key columns.
-
-    Every missing value is mapped to ``None`` so that two rows that are null in the
-    same columns produce equal values.
-
-    Args:
-        table_data (pandas.DataFrame):
-            The data of the table.
-        key_columns (list[str]):
-            The names of the columns that make up the key.
-
-    Returns:
-        pandas.Series:
-            A tuple with the values of ``key_columns`` for every row.
-    """
-    return pd.Series(
-        [_tuple_from_columns(row, key_columns) for _, row in table_data[key_columns].iterrows()],
-        index=table_data.index,
-        dtype=object,
-    )
-
-
 def _validate_foreign_to_primary_key_subset_input(
     parent_table_name,
     child_table_name,
