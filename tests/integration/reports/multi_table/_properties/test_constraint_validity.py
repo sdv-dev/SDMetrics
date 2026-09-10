@@ -78,7 +78,7 @@ class TestConstraintValidity:
             'Score': [1.0, 1.0, np.nan],
             'Error': [None, None, "ValueError: Unsupported constraint class 'Unsupported'."]
         })
-    
+
         # Run
         result = constraint_validity.get_score(real_data, synthetic_data, metadata, constraints)
         details = constraint_validity.get_details()

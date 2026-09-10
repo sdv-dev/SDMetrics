@@ -52,8 +52,9 @@ class ConstraintValidity(BaseMultiTableProperty):
                 if progress_bar:
                     progress_bar.update()
 
-            constraint_names.append(constraint.get('class_name'))
-            constraint_parameters.append(constraint.get('parameters'))
+            is_dict = isinstance(constraint, dict)
+            constraint_names.append(constraint.get('class_name') if is_dict else None)
+            constraint_parameters.append(constraint.get('parameters') if is_dict else None)
             scores.append(score)
             error_messages.append(error_message)
 
@@ -106,3 +107,16 @@ class ConstraintValidity(BaseMultiTableProperty):
             'Error: No visualization is available for Constraint Validity. To see the '
             "detailed score breakdowns, use the 'get_details' function."
         )
+
+    def get_details(self, table_name=None):
+        """Return the details table for the property.
+
+        Args:
+            table_name (str):
+                The name of the table to return details for.
+                Defaults to None.
+
+        Returns:
+            pandas.DataFrame
+        """
+        return self.details.copy()

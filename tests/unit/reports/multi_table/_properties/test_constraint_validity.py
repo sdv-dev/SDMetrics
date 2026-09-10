@@ -161,10 +161,11 @@ class TestConstraintValidity:
 
     @patch('sdmetrics.reports.multi_table._properties.constraint_validity.ConstraintAdherence')
     def test__generate_details_invalid_constraint(
-        self, mock_constraint_adherence, data, synthetic_data, metadata
+        self, mock_constraint_adherence, data, metadata
     ):
         """Test ``_generate_details`` handles constraints that are not dictionaries."""
         # Setup
+        synthetic_data = deepcopy(data)
         mock_constraint_adherence.__name__ = 'ConstraintAdherence'
         mock_constraint_adherence.compute.side_effect = [ValueError('not a dict')]
         constraint_validity = ConstraintValidity()
@@ -184,10 +185,11 @@ class TestConstraintValidity:
 
     @patch('sdmetrics.reports.multi_table._properties.constraint_validity.ConstraintAdherence')
     def test_get_score(
-        self, mock_constraint_adherence, data, synthetic_data, metadata, constraints
+        self, mock_constraint_adherence, data, metadata, constraints
     ):
         """Test ``get_score`` averages the constraint scores and drops the empty error column."""
         # Setup
+        synthetic_data = deepcopy(data)
         mock_constraint_adherence.__name__ = 'ConstraintAdherence'
         mock_constraint_adherence.compute.side_effect = [0.8, 0.4]
         constraint_validity = ConstraintValidity()
@@ -212,10 +214,11 @@ class TestConstraintValidity:
 
     @patch('sdmetrics.reports.multi_table._properties.constraint_validity.ConstraintAdherence')
     def test_get_score_with_errors(
-        self, mock_constraint_adherence, data, synthetic_data, metadata, constraints
+        self, mock_constraint_adherence, data, metadata, constraints
     ):
         """Test ``get_score`` keeps the error column and ignores NaN scores in the average."""
         # Setup
+        synthetic_data = deepcopy(data)
         mock_constraint_adherence.__name__ = 'ConstraintAdherence'
         mock_constraint_adherence.compute.side_effect = [ValueError('error 1'), 0.4]
         constraint_validity = ConstraintValidity()
@@ -235,9 +238,10 @@ class TestConstraintValidity:
         pd.testing.assert_frame_equal(constraint_validity.details, expected_details)
 
     @pytest.mark.parametrize('constraints', [[], None])
-    def test_get_score_without_constraints(self, data, synthetic_data, metadata, constraints):
+    def test_get_score_without_constraints(self, data, metadata, constraints):
         """Test ``get_score`` returns NaN and empty details when there are no constraints."""
         # Setup
+        synthetic_data = deepcopy(data)
         constraint_validity = ConstraintValidity()
         progress_bar = Mock()
 
@@ -258,6 +262,19 @@ class TestConstraintValidity:
         assert constraint_validity.details.empty
         progress_bar.update.assert_not_called()
 
+    def test_get_visualization(self):
+        """Test ``get_visualization`` raises a friendly error."""
+        # Setup
+        constraint_validity = ConstraintValidity()
+        expected_message = (
+            'Error: No visualization is available for Constraint Validity. To see the '
+            "detailed score breakdowns, use the 'get_details' function."
+        )
+
+        # Run and Assert
+        with pytest.raises(VisualizationUnavailableError, match=expected_message):
+            constraint_validity.get_visualization()
+
     def test_get_details(self):
         """Test ``get_details`` returns a copy of the details."""
         # Setup
@@ -274,31 +291,20 @@ class TestConstraintValidity:
 
         # Assert
         pd.testing.assert_frame_equal(details, constraint_validity.details)
-        assert details is not constraint_validity.details
 
     def test_get_details_with_table_name(self):
-        """Test ``get_details`` raises an error when a table name is given."""
+        """Test ``get_details`` returns a copy of details when a table name is given."""
         # Setup
         constraint_validity = ConstraintValidity()
-        expected_message = (
-            'The Constraint Validity property does not break down its details by table. '
-            "Please call 'get_details' without a table name."
-        )
+        constraint_validity.details = pd.DataFrame({
+            'Constraint': ['FixedCombinations'],
+            'Metric': ['ConstraintAdherence'],
+            'Parameters': [{'table_name': 'sessions', 'column_names': ['device', 'os']}],
+            'Score': [1.0],
+        })
 
-        # Run and Assert
-        with pytest.raises(ValueError, match=expected_message):
-            constraint_validity.get_details('users')
+        # Run
+        details = constraint_validity.get_details('table')
 
-    @pytest.mark.parametrize('table_name', [None, 'users'])
-    def test_get_visualization(self, table_name):
-        """Test ``get_visualization`` raises a friendly error."""
-        # Setup
-        constraint_validity = ConstraintValidity()
-        expected_message = (
-            'Error: No visualization is available for Constraint Validity. To see the '
-            "detailed score breakdowns, use the 'get_details' function."
-        )
-
-        # Run and Assert
-        with pytest.raises(VisualizationUnavailableError, match=expected_message):
-            constraint_validity.get_visualization(table_name)
+        # Assert
+        pd.testing.assert_frame_equal(details, constraint_validity.details)
