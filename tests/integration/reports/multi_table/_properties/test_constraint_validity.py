@@ -76,7 +76,7 @@ class TestConstraintValidity:
             'Metric': ['ConstraintAdherence', 'ConstraintAdherence', 'ConstraintAdherence'],
             'Parameters': [constraints[0]['parameters'], constraints[1]['parameters'], {}],
             'Score': [1.0, 1.0, np.nan],
-            'Error': [None, None, "Unsupported constraint class 'Unsupported'"]
+            'Error': [None, None, "ValueError: Unsupported constraint class 'Unsupported'."]
         })
     
         # Run

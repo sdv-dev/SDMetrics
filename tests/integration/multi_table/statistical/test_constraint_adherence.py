@@ -501,8 +501,6 @@ class TestConstraintAdherence:
         score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
 
         # Assert
-<<<<<<< HEAD
-=======
         assert pd.isna(score)
 
     def test_denormalized_table(self):
@@ -543,7 +541,6 @@ class TestConstraintAdherence:
         score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
 
         # Assert
->>>>>>> 971ffb0 (add integration tests)
         assert score == 1.0
 
     def test_denormalized_table_with_an_inconsistent_key(self):
@@ -672,11 +669,7 @@ class TestConstraintAdherence:
         score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
 
         # Assert
-<<<<<<< HEAD
         assert score == 5 / 6
-=======
-        assert score == 10 / 11
->>>>>>> 971ffb0 (add integration tests)
 
     def test_mixed_scales(self):
         """Test the score is 1.0 when every value stays in the bounds of its segment."""
@@ -886,11 +879,7 @@ class TestConstraintAdherence:
         score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
 
         # Assert
-<<<<<<< HEAD
         assert score == 5 / 6
-=======
-        assert score == 9 / 10
->>>>>>> 971ffb0 (add integration tests)
 
     def test_primary_to_primary_key_subset(self):
         """Test the score is 1.0 when every attribute row is allowed to connect."""
@@ -1007,11 +996,7 @@ class TestConstraintAdherence:
         score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
 
         # Assert
-<<<<<<< HEAD
         assert score == 5 / 6
-=======
-        assert score == 11 / 12
->>>>>>> 971ffb0 (add integration tests)
 
     def test_self_referential_hierarchy(self):
         """Test the score is 1.0 when every employee reports up to a root."""

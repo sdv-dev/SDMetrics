@@ -65,7 +65,7 @@ class ConstraintValidity(BaseMultiTableProperty):
             'Error': error_messages
         })
 
-    def get_score(self, real_data, synthetic_data, metadata, constraints, progress_bar=None):
+    def get_score(self, real_data, synthetic_data, metadata, constraints=None, progress_bar=None):
         """Get the average score of all the individual metric scores computed.
 
         Args:
