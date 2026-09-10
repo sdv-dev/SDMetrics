@@ -63,7 +63,7 @@ class ConstraintValidity(BaseMultiTableProperty):
             'Metric': [ConstraintAdherence.__name__] * len(constraint_names),
             'Parameters': constraint_parameters,
             'Score': scores,
-            'Error': error_messages
+            'Error': error_messages,
         })
 
     def get_score(self, real_data, synthetic_data, metadata, constraints=None, progress_bar=None):

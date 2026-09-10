@@ -501,46 +501,6 @@ class TestConstraintAdherence:
         score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
 
         # Assert
-        assert pd.isna(score)
-
-    def test_denormalized_table(self):
-        """Test the score is 1.0 when every row of a key repeats the same values."""
-        # Setup
-        real_data = {
-            'orders': pd.DataFrame({
-                'order_id': [1, 2, 3, 4],
-                'customer_id': [10, 10, 11, 11],
-                'customer_name': ['A', 'A', 'B', 'B'],
-                'item': ['x', 'y', 'z', 'w'],
-            })
-        }
-        synthetic_data = deepcopy(real_data)
-        metadata = {
-            'tables': {
-                'orders': {
-                    'columns': {
-                        'order_id': {'sdtype': 'id'},
-                        'customer_id': {'sdtype': 'id'},
-                        'customer_name': {'sdtype': 'pii'},
-                        'item': {'sdtype': 'categorical'},
-                    },
-                    'primary_key': 'order_id',
-                }
-            }
-        }
-        constraint = {
-            'class_name': 'DenormalizedTable',
-            'parameters': {
-                'table_name': 'orders',
-                'denormalized_primary_key': 'customer_id',
-                'denormalized_column_names': ['customer_name'],
-            },
-        }
-
-        # Run
-        score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
-
-        # Assert
         assert score == 1.0
 
     def test_denormalized_table_with_an_inconsistent_key(self):

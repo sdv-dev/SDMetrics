@@ -160,9 +160,7 @@ class TestConstraintValidity:
         assert progress_bar.update.call_count == 2
 
     @patch('sdmetrics.reports.multi_table._properties.constraint_validity.ConstraintAdherence')
-    def test__generate_details_invalid_constraint(
-        self, mock_constraint_adherence, data, metadata
-    ):
+    def test__generate_details_invalid_constraint(self, mock_constraint_adherence, data, metadata):
         """Test ``_generate_details`` handles constraints that are not dictionaries."""
         # Setup
         synthetic_data = deepcopy(data)
@@ -184,9 +182,7 @@ class TestConstraintValidity:
         pd.testing.assert_frame_equal(constraint_validity.details, expected_details)
 
     @patch('sdmetrics.reports.multi_table._properties.constraint_validity.ConstraintAdherence')
-    def test_get_score(
-        self, mock_constraint_adherence, data, metadata, constraints
-    ):
+    def test_get_score(self, mock_constraint_adherence, data, metadata, constraints):
         """Test ``get_score`` averages the constraint scores and drops the empty error column."""
         # Setup
         synthetic_data = deepcopy(data)
@@ -213,9 +209,7 @@ class TestConstraintValidity:
         assert progress_bar.update.call_count == 2
 
     @patch('sdmetrics.reports.multi_table._properties.constraint_validity.ConstraintAdherence')
-    def test_get_score_with_errors(
-        self, mock_constraint_adherence, data, metadata, constraints
-    ):
+    def test_get_score_with_errors(self, mock_constraint_adherence, data, metadata, constraints):
         """Test ``get_score`` keeps the error column and ignores NaN scores in the average."""
         # Setup
         synthetic_data = deepcopy(data)
