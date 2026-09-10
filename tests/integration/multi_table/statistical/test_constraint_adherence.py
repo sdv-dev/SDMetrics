@@ -435,7 +435,7 @@ class TestConstraintAdherence:
         assert score == 5 / 6
 
     def test_unsupported_constraint(self):
-        """Test the metric warns and returns NaN if the constraint is not supported."""
+        """Test the metric errors if the constraint is not supported."""
         # Setup
         real_data = {
             'table1': pd.DataFrame({
@@ -457,11 +457,8 @@ class TestConstraintAdherence:
             }
         }
         constraint = {'class_name': 'NotAConstraint', 'parameters': {}}
-        warning_message = re.escape("Unsupported constraint class 'NotAConstraint'.")
+        expected_error = re.escape("Unsupported constraint class 'NotAConstraint'.")
 
-        # Run
-        with pytest.warns(UserWarning, match=warning_message):
-            score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
-
-        # Assert
-        assert pd.isna(score)
+        # Run and Assert
+        with pytest.raises(ValueError, match=expected_error):
+            ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)

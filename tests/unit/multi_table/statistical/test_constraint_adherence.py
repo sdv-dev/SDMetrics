@@ -1,4 +1,4 @@
-import re
+import logging
 
 import pandas as pd
 import pytest
@@ -105,46 +105,71 @@ class TestConstraintAdherence:
         # Assert
         assert score == 1.0
 
-    def test_compute_missing_table(self, real_data, metadata, constraint):
-        """Test ``compute`` warns and returns NaN if the constraint can't be checked."""
+    def test_compute_missing_table(self, real_data, metadata, constraint, caplog):
+        """Test ``compute`` logs a warning and returns NaN if the table is missing."""
         # Setup
         constraint['parameters']['table_name'] = 'MissingTable'
-        expected_msg = (
-            'Unable to check the constraint against the real data: '
-            "The table 'MissingTable' is missing from the data."
-        )
 
         # Run
-        with pytest.warns(UserWarning, match=expected_msg):
+        with caplog.at_level(logging.WARNING):
             score = ConstraintAdherence.compute(real_data, real_data, metadata, constraint)
 
         # Assert
         assert pd.isna(score)
+        assert caplog.messages == [
+            'Unable to check the constraint against the real data: '
+            "The table 'MissingTable' is missing from the data.",
+            'Unable to check the constraint against the synthetic data: '
+            "The table 'MissingTable' is missing from the data.",
+        ]
+        assert {record.levelname for record in caplog.records} == {'WARNING'}
 
-    def test_compute_missing_column(self, real_data, metadata, constraint):
-        """Test ``compute`` warns and returns NaN if a constrained column is missing."""
+    def test_compute_missing_column(self, real_data, metadata, constraint, caplog):
+        """Test ``compute`` logs a warning and returns NaN if a constrained column is missing."""
         # Setup
         constraint['parameters']['column_names'] = ['a', 'missing']
-        expected_msg = re.escape(
-            'Unable to check the constraint against the real data: '
-            "The column(s) 'missing' are missing from the table 'table'."
-        )
 
         # Run
-        with pytest.warns(UserWarning, match=expected_msg):
+        with caplog.at_level(logging.WARNING):
             score = ConstraintAdherence.compute(real_data, real_data, metadata, constraint)
 
         # Assert
         assert pd.isna(score)
+        assert caplog.messages == [
+            'Unable to check the constraint against the real data: '
+            "The column(s) 'missing' are missing from the table 'table'.",
+            'Unable to check the constraint against the synthetic data: '
+            "The column(s) 'missing' are missing from the table 'table'.",
+        ]
 
     def test_compute_unsupported_constraint(self, real_data, metadata):
-        """Test ``compute`` warns and returns NaN if the constraint is not supported."""
+        """Test ``compute`` errors if the constraint class is not supported."""
         # Setup
         constraint = {'class_name': 'Unsupported', 'parameters': {}}
+        expected_error = "Unsupported constraint class 'Unsupported'."
 
-        # Run
-        with pytest.warns(UserWarning, match='Unable to check the constraint'):
-            score = ConstraintAdherence.compute(real_data, real_data, metadata, constraint)
+        # Run and Assert
+        with pytest.raises(ValueError, match=expected_error):
+            ConstraintAdherence.compute(real_data, real_data, metadata, constraint)
 
-        # Assert
-        assert pd.isna(score)
+    def test_compute_invalid_parameters(self, real_data, metadata, constraint):
+        """Test ``compute`` errors if the constraint has a parameter that is not supported."""
+        # Setup
+        constraint['parameters']['not_a_parameter'] = 1
+        expected_error = (
+            r"Invalid parameter\(s\) 'not_a_parameter' for constraint 'FixedCombinations'\."
+        )
+
+        # Run and Assert
+        with pytest.raises(ValueError, match=expected_error):
+            ConstraintAdherence.compute(real_data, real_data, metadata, constraint)
+
+    def test_compute_missing_required_parameter(self, real_data, metadata):
+        """Test ``compute`` errors if the constraint is missing a required parameter."""
+        # Setup
+        constraint = {'class_name': 'FixedCombinations', 'parameters': {}}
+        expected_error = "Unable to create the constraint 'FixedCombinations':"
+
+        # Run and Assert
+        with pytest.raises(ValueError, match=expected_error):
+            ConstraintAdherence.compute(real_data, real_data, metadata, constraint)

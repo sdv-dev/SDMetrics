@@ -1,5 +1,6 @@
 """Constraint Adherence metric."""
 
+import logging
 import warnings
 
 import numpy as np
@@ -9,6 +10,8 @@ from sdmetrics.goal import Goal
 from sdmetrics.multi_table.base import MultiTableMetric
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ConstraintAdherence(MultiTableMetric):
@@ -54,17 +57,13 @@ class ConstraintAdherence(MultiTableMetric):
                 The proportion of data points in the synthetic data that match
                 the specified constraint format.
         """
-        try:
-            constraint = BaseConstraint.load_constraint_from_dict(constraint)
-        except ValueError as error:
-            warnings.warn(f'Unable to check the constraint: {error}')
-            return np.nan
+        constraint = BaseConstraint.load_constraint_from_dict(constraint)
 
         try:
             constraint.fit(real_data, metadata)
             real_score = constraint.get_score(real_data, metadata)
         except ConstraintNotApplicableError as error:
-            warnings.warn(f'Unable to check the constraint against the real data: {error}')
+            LOGGER.warning(f'Unable to check the constraint against the real data: {error}')
             real_score = np.nan
 
         if not pd.isna(real_score) and real_score < 1.0:
@@ -76,5 +75,5 @@ class ConstraintAdherence(MultiTableMetric):
         try:
             return constraint.get_score(synthetic_data, metadata)
         except ConstraintNotApplicableError as error:
-            warnings.warn(f'Unable to check the constraint against the synthetic data: {error}')
+            LOGGER.warning(f'Unable to check the constraint against the synthetic data: {error}')
             return np.nan
