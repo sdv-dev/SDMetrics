@@ -38,6 +38,11 @@ class TestDenormalizedTable:
             DenormalizedTable(table_name=1, denormalized_primary_key='id')
 
         # Run and Assert 2
+        error_message = "The 'denormalized_primary_key' parameter must be a string."
+        with pytest.raises(ValueError, match=error_message):
+            DenormalizedTable(table_name='tableA', denormalized_primary_key=1)
+
+        # Run and Assert 3
         error_message = "The 'denormalized_column_names' parameter must be a list of strings."
         with pytest.raises(ValueError, match=error_message):
             DenormalizedTable(

@@ -463,7 +463,6 @@ class TestConstraintAdherence:
         with pytest.raises(ValueError, match=expected_error):
             ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
 
-
     def test_denormalized_table(self):
         """Test the score is 1.0 when every row of a key repeats the same values."""
         # Setup
