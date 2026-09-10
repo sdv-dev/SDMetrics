@@ -63,7 +63,7 @@ class TestFixedCombinations:
         # Setup
         expected_error = re.escape("The table 'table' is missing from the data.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data({'OtherTable': pd.DataFrame()}, metadata)
 
@@ -73,7 +73,7 @@ class TestFixedCombinations:
         del data['table']['a']
         expected_error = re.escape("The column(s) 'a' are missing from the table 'table'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
@@ -103,7 +103,7 @@ class TestFixedCombinations:
         del data['table']['a']
         expected_error = re.escape("The column(s) 'a' are missing from the table 'table'.")
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint.fit(data, metadata)
 
@@ -214,7 +214,7 @@ class TestFixedCombinations:
         # Setup
         constraint.fit(data, metadata)
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
 
     def test_get_score_not_fitted(self, data, metadata, constraint):
@@ -224,7 +224,7 @@ class TestFixedCombinations:
             'FixedCombinations constraint must be called with ``fit`` first.'
         )
 
-        # Run & Assert
+        # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint.get_score(data, metadata)
 
@@ -241,7 +241,7 @@ class TestFixedCombinations:
 
         constraint.fit(data, metadata)
 
-        # Run & Assert
+        # Run and Assert
         assert constraint.get_score(synthetic_data, metadata) == 0.5
 
     def test_get_score_empty_table(self, data, metadata, constraint):
@@ -250,5 +250,5 @@ class TestFixedCombinations:
         data['table'] = data['table'].iloc[:0]
         constraint.fit(data, metadata)
 
-        # Run & Assert
+        # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))

@@ -179,22 +179,18 @@ class BaseConstraint:
 
         return self._is_valid(data, metadata)
 
-    def _filter_single_table_validity(self, validity, metadata=None):
-        """Get the score of the table whose rows this constraint checks.
+    def _get_scored_tables(self, metadata=None):
+        """Return the names of the tables whose rows this constraint can mark invalid.
 
         Args:
             metadata (dict):
                 The multi table metadata.
 
         Returns:
-           dict[pd.Series]:
-                Series of boolean values indicating if the row is valid for a single table.
+            set[str]:
+                The names of the tables that the score is computed over.
         """
-        return {
-            table_name: is_valid
-            for table_name, is_valid in validity.items()
-            if table_name in {self._get_single_table_name(metadata)}
-        }
+        return {self._get_single_table_name(metadata)}
 
     def get_score(self, data, metadata=None):
         """Get the proportion of rows in the data that adhere to this constraint.
@@ -216,8 +212,12 @@ class BaseConstraint:
         """
         self._validate_data(data, metadata)
         validity = self.is_valid(data, metadata)
-        if self._is_single_table:
-            validity = self._filter_single_table_validity(validity, metadata)
+        scored_tables = self._get_scored_tables(metadata)
+        validity = {
+            table_name: is_valid
+            for table_name, is_valid in validity.items()
+            if table_name in scored_tables
+        }
 
         num_rows = sum(len(is_valid) for is_valid in validity.values())
         if num_rows == 0:
