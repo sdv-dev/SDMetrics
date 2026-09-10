@@ -50,11 +50,19 @@ def test_shuffling_data_multi_table(property):
     synthetic_data_shuffled = {
         table_name: SYNTHETIC_DATA_MT[table_name].sample(frac=1) for table_name in SYNTHETIC_DATA_MT
     }
+    kwargs = {}
+    if property is multi_table_properties.ConstraintValidity:
+        kwargs['constraints'] = [
+            {
+                'class_name': 'FixedCombinations',
+                'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
+            },
+        ]
 
     # Run
-    score = property_instance.get_score(REAL_DATA_MT, SYNTHETIC_DATA_MT, METADATA_MT)
+    score = property_instance.get_score(REAL_DATA_MT, SYNTHETIC_DATA_MT, METADATA_MT, **kwargs)
     score_shuffled = property_instance.get_score(
-        real_data_shuffled, synthetic_data_shuffled, METADATA_MT
+        real_data_shuffled, synthetic_data_shuffled, METADATA_MT, **kwargs
     )
 
     # Assert
