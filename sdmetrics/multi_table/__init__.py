@@ -32,6 +32,7 @@ from sdmetrics.multi_table.statistical.cardinality_shape_similarity import (
 from sdmetrics.multi_table.statistical.cardinality_statistic_similarity import (
     CardinalityStatisticSimilarity,
 )
+from sdmetrics.multi_table.statistical.constraint_adherence import ConstraintAdherence
 
 __all__ = [
     'detection',
@@ -59,4 +60,5 @@ __all__ = [
     'TVComplement',
     'RangeCoverage',
     'NewRowSynthesis',
+    'ConstraintAdherence',
 ]
