@@ -33,5 +33,5 @@ def test_load_multi_table_demo():
         'sdtype': 'datetime',
         'datetime_format': '%Y-%m-%d %H:%M:%S',
     }
-    assert real_data['transactions']['timestamp'].dtype == 'datetime64[ns]'
-    assert synthetic_data['transactions']['timestamp'].dtype == 'datetime64[ns]'
+    assert real_data['transactions']['timestamp'].dtype == 'object'
+    assert synthetic_data['transactions']['timestamp'].dtype == 'object'

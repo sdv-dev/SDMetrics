@@ -1,14 +1,13 @@
 import pandas as pd
 from packaging import version
 
-from sdmetrics.demos import load_demo
 from sdmetrics.reports.single_table._properties import ColumnShapes
 
 
 class TestColumnShapes:
-    def test_get_score(self):
+    def test_get_score(self, converted_datetime_single_table_demo):
         # Setup
-        real_data, synthetic_data, metadata = load_demo('single_table')
+        real_data, synthetic_data, metadata = converted_datetime_single_table_demo
 
         # Run
         column_shape_property = ColumnShapes()
@@ -75,10 +74,10 @@ class TestColumnShapes:
         pd.testing.assert_frame_equal(column_shape_property.details, expected_details)
         assert score == 0.8511084702797364
 
-    def test_get_score_errors(self):
+    def test_get_score_errors(self, converted_datetime_single_table_demo):
         """Test the ``get_score`` method when the metrics are raising errors for some columns."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo('single_table')
+        real_data, synthetic_data, metadata = converted_datetime_single_table_demo
 
         real_data['student_placements']['start_date'].iloc[0] = 0
         real_data['student_placements']['employability_perc'].iloc[2] = 'a'

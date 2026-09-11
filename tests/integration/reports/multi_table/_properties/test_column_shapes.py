@@ -3,15 +3,14 @@ from unittest.mock import Mock
 import pytest
 from tqdm import tqdm
 
-from sdmetrics.demos import load_demo
 from sdmetrics.reports.multi_table._properties import ColumnShapes
 
 
 class TestColumnShapes:
-    def test_end_to_end(self):
+    def test_end_to_end(self, converted_datetime_multi_table_demo):
         """Test the ``ColumnShapes`` multi-table property end to end."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+        real_data, synthetic_data, metadata = converted_datetime_multi_table_demo
         column_shapes = ColumnShapes()
 
         # Run
@@ -20,10 +19,10 @@ class TestColumnShapes:
         # Assert
         assert result == pytest.approx(0.7978174603174604)
 
-    def test_with_progress_bar(self):
+    def test_with_progress_bar(self, converted_datetime_multi_table_demo):
         """Test that the progress bar is correctly updated."""
         # Setup
-        real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+        real_data, synthetic_data, metadata = converted_datetime_multi_table_demo
         column_shapes = ColumnShapes()
         num_columns = sum(len(table['columns']) for table in metadata['tables'].values())
 
