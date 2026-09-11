@@ -80,6 +80,72 @@ class TestNewRowSynthesis:
         # Assert
         assert score == 0.5
 
+    def test_compute_breakdown_with_category_dtype(self):
+        """Test ``compute_breakdown`` when a categorical column uses pandas category dtype.
+
+        Expect that string categories are matched instead of raising UndefinedVariableError.
+        """
+        # Setup
+        real_data = pd.DataFrame({
+            'gender': pd.Series(['F', 'M', 'F'], dtype='category'),
+        })
+        synthetic_data = pd.DataFrame({
+            'gender': ['F', 'X'],
+        })
+        metadata = {
+            'tables': {
+                'table': {
+                    'columns': {
+                        'gender': {'sdtype': 'categorical'},
+                    },
+                }
+            }
+        }
+        metric = NewRowSynthesis()
+
+        # Run
+        result = metric.compute_breakdown(real_data, synthetic_data, metadata)
+
+        # Assert
+        assert result == {
+            'score': 0.5,
+            'num_new_rows': 1,
+            'num_matched_rows': 1,
+        }
+
+    def test_compute_breakdown_with_string_dtype(self):
+        """Test ``compute_breakdown`` when a categorical column uses pandas string dtype.
+
+        Expect that string values are matched instead of raising UndefinedVariableError.
+        """
+        # Setup
+        real_data = pd.DataFrame({
+            'gender': pd.Series(['F', 'M', 'F'], dtype='string'),
+        })
+        synthetic_data = pd.DataFrame({
+            'gender': ['F', 'X'],
+        })
+        metadata = {
+            'tables': {
+                'table': {
+                    'columns': {
+                        'gender': {'sdtype': 'categorical'},
+                    },
+                }
+            }
+        }
+        metric = NewRowSynthesis()
+
+        # Run
+        result = metric.compute_breakdown(real_data, synthetic_data, metadata)
+
+        # Assert
+        assert result == {
+            'score': 0.5,
+            'num_new_rows': 1,
+            'num_matched_rows': 1,
+        }
+
     def test_compute_with_sample_size(self):
         """Test the ``compute`` method with a sample size.
 

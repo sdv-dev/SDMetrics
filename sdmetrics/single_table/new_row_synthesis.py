@@ -136,10 +136,11 @@ class NewRowSynthesis(SingleTableMetric):
                         f'{abs(numerical_match_tolerance * row[field])}'
                     )
                 elif field in categorical_fields:
-                    if real_data[field].dtype == 'O':
-                        field_filter = f'`{field}` == {repr(row[field])}'
+                    value = row[field]
+                    if isinstance(value, str):
+                        field_filter = f'`{field}` == {repr(value)}'
                     else:
-                        field_filter = f'`{field}` == {row[field]}'
+                        field_filter = f'`{field}` == {value}'
 
                 row_filter.append(field_filter)
 
