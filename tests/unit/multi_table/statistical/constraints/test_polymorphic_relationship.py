@@ -164,6 +164,29 @@ class TestPolymorphicRelationship:
                 'type_value_to_table': {'DEBIT': 'parent1'},
             })
 
+    def test__get_scored_tables_without_type_column(self, metadata):
+        """Test the parent rows are scored too when there is no type column."""
+        # Setup
+        instance = PolymorphicRelationship(
+            table_name='table',
+            foreign_key='foreign_key',
+            parent_table_names=['parent1', 'parent2'],
+        )
+
+        # Run
+        scored_tables = instance._get_scored_tables(metadata)
+
+        # Assert
+        assert scored_tables == {'table', 'parent1', 'parent2'}
+
+    def test__get_scored_tables_with_type_column(self, metadata, constraint):
+        """Test only the rows of the table that holds the foreign key are scored."""
+        # Run
+        scored_tables = constraint._get_scored_tables(metadata)
+
+        # Assert
+        assert scored_tables == {'table'}
+
     def test__validate_data_missing_table(self, data, metadata, constraint):
         """Test ``_validate_data`` errors if a parent table is not in the data."""
         # Setup
@@ -204,6 +227,16 @@ class TestPolymorphicRelationship:
         expected_error = re.escape(
             "The table 'parent1' does not have a primary key in the metadata."
         )
+
+        # Run and Assert
+        with pytest.raises(ConstraintNotApplicableError, match=expected_error):
+            constraint._validate_data(data, metadata)
+
+    def test__validate_data_missing_foreign_key_table(self, data, metadata, constraint):
+        """Test ``_validate_data`` errors if the table with the foreign key is not in the data."""
+        # Setup
+        del data['table']
+        expected_error = re.escape("The table 'table' is missing from the data.")
 
         # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
