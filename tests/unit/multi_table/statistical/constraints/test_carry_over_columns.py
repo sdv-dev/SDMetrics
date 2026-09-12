@@ -86,6 +86,40 @@ def constraint(common_column_info):
 
 
 class TestCarryOverColumns:
+    def test___init__single_table(self):
+        """Test the ``__init__`` method when every entry names the same table."""
+        # Setup
+        common_column_info = [
+            {
+                'table_name': 'main_table',
+                'key_column_name': 'key_column_1',
+                'carryover_column_name': 'child_1',
+            },
+            {
+                'table_name': 'main_table',
+                'key_column_name': 'key_column_2',
+                'carryover_column_name': 'child_2',
+            },
+        ]
+
+        # Run
+        instance = CarryOverColumns(common_column_info=common_column_info)
+
+        # Assert
+        assert instance.table_name == 'main_table'
+        assert instance._is_single_table is True
+        assert instance._get_scored_tables() == {'main_table'}
+
+    def test___init__several_tables(self, common_column_info):
+        """Test the ``__init__`` method when the entries name more than one table."""
+        # Run
+        instance = CarryOverColumns(common_column_info=common_column_info)
+
+        # Assert
+        assert instance.table_name is None
+        assert instance._is_single_table is False
+        assert instance._get_scored_tables() == {'main_table', 'carry_over_1', 'carry_over_2'}
+
     def test___init__invalid_parameters(self, common_column_info):
         """Test the ``__init__`` method errors with invalid arguments."""
         # Setup
