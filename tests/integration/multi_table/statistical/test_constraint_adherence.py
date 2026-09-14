@@ -1,3 +1,4 @@
+import logging
 import re
 from copy import deepcopy
 
@@ -1252,3 +1253,162 @@ class TestConstraintAdherence:
 
         # Assert
         assert score == 8 / 9
+
+    def test_reference_table_with_several_reference_tables(self):
+        """Test the score only counts the rows of the reference tables."""
+        # Setup
+        real_data = {
+            'country': pd.DataFrame({
+                'country_id': ['US', 'FR', 'JP'],
+                'name': ['United States', 'France', 'Japan'],
+            }),
+            'currency': pd.DataFrame({
+                'currency_id': ['USD', 'EUR', 'JPY', 'CAD'],
+                'country_id': ['US', 'FR', 'JP', 'US'],
+                'symbol': ['$', '€', '¥', '$'],
+            }),
+            'customer': pd.DataFrame({
+                'customer_id': range(6),
+                'country_id': ['US', 'FR', 'JP', 'US', 'FR', 'JP'],
+                'currency_id': ['USD', 'EUR', 'JPY', 'USD', 'EUR', 'JPY'],
+            }),
+        }
+        synthetic_data = deepcopy(real_data)
+
+        metadata = {
+            'tables': {
+                'country': {
+                    'columns': {
+                        'country_id': {'sdtype': 'id'},
+                        'name': {'sdtype': 'categorical'},
+                    },
+                    'primary_key': 'country_id',
+                },
+                'currency': {
+                    'columns': {
+                        'currency_id': {'sdtype': 'id'},
+                        'country_id': {'sdtype': 'id'},
+                        'symbol': {'sdtype': 'categorical'},
+                    },
+                    'primary_key': 'currency_id',
+                },
+                'customer': {
+                    'columns': {
+                        'customer_id': {'sdtype': 'id'},
+                        'country_id': {'sdtype': 'id'},
+                        'currency_id': {'sdtype': 'id'},
+                    },
+                    'primary_key': 'customer_id',
+                },
+            },
+            'relationships': [
+                {
+                    'parent_table_name': 'country',
+                    'child_table_name': 'currency',
+                    'parent_primary_key': 'country_id',
+                    'child_foreign_key': 'country_id',
+                },
+                {
+                    'parent_table_name': 'country',
+                    'child_table_name': 'customer',
+                    'parent_primary_key': 'country_id',
+                    'child_foreign_key': 'country_id',
+                },
+                {
+                    'parent_table_name': 'currency',
+                    'child_table_name': 'customer',
+                    'parent_primary_key': 'currency_id',
+                    'child_foreign_key': 'currency_id',
+                },
+            ],
+        }
+        constraint = {
+            'class_name': 'ReferenceTable',
+            'parameters': {'reference_table_names': ['country', 'currency']},
+        }
+
+        # Run
+        score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
+
+        # Assert
+        assert score == 1.0
+
+    def test_reference_table_with_a_changed_row_in_each_reference_table(self):
+        """Test the score counts the changed rows of every reference table."""
+        # Setup
+        real_data = {
+            'country': pd.DataFrame({
+                'country_id': ['US', 'FR', 'JP'],
+                'name': ['United States', 'France', 'Japan'],
+            }),
+            'currency': pd.DataFrame({
+                'currency_id': ['USD', 'EUR', 'JPY', 'CAD'],
+                'country_id': ['US', 'FR', 'JP', 'US'],
+                'symbol': ['$', '€', '¥', '$'],
+            }),
+            'customer': pd.DataFrame({
+                'customer_id': range(6),
+                'country_id': ['US', 'FR', 'JP', 'US', 'FR', 'JP'],
+                'currency_id': ['USD', 'EUR', 'JPY', 'USD', 'EUR', 'JPY'],
+            }),
+        }
+        synthetic_data = deepcopy(real_data)
+        synthetic_data['country'].loc[1, 'name'] = 'Francia'
+        synthetic_data['currency'].loc[3, 'symbol'] = 'C$'
+        metadata = {
+            'tables': {
+                'country': {
+                    'columns': {
+                        'country_id': {'sdtype': 'id'},
+                        'name': {'sdtype': 'categorical'},
+                    },
+                    'primary_key': 'country_id',
+                },
+                'currency': {
+                    'columns': {
+                        'currency_id': {'sdtype': 'id'},
+                        'country_id': {'sdtype': 'id'},
+                        'symbol': {'sdtype': 'categorical'},
+                    },
+                    'primary_key': 'currency_id',
+                },
+                'customer': {
+                    'columns': {
+                        'customer_id': {'sdtype': 'id'},
+                        'country_id': {'sdtype': 'id'},
+                        'currency_id': {'sdtype': 'id'},
+                    },
+                    'primary_key': 'customer_id',
+                },
+            },
+            'relationships': [
+                {
+                    'parent_table_name': 'country',
+                    'child_table_name': 'currency',
+                    'parent_primary_key': 'country_id',
+                    'child_foreign_key': 'country_id',
+                },
+                {
+                    'parent_table_name': 'country',
+                    'child_table_name': 'customer',
+                    'parent_primary_key': 'country_id',
+                    'child_foreign_key': 'country_id',
+                },
+                {
+                    'parent_table_name': 'currency',
+                    'child_table_name': 'customer',
+                    'parent_primary_key': 'currency_id',
+                    'child_foreign_key': 'currency_id',
+                },
+            ],
+        }
+        constraint = {
+            'class_name': 'ReferenceTable',
+            'parameters': {'reference_table_names': ['country', 'currency']},
+        }
+
+        # Run
+        score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
+
+        # Assert
+        assert score == 5 / 7

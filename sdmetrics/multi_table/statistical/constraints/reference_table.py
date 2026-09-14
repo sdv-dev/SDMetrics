@@ -1,10 +1,33 @@
 """Reference Table Constraint."""
 
-from sdmetrics.multi_table.statistical.constraints._utils import (
-    _get_table_to_valid_rows,
-)
+import pandas as pd
+
+from sdmetrics.multi_table.statistical.constraints._utils import _get_table_to_valid_rows
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
+
+
+def _get_row_tuples(table_data, columns):
+    """Return one hashable tuple per row, with ``None`` in place of every missing value.
+
+    ``itertuples`` is used instead of ``iterrows`` because it does not build a ``Series``
+    for every row, and the missing values are normalized in one vectorized pass so that
+    two rows that are null in the same columns compare as equal.
+
+    Args:
+        table_data (pandas.DataFrame):
+            The data of the table.
+        columns (list[str]):
+            The names of the columns to take the values from, in order.
+
+    Returns:
+        list[tuple]:
+            The values of every row, in the order of ``columns``.
+    """
+    table_data = table_data[columns]
+    table_data = table_data.astype(object).where(table_data.notna(), None)
+
+    return list(table_data.itertuples(index=False, name=None))
 
 
 class ReferenceTable(BaseConstraint):
@@ -26,6 +49,8 @@ class ReferenceTable(BaseConstraint):
             raise ValueError("'reference_table_names' must be a list of strings.")
 
         self.reference_table_names = reference_table_names
+        self._reference_rows = None
+        self._reference_columns = None
 
     def _validate_constraint_with_metadata(self, metadata):
         """Validate the metadata for the constraint.
@@ -64,8 +89,48 @@ class ReferenceTable(BaseConstraint):
             )
 
     def _validate_data(self, data, metadata=None):
-        """No data validation needed for reference tables."""
-        pass
+        """Check that every reference table is in the data and kept its columns.
+
+        Args:
+            data (dict[str, pd.DataFrame]):
+                Table data.
+
+        Raises:
+            ConstraintNotApplicableError:
+                If a reference table is missing from the data, or if it does not have the
+                same columns that it has in the real data.
+        """
+        for table_name in self.reference_table_names:
+            if table_name not in data:
+                raise ConstraintNotApplicableError(
+                    f"The table '{table_name}' is missing from the data."
+                )
+
+            if self._reference_columns is None:
+                continue
+
+            if set(data[table_name].columns) != set(self._reference_columns[table_name]):
+                raise ConstraintNotApplicableError(
+                    f"The columns of the table '{table_name}' do not match the ones of the "
+                    'real data.'
+                )
+
+    def _fit(self, data, metadata=None):
+        """Learn the rows of the reference table.
+
+        Args:
+            data (dict[str, pd.DataFrame]):
+                A dictionary mapping each table name to its real data.
+            metadata (dict):
+                The multi table metadata.
+        """
+        self._reference_columns = {
+            table_name: list(data[table_name].columns) for table_name in self.reference_table_names
+        }
+        self._reference_rows = {
+            table_name: set(_get_row_tuples(data[table_name], self._reference_columns[table_name]))
+            for table_name in self.reference_table_names
+        }
 
     def _get_scored_tables(self, metadata=None):
         return set(self.reference_table_names)
@@ -73,7 +138,8 @@ class ReferenceTable(BaseConstraint):
     def _is_valid(self, data, metadata=None):
         """Get valid rows.
 
-        All rows are valid.
+        A row of a reference table is valid when the real data holds that same row. The
+        rows of every other table are valid, since this constraint does not check them.
 
         Args:
             data (dict[str, pd.DataFrame]):
@@ -84,7 +150,21 @@ class ReferenceTable(BaseConstraint):
                 A dictionary mapping the table name to a Series where each row is=True or False
                 depending on if it's valid.
         """
+        if not self._fitted:
+            raise ConstraintNotApplicableError(
+                'ReferenceTable constraint must be called with ``fit`` first.'
+            )
+
         if metadata is not None:
             self._validate_constraint_with_metadata(metadata)
 
-        return _get_table_to_valid_rows(data)
+        table_to_valid_rows = _get_table_to_valid_rows(data)
+        for table_name in self.reference_table_names:
+            table_data = data[table_name]
+            reference_rows = self._reference_rows[table_name]
+            rows = _get_row_tuples(table_data, self._reference_columns[table_name])
+            table_to_valid_rows[table_name] = pd.Series(
+                [row in reference_rows for row in rows], index=table_data.index, dtype=bool
+            )
+
+        return table_to_valid_rows
