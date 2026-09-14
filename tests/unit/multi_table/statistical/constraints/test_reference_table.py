@@ -1,5 +1,7 @@
 import re
+from copy import deepcopy
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -163,23 +165,144 @@ class TestReferenceTable:
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             instance._validate_constraint_with_metadata(metadata)
 
-    def test__is_valid(self, data, constraint):
-        """Test that all rows are valid."""
+    def test__validate_data_missing_table(self, data, metadata, constraint):
+        """Test ``_validate_data`` errors if a reference table is not in the data."""
+        # Setup
+        del data['grandparent']
+        expected_error = re.escape("The table 'grandparent' is missing from the data.")
+
+        # Run and Assert
+        with pytest.raises(ConstraintNotApplicableError, match=expected_error):
+            constraint._validate_data(data, metadata)
+
+    def test__validate_data_different_columns(self, data, metadata, constraint):
+        """Test ``_validate_data`` errors if a reference table changed its columns."""
+        # Setup
+        constraint.fit(data, metadata)
+        del data['grandparent']['col']
+        expected_error = re.escape(
+            "The columns of the table 'grandparent' do not match the ones of the real data."
+        )
+
+        # Run and Assert
+        with pytest.raises(ConstraintNotApplicableError, match=expected_error):
+            constraint._validate_data(data, metadata)
+
+    def test__fit(self, data, metadata, constraint):
+        """Test ``_fit`` learns the rows that the reference table holds."""
         # Run
-        valid_rows = constraint._is_valid(data)
+        constraint._fit(data, metadata)
+
+        # Assert
+        assert constraint._reference_columns == {'grandparent': ['pk', 'col']}
+        assert constraint._reference_rows == {
+            'grandparent': {(0, 'A'), (1, 'B'), (2, 'C'), (3, 'D'), (4, 'E')}
+        }
+
+    def test__is_valid(self, data, metadata, constraint):
+        """Test that every row of an unchanged reference table is valid."""
+        # Setup
+        constraint.fit(data, metadata)
+
+        # Run
+        valid_rows = constraint._is_valid(data, metadata)
 
         # Assert
         for column in valid_rows.values():
             assert all(column)
 
+    def test__is_valid_not_fitted(self, data, metadata, constraint):
+        """Test ``_is_valid`` errors if the constraint was not fitted first."""
+        # Setup
+        expected_error = re.escape('ReferenceTable constraint must be called with ``fit`` first.')
+
+        # Run and Assert
+        with pytest.raises(ConstraintNotApplicableError, match=expected_error):
+            constraint._is_valid(data, metadata)
+
+    def test__is_valid_with_a_changed_row(self, data, metadata, constraint):
+        """Test ``_is_valid`` flags a reference row that the real data does not hold."""
+        # Setup
+        constraint.fit(data, metadata)
+        synthetic_data = deepcopy(data)
+        synthetic_data['grandparent'].loc[1, 'col'] = 'Z'
+
+        # Run
+        valid_rows = constraint._is_valid(synthetic_data, metadata)
+
+        # Assert
+        expected = pd.Series([True, False, True, True, True])
+        pd.testing.assert_series_equal(valid_rows['grandparent'], expected)
+        assert all(valid_rows['parent'])
+        assert all(valid_rows['child'])
+
+    def test__is_valid_with_a_new_row(self, data, metadata, constraint):
+        """Test ``_is_valid`` flags a reference row that is not in the real data."""
+        # Setup
+        constraint.fit(data, metadata)
+        synthetic_data = deepcopy(data)
+        synthetic_data['grandparent'] = pd.DataFrame({
+            'pk': [0, 1, 9],
+            'col': ['A', 'B', 'Z'],
+        })
+
+        # Run
+        valid_rows = constraint._is_valid(synthetic_data, metadata)
+
+        # Assert
+        pd.testing.assert_series_equal(valid_rows['grandparent'], pd.Series([True, True, False]))
+
+    def test__is_valid_ignores_the_row_order(self, data, metadata, constraint):
+        """Test ``_is_valid`` does not care about the order of the reference rows."""
+        # Setup
+        constraint.fit(data, metadata)
+        synthetic_data = deepcopy(data)
+        synthetic_data['grandparent'] = (
+            synthetic_data['grandparent'].iloc[::-1].reset_index(drop=True)
+        )
+
+        # Run
+        valid_rows = constraint._is_valid(synthetic_data, metadata)
+
+        # Assert
+        assert all(valid_rows['grandparent'])
+
+    def test__is_valid_with_missing_values(self, data, metadata, constraint):
+        """Test ``_is_valid`` matches two reference rows that are null in the same column."""
+        # Setup
+        data['grandparent']['col'] = ['A', None, 'C', 'D', 'E']
+        constraint.fit(data, metadata)
+        synthetic_data = deepcopy(data)
+        synthetic_data['grandparent']['col'] = ['A', np.nan, 'C', 'D', 'E']
+
+        # Run
+        valid_rows = constraint._is_valid(synthetic_data, metadata)
+
+        # Assert
+        assert all(valid_rows['grandparent'])
+
     def test_get_score(self, data, metadata, constraint):
         """Test ``get_score`` returns the proportion of valid rows."""
+        # Setup
+        constraint.fit(data, metadata)
+
         # Run and Assert
         assert constraint.get_score(data, metadata) == 1.0
+
+    def test_get_score_with_a_changed_row(self, data, metadata, constraint):
+        """Test ``get_score`` only counts the rows of the reference tables."""
+        # Setup
+        constraint.fit(data, metadata)
+        synthetic_data = deepcopy(data)
+        synthetic_data['grandparent'].loc[1, 'col'] = 'Z'
+
+        # Run and Assert
+        assert constraint.get_score(synthetic_data, metadata) == 4 / 5
 
     def test_get_score_empty_tables(self, data, metadata, constraint):
         """Test ``get_score`` returns NaN when there are no rows to check."""
         # Setup
+        constraint.fit(data, metadata)
         data = {table: table_data.iloc[:0] for table, table_data in data.items()}
 
         # Run and Assert
