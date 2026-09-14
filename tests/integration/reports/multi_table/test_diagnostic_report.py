@@ -121,13 +121,13 @@ class TestDiagnosticReport:
         assert pd.isna(validity[validity['Metric'] == 'DatetimeFormatAdherence']['Score']).all()
         assert_report_scores_are_not_nan(report, exclude=['DatetimeFormatAdherence'])
 
-    def test_end_to_end_with_metrics_failing(self, converted_datetime_multi_table_demo):
+    def test_end_to_end_with_metrics_failing(self, object_datetime_multi_table_demo):
         """Test the ``DiagnosticReport`` report when some metrics crash.
 
         This test makes fail the 'Boundary' property to check that the report still works.
         The TableStructure should no longer be 1.0 since there is some dtype mismatch.
         """
-        real_data, synthetic_data, metadata = converted_datetime_multi_table_demo
+        real_data, synthetic_data, metadata = object_datetime_multi_table_demo
         real_data['users']['age'].iloc[0] = 'error_1'
         real_data['transactions']['timestamp'].iloc[0] = 'error_2'
         real_data['transactions']['amount'].iloc[0] = 'error_3'

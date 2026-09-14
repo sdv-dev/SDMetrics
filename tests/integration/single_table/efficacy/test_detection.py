@@ -7,10 +7,10 @@ METRICS = [LogisticDetection, SVCDetection]
 
 
 @pytest.mark.parametrize('metric', METRICS)
-def test_primary_key(metric, converted_datetime_single_table_demo):
+def test_primary_key(metric, object_datetime_single_table_demo):
     """Test that primary keys don't affect detection metric."""
     real_data_with_primary_key, synthetic_data_with_primary_key, metadata = (
-        converted_datetime_single_table_demo
+        object_datetime_single_table_demo
     )
 
     real_data_with_primary_key = get_table_data_from_dict(real_data_with_primary_key)

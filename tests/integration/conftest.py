@@ -7,7 +7,7 @@ from sdmetrics.reports.base_report import BaseReport
 
 
 @pytest.fixture
-def converted_datetime_single_table_demo():
+def object_datetime_single_table_demo():
     """Single table demo data with the datetime columns converted to ``datetime64``."""
     real_data, synthetic_data, metadata = load_demo(modality='single_table')
     table_name = 'student_placements'
@@ -19,7 +19,7 @@ def converted_datetime_single_table_demo():
 
 
 @pytest.fixture
-def converted_datetime_multi_table_demo():
+def object_datetime_multi_table_demo():
     """Multi table demo data with the datetime columns converted to ``datetime64``."""
     real_data, synthetic_data, metadata = load_demo(modality='multi_table')
     for table_name, table_metadata in metadata['tables'].items():
@@ -31,7 +31,7 @@ def converted_datetime_multi_table_demo():
 
 
 @pytest.fixture
-def converted_datetime_timeseries_demo():
+def object_datetime_timeseries_demo():
     """Timeseries demo data with the datetime columns converted to ``datetime64``."""
     real_data, synthetic_data, metadata = load_timeseries_demo()
     table_name = 'timeseries'
