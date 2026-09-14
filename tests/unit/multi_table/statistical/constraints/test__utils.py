@@ -9,6 +9,7 @@ import pytest
 from sdmetrics.multi_table.statistical.constraints._utils import (
     _create_unique_name,
     _get_datetime_format,
+    _get_row_tuples,
     _is_datetime_type,
     _is_list_of_type,
     _parse_datetime,
@@ -52,6 +53,66 @@ def test__replace_nans_with_none():
     # Assert
     expected = pd.Series([1, 2, None, 4, 5, None, None], dtype='object')
     pd.testing.assert_series_equal(result, expected)
+
+
+def test__get_row_tuples():
+    """Test ``_get_row_tuples`` returns one tuple per row in the order of the columns."""
+    # Setup
+    table_data = pd.DataFrame(
+        {'a': [1, 2, 3], 'b': ['x', 'y', 'z'], 'c': [1.5, 2.5, 3.5]},
+        index=[7, 8, 9],
+    )
+
+    # Run
+    rows = _get_row_tuples(table_data, ['c', 'a'])
+
+    # Assert
+    assert rows == [(1.5, 1), (2.5, 2), (3.5, 3)]
+
+
+def test__get_row_tuples_missing_values():
+    """Test ``_get_row_tuples`` replaces every kind of missing value with ``None``."""
+    # Setup
+    table_data = pd.DataFrame({
+        'float': [1.5, np.nan, 3.5],
+        'object': ['x', None, 'z'],
+        'nullable_int': pd.array([10, None, np.nan], dtype='Int64'),
+        'datetime': pd.to_datetime(['2024-01-01', None, '2024-01-03']),
+    })
+
+    # Run
+    rows = _get_row_tuples(table_data, ['float', 'object', 'nullable_int', 'datetime'])
+
+    # Assert
+    assert rows == [
+        (1.5, 'x', 10, pd.Timestamp('2024-01-01')),
+        (None, None, None, None),
+        (3.5, 'z', None, pd.Timestamp('2024-01-03')),
+    ]
+
+
+def test__get_row_tuples_rows_with_the_same_missing_values_are_equal():
+    """Test two rows that are missing the same values compare and hash as equal."""
+    # Setup
+    table_data = pd.DataFrame({'a': [np.nan, None, 1.0], 'b': [pd.NA, np.nan, 'x']})
+
+    # Run
+    rows = _get_row_tuples(table_data, ['a', 'b'])
+
+    # Assert
+    assert set(rows) == {(None, None), (1.0, 'x')}
+
+
+def test__get_row_tuples_empty_table():
+    """Test ``_get_row_tuples`` returns an empty list for a table without rows."""
+    # Setup
+    table_data = pd.DataFrame({'a': pd.Series([], dtype='int64'), 'b': pd.Series([], dtype=object)})
+
+    # Run
+    rows = _get_row_tuples(table_data, ['a', 'b'])
+
+    # Assert
+    assert rows == []
 
 
 def test__is_list_of_type():
