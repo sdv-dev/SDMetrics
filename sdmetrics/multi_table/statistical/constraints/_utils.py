@@ -260,6 +260,29 @@ def _get_primary_key(metadata, table_name):
     return primary_key
 
 
+def _get_row_tuples(table_data, columns):
+    """Return one hashable tuple per row, with ``None`` in place of every missing value.
+
+    ``itertuples`` is used instead of ``iterrows`` because it does not build a ``Series``
+    for every row, and the missing values are normalized in one vectorized pass so that
+    two rows that are null in the same columns compare as equal.
+
+    Args:
+        table_data (pandas.DataFrame):
+            The data of the table.
+        columns (list[str]):
+            The names of the columns to take the values from, in order.
+
+    Returns:
+        list[tuple]:
+            The values of every row, in the order of ``columns``.
+    """
+    table_data = table_data[columns]
+    table_data = table_data.astype(object).where(table_data.notna(), None)
+
+    return list(table_data.itertuples(index=False, name=None))
+
+
 def _get_table_to_valid_rows(data):
     return {table: pd.Series(True, index=data[table].index) for table in data}
 

@@ -1,4 +1,3 @@
-import logging
 import re
 from copy import deepcopy
 
@@ -1412,3 +1411,105 @@ class TestConstraintAdherence:
 
         # Assert
         assert score == 5 / 7
+
+    def test_foreign_to_foreign_key_reuse_with_an_unseen_value(self):
+        """Test the score counts a reused foreign key value that the real data does not hold."""
+        # Setup
+        real_data = {
+            'users': pd.DataFrame({
+                'user_id': [1, 2, 3, 4],
+                'product_id': [101, 102, 101, 103],
+            }),
+            'transactions': pd.DataFrame({
+                'transaction_id': [1001, 1002, 1003, 1004],
+                'product_id': [101, 102, 104, 103],
+            }),
+        }
+        synthetic_data = deepcopy(real_data)
+        synthetic_data['users'].loc[1, 'product_id'] = 999
+        metadata = {
+            'tables': {
+                'users': {
+                    'columns': {
+                        'user_id': {'sdtype': 'id'},
+                        'product_id': {'sdtype': 'id'},
+                    },
+                    'primary_key': 'user_id',
+                },
+                'transactions': {
+                    'columns': {
+                        'transaction_id': {'sdtype': 'id'},
+                        'product_id': {'sdtype': 'id'},
+                    },
+                    'primary_key': 'transaction_id',
+                },
+            },
+            'relationships': [],
+        }
+        constraint = {
+            'class_name': 'ForeignToForeignKey',
+            'parameters': {
+                'columns': [
+                    {'table_name': 'users', 'foreign_key': 'product_id'},
+                    {'table_name': 'transactions', 'foreign_key': 'product_id'},
+                ],
+                'foreign_key_generation': 'reuse',
+            },
+        }
+
+        # Run
+        score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
+
+        # Assert
+        assert score == 7 / 8
+
+    def test_foreign_to_foreign_key_new_with_an_unseen_value(self):
+        """Test the score accepts new foreign key values when they are expected to be new."""
+        # Setup
+        real_data = {
+            'users': pd.DataFrame({
+                'user_id': [1, 2, 3, 4],
+                'product_id': [101, 102, 101, 103],
+            }),
+            'transactions': pd.DataFrame({
+                'transaction_id': [1001, 1002, 1003, 1004],
+                'product_id': [101, 102, 104, 103],
+            }),
+        }
+        synthetic_data = deepcopy(real_data)
+        synthetic_data['users'].loc[1, 'product_id'] = 999
+        metadata = {
+            'tables': {
+                'users': {
+                    'columns': {
+                        'user_id': {'sdtype': 'id'},
+                        'product_id': {'sdtype': 'id'},
+                    },
+                    'primary_key': 'user_id',
+                },
+                'transactions': {
+                    'columns': {
+                        'transaction_id': {'sdtype': 'id'},
+                        'product_id': {'sdtype': 'id'},
+                    },
+                    'primary_key': 'transaction_id',
+                },
+            },
+            'relationships': [],
+        }
+        constraint = {
+            'class_name': 'ForeignToForeignKey',
+            'parameters': {
+                'columns': [
+                    {'table_name': 'users', 'foreign_key': 'product_id'},
+                    {'table_name': 'transactions', 'foreign_key': 'product_id'},
+                ],
+                'foreign_key_generation': 'new',
+            },
+        }
+
+        # Run
+        score = ConstraintAdherence.compute(real_data, synthetic_data, metadata, constraint)
+
+        # Assert
+        assert score == 1.0

@@ -2,32 +2,12 @@
 
 import pandas as pd
 
-from sdmetrics.multi_table.statistical.constraints._utils import _get_table_to_valid_rows
+from sdmetrics.multi_table.statistical.constraints._utils import (
+    _get_row_tuples,
+    _get_table_to_valid_rows,
+)
 from sdmetrics.multi_table.statistical.constraints.base import BaseConstraint
 from sdmetrics.multi_table.statistical.constraints.error import ConstraintNotApplicableError
-
-
-def _get_row_tuples(table_data, columns):
-    """Return one hashable tuple per row, with ``None`` in place of every missing value.
-
-    ``itertuples`` is used instead of ``iterrows`` because it does not build a ``Series``
-    for every row, and the missing values are normalized in one vectorized pass so that
-    two rows that are null in the same columns compare as equal.
-
-    Args:
-        table_data (pandas.DataFrame):
-            The data of the table.
-        columns (list[str]):
-            The names of the columns to take the values from, in order.
-
-    Returns:
-        list[tuple]:
-            The values of every row, in the order of ``columns``.
-    """
-    table_data = table_data[columns]
-    table_data = table_data.astype(object).where(table_data.notna(), None)
-
-    return list(table_data.itertuples(index=False, name=None))
 
 
 class ReferenceTable(BaseConstraint):

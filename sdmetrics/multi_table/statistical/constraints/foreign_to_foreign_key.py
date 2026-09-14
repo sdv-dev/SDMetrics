@@ -1,6 +1,9 @@
 """Foreign To Foreign Key Constraint."""
 
+import pandas as pd
+
 from sdmetrics.multi_table.statistical.constraints._utils import (
+    _get_row_tuples,
     _get_table_to_valid_rows,
     _validate_foreign_to_foreign_key_input,
 )
@@ -41,6 +44,7 @@ class ForeignToForeignKey(BaseConstraint):
         _validate_foreign_to_foreign_key_input(columns, foreign_key_generation)
         self.columns = columns
         self.foreign_key_generation = foreign_key_generation
+        self._real_key_values = None
 
     def _get_scored_tables(self, metadata=None):
         return {column_info['table_name'] for column_info in self.columns}
@@ -66,6 +70,24 @@ class ForeignToForeignKey(BaseConstraint):
                     f"The column(s) '{missing_columns}' are missing from the table '{table_name}'."
                 )
 
+    def _fit(self, data, metadata=None):
+        """Learn the foreign key values of the real data when they must be reused.
+
+        Args:
+            data (dict[str, pandas.DataFrame]):
+                A dictionary mapping each table name to its real data.
+            metadata (dict):
+                The multi table metadata.
+        """
+        if self.foreign_key_generation != 'reuse':
+            return
+
+        self._real_key_values = set()
+        for column_info in self.columns:
+            table_data = data[column_info['table_name']]
+            key_columns = _get_key_columns(column_info['foreign_key'])
+            self._real_key_values.update(_get_row_tuples(table_data, key_columns))
+
     def _is_valid(self, data, metadata=None):
         """Check that the data is valid.
 
@@ -78,4 +100,24 @@ class ForeignToForeignKey(BaseConstraint):
         Returns:
             dict[str, pandas.Series]:
         """
-        return _get_table_to_valid_rows(data)
+        table_to_valid_rows = _get_table_to_valid_rows(data)
+        if self.foreign_key_generation != 'reuse':
+            return table_to_valid_rows
+
+        if not self._fitted:
+            raise ConstraintNotApplicableError(
+                'ForeignToForeignKey constraint must be called with ``fit`` first.'
+            )
+
+        for column_info in self.columns:
+            table_name = column_info['table_name']
+            table_data = data[table_name]
+            keys = _get_row_tuples(table_data, _get_key_columns(column_info['foreign_key']))
+            is_valid = [
+                all(value is None for value in key) or key in self._real_key_values for key in keys
+            ]
+            table_to_valid_rows[table_name] &= pd.Series(
+                is_valid, index=table_data.index, dtype=bool
+            )
+
+        return table_to_valid_rows
