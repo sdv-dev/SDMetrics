@@ -6,15 +6,6 @@ import pathlib
 import pandas as pd
 
 
-def _load_table(metadata, path):
-    datetime_columns = []
-    for column, column_meta in metadata['columns'].items():
-        if column_meta['sdtype'] == 'datetime':
-            datetime_columns.append(column)
-
-    return pd.read_csv(path, parse_dates=datetime_columns)
-
-
 def load_demo(modality='multi_table'):
     """Load demo data of the indicated data modality.
 
@@ -38,8 +29,8 @@ def load_demo(modality='multi_table'):
     real_data = {}
     synthetic_data = {}
     for table, table_meta in metadata['tables'].items():
-        real_data[table] = _load_table(table_meta, demo_path / f'{table}_real.csv')
-        synthetic_data[table] = _load_table(table_meta, demo_path / f'{table}_synthetic.csv')
+        real_data[table] = pd.read_csv(demo_path / f'{table}_real.csv')
+        synthetic_data[table] = pd.read_csv(demo_path / f'{table}_synthetic.csv')
 
     return real_data, synthetic_data, metadata
 

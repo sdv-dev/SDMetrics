@@ -4,7 +4,7 @@ import pandas as pd
 
 from sdmetrics.utils import get_columns_from_metadata, is_datetime
 
-MODELABLE_SDTYPES = ('numerical', 'datetime', 'categorical', 'boolean')
+MODELABLE_SDTYPES = ('numerical', 'datetime', 'categorical', 'boolean', 'ordinal')
 
 
 def _validate_metadata_dict(metadata):
@@ -173,7 +173,7 @@ def _remove_missing_columns_metadata(data, metadata):
 def _remove_non_modelable_columns(data, metadata):
     """Remove columns that are not modelable.
 
-    All modelable columns are numerical, datetime, categorical, or boolean sdtypes.
+    All modelable columns are numerical, datetime, categorical, ordinal, or boolean sdtypes.
     """
     columns_modelable = []
     for column, column_metadata in get_columns_from_metadata(metadata).items():

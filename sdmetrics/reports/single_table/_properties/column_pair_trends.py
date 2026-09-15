@@ -25,6 +25,7 @@ class ColumnPairTrends(BaseSingleTableProperty):
         'numerical': 'continuous',
         'datetime': 'continuous',
         'categorical': 'discrete',
+        'ordinal': 'discrete',
         'boolean': 'discrete',
     }
 

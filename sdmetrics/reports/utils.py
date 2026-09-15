@@ -16,7 +16,7 @@ from sdmetrics.utils import (
 )
 
 CONTINUOUS_SDTYPES = ['numerical', 'datetime']
-DISCRETE_SDTYPES = ['categorical', 'boolean']
+DISCRETE_SDTYPES = ['categorical', 'ordinal', 'boolean']
 DEFAULT_NUM_ROWS_SUBSAMPLE = 50000
 DEFAULT_REAL_CORRELATION_THRESHOLD = 0.5
 DEFAULT_REAL_ASSOCIATION_THRESHOLD = 0.3
@@ -99,7 +99,7 @@ def discretize_table_data(real_data, synthetic_data, metadata):
 
 
 def _get_non_id_columns(metadata, binned_metadata):
-    valid_sdtypes = ['numerical', 'categorical', 'boolean', 'datetime']
+    valid_sdtypes = ['numerical', 'categorical', 'boolean', 'ordinal', 'datetime']
     alternate_keys = get_alternate_keys(metadata)
     non_id_columns = []
     for column, column_meta in get_columns_from_metadata(binned_metadata).items():
@@ -202,7 +202,7 @@ def _validate_categorical_values(real_data, synthetic_data, metadata, table=None
     columns = get_columns_from_metadata(metadata)
     for column, column_meta in columns.items():
         column_type = get_type_from_column_meta(column_meta)
-        if column_type == 'categorical':
+        if column_type in ('categorical', 'ordinal'):
             extra_categories = [
                 value
                 for value in synthetic_data[column].unique()
