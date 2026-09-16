@@ -22,6 +22,19 @@ class ConstraintValidity(BaseMultiTableProperty):
         """Get the number of iterations for the property, which is one per constraint."""
         return len(constraints) if constraints else 0
 
+    @staticmethod
+    def _validate_constraints(constraints):
+        """Check that constraints are a list of dictionaries."""
+        if constraints is None:
+            return
+
+        is_list = isinstance(constraints, list)
+        if not is_list or not all(isinstance(constraint, dict) for constraint in constraints):
+            raise ValueError(
+                "The 'constraints' parameter must be a list of dictionaries, each one with "
+                "the keys 'class_name' and 'parameters'."
+            )
+
     def _generate_details(
         self, real_data, synthetic_data, metadata, constraints, progress_bar=None
     ):
@@ -52,9 +65,8 @@ class ConstraintValidity(BaseMultiTableProperty):
                 if progress_bar:
                     progress_bar.update()
 
-            is_dict = isinstance(constraint, dict)
-            constraint_names.append(constraint.get('class_name') if is_dict else None)
-            constraint_parameters.append(constraint.get('parameters') if is_dict else None)
+            constraint_names.append(constraint.get('class_name'))
+            constraint_parameters.append(constraint.get('parameters'))
             scores.append(score)
             error_messages.append(error_message)
 
@@ -86,6 +98,7 @@ class ConstraintValidity(BaseMultiTableProperty):
             float:
                 The average score for the property for all the individual metric scores computed.
         """
+        self._validate_constraints(constraints)
         self._generate_details(real_data, synthetic_data, metadata, constraints, progress_bar)
 
         self.is_computed = True

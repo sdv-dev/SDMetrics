@@ -83,20 +83,42 @@ class TestConstraintValidity:
         assert constraint_validity.is_computed is False
         assert constraint_validity.details.empty
 
-    def test__get_num_iterations(self, metadata, constraints):
+    @pytest.mark.parametrize(
+        ('constraints', 'expected_num_iterations'),
+        [(None, 0), ([], 0), ([{}, {}], 2)],
+    )
+    def test__get_num_iterations(self, metadata, constraints, expected_num_iterations):
         """Test ``_get_num_iterations`` returns one iteration per constraint."""
         # Setup
         constraint_validity = ConstraintValidity()
 
         # Run
         num_iterations = constraint_validity._get_num_iterations(metadata, constraints)
-        num_iterations_empty = constraint_validity._get_num_iterations(metadata, [])
-        num_iterations_none = constraint_validity._get_num_iterations(metadata)
 
         # Assert
-        assert num_iterations == 2
-        assert num_iterations_empty == 0
-        assert num_iterations_none == 0
+        assert num_iterations == expected_num_iterations
+
+    @pytest.mark.parametrize('constraints', [None, [], [{'class_name': 'Range', 'parameters': {}}]])
+    def test__validate_constraints(self, constraints):
+        """Test ``_validate_constraints`` accepts ``None`` and lists of dictionaries."""
+        # Run and Assert
+        ConstraintValidity._validate_constraints(constraints)
+
+    @pytest.mark.parametrize(
+        'constraints',
+        ['invalid', {'class_name': 'Range', 'parameters': {}}, ['invalid'], [{}, 'invalid']],
+    )
+    def test__validate_constraints_invalid(self, constraints):
+        """Test ``_validate_constraints`` rejects anything but a list of dictionaries."""
+        # Setup
+        expected_message = (
+            "The 'constraints' parameter must be a list of dictionaries, each one with "
+            "the keys 'class_name' and 'parameters'."
+        )
+
+        # Run and Assert
+        with pytest.raises(ValueError, match=expected_message):
+            ConstraintValidity._validate_constraints(constraints)
 
     @patch('sdmetrics.reports.multi_table._properties.constraint_validity.ConstraintAdherence')
     def test__generate_details(self, mock_constraint_adherence, data, metadata, constraints):
@@ -160,28 +182,6 @@ class TestConstraintValidity:
         assert progress_bar.update.call_count == 2
 
     @patch('sdmetrics.reports.multi_table._properties.constraint_validity.ConstraintAdherence')
-    def test__generate_details_invalid_constraint(self, mock_constraint_adherence, data, metadata):
-        """Test ``_generate_details`` handles constraints that are not dictionaries."""
-        # Setup
-        synthetic_data = deepcopy(data)
-        mock_constraint_adherence.__name__ = 'ConstraintAdherence'
-        mock_constraint_adherence.compute.side_effect = [ValueError('not a dict')]
-        constraint_validity = ConstraintValidity()
-
-        # Run
-        constraint_validity._generate_details(data, synthetic_data, metadata, ['invalid'])
-
-        # Assert
-        expected_details = pd.DataFrame({
-            'Constraint': [None],
-            'Metric': ['ConstraintAdherence'],
-            'Parameters': [None],
-            'Score': [np.nan],
-            'Error': ['ValueError: not a dict'],
-        })
-        pd.testing.assert_frame_equal(constraint_validity.details, expected_details)
-
-    @patch('sdmetrics.reports.multi_table._properties.constraint_validity.ConstraintAdherence')
     def test_get_score(self, mock_constraint_adherence, data, metadata, constraints):
         """Test ``get_score`` averages the constraint scores and drops the empty error column."""
         # Setup
@@ -230,6 +230,21 @@ class TestConstraintValidity:
         })
         assert score == 0.4
         pd.testing.assert_frame_equal(constraint_validity.details, expected_details)
+
+    def test_get_score_invalid_constraints(self, data, metadata):
+        """Test ``get_score`` raises an error and computes nothing for invalid constraints."""
+        # Setup
+        synthetic_data = deepcopy(data)
+        constraint_validity = ConstraintValidity()
+        progress_bar = Mock()
+        expected_message = "The 'constraints' parameter must be a list of dictionaries"
+
+        # Run and Assert
+        with pytest.raises(ValueError, match=expected_message):
+            constraint_validity.get_score(data, synthetic_data, metadata, ['invalid'], progress_bar)
+
+        assert constraint_validity.is_computed is False
+        progress_bar.update.assert_not_called()
 
     @pytest.mark.parametrize('constraints', [[], None])
     def test_get_score_without_constraints(self, data, metadata, constraints):
@@ -285,6 +300,7 @@ class TestConstraintValidity:
 
         # Assert
         pd.testing.assert_frame_equal(details, constraint_validity.details)
+        assert details is not constraint_validity.details
 
     def test_get_details_with_table_name(self):
         """Test ``get_details`` returns a copy of details when a table name is given."""
@@ -302,3 +318,4 @@ class TestConstraintValidity:
 
         # Assert
         pd.testing.assert_frame_equal(details, constraint_validity.details)
+        assert details is not constraint_validity.details
