@@ -564,3 +564,21 @@ def test_with_large_dataset():
     assert np.isclose(report_2.get_score(), score_1_run_1, atol=0.001)
     assert np.isclose(cpt_report_1, cpt_report_2, atol=0.001)
     assert np.isclose(intertable_trends_1, intertable_trends_2, atol=0.001)
+
+
+def test_report_keeps_data_unchanged():
+    """Test that the quality report does not modify the input data."""
+    # Setup
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    real_data_copy = {table_name: table.copy() for table_name, table in real_data.items()}
+    synthetic_data_copy = {table_name: table.copy() for table_name, table in synthetic_data.items()}
+    report = QualityReport()
+
+    # Run
+    report.generate(real_data, synthetic_data, metadata, verbose=True)
+
+    # Assert
+    for table_name in real_data:
+        pd.testing.assert_frame_equal(real_data[table_name], real_data_copy[table_name])
+    for table_name in synthetic_data:
+        pd.testing.assert_frame_equal(synthetic_data[table_name], synthetic_data_copy[table_name])

@@ -373,3 +373,21 @@ class TestDiagnosticReport:
 
         # Run and Assert
         report.generate(real_data, synthetic_data, metadata)
+
+
+def test_report_keeps_data_unchanged():
+    """Test that the quality report does not modify the input data."""
+    # Setup
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    real_data_copy = {table_name: table.copy() for table_name, table in real_data.items()}
+    synthetic_data_copy = {table_name: table.copy() for table_name, table in synthetic_data.items()}
+    report = DiagnosticReport()
+
+    # Run
+    report.generate(real_data, synthetic_data, metadata, verbose=True)
+
+    # Assert
+    for table_name in real_data:
+        pd.testing.assert_frame_equal(real_data[table_name], real_data_copy[table_name])
+    for table_name in synthetic_data:
+        pd.testing.assert_frame_equal(synthetic_data[table_name], synthetic_data_copy[table_name])
