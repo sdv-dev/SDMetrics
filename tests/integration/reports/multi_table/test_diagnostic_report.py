@@ -376,7 +376,7 @@ class TestDiagnosticReport:
 
 
 def test_report_keeps_data_unchanged():
-    """Test that the quality report does not modify the input data."""
+    """Test that the diagnostic report does not modify the input data."""
     # Setup
     real_data, synthetic_data, metadata = load_demo(modality='multi_table')
     real_data_copy = {table_name: table.copy() for table_name, table in real_data.items()}
