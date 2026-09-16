@@ -51,7 +51,10 @@ class RegexFormatAdherence(SingleColumnMetric):
             regex_format (str):
                 The regex format.
             compare (pd.Series | pd.DataFrame, optional):
-                Dataframe containing groups to compare against.
+                Dataframe containing groups to compare against. Only the named groups are
+                compared, and each one of them separately, so a value is valid when every
+                one of its named groups is present in the matching group of ``compare``,
+                even if the combination is not.
 
         Returns:
             tuple (pd.Series, pd.DataFrame):
@@ -59,13 +62,18 @@ class RegexFormatAdherence(SingleColumnMetric):
                 * A dataframe containing seperated regex groups.
         """
         regex_column = column.str.fullmatch(regex_format, na=False)
+        pattern = re.compile(regex_format)
 
         groups = None
-        if re.compile(regex_format).groups:
+        if pattern.groups:
             groups = column[regex_column].str.extract(regex_format)
-            if compare is not None and not compare.empty:
-                valid_groups = set(map(tuple, compare.dropna().to_numpy()))
-                regex_column = groups.apply(tuple, axis=1).isin(valid_groups)
+            if pattern.groupindex and compare is not None and not compare.empty:
+                valid_values = {
+                    group: set(compare.iloc[:, group_number - 1])
+                    for group, group_number in pattern.groupindex.items()
+                }
+                valid_groups = groups[list(valid_values)].isin(valid_values).all(axis=1)
+                regex_column &= valid_groups.reindex(column.index, fill_value=False)
 
         valid = pd.isna(column) | regex_column
 

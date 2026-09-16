@@ -29,6 +29,7 @@ class TestQualityReport:
                 datetime(2022, 10, 1),
             ],
             'col5': [date(2020, 9, 13), date(2020, 12, 1), date(2021, 1, 12), date(2022, 8, 13)],
+            'col6': ['LOW', 'MEDIUM', 'HIGH', 'MEDIUM'],
         })
 
         synthetic_data = pd.DataFrame({
@@ -42,6 +43,7 @@ class TestQualityReport:
                 datetime(2022, 12, 1),
             ],
             'col5': [date(2020, 10, 13), date(2020, 2, 4), date(2021, 3, 11), date(2022, 7, 23)],
+            'col6': ['LOW', 'HIGH', 'MEDIUM', 'MEDIUM'],
         })
 
         metadata = {
@@ -53,6 +55,7 @@ class TestQualityReport:
                         'col3': {'sdtype': 'boolean'},
                         'col4': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
                         'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                        'col6': {'sdtype': 'ordinal'},
                     }
                 }
             }
@@ -70,7 +73,7 @@ class TestQualityReport:
             properties,
             pd.DataFrame({
                 'Property': ['Column Shapes', 'Column Pair Trends'],
-                'Score': [0.750000, 0.5005754481922459],
+                'Score': [0.7916666666666666, 0.5337169654614973],
             }),
         )
 
@@ -255,8 +258,8 @@ class TestQualityReport:
         assert np.isclose(report_2.get_score(), score_1_run_1, atol=0.001)
         assert np.isclose(cpt_report_1, cpt_report_2, atol=0.001)
 
-    def test_quality_report_with_object_datetimes(self, single_table_demo_data_and_metadata):
-        """Test the quality report with object datetimes.
+    def test_quality_report_with_datetime64_columns(self, single_table_demo_data_and_metadata):
+        """Test the quality report when the datetime columns are ``datetime64``.
 
         The report must compute each property and the overall quality score.
         """
@@ -266,7 +269,7 @@ class TestQualityReport:
         for column, column_meta in metadata['tables']['student_placements']['columns'].items():
             if column_meta['sdtype'] == 'datetime':
                 dt_format = column_meta['datetime_format']
-                real_data[column] = real_data[column].dt.strftime(dt_format)
+                real_data[column] = pd.to_datetime(real_data[column], format=dt_format)
 
         table_meta = metadata['tables']['student_placements']['columns']
         metadata['tables']['student_placements']['columns'] = {

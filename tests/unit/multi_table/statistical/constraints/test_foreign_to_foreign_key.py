@@ -1,5 +1,7 @@
 import re
+from copy import deepcopy
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -268,3 +270,108 @@ class TestForeignToForeignKey:
 
         # Run and Assert
         assert pd.isna(constraint.get_score(data, metadata))
+
+    def test__fit_new(self, data, metadata, constraint):
+        """Test ``_fit`` does not learn anything when new values are generated."""
+        # Run
+        constraint._fit(data, metadata)
+
+        # Assert
+        assert constraint._real_key_values is None
+
+    def test__fit_reuse(self, data, metadata, columns):
+        """Test ``_fit`` learns the foreign key values of every table when they are reused."""
+        # Setup
+        instance = ForeignToForeignKey(columns=columns, foreign_key_generation='reuse')
+
+        # Run
+        instance._fit(data, metadata)
+
+        # Assert
+        assert instance._real_key_values == {(101,), (102,), (103,), (104,), (105,), (106,)}
+
+    def test__is_valid_reuse_not_fitted(self, data, metadata, columns):
+        """Test ``_is_valid`` errors if the constraint reuses values and was not fitted."""
+        # Setup
+        instance = ForeignToForeignKey(columns=columns, foreign_key_generation='reuse')
+        expected_error = re.escape(
+            'ForeignToForeignKey constraint must be called with ``fit`` first.'
+        )
+
+        # Run and Assert
+        with pytest.raises(ConstraintNotApplicableError, match=expected_error):
+            instance._is_valid(data, metadata)
+
+    def test__is_valid_reuse_with_an_unseen_value(self, data, metadata, columns):
+        """Test ``_is_valid`` flags a foreign key value that the real data does not hold."""
+        # Setup
+        instance = ForeignToForeignKey(columns=columns, foreign_key_generation='reuse')
+        instance.fit(data, metadata)
+        synthetic_data = deepcopy(data)
+        synthetic_data['users'].loc[2, 'product_id'] = 999
+
+        # Run
+        is_valid = instance._is_valid(synthetic_data, metadata)
+
+        # Assert
+        expected_users = pd.Series([True, True, False] + [True] * 7)
+        pd.testing.assert_series_equal(is_valid['users'], expected_users)
+        pd.testing.assert_series_equal(is_valid['transactions'], pd.Series([True] * 10))
+
+    def test__is_valid_reuse_with_a_value_of_another_table(self, data, metadata, columns):
+        """Test ``_is_valid`` accepts a real value that comes from another of the tables."""
+        # Setup
+        data['transactions'].loc[0, 'product_id'] = 107
+        instance = ForeignToForeignKey(columns=columns, foreign_key_generation='reuse')
+        instance.fit(data, metadata)
+        synthetic_data = deepcopy(data)
+        synthetic_data['users'].loc[0, 'product_id'] = 107
+
+        # Run
+        is_valid = instance._is_valid(synthetic_data, metadata)
+
+        # Assert
+        pd.testing.assert_series_equal(is_valid['users'], pd.Series([True] * 10))
+
+    def test__is_valid_reuse_with_a_missing_value(self, data, metadata, columns):
+        """Test ``_is_valid`` accepts a row that has no foreign key value."""
+        # Setup
+        instance = ForeignToForeignKey(columns=columns, foreign_key_generation='reuse')
+        instance.fit(data, metadata)
+        synthetic_data = deepcopy(data)
+        synthetic_data['users'].loc[2, 'product_id'] = np.nan
+
+        # Run
+        is_valid = instance._is_valid(synthetic_data, metadata)
+
+        # Assert
+        pd.testing.assert_series_equal(is_valid['users'], pd.Series([True] * 10))
+
+    def test__is_valid_reuse_with_composite_keys(self, data, metadata):
+        """Test ``_is_valid`` flags a combination of values that the real data does not hold."""
+        # Setup
+        columns = [
+            {'table_name': 'users', 'foreign_key': ('product_id', 'company_name')},
+            {'table_name': 'transactions', 'foreign_key': ('product_id', 'company_name')},
+        ]
+        instance = ForeignToForeignKey(columns=columns, foreign_key_generation='reuse')
+        instance.fit(data, metadata)
+        synthetic_data = deepcopy(data)
+        synthetic_data['users'].loc[0, 'company_name'] = 'MobileInc'
+
+        # Run
+        is_valid = instance._is_valid(synthetic_data, metadata)
+
+        # Assert
+        pd.testing.assert_series_equal(is_valid['users'], pd.Series([False] + [True] * 9))
+
+    def test_get_score_reuse_with_an_unseen_value(self, data, metadata, columns):
+        """Test ``get_score`` counts the unseen values over the rows of every table."""
+        # Setup
+        instance = ForeignToForeignKey(columns=columns, foreign_key_generation='reuse')
+        instance.fit(data, metadata)
+        synthetic_data = deepcopy(data)
+        synthetic_data['users'].loc[2, 'product_id'] = 999
+
+        # Run and Assert
+        assert instance.get_score(synthetic_data, metadata) == 19 / 20

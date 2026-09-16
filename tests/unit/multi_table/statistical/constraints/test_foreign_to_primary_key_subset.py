@@ -142,6 +142,16 @@ class TestForeignToPrimaryKeySubset:
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
+    def test__validate_data_missing_primary_key_column(self, data, metadata, constraint):
+        """Test ``_validate_data`` errors if the parent does not hold its primary key."""
+        # Setup
+        del data['users']['user_id']
+        expected_error = re.escape("The column(s) 'user_id' are missing from the table 'users'.")
+
+        # Run and Assert
+        with pytest.raises(ConstraintNotApplicableError, match=expected_error):
+            constraint._validate_data(data, metadata)
+
     def test__validate_data_missing_primary_key(self, data, metadata, constraint):
         """Test ``_validate_data`` errors if the parent has no primary key in the metadata."""
         # Setup

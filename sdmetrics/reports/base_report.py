@@ -32,6 +32,7 @@ class BaseReport:
         self.is_generated = False
         self._properties = {}
         self._skipped_properties = set()
+        self._original_datetime_columns = {}
         self.num_rows_subsample = DEFAULT_NUM_ROWS_SUBSAMPLE
         self.report_info = {
             'report_type': self.__class__.__name__,
@@ -100,16 +101,24 @@ class BaseReport:
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
+
+        Returns:
+            dict:
+                The datetime columns as they were before the conversion.
         """
+        original_columns = {}
         for column, col_meta in get_columns_from_metadata(metadata).items():
             if col_meta['sdtype'] == 'datetime':
                 real_col = real_data[column]
                 synth_col = synthetic_data[column]
+                original_columns[column] = (real_col, synth_col)
                 try:
                     real_data[column] = _convert_datetime_column(column, real_col, col_meta)
                     synthetic_data[column] = _convert_datetime_column(column, synth_col, col_meta)
                 except Exception:
                     continue
+
+        return original_columns
 
     def _print_results(self, verbose):
         """Print the results.
@@ -152,7 +161,9 @@ class BaseReport:
         """
         self._validate(real_data, synthetic_data, metadata)
         self._skipped_properties = self._get_skipped_properties(metadata)
-        self.convert_datetimes(real_data, synthetic_data, metadata)
+        self._original_datetime_columns = self.convert_datetimes(
+            real_data, synthetic_data, metadata
+        )
 
         self.report_info['generated_date'] = datetime.today().strftime('%Y-%m-%d')
         if 'tables' in metadata:
@@ -201,6 +212,9 @@ class BaseReport:
                 property_instance, 'real_association_threshold'
             ):
                 property_instance.real_association_threshold = self.real_association_threshold
+
+            if hasattr(property_instance, '_original_datetime_columns'):
+                property_instance._original_datetime_columns = self._original_datetime_columns
 
             self._properties[property_name].num_rows_subsample = self.num_rows_subsample
             score = self._properties[property_name].get_score(

@@ -1,11 +1,45 @@
 from unittest.mock import Mock, call, patch
 
 import pandas as pd
+import pytest
 
-from sdmetrics.reports.single_table._properties.data_validity import DataValidity
+from sdmetrics.reports.single_table._properties.data_validity import (
+    BoundaryAdherence,
+    DataValidity,
+    DatetimeFormatAdherence,
+    KeyUniqueness,
+    RegexFormatAdherence,
+)
 
 
 class TestDataValidity:
+    @pytest.mark.parametrize(
+        ('metric', 'column_name', 'expected_result'),
+        [
+            (DatetimeFormatAdherence, 'start_date', True),
+            (DatetimeFormatAdherence, 'end_date', False),
+            (RegexFormatAdherence, 'user_id', True),
+            (RegexFormatAdherence, 'session_id', False),
+            (BoundaryAdherence, 'end_date', True),
+            (KeyUniqueness, 'session_id', True),
+        ],
+    )
+    def test__has_required_argument(self, metric, column_name, expected_result):
+        """Test the ``_has_required_argument`` method."""
+        # Setup
+        columns_meta = {
+            'start_date': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+            'end_date': {'sdtype': 'datetime'},
+            'user_id': {'sdtype': 'id', 'regex_format': r'\d{1,30}'},
+            'session_id': {'sdtype': 'id'},
+        }
+
+        # Run
+        result = DataValidity._has_required_argument(metric, column_name, columns_meta)
+
+        # Assert
+        assert result is expected_result
+
     @patch('sdmetrics.reports.single_table._properties.data_validity.BoundaryAdherence.compute')
     @patch('sdmetrics.reports.single_table._properties.data_validity.CategoryAdherence.compute')
     def test__generate_details_with_ranges_in_metadata(
