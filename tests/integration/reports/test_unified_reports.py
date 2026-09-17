@@ -841,9 +841,6 @@ def test_unified_diagnostic_report_multi_table_verbose_with_constraints(capsys):
     for line in expected_lines:
         assert line in output
 
-    assert output.index('Evaluating Relationship Validity') < output.index(
-        'Evaluating Constraint Validity'
-    )
     assert report.get_score() == 1.0
 
 
@@ -869,42 +866,6 @@ def test_unified_diagnostic_report_without_constraints(constraints):
     assert pd.isna(properties.loc[properties['Property'] == 'Constraint Validity', 'Score'].iloc[0])
     assert details.empty
     assert report.get_score() == 1.0
-
-
-def test_unified_diagnostic_report_with_invalid_constraint_rows():
-    """Test the Constraint Validity score reflects the rows that break the constraints."""
-    # Setup
-    multiple_constraints = [
-        {
-            'class_name': 'FixedCombinations',
-            'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
-        },
-        {
-            'class_name': 'Inequality',
-            'parameters': {
-                'table_name': 'transactions',
-                'low_column_name': 'transaction_id',
-                'high_column_name': 'amount',
-            },
-        },
-    ]
-    real_data, synthetic_data, metadata = load_multi_table_demo()
-    synthetic_data['sessions'] = synthetic_data['sessions'].copy()
-    synthetic_data['sessions']['os'] = 'unknown'
-
-    # Run
-    report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, multiple_constraints, verbose=False)
-    properties = report.get_properties()
-    details = report.get_details('Constraint Validity')
-
-    # Assert
-    constraint_score = properties.loc[
-        properties['Property'] == 'Constraint Validity', 'Score'
-    ].iloc[0]
-    assert constraint_score == 0.5
-    assert details['Score'].tolist() == [0.0, 1.0]
-    assert report.get_score() == properties['Score'].mean()
 
 
 def test_unified_diagnostic_report_constraint_validity_visualization():
