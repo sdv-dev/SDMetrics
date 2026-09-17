@@ -509,6 +509,66 @@ class TestBaseReport:
         )
         base_report._print_results.assert_called_once_with(True)
 
+    @patch('tqdm.tqdm')
+    def test_generate_with_constraints(self, mock_tqdm):
+        """Test ``generate`` only passes the constraints to the Constraint Validity property."""
+        # Setup
+        base_report = BaseReport()
+        base_report._validate = Mock()
+        base_report._print_results = Mock()
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 1'].get_score.return_value = 1.0
+        base_report._properties['Property 1']._get_num_iterations.return_value = 4
+        base_report._properties['Constraint Validity'] = Mock()
+        base_report._properties['Constraint Validity'].get_score.return_value = 0.5
+        base_report._properties['Constraint Validity']._get_num_iterations.return_value = 1
+        real_data = pd.DataFrame({'column1': [1, 2, 3]})
+        synthetic_data = pd.DataFrame({'column1': [1, 2, 3]})
+        metadata = {'columns': {'column1': {'sdtype': 'numerical'}}}
+        constraints = [{'class_name': 'Range', 'parameters': {}}]
+
+        # Run
+        base_report.generate(real_data, synthetic_data, metadata, constraints, verbose=True)
+
+        # Assert
+        base_report._properties['Property 1']._get_num_iterations.assert_called_once_with(metadata)
+        base_report._properties['Property 1'].get_score.assert_called_once_with(
+            real_data, synthetic_data, metadata, progress_bar=mock_tqdm.return_value
+        )
+        base_report._properties['Constraint Validity']._get_num_iterations.assert_called_once_with(
+            metadata, constraints=constraints
+        )
+        base_report._properties['Constraint Validity'].get_score.assert_called_once_with(
+            real_data,
+            synthetic_data,
+            metadata,
+            progress_bar=mock_tqdm.return_value,
+            constraints=constraints,
+        )
+        assert base_report._overall_score == 0.75
+
+    def test_generate_invalid_constraints(self):
+        """Test ``generate`` validates the constraints before computing any property."""
+        # Setup
+        base_report = BaseReport()
+        base_report._validate = Mock()
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Constraint Validity'] = Mock()
+        base_report._properties[
+            'Constraint Validity'
+        ]._validate_constraints.side_effect = ValueError('invalid constraints')
+        real_data = pd.DataFrame({'column1': [1, 2, 3]})
+        synthetic_data = pd.DataFrame({'column1': [1, 2, 3]})
+        metadata = {'columns': {'column1': {'sdtype': 'numerical'}}}
+
+        # Run and Assert
+        with pytest.raises(ValueError, match='invalid constraints'):
+            base_report.generate(real_data, synthetic_data, metadata, 'invalid', verbose=False)
+
+        base_report._properties['Property 1'].get_score.assert_not_called()
+        base_report._properties['Constraint Validity'].get_score.assert_not_called()
+        assert base_report.is_generated is False
+
     def test__check_report_generated(self):
         """Test the ``check_report_generated`` method."""
         # Setup

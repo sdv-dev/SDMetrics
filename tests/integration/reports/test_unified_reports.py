@@ -2,10 +2,36 @@ from datetime import date, datetime
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from sdmetrics.demos import load_multi_table_demo, load_single_table_demo
+from sdmetrics.errors import VisualizationUnavailableError
 from sdmetrics.reports import DiagnosticReport, QualityReport
 from tests.utils import assert_report_scores_are_not_nan
+
+SINGLE_TABLE_CONSTRAINTS = [
+    {
+        'class_name': 'FixedCombinations',
+        'parameters': {
+            'table_name': 'student_placements',
+            'column_names': ['gender', 'degree_type'],
+        },
+    },
+]
+MULTI_TABLE_CONSTRAINTS = [
+    {
+        'class_name': 'FixedCombinations',
+        'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
+    },
+    {
+        'class_name': 'Inequality',
+        'parameters': {
+            'table_name': 'transactions',
+            'low_column_name': 'transaction_id',
+            'high_column_name': 'amount',
+        },
+    },
+]
 
 
 def _set_thresholds_zero(report):
@@ -128,12 +154,18 @@ def test_unified_diagnostic_report_single_table():
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, verbose=False)
+    report.generate(real_data, synthetic_data, metadata, SINGLE_TABLE_CONSTRAINTS, verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Data Validity', 'Data Structure'],
-        'Score': [1.0, 1.0],
+        'Property': ['Data Validity', 'Data Structure', 'Constraint Validity'],
+        'Score': [1.0, 1.0, 1.0],
+    })
+    expected_details_constraint_validity = pd.DataFrame({
+        'Constraint': ['FixedCombinations'],
+        'Metric': ['ConstraintAdherence'],
+        'Parameters': [SINGLE_TABLE_CONSTRAINTS[0]['parameters']],
+        'Score': [1.0],
     })
     expected_details_data_validity = pd.DataFrame({
         'Table': ['student_placements'] * 20,
@@ -195,6 +227,9 @@ def test_unified_diagnostic_report_single_table():
     )
     pd.testing.assert_frame_equal(
         report.get_details('Data Structure'), expected_details_data_structure
+    )
+    pd.testing.assert_frame_equal(
+        report.get_details('Constraint Validity'), expected_details_constraint_validity
     )
     assert report.get_score() == 1.0
     assert_report_scores_are_not_nan(report)
@@ -302,18 +337,21 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, verbose=True)
+    report.generate(real_data, synthetic_data, metadata, SINGLE_TABLE_CONSTRAINTS, verbose=True)
     output = capsys.readouterr().out
 
     # Assert
     expected_lines = [
         'Generating report ...',
-        '(1/3) Evaluating Data Validity:',
+        '(1/4) Evaluating Data Validity:',
         'Data Validity Score: 100.0%',
-        '(2/3) Evaluating Data Structure:',
+        '(2/4) Evaluating Data Structure:',
         'Data Structure Score: 100.0%',
-        '(3/3) Evaluating Relationship Validity: N/A',
+        '(3/4) Evaluating Relationship Validity: N/A',
         'This property does not apply to single-table data.',
+        '(4/4) Evaluating Constraint Validity:',
+        '1/1',
+        'Constraint Validity Score: 100.0%',
         'Overall Score (Average): 100.0%',
     ]
     for line in expected_lines:
@@ -322,6 +360,7 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
     assert list(report.get_properties()['Property']) == [
         'Data Validity',
         'Data Structure',
+        'Constraint Validity',
     ]
     assert report.get_score() == 1.0
 
@@ -398,12 +437,23 @@ def test_unified_diagnostic_report_multi_table():
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, verbose=False)
+    report.generate(real_data, synthetic_data, metadata, MULTI_TABLE_CONSTRAINTS, verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-        'Score': [1.0, 1.0, 1.0],
+        'Property': [
+            'Data Validity',
+            'Data Structure',
+            'Relationship Validity',
+            'Constraint Validity',
+        ],
+        'Score': [1.0, 1.0, 1.0, 1.0],
+    })
+    expected_details_constraint_validity = pd.DataFrame({
+        'Constraint': ['FixedCombinations', 'Inequality'],
+        'Metric': ['ConstraintAdherence', 'ConstraintAdherence'],
+        'Parameters': [constraint['parameters'] for constraint in MULTI_TABLE_CONSTRAINTS],
+        'Score': [1.0, 1.0],
     })
     expected_details_data_validity = pd.DataFrame({
         'Table': [
@@ -492,6 +542,12 @@ def test_unified_diagnostic_report_multi_table():
     )
     pd.testing.assert_frame_equal(
         report.get_details('Data Validity', 'users'), expected_details_users
+    )
+    pd.testing.assert_frame_equal(
+        report.get_details('Constraint Validity'), expected_details_constraint_validity
+    )
+    pd.testing.assert_frame_equal(
+        report.get_details('Constraint Validity', 'users'), expected_details_constraint_validity
     )
     assert report.get_score() == 1.0
     assert_report_scores_are_not_nan(report)
@@ -706,10 +762,121 @@ def test_unified_diagnostic_report_multi_table_with_no_relationships_does_not_sk
         'Data Validity',
         'Data Structure',
         'Relationship Validity',
+        'Constraint Validity',
     ]
     assert pd.isna(
         properties.loc[properties['Property'] == 'Relationship Validity', 'Score'].iloc[0]
     )
+
+
+def test_unified_diagnostic_report_multi_table_verbose_with_constraints(capsys):
+    """Test the Constraint Validity property runs last with one progress step per constraint."""
+    # Setup
+    real_data, synthetic_data, metadata = load_multi_table_demo()
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, MULTI_TABLE_CONSTRAINTS, verbose=True)
+    output = capsys.readouterr().out
+
+    # Assert
+    expected_lines = [
+        'Generating report ...',
+        '(1/4) Evaluating Data Validity:',
+        '(2/4) Evaluating Data Structure:',
+        '(3/4) Evaluating Relationship Validity:',
+        '(4/4) Evaluating Constraint Validity:',
+        '2/2',
+        'Constraint Validity Score: 100.0%',
+        'Overall Score (Average): 100.0%',
+    ]
+    for line in expected_lines:
+        assert line in output
+
+    assert output.index('Evaluating Relationship Validity') < output.index(
+        'Evaluating Constraint Validity'
+    )
+    assert report.get_score() == 1.0
+
+
+@pytest.mark.parametrize('constraints', [None, []])
+def test_unified_diagnostic_report_without_constraints(constraints):
+    """Test the Constraint Validity score is NaN and ignored when there are no constraints."""
+    # Setup
+    real_data, synthetic_data, metadata = load_multi_table_demo()
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, constraints, verbose=False)
+    properties = report.get_properties()
+    details = report.get_details('Constraint Validity')
+
+    # Assert
+    assert list(properties['Property']) == [
+        'Data Validity',
+        'Data Structure',
+        'Relationship Validity',
+        'Constraint Validity',
+    ]
+    assert pd.isna(properties.loc[properties['Property'] == 'Constraint Validity', 'Score'].iloc[0])
+    assert details.empty
+    assert list(details.columns) == ['Constraint', 'Metric', 'Parameters', 'Score']
+    assert report.get_score() == 1.0
+
+
+def test_unified_diagnostic_report_with_invalid_constraint_rows():
+    """Test the Constraint Validity score reflects the rows that break the constraints."""
+    # Setup
+    real_data, synthetic_data, metadata = load_multi_table_demo()
+    synthetic_data['sessions'] = synthetic_data['sessions'].copy()
+    synthetic_data['sessions']['os'] = 'unknown'
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, MULTI_TABLE_CONSTRAINTS, verbose=False)
+    properties = report.get_properties()
+    details = report.get_details('Constraint Validity')
+
+    # Assert
+    constraint_score = properties.loc[
+        properties['Property'] == 'Constraint Validity', 'Score'
+    ].iloc[0]
+    assert constraint_score == 0.5
+    assert details['Score'].tolist() == [0.0, 1.0]
+    assert report.get_score() == properties['Score'].mean()
+
+
+def test_unified_diagnostic_report_invalid_constraints():
+    """Test the report raises an error before generating anything for invalid constraints."""
+    # Setup
+    real_data, synthetic_data, metadata = load_multi_table_demo()
+    report = DiagnosticReport()
+    expected_message = "The 'constraints' parameter must be a list of dictionaries"
+
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_message):
+        report.generate(real_data, synthetic_data, metadata, ['invalid'], verbose=False)
+
+    assert report.is_generated is False
+
+
+def test_unified_diagnostic_report_constraint_validity_visualization():
+    """Test asking for the Constraint Validity visualization raises a friendly error."""
+    # Setup
+    real_data, synthetic_data, metadata = load_multi_table_demo()
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, MULTI_TABLE_CONSTRAINTS, verbose=False)
+    expected_message = (
+        'Error: No visualization is available for Constraint Validity. To see the '
+        "detailed score breakdowns, use the 'get_details' function."
+    )
+
+    # Run and Assert
+    with pytest.raises(VisualizationUnavailableError, match=expected_message):
+        report.get_visualization('Constraint Validity')
+
+    with pytest.raises(VisualizationUnavailableError, match=expected_message):
+        report.get_visualization('Constraint Validity', 'users')
 
 
 def test_unified_quality_report_multi_table_with_no_relationships_does_not_skip_properties():

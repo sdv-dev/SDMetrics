@@ -226,7 +226,7 @@ class TestBaseReport:
 
         # Assert
         assert report.table_names == ['Table_1', 'Table_2']
-        mock_generate.assert_called_once_with(real_data, synthetic_data, metadata, True)
+        mock_generate.assert_called_once_with(real_data, synthetic_data, metadata, None, True)
 
     def test__check_table_names(self):
         """Test the ``_check_table_names`` method."""
@@ -403,6 +403,23 @@ class TestBaseReport:
 
         with pytest.raises(ValueError, match=expected_error_message):
             report.get_visualization('Property_1')
+
+    def test_get_visualization_for_constraint_validity_property(self):
+        """Test ``get_visualization`` for the constraint validity property ignores the table."""
+        # Setup
+        report = BaseMultiTableReport()
+        report._validate_property_generated = Mock()
+        report._properties = {'Constraint Validity': Mock()}
+
+        # Run
+        report.get_visualization('Constraint Validity', 'Table_1')
+        report.get_visualization('Constraint Validity')
+
+        # Assert
+        report._validate_property_generated.assert_called_with('Constraint Validity')
+        assert report._validate_property_generated.call_count == 2
+        report._properties['Constraint Validity'].get_visualization.assert_called_with()
+        assert report._properties['Constraint Validity'].get_visualization.call_count == 2
 
     def test_get_visualization_for_structure_property(self):
         """Test the ``get_visualization`` method for the structure property."""
