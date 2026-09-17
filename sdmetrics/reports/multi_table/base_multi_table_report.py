@@ -176,7 +176,6 @@ class BaseMultiTableReport(BaseReport):
             return self._properties[property_name].get_visualization(table_name)
 
         if property_name == 'Constraint Validity':
-            self._validate_property_generated(property_name)
             return self._properties[property_name].get_visualization()
 
         if table_name is None:

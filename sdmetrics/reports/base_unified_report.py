@@ -29,13 +29,13 @@ class BaseUnifiedReport(BaseMultiTableReport):
             set[str]:
                 Names of properties to skip.
         """
-        skipped_properties = set()
+        skipped_properties = super()._get_skipped_properties(metadata, constraints)
         if len(metadata.get('tables', {})) == 1:
             skipped_properties.update(self._SINGLE_TABLE_SKIPPED_PROPERTIES)
         if not constraints:
             skipped_properties.add('Constraint Validity')
 
-        return skipped_properties or super()._get_skipped_properties(metadata, constraints)
+        return skipped_properties
 
     def _validate_data_format(self, real_data, synthetic_data):
         """Validate that the real and synthetic data have compatible formats.
