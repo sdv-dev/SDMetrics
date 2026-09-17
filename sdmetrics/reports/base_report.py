@@ -164,6 +164,8 @@ class BaseReport:
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
+        real_data = deepcopy(real_data)
+        synthetic_data = deepcopy(synthetic_data)
         self._validate(real_data, synthetic_data, metadata)
         self._skipped_properties = self._get_skipped_properties(metadata, constraints)
         self._original_datetime_columns = self.convert_datetimes(
