@@ -305,14 +305,19 @@ class TestBaseReport:
         base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
         # Assert
-        mock_validate.assert_called_once_with(real_data, synthetic_data, metadata)
+        mock_validate.assert_called_once()
+        copied_real_data, copied_synthetic_data, _ = mock_validate.call_args.args
+        pd.testing.assert_frame_equal(copied_real_data, real_data)
+        pd.testing.assert_frame_equal(copied_synthetic_data, synthetic_data)
+        assert copied_real_data is not real_data
+        assert copied_synthetic_data is not synthetic_data
         mock__print_results.assert_called_once_with(False)
         base_report._properties['Property 1'].get_score.assert_called_with(
-            real_data, synthetic_data, metadata, progress_bar=None
+            copied_real_data, copied_synthetic_data, metadata, progress_bar=None
         )
         assert base_report._properties['Property 1'].num_rows_subsample == 1000
         base_report._properties['Property 2'].get_score.assert_called_with(
-            real_data, synthetic_data, metadata, progress_bar=None
+            copied_real_data, copied_synthetic_data, metadata, progress_bar=None
         )
         assert base_report._properties['Property 2'].num_rows_subsample == 1000
         expected_info = {
@@ -377,11 +382,20 @@ class TestBaseReport:
         base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
         # Assert
+        copied_real_data, copied_synthetic_data, _ = base_report._validate.call_args.args
+        for table_name, table in real_data.items():
+            pd.testing.assert_frame_equal(copied_real_data[table_name], table)
+            pd.testing.assert_frame_equal(
+                copied_synthetic_data[table_name], synthetic_data[table_name]
+            )
+
+        assert copied_real_data is not real_data
+        assert copied_synthetic_data is not synthetic_data
         base_report._properties['Property 1'].get_score.assert_called_with(
-            real_data, synthetic_data, metadata, progress_bar=None
+            copied_real_data, copied_synthetic_data, metadata, progress_bar=None
         )
         base_report._properties['Property 2'].get_score.assert_called_with(
-            real_data, synthetic_data, metadata, progress_bar=None
+            copied_real_data, copied_synthetic_data, metadata, progress_bar=None
         )
         expected_info = {
             'report_type': 'BaseReport',
@@ -483,6 +497,11 @@ class TestBaseReport:
         base_report.generate(real_data, synthetic_data, metadata, verbose=True)
 
         # Assert
+        copied_real_data, copied_synthetic_data, _ = base_report._validate.call_args.args
+        pd.testing.assert_frame_equal(copied_real_data, real_data)
+        pd.testing.assert_frame_equal(copied_synthetic_data, synthetic_data)
+        assert copied_real_data is not real_data
+        assert copied_synthetic_data is not synthetic_data
         base_report._properties['Property 1'].get_score.assert_not_called()
         base_report._properties['Property 1']._get_num_iterations.assert_not_called()
         assert base_report._properties['Property 1'].details.empty
@@ -490,7 +509,7 @@ class TestBaseReport:
         assert base_report._skipped_properties == {'Property 1'}
         base_report._get_skipped_properties.assert_called_once_with(metadata)
         base_report._properties['Property 2'].get_score.assert_called_once_with(
-            real_data, synthetic_data, metadata, progress_bar=mock_tqdm.return_value
+            copied_real_data, copied_synthetic_data, metadata, progress_bar=mock_tqdm.return_value
         )
         mock_write.assert_any_call('Generating report ...\n\n')
         mock_write.assert_any_call(
