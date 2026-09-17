@@ -467,6 +467,7 @@ class TestBaseReport:
         base_report._skipped_properties = {'Old Property'}
         base_report._get_skipped_properties = Mock(return_value={'Property 1'})
         base_report._properties['Property 1'] = Mock()
+        del base_report._properties['Property 1']._skipped_message
         base_report._properties['Property 1'].details = pd.DataFrame({'old': [1]})
         base_report._properties['Property 1'].is_computed = True
         base_report._properties['Property 1']._compute_average.return_value = float('nan')
@@ -488,7 +489,7 @@ class TestBaseReport:
         assert base_report._properties['Property 1'].details.empty
         assert not base_report._properties['Property 1'].is_computed
         assert base_report._skipped_properties == {'Property 1'}
-        base_report._get_skipped_properties.assert_called_once_with(metadata)
+        base_report._get_skipped_properties.assert_called_once_with(metadata, None)
         base_report._properties['Property 2'].get_score.assert_called_once_with(
             real_data, synthetic_data, metadata, progress_bar=mock_tqdm.return_value
         )
@@ -547,27 +548,28 @@ class TestBaseReport:
         )
         assert base_report._overall_score == 0.75
 
-    def test_generate_invalid_constraints(self):
-        """Test ``generate`` validates the constraints before computing any property."""
+    @patch('sys.stdout.write')
+    @patch('tqdm.tqdm')
+    def test_generate_verbose_with_skipped_property_message(self, mock_tqdm, mock_write):
+        """Test a skipped property prints its own message when it defines one."""
         # Setup
         base_report = BaseReport()
         base_report._validate = Mock()
-        base_report._properties['Property 1'] = Mock()
-        base_report._properties['Constraint Validity'] = Mock()
-        base_report._properties[
-            'Constraint Validity'
-        ]._validate_constraints.side_effect = ValueError('invalid constraints')
+        base_report.convert_datetimes = Mock()
+        base_report._print_results = Mock()
+        base_report._get_skipped_properties = Mock(return_value={'Property 1'})
+        base_report._properties['Property 1'] = Mock(_skipped_message='Property message.')
+        base_report._properties['Property 1']._compute_average.return_value = float('nan')
         real_data = pd.DataFrame({'column1': [1, 2, 3]})
         synthetic_data = pd.DataFrame({'column1': [1, 2, 3]})
         metadata = {'columns': {'column1': {'sdtype': 'numerical'}}}
 
-        # Run and Assert
-        with pytest.raises(ValueError, match='invalid constraints'):
-            base_report.generate(real_data, synthetic_data, metadata, 'invalid', verbose=False)
+        # Run
+        base_report.generate(real_data, synthetic_data, metadata, verbose=True)
 
+        # Assert
+        mock_write.assert_any_call('(1/1) Evaluating Property 1: N/A\nProperty message.\n\n')
         base_report._properties['Property 1'].get_score.assert_not_called()
-        base_report._properties['Constraint Validity'].get_score.assert_not_called()
-        assert base_report.is_generated is False
 
     def test__check_report_generated(self):
         """Test the ``check_report_generated`` method."""

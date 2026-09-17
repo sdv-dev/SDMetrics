@@ -17,6 +17,7 @@ class ConstraintValidity(BaseMultiTableProperty):
     """
 
     _num_iteration_case = 'constraint'
+    _skipped_message = 'No constraints were provided.'
 
     def _get_num_iterations(self, metadata, constraints=None):
         """Get the number of iterations for the property, which is one per constraint."""

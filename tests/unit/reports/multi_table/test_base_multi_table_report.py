@@ -7,6 +7,8 @@ import pandas as pd
 import pytest
 
 from sdmetrics.demos import load_demo
+from sdmetrics.errors import VisualizationUnavailableError
+from sdmetrics.reports.multi_table._properties import ConstraintValidity
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
 from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
 
@@ -404,22 +406,23 @@ class TestBaseReport:
         with pytest.raises(ValueError, match=expected_error_message):
             report.get_visualization('Property_1')
 
-    def test_get_visualization_for_constraint_validity_property(self):
-        """Test ``get_visualization`` for the constraint validity property ignores the table."""
+    @pytest.mark.parametrize('table_name', [None, 'Table_1'])
+    def test_get_visualization_for_constraint_validity_property(self, table_name):
+        """Test ``get_visualization`` raises the property error, with or without a table."""
         # Setup
         report = BaseMultiTableReport()
         report._validate_property_generated = Mock()
-        report._properties = {'Constraint Validity': Mock()}
+        report._properties = {'Constraint Validity': ConstraintValidity()}
+        expected_message = (
+            'Error: No visualization is available for Constraint Validity. To see the '
+            "detailed score breakdowns, use the 'get_details' function."
+        )
 
-        # Run
-        report.get_visualization('Constraint Validity', 'Table_1')
-        report.get_visualization('Constraint Validity')
+        # Run and Assert
+        with pytest.raises(VisualizationUnavailableError, match=expected_message):
+            report.get_visualization('Constraint Validity', table_name)
 
-        # Assert
-        report._validate_property_generated.assert_called_with('Constraint Validity')
-        assert report._validate_property_generated.call_count == 2
-        report._properties['Constraint Validity'].get_visualization.assert_called_with()
-        assert report._properties['Constraint Validity'].get_visualization.call_count == 2
+        report._validate_property_generated.assert_called_once_with('Constraint Validity')
 
     def test_get_visualization_for_structure_property(self):
         """Test the ``get_visualization`` method for the structure property."""

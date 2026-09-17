@@ -130,12 +130,14 @@ class BaseReport:
         if verbose:
             sys.stdout.write(f'Overall Score (Average): {round(self._overall_score * 100, 2)}%\n\n')
 
-    def _get_skipped_properties(self, metadata):
+    def _get_skipped_properties(self, metadata, constraints=None):
         """Return properties that should not be computed for the metadata.
 
         Args:
             metadata (dict):
                 The metadata dict.
+            constraints (list[dict] or None):
+                The constraints given to the report. Defaults to None.
 
         Returns:
             set[str]:
@@ -163,10 +165,7 @@ class BaseReport:
                 Whether or not to print report summary and progress.
         """
         self._validate(real_data, synthetic_data, metadata)
-        if 'Constraint Validity' in self._properties:
-            self._properties['Constraint Validity']._validate_constraints(constraints)
-
-        self._skipped_properties = self._get_skipped_properties(metadata)
+        self._skipped_properties = self._get_skipped_properties(metadata, constraints)
         self._original_datetime_columns = self.convert_datetimes(
             real_data, synthetic_data, metadata
         )
@@ -196,9 +195,10 @@ class BaseReport:
                 property_instance.is_computed = False
                 property_instance.details = pd.DataFrame()
                 if verbose:
-                    sys.stdout.write(
-                        f'{property_description}: N/A\n{self._skipped_property_message}\n\n'
+                    skipped_message = getattr(
+                        property_instance, '_skipped_message', self._skipped_property_message
                     )
+                    sys.stdout.write(f'{property_description}: N/A\n{skipped_message}\n\n')
                     sys.stdout.flush()
 
                 continue

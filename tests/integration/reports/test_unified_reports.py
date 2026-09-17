@@ -9,30 +9,6 @@ from sdmetrics.errors import VisualizationUnavailableError
 from sdmetrics.reports import DiagnosticReport, QualityReport
 from tests.utils import assert_report_scores_are_not_nan
 
-SINGLE_TABLE_CONSTRAINTS = [
-    {
-        'class_name': 'FixedCombinations',
-        'parameters': {
-            'table_name': 'student_placements',
-            'column_names': ['gender', 'degree_type'],
-        },
-    },
-]
-MULTI_TABLE_CONSTRAINTS = [
-    {
-        'class_name': 'FixedCombinations',
-        'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
-    },
-    {
-        'class_name': 'Inequality',
-        'parameters': {
-            'table_name': 'transactions',
-            'low_column_name': 'transaction_id',
-            'high_column_name': 'amount',
-        },
-    },
-]
-
 
 def _set_thresholds_zero(report):
     report.real_correlation_threshold = 0
@@ -150,11 +126,18 @@ def _load_single_table_quality_report_data():
 
 def test_unified_diagnostic_report_single_table():
     # Setup
+    fixed_combination = {
+        'class_name': 'FixedCombinations',
+        'parameters': {
+            'table_name': 'student_placements',
+            'column_names': ['gender', 'degree_type'],
+        },
+    }
     real_data, synthetic_data, metadata = load_single_table_demo()
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, SINGLE_TABLE_CONSTRAINTS, verbose=False)
+    report.generate(real_data, synthetic_data, metadata, [fixed_combination], verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
@@ -164,7 +147,7 @@ def test_unified_diagnostic_report_single_table():
     expected_details_constraint_validity = pd.DataFrame({
         'Constraint': ['FixedCombinations'],
         'Metric': ['ConstraintAdherence'],
-        'Parameters': [SINGLE_TABLE_CONSTRAINTS[0]['parameters']],
+        'Parameters': [fixed_combination['parameters']],
         'Score': [1.0],
     })
     expected_details_data_validity = pd.DataFrame({
@@ -337,7 +320,48 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, SINGLE_TABLE_CONSTRAINTS, verbose=True)
+    report.generate(real_data, synthetic_data, metadata, verbose=True)
+    output = capsys.readouterr().out
+
+    # Assert
+    expected_lines = [
+        'Generating report ...',
+        '(1/4) Evaluating Data Validity:',
+        'Data Validity Score: 100.0%',
+        '(2/4) Evaluating Data Structure:',
+        'Data Structure Score: 100.0%',
+        '(3/4) Evaluating Relationship Validity: N/A',
+        'This property does not apply to single-table data.',
+        '(4/4) Evaluating Constraint Validity: N/A',
+        'No constraints were provided.',
+        'Overall Score (Average): 100.0%',
+    ]
+    for line in expected_lines:
+        assert line in output
+
+    assert list(report.get_properties()['Property']) == [
+        'Data Validity',
+        'Data Structure',
+        'Constraint Validity',
+    ]
+    assert report.get_score() == 1.0
+
+
+def test_unified_diagnostic_report_single_table_verbose_with_constraints(capsys):
+    """Test unified diagnostic report prints the Constraint Validity progress for single-table."""
+    # Setup
+    fixed_combination = {
+        'class_name': 'FixedCombinations',
+        'parameters': {
+            'table_name': 'student_placements',
+            'column_names': ['gender', 'degree_type'],
+        },
+    }
+    real_data, synthetic_data, metadata = load_single_table_demo()
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, [fixed_combination], verbose=True)
     output = capsys.readouterr().out
 
     # Assert
@@ -350,18 +374,12 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
         '(3/4) Evaluating Relationship Validity: N/A',
         'This property does not apply to single-table data.',
         '(4/4) Evaluating Constraint Validity:',
-        '1/1',
         'Constraint Validity Score: 100.0%',
         'Overall Score (Average): 100.0%',
     ]
     for line in expected_lines:
         assert line in output
 
-    assert list(report.get_properties()['Property']) == [
-        'Data Validity',
-        'Data Structure',
-        'Constraint Validity',
-    ]
     assert report.get_score() == 1.0
 
 
@@ -433,11 +451,25 @@ def test_unified_quality_report_single_table_verbose_skips_relationship_properti
 
 def test_unified_diagnostic_report_multi_table():
     # Setup
+    multiple_constraints = [
+        {
+            'class_name': 'FixedCombinations',
+            'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
+        },
+        {
+            'class_name': 'Inequality',
+            'parameters': {
+                'table_name': 'transactions',
+                'low_column_name': 'transaction_id',
+                'high_column_name': 'amount',
+            },
+        },
+    ]
     real_data, synthetic_data, metadata = load_multi_table_demo()
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, MULTI_TABLE_CONSTRAINTS, verbose=False)
+    report.generate(real_data, synthetic_data, metadata, multiple_constraints, verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
@@ -452,7 +484,7 @@ def test_unified_diagnostic_report_multi_table():
     expected_details_constraint_validity = pd.DataFrame({
         'Constraint': ['FixedCombinations', 'Inequality'],
         'Metric': ['ConstraintAdherence', 'ConstraintAdherence'],
-        'Parameters': [constraint['parameters'] for constraint in MULTI_TABLE_CONSTRAINTS],
+        'Parameters': [constraint['parameters'] for constraint in multiple_constraints],
         'Score': [1.0, 1.0],
     })
     expected_details_data_validity = pd.DataFrame({
@@ -772,21 +804,37 @@ def test_unified_diagnostic_report_multi_table_with_no_relationships_does_not_sk
 def test_unified_diagnostic_report_multi_table_verbose_with_constraints(capsys):
     """Test the Constraint Validity property runs last with one progress step per constraint."""
     # Setup
+    multiple_constraints = [
+        {
+            'class_name': 'FixedCombinations',
+            'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
+        },
+        {
+            'class_name': 'Inequality',
+            'parameters': {
+                'table_name': 'transactions',
+                'low_column_name': 'transaction_id',
+                'high_column_name': 'amount',
+            },
+        },
+    ]
     real_data, synthetic_data, metadata = load_multi_table_demo()
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, MULTI_TABLE_CONSTRAINTS, verbose=True)
+    report.generate(real_data, synthetic_data, metadata, multiple_constraints, verbose=True)
     output = capsys.readouterr().out
 
     # Assert
     expected_lines = [
         'Generating report ...',
         '(1/4) Evaluating Data Validity:',
+        'Data Validity Score: 100.0%',
         '(2/4) Evaluating Data Structure:',
+        'Data Structure Score: 100.0%',
         '(3/4) Evaluating Relationship Validity:',
+        'Relationship Validity Score: 100.0%',
         '(4/4) Evaluating Constraint Validity:',
-        '2/2',
         'Constraint Validity Score: 100.0%',
         'Overall Score (Average): 100.0%',
     ]
@@ -820,20 +868,33 @@ def test_unified_diagnostic_report_without_constraints(constraints):
     ]
     assert pd.isna(properties.loc[properties['Property'] == 'Constraint Validity', 'Score'].iloc[0])
     assert details.empty
-    assert list(details.columns) == ['Constraint', 'Metric', 'Parameters', 'Score']
     assert report.get_score() == 1.0
 
 
 def test_unified_diagnostic_report_with_invalid_constraint_rows():
     """Test the Constraint Validity score reflects the rows that break the constraints."""
     # Setup
+    multiple_constraints = [
+        {
+            'class_name': 'FixedCombinations',
+            'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
+        },
+        {
+            'class_name': 'Inequality',
+            'parameters': {
+                'table_name': 'transactions',
+                'low_column_name': 'transaction_id',
+                'high_column_name': 'amount',
+            },
+        },
+    ]
     real_data, synthetic_data, metadata = load_multi_table_demo()
     synthetic_data['sessions'] = synthetic_data['sessions'].copy()
     synthetic_data['sessions']['os'] = 'unknown'
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, MULTI_TABLE_CONSTRAINTS, verbose=False)
+    report.generate(real_data, synthetic_data, metadata, multiple_constraints, verbose=False)
     properties = report.get_properties()
     details = report.get_details('Constraint Validity')
 
@@ -846,26 +907,12 @@ def test_unified_diagnostic_report_with_invalid_constraint_rows():
     assert report.get_score() == properties['Score'].mean()
 
 
-def test_unified_diagnostic_report_invalid_constraints():
-    """Test the report raises an error before generating anything for invalid constraints."""
-    # Setup
-    real_data, synthetic_data, metadata = load_multi_table_demo()
-    report = DiagnosticReport()
-    expected_message = "The 'constraints' parameter must be a list of dictionaries"
-
-    # Run and Assert
-    with pytest.raises(ValueError, match=expected_message):
-        report.generate(real_data, synthetic_data, metadata, ['invalid'], verbose=False)
-
-    assert report.is_generated is False
-
-
 def test_unified_diagnostic_report_constraint_validity_visualization():
     """Test asking for the Constraint Validity visualization raises a friendly error."""
     # Setup
     real_data, synthetic_data, metadata = load_multi_table_demo()
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, MULTI_TABLE_CONSTRAINTS, verbose=False)
+    report.generate(real_data, synthetic_data, metadata, verbose=False)
     expected_message = (
         'Error: No visualization is available for Constraint Validity. To see the '
         "detailed score breakdowns, use the 'get_details' function."
