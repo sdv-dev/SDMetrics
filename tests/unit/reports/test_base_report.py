@@ -551,16 +551,17 @@ class TestBaseReport:
         base_report.generate(real_data, synthetic_data, metadata, constraints, verbose=True)
 
         # Assert
+        copied_real_data, copied_synthetic_data, _ = base_report._validate.call_args.args
         base_report._properties['Property 1']._get_num_iterations.assert_called_once_with(metadata)
         base_report._properties['Property 1'].get_score.assert_called_once_with(
-            real_data, synthetic_data, metadata, progress_bar=mock_tqdm.return_value
+            copied_real_data, copied_synthetic_data, metadata, progress_bar=mock_tqdm.return_value
         )
         base_report._properties['Constraint Validity']._get_num_iterations.assert_called_once_with(
             metadata, constraints=constraints
         )
         base_report._properties['Constraint Validity'].get_score.assert_called_once_with(
-            real_data,
-            synthetic_data,
+            copied_real_data,
+            copied_synthetic_data,
             metadata,
             progress_bar=mock_tqdm.return_value,
             constraints=constraints,

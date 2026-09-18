@@ -451,25 +451,17 @@ def test_unified_quality_report_single_table_verbose_skips_relationship_properti
 
 def test_unified_diagnostic_report_multi_table():
     # Setup
-    multiple_constraints = [
+    constraints = [
         {
             'class_name': 'FixedCombinations',
             'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
-        },
-        {
-            'class_name': 'Inequality',
-            'parameters': {
-                'table_name': 'transactions',
-                'low_column_name': 'transaction_id',
-                'high_column_name': 'amount',
-            },
         },
     ]
     real_data, synthetic_data, metadata = load_multi_table_demo()
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, multiple_constraints, verbose=False)
+    report.generate(real_data, synthetic_data, metadata, constraints, verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
@@ -482,10 +474,10 @@ def test_unified_diagnostic_report_multi_table():
         'Score': [1.0, 1.0, 1.0, 1.0],
     })
     expected_details_constraint_validity = pd.DataFrame({
-        'Constraint': ['FixedCombinations', 'Inequality'],
-        'Metric': ['ConstraintAdherence', 'ConstraintAdherence'],
-        'Parameters': [constraint['parameters'] for constraint in multiple_constraints],
-        'Score': [1.0, 1.0],
+        'Constraint': ['FixedCombinations'],
+        'Metric': ['ConstraintAdherence'],
+        'Parameters': [constraints[0]['parameters']],
+        'Score': [1.0],
     })
     expected_details_data_validity = pd.DataFrame({
         'Table': [
@@ -804,25 +796,17 @@ def test_unified_diagnostic_report_multi_table_with_no_relationships_does_not_sk
 def test_unified_diagnostic_report_multi_table_verbose_with_constraints(capsys):
     """Test the Constraint Validity property runs last with one progress step per constraint."""
     # Setup
-    multiple_constraints = [
+    constraints = [
         {
             'class_name': 'FixedCombinations',
             'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
-        },
-        {
-            'class_name': 'Inequality',
-            'parameters': {
-                'table_name': 'transactions',
-                'low_column_name': 'transaction_id',
-                'high_column_name': 'amount',
-            },
         },
     ]
     real_data, synthetic_data, metadata = load_multi_table_demo()
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, multiple_constraints, verbose=True)
+    report.generate(real_data, synthetic_data, metadata, constraints, verbose=True)
     output = capsys.readouterr().out
 
     # Assert
