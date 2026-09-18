@@ -394,15 +394,20 @@ def test_column_pair_trends_threshold_changes_details():
     assert score_zero_intertable >= score_default_intertable  # approximately 0.45 > 0.4
 
 
-def test_quality_report_with_object_datetimes():
-    """Test the multi table QualityReport with object datetimes."""
+def test_quality_report_with_datetime64_columns():
+    """Test the multi table QualityReport when the datetimes are ``datetime64``."""
     # Setup
     real_data, synthetic_data, metadata = load_demo(modality='multi_table')
     for table, table_meta in metadata['tables'].items():
         for column, column_meta in table_meta['columns'].items():
             if column_meta['sdtype'] == 'datetime':
                 dt_format = column_meta['datetime_format']
-                real_data[table][column] = real_data[table][column].dt.strftime(dt_format)
+                real_data[table][column] = pd.to_datetime(
+                    real_data[table][column], format=dt_format
+                )
+                synthetic_data[table][column] = pd.to_datetime(
+                    synthetic_data[table][column], format=dt_format
+                )
 
     report = QualityReport()
     _set_thresholds_zero(report)
@@ -422,10 +427,10 @@ def test_quality_report_with_object_datetimes():
     assert_report_scores_are_not_nan(report)
 
 
-def test_quality_report_with_errors():
+def test_quality_report_with_errors(object_datetime_multi_table_demo):
     """Test the multi table QualityReport with errors when computing metrics."""
     # Setup
-    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    real_data, synthetic_data, metadata = object_datetime_multi_table_demo
     real_data['users']['age'].iloc[0] = 'error_1'
     real_data['transactions']['timestamp'].iloc[0] = 'error_2'
     real_data['transactions']['amount'].iloc[0] = 'error_3'
@@ -559,3 +564,21 @@ def test_with_large_dataset():
     assert np.isclose(report_2.get_score(), score_1_run_1, atol=0.001)
     assert np.isclose(cpt_report_1, cpt_report_2, atol=0.001)
     assert np.isclose(intertable_trends_1, intertable_trends_2, atol=0.001)
+
+
+def test_report_keeps_data_unchanged():
+    """Test that the quality report does not modify the input data."""
+    # Setup
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    real_data_copy = {table_name: table.copy() for table_name, table in real_data.items()}
+    synthetic_data_copy = {table_name: table.copy() for table_name, table in synthetic_data.items()}
+    report = QualityReport()
+
+    # Run
+    report.generate(real_data, synthetic_data, metadata, verbose=True)
+
+    # Assert
+    for table_name in real_data:
+        pd.testing.assert_frame_equal(real_data[table_name], real_data_copy[table_name])
+    for table_name in synthetic_data:
+        pd.testing.assert_frame_equal(synthetic_data[table_name], synthetic_data_copy[table_name])

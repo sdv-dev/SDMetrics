@@ -89,14 +89,19 @@ class TestDiagnosticReport:
         assert report.get_score() < 1.0
         assert report_v2.get_score() == 1.0
 
-    def test_end_to_end_with_object_datetimes(self):
-        """Test the ``DiagnosticReport`` report with object datetimes."""
+    def test_end_to_end_with_datetime64_columns(self):
+        """Test the ``DiagnosticReport`` report when the datetimes are ``datetime64``."""
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
         for table, table_meta in metadata['tables'].items():
             for column, column_meta in table_meta['columns'].items():
                 if column_meta['sdtype'] == 'datetime':
                     dt_format = column_meta['datetime_format']
-                    real_data[table][column] = real_data[table][column].dt.strftime(dt_format)
+                    real_data[table][column] = pd.to_datetime(
+                        real_data[table][column], format=dt_format
+                    )
+                    synthetic_data[table][column] = pd.to_datetime(
+                        synthetic_data[table][column], format=dt_format
+                    )
 
         report = DiagnosticReport()
 
@@ -104,6 +109,7 @@ class TestDiagnosticReport:
         report.generate(real_data, synthetic_data, metadata, verbose=False)
         results = report.get_score()
         properties = report.get_properties()
+        validity = report.get_details('Data Validity')
 
         # Assert
         expected_dataframe = pd.DataFrame({
@@ -112,15 +118,16 @@ class TestDiagnosticReport:
         })
         assert results == 1.0
         pd.testing.assert_frame_equal(properties, expected_dataframe)
-        assert_report_scores_are_not_nan(report)
+        assert pd.isna(validity[validity['Metric'] == 'DatetimeFormatAdherence']['Score']).all()
+        assert_report_scores_are_not_nan(report, exclude=['DatetimeFormatAdherence'])
 
-    def test_end_to_end_with_metrics_failing(self):
+    def test_end_to_end_with_metrics_failing(self, object_datetime_multi_table_demo):
         """Test the ``DiagnosticReport`` report when some metrics crash.
 
         This test makes fail the 'Boundary' property to check that the report still works.
         The TableStructure should no longer be 1.0 since there is some dtype mismatch.
         """
-        real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+        real_data, synthetic_data, metadata = object_datetime_multi_table_demo
         real_data['users']['age'].iloc[0] = 'error_1'
         real_data['transactions']['timestamp'].iloc[0] = 'error_2'
         real_data['transactions']['amount'].iloc[0] = 'error_3'
@@ -209,7 +216,7 @@ class TestDiagnosticReport:
                 1.0,
                 1.0,
                 np.nan,
-                1.0,
+                np.nan,
                 np.nan,
                 1.0,
             ],
@@ -366,3 +373,21 @@ class TestDiagnosticReport:
 
         # Run and Assert
         report.generate(real_data, synthetic_data, metadata)
+
+
+def test_report_keeps_data_unchanged():
+    """Test that the diagnostic report does not modify the input data."""
+    # Setup
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    real_data_copy = {table_name: table.copy() for table_name, table in real_data.items()}
+    synthetic_data_copy = {table_name: table.copy() for table_name, table in synthetic_data.items()}
+    report = DiagnosticReport()
+
+    # Run
+    report.generate(real_data, synthetic_data, metadata, verbose=True)
+
+    # Assert
+    for table_name in real_data:
+        pd.testing.assert_frame_equal(real_data[table_name], real_data_copy[table_name])
+    for table_name in synthetic_data:
+        pd.testing.assert_frame_equal(synthetic_data[table_name], synthetic_data_copy[table_name])
