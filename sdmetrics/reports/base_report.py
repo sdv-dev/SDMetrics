@@ -130,12 +130,14 @@ class BaseReport:
         if verbose:
             sys.stdout.write(f'Overall Score (Average): {round(self._overall_score * 100, 2)}%\n\n')
 
-    def _get_skipped_properties(self, metadata):
+    def _get_skipped_properties(self, metadata, constraints=None):
         """Return properties that should not be computed for the metadata.
 
         Args:
             metadata (dict):
                 The metadata dict.
+            constraints (list[dict] or None):
+                The constraints given to the report. Defaults to None.
 
         Returns:
             set[str]:
@@ -143,7 +145,7 @@ class BaseReport:
         """
         return set()
 
-    def generate(self, real_data, synthetic_data, metadata, verbose=True):
+    def generate(self, real_data, synthetic_data, metadata, constraints=None, verbose=True):
         """Generate report.
 
         This method generates the report by iterating through each property and calculating
@@ -156,13 +158,16 @@ class BaseReport:
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
+            constraints (list[dict] or None):
+                A list of constraints to evaluate their adherence, each represented as a
+                dictionary with a ``class_name`` and a ``parameters`` key. Defaults to None.
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
         real_data = deepcopy(real_data)
         synthetic_data = deepcopy(synthetic_data)
         self._validate(real_data, synthetic_data, metadata)
-        self._skipped_properties = self._get_skipped_properties(metadata)
+        self._skipped_properties = self._get_skipped_properties(metadata, constraints)
         self._original_datetime_columns = self.convert_datetimes(
             real_data, synthetic_data, metadata
         )
@@ -192,15 +197,22 @@ class BaseReport:
                 property_instance.is_computed = False
                 property_instance.details = pd.DataFrame()
                 if verbose:
-                    sys.stdout.write(
-                        f'{property_description}: N/A\n{self._skipped_property_message}\n\n'
+                    skipped_message = getattr(
+                        property_instance, '_skipped_message', self._skipped_property_message
                     )
+                    sys.stdout.write(f'{property_description}: N/A\n{skipped_message}\n\n')
                     sys.stdout.flush()
 
                 continue
 
+            property_arguments = {}
+            if property_name == 'Constraint Validity':
+                property_arguments['constraints'] = constraints
+
             if verbose:
-                num_iterations = int(property_instance._get_num_iterations(metadata))
+                num_iterations = int(
+                    property_instance._get_num_iterations(metadata, **property_arguments)
+                )
                 progress_bar = tqdm.tqdm(
                     total=num_iterations, file=sys.stdout, bar_format='{desc}|{bar}{r_bar}|'
                 )
@@ -220,7 +232,7 @@ class BaseReport:
 
             self._properties[property_name].num_rows_subsample = self.num_rows_subsample
             score = self._properties[property_name].get_score(
-                real_data, synthetic_data, metadata, progress_bar=progress_bar
+                real_data, synthetic_data, metadata, progress_bar=progress_bar, **property_arguments
             )
             scores.append(score)
             if verbose:

@@ -181,8 +181,10 @@ class TestBaseUnifiedReport:
             'relationships': [],
         }
 
+        constraints = [{'class_name': 'Range', 'parameters': {}}]
+
         # Run
-        skipped_properties = base_report._get_skipped_properties(metadata)
+        skipped_properties = base_report._get_skipped_properties(metadata, constraints)
 
         # Assert
         assert skipped_properties == {'Relationship Validity', 'Cardinality', 'Intertable Trends'}
@@ -207,11 +209,49 @@ class TestBaseUnifiedReport:
             'relationships': [],
         }
 
+        constraints = [{'class_name': 'Range', 'parameters': {}}]
+
+        # Run
+        skipped_properties = base_report._get_skipped_properties(metadata, constraints)
+
+        # Assert
+        assert skipped_properties == set()
+
+    @pytest.mark.parametrize('constraints', [None, []])
+    def test__get_skipped_properties_without_constraints(self, constraints):
+        """Test Constraint Validity is skipped when no constraints are given."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        metadata = {
+            'tables': {
+                'table1': {'columns': {'column1': {'sdtype': 'numerical'}}},
+                'table2': {'columns': {'column2': {'sdtype': 'numerical'}}},
+            },
+            'relationships': [],
+        }
+
+        # Run
+        skipped_properties = base_report._get_skipped_properties(metadata, constraints)
+
+        # Assert
+        assert skipped_properties == {'Constraint Validity'}
+
+    def test__get_skipped_properties_single_table_without_constraints(self):
+        """Test the single-table skips are combined with the Constraint Validity skip."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        metadata = {'tables': {'table1': {'columns': {'column1': {'sdtype': 'numerical'}}}}}
+
         # Run
         skipped_properties = base_report._get_skipped_properties(metadata)
 
         # Assert
-        assert skipped_properties == set()
+        assert skipped_properties == {
+            'Relationship Validity',
+            'Cardinality',
+            'Intertable Trends',
+            'Constraint Validity',
+        }
 
     @patch('sdmetrics.reports.base_unified_report._validate_unified_metadata')
     def test__validate_metadata_error(self, mock__validate_metadata):
