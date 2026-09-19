@@ -1,5 +1,18 @@
 # History
 
+## v0.31.1 - 2026-09-18
+
+### New Features
+
+* Add `ConstraintValidity` property - Issue [#900](https://github.com/sdv-dev/SDMetrics/issues/900) by @sarahmish
+* Add `ConstraintAdherence` metric - Issue [#899](https://github.com/sdv-dev/SDMetrics/issues/899) by @sarahmish
+
+### Bugs Fixed
+
+* [SDV 2.0] Quality report modifies real data - Issue [#939](https://github.com/sdv-dev/SDMetrics/issues/939) by @R-Palazzo
+* The `load_demo` function should load in datetimes as strings with their original format intact - Issue [#926](https://github.com/sdv-dev/SDMetrics/issues/926) by @sarahmish
+* The DiagnosticReport reports a score of 1.0 even if a datetime format cannot be checked - Issue [#925](https://github.com/sdv-dev/SDMetrics/issues/925) by @sarahmish
+
 ## v0.31.0 - 2026-09-04
 
 ### New Features
