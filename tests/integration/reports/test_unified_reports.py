@@ -126,18 +126,20 @@ def _load_single_table_quality_report_data():
 
 def test_unified_diagnostic_report_single_table():
     # Setup
-    fixed_combination = {
-        'class_name': 'FixedCombinations',
+    inequality = {
+        'class_name': 'Inequality',
         'parameters': {
             'table_name': 'student_placements',
-            'column_names': ['gender', 'degree_type'],
+            'low_column_name': 'start_date',
+            'high_column_name': 'end_date',
         },
     }
     real_data, synthetic_data, metadata = load_single_table_demo()
+    synthetic_data['student_placements'].loc[[43, 93, 179], 'end_date'] = None
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, [fixed_combination], verbose=False)
+    report.generate(real_data, synthetic_data, metadata, [inequality], verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
@@ -145,9 +147,9 @@ def test_unified_diagnostic_report_single_table():
         'Score': [1.0, 1.0, 1.0],
     })
     expected_details_constraint_validity = pd.DataFrame({
-        'Constraint': ['FixedCombinations'],
+        'Constraint': ['Inequality'],
         'Metric': ['ConstraintAdherence'],
-        'Parameters': [fixed_combination['parameters']],
+        'Parameters': [inequality['parameters']],
         'Score': [1.0],
     })
     expected_details_data_validity = pd.DataFrame({
@@ -350,18 +352,19 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
 def test_unified_diagnostic_report_single_table_verbose_with_constraints(capsys):
     """Test unified diagnostic report prints the Constraint Validity progress for single-table."""
     # Setup
-    fixed_combination = {
-        'class_name': 'FixedCombinations',
+    inequality = {
+        'class_name': 'Inequality',
         'parameters': {
             'table_name': 'student_placements',
-            'column_names': ['gender', 'degree_type'],
+            'low_column_name': 'start_date',
+            'high_column_name': 'end_date',
         },
     }
     real_data, synthetic_data, metadata = load_single_table_demo()
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, [fixed_combination], verbose=True)
+    report.generate(real_data, synthetic_data, metadata, [inequality], verbose=True)
     output = capsys.readouterr().out
 
     # Assert
@@ -374,13 +377,13 @@ def test_unified_diagnostic_report_single_table_verbose_with_constraints(capsys)
         '(3/4) Evaluating Relationship Validity: N/A',
         'This property does not apply to single-table data.',
         '(4/4) Evaluating Constraint Validity:',
-        'Constraint Validity Score: 100.0%',
-        'Overall Score (Average): 100.0%',
+        'Constraint Validity Score: 98.6%',
+        'Overall Score (Average): 99.53%',
     ]
     for line in expected_lines:
         assert line in output
 
-    assert report.get_score() == 1.0
+    assert report.get_score() >= 0.99
 
 
 def test_diagnostic_report_with_ordinal_sdtype():

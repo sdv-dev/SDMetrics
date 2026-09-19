@@ -20,8 +20,6 @@ def data():
             'user_id': [0, 0, 1],
             'device': ['mobile', 'tablet', 'mobile'],
             'os': ['android', 'ios', 'android'],
-            'session_start': ['2024-01-01', '2024-01-02', '2024-01-03'],
-            'session_end': ['2024-01-02', '2024-01-02', '2024-01-05'],
         }),
     }
 
@@ -41,8 +39,6 @@ def metadata():
                     'user_id': {'sdtype': 'id'},
                     'device': {'sdtype': 'categorical'},
                     'os': {'sdtype': 'categorical'},
-                    'session_start': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-                    'session_end': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
                 },
             },
         },
@@ -67,9 +63,9 @@ def constraints():
         {
             'class_name': 'Inequality',
             'parameters': {
-                'table_name': 'sessions',
-                'low_column_name': 'session_start',
-                'high_column_name': 'session_end',
+                'table_name': 'users',
+                'low_column_name': 'user_id',
+                'high_column_name': 'age',
             },
         },
     ]
