@@ -7,6 +7,8 @@ import pandas as pd
 import pytest
 
 from sdmetrics.demos import load_demo
+from sdmetrics.errors import VisualizationUnavailableError
+from sdmetrics.reports.multi_table._properties import ConstraintValidity
 from sdmetrics.reports.multi_table.base_multi_table_report import BaseMultiTableReport
 from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
 
@@ -226,7 +228,7 @@ class TestBaseReport:
 
         # Assert
         assert report.table_names == ['Table_1', 'Table_2']
-        mock_generate.assert_called_once_with(real_data, synthetic_data, metadata, True)
+        mock_generate.assert_called_once_with(real_data, synthetic_data, metadata, None, True)
 
     def test__check_table_names(self):
         """Test the ``_check_table_names`` method."""
@@ -403,6 +405,21 @@ class TestBaseReport:
 
         with pytest.raises(ValueError, match=expected_error_message):
             report.get_visualization('Property_1')
+
+    @pytest.mark.parametrize('table_name', [None, 'Table_1'])
+    def test_get_visualization_for_constraint_validity_property(self, table_name):
+        """Test ``get_visualization`` raises the property error, with or without a table."""
+        # Setup
+        report = BaseMultiTableReport()
+        report._properties = {'Constraint Validity': ConstraintValidity()}
+        expected_message = (
+            'Error: No visualization is available for Constraint Validity. To see the '
+            "detailed score breakdowns, use the 'get_details' function."
+        )
+
+        # Run and Assert
+        with pytest.raises(VisualizationUnavailableError, match=expected_message):
+            report.get_visualization('Constraint Validity', table_name)
 
     def test_get_visualization_for_structure_property(self):
         """Test the ``get_visualization`` method for the structure property."""
