@@ -75,7 +75,19 @@ class BaseReport:
         )
         raise ValueError(error_message)
 
-    def _validate(self, real_data, synthetic_data, metadata):
+    def _validate_constraints_input(self, constraints):
+        """Validate that the constraints are ``None`` or a list of dictionaries."""
+        if constraints is None:
+            return
+
+        is_list = isinstance(constraints, list)
+        if not is_list or not all(isinstance(constraint, dict) for constraint in constraints):
+            raise ValueError(
+                f"{self.__class__.__name__} expects 'constraints' parameter to be "
+                "a list of dictionaries, each one with the keys 'class_name' and 'parameters'."
+            )
+
+    def _validate(self, real_data, synthetic_data, metadata, constraints=None):
         """Validate the inputs.
 
         Args:
@@ -85,10 +97,13 @@ class BaseReport:
                 The synthetic data.
             metadata (dict):
                 The metadata of the table.
+            constraints (list[dict] or None):
+                The constraints to evaluate. Defaults to None.
         """
         self._validate_data_format(real_data, synthetic_data)
         _validate_metadata(metadata)
         self._validate_metadata_matches_data(real_data, synthetic_data, metadata)
+        self._validate_constraints_input(constraints)
 
     @staticmethod
     def convert_datetimes(real_data, synthetic_data, metadata):
@@ -166,7 +181,7 @@ class BaseReport:
         """
         real_data = deepcopy(real_data)
         synthetic_data = deepcopy(synthetic_data)
-        self._validate(real_data, synthetic_data, metadata)
+        self._validate(real_data, synthetic_data, metadata, constraints)
         self._skipped_properties = self._get_skipped_properties(metadata, constraints)
         self._original_datetime_columns = self.convert_datetimes(
             real_data, synthetic_data, metadata

@@ -80,7 +80,7 @@ class BaseUnifiedReport(BaseMultiTableReport):
         super()._validate_property_generated(property_name)
         self._check_property_single_table(property_name)
 
-    def _validate(self, real_data, synthetic_data, metadata):
+    def _validate(self, real_data, synthetic_data, metadata, constraints=None):
         """Validate the inputs.
 
         Args:
@@ -90,6 +90,8 @@ class BaseUnifiedReport(BaseMultiTableReport):
                 The synthetic data.
             metadata (dict):
                 The metadata.
+            constraints (list[dict] or None):
+                The constraints to evaluate. Defaults to None.
         """
         _validate_unified_metadata(metadata)
         self.table_names = list(metadata.get('tables', []))
@@ -99,6 +101,7 @@ class BaseUnifiedReport(BaseMultiTableReport):
             synthetic_data,
             metadata,
         )
+        self._validate_constraints_input(constraints)
 
     def get_properties(self):
         """Return the property score.
