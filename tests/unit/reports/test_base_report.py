@@ -125,8 +125,7 @@ class TestBaseReport:
         base_report = BaseReport()
         mock__validate_metadata_matches_data = Mock()
         base_report._validate_metadata_matches_data = mock__validate_metadata_matches_data
-        base_report._validate_constraints_input = Mock()
-        constraints = [{'class_name': 'Range', 'parameters': {}}]
+        constraints = None
 
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
@@ -153,7 +152,6 @@ class TestBaseReport:
         mock__validate_metadata_matches_data.assert_called_once_with(
             real_data, synthetic_data, metadata
         )
-        base_report._validate_constraints_input.assert_called_once_with(constraints)
 
     @pytest.mark.parametrize(
         'constraints',
@@ -176,8 +174,8 @@ class TestBaseReport:
         # Setup
         base_report = BaseReport()
         expected_message = (
-            "expects 'constraints' parameter to be a list of dictionaries, each one with "
-            "the keys 'class_name' and 'parameters'."
+            "BaseReport expects 'constraints' parameter to be a list of dictionaries, "
+            "each one with the keys 'class_name' and 'parameters'."
         )
 
         # Run and Assert
