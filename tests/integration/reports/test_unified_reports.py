@@ -797,7 +797,7 @@ def test_unified_diagnostic_report_multi_table_with_no_relationships_does_not_sk
 
 
 def test_unified_diagnostic_report_multi_table_verbose_with_constraints(capsys):
-    """Test the Constraint Validity property runs last with one progress step per constraint."""
+    """Test unified diagnostic report prints the Constraint Validity progress for multi-table."""
     # Setup
     constraints = [
         {
