@@ -855,6 +855,21 @@ def test_unified_diagnostic_report_without_constraints(constraints):
     assert report.get_score() == 1.0
 
 
+@pytest.mark.parametrize('constraints', [True, 'invalid', ['invalid']])
+def test_unified_diagnostic_report_invalid_constraints(constraints):
+    """Test the report rejects invalid constraints before running any property (GH#947)."""
+    # Setup
+    real_data, synthetic_data, metadata = load_multi_table_demo()
+    report = DiagnosticReport()
+    expected_message = (
+        "DiagnosticReport expects 'constraints' parameter to be "
+        "a list of dictionaries, each one with the keys 'class_name' and 'parameters'."
+    )
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_message):
+        report.generate(real_data, synthetic_data, metadata, constraints, verbose=False)
+
+
 def test_unified_diagnostic_report_constraint_validity_visualization():
     """Test asking for the Constraint Validity visualization raises a friendly error."""
     # Setup

@@ -159,12 +159,29 @@ class TestBaseUnifiedReport:
             },
             'relationships': [],
         }
+        constraints = None
 
         # Run
-        base_report._validate(real_data, synthetic_data, metadata)
+        base_report._validate(real_data, synthetic_data, metadata, constraints)
 
         # Assert
         assert base_report.table_names == ['table1', 'table2']
+
+    def test__validate_invalid_constraints(self):
+        """Test ``_validate`` rejects invalid constraints through the inherited check."""
+        # Setup
+        base_report = BaseUnifiedReport()
+        real_data = {'table1': pd.DataFrame({'column1': [1, 2, 3]})}
+        synthetic_data = {'table1': pd.DataFrame({'column1': [1, 2, 3]})}
+        metadata = {'tables': {'table1': {'columns': {'column1': {'sdtype': 'numerical'}}}}}
+        expected_message = (
+            "BaseUnifiedReport expects 'constraints' parameter to be a list of dictionaries, "
+            "each one with the keys 'class_name' and 'parameters'."
+        )
+
+        # Run and Assert
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._validate(real_data, synthetic_data, metadata, True)
 
     def test__get_skipped_properties_single_table(self):
         """Test single-table unified data returns relationship properties."""
