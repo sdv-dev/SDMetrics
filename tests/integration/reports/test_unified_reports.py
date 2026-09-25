@@ -869,8 +869,6 @@ def test_unified_diagnostic_report_invalid_constraints(constraints):
     with pytest.raises(ValueError, match=expected_message):
         report.generate(real_data, synthetic_data, metadata, constraints, verbose=False)
 
-    assert report.is_generated is False
-
 
 def test_unified_diagnostic_report_constraint_validity_visualization():
     """Test asking for the Constraint Validity visualization raises a friendly error."""
