@@ -2,8 +2,10 @@ from datetime import date, datetime
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from sdmetrics.demos import load_multi_table_demo, load_single_table_demo
+from sdmetrics.errors import VisualizationUnavailableError
 from sdmetrics.reports import DiagnosticReport, QualityReport
 from tests.utils import assert_report_scores_are_not_nan
 
@@ -40,17 +42,18 @@ def _load_quality_report_data():
             'col1': [0, 1, 2, 3],
             'col2': ['a', 'b', 'c', 'd'],
             'col3': [True, False, False, True],
+            'col4': ['LOW', 'MEDIUM', 'HIGH', 'MEDIUM'],
         }),
         'table2': pd.DataFrame({
-            'col4': [
+            'col5': [
                 datetime(2020, 10, 1),
                 datetime(2021, 1, 2),
                 datetime(2021, 9, 12),
                 datetime(2022, 10, 1),
             ],
-            'col5': [date(2020, 9, 13), date(2020, 12, 1), date(2021, 1, 12), date(2022, 8, 13)],
-            'col6': [0, 1, 1, 0],
-            'col7': [0.1, 0.2, 0.3, 0.4],
+            'col6': [date(2020, 9, 13), date(2020, 12, 1), date(2021, 1, 12), date(2022, 8, 13)],
+            'col7': [0, 1, 1, 0],
+            'col8': [0.1, 0.2, 0.3, 0.4],
         }),
     }
     synthetic_data = {
@@ -58,17 +61,18 @@ def _load_quality_report_data():
             'col1': [0, 2, 2, 3],
             'col2': ['a', 'c', 'c', 'b'],
             'col3': [False, False, False, True],
+            'col4': ['LOW', 'MEDIUM', 'MEDIUM', 'HIGH'],
         }),
         'table2': pd.DataFrame({
-            'col4': [
+            'col5': [
                 datetime(2020, 11, 4),
                 datetime(2021, 2, 1),
                 datetime(2021, 8, 1),
                 datetime(2022, 12, 1),
             ],
-            'col5': [date(2020, 10, 13), date(2020, 2, 4), date(2021, 3, 11), date(2022, 7, 23)],
-            'col6': [0, 1, 1, 0],
-            'col7': [0.1, 0.2, 0.3, 0.4],
+            'col6': [date(2020, 10, 13), date(2020, 2, 4), date(2021, 3, 11), date(2022, 7, 23)],
+            'col7': [0, 1, 1, 0],
+            'col8': [0.1, 0.2, 0.3, 0.4],
         }),
     }
     metadata = {
@@ -78,14 +82,15 @@ def _load_quality_report_data():
                     'col1': {'sdtype': 'id'},
                     'col2': {'sdtype': 'categorical'},
                     'col3': {'sdtype': 'boolean'},
+                    'col4': {'sdtype': 'ordinal'},
                 },
             },
             'table2': {
                 'columns': {
-                    'col4': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
                     'col5': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
-                    'col6': {'sdtype': 'id'},
-                    'col7': {'sdtype': 'numerical'},
+                    'col6': {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+                    'col7': {'sdtype': 'id'},
+                    'col8': {'sdtype': 'numerical'},
                 },
             },
         },
@@ -94,7 +99,7 @@ def _load_quality_report_data():
                 'parent_table_name': 'table1',
                 'parent_primary_key': 'col1',
                 'child_table_name': 'table2',
-                'child_foreign_key': 'col6',
+                'child_foreign_key': 'col7',
             }
         ],
     }
@@ -121,24 +126,42 @@ def _load_single_table_quality_report_data():
 
 def test_unified_diagnostic_report_single_table():
     # Setup
+    inequality = {
+        'class_name': 'Inequality',
+        'parameters': {
+            'table_name': 'student_placements',
+            'low_column_name': 'start_date',
+            'high_column_name': 'end_date',
+        },
+    }
     real_data, synthetic_data, metadata = load_single_table_demo()
+    synthetic_data['student_placements'].loc[[43, 93, 179], 'end_date'] = None
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, verbose=False)
+    report.generate(real_data, synthetic_data, metadata, [inequality], verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Data Validity', 'Data Structure'],
-        'Score': [1.0, 1.0],
+        'Property': ['Data Validity', 'Data Structure', 'Constraint Validity'],
+        'Score': [1.0, 1.0, 1.0],
+    })
+    expected_details_constraint_validity = pd.DataFrame({
+        'Constraint': ['Inequality'],
+        'Metric': ['ConstraintAdherence'],
+        'Parameters': [inequality['parameters']],
+        'Score': [1.0],
     })
     expected_details_data_validity = pd.DataFrame({
-        'Table': ['student_placements'] * 17,
+        'Table': ['student_placements'] * 20,
         'Column': [
             'start_date',
+            'start_date',
+            'end_date',
             'end_date',
             'salary',
             'duration',
+            'student_id',
             'student_id',
             'high_perc',
             'high_spec',
@@ -155,10 +178,13 @@ def test_unified_diagnostic_report_single_table():
         ],
         'Metric': [
             'BoundaryAdherence',
+            'DatetimeFormatAdherence',
             'BoundaryAdherence',
+            'DatetimeFormatAdherence',
             'BoundaryAdherence',
             'BoundaryAdherence',
             'KeyUniqueness',
+            'RegexFormatAdherence',
             'BoundaryAdherence',
             'CategoryAdherence',
             'CategoryAdherence',
@@ -172,7 +198,7 @@ def test_unified_diagnostic_report_single_table():
             'CategoryAdherence',
             'CategoryAdherence',
         ],
-        'Score': [1.0] * 17,
+        'Score': [1.0] * 20,
     })
     expected_details_data_structure = pd.DataFrame({
         'Table': ['student_placements'],
@@ -186,6 +212,9 @@ def test_unified_diagnostic_report_single_table():
     )
     pd.testing.assert_frame_equal(
         report.get_details('Data Structure'), expected_details_data_structure
+    )
+    pd.testing.assert_frame_equal(
+        report.get_details('Constraint Validity'), expected_details_constraint_validity
     )
     assert report.get_score() == 1.0
     assert_report_scores_are_not_nan(report)
@@ -299,12 +328,14 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
     # Assert
     expected_lines = [
         'Generating report ...',
-        '(1/3) Evaluating Data Validity:',
+        '(1/4) Evaluating Data Validity:',
         'Data Validity Score: 100.0%',
-        '(2/3) Evaluating Data Structure:',
+        '(2/4) Evaluating Data Structure:',
         'Data Structure Score: 100.0%',
-        '(3/3) Evaluating Relationship Validity: N/A',
+        '(3/4) Evaluating Relationship Validity: N/A',
         'This property does not apply to single-table data.',
+        '(4/4) Evaluating Constraint Validity: N/A',
+        'No constraints were provided.',
         'Overall Score (Average): 100.0%',
     ]
     for line in expected_lines:
@@ -313,8 +344,77 @@ def test_unified_diagnostic_report_single_table_verbose_skips_relationship_valid
     assert list(report.get_properties()['Property']) == [
         'Data Validity',
         'Data Structure',
+        'Constraint Validity',
     ]
     assert report.get_score() == 1.0
+
+
+def test_unified_diagnostic_report_single_table_verbose_with_constraints(capsys):
+    """Test unified diagnostic report prints the Constraint Validity progress for single-table."""
+    # Setup
+    inequality = {
+        'class_name': 'Inequality',
+        'parameters': {
+            'table_name': 'student_placements',
+            'low_column_name': 'start_date',
+            'high_column_name': 'end_date',
+        },
+    }
+    real_data, synthetic_data, metadata = load_single_table_demo()
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, [inequality], verbose=True)
+    output = capsys.readouterr().out
+
+    # Assert
+    expected_lines = [
+        'Generating report ...',
+        '(1/4) Evaluating Data Validity:',
+        'Data Validity Score: 100.0%',
+        '(2/4) Evaluating Data Structure:',
+        'Data Structure Score: 100.0%',
+        '(3/4) Evaluating Relationship Validity: N/A',
+        'This property does not apply to single-table data.',
+        '(4/4) Evaluating Constraint Validity:',
+        'Constraint Validity Score: 98.6%',
+        'Overall Score (Average): 99.53%',
+    ]
+    for line in expected_lines:
+        assert line in output
+
+    assert report.get_score() >= 0.99
+
+
+def test_diagnostic_report_with_ordinal_sdtype():
+    """Test diagnostic report handles ordinal sdtype correctly.
+
+    In the data, `col4` in `table1` is an ordinal column.
+    """
+    # Setup
+    real_data, synthetic_data, metadata = _load_quality_report_data()
+    expected_details = pd.DataFrame({
+        'Table': ['table1', 'table1', 'table1', 'table2', 'table2', 'table2', 'table2', 'table2'],
+        'Column': ['col2', 'col3', 'col4', 'col5', 'col5', 'col6', 'col6', 'col8'],
+        'Metric': [
+            'CategoryAdherence',
+            'CategoryAdherence',
+            'CategoryAdherence',
+            'BoundaryAdherence',
+            'DatetimeFormatAdherence',
+            'BoundaryAdherence',
+            'DatetimeFormatAdherence',
+            'BoundaryAdherence',
+        ],
+        'Score': [1.0, 1.0, 1.0, 0.75, np.nan, 0.75, 1.0, 1.0],
+    })
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+    # Assert
+    pd.testing.assert_frame_equal(report.get_details('Data Validity'), expected_details)
 
 
 def test_unified_quality_report_single_table_verbose_skips_relationship_properties(capsys):
@@ -354,16 +454,33 @@ def test_unified_quality_report_single_table_verbose_skips_relationship_properti
 
 def test_unified_diagnostic_report_multi_table():
     # Setup
+    constraints = [
+        {
+            'class_name': 'FixedCombinations',
+            'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
+        },
+    ]
     real_data, synthetic_data, metadata = load_multi_table_demo()
 
     # Run
     report = DiagnosticReport()
-    report.generate(real_data, synthetic_data, metadata, verbose=False)
+    report.generate(real_data, synthetic_data, metadata, constraints, verbose=False)
 
     # Assert
     expected_properties = pd.DataFrame({
-        'Property': ['Data Validity', 'Data Structure', 'Relationship Validity'],
-        'Score': [1.0, 1.0, 1.0],
+        'Property': [
+            'Data Validity',
+            'Data Structure',
+            'Relationship Validity',
+            'Constraint Validity',
+        ],
+        'Score': [1.0, 1.0, 1.0, 1.0],
+    })
+    expected_details_constraint_validity = pd.DataFrame({
+        'Constraint': ['FixedCombinations'],
+        'Metric': ['ConstraintAdherence'],
+        'Parameters': [constraints[0]['parameters']],
+        'Score': [1.0],
     })
     expected_details_data_validity = pd.DataFrame({
         'Table': [
@@ -371,9 +488,15 @@ def test_unified_diagnostic_report_multi_table():
             'users',
             'users',
             'users',
+            'users',
             'sessions',
             'sessions',
             'sessions',
+            'sessions',
+            'sessions',
+            'transactions',
+            'transactions',
+            'transactions',
             'transactions',
             'transactions',
             'transactions',
@@ -381,31 +504,43 @@ def test_unified_diagnostic_report_multi_table():
         ],
         'Column': [
             'user_id',
+            'user_id',
             'country',
             'gender',
             'age',
             'session_id',
+            'session_id',
+            'user_id',
             'device',
             'os',
             'transaction_id',
+            'transaction_id',
+            'session_id',
+            'timestamp',
             'timestamp',
             'amount',
             'approved',
         ],
         'Metric': [
             'KeyUniqueness',
+            'RegexFormatAdherence',
             'CategoryAdherence',
             'CategoryAdherence',
             'BoundaryAdherence',
             'KeyUniqueness',
+            'RegexFormatAdherence',
+            'RegexFormatAdherence',
             'CategoryAdherence',
             'CategoryAdherence',
             'KeyUniqueness',
+            'RegexFormatAdherence',
+            'RegexFormatAdherence',
             'BoundaryAdherence',
+            'DatetimeFormatAdherence',
             'BoundaryAdherence',
             'CategoryAdherence',
         ],
-        'Score': [1.0] * 11,
+        'Score': [1.0] * 17,
     })
     expected_details_data_structure = pd.DataFrame({
         'Table': ['users', 'sessions', 'transactions'],
@@ -413,15 +548,16 @@ def test_unified_diagnostic_report_multi_table():
         'Score': [1.0, 1.0, 1.0],
     })
     expected_details_users = pd.DataFrame({
-        'Table': ['users', 'users', 'users', 'users'],
-        'Column': ['user_id', 'country', 'gender', 'age'],
+        'Table': ['users', 'users', 'users', 'users', 'users'],
+        'Column': ['user_id', 'user_id', 'country', 'gender', 'age'],
         'Metric': [
             'KeyUniqueness',
+            'RegexFormatAdherence',
             'CategoryAdherence',
             'CategoryAdherence',
             'BoundaryAdherence',
         ],
-        'Score': [1.0, 1.0, 1.0, 1.0],
+        'Score': [1.0, 1.0, 1.0, 1.0, 1.0],
     })
 
     pd.testing.assert_frame_equal(report.get_properties(), expected_properties)
@@ -433,6 +569,12 @@ def test_unified_diagnostic_report_multi_table():
     )
     pd.testing.assert_frame_equal(
         report.get_details('Data Validity', 'users'), expected_details_users
+    )
+    pd.testing.assert_frame_equal(
+        report.get_details('Constraint Validity'), expected_details_constraint_validity
+    )
+    pd.testing.assert_frame_equal(
+        report.get_details('Constraint Validity', 'users'), expected_details_constraint_validity
     )
     assert report.get_score() == 1.0
     assert_report_scores_are_not_nan(report)
@@ -463,41 +605,61 @@ def test_unified_quality_report_multi_table():
         details.append(report.get_details(property_))
 
     # Assert
-    assert round(score, 15) == 0.649582127409184
+    assert round(score, 15) == 0.633054751606123
     expected_properties = pd.DataFrame({
         'Property': ['Column Shapes', 'Column Pair Trends', 'Cardinality', 'Intertable Trends'],
-        'Score': [0.8, 0.7983285096367361, 0.75, 0.25],
+        'Score': [0.8333333333333334, 0.6155523397578241, 0.75, 0.3333333333333333],
     })
     expected_details_column_shapes = pd.DataFrame({
-        'Table': ['table1', 'table1'],
-        'Column': ['col2', 'col3'],
-        'Metric': ['TVComplement', 'TVComplement'],
-        'Score': [0.75, 0.75],
+        'Table': ['table1', 'table1', 'table1'],
+        'Column': ['col2', 'col3', 'col4'],
+        'Metric': ['TVComplement', 'TVComplement', 'TVComplement'],
+        'Score': [0.75, 0.75, 1.0],
     })
     expected_details_cpt = pd.DataFrame({
-        'Table': ['table1'],
-        'Column 1': ['col2'],
-        'Column 2': ['col3'],
-        'Metric': ['ContingencySimilarity'],
-        'Score': [0.25],
-        'Real Correlation': [np.nan],
-        'Synthetic Correlation': [np.nan],
-        'Real Association': [np.nan],
-        'Meets Threshold?': pd.Series([True], dtype='boolean'),
+        'Table': ['table1', 'table1', 'table1'],
+        'Column 1': ['col2', 'col2', 'col3'],
+        'Column 2': ['col3', 'col4', 'col4'],
+        'Metric': ['ContingencySimilarity', 'ContingencySimilarity', 'ContingencySimilarity'],
+        'Score': [0.25, 0.25, 0.25],
+        'Real Correlation': [np.nan, np.nan, np.nan],
+        'Synthetic Correlation': [np.nan, np.nan, np.nan],
+        'Real Association': [np.nan, np.nan, np.nan],
+        'Meets Threshold?': pd.Series([True, True, True], dtype='boolean'),
     })
     expected_details_cardinality = pd.DataFrame({
         'Child Table': ['table2'],
         'Parent Table': ['table1'],
-        'Foreign Key': ['col6'],
+        'Foreign Key': ['col7'],
         'Metric': ['CardinalityShapeSimilarity'],
         'Score': [0.75],
     })
     expected_details_intertable_trends = pd.DataFrame({
-        'Parent Table': ['table1', 'table1', 'table1', 'table1', 'table1', 'table1'],
-        'Child Table': ['table2', 'table2', 'table2', 'table2', 'table2', 'table2'],
-        'Foreign Key': ['col6', 'col6', 'col6', 'col6', 'col6', 'col6'],
-        'Column 1': ['col2', 'col2', 'col2', 'col3', 'col3', 'col3'],
-        'Column 2': ['col4', 'col5', 'col7', 'col4', 'col5', 'col7'],
+        'Parent Table': [
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+            'table1',
+        ],
+        'Child Table': [
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+            'table2',
+        ],
+        'Foreign Key': ['col7', 'col7', 'col7', 'col7', 'col7', 'col7', 'col7', 'col7', 'col7'],
+        'Column 1': ['col2', 'col2', 'col2', 'col3', 'col3', 'col3', 'col4', 'col4', 'col4'],
+        'Column 2': ['col5', 'col6', 'col8', 'col5', 'col6', 'col8', 'col5', 'col6', 'col8'],
         'Metric': [
             'ContingencySimilarity',
             'ContingencySimilarity',
@@ -505,34 +667,92 @@ def test_unified_quality_report_multi_table():
             'ContingencySimilarity',
             'ContingencySimilarity',
             'ContingencySimilarity',
+            'ContingencySimilarity',
+            'ContingencySimilarity',
+            'ContingencySimilarity',
         ],
-        'Score': [0.5, 0.5, 0.5, 0.0, 0.0, 0.0],
-        'Real Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-        'Synthetic Correlation': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-        'Real Association': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-        'Meets Threshold?': pd.Series([True, True, True, True, True, True], dtype='boolean'),
+        'Score': [0.5, 0.5, 0.5, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5],
+        'Real Correlation': [
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+        ],
+        'Synthetic Correlation': [
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+        ],
+        'Real Association': [
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+        ],
+        'Meets Threshold?': pd.Series(
+            [True, True, True, True, True, True, True, True, True], dtype='boolean'
+        ),
     })
     expected_details_all_column_shapes = pd.DataFrame({
-        'Table': ['table1', 'table1', 'table2', 'table2', 'table2'],
-        'Column': ['col2', 'col3', 'col4', 'col5', 'col7'],
-        'Metric': ['TVComplement', 'TVComplement', 'KSComplement', 'KSComplement', 'KSComplement'],
-        'Score': [0.75, 0.75, 0.75, 0.75, 1.0],
+        'Table': ['table1', 'table1', 'table1', 'table2', 'table2', 'table2'],
+        'Column': ['col2', 'col3', 'col4', 'col5', 'col6', 'col8'],
+        'Metric': [
+            'TVComplement',
+            'TVComplement',
+            'TVComplement',
+            'KSComplement',
+            'KSComplement',
+            'KSComplement',
+        ],
+        'Score': [0.75, 0.75, 1.0, 0.75, 0.75, 1.0],
     })
     expected_details_all_cpt = pd.DataFrame({
-        'Table': ['table1', 'table2', 'table2', 'table2'],
-        'Column 1': ['col2', 'col4', 'col4', 'col5'],
-        'Column 2': ['col3', 'col5', 'col7', 'col7'],
+        'Table': ['table1', 'table1', 'table1', 'table2', 'table2', 'table2'],
+        'Column 1': ['col2', 'col2', 'col3', 'col5', 'col5', 'col6'],
+        'Column 2': ['col3', 'col4', 'col4', 'col6', 'col8', 'col8'],
         'Metric': [
+            'ContingencySimilarity',
+            'ContingencySimilarity',
             'ContingencySimilarity',
             'CorrelationSimilarity',
             'CorrelationSimilarity',
             'CorrelationSimilarity',
         ],
-        'Score': [0.25, 0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
-        'Real Correlation': [np.nan, 0.946664, 0.966247, 0.862622],
-        'Synthetic Correlation': [np.nan, 0.926925, 0.936853, 0.798384],
-        'Real Association': [np.nan, np.nan, np.nan, np.nan],
-        'Meets Threshold?': pd.Series([True, True, True, True], dtype='boolean'),
+        'Score': [0.25, 0.25, 0.25, 0.9901306731066666, 0.9853027960145061, 0.9678805694257717],
+        'Real Correlation': [
+            np.nan,
+            np.nan,
+            np.nan,
+            0.9466639257406892,
+            0.9662472445951453,
+            0.8626223808890117,
+        ],
+        'Synthetic Correlation': [
+            np.nan,
+            np.nan,
+            np.nan,
+            0.9269252719540224,
+            0.9368528366241575,
+            0.7983835197405551,
+        ],
+        'Real Association': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+        'Meets Threshold?': pd.Series([True, True, True, True, True, True], dtype='boolean'),
     })
 
     pd.testing.assert_frame_equal(properties, expected_properties)
@@ -569,10 +789,104 @@ def test_unified_diagnostic_report_multi_table_with_no_relationships_does_not_sk
         'Data Validity',
         'Data Structure',
         'Relationship Validity',
+        'Constraint Validity',
     ]
     assert pd.isna(
         properties.loc[properties['Property'] == 'Relationship Validity', 'Score'].iloc[0]
     )
+
+
+def test_unified_diagnostic_report_multi_table_verbose_with_constraints(capsys):
+    """Test unified diagnostic report prints the Constraint Validity progress for multi-table."""
+    # Setup
+    constraints = [
+        {
+            'class_name': 'FixedCombinations',
+            'parameters': {'table_name': 'sessions', 'column_names': ['device', 'os']},
+        },
+    ]
+    real_data, synthetic_data, metadata = load_multi_table_demo()
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, constraints, verbose=True)
+    output = capsys.readouterr().out
+
+    # Assert
+    expected_lines = [
+        'Generating report ...',
+        '(1/4) Evaluating Data Validity:',
+        'Data Validity Score: 100.0%',
+        '(2/4) Evaluating Data Structure:',
+        'Data Structure Score: 100.0%',
+        '(3/4) Evaluating Relationship Validity:',
+        'Relationship Validity Score: 100.0%',
+        '(4/4) Evaluating Constraint Validity:',
+        'Constraint Validity Score: 100.0%',
+        'Overall Score (Average): 100.0%',
+    ]
+    for line in expected_lines:
+        assert line in output
+
+    assert report.get_score() == 1.0
+
+
+@pytest.mark.parametrize('constraints', [None, []])
+def test_unified_diagnostic_report_without_constraints(constraints):
+    """Test the Constraint Validity score is NaN and ignored when there are no constraints."""
+    # Setup
+    real_data, synthetic_data, metadata = load_multi_table_demo()
+
+    # Run
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, constraints, verbose=False)
+    properties = report.get_properties()
+    details = report.get_details('Constraint Validity')
+
+    # Assert
+    assert list(properties['Property']) == [
+        'Data Validity',
+        'Data Structure',
+        'Relationship Validity',
+        'Constraint Validity',
+    ]
+    assert pd.isna(properties.loc[properties['Property'] == 'Constraint Validity', 'Score'].iloc[0])
+    assert details.empty
+    assert report.get_score() == 1.0
+
+
+@pytest.mark.parametrize('constraints', [True, 'invalid', ['invalid']])
+def test_unified_diagnostic_report_invalid_constraints(constraints):
+    """Test the report rejects invalid constraints before running any property (GH#947)."""
+    # Setup
+    real_data, synthetic_data, metadata = load_multi_table_demo()
+    report = DiagnosticReport()
+    expected_message = (
+        "DiagnosticReport expects 'constraints' parameter to be "
+        "a list of dictionaries, each one with the keys 'class_name' and 'parameters'."
+    )
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_message):
+        report.generate(real_data, synthetic_data, metadata, constraints, verbose=False)
+
+
+def test_unified_diagnostic_report_constraint_validity_visualization():
+    """Test asking for the Constraint Validity visualization raises a friendly error."""
+    # Setup
+    real_data, synthetic_data, metadata = load_multi_table_demo()
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, verbose=False)
+    expected_message = (
+        'Error: No visualization is available for Constraint Validity. To see the '
+        "detailed score breakdowns, use the 'get_details' function."
+    )
+
+    # Run and Assert
+    with pytest.raises(VisualizationUnavailableError, match=expected_message):
+        report.get_visualization('Constraint Validity')
+
+    with pytest.raises(VisualizationUnavailableError, match=expected_message):
+        report.get_visualization('Constraint Validity', 'users')
 
 
 def test_unified_quality_report_multi_table_with_no_relationships_does_not_skip_properties():
@@ -596,3 +910,37 @@ def test_unified_quality_report_multi_table_with_no_relationships_does_not_skip_
     ]
     assert pd.isna(properties.loc[properties['Property'] == 'Cardinality', 'Score'].iloc[0])
     assert pd.isna(properties.loc[properties['Property'] == 'Intertable Trends', 'Score'].iloc[0])
+
+
+def test_unified_report_with_non_key_regex_format():
+    # Setup
+    df1 = pd.DataFrame(
+        data={'id': ['US-123', 'CA-102', 'US-001', 'CA-091', 'US-938'], 'num': [45, 56, 31, 30, 12]}
+    )
+
+    df2 = pd.DataFrame(
+        data={'id': ['CA-394', 'US-235', 'CA-230', 'US-209', 'US-502'], 'num': [56, 31, 30, 12, 18]}
+    )
+
+    real_data = {'table': df1}
+    synthetic_data = {'table': df2}
+
+    metadata = {
+        'tables': {
+            'table': {
+                'columns': {
+                    'id': {'sdtype': 'id', 'regex_format': '(?P<country>[A-Z]{2})-[0-9]{3}'},
+                    'num': {'sdtype': 'numerical'},
+                }
+            }
+        }
+    }
+
+    # Run
+    diagnostic = DiagnosticReport()
+    diagnostic.generate(real_data, synthetic_data, metadata)
+    details = diagnostic.get_details('Data Validity')
+
+    # Assert
+    assert 'RegexFormatAdherence' in details['Metric'].to_numpy()
+    assert diagnostic.get_score() == 1.0

@@ -82,6 +82,7 @@ class GMLogLikelihood(SingleTableMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         n_components=(1, 30),
         covariance_type='diag',
         iterations=3,
@@ -112,6 +113,8 @@ class GMLogLikelihood(SingleTableMetric):
                 The values from the synthetic dataset.
             metadata (dict):
                 Table metadata dict.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             n_components (Union[int, tuple[int]]):
                 Number of components to use for the GMM. If a tuple with
                 2 integers is passed, the optimal number of components within
@@ -131,7 +134,7 @@ class GMLogLikelihood(SingleTableMetric):
                 Average score returned by the GaussianMixtures.
         """
         real_data, synthetic_data, metadata = cls._validate_inputs(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, table_name
         )
         fields = cls._select_fields(metadata, 'numerical')
 

@@ -5,7 +5,7 @@
             "columns": {
                 "user_id": {
                     "sdtype": "id",
-                    "regex_format": "\\d{30}"
+                    "regex_format": "\\d{1,30}"
                 },
                 "country": {
                     "sdtype": "categorical"
@@ -24,11 +24,11 @@
             "columns": {
                 "session_id": {
                     "sdtype": "id",
-                    "regex_format": "\\d{30}"
+                    "regex_format": "\\d{1,30}"
                 },
                 "user_id": {
                     "sdtype": "id",
-                    "regex_format": "\\d{30}"
+                    "regex_format": "\\d{1,30}"
                 },
                 "device": {
                     "sdtype": "categorical"
@@ -43,11 +43,11 @@
             "columns": {
                 "transaction_id": {
                     "sdtype": "id",
-                    "regex_format": "\\d{30}"
+                    "regex_format": "\\d{1,30}"
                 },
                 "session_id": {
                     "sdtype": "id",
-                    "regex_format": "\\d{30}"
+                    "regex_format": "\\d{1,30}"
                 },
                 "timestamp": {
                     "sdtype": "datetime",

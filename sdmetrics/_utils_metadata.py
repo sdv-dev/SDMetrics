@@ -4,7 +4,7 @@ import pandas as pd
 
 from sdmetrics.utils import get_columns_from_metadata, is_datetime
 
-MODELABLE_SDTYPES = ('numerical', 'datetime', 'categorical', 'boolean')
+MODELABLE_SDTYPES = ('numerical', 'datetime', 'categorical', 'boolean', 'ordinal')
 
 
 def _validate_metadata_dict(metadata):
@@ -53,6 +53,37 @@ def _validate_unified_metadata(metadata):
     _validate_metadata(metadata)
 
 
+def _get_single_table_metadata(metadata, table_name=None):
+    """Get single table metadata."""
+    if table_name is not None and not isinstance(table_name, str):
+        raise TypeError('`table_name` must be a string.')
+
+    if metadata is None:
+        return None
+
+    _validate_metadata_dict(metadata)
+    if 'tables' not in metadata:
+        return metadata
+
+    tables = metadata['tables']
+    _validate_metadata_dict(tables)
+    table_names = list(tables)
+    if not table_names:
+        raise ValueError('Metadata does not contain any tables.')
+
+    if table_name is None:
+        if len(table_names) > 1:
+            raise ValueError(
+                'Metadata contains more than one table, please specify the `table_name`.'
+            )
+
+        table_name = table_names[0]
+    elif table_name not in tables:
+        raise ValueError(f"Unknown table ('{table_name}'). Must be one of {table_names}.")
+
+    return tables[table_name]
+
+
 def handle_single_and_multi_table(single_table_func):
     """Decorator to handle both single and multi table functions."""
 
@@ -67,6 +98,15 @@ def handle_single_and_multi_table(single_table_func):
         return result
 
     return wrapper
+
+
+def _convert_column_to_string(column_data, column_metadata):
+    if is_datetime(column_data):
+        datetime_format = column_metadata.get('datetime_format')
+        if datetime_format is not None:
+            return column_data.dt.strftime(datetime_format)
+
+    return column_data.astype(str)
 
 
 def _convert_datetime_column(column_name, column_data, column_metadata):
@@ -133,7 +173,7 @@ def _remove_missing_columns_metadata(data, metadata):
 def _remove_non_modelable_columns(data, metadata):
     """Remove columns that are not modelable.
 
-    All modelable columns are numerical, datetime, categorical, or boolean sdtypes.
+    All modelable columns are numerical, datetime, categorical, ordinal, or boolean sdtypes.
     """
     columns_modelable = []
     for column, column_metadata in get_columns_from_metadata(metadata).items():

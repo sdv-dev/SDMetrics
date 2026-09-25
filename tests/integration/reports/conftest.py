@@ -52,3 +52,95 @@ def composite_keys_multi_table_demo():
         data['sessions'].loc[data['sessions']['user_type'].isna(), 'user_id'] -= 5
 
     return real_data, synthetic_data, metadata
+
+
+@pytest.fixture
+def metadata_v2_single_table_demo():
+    """Demo data with a V2 metadata that defines the valid range of the columns."""
+    real_data, synthetic_data, metadata = load_demo(modality='single_table')
+    columns_meta = metadata['tables']['student_placements']['columns']
+    for column_name in [
+        'second_perc',
+        'high_perc',
+        'degree_perc',
+        'employability_perc',
+        'mba_perc',
+    ]:
+        columns_meta[column_name].update({
+            'range_min': 0,
+            'range_max': 100,
+            'range_is_nullable': False,
+        })
+
+    for column_name in ['start_date', 'end_date']:
+        columns_meta[column_name].update({
+            'range_min': '2020-01-01',
+            'range_max': '2021-12-31',
+            'range_is_nullable': True,
+        })
+
+    columns_meta['salary'].update({
+        'range_min': 0,
+        'range_max': 200000,
+        'range_is_nullable': True,
+    })
+    columns_meta['duration'].update({'range_min': 1, 'range_max': 24, 'range_is_nullable': True})
+    columns_meta['experience_years'].update({
+        'range_min': 0,
+        'range_max': 50,
+        'range_is_nullable': False,
+    })
+    columns_meta['high_spec'].update({
+        'range_values': ['Arts', 'Commerce', 'Science', 'Engineering'],
+        'range_is_nullable': False,
+    })
+    columns_meta['mba_spec'].update({
+        'range_values': ['Mkt&Fin', 'Mkt&HR'],
+        'range_is_nullable': False,
+    })
+    columns_meta['degree_type'].update({
+        'range_values': ['Comm&Mgmt', 'Sci&Tech', 'Others'],
+        'range_is_nullable': False,
+    })
+
+    return real_data['student_placements'], synthetic_data['student_placements'], metadata
+
+
+@pytest.fixture
+def metadata_v2_multi_table_demo():
+    """Multi table demo data with a V2 metadata that defines the valid range of the columns."""
+    real_data, synthetic_data, metadata = load_demo(modality='multi_table')
+    users_meta = metadata['tables']['users']['columns']
+    users_meta['age'].update({'range_min': 0, 'range_max': 120, 'range_is_nullable': False})
+    users_meta['country'].update({
+        'range_values': ['BG', 'DE', 'ES', 'FR', 'IT', 'UK', 'US'],
+        'range_is_nullable': False,
+    })
+
+    sessions_meta = metadata['tables']['sessions']['columns']
+    sessions_meta['device'].update({
+        'range_values': ['mobile', 'tablet', 'desktop'],
+        'range_is_nullable': False,
+    })
+    sessions_meta['os'].update({
+        'range_values': ['android', 'ios', 'windows'],
+        'range_is_nullable': False,
+    })
+
+    transactions_meta = metadata['tables']['transactions']['columns']
+    transactions_meta['timestamp'].update({
+        'range_min': '2019-01-01 00:00:00',
+        'range_max': '2019-12-31 23:59:59',
+        'range_is_nullable': False,
+    })
+    transactions_meta['amount'].update({
+        'range_min': 0,
+        'range_max': 1000,
+        'range_is_nullable': False,
+    })
+    transactions_meta['approved'].update({
+        'range_values': [True, False],
+        'range_is_nullable': False,
+    })
+
+    return real_data, synthetic_data, metadata

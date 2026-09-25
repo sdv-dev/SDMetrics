@@ -74,7 +74,7 @@ class DetectionMetric(SingleTableMetric):
         return transformed_real_data, transformed_synthetic_data
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, table_name=None):
         """Compute this metric.
 
         This builds a Machine Learning Classifier that learns to tell the synthetic
@@ -90,13 +90,15 @@ class DetectionMetric(SingleTableMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
 
         Returns:
             float:
                 One minus the ROC AUC Cross Validation Score obtained by the classifier.
         """
         real_data, synthetic_data, metadata = cls._validate_inputs(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, table_name
         )
 
         transformed_real_data, transformed_synthetic_data = cls._drop_non_compute_columns(

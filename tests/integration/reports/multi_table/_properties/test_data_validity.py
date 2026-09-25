@@ -24,7 +24,7 @@ class TestDataValidity:
         # Setup
         real_data, synthetic_data, metadata = load_demo(modality='multi_table')
         column_shapes = DataValidity()
-        num_columns = sum(len(table['columns']) for table in metadata['tables'].values())
+        num_columns = sum(len(data.columns) for data in real_data.values())
 
         progress_bar = tqdm(total=num_columns)
         mock_update = Mock()

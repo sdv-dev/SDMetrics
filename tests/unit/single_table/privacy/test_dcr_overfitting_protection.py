@@ -28,13 +28,18 @@ class TestDCROverfittingProtection:
         zero_subsample_msg = re.escape('num_rows_subsample (0) must be an integer greater than 1.')
         with pytest.raises(ValueError, match=zero_subsample_msg):
             DCROverfittingProtection.compute_breakdown(
-                train_data, synthetic_data, holdout_data, metadata, 0
+                train_data, synthetic_data, holdout_data, metadata, 'table', 0
             )
 
         large_subsample_msg = re.escape('Ignoring the num_rows_subsample and num_iterations args.')
         with pytest.warns(UserWarning, match=large_subsample_msg):
             DCROverfittingProtection.compute_breakdown(
-                train_data, synthetic_data, holdout_data, metadata, len(synthetic_data) * 2
+                train_data,
+                synthetic_data,
+                holdout_data,
+                metadata,
+                'table',
+                len(synthetic_data) * 2,
             )
 
         subsample_none_msg = re.escape(
@@ -42,13 +47,13 @@ class TestDCROverfittingProtection:
         )
         with pytest.raises(ValueError, match=subsample_none_msg):
             DCROverfittingProtection.compute_breakdown(
-                train_data, synthetic_data, holdout_data, metadata, None, 10
+                train_data, synthetic_data, holdout_data, metadata, 'table', None, 10
             )
 
         zero_iteration_msg = re.escape('num_iterations (0) must be an integer greater than 1.')
         with pytest.raises(ValueError, match=zero_iteration_msg):
             DCROverfittingProtection.compute_breakdown(
-                train_data, synthetic_data, holdout_data, metadata, 1, 0
+                train_data, synthetic_data, holdout_data, metadata, 'table', 1, 0
             )
 
         no_dcr_metadata = {'columns': {'bad_col': {'sdtype': 'unknown'}}}
@@ -57,7 +62,7 @@ class TestDCROverfittingProtection:
         missing_metric = 'There are no overlapping statistical columns to measure.'
         with pytest.raises(ValueError, match=missing_metric):
             DCROverfittingProtection.compute_breakdown(
-                no_dcr_data, no_dcr_data, no_dcr_data, no_dcr_metadata
+                no_dcr_data, no_dcr_data, no_dcr_data, no_dcr_metadata, 'table'
             )
 
         small_holdout_data = holdout_data.sample(frac=0.2)
@@ -69,7 +74,7 @@ class TestDCROverfittingProtection:
         )
         with pytest.warns(UserWarning, match=small_validation_msg):
             DCROverfittingProtection.compute_breakdown(
-                train_data, synthetic_data, small_holdout_data, metadata
+                train_data, synthetic_data, small_holdout_data, metadata, 'table'
             )
 
         no_df_msg = re.escape(
@@ -78,7 +83,9 @@ class TestDCROverfittingProtection:
             'must be of type pandas.DataFrame.'
         )
         with pytest.raises(TypeError, match=no_df_msg):
-            DCROverfittingProtection.compute_breakdown(None, {}, {}, metadata)
+            DCROverfittingProtection.compute_breakdown(
+                None, {'table': {}}, {'table': {}}, metadata, 'table'
+            )
 
     @patch('numpy.where')
     @patch('sdmetrics.single_table.privacy.dcr_overfitting_protection.calculate_dcr')
@@ -95,7 +102,13 @@ class TestDCROverfittingProtection:
 
         # Run
         result = DCROverfittingProtection.compute_breakdown(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, num_iterations
+            train_data,
+            synthetic_data,
+            holdout_data,
+            metadata,
+            'table',
+            num_rows_subsample,
+            num_iterations,
         )
 
         # Assert
@@ -116,10 +129,22 @@ class TestDCROverfittingProtection:
 
         # Run
         DCROverfittingProtection.compute(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, num_iterations
+            train_data,
+            synthetic_data,
+            holdout_data,
+            metadata,
+            'table',
+            num_rows_subsample,
+            num_iterations,
         )
 
         # Assert
         mock_compute_breakdown.assert_called_once_with(
-            train_data, synthetic_data, holdout_data, metadata, num_rows_subsample, num_iterations
+            real_training_data=train_data,
+            synthetic_data=synthetic_data,
+            real_validation_data=holdout_data,
+            metadata=metadata,
+            table_name='table',
+            num_rows_subsample=num_rows_subsample,
+            num_iterations=num_iterations,
         )

@@ -31,7 +31,7 @@ class MLEfficacy(MLEfficacyMetric):
     max_value = np.inf
 
     @classmethod
-    def compute(cls, test_data, train_data, metadata=None, target=None):
+    def compute(cls, test_data, train_data, metadata=None, table_name=None, target=None):
         """Compute this metric.
 
         A ``target`` column name must be given, either directly or as a first level
@@ -50,17 +50,24 @@ class MLEfficacy(MLEfficacyMetric):
                 The values from the test dataset.
             train_data (Union[numpy.ndarray, pandas.DataFrame]):
                 The values from the training dataset.
+            metadata (dict):
+                Table metadata dict. If not passed, it is built from the data.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             target (str):
                 Name of the column to use as the target.
-            scorer (Union[callable, list[callable], NoneType]):
-                Scorer (or list of scorers) to apply. If not passed, use the default
-                one for the type of metric.
 
         Returns:
             union[float, tuple[float]]:
                 Scores obtained by the models when evaluated on the test data.
         """
-        target = cls._validate_inputs(test_data, train_data, metadata, target)
+        test_data, train_data, metadata, target = cls._validate_inputs(
+            test_data,
+            train_data,
+            metadata,
+            table_name,
+            target,
+        )
         target_type = get_type_from_column_meta(get_columns_from_metadata(metadata)[target])
         target_data = test_data[target]
         uniques = target_data.unique()
@@ -79,7 +86,14 @@ class MLEfficacy(MLEfficacyMetric):
         scores = []
         for name, metric in metrics.items():
             LOGGER.info('MLEfficacy: Computing %s', name)
-            scores.append(metric.compute(test_data, train_data, metadata, target))
+            scores.append(
+                metric.compute(
+                    test_data,
+                    train_data,
+                    metadata=metadata,
+                    target=target,
+                )
+            )
 
     @classmethod
     def normalize(cls, raw_score):

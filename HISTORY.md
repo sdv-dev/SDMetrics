@@ -1,5 +1,49 @@
 # History
 
+## v0.31.1 - 2026-09-18
+
+### New Features
+
+* Add `ConstraintValidity` property - Issue [#900](https://github.com/sdv-dev/SDMetrics/issues/900) by @sarahmish
+* Add `ConstraintAdherence` metric - Issue [#899](https://github.com/sdv-dev/SDMetrics/issues/899) by @sarahmish
+
+### Bugs Fixed
+
+* [SDV 2.0] Quality report modifies real data - Issue [#939](https://github.com/sdv-dev/SDMetrics/issues/939) by @R-Palazzo
+* The `load_demo` function should load in datetimes as strings with their original format intact - Issue [#926](https://github.com/sdv-dev/SDMetrics/issues/926) by @sarahmish
+* The DiagnosticReport reports a score of 1.0 even if a datetime format cannot be checked - Issue [#925](https://github.com/sdv-dev/SDMetrics/issues/925) by @sarahmish
+
+## v0.31.0 - 2026-09-04
+
+### New Features
+
+* SDV 2.0: Reports should understand and parse the `ordinal` sdtype - Issue [#908](https://github.com/sdv-dev/SDMetrics/issues/908) by @R-Palazzo
+
+### Bugs Fixed
+
+* The `RegexFormatAdherence` considers a valid entry as incorrect due to named capture group - Issue [#930](https://github.com/sdv-dev/SDMetrics/issues/930) by @sarahmish
+* The DiagnosticReport is only applying `RegexFormatAdherence` to primary/foreign keys - Issue [#927](https://github.com/sdv-dev/SDMetrics/issues/927) by @sarahmish
+* When running DiagnosticReport, the progress bar for the Data Validity is empty with unknown denominator - Issue [#924](https://github.com/sdv-dev/SDMetrics/issues/924) by @sarahmish
+
+## v0.30.0 - 2026-08-28
+
+### New Features
+
+* SDV 2.0: The diagnostic report should consider the ranges in the metadata (V2) - Issue [#910](https://github.com/sdv-dev/SDMetrics/issues/910) by @sarahmish
+* Add `RegexFormatAdherence` and `DateimeFormatAdherence` to `DataValidity` property - Issue [#902](https://github.com/sdv-dev/SDMetrics/issues/902) by @sarahmish
+
+### Bugs Fixed
+
+* get_column_plot broken with plotly 7.0 - Issue [#917](https://github.com/sdv-dev/SDMetrics/issues/917) by @sarahmish
+
+## v0.29.0 - 2026-08-20
+
+### New Features
+
+* Add `DatetimeFormatAdherence` metric - Issue [#898](https://github.com/sdv-dev/SDMetrics/issues/898) by @sarahmish
+* Add `RegexFormatAdherence` metric - Issue [#897](https://github.com/sdv-dev/SDMetrics/issues/897) by @sarahmish
+* Single table metrics that require metadata should also accept a table name - Issue [#891](https://github.com/sdv-dev/SDMetrics/issues/891) by @fealho
+
 ## v0.28.2 - 2026-07-24
 
 ### Bugs Fixed

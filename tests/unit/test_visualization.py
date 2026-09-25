@@ -162,8 +162,8 @@ def test_generate_cardinality_bar_plot(mock_px):
         )
 
 
-@patch('sdmetrics.visualization.ff')
-def test_generate_cardinality_distplot(mock_ff):
+@patch('sdmetrics.visualization.go.Figure')
+def test_generate_cardinality_distplot(mock_figure):
     """Test the ``_generate_cardinality_plot`` method with ``plot_type``=='distplot'."""
     # Setup
     mock_real_data = pd.Series([1, 1, 2, 2, 2], name='values')
@@ -173,8 +173,8 @@ def test_generate_cardinality_distplot(mock_ff):
     child_foreign_key = 'child_key'
 
     mock_fig = Mock()
-    mock_ff.create_distplot.return_value = mock_fig
     mock_fig.data = [Mock(), Mock()]
+    mock_figure.return_value = mock_fig
 
     # Run
     _generate_cardinality_plot(
@@ -185,15 +185,17 @@ def test_generate_cardinality_distplot(mock_ff):
         plot_type='distplot',
     )
 
-    # Expected call
-    expected_kwargs = {'show_hist': False, 'show_rug': False, 'colors': ['#000036', '#01E0C9']}
-
     # Assert
-    mock_ff.create_distplot.assert_called_once_with(
-        [SeriesMatcher(mock_real_data), SeriesMatcher(mock_synthetic_data)],
-        ['Real', 'Synthetic'],
-        **expected_kwargs,
-    )
+    mock_figure.assert_called_once()
+    real_trace, synthetic_trace = mock_figure.call_args[1]['data']
+
+    assert real_trace.name == 'Real'
+    assert real_trace.mode == 'lines'
+    assert real_trace.line.color == '#000036'
+
+    assert synthetic_trace.name == 'Synthetic'
+    assert synthetic_trace.mode == 'lines'
+    assert synthetic_trace.line.color == '#01E0C9'
 
     title = (
         f"Relationship (child foreign key='{child_foreign_key}' and parent "
@@ -465,30 +467,31 @@ def test__generate_column_bar_plot(mock_histogram):
     mock_histogram.assert_called_once_with(ANY, **expected_parameters)
 
 
-@patch('sdmetrics.visualization.ff.create_distplot')
-def test__generate_column_distplot(mock_distplot):
+@patch('sdmetrics.visualization.scipy.stats.gaussian_kde')
+def test__generate_column_distplot(mock_gaussian_kde):
     """Test ``_generate_column_distplot`` functionality"""
     # Setup
     real_data = pd.DataFrame({'values': [1, 2, 2, 3, 5]})
     synthetic_data = pd.DataFrame({'values': [2, 2, 3, 4, 5]})
 
+    real_kde = Mock(return_value=np.arange(500))
+    synthetic_kde = Mock(return_value=np.arange(500, 1000))
+    mock_gaussian_kde.side_effect = [real_kde, synthetic_kde]
+    plot_kwargs = {'layout': {'title': 'check plot kwargs are used'}}
+
     # Run
-    _generate_column_distplot(real_data, synthetic_data)
+    fig = _generate_column_distplot(real_data, synthetic_data, plot_kwargs)
 
     # Assert
-    expected_data = []
-    expected_data.append(real_data['values'])
-    expected_data.append(synthetic_data['values'])
-    expected_data == mock_distplot.call_args[0][0]
-    expected_col = ['Real', 'Synthetic']
-    expected_colors = [PlotConfig.DATACEBO_DARK, PlotConfig.DATACEBO_GREEN]
-    expected_parameters = {
-        'show_hist': False,
-        'show_rug': False,
-        'colors': expected_colors,
-    }
-    assert expected_parameters == mock_distplot.call_args[1]
-    mock_distplot.assert_called_once_with(expected_data, expected_col, **expected_parameters)
+    assert fig.layout.title.text == 'check plot kwargs are used'
+    assert len(fig.data) == 2
+    mock_gaussian_kde.assert_has_calls([
+        call(real_data['values']),
+        call(synthetic_data['values']),
+    ])
+
+    real_kde.assert_called_once()
+    synthetic_kde.assert_called_once()
 
 
 @patch('sdmetrics.visualization._generate_column_distplot')

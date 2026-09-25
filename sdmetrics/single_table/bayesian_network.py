@@ -20,7 +20,14 @@ class BNLikelihoodBase(SingleTableMetric):
     """BayesianNetwork Likelihood Single Table base metric."""
 
     @classmethod
-    def _likelihoods(cls, real_data, synthetic_data, metadata=None, structure=None):
+    def _likelihoods(
+        cls,
+        real_data,
+        synthetic_data,
+        metadata=None,
+        table_name=None,
+        structure=None,
+    ):
         try:
             from pomegranate.bayesian_network import BayesianNetwork
 
@@ -32,7 +39,7 @@ class BNLikelihoodBase(SingleTableMetric):
             )
 
         real_data, synthetic_data, metadata = cls._validate_inputs(
-            real_data, synthetic_data, metadata
+            real_data, synthetic_data, metadata, table_name
         )
         structure = metadata.get('structure', structure)
         fields = cls._select_fields(metadata, ('categorical', 'boolean'))
@@ -91,7 +98,7 @@ class BNLikelihood(BNLikelihoodBase):
     max_value = 1.0
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, structure=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, table_name=None, structure=None):
         """Compute this metric.
 
         This fits a BayesianNetwork to the real data and then evaluates how
@@ -125,6 +132,8 @@ class BNLikelihood(BNLikelihoodBase):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes. Optionally, the metadata can include
                 a ``structure`` entry with the structure of the Bayesian Network.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             structure (dict):
                 Optional. BayesianNetwork structure to use when fitting
                 to the real data. If not passed, learn it from the data
@@ -135,7 +144,15 @@ class BNLikelihood(BNLikelihoodBase):
             float:
                 Mean of the probabilities returned by the Bayesian Network.
         """
-        return np.mean(cls._likelihoods(real_data, synthetic_data, metadata, structure))
+        return np.mean(
+            cls._likelihoods(
+                real_data,
+                synthetic_data,
+                metadata=metadata,
+                table_name=table_name,
+                structure=structure,
+            )
+        )
 
 
 class BNLogLikelihood(BNLikelihoodBase):
@@ -163,7 +180,7 @@ class BNLogLikelihood(BNLikelihoodBase):
     max_value = 0
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, structure=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, table_name=None, structure=None):
         """Compute this metric.
 
         This fits a BayesianNetwork to the real data and then evaluates how
@@ -197,6 +214,8 @@ class BNLogLikelihood(BNLikelihoodBase):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes. Optionally, the metadata can include
                 a ``structure`` entry with the structure of the Bayesian Network.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             structure (dict):
                 Optional. BayesianNetwork structure to use when fitting
                 to the real data. If not passed, learn it from the data
@@ -207,7 +226,13 @@ class BNLogLikelihood(BNLikelihoodBase):
             float:
                 Mean of the log probabilities returned by the Bayesian Network.
         """
-        likelihoods = cls._likelihoods(real_data, synthetic_data, metadata, structure)
+        likelihoods = cls._likelihoods(
+            real_data,
+            synthetic_data,
+            metadata=metadata,
+            table_name=table_name,
+            structure=structure,
+        )
         likelihoods[np.where(likelihoods == 0)] = 1e-8
         return np.mean(np.log(likelihoods))
 

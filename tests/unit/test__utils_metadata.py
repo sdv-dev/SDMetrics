@@ -6,8 +6,10 @@ import pandas as pd
 import pytest
 
 from sdmetrics._utils_metadata import (
+    _convert_column_to_string,
     _convert_datetime_column,
     _convert_datetime_columns,
+    _get_single_table_metadata,
     _process_data_with_metadata,
     _remove_missing_columns_metadata,
     _remove_non_modelable_columns,
@@ -109,6 +111,55 @@ def test__validate_metadata_invalid(metadata_wrong, expected_error):
     # Run and Assert
     with pytest.raises(ValueError, match=expected_error):
         _validate_metadata(metadata_wrong)
+
+
+@pytest.mark.parametrize(
+    ('column_data', 'column_metadata', 'expected_result'),
+    [
+        (pd.Series([1, 2, 3]), {'sdtype': 'numerical'}, pd.Series(['1', '2', '3'])),
+        (pd.Series([1.1, 2.2, 3.3]), {'sdtype': 'numerical'}, pd.Series(['1.1', '2.2', '3.3'])),
+        (pd.Series(['a', 'b', 'c']), {'sdtype': 'categorical'}, pd.Series(['a', 'b', 'c'])),
+        (
+            pd.Series([
+                pd.Timestamp('2021-01-01'),
+                pd.Timestamp('2021-01-02'),
+                pd.Timestamp('2021-01-03'),
+            ]),
+            {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+            pd.Series(['2021-01-01', '2021-01-02', '2021-01-03']),
+        ),
+        (
+            pd.Series(['2021-01-01', '2021-01-02', '2021-01-03']),
+            {'sdtype': 'datetime', 'datetime_format': '%Y-%m-%d'},
+            pd.Series(['2021-01-01', '2021-01-02', '2021-01-03']),
+        ),
+        (
+            pd.Series([
+                pd.Timestamp('2021-01-01'),
+                pd.Timestamp('2021-01-02'),
+                pd.Timestamp('2021-01-03'),
+            ]),
+            {'sdtype': 'datetime'},
+            pd.Series(['2021-01-01', '2021-01-02', '2021-01-03']),
+        ),
+        (
+            pd.Series([
+                pd.Timestamp('2021-01-01'),
+                pd.Timestamp('2021-01-02'),
+                pd.Timestamp('2021-01-03'),
+            ]),
+            {'sdtype': 'datetime', 'datetime_format': '%Y %H'},
+            pd.Series(['2021 00', '2021 00', '2021 00']),
+        ),
+    ],
+)
+def test__convert_column_to_string(column_data, column_metadata, expected_result):
+    """Test the ``_convert_column_to_string`` method."""
+    # Run
+    result = _convert_column_to_string(column_data, column_metadata)
+
+    # Assert
+    pd.testing.assert_series_equal(expected_result, result)
 
 
 def test__convert_datetime_column(data, metadata):
@@ -349,3 +400,96 @@ def test__validate_unified_metadata_requires_tables_key():
     # Assert
     with pytest.raises(ValueError, match="Metadata must include a 'tables' key"):
         _validate_unified_metadata(metadata)
+
+
+def test__get_single_table_metadata_single_table():
+    """Test it with only one table."""
+    # Setup
+    table_metadata = {'columns': {'column': {'sdtype': 'numerical'}}}
+    metadata = {'tables': {'table': table_metadata}}
+
+    # Run
+    result = _get_single_table_metadata(metadata)
+
+    # Assert
+    assert result == table_metadata
+
+
+def test__get_single_table_metadata_multiple_tables():
+    """Test it with multiple tables."""
+    # Setup
+    selected_metadata = {'columns': {'selected': {'sdtype': 'categorical'}}}
+    metadata = {
+        'tables': {
+            'first': {'columns': {'first': {'sdtype': 'numerical'}}},
+            'selected': selected_metadata,
+        }
+    }
+
+    # Run
+    result = _get_single_table_metadata(metadata, 'selected')
+
+    # Assert
+    assert result == selected_metadata
+
+
+def test__get_single_table_metadata_invalid_tables():
+    """Test it must define `tables`."""
+    # Setup
+    metadata = {'tables': []}
+    expected_message = "Expected a dictionary but received a 'list' instead."
+
+    # Run and Assert
+    with pytest.raises(TypeError, match=expected_message):
+        _get_single_table_metadata(metadata)
+
+
+def test__get_single_table_metadata_no_tables():
+    """Test it with no tables."""
+    # Setup
+    metadata = {'tables': {}}
+
+    # Run and Assert
+    with pytest.raises(ValueError, match=re.escape('Metadata does not contain any tables.')):
+        _get_single_table_metadata(metadata)
+
+
+def test__get_single_table_metadata_requires_name():
+    """Test it requires table name."""
+    # Setup
+    metadata = {
+        'tables': {
+            'first': {'columns': {}},
+            'second': {'columns': {}},
+        }
+    }
+    expected_message = re.escape(
+        'Metadata contains more than one table, please specify the `table_name`.'
+    )
+
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_message):
+        _get_single_table_metadata(metadata)
+
+
+def test__get_single_table_metadata_unknown_table():
+    """Test it with unknown table."""
+    # Setup
+    metadata = {
+        'tables': {
+            'first': {'columns': {}},
+            'second': {'columns': {}},
+        }
+    }
+    expected_message = re.escape("Unknown table ('unknown'). Must be one of ['first', 'second'].")
+
+    # Run and Assert
+    with pytest.raises(ValueError, match=expected_message):
+        _get_single_table_metadata(metadata, 'unknown')
+
+
+def test__get_single_table_metadata_invalid_table_name():
+    """Test it with invalid table name."""
+    # Run and Assert
+    with pytest.raises(TypeError, match=re.escape('`table_name` must be a string.')):
+        _get_single_table_metadata(None, 1)

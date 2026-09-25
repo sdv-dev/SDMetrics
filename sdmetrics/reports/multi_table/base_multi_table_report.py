@@ -84,7 +84,7 @@ class BaseMultiTableReport(BaseReport):
 
         self._validate_relationships(real_data, synthetic_data, metadata)
 
-    def generate(self, real_data, synthetic_data, metadata, verbose=True):
+    def generate(self, real_data, synthetic_data, metadata, constraints=None, verbose=True):
         """Generate report.
 
         This method generates the report by iterating through each property and calculating
@@ -97,10 +97,12 @@ class BaseMultiTableReport(BaseReport):
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
+            constraints (list[dict] or None):
+                A list of constraints to evaluate their adherence. Defaults to None.
             verbose (bool):
                 Whether or not to print report summary and progress.
         """
-        results = super().generate(real_data, synthetic_data, metadata, verbose)
+        results = super().generate(real_data, synthetic_data, metadata, constraints, verbose)
         self.table_names = list(metadata.get('tables', {}).keys())
 
         return results
@@ -120,9 +122,18 @@ class BaseMultiTableReport(BaseReport):
                 The synthetic data.
             metadata (dict):
                 The metadata, which contains each column's data type as well as relationships.
+
+        Returns:
+            dict:
+                The datetime columns of every table as they were before the conversion.
         """
+        original_columns = {}
         for table, table_metadata in metadata['tables'].items():
-            BaseReport.convert_datetimes(real_data[table], synthetic_data[table], table_metadata)
+            original_columns[table] = BaseReport.convert_datetimes(
+                real_data[table], synthetic_data[table], table_metadata
+            )
+
+        return original_columns
 
     def get_details(self, property_name, table_name=None):
         """Return the details table for the given property name.
@@ -163,6 +174,9 @@ class BaseMultiTableReport(BaseReport):
         """
         if property_name == 'Data Structure':
             return self._properties[property_name].get_visualization(table_name)
+
+        if property_name == 'Constraint Validity':
+            return self._properties[property_name].get_visualization()
 
         if table_name is None:
             raise ValueError('Please provide a table name to get a visualization for the property.')

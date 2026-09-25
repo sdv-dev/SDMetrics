@@ -318,6 +318,7 @@ class TestBaseDataAugmentationMetric:
         minority_class_label = 1
         classifier = 'XGBoost'
         fixed_recall_value = 0.9
+        table_name = 'table'
         mock_process_data_with_metadata.side_effect = lambda x, y, z, t: (x, y, z)
         real_data_baseline = {
             'precision_score_training': 0.43,
@@ -361,6 +362,7 @@ class TestBaseDataAugmentationMetric:
             synthetic_data,
             real_validation_data,
             metadata,
+            table_name,
             prediction_column_name,
             minority_class_label,
             classifier,
@@ -419,6 +421,7 @@ class TestBaseDataAugmentationMetric:
         minority_class_label = 1
         classifier = 'XGBoost'
         fixed_recall_value = 0.9
+        table_name = 'table'
         mock_compute_breakdown.return_value = {
             'score': 0.9,
             'other_key': 'other_value',
@@ -430,6 +433,7 @@ class TestBaseDataAugmentationMetric:
             synthetic_data,
             real_validation_data,
             metadata,
+            table_name,
             prediction_column_name,
             minority_class_label,
             classifier,

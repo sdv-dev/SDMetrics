@@ -92,6 +92,7 @@ class CategoricalCAP(CategoricalPrivacyMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         key_fields=None,
         sensitive_fields=None,
         model_kwargs=None,
@@ -100,6 +101,7 @@ class CategoricalCAP(CategoricalPrivacyMetric):
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
+            table_name=table_name,
             key_fields=key_fields,
             sensitive_fields=sensitive_fields,
             model_kwargs=model_kwargs,
@@ -111,6 +113,7 @@ class CategoricalCAP(CategoricalPrivacyMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         key_fields=None,
         sensitive_fields=None,
         model_kwargs=None,
@@ -136,6 +139,8 @@ class CategoricalCAP(CategoricalPrivacyMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             key_fields (list(str)):
                 Name of the column(s) to use as the key attributes.
             sensitive_fields (list(str)):
@@ -153,6 +158,7 @@ class CategoricalCAP(CategoricalPrivacyMetric):
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
+            table_name=table_name,
             key_fields=key_fields,
             sensitive_fields=sensitive_fields,
             model_kwargs=model_kwargs,
@@ -199,6 +205,7 @@ class CategoricalZeroCAP(CategoricalPrivacyMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         key_fields=None,
         sensitive_fields=None,
         model_kwargs=None,
@@ -207,6 +214,7 @@ class CategoricalZeroCAP(CategoricalPrivacyMetric):
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
+            table_name=table_name,
             key_fields=key_fields,
             sensitive_fields=sensitive_fields,
             model_kwargs=model_kwargs,
@@ -218,6 +226,7 @@ class CategoricalZeroCAP(CategoricalPrivacyMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         key_fields=None,
         sensitive_fields=None,
         model_kwargs=None,
@@ -243,6 +252,8 @@ class CategoricalZeroCAP(CategoricalPrivacyMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             key_fields (list(str)):
                 Name of the column(s) to use as the key attributes.
             sensitive_fields (list(str)):
@@ -260,6 +271,7 @@ class CategoricalZeroCAP(CategoricalPrivacyMetric):
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
+            table_name=table_name,
             key_fields=key_fields,
             sensitive_fields=sensitive_fields,
             model_kwargs=model_kwargs,
@@ -328,6 +340,7 @@ class CategoricalGeneralizedCAP(CategoricalPrivacyMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         key_fields=None,
         sensitive_fields=None,
         model_kwargs=None,
@@ -336,6 +349,7 @@ class CategoricalGeneralizedCAP(CategoricalPrivacyMetric):
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
+            table_name=table_name,
             key_fields=key_fields,
             sensitive_fields=sensitive_fields,
             model_kwargs=model_kwargs,
@@ -347,6 +361,7 @@ class CategoricalGeneralizedCAP(CategoricalPrivacyMetric):
         real_data,
         synthetic_data,
         metadata=None,
+        table_name=None,
         key_fields=None,
         sensitive_fields=None,
         model_kwargs=None,
@@ -372,6 +387,8 @@ class CategoricalGeneralizedCAP(CategoricalPrivacyMetric):
             metadata (dict):
                 Table metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             key_fields (list(str)):
                 Name of the column(s) to use as the key attributes.
             sensitive_fields (list(str)):
@@ -389,6 +406,7 @@ class CategoricalGeneralizedCAP(CategoricalPrivacyMetric):
             real_data=real_data,
             synthetic_data=synthetic_data,
             metadata=metadata,
+            table_name=table_name,
             key_fields=key_fields,
             sensitive_fields=sensitive_fields,
             model_kwargs=model_kwargs,

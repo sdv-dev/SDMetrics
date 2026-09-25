@@ -28,37 +28,43 @@ class TestDCRBaselineProtection:
         # Run and Assert
         zero_subsample_msg = re.escape('num_rows_subsample (0) must be an integer greater than 1.')
         with pytest.raises(ValueError, match=zero_subsample_msg):
-            DCRBaselineProtection.compute_breakdown(real_data, synthetic_data, metadata, 0)
+            DCRBaselineProtection.compute_breakdown(real_data, synthetic_data, metadata, 'table', 0)
 
         subsample_none_msg = re.escape(
             'num_iterations should not be greater than 1 if there is no subsampling.'
         )
         with pytest.raises(ValueError, match=subsample_none_msg):
-            DCRBaselineProtection.compute_breakdown(real_data, synthetic_data, metadata, None, 10)
+            DCRBaselineProtection.compute_breakdown(
+                real_data, synthetic_data, metadata, 'table', None, 10
+            )
 
         large_subsample_msg = re.escape('Ignoring the num_rows_subsample and num_iterations args.')
         with pytest.warns(UserWarning, match=large_subsample_msg):
             DCRBaselineProtection.compute_breakdown(
-                real_data, synthetic_data, metadata, len(synthetic_data) * 2
+                real_data, synthetic_data, metadata, 'table', len(synthetic_data) * 2
             )
 
         zero_iteration_msg = re.escape('num_iterations (0) must be an integer greater than 1.')
         with pytest.raises(ValueError, match=zero_iteration_msg):
-            DCRBaselineProtection.compute_breakdown(real_data, synthetic_data, metadata, 1, 0)
+            DCRBaselineProtection.compute_breakdown(
+                real_data, synthetic_data, metadata, 'table', 1, 0
+            )
 
         no_dcr_metadata = {'columns': {'bad_col': {'sdtype': 'unknown'}}}
         no_dcr_data = pd.DataFrame({'bad_col': [1.0]})
 
         missing_metric = 'There are no overlapping statistical columns to measure.'
         with pytest.raises(ValueError, match=missing_metric):
-            DCRBaselineProtection.compute_breakdown(no_dcr_data, no_dcr_data, no_dcr_metadata)
+            DCRBaselineProtection.compute_breakdown(
+                no_dcr_data, no_dcr_data, no_dcr_metadata, 'table'
+            )
 
         no_df_msg = re.escape(
             f'Both real_data ({type(None)}) and synthetic_data ({type({})}) '
             'must be of type pandas.DataFrame.'
         )
         with pytest.raises(TypeError, match=no_df_msg):
-            DCRBaselineProtection.compute_breakdown(None, {}, metadata)
+            DCRBaselineProtection.compute_breakdown(None, {'table': {}}, metadata, 'table')
 
     @patch(
         'sdmetrics.single_table.privacy.dcr_baseline_protection.DCRBaselineProtection._generate_random_data'
@@ -76,7 +82,12 @@ class TestDCRBaselineProtection:
 
         # Run
         result = DCRBaselineProtection.compute_breakdown(
-            real_data, synthetic_data, metadata, num_rows_subsample, num_iterations
+            real_data,
+            synthetic_data,
+            metadata,
+            'table',
+            num_rows_subsample,
+            num_iterations,
         )
 
         # Assert
@@ -98,12 +109,17 @@ class TestDCRBaselineProtection:
 
         # Run
         DCRBaselineProtection.compute(
-            real_data, synthetic_data, metadata, num_rows_subsample, num_iterations
+            real_data, synthetic_data, metadata, 'table', num_rows_subsample, num_iterations
         )
 
         # Assert
         mock_compute_breakdown.assert_called_once_with(
-            real_data, synthetic_data, metadata, num_rows_subsample, num_iterations
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            table_name='table',
+            num_rows_subsample=num_rows_subsample,
+            num_iterations=num_iterations,
         )
 
     def test__generate_random_data_check_type_and_range(self):
@@ -202,7 +218,12 @@ class TestDCRBaselineProtection:
 
         # Run
         result = DCRBaselineProtection.compute_breakdown(
-            real_data, synthetic_data, metadata, num_rows_subsample, num_iterations
+            real_data,
+            synthetic_data,
+            metadata,
+            'table',
+            num_rows_subsample,
+            num_iterations,
         )
 
         # Assert
@@ -223,7 +244,7 @@ class TestDCRBaselineProtection:
 
         # Run
         result = DCRBaselineProtection.compute_breakdown(
-            real_data, synthetic_data, metadata, num_rows_subsample
+            real_data, synthetic_data, metadata, 'table', num_rows_subsample
         )
 
         # Assert

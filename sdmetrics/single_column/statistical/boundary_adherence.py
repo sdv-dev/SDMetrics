@@ -11,7 +11,8 @@ class BoundaryAdherence(SingleColumnMetric):
     """Boundary adherence metric.
 
     Compute the fraction of rows in the synthetic data that are within the min and max
-    bounds of the real data
+    bounds of the real data. If any of ``range_min``, ``range_max`` or ``range_is_nullable``
+    are provided, they are used instead of the values computed from the real data.
 
     Attributes:
         name (str):
@@ -30,7 +31,9 @@ class BoundaryAdherence(SingleColumnMetric):
     max_value = 1.0
 
     @classmethod
-    def compute(cls, real_data, synthetic_data):
+    def compute(
+        cls, real_data, synthetic_data, range_min=None, range_max=None, range_is_nullable=None
+    ):
         """Compute the boundary adherence of two continuous columns.
 
         Args:
@@ -38,6 +41,15 @@ class BoundaryAdherence(SingleColumnMetric):
                 The values from the real dataset.
             synthetic_data (Union[numpy.ndarray, pandas.Series]):
                 The values from the synthetic dataset.
+            range_min (float or datetime, optional):
+                The minimum value the column is allowed to take. If ``None``, the minimum
+                value of the real data is used instead. Defaults to ``None``.
+            range_max (float or datetime, optional):
+                The maximum value the column is allowed to take. If ``None``, the maximum
+                value of the real data is used instead. Defaults to ``None``.
+            range_is_nullable (bool, optional):
+                Whether the column is allowed to contain missing values.
+                Defaults to ``None``.
 
         Returns:
             float:
@@ -45,15 +57,24 @@ class BoundaryAdherence(SingleColumnMetric):
         """
         real_data = pd.Series(real_data)
         synthetic_data = pd.Series(synthetic_data)
-        if any(pd.isna(real_data)):
-            real_data = real_data.dropna()
+
+        range_min = real_data.min() if range_min is None else range_min
+        range_max = real_data.max() if range_max is None else range_max
+
+        if range_is_nullable is None:
+            range_is_nullable = any(pd.isna(real_data))
+
+        real_data = real_data.dropna()
+        if range_is_nullable:
             synthetic_data = synthetic_data.dropna()
 
         if is_datetime(real_data):
+            bounds = pd.to_datetime([range_min, range_max]).astype(real_data.dtype)
             real_data = pd.to_numeric(real_data)
             synthetic_data = pd.to_numeric(synthetic_data)
+            range_min, range_max = pd.to_numeric(bounds)
 
-        valid = synthetic_data.between(real_data.min(), real_data.max())
+        valid = synthetic_data.between(range_min, range_max)
 
         return valid.sum() / len(synthetic_data)
 

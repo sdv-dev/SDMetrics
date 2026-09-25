@@ -18,7 +18,8 @@
                     "computer_representation": "Float"
                 },
                 "date": {
-                    "sdtype": "datetime"
+                    "sdtype": "datetime",
+                    "datetime_format": "%Y-%m-%d"
                 },
                 "day_of_week": {
                     "sdtype": "numerical",

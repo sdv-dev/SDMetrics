@@ -79,7 +79,7 @@ class TimeSeriesMetric(BaseMetric):
         return metadata, sequence_key
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, sequence_key=None):
+    def compute(cls, real_data, synthetic_data, metadata=None, table_name=None, sequence_key=None):
         """Compute this metric.
 
         Args:
@@ -90,6 +90,8 @@ class TimeSeriesMetric(BaseMetric):
             metadata (dict):
                 TimeSeries metadata dict. If not passed, it is build based on the
                 real_data fields and dtypes.
+            table_name (str or None):
+                Name of the table to use when ``metadata`` contains multiple tables.
             sequence_key (list[str]):
                 Names of the columns which identify different time series
                 sequences.

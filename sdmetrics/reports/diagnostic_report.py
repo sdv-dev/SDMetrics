@@ -1,7 +1,12 @@
 """Unified diagnostic report."""
 
 from sdmetrics.reports.base_unified_report import BaseUnifiedReport
-from sdmetrics.reports.multi_table._properties import DataValidity, RelationshipValidity, Structure
+from sdmetrics.reports.multi_table._properties import (
+    ConstraintValidity,
+    DataValidity,
+    RelationshipValidity,
+    Structure,
+)
 
 
 class DiagnosticReport(BaseUnifiedReport):
@@ -17,6 +22,7 @@ class DiagnosticReport(BaseUnifiedReport):
             'Data Validity': DataValidity(),
             'Data Structure': Structure(),
             'Relationship Validity': RelationshipValidity(),
+            'Constraint Validity': ConstraintValidity(),
         }
 
     def _validate_metadata_matches_data(self, real_data, synthetic_data, metadata):

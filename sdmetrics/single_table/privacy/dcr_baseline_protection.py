@@ -5,6 +5,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
+from sdmetrics._utils_metadata import _get_single_table_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
@@ -59,6 +60,7 @@ class DCRBaselineProtection(SingleTableMetric):
         real_data,
         synthetic_data,
         metadata,
+        table_name,
         num_rows_subsample=None,
         num_iterations=1,
     ):
@@ -72,6 +74,8 @@ class DCRBaselineProtection(SingleTableMetric):
                 from the synthesizer.
             metadata (dict):
                 A metadata dictionary that describes the table of data.
+            table_name (str):
+                The name of the table to use from the metadata.
             num_rows_subsample (int or None):
                 The number of synthetic data rows to subsample from the synthetic data.
                 This is used to increase the speed of the computation, if the dataset is large.
@@ -87,6 +91,7 @@ class DCRBaselineProtection(SingleTableMetric):
                 and the median DCR score between the random data and real data.
                 Averages of the medians are returned in the case of multiple iterations.
         """
+        metadata = _get_single_table_metadata(metadata, table_name)
         real_data = get_table_data_from_dict(real_data)
         synthetic_data = get_table_data_from_dict(synthetic_data)
         num_rows_subsample, num_iterations = cls._validate_inputs(
@@ -153,6 +158,7 @@ class DCRBaselineProtection(SingleTableMetric):
         real_data,
         synthetic_data,
         metadata,
+        table_name,
         num_rows_subsample=None,
         num_iterations=1,
     ):
@@ -164,10 +170,10 @@ class DCRBaselineProtection(SingleTableMetric):
             synthetic_data (pd.DataFrame):
                 A pandas.DataFrame object containing the synthetic data sampled
                 from the synthesizer.
-            real_validation_data (pd.DataFrame):
-                A pandas.DataFrame object containing a holdout set of real data.
             metadata (dict):
                 A metadata dictionary that describes the table of data.
+            table_name (str):
+                The name of the table to use from the metadata.
             num_rows_subsample (int or None):
                 The number of synthetic data rows to subsample from the synthetic data.
                 This is used to increase the speed of the computation, if the dataset is large.
@@ -181,11 +187,12 @@ class DCRBaselineProtection(SingleTableMetric):
                 The score for the DCRBaselineProtection metric.
         """
         result = cls.compute_breakdown(
-            real_data,
-            synthetic_data,
-            metadata,
-            num_rows_subsample,
-            num_iterations,
+            real_data=real_data,
+            synthetic_data=synthetic_data,
+            metadata=metadata,
+            table_name=table_name,
+            num_rows_subsample=num_rows_subsample,
+            num_iterations=num_iterations,
         )
 
         return result.get('score')
