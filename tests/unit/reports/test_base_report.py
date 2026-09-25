@@ -125,6 +125,7 @@ class TestBaseReport:
         base_report = BaseReport()
         mock__validate_metadata_matches_data = Mock()
         base_report._validate_metadata_matches_data = mock__validate_metadata_matches_data
+        constraints = None
 
         real_data = pd.DataFrame({
             'column1': [1, 2, 3],
@@ -144,13 +145,42 @@ class TestBaseReport:
         }
 
         # Run
-        base_report._validate(real_data, synthetic_data, metadata)
+        base_report._validate(real_data, synthetic_data, metadata, constraints)
 
         # Assert
         mock__validate_metadata.assert_called_once_with(metadata)
         mock__validate_metadata_matches_data.assert_called_once_with(
             real_data, synthetic_data, metadata
         )
+
+    @pytest.mark.parametrize(
+        'constraints',
+        [None, [], [{'class_name': 'Range', 'parameters': {}}], [{}, {}]],
+    )
+    def test__validate_constraints_input(self, constraints):
+        """Test ``_validate_constraints_input`` accepts ``None`` and lists of dictionaries."""
+        # Setup
+        base_report = BaseReport()
+
+        # Run and Assert
+        base_report._validate_constraints_input(constraints)
+
+    @pytest.mark.parametrize(
+        'constraints',
+        [True, 'invalid', {'class_name': 'Range', 'parameters': {}}, ['invalid'], [{}, 'invalid']],
+    )
+    def test__validate_constraints_input_invalid(self, constraints):
+        """Test ``_validate_constraints_input`` rejects anything but ``None`` or a list of dicts."""
+        # Setup
+        base_report = BaseReport()
+        expected_message = (
+            "BaseReport expects 'constraints' parameter to be a list of dictionaries, "
+            "each one with the keys 'class_name' and 'parameters'."
+        )
+
+        # Run and Assert
+        with pytest.raises(ValueError, match=expected_message):
+            base_report._validate_constraints_input(constraints)
 
     def test__validate_with_value_error(self):
         """Test the ``_validate`` method with a ValueError."""
@@ -229,6 +259,25 @@ class TestBaseReport:
         with pytest.raises(TypeError, match=expected_message):
             base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
+    def test_generate_constraints_not_list(self):
+        """Test the ``generate`` method when constraints is not a list."""
+        # Setup
+        base_report = BaseReport()
+        real_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
+        synthetic_data = pd.DataFrame({'column1': [1, 2, 3], 'column2': ['a', 'b', 'c']})
+        metadata = {
+            'columns': {'column1': {'sdtype': 'numerical'}, 'column2': {'sdtype': 'categorical'}}
+        }
+        constraints = 'constraints'
+
+        # Run and Assert
+        expected_message = (
+            "BaseReport expects 'constraints' parameter to be a list of dictionaries, "
+            "each one with the keys 'class_name' and 'parameters'."
+        )
+        with pytest.raises(ValueError, match=expected_message):
+            base_report.generate(real_data, synthetic_data, metadata, constraints)
+
     @patch('sys.stdout.write')
     def test_print_results_verbose_true(self, mock_write):
         """Test the results are printed if verbose is True."""
@@ -306,7 +355,7 @@ class TestBaseReport:
 
         # Assert
         mock_validate.assert_called_once()
-        copied_real_data, copied_synthetic_data, _ = mock_validate.call_args.args
+        copied_real_data, copied_synthetic_data, *_ = mock_validate.call_args.args
         pd.testing.assert_frame_equal(copied_real_data, real_data)
         pd.testing.assert_frame_equal(copied_synthetic_data, synthetic_data)
         assert copied_real_data is not real_data
@@ -382,7 +431,7 @@ class TestBaseReport:
         base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
         # Assert
-        copied_real_data, copied_synthetic_data, _ = base_report._validate.call_args.args
+        copied_real_data, copied_synthetic_data, *_ = base_report._validate.call_args.args
         for table_name, table in real_data.items():
             pd.testing.assert_frame_equal(copied_real_data[table_name], table)
             pd.testing.assert_frame_equal(
@@ -481,6 +530,7 @@ class TestBaseReport:
         base_report._skipped_properties = {'Old Property'}
         base_report._get_skipped_properties = Mock(return_value={'Property 1'})
         base_report._properties['Property 1'] = Mock()
+        del base_report._properties['Property 1']._skipped_message
         base_report._properties['Property 1'].details = pd.DataFrame({'old': [1]})
         base_report._properties['Property 1'].is_computed = True
         base_report._properties['Property 1']._compute_average.return_value = float('nan')
@@ -497,7 +547,7 @@ class TestBaseReport:
         base_report.generate(real_data, synthetic_data, metadata, verbose=True)
 
         # Assert
-        copied_real_data, copied_synthetic_data, _ = base_report._validate.call_args.args
+        copied_real_data, copied_synthetic_data, *_ = base_report._validate.call_args.args
         pd.testing.assert_frame_equal(copied_real_data, real_data)
         pd.testing.assert_frame_equal(copied_synthetic_data, synthetic_data)
         assert copied_real_data is not real_data
@@ -507,7 +557,7 @@ class TestBaseReport:
         assert base_report._properties['Property 1'].details.empty
         assert not base_report._properties['Property 1'].is_computed
         assert base_report._skipped_properties == {'Property 1'}
-        base_report._get_skipped_properties.assert_called_once_with(metadata)
+        base_report._get_skipped_properties.assert_called_once_with(metadata, None)
         base_report._properties['Property 2'].get_score.assert_called_once_with(
             copied_real_data, copied_synthetic_data, metadata, progress_bar=mock_tqdm.return_value
         )
@@ -527,6 +577,68 @@ class TestBaseReport:
             }),
         )
         base_report._print_results.assert_called_once_with(True)
+
+    @patch('tqdm.tqdm')
+    def test_generate_with_constraints(self, mock_tqdm):
+        """Test ``generate`` only passes the constraints to the Constraint Validity property."""
+        # Setup
+        base_report = BaseReport()
+        base_report._validate = Mock()
+        base_report._print_results = Mock()
+        base_report._properties['Property 1'] = Mock()
+        base_report._properties['Property 1'].get_score.return_value = 1.0
+        base_report._properties['Property 1']._get_num_iterations.return_value = 4
+        base_report._properties['Constraint Validity'] = Mock()
+        base_report._properties['Constraint Validity'].get_score.return_value = 0.5
+        base_report._properties['Constraint Validity']._get_num_iterations.return_value = 1
+        real_data = pd.DataFrame({'column1': [1, 2, 3]})
+        synthetic_data = pd.DataFrame({'column1': [1, 2, 3]})
+        metadata = {'columns': {'column1': {'sdtype': 'numerical'}}}
+        constraints = [{'class_name': 'Range', 'parameters': {}}]
+
+        # Run
+        base_report.generate(real_data, synthetic_data, metadata, constraints, verbose=True)
+
+        # Assert
+        copied_real_data, copied_synthetic_data, *_ = base_report._validate.call_args.args
+        base_report._properties['Property 1']._get_num_iterations.assert_called_once_with(metadata)
+        base_report._properties['Property 1'].get_score.assert_called_once_with(
+            copied_real_data, copied_synthetic_data, metadata, progress_bar=mock_tqdm.return_value
+        )
+        base_report._properties['Constraint Validity']._get_num_iterations.assert_called_once_with(
+            metadata, constraints=constraints
+        )
+        base_report._properties['Constraint Validity'].get_score.assert_called_once_with(
+            copied_real_data,
+            copied_synthetic_data,
+            metadata,
+            progress_bar=mock_tqdm.return_value,
+            constraints=constraints,
+        )
+        assert base_report._overall_score == 0.75
+
+    @patch('sys.stdout.write')
+    @patch('tqdm.tqdm')
+    def test_generate_verbose_with_skipped_property_message(self, mock_tqdm, mock_write):
+        """Test a skipped property prints its own message when it defines one."""
+        # Setup
+        base_report = BaseReport()
+        base_report._validate = Mock()
+        base_report.convert_datetimes = Mock()
+        base_report._print_results = Mock()
+        base_report._get_skipped_properties = Mock(return_value={'Property 1'})
+        base_report._properties['Property 1'] = Mock(_skipped_message='Property message.')
+        base_report._properties['Property 1']._compute_average.return_value = float('nan')
+        real_data = pd.DataFrame({'column1': [1, 2, 3]})
+        synthetic_data = pd.DataFrame({'column1': [1, 2, 3]})
+        metadata = {'columns': {'column1': {'sdtype': 'numerical'}}}
+
+        # Run
+        base_report.generate(real_data, synthetic_data, metadata, verbose=True)
+
+        # Assert
+        mock_write.assert_any_call('(1/1) Evaluating Property 1: N/A\nProperty message.\n\n')
+        base_report._properties['Property 1'].get_score.assert_not_called()
 
     def test__check_report_generated(self):
         """Test the ``check_report_generated`` method."""

@@ -80,6 +80,7 @@ class TestConstraintValidity:
         # Assert
         assert isinstance(constraint_validity, BaseMultiTableProperty)
         assert constraint_validity._num_iteration_case == 'constraint'
+        assert constraint_validity._skipped_message == 'No constraints were provided.'
         assert constraint_validity.is_computed is False
         assert constraint_validity.details.empty
 

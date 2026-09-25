@@ -16,21 +16,26 @@ class BaseUnifiedReport(BaseMultiTableReport):
     })
     _skipped_property_message = 'This property does not apply to single-table data.'
 
-    def _get_skipped_properties(self, metadata):
+    def _get_skipped_properties(self, metadata, constraints=None):
         """Return properties unavailable to single-table data.
 
         Args:
             metadata (dict):
                 The metadata dict.
+            constraints (list[dict] or None):
+                The constraints given to the report. Defaults to None.
 
         Returns:
             set[str]:
                 Names of properties to skip.
         """
+        skipped_properties = super()._get_skipped_properties(metadata, constraints)
         if len(metadata.get('tables', {})) == 1:
-            return self._SINGLE_TABLE_SKIPPED_PROPERTIES
+            skipped_properties.update(self._SINGLE_TABLE_SKIPPED_PROPERTIES)
+        if not constraints:
+            skipped_properties.add('Constraint Validity')
 
-        return super()._get_skipped_properties(metadata)
+        return skipped_properties
 
     def _validate_data_format(self, real_data, synthetic_data):
         """Validate that the real and synthetic data have compatible formats.
@@ -75,7 +80,7 @@ class BaseUnifiedReport(BaseMultiTableReport):
         super()._validate_property_generated(property_name)
         self._check_property_single_table(property_name)
 
-    def _validate(self, real_data, synthetic_data, metadata):
+    def _validate(self, real_data, synthetic_data, metadata, constraints=None):
         """Validate the inputs.
 
         Args:
@@ -85,6 +90,8 @@ class BaseUnifiedReport(BaseMultiTableReport):
                 The synthetic data.
             metadata (dict):
                 The metadata.
+            constraints (list[dict] or None):
+                The constraints to evaluate. Defaults to None.
         """
         _validate_unified_metadata(metadata)
         self.table_names = list(metadata.get('tables', []))
@@ -94,6 +101,7 @@ class BaseUnifiedReport(BaseMultiTableReport):
             synthetic_data,
             metadata,
         )
+        self._validate_constraints_input(constraints)
 
     def get_properties(self):
         """Return the property score.

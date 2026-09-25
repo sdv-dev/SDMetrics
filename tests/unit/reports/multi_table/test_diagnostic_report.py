@@ -4,7 +4,12 @@ import sys
 import pytest
 
 from sdmetrics.reports import DiagnosticReport
-from sdmetrics.reports.multi_table._properties import DataValidity, RelationshipValidity, Structure
+from sdmetrics.reports.multi_table._properties import (
+    ConstraintValidity,
+    DataValidity,
+    RelationshipValidity,
+    Structure,
+)
 
 
 class TestDiagnosticReport:
@@ -52,3 +57,4 @@ class TestDiagnosticReport:
         assert isinstance(report._properties['Data Validity'], DataValidity)
         assert isinstance(report._properties['Data Structure'], Structure)
         assert isinstance(report._properties['Relationship Validity'], RelationshipValidity)
+        assert isinstance(report._properties['Constraint Validity'], ConstraintValidity)
