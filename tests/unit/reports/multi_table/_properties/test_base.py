@@ -120,7 +120,8 @@ class TestBaseMultiTableProperty:
         real_columns = base_property._extract_tuple(real_data, relation)
 
         # Assert
-        assert real_columns == (real_data['users']['user_id'], real_data['sessions']['user_id'])
+        pd.testing.assert_frame_equal(real_columns[0], real_data['users'][['user_id']])
+        pd.testing.assert_frame_equal(real_columns[1], real_data['sessions'][['user_id']])
 
     def test__generate_details_property(self):
         """Test the ``_generate_details`` method."""
