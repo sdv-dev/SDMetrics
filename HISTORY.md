@@ -1,5 +1,15 @@
 # History
 
+## v0.32.0 - 2026-09-25
+
+### New Features
+
+* Update `DiagnosticReport` to include `ConstraintValidity` property - Issue [#901](https://github.com/sdv-dev/SDMetrics/issues/901) by @sarahmish
+
+### Bugs Fixed
+
+* Validate the constraints input prior to running the report - Issue [#947](https://github.com/sdv-dev/SDMetrics/issues/947) by @sarahmish
+
 ## v0.31.1 - 2026-09-18
 
 ### New Features
