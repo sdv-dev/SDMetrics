@@ -56,9 +56,13 @@ class BaseMultiTableProperty:
     def _extract_tuple(data, relation):
         parent_data = data[relation['parent_table_name']]
         child_data = data[relation['child_table_name']]
+        primary_key = relation['parent_primary_key']
+        foreign_key = relation['child_foreign_key']
+        primary_key = [primary_key] if not isinstance(primary_key, list) else primary_key
+        foreign_key = [foreign_key] if not isinstance(foreign_key, list) else foreign_key
         return (
-            parent_data[relation['parent_primary_key']],
-            child_data[relation['child_foreign_key']],
+            parent_data[primary_key],
+            child_data[foreign_key],
         )
 
     def _compute_average(self):
