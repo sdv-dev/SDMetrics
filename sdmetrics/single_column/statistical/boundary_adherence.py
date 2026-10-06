@@ -4,7 +4,7 @@ import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
-from sdmetrics.utils import is_datetime
+from sdmetrics.utils import is_datetime, safe_divide
 
 
 class BoundaryAdherence(SingleColumnMetric):
@@ -76,7 +76,7 @@ class BoundaryAdherence(SingleColumnMetric):
 
         valid = synthetic_data.between(range_min, range_max)
 
-        return valid.sum() / len(synthetic_data)
+        return safe_divide(valid.sum(), len(synthetic_data))
 
     @classmethod
     def normalize(cls, raw_score):
