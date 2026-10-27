@@ -142,33 +142,53 @@ class TestForeignToPrimaryKeySubset:
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
             constraint._validate_data(data, metadata)
 
-    def test__validate_data_missing_primary_key_column(self, data, metadata, constraint):
-        """Test ``_validate_data`` errors if the parent does not hold its primary key."""
+    def test__validate_data_composite_foreign_key(self, data, metadata, constraint):
+        """Test ``_validate_data`` works when the child foreign key is a composite key."""
+        # Setup
+        metadata['tables']['transactions']['primary_key'] = ['user_id', 'transaction_id']
+        constraint.child_foreign_key = ['user_id', 'transaction_id']
+
+        # Run & Assert
+        constraint._validate_data(data, metadata)
+
+    def test__fit_missing_primary_key_column(self, data, metadata, constraint):
+        """Test ``_fit`` errors if the parent does not hold its primary key."""
         # Setup
         del data['users']['user_id']
         expected_error = re.escape("The column(s) 'user_id' are missing from the table 'users'.")
 
         # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
-            constraint._validate_data(data, metadata)
+            constraint._fit(data, metadata)
 
-    def test__validate_data_missing_primary_key(self, data, metadata, constraint):
-        """Test ``_validate_data`` errors if the parent has no primary key in the metadata."""
+    def test__fit_missing_primary_key(self, data, metadata, constraint):
+        """Test ``_fit`` errors if the parent has no primary key in the metadata."""
         # Setup
         del metadata['tables']['users']['primary_key']
         expected_error = re.escape("The table 'users' does not have a primary key in the metadata.")
 
         # Run and Assert
         with pytest.raises(ConstraintNotApplicableError, match=expected_error):
-            constraint._validate_data(data, metadata)
+            constraint._fit(data, metadata)
 
-    def test__validate_data_stores_the_primary_key(self, data, metadata, constraint):
-        """Test ``_validate_data`` remembers the primary key that it resolved."""
+    def test__fit_stores_the_primary_key(self, data, metadata, constraint):
+        """Test ``_fit`` remembers the primary key that it resolved."""
         # Run
-        constraint._validate_data(data, metadata)
+        constraint._fit(data, metadata)
 
         # Assert
         assert constraint._parent_primary_key == 'user_id'
+
+    def test__fit_composite_primary_key(self, data, metadata, constraint):
+        """Test ``_fit`` works when the parent has a composite primary key."""
+        # Setup
+        metadata['tables']['users']['primary_key'] = ['user_id', 'company_name']
+
+        # Run
+        constraint._fit(data, metadata)
+
+        # Assert
+        assert constraint._parent_primary_key == ['user_id', 'company_name']
 
     def test__is_valid(self, data, metadata, constraint):
         """Test ``_is_valid`` considers valid every child row that references a subset row."""

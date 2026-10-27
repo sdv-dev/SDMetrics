@@ -1,6 +1,7 @@
 """Foreign To Primary Key Subset Constraint."""
 
 from sdmetrics.multi_table.statistical.constraints._utils import (
+    _cast_to_iterable,
     _get_primary_key,
     _validate_foreign_to_primary_key_subset,
     _validate_foreign_to_primary_key_subset_input,
@@ -59,8 +60,8 @@ class ForeignToPrimaryKeySubset(BaseConstraint):
     def _validate_data(self, data, metadata=None):
         """Check that both tables and all the referenced columns exist in the data."""
         table_to_columns = {
-            self.parent_table_name: [self.conditional_column_name],
-            self.child_table_name: [self.child_foreign_key],
+            self.parent_table_name: _cast_to_iterable(self.conditional_column_name),
+            self.child_table_name: _cast_to_iterable(self.child_foreign_key),
         }
         for table_name, table_columns in table_to_columns.items():
             if table_name not in data:
@@ -78,12 +79,14 @@ class ForeignToPrimaryKeySubset(BaseConstraint):
                     f"The column(s) '{missing_columns}' are missing from the table '{table_name}'."
                 )
 
+    def _fit(self, data, metadata=None):
         primary_key = _get_primary_key(metadata, self.parent_table_name)
-        if primary_key not in data[self.parent_table_name].columns:
-            raise ConstraintNotApplicableError(
-                f"The column(s) '{primary_key}' are missing from the table "
-                f"'{self.parent_table_name}'."
-            )
+        for key in _cast_to_iterable(primary_key):
+            if key not in data[self.parent_table_name].columns:
+                raise ConstraintNotApplicableError(
+                    f"The column(s) '{primary_key}' are missing from the table "
+                    f"'{self.parent_table_name}'."
+                )
 
         self._parent_primary_key = primary_key
 

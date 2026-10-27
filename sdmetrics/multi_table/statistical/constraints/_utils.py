@@ -252,7 +252,7 @@ def _get_primary_key(metadata, table_name):
     """
     tables_metadata = (metadata or {}).get('tables', {})
     primary_key = tables_metadata.get(table_name, {}).get('primary_key')
-    if not isinstance(primary_key, str):
+    if primary_key is None:
         raise ConstraintNotApplicableError(
             f"The table '{table_name}' does not have a primary key in the metadata."
         )
