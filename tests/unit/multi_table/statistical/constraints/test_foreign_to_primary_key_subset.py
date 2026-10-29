@@ -148,7 +148,7 @@ class TestForeignToPrimaryKeySubset:
         metadata['tables']['transactions']['primary_key'] = ['user_id', 'transaction_id']
         constraint.child_foreign_key = ['user_id', 'transaction_id']
 
-        # Run & Assert
+        # Run and Assert
         constraint._validate_data(data, metadata)
 
     def test__fit_missing_primary_key_column(self, data, metadata, constraint):
