@@ -1,5 +1,15 @@
 # History
 
+## v0.33.0 - 2026-10-29
+
+### Bugs Fixed
+
+* `'ForeignToPrimaryKeySubset'` fails on composite foreign keys - Issue [#955](https://github.com/sdv-dev/SDMetrics/issues/955) by @sarahmish
+
+### Maintenance
+
+* Remove support for Python 3.9 - Issue [#958](https://github.com/sdv-dev/SDMetrics/issues/958) by @sarahmish
+
 ## v0.32.0 - 2026-09-25
 
 ### New Features
