@@ -34,7 +34,7 @@ jobs:
           echo 'export DYLD_LIBRARY_PATH=$(brew --prefix libomp)/lib:$DYLD_LIBRARY_PATH' >> $GITHUB_ENV
     - name: Install dependencies
       run: |
-          python -m pip install --upgrade pip
+          make upgradepip
           python -m pip install invoke .[test]
     - name: Run unit tests
       run: invoke unit
