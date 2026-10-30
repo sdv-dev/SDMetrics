@@ -86,9 +86,27 @@ def get_missing_percentage(data_column):
     return round((data_column.isna().sum() / len(data_column)) * 100, 2)
 
 
+def safe_divide(numerator, denominator):
+    """Divide two numbers, returning ``np.nan`` if the denominator is zero.
+
+    Args:
+        numerator (float):
+            The number to be divided.
+        denominator (float):
+            The number to divide by.
+
+    Returns:
+        float:
+            The result of the division, or ``np.nan`` if the denominator is zero.
+    """
+    if denominator == 0:
+        return np.nan
+
+    return numerator / denominator
+
+
 def get_cardinality_distribution(parent_column, child_column):
     """Compute the cardinality distribution of the (parent, child) pairing.
-
     Args:
         parent_column (pd.Series or pd.DataFrame):
             The parent column(s).
