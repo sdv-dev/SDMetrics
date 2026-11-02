@@ -833,7 +833,7 @@ def test_unified_diagnostic_report_multi_table_verbose_with_constraints(capsys):
 
 @pytest.mark.parametrize('constraints', [None, []])
 def test_unified_diagnostic_report_without_constraints(constraints):
-    """Test the Constraint Validity score is NaN and ignored when there are no constraints."""
+    """Test missing constraints give a clear error for details, but not for scores."""
     # Setup
     real_data, synthetic_data, metadata = load_multi_table_demo()
 
@@ -841,7 +841,6 @@ def test_unified_diagnostic_report_without_constraints(constraints):
     report = DiagnosticReport()
     report.generate(real_data, synthetic_data, metadata, constraints, verbose=False)
     properties = report.get_properties()
-    details = report.get_details('Constraint Validity')
 
     # Assert
     assert list(properties['Property']) == [
@@ -851,8 +850,19 @@ def test_unified_diagnostic_report_without_constraints(constraints):
         'Constraint Validity',
     ]
     assert pd.isna(properties.loc[properties['Property'] == 'Constraint Validity', 'Score'].iloc[0])
-    assert details.empty
+    with pytest.raises(ValueError, match='No constraints were provided.'):
+        report.get_details('Constraint Validity')
     assert report.get_score() == 1.0
+
+
+def test_single_table_diagnostic_report_without_constraints_details():
+    """Test missing constraints give a clear error for single-table details."""
+    real_data, synthetic_data, metadata = load_single_table_demo()
+    report = DiagnosticReport()
+    report.generate(real_data, synthetic_data, metadata, verbose=False)
+
+    with pytest.raises(ValueError, match='No constraints were provided.'):
+        report.get_details('Constraint Validity')
 
 
 @pytest.mark.parametrize('constraints', [True, 'invalid', ['invalid']])
