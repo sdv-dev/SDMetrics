@@ -7,6 +7,7 @@ import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
+from sdmetrics.utils import safe_divide
 
 
 class RegexFormatAdherence(SingleColumnMetric):
@@ -113,6 +114,6 @@ class RegexFormatAdherence(SingleColumnMetric):
             warnings.warn(message)
 
         synthetic_valid, _ = cls._filter_valid_regex_rows(synthetic_data, regex_format, real_groups)
-        score = len(synthetic_valid) / len(synthetic_data)
+        score = safe_divide(len(synthetic_valid), len(synthetic_data))
 
         return score
