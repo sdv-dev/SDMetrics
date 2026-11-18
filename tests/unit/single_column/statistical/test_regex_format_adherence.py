@@ -1,4 +1,5 @@
 import re
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
@@ -153,7 +154,8 @@ class TestRegexFormatAdherence:
         # Assert
         assert len(result) == 2  # including nan
 
-    def test_compute(self):
+    @patch('sdmetrics.single_column.statistical.regex_format_adherence._safe_divide')
+    def test_compute(self, mock_safe_divide):
         """Test the `compute` method.
 
         Expect that the percentage of rows that match the regex format is returned.
@@ -171,6 +173,7 @@ class TestRegexFormatAdherence:
         synthetic_data = pd.Series([np.nan, 'second', 'third', '1234'])
         regex_format = r'[a-z]{5,6}'
         message = "Some values in the real data do not match the specified regex format: '1234'"
+        mock_safe_divide.return_value = 0.75
 
         metric = RegexFormatAdherence()
 
@@ -179,7 +182,8 @@ class TestRegexFormatAdherence:
             result = metric.compute(real_data, synthetic_data, regex_format)
 
         # Assert
-        result == 0.75
+        mock_safe_divide.assert_called_once_with(3, 4)
+        assert result == 0.75
         assert len(record) == 1
         assert str(record[0].message) == message
 
