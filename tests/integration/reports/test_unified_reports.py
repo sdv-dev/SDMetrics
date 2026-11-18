@@ -1,4 +1,6 @@
+import warnings
 from datetime import date, datetime
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
@@ -944,3 +946,53 @@ def test_unified_report_with_non_key_regex_format():
     # Assert
     assert 'RegexFormatAdherence' in details['Metric'].to_numpy()
     assert diagnostic.get_score() == 1.0
+
+
+def test_warning_emitted_at_the_end(capsys):
+    """Test that warnings are emitted at the end of the report generation."""
+    # Setup
+    real_data = {
+        'users': pd.DataFrame({
+            'user_id': ['ID_001', 'ID_002', 'USER_3'],
+            'age': [25, 31, 47],
+        })
+    }
+    synthetic_data = {
+        'users': pd.DataFrame({
+            'user_id': ['ID_004', 'ID_005', 'ID_006'],
+            'age': [29, 35, 41],
+        })
+    }
+    metadata = {
+        'tables': {
+            'users': {
+                'primary_key': 'user_id',
+                'columns': {
+                    'user_id': {'sdtype': 'id', 'regex_format': 'ID_[0-9]{3}'},
+                    'age': {'sdtype': 'numerical'},
+                },
+            }
+        }
+    }
+    expected_warning = (
+        'UserWarning: Some values in the real data do not match '
+        "the specified regex format: 'USER_3'"
+    )
+    report = DiagnosticReport()
+
+    def show_warning(message, category, filename, lineno, file=None, line=None):
+        """Print warnings to stdout to verify their order relative to report output."""
+        print(f'{category.__name__}: {message}')
+
+    # Run
+    with warnings.catch_warnings():
+        warnings.simplefilter('always', UserWarning)
+        with patch('warnings.showwarning', side_effect=show_warning):
+            report.generate(real_data, synthetic_data, metadata, verbose=True)
+
+    # Assert
+    output = capsys.readouterr().out
+    assert 'Generating report' in output
+    assert output.count(expected_warning) == 1
+    assert output.index('Overall Score (Average):') < output.index(expected_warning)
+    assert output.rstrip().endswith(expected_warning)
