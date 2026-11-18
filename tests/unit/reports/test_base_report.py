@@ -347,6 +347,7 @@ class TestBaseReport:
             warning_counts.append(len(captured))
             return 1.0
 
+        base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 1'].get_score.side_effect = get_score_with_warning
         mock__print_results.side_effect = lambda verbose: warning_counts.append(len(captured))
         base_report._properties['Property 2'] = Mock()
