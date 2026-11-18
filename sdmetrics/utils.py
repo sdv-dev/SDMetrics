@@ -403,3 +403,11 @@ def _cast_to_iterable(value):
         return value
 
     return [value]
+
+
+def _safe_divide(numerator, denominator):
+    """Divide two numbers, returning ``np.nan`` if the denominator is zero."""
+    if denominator == 0:
+        return np.nan
+
+    return numerator / denominator

@@ -4,6 +4,7 @@ import pandas as pd
 
 from sdmetrics.column_pairs.base import ColumnPairsMetric
 from sdmetrics.goal import Goal
+from sdmetrics.utils import _safe_divide
 
 
 class CardinalityBoundaryAdherence(ColumnPairsMetric):
@@ -57,7 +58,7 @@ class CardinalityBoundaryAdherence(ColumnPairsMetric):
         valid_cardinality = sum(
             synthetic_cardinality['cardinality'].between(min_cardinality, max_cardinality)
         )
-        score = valid_cardinality / len(synthetic_cardinality)
+        score = _safe_divide(valid_cardinality, len(synthetic_cardinality))
 
         return {'score': score}
 
