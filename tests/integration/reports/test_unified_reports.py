@@ -988,7 +988,7 @@ def test_warning_emitted_at_the_end(capsys):
     with warnings.catch_warnings():
         warnings.simplefilter('always', UserWarning)
         with patch('warnings.showwarning', side_effect=show_warning):
-            report.generate(real_data, synthetic_data, metadata, verbose=True)
+            report.generate(real_data, synthetic_data, metadata)
 
     # Assert
     output = capsys.readouterr().out
