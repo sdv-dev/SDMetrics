@@ -37,10 +37,7 @@ def test_defer_warnings():
     # Assert
     assert result == 'result'
     assert warning_counts == [0]
-    assert [
-        (warning.category, str(warning.message))
-        for warning in captured
-    ] == [
+    assert [(warning.category, str(warning.message)) for warning in captured] == [
         (UserWarning, 'First warning'),
         (RuntimeWarning, 'Second warning'),
     ]
