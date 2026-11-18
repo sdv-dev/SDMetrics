@@ -14,7 +14,7 @@ import pandas as pd
 import tqdm
 
 from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata
-from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
+from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE, defer_warnings
 from sdmetrics.utils import get_columns_from_metadata
 from sdmetrics.visualization import set_plotly_config
 
@@ -160,6 +160,7 @@ class BaseReport:
         """
         return set()
 
+    @defer_warnings()
     def generate(self, real_data, synthetic_data, metadata, constraints=None, verbose=True):
         """Generate report.
 

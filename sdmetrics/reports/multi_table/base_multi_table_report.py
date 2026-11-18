@@ -3,6 +3,7 @@
 import pandas as pd
 
 from sdmetrics.reports.base_report import BaseReport
+from sdmetrics.reports.utils import defer_warnings
 from sdmetrics.utils import _cast_to_iterable
 from sdmetrics.visualization import set_plotly_config
 
@@ -84,6 +85,7 @@ class BaseMultiTableReport(BaseReport):
 
         self._validate_relationships(real_data, synthetic_data, metadata)
 
+    @defer_warnings()
     def generate(self, real_data, synthetic_data, metadata, constraints=None, verbose=True):
         """Generate report.
 
