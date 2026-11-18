@@ -1,14 +1,49 @@
+import warnings
 from datetime import date, datetime
 from unittest.mock import Mock, call, patch
 
 import pandas as pd
+import pytest
 
 from sdmetrics.reports.utils import (
     aggregate_metric_results,
+    defer_warnings,
     discretize_and_apply_metric,
     discretize_table_data,
 )
 from tests.utils import DataFrameMatcher
+
+
+def test_defer_warnings():
+    """Test the `defer_warnings` method."""
+    # Setup
+    warning_counts = []
+
+    def emit_warnings():
+        warnings.warn('First warning', UserWarning)
+        warnings.warn('Second warning', RuntimeWarning)
+        return 'result'
+
+    @defer_warnings()
+    def run():
+        result = emit_warnings()
+        warning_counts.append(len(captured))
+        return result
+
+    # Run
+    with pytest.warns() as captured:
+        result = run()
+
+    # Assert
+    assert result == 'result'
+    assert warning_counts == [0]
+    assert [
+        (warning.category, str(warning.message))
+        for warning in captured
+    ] == [
+        (UserWarning, 'First warning'),
+        (RuntimeWarning, 'Second warning'),
+    ]
 
 
 def test_discretize_table_data():

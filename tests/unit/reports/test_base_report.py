@@ -1,6 +1,7 @@
 import pickle
 import re
 import sys
+import warnings
 from datetime import datetime
 from unittest.mock import Mock, call, mock_open, patch
 
@@ -339,8 +340,15 @@ class TestBaseReport:
         mock__print_results = Mock()
         base_report._print_results = mock__print_results
         base_report._validate = mock_validate
-        base_report._properties['Property 1'] = Mock()
-        base_report._properties['Property 1'].get_score.return_value = 1.0
+        warning_counts = []
+
+        def get_score_with_warning(*args, **kwargs):
+            warnings.warn('Warning during generate', UserWarning)
+            warning_counts.append(len(captured))
+            return 1.0
+
+        base_report._properties['Property 1'].get_score.side_effect = get_score_with_warning
+        mock__print_results.side_effect = lambda verbose: warning_counts.append(len(captured))
         base_report._properties['Property 2'] = Mock()
         base_report._properties['Property 2'].get_score.return_value = 1.0
 
@@ -351,7 +359,8 @@ class TestBaseReport:
         }
 
         # Run
-        base_report.generate(real_data, synthetic_data, metadata, verbose=False)
+        with pytest.warns(UserWarning, match='Warning during generate') as captured:
+            base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
         # Assert
         mock_validate.assert_called_once()
@@ -378,6 +387,9 @@ class TestBaseReport:
             'generation_time': 5,
         }
         assert base_report.report_info == expected_info
+        assert warning_counts == [0, 0]
+        assert len(captured) == 1
+        assert str(captured[0].message) == 'Warning during generate'
 
     @patch('sdmetrics.reports.base_report.datetime')
     @patch('sdmetrics.reports.base_report.time')
