@@ -982,7 +982,7 @@ def test_warning_emitted_at_the_end(capsys):
 
     def show_warning(message, category, filename, lineno, file=None, line=None):
         """Print warnings to stdout to verify their order relative to report output."""
-        print(f'{category.__name__}: {message}')
+        print(f'{category.__name__}: {message}')  # noqa: T201
 
     # Run
     with warnings.catch_warnings():
