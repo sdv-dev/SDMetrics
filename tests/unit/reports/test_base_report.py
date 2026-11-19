@@ -784,6 +784,27 @@ class TestBaseReport:
         base_report._properties['Property 1'].get_visualization.assert_called_once()
         base_report._properties['Property 2'].get_visualization.assert_called_once()
 
+    @pytest.mark.parametrize(
+        'details, property_name, expected_error',
+        [
+            (pd.DataFrame(), 'Constraint Validity', ValueError),
+            (pd.DataFrame(), 'Data Validity', None),
+            (pd.DataFrame({'col1': [1, 2, 3]}), 'Constraint Validity', None),
+        ],
+    )
+    def test__validate_constraint_validity_details(self, details, property_name, expected_error):
+        """Test the ``_validate_constraint_validity_details`` method."""
+        # Setup
+        base_report = BaseReport()
+        expected_error_message = re.escape('No constraints were provided.')
+
+        # Run and Assert
+        if expected_error:
+            with pytest.raises(expected_error, match=expected_error_message):
+                base_report._validate_constraint_validity_details(details, property_name)
+        else:
+            base_report._validate_constraint_validity_details(details, property_name)
+
     def test_get_details(self):
         """Test the ``get_details`` method."""
         # Setup
@@ -793,6 +814,7 @@ class TestBaseReport:
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 2'] = Mock()
         base_report.is_generated = True
+        base_report._validate_constraint_validity_details = Mock()
 
         # Run
         base_report.get_details('Property 1')
@@ -800,6 +822,10 @@ class TestBaseReport:
 
         # Assert
         mock_validate_property_generated.assert_has_calls([call('Property 1'), call('Property 2')])
+        base_report._validate_constraint_validity_details.assert_has_calls([
+            call(base_report._properties['Property 1'].details.copy.return_value, 'Property 1'),
+            call(base_report._properties['Property 2'].details.copy.return_value, 'Property 2'),
+        ])
         base_report._properties['Property 1'].details.copy.assert_called_once()
         base_report._properties['Property 2'].details.copy.assert_called_once()
 
