@@ -3,7 +3,6 @@
 import numpy as np
 
 from sdmetrics.goal import Goal
-from sdmetrics.utils import _safe_divide
 
 
 class BaseMetric:
@@ -87,7 +86,7 @@ class BaseMetric:
 
         score = None
         if is_min_finite and is_max_finite:
-            score = _safe_divide(raw_score - min_value, max_value - min_value)
+            score = (raw_score - min_value) / (max_value - min_value)
 
         elif not is_min_finite and is_max_finite:
             score = np.exp(raw_score - max_value)
