@@ -261,9 +261,9 @@ class TestHyperTransformer:
 @pytest.mark.parametrize(
     'numerator, denominator, expected',
     [
-        (6, 3, 2),
-        (6, 0, np.nan),
-        (6, 2, 3),
+        (4, 2, 2),
+        (4, 0, np.nan),
+        (5, 2, 2.5),
         (0, 0, np.nan),
     ],
 )
