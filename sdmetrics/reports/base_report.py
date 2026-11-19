@@ -335,6 +335,10 @@ class BaseReport:
         self._validate_property_generated(property_name)
         return self._properties[property_name].get_visualization()
 
+    def _validate_constraint_validity_details(self, details, property_name):
+        if details.empty and property_name == 'Constraint Validity':
+            raise ValueError('No constraints were provided.')
+
     def get_details(self, property_name):
         """Return the details table for the given property name.
 
@@ -347,6 +351,8 @@ class BaseReport:
         """
         self._validate_property_generated(property_name)
         details = self._properties[property_name].details.copy()
+        self._validate_constraint_validity_details(details, property_name)
+
         return details
 
     def save(self, filepath):
