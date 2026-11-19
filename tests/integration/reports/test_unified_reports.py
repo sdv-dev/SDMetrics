@@ -1,3 +1,4 @@
+import re
 import warnings
 from datetime import date, datetime
 from unittest.mock import patch
@@ -978,6 +979,23 @@ def test_warning_emitted_at_the_end(capsys):
         'UserWarning: Some values in the real data do not match '
         "the specified regex format: 'USER_3'"
     )
+
+    progress_bar_regex = r'\|[^\r\n|]*\| \d+/\d+ \[[^\r\n\]]+\]\|'
+    expected_output = (
+        r'Generating report \.\.\.\n\n'
+        rf'\r{progress_bar_regex}'
+        rf'(?:\r\(1/4\) Evaluating Data Validity: {progress_bar_regex})+\n'
+        r'Data Validity Score: 100\.0%\n\n'
+        rf'\r{progress_bar_regex}'
+        rf'(?:\r\(2/4\) Evaluating Data Structure: {progress_bar_regex})+\n'
+        r'Data Structure Score: 100\.0%\n\n'
+        r'\(3/4\) Evaluating Relationship Validity: N/A\n'
+        r'This property does not apply to single-table data\.\n\n'
+        r'\(4/4\) Evaluating Constraint Validity: N/A\n'
+        r'No constraints were provided\.\n\n'
+        r'Overall Score \(Average\): 100\.0%\n\n'
+        rf'{re.escape(expected_warning)}\n'
+    )
     report = DiagnosticReport()
 
     def show_warning(message, category, filename, lineno, file=None, line=None):
@@ -996,3 +1014,4 @@ def test_warning_emitted_at_the_end(capsys):
     assert output.count(expected_warning) == 1
     assert output.index('Overall Score (Average):') < output.index(expected_warning)
     assert output.rstrip().endswith(expected_warning)
+    assert re.fullmatch(expected_output, output) is not None
