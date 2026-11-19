@@ -1,3 +1,4 @@
+import re
 from datetime import date, datetime
 
 import numpy as np
@@ -836,12 +837,14 @@ def test_unified_diagnostic_report_without_constraints(constraints):
     """Test the Constraint Validity score is NaN and ignored when there are no constraints."""
     # Setup
     real_data, synthetic_data, metadata = load_multi_table_demo()
-
-    # Run
+    expected_error = re.escape('No constraints were provided.')
     report = DiagnosticReport()
     report.generate(real_data, synthetic_data, metadata, constraints, verbose=False)
     properties = report.get_properties()
-    details = report.get_details('Constraint Validity')
+
+    # Run
+    with pytest.raises(ValueError, match=expected_error):
+        report.get_details('Constraint Validity')
 
     # Assert
     assert list(properties['Property']) == [
@@ -851,7 +854,6 @@ def test_unified_diagnostic_report_without_constraints(constraints):
         'Constraint Validity',
     ]
     assert pd.isna(properties.loc[properties['Property'] == 'Constraint Validity', 'Score'].iloc[0])
-    assert details.empty
     assert report.get_score() == 1.0
 
 
