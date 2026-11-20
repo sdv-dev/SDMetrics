@@ -10,6 +10,9 @@ class TestStructure:
         """Test the ``get_score`` method."""
         # Setup
         real_data, synthetic_data, metadata = load_demo('single_table')
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
 
         # Run
         synthesis_property = Structure()
@@ -34,12 +37,12 @@ class TestStructure:
         """
         # Setup
         real_data, _, metadata = load_demo('single_table')
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
 
         # Run
         synthesis_property = Structure()
-        score = synthesis_property.get_score(
-            real_data['student_placements'].iloc[:20], [], metadata
-        )
+        score = synthesis_property.get_score(real_data.iloc[:20], [], metadata)
 
         # Assert
         assert pd.isna(score)

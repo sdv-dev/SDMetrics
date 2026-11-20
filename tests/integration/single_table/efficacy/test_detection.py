@@ -1,7 +1,6 @@
 import pytest
 
 from sdmetrics.single_table.detection import LogisticDetection, SVCDetection
-from sdmetrics.utils import get_table_data_from_dict
 
 METRICS = [LogisticDetection, SVCDetection]
 
@@ -13,8 +12,6 @@ def test_primary_key(metric, object_datetime_single_table_demo):
         object_datetime_single_table_demo
     )
 
-    real_data_with_primary_key = get_table_data_from_dict(real_data_with_primary_key)
-    synthetic_data_with_primary_key = get_table_data_from_dict(synthetic_data_with_primary_key)
     primary_key = metadata['tables']['student_placements']['primary_key']
     real_data_sin_primary_key = real_data_with_primary_key.drop(primary_key, axis=1)
     synthetic_data_sin_primary_key = synthetic_data_with_primary_key.drop(primary_key, axis=1)

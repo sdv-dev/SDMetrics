@@ -79,8 +79,8 @@ class TestCoverage:
         """Test the ``get_score`` method with errors."""
         # Setup
         real_data, synthetic_data, metadata = object_datetime_single_table_demo
-        real_data['student_placements']['start_date'].iloc[0] = 0
-        real_data['student_placements']['employability_perc'].iloc[2] = 'a'
+        real_data['start_date'].iloc[0] = 0
+        real_data['employability_perc'].iloc[2] = 'a'
 
         coverage_property = Coverage()
 
