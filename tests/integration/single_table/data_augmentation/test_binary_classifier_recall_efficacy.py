@@ -221,11 +221,9 @@ class TestBinaryClassifierRecallEfficacy:
         synthetic_data = synthetic_data[table_name]
         table_metadata = metadata['tables'][table_name]
         table_metadata['columns']['extra_metadata_column'] = {'sdtype': 'categorical'}
-        synthetic_data[table_name]['extra_column'] = 'extra'
-        real_data[table_name]['start_date'] = real_data[table_name]['start_date'].astype(str)
-        synthetic_data[table_name]['start_date'] = synthetic_data[table_name]['start_date'].astype(
-            str
-        )
+        synthetic_data['extra_column'] = 'extra'
+        real_data['start_date'] = real_data['start_date'].astype(str)
+        synthetic_data['start_date'] = synthetic_data['start_date'].astype(str)
         mask_validation = np.random.rand(len(real_data)) < 0.8
         real_training = real_data[mask_validation]
         real_validation = real_data[~mask_validation]
