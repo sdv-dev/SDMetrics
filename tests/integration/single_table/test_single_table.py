@@ -119,6 +119,9 @@ def test_rank(metric, ones, zeros, real_data, good_data, bad_data):
 
 def test_compute_all():
     real_data, synthetic_data, metadata = load_single_table_demo()
+    table_name = 'student_placements'
+    real_data = real_data[table_name]
+    synthetic_data = synthetic_data[table_name]
 
     output = compute_metrics(
         SingleTableMetric.get_subclasses(), real_data, synthetic_data, metadata=metadata
