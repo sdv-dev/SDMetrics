@@ -9,7 +9,8 @@ from sdmetrics.single_column.statistical import BoundaryAdherence
 
 
 class TestBoundaryAdherence:
-    def test_compute(self):
+    @patch('sdmetrics.single_column.statistical.boundary_adherence._safe_divide')
+    def test_compute(self, mock_safe_divide):
         """Test the ``compute`` method.
 
         Expect that the number of in-bounds values in the synthetic data is returned.
@@ -24,6 +25,7 @@ class TestBoundaryAdherence:
         # Setup
         real_data = pd.Series([1.0, 2.4, 2.6, 0.8])
         synthetic_data = pd.Series([0.9, 1.8, 2.1, 5.0])
+        mock_safe_divide.return_value = 0.75
 
         metric = BoundaryAdherence()
 
@@ -32,6 +34,7 @@ class TestBoundaryAdherence:
 
         # Assert
         assert result == 0.75
+        mock_safe_divide.assert_called_once_with(3, 4)
 
     def test_compute_nans(self):
         """Test the ``compute`` method with nan values.
