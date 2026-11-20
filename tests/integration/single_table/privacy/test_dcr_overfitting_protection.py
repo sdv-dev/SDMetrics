@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 
 from sdmetrics.demos import load_single_table_demo
 from sdmetrics.single_table.privacy import DCROverfittingProtection
-from sdmetrics.utils import get_table_data_from_dict
 
 
 class TestDCROverfittingProtection:
@@ -23,29 +22,30 @@ class TestDCROverfittingProtection:
         """
         # Setup
         real_data, synthetic_data, metadata = load_single_table_demo()
-        real_data = get_table_data_from_dict(real_data)
-        synthetic_data = get_table_data_from_dict(synthetic_data)
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
         train_df, holdout_df = train_test_split(real_data, test_size=0.5)
 
         # Run
         compute_breakdown_result = DCROverfittingProtection.compute_breakdown(
-            train_df, synthetic_data, holdout_df, metadata, 'student_placements'
+            train_df, synthetic_data, holdout_df, metadata, table_name
         )
         compute_result = DCROverfittingProtection.compute(
-            train_df, synthetic_data, holdout_df, metadata, 'student_placements'
+            train_df, synthetic_data, holdout_df, metadata, table_name
         )
         compute_holdout_same = DCROverfittingProtection.compute_breakdown(
-            train_df, synthetic_data, synthetic_data, metadata, 'student_placements'
+            train_df, synthetic_data, synthetic_data, metadata, table_name
         )
         compute_train_same = DCROverfittingProtection.compute_breakdown(
-            synthetic_data, synthetic_data, holdout_df, metadata, 'student_placements'
+            synthetic_data, synthetic_data, holdout_df, metadata, table_name
         )
         compute_all_same = DCROverfittingProtection.compute_breakdown(
             synthetic_data,
             synthetic_data,
             synthetic_data,
             metadata,
-            'student_placements',
+            table_name,
         )
 
         synth_percentages_key = 'synthetic_data_percentages'

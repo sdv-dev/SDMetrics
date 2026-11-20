@@ -21,9 +21,12 @@ class TestBinaryClassifierRecallEfficacy:
         # Setup
         np.random.seed(0)
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
-        mask_validation = np.random.rand(len(real_data['student_placements'])) < 0.8
-        real_training = real_data['student_placements'][mask_validation]
-        real_validation = real_data['student_placements'][~mask_validation]
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
+        mask_validation = np.random.rand(len(real_data)) < 0.8
+        real_training = real_data[mask_validation]
+        real_validation = real_data[~mask_validation]
         expected_keys_classifier = {
             'precision_score_training',
             'precision_score_validation',
@@ -49,7 +52,7 @@ class TestBinaryClassifierRecallEfficacy:
             synthetic_data=synthetic_data,
             real_validation_data=real_validation,
             metadata=metadata,
-            table_name='student_placements',
+            table_name=table_name,
             prediction_column_name='gender',
             minority_class_label='F',
             fixed_precision_value=0.8,
@@ -60,7 +63,7 @@ class TestBinaryClassifierRecallEfficacy:
             synthetic_data=synthetic_data,
             real_validation_data=real_validation,
             metadata=metadata,
-            table_name='student_placements',
+            table_name=table_name,
             prediction_column_name='gender',
             minority_class_label='F',
             classifier='XGBoost',
@@ -86,9 +89,12 @@ class TestBinaryClassifierRecallEfficacy:
         # Setup
         np.random.seed(0)
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
-        mask_validation = np.random.rand(len(real_data['student_placements'])) < 0.8
-        real_training = real_data['student_placements'][mask_validation]
-        real_validation = real_data['student_placements'][~mask_validation]
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
+        mask_validation = np.random.rand(len(real_data)) < 0.8
+        real_training = real_data[mask_validation]
+        real_validation = real_data[~mask_validation]
         real_validation['gender'] = 'M'
         expected_error = re.escape(
             "The metric can't be computed because the value `F` is not present in the column "
@@ -103,7 +109,7 @@ class TestBinaryClassifierRecallEfficacy:
                 synthetic_data=synthetic_data,
                 real_validation_data=real_validation,
                 metadata=metadata,
-                table_name='student_placements',
+                table_name=table_name,
                 prediction_column_name='gender',
                 minority_class_label='F',
                 classifier='XGBoost',
@@ -115,9 +121,12 @@ class TestBinaryClassifierRecallEfficacy:
         # Setup
         np.random.seed(35)
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
-        mask_validation = np.random.rand(len(real_data['student_placements'])) < 0.8
-        real_training = real_data['student_placements'][mask_validation].reset_index(drop=True)
-        real_validation = real_data['student_placements'][~mask_validation].reset_index(drop=True)
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
+        mask_validation = np.random.rand(len(real_data)) < 0.8
+        real_training = real_data[mask_validation].reset_index(drop=True)
+        real_validation = real_data[~mask_validation].reset_index(drop=True)
         real_training.loc[:3, 'gender'] = np.nan
         real_validation.loc[:5, 'gender'] = np.nan
 
@@ -127,7 +136,7 @@ class TestBinaryClassifierRecallEfficacy:
             synthetic_data=synthetic_data,
             real_validation_data=real_validation,
             metadata=metadata,
-            table_name='student_placements',
+            table_name=table_name,
             prediction_column_name='gender',
             minority_class_label='F',
             classifier='XGBoost',
@@ -142,9 +151,12 @@ class TestBinaryClassifierRecallEfficacy:
         # Setup
         np.random.seed(0)
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
-        mask_validation = np.random.rand(len(real_data['student_placements'])) < 0.8
-        real_training = real_data['student_placements'][mask_validation]
-        real_validation = real_data['student_placements'][~mask_validation]
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
+        mask_validation = np.random.rand(len(real_data)) < 0.8
+        real_training = real_data[mask_validation]
+        real_validation = real_data[~mask_validation]
 
         # Run
         score = BinaryClassifierRecallEfficacy.compute(
@@ -152,7 +164,7 @@ class TestBinaryClassifierRecallEfficacy:
             synthetic_data=synthetic_data,
             real_validation_data=real_validation,
             metadata=metadata,
-            table_name='student_placements',
+            table_name=table_name,
             prediction_column_name='gender',
             minority_class_label='F',
             classifier='XGBoost',
@@ -170,9 +182,12 @@ class TestBinaryClassifierRecallEfficacy:
         # Setup
         np.random.seed(0)
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
-        mask_validation = np.random.rand(len(real_data['student_placements'])) < 0.8
-        real_training = real_data['student_placements'][mask_validation]
-        real_validation = real_data['student_placements'][~mask_validation]
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
+        mask_validation = np.random.rand(len(real_data)) < 0.8
+        real_training = real_data[mask_validation]
+        real_validation = real_data[~mask_validation]
 
         # Run
         score_breakdown = BinaryClassifierRecallEfficacy.compute_breakdown(
@@ -180,7 +195,7 @@ class TestBinaryClassifierRecallEfficacy:
             synthetic_data=synthetic_data,
             real_validation_data=real_validation,
             metadata=metadata,
-            table_name='student_placements',
+            table_name=table_name,
             prediction_column_name='high_spec',
             minority_class_label='Science',
             classifier='XGBoost',
@@ -201,18 +216,19 @@ class TestBinaryClassifierRecallEfficacy:
         # Setup
         np.random.seed(0)
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
-        table_metadata = metadata['tables']['student_placements']
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
+        table_metadata = metadata['tables'][table_name]
         table_metadata['columns']['extra_metadata_column'] = {'sdtype': 'categorical'}
-        synthetic_data['student_placements']['extra_column'] = 'extra'
-        real_data['student_placements']['start_date'] = real_data['student_placements'][
-            'start_date'
-        ].astype(str)
-        synthetic_data['student_placements']['start_date'] = synthetic_data['student_placements'][
-            'start_date'
-        ].astype(str)
-        mask_validation = np.random.rand(len(real_data['student_placements'])) < 0.8
-        real_training = real_data['student_placements'][mask_validation]
-        real_validation = real_data['student_placements'][~mask_validation]
+        synthetic_data[table_name]['extra_column'] = 'extra'
+        real_data[table_name]['start_date'] = real_data[table_name]['start_date'].astype(str)
+        synthetic_data[table_name]['start_date'] = synthetic_data[table_name]['start_date'].astype(
+            str
+        )
+        mask_validation = np.random.rand(len(real_data)) < 0.8
+        real_training = real_data[mask_validation]
+        real_validation = real_data[~mask_validation]
         warning_extra_col = re.escape(
             "The columns ('extra_column') are not present in the metadata. "
             'They will not be included for further evaluation.'

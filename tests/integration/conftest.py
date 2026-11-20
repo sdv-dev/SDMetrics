@@ -15,7 +15,7 @@ def object_datetime_single_table_demo():
         real_data[table_name], synthetic_data[table_name], metadata['tables'][table_name]
     )
 
-    return real_data, synthetic_data, metadata
+    return real_data[table_name], synthetic_data[table_name], metadata
 
 
 @pytest.fixture
@@ -39,4 +39,4 @@ def object_datetime_timeseries_demo():
         real_data[table_name], synthetic_data[table_name], metadata['tables'][table_name]
     )
 
-    return real_data, synthetic_data, metadata
+    return real_data[table_name], synthetic_data[table_name], metadata

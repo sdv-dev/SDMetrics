@@ -22,13 +22,16 @@ class TestDCRBaselineProtection:
         """
         # Setup
         real_data, synthetic_data, metadata = load_single_table_demo()
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
 
         # Run
         compute_breakdown_result = DCRBaselineProtection.compute_breakdown(
-            real_data, synthetic_data, metadata, 'student_placements'
+            real_data, synthetic_data, metadata, table_name
         )
         compute_same_data = DCRBaselineProtection.compute_breakdown(
-            synthetic_data, synthetic_data, metadata, 'student_placements'
+            synthetic_data, synthetic_data, metadata, table_name
         )
 
         median_key = 'median_DCR_to_real_data'
