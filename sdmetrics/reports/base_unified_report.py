@@ -79,6 +79,8 @@ class BaseUnifiedReport(BaseMultiTableReport):
     def _validate_property_generated(self, property_name):
         super()._validate_property_generated(property_name)
         self._check_property_single_table(property_name)
+        if property_name == 'Constraint Validity' and property_name in self._skipped_properties:
+            raise ValueError('No constraints were provided.')
 
     def _validate(self, real_data, synthetic_data, metadata, constraints=None):
         """Validate the inputs.
