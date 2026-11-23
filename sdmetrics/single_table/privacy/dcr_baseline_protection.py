@@ -10,7 +10,7 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr
 from sdmetrics.single_table.privacy.util import validate_num_samples_num_iteration
-from sdmetrics.utils import get_table_data_from_dict, is_datetime
+from sdmetrics.utils import is_datetime
 
 
 class DCRBaselineProtection(SingleTableMetric):
@@ -92,8 +92,6 @@ class DCRBaselineProtection(SingleTableMetric):
                 Averages of the medians are returned in the case of multiple iterations.
         """
         metadata = _get_single_table_metadata(metadata, table_name)
-        real_data = get_table_data_from_dict(real_data)
-        synthetic_data = get_table_data_from_dict(synthetic_data)
         num_rows_subsample, num_iterations = cls._validate_inputs(
             real_data,
             synthetic_data,

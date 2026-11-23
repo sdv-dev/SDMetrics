@@ -12,7 +12,7 @@ from sdmetrics.goal import Goal
 from sdmetrics.single_table.base import SingleTableMetric
 from sdmetrics.single_table.data_augmentation.utils import _validate_inputs
 from sdmetrics.single_table.utils import _process_data_with_metadata_ml_efficacy_metrics
-from sdmetrics.utils import get_columns_from_metadata, get_table_data_from_dict
+from sdmetrics.utils import get_columns_from_metadata
 
 METRIC_NAME_TO_METHOD = {'recall': recall_score, 'precision': precision_score}
 
@@ -211,8 +211,6 @@ class BaseDataAugmentationMetric(SingleTableMetric):
     ):
         """Compute the score breakdown of the metric."""
         metadata = _get_single_table_metadata(metadata, table_name)
-        real_training_data = get_table_data_from_dict(real_training_data)
-        synthetic_data = get_table_data_from_dict(synthetic_data)
         _validate_inputs(
             real_training_data,
             synthetic_data,

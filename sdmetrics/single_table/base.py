@@ -15,7 +15,6 @@ from sdmetrics.utils import (
     get_alternate_keys,
     get_columns_from_metadata,
     get_primary_key_from_metadata,
-    get_table_data_from_dict,
     get_type_from_column_meta,
 )
 
@@ -123,8 +122,8 @@ class SingleTableMetric(BaseMetric):
         if table_name is not BACKWARDS_COMPATIBLE_NONE:
             metadata = _get_single_table_metadata(metadata, table_name)
 
-        real_data = get_table_data_from_dict(real_data).copy()
-        synthetic_data = get_table_data_from_dict(synthetic_data).copy()
+        real_data = real_data.copy()
+        synthetic_data = synthetic_data.copy()
         if set(real_data.columns) != set(synthetic_data.columns):
             raise ValueError('`real_data` and `synthetic_data` must have the same columns')
 

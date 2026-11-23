@@ -15,9 +15,12 @@ class TestColumnPairTrends:
         # Setup
         column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
 
-        table_metadata = metadata['tables']['student_placements']
-        metadata['tables']['student_placements']['columns'] = {
+        table_metadata = metadata['tables'][table_name]
+        metadata['tables'][table_name]['columns'] = {
             key: val for key, val in table_metadata['columns'].items() if key in column_names
         }
 
@@ -73,13 +76,16 @@ class TestColumnPairTrends:
         # Setup
         column_names = ['student_id', 'degree_type', 'start_date', 'second_perc', 'work_experience']
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
 
-        table_metadata = metadata['tables']['student_placements']
-        metadata['tables']['student_placements']['columns'] = {
+        table_metadata = metadata['tables'][table_name]
+        metadata['tables'][table_name]['columns'] = {
             key: val for key, val in table_metadata['columns'].items() if key in column_names
         }
 
-        real_data['student_placements']['second_perc'].iloc[2] = 'a'
+        real_data['second_perc'].iloc[2] = 'a'
 
         # Run
         column_pair_trends = ColumnPairTrends()
@@ -114,9 +120,12 @@ class TestColumnPairTrends:
         # Setup
         column_names = ['student_id', 'degree_type', 'gender', 'high_spec', 'work_experience']
         real_data, synthetic_data, metadata = load_demo(modality='single_table')
+        table_name = 'student_placements'
+        real_data = real_data[table_name]
+        synthetic_data = synthetic_data[table_name]
 
-        table_metadata = metadata['tables']['student_placements']
-        metadata['tables']['student_placements']['columns'] = {
+        table_metadata = metadata['tables'][table_name]
+        metadata['tables'][table_name]['columns'] = {
             key: val for key, val in table_metadata['columns'].items() if key in column_names
         }
 
