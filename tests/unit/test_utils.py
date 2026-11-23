@@ -7,6 +7,7 @@ import pytest
 
 from sdmetrics.utils import (
     HyperTransformer,
+    _safe_divide,
     discretize_column,
     get_alternate_keys,
     get_cardinality_distribution,
@@ -255,3 +256,24 @@ class TestHyperTransformer:
         ht.fit.assert_called_once_with(data)
         ht.transform.assert_called_once_with(data)
         assert out == ht.transform.return_value
+
+
+@pytest.mark.parametrize(
+    'numerator, denominator, expected',
+    [
+        (4, 2, 2),
+        (4, 0, np.nan),
+        (5, 2, 2.5),
+        (0, 0, np.nan),
+    ],
+)
+def test__safe_divide(numerator, denominator, expected):
+    """Test the ``_safe_divide`` method."""
+    # Run
+    result = _safe_divide(numerator, denominator)
+
+    # Assert
+    if np.isnan(expected):
+        assert np.isnan(result)
+    else:
+        assert result == expected
