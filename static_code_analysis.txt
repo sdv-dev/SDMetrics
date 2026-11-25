@@ -1,4 +1,4 @@
-Run started:2026-10-29 21:09:44.742932+00:00
+Run started:2026-11-25 19:42:51.071703+00:00
 
 Test results:
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -36,10 +36,10 @@ Test results:
    Severity: Medium   Confidence: High
    CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
    More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b301-pickle
-   Location: ./sdmetrics/reports/base_report.py:378:21
-377	        with open(filepath, 'rb') as f:
-378	            report = pickle.load(f)
-379	            if current_version != report._package_version:
+   Location: ./sdmetrics/reports/base_report.py:385:21
+384	        with open(filepath, 'rb') as f:
+385	            report = pickle.load(f)
+386	            if current_version != report._package_version:
 
 --------------------------------------------------
 >> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
@@ -98,10 +98,10 @@ Test results:
    Severity: Low   Confidence: High
    CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
    More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b101_assert_used.html
-   Location: ./sdmetrics/timeseries/detection.py:115:8
-114	        """
-115	        assert cls.min_value == 0.0
-116	        return super().normalize(raw_score)
+   Location: ./sdmetrics/timeseries/detection.py:113:8
+112	        """
+113	        assert cls.min_value == 0.0
+114	        return super().normalize(raw_score)
 
 --------------------------------------------------
 >> Issue: [B110:try_except_pass] Try, Except, Pass detected.
@@ -117,7 +117,7 @@ Test results:
 --------------------------------------------------
 
 Code scanned:
-	Total lines of code: 16323
+	Total lines of code: 16325
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 

@@ -1,5 +1,14 @@
 # History
 
+## v0.33.1 - 2026-11-25
+
+### Bugs Fixed
+
+* Create a safe divide function for computing the valid percentage of rows in adherence metrics - Issue [#948](https://github.com/sdv-dev/SDMetrics/issues/948) by @R-Palazzo
+* Show warnings after the report finishes - Issue [#946](https://github.com/sdv-dev/SDMetrics/issues/946) by @R-Palazzo
+* Constraint Validity details output should be consistent when there are no constraints - Issue [#945](https://github.com/sdv-dev/SDMetrics/issues/945) by @R-Palazzo
+* Revert Multi-Input Support in Single-Table Metrics - Issue [#892](https://github.com/sdv-dev/SDMetrics/issues/892) by @R-Palazzo
+
 ## v0.33.0 - 2026-10-29
 
 ### Bugs Fixed
