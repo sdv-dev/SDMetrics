@@ -1,4 +1,5 @@
 from datetime import datetime
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
@@ -102,7 +103,8 @@ class TestDatetimeFormatAdherence:
         # Assert
         assert result.equals(expected)
 
-    def test_compute(self):
+    @patch('sdmetrics.single_column.statistical.datetime_format_adherence._safe_divide')
+    def test_compute(self, mock_safe_divide):
         """Test the ``compute`` method.
 
         Expect that the percentage of rows that match the datetime format is returned.
@@ -119,6 +121,7 @@ class TestDatetimeFormatAdherence:
         real_data = pd.Series(['10-10-2020', '10-11-2021', '10-12-2022'])
         synthetic_data = pd.Series(['9-10-2020', '29-7-2020', '15-12-2020'])
         datetime_format = '%d-%m-%Y'
+        mock_safe_divide.return_value = 1.0
 
         metric = DatetimeFormatAdherence()
 
@@ -126,6 +129,7 @@ class TestDatetimeFormatAdherence:
         result = metric.compute(real_data, synthetic_data, datetime_format)
 
         # Assert
+        mock_safe_divide.assert_called_once_with(3, 3)
         assert result == 1.0
 
     def test_compute_warning(self):

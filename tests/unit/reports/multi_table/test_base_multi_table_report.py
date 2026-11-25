@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from unittest.mock import Mock, call, patch
+from unittest.mock import ANY, Mock, call, patch
 
 import numpy as np
 import pandas as pd
@@ -300,9 +300,11 @@ class TestBaseReport:
         })
 
         mock__validate_property_generated = Mock()
+        mock__validate_constraint_validity_details = Mock()
 
         report = BaseMultiTableReport()
         report._validate_property_generated = mock__validate_property_generated
+        report._validate_constraint_validity_details = mock__validate_constraint_validity_details
 
         property_1 = Mock()
         property_1.details = details_property_df
@@ -323,6 +325,11 @@ class TestBaseReport:
             'Error': ['Error', None, None],
         })
         mock__validate_property_generated.assert_called_once_with('Property_1')
+        mock__validate_constraint_validity_details.assert_called_once_with(ANY, 'Property_1')
+        pd.testing.assert_frame_equal(
+            mock__validate_constraint_validity_details.call_args.args[0],
+            details_property_df,
+        )
         pd.testing.assert_frame_equal(result, expected_result)
 
     def test_get_details_with_table_name(self):
@@ -336,10 +343,12 @@ class TestBaseReport:
 
         mock__check_table_names = Mock()
         mock__validate_property_generated = Mock()
+        mock__validate_constraint_validity_details = Mock()
 
         report = BaseMultiTableReport()
         report._check_table_names = mock__check_table_names
         report._validate_property_generated = mock__validate_property_generated
+        report._validate_constraint_validity_details = mock__validate_constraint_validity_details
 
         expected_details = pd.DataFrame({
             'Table': ['Table_1', 'Table_1'],
@@ -362,6 +371,11 @@ class TestBaseReport:
         # Assert
         mock__check_table_names.assert_called_once_with('Table_1')
         mock__validate_property_generated.assert_called_once_with('Property_1')
+        mock__validate_constraint_validity_details.assert_called_once_with(ANY, 'Property_1')
+        pd.testing.assert_frame_equal(
+            mock__validate_constraint_validity_details.call_args.args[0],
+            expected_details,
+        )
         pd.testing.assert_frame_equal(result, expected_details)
 
     def test_get_visualization_with_table_name(self):

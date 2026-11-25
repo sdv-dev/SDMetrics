@@ -9,7 +9,7 @@ import pandas as pd
 
 from sdmetrics.goal import Goal
 from sdmetrics.single_column.base import SingleColumnMetric
-from sdmetrics.utils import is_datetime
+from sdmetrics.utils import _safe_divide, is_datetime
 
 
 class DatetimeFormatAdherence(SingleColumnMetric):
@@ -113,6 +113,6 @@ class DatetimeFormatAdherence(SingleColumnMetric):
                 warnings.warn(message)
 
         synthetic_valid_rows = cls._filter_valid_datetime_rows(synthetic_data, datetime_format)
-        score = len(synthetic_valid_rows) / len(synthetic_data)
+        score = _safe_divide(len(synthetic_valid_rows), len(synthetic_data))
 
         return score

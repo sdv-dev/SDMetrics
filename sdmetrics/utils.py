@@ -358,24 +358,6 @@ def get_sequence_index(metadata):
     return metadata.get('sequence_index')
 
 
-def get_table_data_from_dict(data):
-    """Get the table data from a data object.
-
-    Args:
-        data (dict or pandas.DataFrame):
-            The data object. If a dict is provided, the first table is returned.
-
-    Returns:
-        pandas.DataFrame:
-            The table data.
-    """
-    if isinstance(data, dict):
-        if len(list(data)) > 0:
-            return data[list(data)[0]]
-
-    return data
-
-
 def strip_characters(list_character, a_string):
     """Strip characters from a column name.
 
@@ -403,3 +385,11 @@ def _cast_to_iterable(value):
         return value
 
     return [value]
+
+
+def _safe_divide(numerator, denominator):
+    """Divide two numbers, returning ``np.nan`` if the denominator is zero."""
+    if denominator == 0:
+        return np.nan
+
+    return numerator / denominator

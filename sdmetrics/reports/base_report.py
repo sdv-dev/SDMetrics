@@ -14,7 +14,7 @@ import pandas as pd
 import tqdm
 
 from sdmetrics._utils_metadata import _convert_datetime_column, _validate_metadata
-from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE
+from sdmetrics.reports.utils import DEFAULT_NUM_ROWS_SUBSAMPLE, defer_warnings
 from sdmetrics.utils import get_columns_from_metadata
 from sdmetrics.visualization import set_plotly_config
 
@@ -160,6 +160,7 @@ class BaseReport:
         """
         return set()
 
+    @defer_warnings()
     def generate(self, real_data, synthetic_data, metadata, constraints=None, verbose=True):
         """Generate report.
 
@@ -334,6 +335,10 @@ class BaseReport:
         self._validate_property_generated(property_name)
         return self._properties[property_name].get_visualization()
 
+    def _validate_constraint_validity_details(self, details, property_name):
+        if details.empty and property_name == 'Constraint Validity':
+            raise ValueError('No constraints were provided.')
+
     def get_details(self, property_name):
         """Return the details table for the given property name.
 
@@ -346,6 +351,8 @@ class BaseReport:
         """
         self._validate_property_generated(property_name)
         details = self._properties[property_name].details.copy()
+        self._validate_constraint_validity_details(details, property_name)
+
         return details
 
     def save(self, filepath):

@@ -1,4 +1,7 @@
+import re
+import warnings
 from datetime import date, datetime
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
@@ -836,12 +839,14 @@ def test_unified_diagnostic_report_without_constraints(constraints):
     """Test the Constraint Validity score is NaN and ignored when there are no constraints."""
     # Setup
     real_data, synthetic_data, metadata = load_multi_table_demo()
-
-    # Run
+    expected_error = re.escape('No constraints were provided.')
     report = DiagnosticReport()
     report.generate(real_data, synthetic_data, metadata, constraints, verbose=False)
     properties = report.get_properties()
-    details = report.get_details('Constraint Validity')
+
+    # Run
+    with pytest.raises(ValueError, match=expected_error):
+        report.get_details('Constraint Validity')
 
     # Assert
     assert list(properties['Property']) == [
@@ -851,7 +856,6 @@ def test_unified_diagnostic_report_without_constraints(constraints):
         'Constraint Validity',
     ]
     assert pd.isna(properties.loc[properties['Property'] == 'Constraint Validity', 'Score'].iloc[0])
-    assert details.empty
     assert report.get_score() == 1.0
 
 
@@ -944,3 +948,71 @@ def test_unified_report_with_non_key_regex_format():
     # Assert
     assert 'RegexFormatAdherence' in details['Metric'].to_numpy()
     assert diagnostic.get_score() == 1.0
+
+
+def test_warning_emitted_at_the_end(capsys):
+    """Test that warnings are emitted at the end of the report generation."""
+    # Setup
+    real_data = {
+        'users': pd.DataFrame({
+            'user_id': ['ID_001', 'ID_002', 'USER_3'],
+            'age': [25, 31, 47],
+        })
+    }
+    synthetic_data = {
+        'users': pd.DataFrame({
+            'user_id': ['ID_004', 'ID_005', 'ID_006'],
+            'age': [29, 35, 41],
+        })
+    }
+    metadata = {
+        'tables': {
+            'users': {
+                'primary_key': 'user_id',
+                'columns': {
+                    'user_id': {'sdtype': 'id', 'regex_format': 'ID_[0-9]{3}'},
+                    'age': {'sdtype': 'numerical'},
+                },
+            }
+        }
+    }
+    expected_warning = (
+        'UserWarning: Some values in the real data do not match '
+        "the specified regex format: 'USER_3'"
+    )
+
+    progress_bar_regex = r'\|[^\r\n|]*\| \d+/\d+ \[[^\r\n\]]+\]\|'
+    expected_output = (
+        r'Generating report \.\.\.\n\n'
+        rf'\r{progress_bar_regex}'
+        rf'(?:\r\(1/4\) Evaluating Data Validity: {progress_bar_regex})+\n'
+        r'Data Validity Score: 100\.0%\n\n'
+        rf'\r{progress_bar_regex}'
+        rf'(?:\r\(2/4\) Evaluating Data Structure: {progress_bar_regex})+\n'
+        r'Data Structure Score: 100\.0%\n\n'
+        r'\(3/4\) Evaluating Relationship Validity: N/A\n'
+        r'This property does not apply to single-table data\.\n\n'
+        r'\(4/4\) Evaluating Constraint Validity: N/A\n'
+        r'No constraints were provided\.\n\n'
+        r'Overall Score \(Average\): 100\.0%\n\n'
+        rf'{re.escape(expected_warning)}\n'
+    )
+    report = DiagnosticReport()
+
+    def show_warning(message, category, filename, lineno, file=None, line=None):
+        """Print warnings to stdout to verify their order relative to report output."""
+        print(f'{category.__name__}: {message}')  # noqa: T201
+
+    # Run
+    with warnings.catch_warnings():
+        warnings.simplefilter('always', UserWarning)
+        with patch('warnings.showwarning', side_effect=show_warning):
+            report.generate(real_data, synthetic_data, metadata)
+
+    # Assert
+    output = capsys.readouterr().out
+    assert 'Generating report' in output
+    assert output.count(expected_warning) == 1
+    assert output.index('Overall Score (Average):') < output.index(expected_warning)
+    assert output.rstrip().endswith(expected_warning)
+    assert re.fullmatch(expected_output, output) is not None

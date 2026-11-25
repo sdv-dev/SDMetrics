@@ -3,6 +3,7 @@
 import copy
 import itertools
 import warnings
+from contextlib import contextmanager
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,24 @@ DISCRETE_SDTYPES = ['categorical', 'ordinal', 'boolean']
 DEFAULT_NUM_ROWS_SUBSAMPLE = 50000
 DEFAULT_REAL_CORRELATION_THRESHOLD = 0.5
 DEFAULT_REAL_ASSOCIATION_THRESHOLD = 0.3
+
+
+@contextmanager
+def defer_warnings():
+    """Display warnings at the end of the report."""
+    captured = []
+    try:
+        with warnings.catch_warnings(record=True) as captured:
+            yield
+    finally:
+        for warning in captured:
+            warnings.showwarning(
+                message=warning.message,
+                category=warning.category,
+                filename=warning.filename,
+                lineno=warning.lineno,
+                line=warning.line,
+            )
 
 
 def _warn_deprecated_report(report_name, replacement_class):

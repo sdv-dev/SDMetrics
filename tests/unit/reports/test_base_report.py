@@ -1,6 +1,7 @@
 import pickle
 import re
 import sys
+import warnings
 from datetime import datetime
 from unittest.mock import Mock, call, mock_open, patch
 
@@ -339,8 +340,16 @@ class TestBaseReport:
         mock__print_results = Mock()
         base_report._print_results = mock__print_results
         base_report._validate = mock_validate
+        warning_counts = []
+
+        def get_score_with_warning(*args, **kwargs):
+            warnings.warn('Warning during generate', UserWarning)
+            warning_counts.append(len(captured))
+            return 1.0
+
         base_report._properties['Property 1'] = Mock()
-        base_report._properties['Property 1'].get_score.return_value = 1.0
+        base_report._properties['Property 1'].get_score.side_effect = get_score_with_warning
+        mock__print_results.side_effect = lambda verbose: warning_counts.append(len(captured))
         base_report._properties['Property 2'] = Mock()
         base_report._properties['Property 2'].get_score.return_value = 1.0
 
@@ -351,7 +360,8 @@ class TestBaseReport:
         }
 
         # Run
-        base_report.generate(real_data, synthetic_data, metadata, verbose=False)
+        with pytest.warns(UserWarning, match='Warning during generate') as captured:
+            base_report.generate(real_data, synthetic_data, metadata, verbose=False)
 
         # Assert
         mock_validate.assert_called_once()
@@ -378,6 +388,9 @@ class TestBaseReport:
             'generation_time': 5,
         }
         assert base_report.report_info == expected_info
+        assert warning_counts == [0, 0]
+        assert len(captured) == 1
+        assert str(captured[0].message) == 'Warning during generate'
 
     @patch('sdmetrics.reports.base_report.datetime')
     @patch('sdmetrics.reports.base_report.time')
@@ -771,6 +784,27 @@ class TestBaseReport:
         base_report._properties['Property 1'].get_visualization.assert_called_once()
         base_report._properties['Property 2'].get_visualization.assert_called_once()
 
+    @pytest.mark.parametrize(
+        'details, property_name, expected_error',
+        [
+            (pd.DataFrame(), 'Constraint Validity', ValueError),
+            (pd.DataFrame(), 'Data Validity', None),
+            (pd.DataFrame({'col1': [1, 2, 3]}), 'Constraint Validity', None),
+        ],
+    )
+    def test__validate_constraint_validity_details(self, details, property_name, expected_error):
+        """Test the ``_validate_constraint_validity_details`` method."""
+        # Setup
+        base_report = BaseReport()
+        expected_error_message = re.escape('No constraints were provided.')
+
+        # Run and Assert
+        if expected_error:
+            with pytest.raises(expected_error, match=expected_error_message):
+                base_report._validate_constraint_validity_details(details, property_name)
+        else:
+            base_report._validate_constraint_validity_details(details, property_name)
+
     def test_get_details(self):
         """Test the ``get_details`` method."""
         # Setup
@@ -780,6 +814,7 @@ class TestBaseReport:
         base_report._properties['Property 1'] = Mock()
         base_report._properties['Property 2'] = Mock()
         base_report.is_generated = True
+        base_report._validate_constraint_validity_details = Mock()
 
         # Run
         base_report.get_details('Property 1')
@@ -787,6 +822,10 @@ class TestBaseReport:
 
         # Assert
         mock_validate_property_generated.assert_has_calls([call('Property 1'), call('Property 2')])
+        base_report._validate_constraint_validity_details.assert_has_calls([
+            call(base_report._properties['Property 1'].details.copy.return_value, 'Property 1'),
+            call(base_report._properties['Property 2'].details.copy.return_value, 'Property 2'),
+        ])
         base_report._properties['Property 1'].details.copy.assert_called_once()
         base_report._properties['Property 2'].details.copy.assert_called_once()
 

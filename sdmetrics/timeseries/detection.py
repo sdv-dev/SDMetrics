@@ -8,7 +8,7 @@ from sdmetrics._utils_metadata import _get_single_table_metadata
 from sdmetrics.goal import Goal
 from sdmetrics.timeseries import ml_scorers
 from sdmetrics.timeseries.base import TimeSeriesMetric
-from sdmetrics.utils import HyperTransformer, get_table_data_from_dict
+from sdmetrics.utils import HyperTransformer
 
 
 class TimeSeriesDetectionMetric(TimeSeriesMetric):
@@ -78,8 +78,6 @@ class TimeSeriesDetectionMetric(TimeSeriesMetric):
                 Metric output.
         """
         metadata = _get_single_table_metadata(metadata, table_name)
-        real_data = get_table_data_from_dict(real_data)
-        synthetic_data = get_table_data_from_dict(synthetic_data)
         real_data, synthetic_data = real_data.copy(), synthetic_data.copy()
         _, sequence_key = cls._validate_inputs(
             real_data=real_data,
